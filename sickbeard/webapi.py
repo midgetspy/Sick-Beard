@@ -490,10 +490,11 @@ class TVDBShorthandWrapper(ApiCall):
 ################################
 
 def _sizeof_fmt(num):
-    for x in ['bytes','KB','MB','GB','TB']:
+    for x in ['bytes', 'KB', 'MB', 'GB', 'TB']:
         if num < 1024.00:
             return "%3.2f %s" % (num, x)
         num /= 1024.00
+
 
 def _is_int(data):
     try:
@@ -878,13 +879,13 @@ class CMD_EpisodeSearch(ApiCall):
 
 
 class CMD_EpisodeSetStatus(ApiCall):
-    _help = {"desc": "set status of an episode",
+    _help = {"desc": "set status of an episode or season (when no ep is provided)",
              "requiredParameters": {"tvdbid": {"desc": "thetvdb.com unique id of a show"},
                                    "season": {"desc": "the season number"},
                                    "status": {"desc": "the status values: wanted, skipped, archived, ignored"}
                                   },
              "optionalParameters": {"episode": {"desc": "the episode number"},
-                                    "force": {"desc": "should we replace existing episodes or not"}
+                                    "force": {"desc": "should we replace existing (downloaded) episodes or not"}
                                      }
              }
 
@@ -900,7 +901,7 @@ class CMD_EpisodeSetStatus(ApiCall):
         ApiCall.__init__(self, args, kwargs)
 
     def run(self):
-        """ set status of an episode """
+        """ set status of an episode or a season (when no ep is provided) """
         showObj = sickbeard.helpers.findCertainShow(sickbeard.showList, int(self.tvdbid))
         if not showObj:
             return _responds(RESULT_FAILURE, msg="Show not found")
@@ -908,13 +909,13 @@ class CMD_EpisodeSetStatus(ApiCall):
         # convert the string status to a int
         for status in statusStrings.statusStrings:
             if str(statusStrings[status]).lower() == str(self.status).lower():
-                self.status = status # here self.status becomes an int
+                self.status = status
                 break
         else: # if we dont break out of the for loop we got here.
-            raise ApiError("The status string could not be matched to a status. Report to Devs!") #the allowed values has at least one item that could not be matched against the internal status strings
+            # the allowed values has at least one item that could not be matched against the internal status strings
+            raise ApiError("The status string could not be matched to a status. Report to Devs!")
 
         ep_list = []
-        # branch logic for when user provides an episode number (old method)
         if self.e:
             epObj = showObj.getEpisode(self.s, self.e)
             if epObj == None:
@@ -949,7 +950,7 @@ class CMD_EpisodeSetStatus(ApiCall):
 
                 # allow the user to force setting the status for an already downloaded episode
                 if epObj.status in Quality.DOWNLOADED and not self.force:
-                    ep_results.append(_epResult(RESULT_FAILURE, epObj, "Refusing to change status to Wanted because it's already marked as DOWNLOADED"))
+                    ep_results.append(_epResult(RESULT_FAILURE, epObj, "Refusing to change status because it is already marked as DOWNLOADED"))
                     failure = True
                     continue
 
@@ -964,13 +965,13 @@ class CMD_EpisodeSetStatus(ApiCall):
         if start_backlog:
             cur_backlog_queue_item = search_queue.BacklogQueueItem(showObj, ep_segment)
             sickbeard.searchQueueScheduler.action.add_item(cur_backlog_queue_item) #@UndefinedVariable
-            logger.log(u"API :: Starting backlog for " + showObj.name + " season " + str(ep_segment) + " because some eps were set to Wanted")
+            logger.log(u"API :: Starting backlog for " + showObj.name + " season " + str(ep_segment) + " because some episodes were set to WANTED")
             extra_msg = " Backlog started"
 
         if failure:
-            return _responds(RESULT_FAILURE, ep_results, 'Failed to set some or all status. Check data.' + extra_msg)
+            return _responds(RESULT_FAILURE, ep_results, 'Failed to set all or some status. Check data.' + extra_msg)
         else:
-            return _responds(RESULT_SUCCESS, msg='All status set.' + extra_msg)
+            return _responds(RESULT_SUCCESS, msg='All status set successfully.' + extra_msg)
 
 
 class CMD_Exceptions(ApiCall):
