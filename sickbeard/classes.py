@@ -101,7 +101,7 @@ class SearchResult:
         return myString
 
     def fileName(self):
-        return self.episodes[0].prettyName(True) + "." + self.resultType
+        return self.episodes[0].prettyName() + "." + self.resultType
 
 class NZBSearchResult(SearchResult):
     """

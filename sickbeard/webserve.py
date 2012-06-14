@@ -34,15 +34,16 @@ import sickbeard
 
 from sickbeard import config, sab
 from sickbeard import history, notifiers, processTV
-from sickbeard import tv, ui
+from sickbeard import ui
 from sickbeard import logger, helpers, exceptions, classes, db
 from sickbeard import encodingKludge as ek
 from sickbeard import search_queue
 from sickbeard import image_cache
+from sickbeard import naming
 
-from sickbeard.providers import newznab, getProviderClass
+from sickbeard.providers import newznab
 from sickbeard.common import Quality, Overview, statusStrings
-from sickbeard.common import SNATCHED, DOWNLOADED, SKIPPED, UNAIRED, IGNORED, ARCHIVED, WANTED
+from sickbeard.common import SNATCHED, SKIPPED, UNAIRED, IGNORED, ARCHIVED, WANTED
 from sickbeard.exceptions import ex
 from sickbeard.webapi import Api
 
@@ -370,8 +371,8 @@ class Manage:
             if showObj:
                 showList.append(showObj)
 
-        season_folders_all_same = True
-        last_season_folders = None
+        flatten_folders_all_same = True
+        last_flatten_folders = None
 
         paused_all_same = True
         last_paused = None
@@ -395,11 +396,11 @@ class Manage:
                 else:
                     last_paused = curShow.paused
 
-            if season_folders_all_same:
-                if last_season_folders not in (None, curShow.seasonfolders):
-                    season_folders_all_same = False
+            if flatten_folders_all_same:
+                if last_flatten_folders not in (None, curShow.flatten_folders):
+                    flatten_folders_all_same = False
                 else:
-                    last_season_folders = curShow.seasonfolders
+                    last_flatten_folders = curShow.flatten_folders
 
             if quality_all_same:
                 if last_quality not in (None, curShow.quality):
@@ -409,14 +410,14 @@ class Manage:
 
         t.showList = toEdit
         t.paused_value = last_paused if paused_all_same else None
-        t.season_folders_value = last_season_folders if season_folders_all_same else None
+        t.flatten_folders_value = last_flatten_folders if flatten_folders_all_same else None
         t.quality_value = last_quality if quality_all_same else None
         t.root_dir_list = root_dir_list
 
         return _munge(t)
 
     @cherrypy.expose
-    def massEditSubmit(self, paused=None, season_folders=None, quality_preset=False,
+    def massEditSubmit(self, paused=None, flatten_folders=None, quality_preset=False,
                        anyQualities=[], bestQualities=[], toEdit=None, *args, **kwargs):
 
         dir_map = {}
@@ -449,16 +450,16 @@ class Manage:
                 new_paused = True if paused == 'enable' else False
             new_paused = 'on' if new_paused else 'off'
 
-            if season_folders == 'keep':
-                new_season_folders = showObj.seasonfolders
+            if flatten_folders == 'keep':
+                new_flatten_folders = showObj.flatten_folders
             else:
-                new_season_folders = True if season_folders == 'enable' else False
-            new_season_folders = 'on' if new_season_folders else 'off'
+                new_flatten_folders = True if flatten_folders == 'enable' else False
+            new_flatten_folders = 'on' if new_flatten_folders else 'off'
 
             if quality_preset == 'keep':
                 anyQualities, bestQualities = Quality.splitQuality(showObj.quality)
             
-            curErrors += Home().editShow(curShow, new_show_dir, anyQualities, bestQualities, new_season_folders, new_paused, directCall=True)
+            curErrors += Home().editShow(curShow, new_show_dir, anyQualities, bestQualities, new_flatten_folders, new_paused, directCall=True)
 
             if curErrors:
                 logger.log(u"Errors: "+str(curErrors), logger.ERROR)
@@ -629,7 +630,7 @@ class ConfigGeneral:
         sickbeard.ROOT_DIRS = rootDirString
     
     @cherrypy.expose
-    def saveAddShowDefaults(self, defaultSeasonFolders, defaultStatus, anyQualities, bestQualities):
+    def saveAddShowDefaults(self, defaultFlattenFolders, defaultStatus, anyQualities, bestQualities):
 
         if anyQualities:
             anyQualities = anyQualities.split(',')
@@ -646,12 +647,12 @@ class ConfigGeneral:
         sickbeard.STATUS_DEFAULT = int(defaultStatus)
         sickbeard.QUALITY_DEFAULT = int(newQuality)
 
-        if defaultSeasonFolders == "true":
-            defaultSeasonFolders = 1
+        if defaultFlattenFolders == "true":
+            defaultFlattenFolders = 1
         else:
-            defaultSeasonFolders = 0
+            defaultFlattenFolders = 0
 
-        sickbeard.SEASON_FOLDERS_DEFAULT = int(defaultSeasonFolders)
+        sickbeard.FLATTEN_FOLDERS_DEFAULT = int(defaultFlattenFolders)
 
     @cherrypy.expose
     def generateKey(self):
@@ -841,42 +842,15 @@ class ConfigPostProcessing:
         return _munge(t)
 
     @cherrypy.expose
-    def savePostProcessing(self, season_folders_format=None, naming_show_name=None, naming_ep_type=None,
-                    naming_multi_ep_type=None, naming_ep_name=None, naming_use_periods=None,
-                    naming_sep_type=None, naming_quality=None, naming_dates=None,
+    def savePostProcessing(self, naming_pattern=None, naming_multi_ep=None,
                     xbmc_data=None, mediabrowser_data=None, synology_data=None, sony_ps3_data=None, wdtv_data=None, tivo_data=None,
                     use_banner=None, keep_processed_dir=None, process_automatically=None, rename_episodes=None,
-                    move_associated_files=None, tv_download_dir=None):
+                    move_associated_files=None, tv_download_dir=None, naming_custom_abd=None, naming_abd_pattern=None):
 
         results = []
 
         if not config.change_TV_DOWNLOAD_DIR(tv_download_dir):
             results += ["Unable to create directory " + os.path.normpath(tv_download_dir) + ", dir not changed."]
-
-        if naming_show_name == "on":
-            naming_show_name = 1
-        else:
-            naming_show_name = 0
-
-        if naming_ep_name == "on":
-            naming_ep_name = 1
-        else:
-            naming_ep_name = 0
-
-        if naming_use_periods == "on":
-            naming_use_periods = 1
-        else:
-            naming_use_periods = 0
-
-        if naming_quality == "on":
-            naming_quality = 1
-        else:
-            naming_quality = 0
-
-        if naming_dates == "on":
-            naming_dates = 1
-        else:
-            naming_dates = 0
 
         if use_banner == "on":
             use_banner = 1
@@ -903,10 +877,16 @@ class ConfigPostProcessing:
         else:
             move_associated_files = 0
 
+        if naming_custom_abd == "on":
+            naming_custom_abd = 1
+        else:
+            naming_custom_abd = 0
+
         sickbeard.PROCESS_AUTOMATICALLY = process_automatically
         sickbeard.KEEP_PROCESSED_DIR = keep_processed_dir
         sickbeard.RENAME_EPISODES = rename_episodes
         sickbeard.MOVE_ASSOCIATED_FILES = move_associated_files
+        sickbeard.NAMING_CUSTOM_ABD = naming_custom_abd
 
         sickbeard.metadata_provider_dict['XBMC'].set_config(xbmc_data)
         sickbeard.metadata_provider_dict['MediaBrowser'].set_config(mediabrowser_data)
@@ -915,16 +895,17 @@ class ConfigPostProcessing:
         sickbeard.metadata_provider_dict['WDTV'].set_config(wdtv_data)
         sickbeard.metadata_provider_dict['TIVO'].set_config(tivo_data)
         
-        sickbeard.SEASON_FOLDERS_FORMAT = season_folders_format
+        if self.isNamingValid(naming_pattern, naming_multi_ep) != "invalid":
+            sickbeard.NAMING_PATTERN = naming_pattern
+            sickbeard.NAMING_MULTI_EP = int(naming_multi_ep)
+            sickbeard.NAMING_FORCE_FOLDERS = naming.check_force_season_folders()
+        else:
+            results.append("You tried saving an invalid naming config, not saving your naming settings")
 
-        sickbeard.NAMING_SHOW_NAME = naming_show_name
-        sickbeard.NAMING_EP_NAME = naming_ep_name
-        sickbeard.NAMING_USE_PERIODS = naming_use_periods
-        sickbeard.NAMING_QUALITY = naming_quality
-        sickbeard.NAMING_DATES = naming_dates
-        sickbeard.NAMING_EP_TYPE = int(naming_ep_type)
-        sickbeard.NAMING_MULTI_EP_TYPE = int(naming_multi_ep_type)
-        sickbeard.NAMING_SEP_TYPE = int(naming_sep_type)
+        if self.isNamingValid(naming_abd_pattern, None, True) != "invalid":
+            sickbeard.NAMING_ABD_PATTERN = naming_abd_pattern
+        else:
+            results.append("You tried saving an invalid air-by-date naming config, not saving your air-by-date settings")
 
         sickbeard.USE_BANNER = use_banner
 
@@ -941,86 +922,42 @@ class ConfigPostProcessing:
         redirect("/config/postProcessing/")
 
     @cherrypy.expose
-    def testNaming(self, show_name=None, ep_type=None, multi_ep_type=None, ep_name=None,
-                   sep_type=None, use_periods=None, quality=None, whichTest="single"):
+    def testNaming(self, pattern=None, multi=None, abd=False):
 
-        if show_name == None:
-            show_name = sickbeard.NAMING_SHOW_NAME
+        if multi != None:
+            multi = int(multi)
+
+        result = naming.test_name(pattern, multi, abd)
+
+        result = ek.ek(os.path.join, result['dir'], result['name']) 
+
+        return result
+    
+    @cherrypy.expose
+    def isNamingValid(self, pattern=None, multi=None, abd=False):
+        if pattern == None:
+            return "invalid"
+        
+        # air by date shows just need one check, we don't need to worry about season folders 
+        if abd:
+            is_valid = naming.check_valid_abd_naming(pattern)
+            require_season_folders = False
+
         else:
-            if show_name == "0":
-                show_name = False
-            else:
-                show_name = True
+            # check validity of single and multi ep cases for the whole path
+            is_valid = naming.check_valid_naming(pattern, multi)
+    
+            # check validity of single and multi ep cases for only the file name
+            require_season_folders = naming.check_force_season_folders(pattern, multi)
 
-        if ep_name == None:
-            ep_name = sickbeard.NAMING_EP_NAME
+        if is_valid and not require_season_folders:
+            return "valid"
+        elif is_valid and require_season_folders:
+            return "seasonfolders"
         else:
-            if ep_name == "0":
-                ep_name = False
-            else:
-                ep_name = True
+            return "invalid"
 
-        if use_periods == None:
-            use_periods = sickbeard.NAMING_USE_PERIODS
-        else:
-            if use_periods == "0":
-                use_periods = False
-            else:
-                use_periods = True
-
-        if quality == None:
-            quality = sickbeard.NAMING_QUALITY
-        else:
-            if quality == "0":
-                quality = False
-            else:
-                quality = True
-
-        if ep_type == None:
-            ep_type = sickbeard.NAMING_EP_TYPE
-        else:
-            ep_type = int(ep_type)
-
-        if multi_ep_type == None:
-            multi_ep_type = sickbeard.NAMING_MULTI_EP_TYPE
-        else:
-            multi_ep_type = int(multi_ep_type)
-
-        if sep_type == None:
-            sep_type = sickbeard.NAMING_SEP_TYPE
-        else:
-            sep_type = int(sep_type)
-
-        class TVShow():
-            def __init__(self):
-                self.name = "Show Name"
-                self.genre = "Comedy"
-                self.air_by_date = 0
-
-        # fake a TVShow (hack since new TVShow is coming anyway)
-        class TVEpisode(tv.TVEpisode):
-            def __init__(self, season, episode, name):
-                self.relatedEps = []
-                self._name = name
-                self._season = season
-                self._episode = episode
-                self.show = TVShow()
-
-
-        # make a fake episode object
-        ep = TVEpisode(1,2,"Ep Name")
-        ep._status = Quality.compositeStatus(DOWNLOADED, Quality.HDTV)
-
-        if whichTest == "multi":
-            ep._name = "Ep Name (1)"
-            secondEp = TVEpisode(1,3,"Ep Name (2)")
-            ep.relatedEps.append(secondEp)
-
-        # get the name
-        name = ep.prettyName(show_name, ep_type, multi_ep_type, ep_name, sep_type, use_periods, quality)
-
-        return name
-
+        
 class ConfigProviders:
 
     @cherrypy.expose
@@ -1737,7 +1674,7 @@ class NewHomeAddShows:
 
     @cherrypy.expose
     def addNewShow(self, whichSeries=None, tvdbLang="en", rootDir=None, defaultStatus=None,
-                   anyQualities=None, bestQualities=None, seasonFolders=None, fullShowPath=None,
+                   anyQualities=None, bestQualities=None, flatten_folders=None, fullShowPath=None,
                    other_shows=None, skipShow=None):
         """
         Receive tvdb id, dir, and other options and create a show from them. If extra show dirs are
@@ -1789,20 +1726,23 @@ class NewHomeAddShows:
             ui.notifications.error("Unable to add show", "Folder "+show_dir+" exists already")
             redirect('/home')
         
-        # create the dir and make sure it worked
-        dir_exists = helpers.makeDir(show_dir)
-        if not dir_exists:
-            logger.log(u"Unable to create the folder "+show_dir+", can't add the show", logger.ERROR)
-            ui.notifications.error("Unable to add show", "Unable to create the folder "+show_dir+", can't add the show")
-            redirect("/home")
+        # don't create show dir if config says not to
+        if sickbeard.ADD_SHOWS_WO_DIR:
+            logger.log(u"Skipping initial creation of "+show_dir+" due to config.ini setting")
         else:
-            helpers.chmodAsParent(show_dir)
+            dir_exists = helpers.makeDir(show_dir)
+            if not dir_exists:
+                logger.log(u"Unable to create the folder "+show_dir+", can't add the show", logger.ERROR)
+                ui.notifications.error("Unable to add show", "Unable to create the folder "+show_dir+", can't add the show")
+                redirect("/home")
+            else:
+                helpers.chmodAsParent(show_dir)
 
         # prepare the inputs for passing along
-        if seasonFolders == "on":
-            seasonFolders = 1
+        if flatten_folders == "on":
+            flatten_folders = 1
         else:
-            seasonFolders = 0
+            flatten_folders = 0
         
         if not anyQualities:
             anyQualities = []
@@ -1815,7 +1755,7 @@ class NewHomeAddShows:
         newQuality = Quality.combineQualities(map(int, anyQualities), map(int, bestQualities))
         
         # add the show
-        sickbeard.showQueueScheduler.action.addShow(tvdb_id, show_dir, int(defaultStatus), newQuality, seasonFolders, tvdbLang) #@UndefinedVariable
+        sickbeard.showQueueScheduler.action.addShow(tvdb_id, show_dir, int(defaultStatus), newQuality, flatten_folders, tvdbLang) #@UndefinedVariable
         ui.notifications.message('Show added', 'Adding the specified show into '+show_dir)
 
         return finishAddShow()
@@ -1886,7 +1826,7 @@ class NewHomeAddShows:
             show_dir, tvdb_id, show_name = cur_show
 
             # add the show
-            sickbeard.showQueueScheduler.action.addShow(tvdb_id, show_dir, SKIPPED, sickbeard.QUALITY_DEFAULT, sickbeard.SEASON_FOLDERS_DEFAULT) #@UndefinedVariable
+            sickbeard.showQueueScheduler.action.addShow(tvdb_id, show_dir, SKIPPED, sickbeard.QUALITY_DEFAULT, sickbeard.FLATTEN_FOLDERS_DEFAULT) #@UndefinedVariable
             num_added += 1
          
         if num_added:
@@ -2234,7 +2174,7 @@ class Home:
         )
 
         sqlResults = myDB.select(
-            "SELECT * FROM tv_episodes WHERE showid = ? ORDER BY season*1000+episode DESC",
+            "SELECT * FROM tv_episodes WHERE showid = ? ORDER BY season DESC, episode DESC",
             [showObj.tvdbid]
         )
 
@@ -2269,7 +2209,7 @@ class Home:
                 t.submenu.append({ 'title': 'Re-scan files',        'path': 'home/refreshShow?show=%d'%showObj.tvdbid })
                 t.submenu.append({ 'title': 'Force Full Update',    'path': 'home/updateShow?show=%d&amp;force=1'%showObj.tvdbid })
                 t.submenu.append({ 'title': 'Update show in XBMC',  'path': 'home/updateXBMC?showName=%s'%urllib.quote_plus(showObj.name.encode('utf-8')), 'requires': haveXBMC })
-                t.submenu.append({ 'title': 'Rename Episodes',      'path': 'home/fixEpisodeNames?show=%d'%showObj.tvdbid, 'confirm': True })
+                t.submenu.append({ 'title': 'Rename Episodes',      'path': 'home/testRename?show=%d'%showObj.tvdbid })
 
         t.show = showObj
         t.sqlResults = sqlResults
@@ -2311,7 +2251,7 @@ class Home:
         return result['description'] if result else 'Episode not found.'
 
     @cherrypy.expose
-    def editShow(self, show=None, location=None, anyQualities=[], bestQualities=[], seasonfolders=None, paused=None, directCall=False, air_by_date=None, tvdbLang=None):
+    def editShow(self, show=None, location=None, anyQualities=[], bestQualities=[], flatten_folders=None, paused=None, directCall=False, air_by_date=None, tvdbLang=None):
 
         if show == None:
             errString = "Invalid show ID: "+str(show)
@@ -2329,7 +2269,7 @@ class Home:
             else:
                 return _genericMessage("Error", errString)
 
-        if not location and not anyQualities and not bestQualities and not seasonfolders:
+        if not location and not anyQualities and not bestQualities and not flatten_folders:
 
             t = PageTemplate(file="editShow.tmpl")
             t.submenu = HomeMenu()
@@ -2338,10 +2278,12 @@ class Home:
 
             return _munge(t)
 
-        if seasonfolders == "on":
-            seasonfolders = 1
+        if flatten_folders == "on":
+            flatten_folders = 1
         else:
-            seasonfolders = 0
+            flatten_folders = 0
+
+        logger.log(u"flatten folders: "+str(flatten_folders))
 
         if paused == "on":
             paused = 1
@@ -2375,8 +2317,9 @@ class Home:
             newQuality = Quality.combineQualities(map(int, anyQualities), map(int, bestQualities))
             showObj.quality = newQuality
 
-            if bool(showObj.seasonfolders) != bool(seasonfolders):
-                showObj.seasonfolders = seasonfolders
+            # reversed for now
+            if bool(showObj.flatten_folders) != bool(flatten_folders):
+                showObj.flatten_folders = flatten_folders
                 try:
                     sickbeard.showQueueScheduler.action.refreshShow(showObj) #@UndefinedVariable
                 except exceptions.CantRefreshException, e:
@@ -2514,25 +2457,6 @@ class Home:
             logger.log(u"Plex library update failed for host " + sickbeard.PLEX_HOST, logger.ERROR)
         redirect('/home')
 
-
-    @cherrypy.expose
-    def fixEpisodeNames(self, show=None):
-
-        if show == None:
-            return _genericMessage("Error", "Invalid show ID")
-
-        showObj = sickbeard.helpers.findCertainShow(sickbeard.showList, int(show))
-
-        if showObj == None:
-            return _genericMessage("Error", "Unable to find the specified show")
-
-        if sickbeard.showQueueScheduler.action.isBeingAdded(showObj): #@UndefinedVariable
-            return _genericMessage("Error", "Show is still being added, wait until it is finished before you rename files")
-
-        showObj.fixEpisodeNames()
-
-        redirect("/home/displayShow?show=" + show)
-
     @cherrypy.expose
     def setStatus(self, show=None, eps=None, status=None, direct=False):
 
@@ -2615,6 +2539,85 @@ class Home:
             return json.dumps({'result': 'success'})
         else:
             redirect("/home/displayShow?show=" + show)
+
+    @cherrypy.expose
+    def testRename(self, show=None):
+
+        if show == None:
+            return _genericMessage("Error", "You must specify a show")
+
+        showObj = sickbeard.helpers.findCertainShow(sickbeard.showList, int(show))
+
+        if showObj == None:
+            return _genericMessage("Error", "Show not in show list")
+
+        ep_obj_list = []
+
+        myDB = db.DBConnection()
+        ep_list = myDB.select("SELECT * FROM tv_episodes WHERE showid = ? AND location != '' GROUP BY location ORDER BY season*1000+episode", [show])
+
+        try:
+            show_loc = showObj.location #@UnusedVariable
+        except exceptions.ShowDirNotFoundException:
+            return _genericMessage("Error", "Can't rename episodes when the show dir is missing.")
+
+        for cur_ep in ep_list:
+
+            # get the episode object
+            cur_ep_obj = showObj.makeEpFromFile(cur_ep["location"])
+            
+            ep_obj_list.append(cur_ep_obj)
+                
+        t = PageTemplate(file="testRename.tmpl")
+        t.submenu = [ { 'title': 'Edit', 'path': 'home/editShow?show=%d'%showObj.tvdbid } ]
+        t.ep_obj_list = ep_obj_list
+        t.show = showObj
+
+        return _munge(t)
+
+    @cherrypy.expose
+    def doRename(self, show=None, eps=None):
+
+        if show == None or eps == None:
+            errMsg = "You must specify a show and at least one episode"
+            return _genericMessage("Error", errMsg)
+
+        show_obj = sickbeard.helpers.findCertainShow(sickbeard.showList, int(show))
+
+        if show_obj == None:
+            errMsg = "Error", "Show not in show list"
+            return _genericMessage("Error", errMsg)
+
+        try:
+            show_loc = show_obj.location #@UnusedVariable
+        except exceptions.ShowDirNotFoundException:
+            return _genericMessage("Error", "Can't rename episodes when the show dir is missing.")
+
+        myDB = db.DBConnection()
+
+        if eps == None:
+            redirect("/home/displayShow?show=" + show)
+            
+        for curEp in eps.split('|'):
+
+            epInfo = curEp.split('x')
+            
+            # this is probably the worst possible way to deal with double eps but I've kinda painted myself into a corner here with this stupid database
+            ep_result = myDB.select("SELECT * FROM tv_episodes WHERE showid = ? AND season = ? AND episode = ? AND 5=5", [show, epInfo[0], epInfo[1]])
+            if not ep_result:
+                logger.log(u"Unable to find an episode for "+curEp+", skipping", logger.WARNING)
+                continue
+            related_eps_result = myDB.select("SELECT * FROM tv_episodes WHERE location = ? AND episode != ?", [ep_result[0]["location"], epInfo[1]])
+            
+            root_ep_obj = show_obj.getEpisode(int(epInfo[0]), int(epInfo[1]))
+            for cur_related_ep in related_eps_result:
+                related_ep_obj = show_obj.getEpisode(int(cur_related_ep["season"]), int(cur_related_ep["episode"]))
+                if related_ep_obj not in root_ep_obj.relatedEps:
+                    root_ep_obj.relatedEps.append(related_ep_obj)
+
+            root_ep_obj.rename()
+
+        redirect("/home/displayShow?show=" + show)
 
     @cherrypy.expose
     def searchEpisode(self, show=None, season=None, episode=None):
