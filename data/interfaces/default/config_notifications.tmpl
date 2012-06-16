@@ -851,6 +851,59 @@
 
                     </fieldset>
                 </div><!-- /trakt component-group //-->
+                
+                <div class="component-group clearfix">
+                    <div class="component-group-desc">
+                        <h3>Webhook</h3>
+                        <p>Send a POST request to a specified URL. The request will have three parameters:</p>
+                        <p>ep_name<br> (the name of the episode)</p>
+                        <p>notification_type<br> ('snatch', 'download' or 'test')</p>
+                        <p>notify_string<br> (a human readable version of the notification type)</p>
+                    </div>
+                    <fieldset class="component-group-list">
+                        <div class="field-pair">
+                            <input type="checkbox" class="enabler" name="use_webhook" id="use_webhook" #if $sickbeard.USE_WEBHOOK then "checked=\"checked\"" else ""# />
+                            <label class="clearfix" for="use_webhook">
+                                <span class="component-title">Enable</span>
+                                <span class="component-desc">Should Sick Beard send a POST request?</span>
+                            </label>
+                        </div>
+
+                        <div id="content_use_webhook">
+                            <div class="field-pair">
+                                <input type="checkbox" name="webhook_notify_onsnatch" id="webhook_notify_onsnatch" #if $sickbeard.WEBHOOK_NOTIFY_ONSNATCH then "checked=\"checked\"" else ""# /> 
+                                <label class="clearfix" for="webhook_notify_onsnatch">
+                                    <span class="component-title">Notify on Snatch</span>
+                                    <span class="component-desc">Send POST request when we start a download?</span>
+                                </label>
+                            </div>
+                            
+                            <div class="field-pair">
+                                <input type="checkbox" name="webhook_notify_ondownload" id="webhook_notify_ondownload" #if $sickbeard.WEBHOOK_NOTIFY_ONDOWNLOAD then "checked=\"checked\"" else ""# />
+                                <label class="clearfix" for="webhook_notify_ondownload">
+                                    <span class="component-title">Notify on Download</span>
+                                    <span class="component-desc">Send POST request when we finish a download?</span>
+                                </label>
+                            </div>
+                            
+                            <div class="field-pair">
+                                <label class="nocheck clearfix">
+                                    <span class="component-title">URL</span>
+                                    <input type="text" name="webhook_url" id="webhook_url" value="$sickbeard.WEBHOOK_URL" size="35" />
+                                </label>
+                                <label class="nocheck clearfix">
+                                    <span class="component-title">&nbsp;</span>
+                                    <span class="component-desc">The URL to POST to.</span>
+                                </label>
+                            </div>
+                            
+                            <div class="testNotification" id="testWebhook-result">Click below to test.</div>
+                            <input type="button" value="Test Webhook" id="testWebhook" />
+                            <input type="submit" class="config_submitter" value="Save Changes" />
+                        </div><!-- /content_use_webhook //-->
+
+                    </fieldset>
+                </div><!-- /webhook component-group //-->
 
 
             <br/><input type="submit" class="config_submitter" value="Save Changes" /><br/>
