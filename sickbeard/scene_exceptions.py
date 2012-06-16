@@ -244,15 +244,21 @@ def getSceneSeasons(tvdb_id):
 
 
 def buil_name_set():
+    logger.log(u"Updating internal scene name cache", logger.MESSAGE)
+    _excpetionDots = []
     global exception_tvdb
     exception_tvdb = {}
 
     for show in sickbeard.showList:
         for curSeason in [-1] + sickbeard.scene_exceptions.get_scene_seasons(show.tvdbid):
             exception_tvdb[helpers.full_sanitizeSceneName(show.name)] = show.tvdbid
+            _excpetionDots.append(".")
             for name in get_scene_exceptions(show.tvdbid, season=curSeason):
                 exception_tvdb[name] = show.tvdbid
                 exception_tvdb[helpers.full_sanitizeSceneName(name)] = show.tvdbid
+                _excpetionDots.append(".")
 
+    logger.log(u"Updated internal scene name cache " + "".join(_excpetionDots), logger.MESSAGE)
+    logger.log(u"Internal scene name cache set to: " + str(exception_tvdb), logger.DEBUG)
 
 
