@@ -1217,7 +1217,8 @@ class ConfigNotifications:
                           use_trakt=None, trakt_username=None, trakt_password=None, trakt_api=None,
                           use_pytivo=None, pytivo_notify_onsnatch=None, pytivo_notify_ondownload=None, pytivo_update_library=None, 
                           pytivo_host=None, pytivo_share_name=None, pytivo_tivo_name=None,
-                          use_nma=None, nma_notify_onsnatch=None, nma_notify_ondownload=None, nma_api=None, nma_priority=0 ):
+                          use_nma=None, nma_notify_onsnatch=None, nma_notify_ondownload=None, nma_api=None, nma_priority=0, use_webhook=None,
+                          webhook_notify_onsnatch=None, webhook_notify_ondownload=None, webhook_url=None):
 
         results = []
 
@@ -1400,7 +1401,22 @@ class ConfigNotifications:
             nma_notify_ondownload = 1
         else:
             nma_notify_ondownload = 0
-
+        
+        if use_webhook == "on":
+            use_webhook = 1
+        else:
+            use_webhook = 0
+        
+        if webhook_notify_onsnatch == "on":
+            webhook_notify_onsnatch = 1
+        else:
+            webhook_notify_onsnatch = 0
+            
+        if webhook_notify_ondownload == "on":
+            webhook_notify_ondownload = 1
+        else:
+            webhook_notify_ondownload = 0
+    
         sickbeard.USE_XBMC = use_xbmc
         sickbeard.XBMC_NOTIFY_ONSNATCH = xbmc_notify_onsnatch
         sickbeard.XBMC_NOTIFY_ONDOWNLOAD = xbmc_notify_ondownload
@@ -1480,6 +1496,11 @@ class ConfigNotifications:
         sickbeard.NMA_NOTIFY_ONDOWNLOAD = nma_notify_ondownload
         sickbeard.NMA_API = nma_api
         sickbeard.NMA_PRIORITY = nma_priority
+        
+        sickbeard.USE_WEBHOOK = use_webhook
+        sickbeard.WEBHOOK_NOTIFY_ONSNATCH = webhook_notify_onsnatch
+        sickbeard.WEBHOOK_NOTIFY_ONDOWNLOAD = webhook_notify_ondownload
+        sickbeard.WEBHOOK_URL = webhook_url
         
         sickbeard.save_config()
 
@@ -2173,6 +2194,12 @@ class Home:
             return "Test NMA notice sent successfully"
         else:
             return "Test NMA notice failed"
+
+    @cherrypy.expose
+    def testWebhook(self, webhook_url=None):
+        cherrypy.response.headers['Cache-Control'] = "max-age=0,no-cache,no-store"
+        
+        return notifiers.webhook_notifier.test_notify(webhook_url)
 
     @cherrypy.expose
     def shutdown(self):
