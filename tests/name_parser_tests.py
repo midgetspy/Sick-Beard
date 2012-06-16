@@ -122,7 +122,8 @@ simple_test_cases = {
                },
                'anime_ep_name':{
                '[TzaTziki]_One_Piece_279_Chopper_Man_1_[720p][8AE5F25D]': parser.ParseResult(None, 'One Piece', None, [], '720p', 'TzaTziki', None, [279]),
-               "[ACX]Wolf's_Rain_-_04_-_Scars_in_the_Wasteland_[octavarium]_[82B7E357]": parser.ParseResult(None, "Wolf's Rain", None, [], 'octavarium', 'ACX', None, [4])
+               "[ACX]Wolf's_Rain_-_04_-_Scars_in_the_Wasteland_[octavarium]_[82B7E357]": parser.ParseResult(None, "Wolf's Rain", None, [], 'octavarium', 'ACX', None, [4]),
+              '[ACX]Black Lagoon - 02v2 - Mangrove Heaven [SaintDeath] [7481F875]': parser.ParseResult(None, 'Black Lagoon', None, [], 'SaintDeath', 'ACX', None, [2]),
               },
               
               "anime_standard_round": {
@@ -352,11 +353,11 @@ class BasicTests(unittest.TestCase):
         
     def test_anime_ultimate(self):
         np = parser.NameParser(False,parser.NameParser.ANIME_REGEX)
-        self._test_names(np, 'anime_ultimate',verbose=False)
+        self._test_names(np, 'anime_ultimate',verbose=True)
 
     def test_anime_ep_name(self):
         np = parser.NameParser(False,parser.NameParser.ANIME_REGEX)
-        self._test_names(np, 'anime_ep_name',verbose=False)
+        self._test_names(np, 'anime_ep_name',verbose=True)
         
     def test_anime_slash(self):
         np = parser.NameParser(False,parser.NameParser.ANIME_REGEX)
@@ -364,7 +365,7 @@ class BasicTests(unittest.TestCase):
         
     def test_anime_codec(self):
         np = parser.NameParser(False,parser.NameParser.ANIME_REGEX)
-        self._test_names(np, 'anime_standard_codec',verbose=False)
+        self._test_names(np, 'anime_standard_codec',verbose=True)
                 
     def test_anime_and_normal(self):
         np = parser.NameParser(False,parser.NameParser.ANIME_REGEX)

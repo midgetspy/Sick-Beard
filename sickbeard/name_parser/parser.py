@@ -343,7 +343,7 @@ class ParseResult(object):
             to_return += ' absolute_numbers: '+str(self.ab_episode_numbers)
 
         if self.extra_info:
-            to_return += ' - ' + self.extra_info
+            to_return += u' - ' + unicode(self.extra_info)
         if self.release_group:
             to_return += ' (' + self.release_group + ')'
 
@@ -364,6 +364,11 @@ class ParseResult(object):
             return True
         return False
     is_anime = property(_is_anime)
+
+    def _sxxexx(self):
+        return bool(self.season_number != None and self.episode_numbers)
+
+    sxxexx = property(_sxxexx)
 
 class InvalidNameException(Exception):
     "The given name is not valid"

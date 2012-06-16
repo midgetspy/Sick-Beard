@@ -151,7 +151,7 @@ class Quality:
         
         
         blueRayOptions = checkName(["bluray", "blu-ray"], any)
-        hdOptions = checkName(["720p", "1280x720"], any)
+        hdOptions = checkName(["720p", "1280x720", "960x720"], any)
         fullHD = checkName(["1080p", "1920x1080"], any)
 
         if checkName(["360p", "XviD"], any):
@@ -164,7 +164,7 @@ class Quality:
             return Quality.HDWEBDL
         elif blueRayOptions and hdOptions and not fullHD:
             return Quality.HDBLURAY
-        elif blueRayOptions or fullHD:
+        elif fullHD:
             return Quality.FULLHDBLURAY
         else:
             return Quality.assumeQuality(name)

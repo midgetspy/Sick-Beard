@@ -145,7 +145,7 @@ class RSSSearchQueueItem(generic_queue.QueueItem):
         curDate = datetime.date.today().toordinal()
 
         myDB = db.DBConnection()
-        sqlResults = myDB.select("SELECT * FROM tv_episodes WHERE status = ? AND airdate < ?", [common.UNAIRED, curDate])
+        sqlResults = myDB.select("SELECT * FROM tv_episodes WHERE status = ? AND airdate < ? AND airdate > 1", [common.UNAIRED, curDate])
 
         for sqlEp in sqlResults:
 
@@ -168,13 +168,14 @@ class RSSSearchQueueItem(generic_queue.QueueItem):
                 ep.saveToDB()
 
 class BacklogQueueItem(generic_queue.QueueItem):
-    def __init__(self, show, segment):
+    def __init__(self, show, segment, scene=False):
         generic_queue.QueueItem.__init__(self, 'Backlog', BACKLOG_SEARCH)
         self.priority = generic_queue.QueuePriorities.LOW
         self.thread_name = 'BACKLOG-'+str(show.tvdbid)
         
         self.show = show
         self.segment = segment
+        self.scene = scene
 
         logger.log(u"Seeing if we need any episodes from "+self.show.name+" season "+str(self.segment))
 
@@ -182,7 +183,10 @@ class BacklogQueueItem(generic_queue.QueueItem):
 
         # see if there is anything in this season worth searching for
         if not self.show.air_by_date:
-            statusResults = myDB.select("SELECT status FROM tv_episodes WHERE showid = ? AND season = ?", [self.show.tvdbid, self.segment])
+            if not self.scene:
+                statusResults = myDB.select("SELECT status FROM tv_episodes WHERE showid = ? AND season = ?", [self.show.tvdbid, self.segment])
+            else:
+                statusResults = myDB.select("SELECT status FROM tv_episodes WHERE showid = ? AND scene_season = ?", [self.show.tvdbid, self.segment])
         else:
             segment_year, segment_month = map(int, self.segment.split('-'))
             min_date = datetime.date(segment_year, segment_month, 1)
@@ -203,7 +207,7 @@ class BacklogQueueItem(generic_queue.QueueItem):
         
         generic_queue.QueueItem.execute(self)
 
-        results = search.findSeason(self.show, self.segment)
+        results = search.findSeason(self.show, self.segment, self.scene)
 
         # download whatever we find
         for curResult in results:

@@ -21,13 +21,11 @@ import unittest
 import test_lib as test
 
 from sickbeard import db
-
 class DBBasicTests(test.SickbeardTestDBCase):
 
     def test_select(self):
         curDB = db.DBConnection()
         curDB.select("SELECT * FROM tv_episodes WHERE showid = ? AND location != ''", [0000])
-
 
 if __name__ == '__main__':
     print "=================="

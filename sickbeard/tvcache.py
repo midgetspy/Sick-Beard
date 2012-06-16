@@ -26,7 +26,7 @@ from sickbeard import db
 from sickbeard import logger
 from sickbeard.common import Quality
 
-from sickbeard import helpers, exceptions, show_name_helpers
+from sickbeard import helpers, exceptions, show_name_helpers, scene_exceptions
 from sickbeard import name_cache
 from sickbeard.exceptions import ex
 
@@ -34,9 +34,7 @@ from sickbeard.exceptions import ex
 import xml.dom.minidom
 
 from lib.tvdb_api import tvdb_api, tvdb_exceptions
-
-from name_parser.parser import NameParser, InvalidNameException
-from sickbeard.helpers import parse_result_wrapper
+from sickbeard.completparser import CompleteParser
 
 
 class CacheDBConnection(db.DBConnection):
@@ -193,159 +191,20 @@ class TVCache():
         """
         myDB = self._getDB()
 
-        parse_result = None
-        tvdb_lang = None
-        
         # if we don't have complete info then parse the filename to get it
         for curName in [name] + extraNames:
-            try:
-                """
-                if self.provider.supportsAbsoluteNumbering:                
-                    myParser = NameParser(regexMode=NameParser.ALL_REGEX)
-                else:
-                    myParser = NameParser(regexMode=NameParser.NORMAL_REGEX)
-                parse_result = myParser.parse(curName)
-                """
-                parse_result = parse_result_wrapper(None,curName)
-            except InvalidNameException:
-                logger.log(u"tvcache: Unable to parse the filename "+curName+" into a valid episode", logger.DEBUG)
-                continue
-
-        if not parse_result:
-            logger.log(u"Giving up because I'm unable to parse this name: "+name, logger.DEBUG)
+            cp = CompleteParser()
+            cpr = cp.parse(curName)
+            if cpr:
+                break
+        else:
             return False
 
-        if not parse_result.series_name:
-            logger.log(u"No series name retrieved from "+name+", unable to cache it", logger.DEBUG)
-            return False
-
-        tvdb_lang = None
-
-        # if we need tvdb_id or tvrage_id then search the DB for them
-        # if this is called from the a generic provider none of this will be present
-        if not tvdb_id or not tvrage_id:
-
-            # if we have only the tvdb_id, use the database
-            if tvdb_id:
-                showObj = helpers.findCertainShow(sickbeard.showList, tvdb_id)
-                if showObj:
-                    tvrage_id = showObj.tvrid
-                    tvdb_lang = showObj.lang
-                else:
-                    logger.log(u"We were given a TVDB id "+str(tvdb_id)+" but it doesn't match a show we have in our list, so leaving tvrage_id empty", logger.DEBUG)
-                    tvrage_id = 0
-
-            # if we have only a tvrage_id then use the database
-            elif tvrage_id:
-                showObj = helpers.findCertainTVRageShow(sickbeard.showList, tvrage_id)
-                if showObj:
-                    tvdb_id = showObj.tvdbid
-                    tvdb_lang = showObj.lang
-                else:
-                    logger.log(u"We were given a TVRage id "+str(tvrage_id)+" but it doesn't match a show we have in our list, so leaving tvdb_id empty", logger.DEBUG)
-                    tvdb_id = 0
-
-            # if they're both empty then fill out as much info as possible by searching the show name
-            else:
-                
-                # check the name cache and see if we already know what show this is
-                logger.log(u"Checking the cache to see if we already know the tvdb id of "+parse_result.series_name, logger.DEBUG)
-                tvdb_id = name_cache.retrieveNameFromCache(parse_result.series_name)
-                
-                # remember if the cache lookup worked or not so we know whether we should bother updating it later
-                if tvdb_id == None:
-                    logger.log(u"No cache results returned, continuing on with the search", logger.DEBUG)
-                    from_cache = False
-                else:
-                    logger.log(u"Cache lookup found "+repr(tvdb_id)+", using that", logger.DEBUG)
-                    from_cache = True
-                
-                # if the cache failed, try looking up the show name in the database
-                if tvdb_id == None:
-                    logger.log(u"Trying to look the show up in the show database", logger.DEBUG)
-                    showResult = helpers.searchDBForShow(parse_result.series_name)
-                    if showResult:
-                        logger.log(parse_result.series_name+" was found to be show "+showResult[1]+" ("+str(showResult[0])+") in our DB.", logger.DEBUG)
-                        tvdb_id = showResult[0]
-
-                # if the DB lookup fails then do a comprehensive regex search
-                if tvdb_id == None:
-                    logger.log(u"Couldn't figure out a show name straight from the DB, trying a regex search instead", logger.DEBUG)
-                    for curShow in sickbeard.showList:
-                        if show_name_helpers.isGoodResult(name, curShow, False):
-                            logger.log(u"Successfully matched "+name+" to "+curShow.name+" with regex", logger.DEBUG)
-                            tvdb_id = curShow.tvdbid
-                            tvdb_lang = curShow.lang
-                            break
-
-                # if tvdb_id was anything but None (0 or a number) then 
-                if not from_cache:
-                    name_cache.addNameToCache(parse_result.series_name, tvdb_id)
-
-                # if we came out with tvdb_id = None it means we couldn't figure it out at all, just use 0 for that
-                if tvdb_id == None:
-                    tvdb_id = 0
-
-                # if we found the show then retrieve the show object
-                if tvdb_id:
-                    showObj = helpers.findCertainShow(sickbeard.showList, tvdb_id)
-                    if showObj:
-                        tvrage_id = showObj.tvrid
-                        tvdb_lang = showObj.lang
-
-        # if we weren't provided with season/episode information then get it from the name that we parsed
-        if not season:
-            season = parse_result.season_number if parse_result.season_number != None else 1
-        if not episodes:
-            episodes = parse_result.episode_numbers
-
-        # if we have an air-by-date show then get the real season/episode numbers
-        if parse_result.air_by_date and tvdb_id:
-            try:
-                # There's gotta be a better way of doing this but we don't wanna
-                # change the language value elsewhere
-                ltvdb_api_parms = sickbeard.TVDB_API_PARMS.copy()
-
-                if not (tvdb_lang == "" or tvdb_lang == "en" or tvdb_lang == None):
-                    ltvdb_api_parms['language'] = tvdb_lang
-
-                t = tvdb_api.Tvdb(**ltvdb_api_parms)
-                epObj = t[tvdb_id].airedOn(parse_result.air_date)[0]
-                season = int(epObj["seasonnumber"])
-                episodes = [int(epObj["episodenumber"])]
-            except tvdb_exceptions.tvdb_episodenotfound:
-                logger.log(u"Unable to find episode with date "+str(parse_result.air_date)+" for show "+parse_result.series_name+", skipping", logger.WARNING)
-                return False
-            except tvdb_exceptions.tvdb_error, e:
-                logger.log(u"Unable to contact TVDB: "+ex(e), logger.WARNING)
-                return False
-
-        if parse_result.is_anime and len(parse_result.ab_episode_numbers) >= 1 and tvdb_id:
-            # look it up
-            curShow = helpers.findCertainShow(sickbeard.showList, tvdb_id)
-            if curShow.is_anime  and len(parse_result.ab_episode_numbers) > 0:
-                try:
-                    (season, episodes) = helpers.get_all_episodes_from_absolute_number(curShow, None, parse_result.ab_episode_numbers)
-                except exceptions.EpisodeNotFoundByAbsoluteNumerException:
-                    logger.log(str(tvdb_id) + ": DB objekt with absolute number " + str(parse_result.ab_episode_numbers) + " was not found, TheTvDB lacking behind?")
-                    return False 
-            else:
-                logger.log(u""+str(name)+" was matched to the show "+str(curShow.name)+" as an anime but the show is not marked as an anime", logger.WARNING)
-
-        episodeText = "|"+"|".join(map(str, episodes))+"|"
-
+        episodeText = "|"+"|".join(map(str, cpr.episodes))+"|"
         # get the current timestamp
         curTimestamp = int(time.mktime(datetime.datetime.today().timetuple()))
-
-        if not quality:
-            quality = Quality.nameQuality(name, parse_result.is_anime)
-
-        release_group = parse_result.release_group
-        if not release_group:
-            release_group = "";
-
         myDB.action("INSERT INTO "+self.providerID+" (name, season, episodes, tvrid, tvdbid, url, time, quality, release_group) VALUES (?,?,?,?,?,?,?,?,?)",
-                    [name, season, episodeText, tvrage_id, tvdb_id, url, curTimestamp, quality, release_group])
+                    [name, cpr.season, episodeText, 0, cpr.tvdbid, url, curTimestamp, cpr.quality, cpr.release_group])
 
 
     def searchCache(self, episode, manualSearch=False):
@@ -375,7 +234,7 @@ class TVCache():
         if not episode:
             sqlResults = myDB.select("SELECT * FROM "+self.providerID)
         else:
-            sqlResults = myDB.select("SELECT * FROM "+self.providerID+" WHERE tvdbid = ? AND season = ? AND episodes LIKE ?", [episode.show.tvdbid, episode.season, "%|"+str(episode.episode)+"|%"])
+            sqlResults = myDB.select("SELECT * FROM "+self.providerID+" WHERE tvdbid = ? AND season = ? AND episodes LIKE ?", [episode.show.tvdbid, episode.scene_season, "%|"+str(episode.scene_episode)+"|%"])
 
         # for each cache entry
         for curResult in sqlResults:

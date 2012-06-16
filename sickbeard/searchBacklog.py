@@ -115,15 +115,15 @@ class BacklogSearcher:
                 continue
 
             if curShow.air_by_date:
-                segments = [x[1] for x in self._get_air_by_date_segments(curShow.tvdbid, fromDate)]
+                segments = self._get_air_by_date_segments(curShow.tvdbid, fromDate)
             else:
                 segments = self._get_season_segments(curShow.tvdbid, fromDate)
 
-            for cur_segment in segments:
+            for cur_segment, scene in segments.items():
 
                 self.currentSearchInfo = {'title': curShow.name + " Season "+str(cur_segment)}
 
-                backlog_queue_item = search_queue.BacklogQueueItem(curShow, cur_segment)
+                backlog_queue_item = search_queue.BacklogQueueItem(curShow, cur_segment, scene)
 
                 if not backlog_queue_item.wantSeason:
                     logger.log(u"Nothing in season "+str(cur_segment)+" needs to be downloaded, skipping this season", logger.DEBUG)
@@ -156,9 +156,19 @@ class BacklogSearcher:
         return self._lastBacklog
 
     def _get_season_segments(self, tvdb_id, fromDate):
+
         myDB = db.DBConnection()
-        sqlResults = myDB.select("SELECT DISTINCT(season) as season FROM tv_episodes WHERE showid = ? AND season > 0 and airdate > ?", [tvdb_id, fromDate.toordinal()])
-        return [int(x["season"]) for x in sqlResults]
+        sqlResults = myDB.select("SELECT season, scene_season FROM tv_episodes WHERE showid = ? AND season > 0 and airdate > ?", [tvdb_id, fromDate.toordinal()])
+        seasons = {}
+        for x in sqlResults:
+            scene = False
+            cur_season = int(x["season"])
+            if isinstance(x["scene_season"], int):
+                cur_season = int(x["scene_season"])
+                scene = True
+            seasons[cur_season] = scene
+
+        return seasons
 
     def _get_air_by_date_segments(self, tvdb_id, fromDate):
         # query the DB for all dates for this show
@@ -177,7 +187,15 @@ class BacklogSearcher:
             if cur_result_tuple not in air_by_date_segments:
                 air_by_date_segments.append(cur_result_tuple)
         
-        return air_by_date_segments
+        final_air_by_date_segments = {}
+        for x in air_by_date_segments:
+            final_air_by_date_segments[x[1]] = False
+        
+        return final_air_by_date_segments
+    
+    
+    
+    
 
     def _set_lastBacklog(self, when):
 

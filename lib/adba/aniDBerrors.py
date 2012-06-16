@@ -29,6 +29,9 @@ class AniDBMustAuthError(AniDBError):
 	
 class AniDBPacketCorruptedError(AniDBError):
 	pass
+	
+class AniDBBannedError(AniDBError):
+	pass
 
 class AniDBInternalError(AniDBError):
 	pass

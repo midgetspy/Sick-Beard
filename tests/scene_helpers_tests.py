@@ -71,7 +71,7 @@ class SceneTests(test.SickbeardTestDBCase):
     def test_allPossibleShowNames(self):
         #common.sceneExceptions[-1] = ['Exception Test']
         myDB = db.DBConnection("cache.db")
-        myDB.action("INSERT INTO scene_exceptions (tvdb_id, show_name) VALUES (?,?)", [-1, 'Exception Test'])
+        myDB.action("INSERT INTO scene_exceptions (tvdb_id, show_name, season) VALUES (?,?,?)", [-1, 'Exception Test', -1])
         common.countryList['Full Country Name'] = 'FCN'
 
         self._test_allPossibleShowNames('Show Name', expected=['Show Name'])

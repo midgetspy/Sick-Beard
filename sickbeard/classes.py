@@ -108,6 +108,7 @@ class NZBSearchResult(SearchResult):
     Regular NZB result with an URL to the NZB
     """
     resultType = "nzb"
+    is_proper = False
 
 class NZBDataSearchResult(SearchResult):
     """

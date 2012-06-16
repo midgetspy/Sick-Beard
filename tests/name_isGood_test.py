@@ -17,10 +17,15 @@ dontTest = ["Show.Name.102",
             "Show Name - 01 - Ep Name",
             "Show Name - Episode 01 - Ep Name",
             "Show Name - Episode 01-02 - Ep Name",
-            "Show Name Season 2"]
+            "Show Name Season 2",
+            "[Ayako] Infinite Stratos - IS - 07v2 [H264][720p][44419534]",
+            "[Ayako]_Infinite_Stratos_-_IS_-_07_[H264][720p][EB7838FC]"]
 
 
 class TestSequense(test.SickbeardTestDBCase):
+    def setUp(self):
+        test.SickbeardTestDBCase.setUp(self)
+    
     pass
 
 def test_generator(toTest, tvdb_id, parseResult , anime):

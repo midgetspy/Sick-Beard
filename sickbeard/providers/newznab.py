@@ -68,7 +68,7 @@ class NewznabProvider(generic.NZBProvider):
 	def isEnabled(self):
 		return self.enabled
 
-	def _get_season_search_strings(self, show, season=None):
+	def _get_season_search_strings(self, show, season=None, scene=False):
 
 		if not show:
 			return [{}]
@@ -76,7 +76,8 @@ class NewznabProvider(generic.NZBProvider):
 		to_return = []
 
 		# add new query strings for exceptions
-		name_exceptions = scene_exceptions.get_scene_exceptions(show.tvdbid) + [show.name]
+		name_exceptions = scene_exceptions.get_scene_exceptions(show.tvdbid, season) + [show.name]
+		name_exceptions = set(name_exceptions)
 		for cur_exception in name_exceptions:
 		
 			cur_params = {}
@@ -125,8 +126,8 @@ class NewznabProvider(generic.NZBProvider):
 			params['season'] = date_str.partition('-')[0]
 			params['ep'] = date_str.partition('-')[2].replace('-','/')
 		else:
-			params['season'] = ep_obj.season
-			params['ep'] = ep_obj.episode
+			params['season'] = ep_obj.scene_season
+			params['ep'] = ep_obj.scene_episode
 
 		to_return = [params]
 

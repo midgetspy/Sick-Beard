@@ -287,6 +287,15 @@ class QueueItemAdd(ShowQueueItem):
             logger.log(u"Error with TVDB, not creating episode list: " + ex(e), logger.ERROR)
             logger.log(traceback.format_exc(), logger.DEBUG)
 
+        # before we parse local files lets update exceptions
+        scene_exceptions.retrieve_exceptions()
+        # and get scene numbers
+        logger.log(u"Attempting to load scene numbers", logger.DEBUG)
+        if self.show.loadEpisodeSceneNumbers():
+            logger.log(u"loading scene numbers successfull", logger.DEBUG)
+        else:
+            logger.log(u"loading scene numbers NOT successfull or no scene numbers available", logger.DEBUG)
+
         try:
             self.show.loadEpisodesFromDir()
         except Exception, e:
@@ -304,10 +313,6 @@ class QueueItemAdd(ShowQueueItem):
             logger.log(u"Setting all episodes to the specified default status: "+str(self.default_status))
             myDB = db.DBConnection();
             myDB.action("UPDATE tv_episodes SET status = ? WHERE status = ? AND showid = ? AND season != 0", [self.default_status, SKIPPED, self.show.tvdbid])
-
-        # before we run the backlog lets update the local aliases if the new show is an anime
-        if self.show.is_anime:
-            scene_exceptions.retrieve_exceptions(localOnly=True)
 
         # if they started with WANTED eps then run the backlog
         if self.default_status == WANTED:
@@ -409,6 +414,14 @@ class QueueItemUpdate(ShowQueueItem):
                         curEp.deleteEpisode()
                     except exceptions.EpisodeDeletedException:
                         pass
+
+        logger.log(u"Attempting to load scene numbers", logger.DEBUG)
+        if self.show.loadEpisodeSceneNumbers():
+            logger.log(u"loading scene numbers successfull", logger.DEBUG)
+        else:
+            logger.log(u"loading scene numbers NOT successfull or no scene numbers available", logger.DEBUG)
+            
+
 
         # now that we've updated the DB from TVDB see if there's anything we can add from TVRage
         with self.show.lock:

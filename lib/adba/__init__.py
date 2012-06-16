@@ -121,7 +121,10 @@ class Connection(threading.Thread):
                 command.resp
             except:
                 self.lock.release()
-                raise AniDBCommandTimeoutError, "Command has timed out"
+                if self.link.banned:
+                    raise AniDBBannedError("User is banned")
+                else:
+                    raise AniDBCommandTimeoutError("Command has timed out")
 
             self.handle_response(command.resp)
             self.lock.release()
