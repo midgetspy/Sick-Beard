@@ -142,4 +142,12 @@ $(document).ready(function(){
         var nma_result = $.get(sbRoot+"/home/testNMA", {'nma_api': nma_api, 'nma_priority': nma_priority}, 
         function (data){ $('#testNMA-result').html(data); });
     });
+    
+    $('#testWebhook').click(function(){
+       $('#testWebhook-result').html(loading);
+       var webhook_url = $("#webhook_url").val()
+       
+       $.get(sbRoot+"/home/testWebhook", {'webhook_url': webhook_url},
+       function (data){ $('#testWebhook-result').html(data); });
+    });
 });

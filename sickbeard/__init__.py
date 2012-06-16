@@ -284,6 +284,11 @@ NMA_NOTIFY_ONDOWNLOAD = False
 NMA_API = None
 NMA_PRIORITY = 0
 
+USE_WEBHOOK = False
+WEBHOOK_NOTIFY_ONSNATCH = False
+WEBHOOK_NOTIFY_ONDOWNLOAD = False
+WEBHOOK_URL = ''
+
 COMING_EPS_LAYOUT = None
 COMING_EPS_DISPLAY_PAUSED = None
 COMING_EPS_SORT = None
@@ -400,6 +405,7 @@ def initialize(consoleLogging=True):
                 USE_GROWL, GROWL_HOST, GROWL_PASSWORD, USE_PROWL, PROWL_NOTIFY_ONSNATCH, PROWL_NOTIFY_ONDOWNLOAD, PROWL_API, PROWL_PRIORITY, PROG_DIR, NZBMATRIX, NZBMATRIX_USERNAME, \
                 USE_PYTIVO, PYTIVO_NOTIFY_ONSNATCH, PYTIVO_NOTIFY_ONDOWNLOAD, PYTIVO_UPDATE_LIBRARY, PYTIVO_HOST, PYTIVO_SHARE_NAME, PYTIVO_TIVO_NAME, \
                 USE_NMA, NMA_NOTIFY_ONSNATCH, NMA_NOTIFY_ONDOWNLOAD, NMA_API, NMA_PRIORITY, \
+                USE_WEBHOOK, WEBHOOK_NOTIFY_ONSNATCH, WEBHOOK_NOTIFY_ONDOWNLOAD, WEBHOOK_URL, \
                 NZBMATRIX_APIKEY, versionCheckScheduler, VERSION_NOTIFY, PROCESS_AUTOMATICALLY, \
                 KEEP_PROCESSED_DIR, TV_DOWNLOAD_DIR, TVDB_BASE_URL, MIN_SEARCH_FREQUENCY, \
                 showQueueScheduler, searchQueueScheduler, ROOT_DIRS, \
@@ -435,7 +441,8 @@ def initialize(consoleLogging=True):
         CheckSection('Synology')
         CheckSection('pyTivo')
         CheckSection('NMA')
-
+        CheckSection('Webhook')
+        
         LOG_DIR = check_setting_str(CFG, 'General', 'log_dir', 'Logs')
         if not helpers.makeDir(LOG_DIR):
             logger.log(u"!!! No log folder, logging to screen only!", logger.ERROR)
@@ -668,6 +675,11 @@ def initialize(consoleLogging=True):
         NMA_NOTIFY_ONDOWNLOAD = bool(check_setting_int(CFG, 'NMA', 'nma_notify_ondownload', 0))
         NMA_API = check_setting_str(CFG, 'NMA', 'nma_api', '')
         NMA_PRIORITY = check_setting_str(CFG, 'NMA', 'nma_priority', "0")
+
+        USE_WEBHOOK = bool(check_setting_int(CFG, 'Webhook', 'use_webhook', 0))
+        WEBHOOK_NOTIFY_ONSNATCH = bool(check_setting_int(CFG, 'Webhook', 'webhook_notify_onsnatch', 0))
+        WEBHOOK_NOTIFY_ONDOWNLOAD = bool(check_setting_int(CFG, 'Webhook', 'webhook_notify_ondownload', 0))
+        WEBHOOK_URL = check_setting_str(CFG, 'Webhook', 'webhook_url', '')
 
         GIT_PATH = check_setting_str(CFG, 'General', 'git_path', '')
 
@@ -1215,6 +1227,13 @@ def save_config():
     new_config['NMA']['nma_notify_ondownload'] = int(NMA_NOTIFY_ONDOWNLOAD)
     new_config['NMA']['nma_api'] = NMA_API
     new_config['NMA']['nma_priority'] = NMA_PRIORITY
+
+    new_config['Webhook'] = {}
+    new_config['Webhook']['use_webhook'] = int(USE_WEBHOOK)
+    new_config['Webhook']['webhook_notify_onsnatch'] = int(WEBHOOK_NOTIFY_ONSNATCH)
+    new_config['Webhook']['webhook_notify_ondownload'] = int(WEBHOOK_NOTIFY_ONDOWNLOAD)
+    new_config['Webhook']['webhook_url'] = str(WEBHOOK_URL)
+    
 
     new_config['Newznab'] = {}
     new_config['Newznab']['newznab_data'] = '!!!'.join([x.configStr() for x in newznabProviderList])
