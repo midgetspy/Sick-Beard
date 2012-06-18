@@ -5,8 +5,8 @@
 #import datetime
 #set global $title=$show.name
 #set global $header = '<a href="http://thetvdb.com/?tab=series&amp;id=%d" target="_new">%s</a>' % ($show.tvdbid, $show.name)
-
 #set global $topmenu="manageShows"#
+#set $exceptions_string = " | ".join($show.exceptions) 
 #include $os.path.join($sickbeard.PROG_DIR, "data/interfaces/default/inc_top.tmpl")
 
 <script type="text/javascript" src="$sbRoot/js/jquery.bookmarkscroll.js"></script>
@@ -82,8 +82,11 @@ initially download: <b><%=", ".join([Quality.qualityStrings[x] for x in anyQuali
 replace with: <b><%=", ".join([Quality.qualityStrings[x] for x in bestQualities])%></b>
 #end if 
 #end if
-    </td></tr>
-    <tr><td class="showLegend">Language:</td><td><img src="$sbRoot/images/flags/${show.lang}.png" width="16" height="11" alt="" /> $show.lang</td></tr>
+	</td></tr>
+#if $show.exceptions:
+    <tr><td class="showLegend">Scene Exception: </td><td>$exceptions_string</td></tr>
+#end if 
+    <tr><td class="showLegend">Language: </td><td><img src="$sbRoot/images/flags/${show.lang}.png" width="16" height="11" alt="" /> $show.lang</td></tr>
     <tr><td class="showLegend">Season Folders: </td><td><img src="$sbRoot/images/#if $show.seasonfolders == 1 then "yes16.png\" alt=\"Y" else "no16.png\" alt=\"N"#" width="16" height="16" /></td></tr>
     <tr><td class="showLegend">Paused: </td><td><img src="$sbRoot/images/#if int($show.paused) == 1 then "yes16.png\" alt=\"Y" else "no16.png\" alt=\"N"#" width="16" height="16" /></td></tr>
     <tr><td class="showLegend">Air-by-Date: </td><td><img src="$sbRoot/images/#if int($show.air_by_date) == 1 then "yes16.png\" alt=\"Y" else "no16.png\" alt=\"N"#" width="16" height="16" /></td></tr>

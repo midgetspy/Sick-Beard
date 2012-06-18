@@ -103,3 +103,17 @@ def retrieve_exceptions():
     # since this could invalidate the results of the cache we clear it out after updating
     if changed_exceptions:
         name_cache.clearCache()
+        
+def update_scene_exceptions(tvdb_id, scene_exceptions):
+    """
+    Given a tvdb_id, and a list of all show scene exceptions, update the db.
+    """
+
+    myDB = db.DBConnection("cache.db")
+    
+    myDB.action('DELETE FROM scene_exceptions WHERE tvdb_id=?', [tvdb_id])
+    
+    for cur_exception in scene_exceptions:
+        myDB.action("INSERT INTO scene_exceptions (tvdb_id, show_name) VALUES (?,?)", [tvdb_id, cur_exception])
+    
+    name_cache.clearCache()

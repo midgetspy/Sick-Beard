@@ -39,6 +39,7 @@ from sickbeard import logger, helpers, exceptions, classes, db
 from sickbeard import encodingKludge as ek
 from sickbeard import search_queue
 from sickbeard import image_cache
+from sickbeard import scene_exceptions
 
 from sickbeard.providers import newznab, getProviderClass
 from sickbeard.common import Quality, Overview, statusStrings
@@ -2307,6 +2308,8 @@ class Home:
 
                 return _genericMessage("Error", "Unable to find the specified show.")
 
+        showObj.exceptions = scene_exceptions.get_scene_exceptions(showObj.tvdbid)      
+            
         myDB = db.DBConnection()
 
         seasonResults = myDB.select(
@@ -2351,7 +2354,7 @@ class Home:
                 t.submenu.append({ 'title': 'Force Full Update',    'path': 'home/updateShow?show=%d&amp;force=1'%showObj.tvdbid })
                 t.submenu.append({ 'title': 'Update show in XBMC',  'path': 'home/updateXBMC?showName=%s'%urllib.quote_plus(showObj.name.encode('utf-8')), 'requires': haveXBMC })
                 t.submenu.append({ 'title': 'Rename Episodes',      'path': 'home/fixEpisodeNames?show=%d'%showObj.tvdbid, 'confirm': True })
-
+        
         t.show = showObj
         t.sqlResults = sqlResults
         t.seasonResults = seasonResults
@@ -2392,7 +2395,7 @@ class Home:
         return result['description'] if result else 'Episode not found.'
 
     @cherrypy.expose
-    def editShow(self, show=None, location=None, anyQualities=[], bestQualities=[], seasonfolders=None, paused=None, directCall=False, air_by_date=None, tvdbLang=None):
+    def editShow(self, show=None, location=None, anyQualities=[], bestQualities=[], exceptions_list=[], seasonfolders=None, paused=None, directCall=False, air_by_date=None, tvdbLang=None):
 
         if show == None:
             errString = "Invalid show ID: "+str(show)
@@ -2409,6 +2412,8 @@ class Home:
                 return [errString]
             else:
                 return _genericMessage("Error", errString)
+            
+        showObj.exceptions = scene_exceptions.get_scene_exceptions(showObj.tvdbid)
 
         if not location and not anyQualities and not bestQualities and not seasonfolders:
 
@@ -2450,6 +2455,14 @@ class Home:
 
         if type(bestQualities) != list:
             bestQualities = [bestQualities]
+            
+        if type(exceptions_list) != list:
+            exceptions_list = [exceptions_list]
+            
+        if set(exceptions_list) == set(showObj.exceptions):
+            do_update_exceptions = False
+        else:
+            do_update_exceptions = True        
 
         errors = []
         with showObj.lock:
@@ -2498,7 +2511,14 @@ class Home:
                 time.sleep(1)
             except exceptions.CantUpdateException, e:
                 errors.append("Unable to force an update on the show.")
-
+       
+        if do_update_exceptions:
+            try:
+                scene_exceptions.update_scene_exceptions(showObj.tvdbid, exceptions_list) #@UndefinedVariable
+                time.sleep(1)
+            except exceptions.CantUpdateException, e:
+                errors.append("Unable to force an update on scene exception of the show.")
+        
         if directCall:
             return errors
 
