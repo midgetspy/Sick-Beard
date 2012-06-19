@@ -216,9 +216,17 @@
                             <input type="checkbox" name="naming_quality" id="naming_quality" #if $sickbeard.NAMING_QUALITY then "checked=\"checked\"" else ""#/>
                             <label class="clearfix" for="naming_quality">
                                 <span class="component-title">Quality</span>
-                                <span class="component-desc">Append the show quality to the end of the filename?</span>
+                                <span class="component-desc">Append the show quality to the filename?</span>
                             </label>
                         </div>
+                        
+                        <div class="field-pair">
+                            <input type="checkbox" name="naming_release_group" id="naming_release_group" #if $sickbeard.NAMING_RELEASE_GROUP then "checked=\"checked\"" else ""#/>
+                            <label class="clearfix" for="naming_release_group">
+                                <span class="component-title">Release Group</span>
+                                <span class="component-desc">Append the release group to the end of the filename?</span>
+                            </label>
+                        </div>                        
 
                         <div class="field-pair">
                             <input type="checkbox" name="naming_dates" id="naming_dates" #if $sickbeard.NAMING_DATES then "checked=\"checked\"" else ""#/>
@@ -258,7 +266,7 @@
                             </label>
                         </div>
                         
-                        <div class="field-pair" style="padding:10px; background: #efefef;">
+                        <div class="field-pair" style="padding:0px; background: #efefef;">
                             <label class="clearfix" for="naming_ep_type">
                                 <span class="component-title jumbo">Single-Ep Example:</span>
                                 <span class="component-desc jumbo" id="normalExampleText"></span>
@@ -278,7 +286,7 @@
                             </label>
                         </div>
 
-                        <div class="field-pair" style="padding:10px; background: #efefef;">
+                        <div class="field-pair" style="padding:0px; background: #efefef;">
                             <label class="clearfix" for="naming_multi_ep_type">
                                 <span class="component-title jumbo">Multi-Ep Example:</span>
                                 <span class="component-desc jumbo" id="multiExampleText"></span>

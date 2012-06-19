@@ -870,7 +870,7 @@ class ConfigPostProcessing:
     @cherrypy.expose
     def savePostProcessing(self, season_folders_format=None, naming_show_name=None, naming_strip_year=None, naming_ep_type=None,
                     naming_multi_ep_type=None, naming_ep_name=None, naming_use_periods=None,
-                    naming_sep_type=None, naming_quality=None, naming_dates=None,
+                    naming_sep_type=None, naming_quality=None, naming_release_group=None, naming_dates=None,
                     xbmc_data=None, mediabrowser_data=None, synology_data=None, sony_ps3_data=None, wdtv_data=None, tivo_data=None,
                     use_banner=None, keep_processed_dir=None, process_automatically=None, rename_episodes=None,
                     move_associated_files=None, tv_download_dir=None):
@@ -904,6 +904,11 @@ class ConfigPostProcessing:
             naming_quality = 1
         else:
             naming_quality = 0
+
+        if naming_release_group == "on":
+            naming_release_group = 1
+        else:
+            naming_release_group = 0
 
         if naming_dates == "on":
             naming_dates = 1
@@ -954,6 +959,7 @@ class ConfigPostProcessing:
         sickbeard.NAMING_EP_NAME = naming_ep_name
         sickbeard.NAMING_USE_PERIODS = naming_use_periods
         sickbeard.NAMING_QUALITY = naming_quality
+        sickbeard.NAMING_RELEASE_GROUP = naming_release_group
         sickbeard.NAMING_DATES = naming_dates
         sickbeard.NAMING_EP_TYPE = int(naming_ep_type)
         sickbeard.NAMING_MULTI_EP_TYPE = int(naming_multi_ep_type)
@@ -975,7 +981,7 @@ class ConfigPostProcessing:
 
     @cherrypy.expose
     def testNaming(self, show_name=None, ep_type=None, multi_ep_type=None, ep_name=None,
-                   sep_type=None, use_periods=None, quality=None, whichTest="single"):
+                   sep_type=None, use_periods=None, quality=None, release_group=None, whichTest="single"):
 
         if show_name == None:
             show_name = sickbeard.NAMING_SHOW_NAME
@@ -984,6 +990,8 @@ class ConfigPostProcessing:
                 show_name = False
             else:
                 show_name = True
+                
+        strip_year = True        
 
         if ep_name == None:
             ep_name = sickbeard.NAMING_EP_NAME
@@ -1008,6 +1016,14 @@ class ConfigPostProcessing:
                 quality = False
             else:
                 quality = True
+                
+        if release_group == None:
+            release_group = sickbeard.NAMING_RELEASE_GROUP
+        else:
+            if release_group == "0":
+                release_group = False
+            else:
+                release_group = True                
 
         if ep_type == None:
             ep_type = sickbeard.NAMING_EP_TYPE
@@ -1050,7 +1066,7 @@ class ConfigPostProcessing:
             ep.relatedEps.append(secondEp)
 
         # get the name
-        name = ep.prettyName(show_name, ep_type, multi_ep_type, ep_name, sep_type, use_periods, quality)
+        name = ep.prettyName(show_name, strip_year, ep_type, multi_ep_type, ep_name, sep_type, use_periods, quality, release_group, 'Rel.Group')
 
         return name
 

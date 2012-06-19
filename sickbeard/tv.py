@@ -1351,8 +1351,8 @@ class TVEpisode(object):
     def getOverview(self):
         return self.show.getOverview(self.status)
 
-    def prettyName (self, naming_show_name=None, naming_ep_type=None, naming_multi_ep_type=None,
-                    naming_ep_name=None, naming_sep_type=None, naming_use_periods=None, naming_quality=None, naming_strip_year=None):
+    def prettyName (self, naming_show_name=None, naming_strip_year=None, naming_ep_type=None, naming_multi_ep_type=None,
+                    naming_ep_name=None, naming_sep_type=None, naming_use_periods=None, naming_quality=None, naming_release_group=None, scene_release_group=None):
 
         regex = "(.*) \(\d\)"
 
@@ -1413,6 +1413,9 @@ class TVEpisode(object):
 
         if naming_quality == None:
             naming_quality = sickbeard.NAMING_QUALITY
+            
+        if naming_release_group == None:
+            naming_release_group = sickbeard.NAMING_RELEASE_GROUP    
 
         if self.show.air_by_date and sickbeard.NAMING_DATES:
             try:
@@ -1449,6 +1452,10 @@ class TVEpisode(object):
             epStatus, epQual = Quality.splitCompositeStatus(self.status) #@UnusedVariable
             if epQual != Quality.NONE:
                 finalName += config.naming_sep_type[naming_sep_type] + Quality.qualityStrings[epQual]
+                
+        if naming_release_group:
+            if scene_release_group != None:
+                finalName += config.naming_sep_type[naming_sep_type] + scene_release_group
 
         if naming_use_periods:
             finalName = re.sub("\s+", ".", finalName)

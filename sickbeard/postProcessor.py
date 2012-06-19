@@ -784,7 +784,7 @@ class PostProcessor(object):
         # figure out the base name of the resulting episode file
         if sickbeard.RENAME_EPISODES:
             orig_extension = self.file_name.rpartition('.')[-1]
-            new_base_name = helpers.sanitizeFileName(ep_obj.prettyName())
+            new_base_name = helpers.sanitizeFileName(ep_obj.prettyName(scene_release_group = self.release_group))
             new_file_name = new_base_name + '.' + orig_extension
 
         else:
