@@ -127,6 +127,7 @@ class CompleteParser(object):
             self.complete_result.episodes = self.raw_parse_result.episode_numbers
 
         if cur_show and cur_show.is_anime and not self.complete_result.scene: # only need to to do another conversion if the scene2tvdb didn work
+            _ab_conversion = False
             if self.raw_parse_result.is_anime:
                 self._log("Getting season and episodes from absolute numbers", logger.DEBUG)
                 try:
@@ -136,8 +137,10 @@ class CompleteParser(object):
                 else:
                     self.complete_result.season = _actual_season
                     self.complete_result.episodes = _actual_episodes
-            elif self.raw_parse_result.sxxexx:
-                self._log("No absolute number found while parsing an anime but we have season and episode numbers. There will be no scene conversion for this.", logger.DEBUG)
+                    _ab_conversion = True
+
+            if not _ab_conversion and self.raw_parse_result.sxxexx:
+                self._log("Absolute number conversion failed. but we have season and episode numbers. There will be no scene conversion for this!", logger.DEBUG)
                 # this show is an anime but scene conversion did not work and we dont have any absolute numbers but we do have sxxexx numbers
                 self.complete_result.season = self.raw_parse_result.season_number
                 self.complete_result.episodes = self.raw_parse_result.episode_numbers
