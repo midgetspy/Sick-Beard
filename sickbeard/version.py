@@ -1,1 +1,0 @@
-SICKBEARD_VERSION = "master"
