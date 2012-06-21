@@ -1,33 +1,35 @@
 Sick Beard Interface by Elmar Kouwenhoven
 =====
 
-## Installation
+## INSTALLATION
 Download the original files from Sick-Beard at https://github.com/midgetspy/Sick-Beard
 Replace the original /data folder with this /data folder and your up and running.
 
-## Screenshots
 
-Index
+## SCREENSHOTS
+
+## Index
 ![preview thumb](http://i47.tinypic.com/29lzcp1.png)
 
-Details
+## Details
 ![preview thumb](http://i47.tinypic.com/2nrecyx.png)
 
-Upcoming
+## Upcoming
 ![preview thumb](http://i48.tinypic.com/24cuow4.png)
 
-History
+## History
 ![preview thumb](http://i50.tinypic.com/25roy78.png)
 
-Update
+## Update
 ![preview thumb](http://i50.tinypic.com/2efn6ly.png)
 
-Config
+## Config
 ![preview thumb](http://i49.tinypic.com/20zxqtc.png)
 
-Feedback
+## Feedback
 ![preview thumb](http://i49.tinypic.com/1zd7tae.png)
 
-## Bugs (regarding styling)
+
+## BUGS (regarding styling)
 If you run into any (styling) issues, visit http://github.com/elmarkou/Sick-Beard.
 For other issues visit https://github.com/midgetspy/Sick-Beard  
