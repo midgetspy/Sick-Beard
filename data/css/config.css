@@ -1,5 +1,5 @@
 #config{text-align:center;padding:0 0px 20px 0;}
-#config *{font-family:"Trebuchet MS", Verdana, sans-serif;}
+#config *{font-family:Verdana, sans-serif;}
 #config h3 a {text-decoration: none;}
 #config h3 img {vertical-align: baseline; padding-right: 5px;}
 #config ul{list-style-type:none;}
@@ -16,15 +16,16 @@
 #config .component-group{border-bottom:1px dotted #666;padding:15px 15px 25px;}
 #config .component-group-desc{float:left;width:235px;}
 #config .component-group-desc h3{font-size:1.5em;}
-#config .component-group-desc p{width:85%;font-size:1.2em;color:#666;margin:.8em 0;}
+#config .component-group-desc p{width:85%;font-size:1.0em;color:#666;margin:.8em 0;}
 #config .component-group-desc p.note{width:90%;font-size:1.2em;color:#333;margin:.8em 0;}
-#config .component-group-list{float:left;width:550px;}
+#config .component-group-list{float:left;width:600px;}
 #config fieldset{border:0;outline:0;}
 #config div.field-pair{margin:.9em 0 1.4em;}
-#config div.field-pair input{float:left;margin-right:6px;}
+#config div.field-pair input{float:left;margin-right:6px;margin-top:5px;}
 #config label.nocheck,#config div.providerDiv,#config div #customQuality{padding-left:20px;}
-#config label span.component-title{font-size:1.2em;font-weight:700;float:left;width:160px;margin-right:10px;}
-#config label span.component-desc{font-size:1.1em;}
+#config label span.component-title{font-size:1.0em;font-weight:700;float:left;width:175px;margin-right:10px;}
+#config label span.component-desc{font-size:1.1em; margin-left:190px; display:block; font-size:11px;}
+#config label.nocheck span.component-desc{margin-left:170px;}
 #config div.field-pair select{font-size:1.1em;border:1px solid #d4d0c8;}
 #config div.field-pair select option{line-height:1.4;padding:0 10px; border-bottom: 1px dotted #D7D7D7;}
 #config-settings{float:right;width:200px;background:#fffae5;border-bottom:1px dotted #666;border-top:1px solid #999;margin-right:20px;padding:20px 0 30px;}
