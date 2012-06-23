@@ -95,6 +95,16 @@ class ThePirateBayProvider(generic.TorrentProvider):
         if not show:
             return []
 
+        #Building the search string with the season we need
+        #1) ShowName SXX 
+        #2) ShowName Season X
+        for show_name in set(show_name_helpers.allPossibleShowNames(show)):
+            ep_string = show_name + ' ' + 'S%02d' % int(season)   
+            search_string.append(ep_string)
+          
+            ep_string = show_name + ' ' + 'Season' + ' ' + str(season)   
+            search_string.append(ep_string)
+
         #Building the search string with the episodes we need         
         myDB = db.DBConnection()
         

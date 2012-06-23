@@ -38,6 +38,7 @@ from sickbeard import deluge
 from sickbeard import encodingKludge as ek
 from sickbeard.exceptions import ex
 from sickbeard import providers
+from sickbeard.providers.generic import GenericProvider
 
 def _downloadResult(result):
     """
@@ -119,7 +120,7 @@ def snatchEpisode(result, endStatus=SNATCHED):
         # torrents are always saved to disk
         if sickbeard.TORRENT_METHOD == "blackhole": 
             dlResult = _downloadResult(result)
-        # torrents are sending to torrent client
+        # torrents are sended to torrent client
         elif sickbeard.TORRENT_METHOD == "utorrent":
             dlResult = utorrent.sendTORRENT(result)
         elif sickbeard.TORRENT_METHOD == "transmission":
@@ -406,24 +407,40 @@ def findSeason(show, season):
 
         else:
 
-            logger.log(u"Breaking apart the NZB and adding the individual ones to our results", logger.DEBUG)
+            if bestSeasonNZB.provider.providerType == GenericProvider.NZB:
+                logger.log(u"Breaking apart the NZB and adding the individual ones to our results", logger.DEBUG)
+    
+                # if not, break it apart and add them as the lowest priority results
+                individualResults = nzbSplitter.splitResult(bestSeasonNZB)
+    
+                individualResults = filter(lambda x:  show_name_helpers.filterBadReleases(x.name) and show_name_helpers.isGoodResult(x.name, show), individualResults)
+    
+                for curResult in individualResults:
+                    if len(curResult.episodes) == 1:
+                        epNum = curResult.episodes[0].episode
+                    elif len(curResult.episodes) > 1:
+                        epNum = MULTI_EP_RESULT
+    
+                    if epNum in foundResults:
+                        foundResults[epNum].append(curResult)
+                    else:
+                        foundResults[epNum] = [curResult]
 
-            # if not, break it apart and add them as the lowest priority results
-            individualResults = nzbSplitter.splitResult(bestSeasonNZB)
+            # If this is a torrent all we can do is leech the entire torrent, user will have to select which eps not do download in his torrent client
+            else:
+                
+                # Season result from BTN must be a full-season torrent, creating multi-ep result for it.
+                logger.log(u"Adding multi-ep result for full-season torrent. Set the episodes you don't want to 'don't download' in your torrent client if desired!")
+                epObjs = []
+                for curEpNum in allEps:
+                    epObjs.append(show.getEpisode(season, curEpNum))
+                bestSeasonNZB.episodes = epObjs
 
-            individualResults = filter(lambda x:  show_name_helpers.filterBadReleases(x.name) and show_name_helpers.isGoodResult(x.name, show), individualResults)
-
-            for curResult in individualResults:
-                if len(curResult.episodes) == 1:
-                    epNum = curResult.episodes[0].episode
-                elif len(curResult.episodes) > 1:
-                    epNum = MULTI_EP_RESULT
-
+                epNum = MULTI_EP_RESULT
                 if epNum in foundResults:
-                    foundResults[epNum].append(curResult)
+                    foundResults[epNum].append(bestSeasonNZB)
                 else:
-                    foundResults[epNum] = [curResult]
-
+                    foundResults[epNum] = [bestSeasonNZB]
 
     # go through multi-ep results and see if we really want them or not, get rid of the rest
     multiResults = {}
