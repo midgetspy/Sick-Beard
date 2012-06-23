@@ -241,8 +241,8 @@ class CompleteParser(object):
         # filter possible_seasons
         possible_seasons = []
         for cur_scene_tvdb_id, cur_scene_season in _possible_seasons:
-            if cur_scene_tvdb_id and cur_scene_tvdb_id != show.tvdbid:
-                self._log("dfuq when i tried to figure out the season from the name i got a different tvdbid then we got before !! stoping right now! before: " + str(show.tvdbid) + " now:" + str(cur_scene_tvdb_id), logger.ERROR)
+            if cur_scene_tvdb_id and str(cur_scene_tvdb_id) != str(show.tvdbid):
+                self._log("dfuq when i tried to figure out the season from the name i got a different tvdbid then we got before !! stoping right now! before: " + str(show.tvdbid) + " now: " + str(cur_scene_tvdb_id), logger.ERROR)
                 raise MultipleSceneShowResults("different tvdbid then we got before")
             # don't add season -1 since this is a generic name and not a real season... or if we get None
             # if this was the only result possible_seasons will stay empty and the next parts will look in the general matter
