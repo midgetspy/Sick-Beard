@@ -379,7 +379,7 @@ def findSeason(show, season):
         # get the quality of the season nzb
         seasonQual = Quality.nameQuality(bestSeasonNZB.name)
         seasonQual = bestSeasonNZB.quality
-        logger.log(u"The quality of the season NZB is "+Quality.qualityStrings[seasonQual], logger.DEBUG)
+        logger.log(u"The quality of the season "+bestSeasonNZB.provider.providerType+" is "+Quality.qualityStrings[seasonQual], logger.DEBUG)
 
         myDB = db.DBConnection()
         allEps = [int(x["episode"]) for x in myDB.select("SELECT episode FROM tv_episodes WHERE showid = ? AND season = ?", [show.tvdbid, season])]
@@ -395,7 +395,7 @@ def findSeason(show, season):
 
         # if we need every ep in the season and there's nothing better then just download this and be done with it
         if allWanted and bestSeasonNZB.quality == highest_quality_overall:
-            logger.log(u"Every ep in this season is needed, downloading the whole NZB "+bestSeasonNZB.name)
+            logger.log(u"Every ep in this season is needed, downloading the whole "+bestSeasonNZB.provider.providerType+" "+bestSeasonNZB.name)
             epObjs = []
             for curEpNum in allEps:
                 epObjs.append(show.getEpisode(season, curEpNum))

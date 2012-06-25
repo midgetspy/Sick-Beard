@@ -37,7 +37,7 @@ $(document).ready(function(){
     $.fn.torrent_method_handler = function() {
         
         var selectedProvider = $('#torrent_method :selected').val();
-
+		
         if (selectedProvider == "blackhole") {
             $('#t_blackhole_settings').show();
             $('#torrent_settings').hide();

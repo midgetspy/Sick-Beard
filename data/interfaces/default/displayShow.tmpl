@@ -84,7 +84,7 @@ replace with: <b><%=", ".join([Quality.qualityStrings[x] for x in bestQualities]
 #end if
 	</td></tr>
 #if $show.exceptions:
-    <tr><td class="showLegend">Scene Exception: </td><td>$exceptions_string</td></tr>
+    <tr><td class="showLegend">Scene Exceptions: </td><td>$exceptions_string</td></tr>
 #end if 
     <tr><td class="showLegend">Language: </td><td><img src="$sbRoot/images/flags/${show.lang}.png" width="16" height="11" alt="" /> $show.lang</td></tr>
     <tr><td class="showLegend">Season Folders: </td><td><img src="$sbRoot/images/#if $show.seasonfolders == 1 then "yes16.png\" alt=\"Y" else "no16.png\" alt=\"N"#" width="16" height="16" /></td></tr>

@@ -51,7 +51,13 @@ def processEpisode(dirName, nzbName=None):
         print "ERROR: You need an autoProcessTV.cfg file - did you rename and edit the .sample?"
         sys.exit(-1)
     
-    config.read(configFilename)
+    try:
+        fp = open(configFilename, "r")
+        config.readfp(fp)
+        fp.close()
+    except IOError, e:
+        print "Could not read configuration file: ", str(e)
+        sys.exit(1)
     
     host = config.get("SickBeard", "host")
     port = config.get("SickBeard", "port")

@@ -171,7 +171,7 @@ class TVShow(object):
         logger.log(str(self.tvdbid) + ": Writing NFOs for all episodes")
 
         myDB = db.DBConnection()
-        sqlResults = myDB.select("SELECT * FROM tv_episodes WHERE showid = ? AND location != ''", [self.tvdbid])
+        sqlResults = myDB.select("SELECT * FROM tv_episodes WHERE showid = ? AND location != '' ORDER BY episode ASC", [self.tvdbid])
 
         for epResult in sqlResults:
             logger.log(str(self.tvdbid) + ": Retrieving/creating episode " + str(epResult["season"]) + "x" + str(epResult["episode"]), logger.DEBUG)
@@ -886,7 +886,7 @@ class TVShow(object):
         curStatus, curQuality = Quality.splitCompositeStatus(epStatus)
 
         # if we are re-downloading then we only want it if it's in our bestQualities list and better than what we have
-        if curStatus in Quality.SNATCHED + Quality.DOWNLOADED and quality in bestQualities and quality > curQuality:
+        if curStatus in Quality.SNATCHED + Quality.SNATCHED_PROPER + Quality.DOWNLOADED and quality in bestQualities and quality > curQuality:
             logger.log(u"We already have this ep but the new one is better quality, saying yes", logger.DEBUG)
             return True
 

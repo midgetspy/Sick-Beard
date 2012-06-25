@@ -459,7 +459,9 @@ class Manage:
             if quality_preset == 'keep':
                 anyQualities, bestQualities = Quality.splitQuality(showObj.quality)
             
-            curErrors += Home().editShow(curShow, new_show_dir, anyQualities, bestQualities, new_season_folders, new_paused, directCall=True)
+            exceptions_list = []
+            
+            curErrors += Home().editShow(curShow, new_show_dir, anyQualities, bestQualities, exceptions_list, new_season_folders, new_paused, directCall=True)
 
             if curErrors:
                 logger.log(u"Errors: "+str(curErrors), logger.ERROR)
@@ -1871,7 +1873,7 @@ class NewHomeAddShows:
         # blanket policy - if the dir exists you should have used "add existing show" numbnuts
         if ek.ek(os.path.isdir, show_dir) and not fullShowPath:
             ui.notifications.error("Unable to add show", "Folder "+show_dir+" exists already")
-            redirect('/home')
+            redirect('/home/addShows/existingShows')
         
         # create the dir and make sure it worked
         dir_exists = helpers.makeDir(show_dir)
@@ -2334,7 +2336,7 @@ class Home:
         )
 
         sqlResults = myDB.select(
-            "SELECT * FROM tv_episodes WHERE showid = ? ORDER BY season*1000+episode DESC",
+            "SELECT * FROM tv_episodes WHERE showid = ? ORDER BY season DESC, episode DESC",
             [showObj.tvdbid]
         )
 
@@ -2474,11 +2476,15 @@ class Home:
             
         if type(exceptions_list) != list:
             exceptions_list = [exceptions_list]
-            
-        if set(exceptions_list) == set(showObj.exceptions):
+
+        #If directCall from mass_edit_update no scene exceptions handling
+        if directCall:            
             do_update_exceptions = False
         else:
-            do_update_exceptions = True        
+            if set(exceptions_list) == set(showObj.exceptions):
+                do_update_exceptions = False
+            else:
+                do_update_exceptions = True
 
         errors = []
         with showObj.lock:
@@ -2527,13 +2533,13 @@ class Home:
                 time.sleep(1)
             except exceptions.CantUpdateException, e:
                 errors.append("Unable to force an update on the show.")
-       
+
         if do_update_exceptions:
             try:
                 scene_exceptions.update_scene_exceptions(showObj.tvdbid, exceptions_list) #@UndefinedVariable
                 time.sleep(1)
             except exceptions.CantUpdateException, e:
-                errors.append("Unable to force an update on scene exception of the show.")
+                errors.append("Unable to force an update on scene exceptions of the show.")
         
         if directCall:
             return errors
