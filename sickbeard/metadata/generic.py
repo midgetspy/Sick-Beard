@@ -215,8 +215,11 @@ class GenericMetadata():
     
     def create_season_thumbs(self, show_obj):
         if self.season_thumbnails and show_obj:
-            logger.log("Metadata provider "+self.name+" creating season thumbnails for "+show_obj.name, logger.DEBUG)
-            return self.save_season_thumbs(show_obj)
+            for season, episodes in show_obj.episodes.iteritems():
+                if not self._has_season_thumb(show_obj, season):
+                    logger.log("Metadata provider "+self.name+" creating season thumbnails for "+show_obj.name, logger.DEBUG)
+                    self.save_season_thumbs(show_obj, season)
+            return True
         return False
     
     def _get_episode_thumb_url(self, ep_obj):
@@ -427,7 +430,7 @@ class GenericMetadata():
         return self._write_image(poster_data, poster_path)
 
 
-    def save_season_thumbs(self, show_obj):
+    def save_season_thumbs(self, show_obj, season):
         """
         Saves all season thumbnails to disk for the given show.
         
@@ -438,7 +441,7 @@ class GenericMetadata():
         _season_thumb_dict and get_season_thumb_path should be good enough.
         """
     
-        season_dict = self._season_thumb_dict(show_obj)
+        season_dict = self._season_thumb_dict(show_obj, season)
     
         # Returns a nested dictionary of season art with the season
         # number as primary key. It's really overkill but gives the option
@@ -446,10 +449,10 @@ class GenericMetadata():
         for cur_season in season_dict:
 
             cur_season_art = season_dict[cur_season]
-            
+
             if len(cur_season_art) == 0:
                 continue
-    
+
             # Just grab whatever's there for now
             art_id, season_url = cur_season_art.popitem() #@UnusedVariable
 
@@ -542,7 +545,7 @@ class GenericMetadata():
 
         return image_data
     
-    def _season_thumb_dict(self, show_obj):
+    def _season_thumb_dict(self, show_obj, season):
         """
         Should return a dict like:
         
@@ -568,10 +571,7 @@ class GenericMetadata():
         except (tvdb_exceptions.tvdb_error, IOError), e:
             logger.log(u"Unable to look up show on TVDB, not downloading images: "+ex(e), logger.ERROR)
             return result
-    
-        #  How many seasons?
-        num_seasons = len(tvdb_show_obj)
-    
+
         # if we have no season banners then just finish
         if 'season' not in tvdb_show_obj['_banners'] or 'season' not in tvdb_show_obj['_banners']['season']:
             return result
@@ -582,17 +582,13 @@ class GenericMetadata():
         # Returns a nested dictionary of season art with the season
         # number as primary key. It's really overkill but gives the option
         # to present to user via ui to pick down the road.
-        for cur_season in range(num_seasons):
 
-            result[cur_season] = {}
-            
-            # find the correct season in the tvdb object and just copy the dict into our result dict
-            for seasonArtID in seasonsArtObj.keys():
-                if int(seasonsArtObj[seasonArtID]['season']) == cur_season and seasonsArtObj[seasonArtID]['language'] == 'en':
-                    result[cur_season][seasonArtID] = seasonsArtObj[seasonArtID]['_bannerpath']
-            
-            if len(result[cur_season]) == 0:
-                continue
+        result[season] = {}
+
+        # find the correct season in the tvdb object and just copy the dict into our result dict
+        for seasonArtID in seasonsArtObj.keys():
+            if int(seasonsArtObj[seasonArtID]['season']) == season and seasonsArtObj[seasonArtID]['language'] == 'en':
+                result[season][seasonArtID] = seasonsArtObj[seasonArtID]['_bannerpath']
 
         return result
 
