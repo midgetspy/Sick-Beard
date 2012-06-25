@@ -25,7 +25,7 @@ from types import FunctionType, MethodType
 import sickbeard
 from sickbeard.exceptions import MultipleShowObjectsException, EpisodeNotFoundByAbsoluteNumerException, ex
 from sickbeard import logger, classes, exceptions, helpers
-from sickbeard.name_parser.parser import NameParser, InvalidNameException
+from sickbeard.name_parser.parser import NameParser, InvalidNameException, ParseResult
 from sickbeard import common
 
 from sickbeard import db
@@ -84,6 +84,7 @@ class CompleteParser(object):
         try:
             self.raw_parse_result, cur_show = self.parse_wrapper(self.show, self.name_to_parse, self.showList, self.tvdbActiveLookUp)
         except InvalidNameException:
+            self.complete_result.parse_result = ParseResult(name_to_parse)
             self._log(u"Could not parse: " + self.name_to_parse, logger.DEBUG)
             return self.complete_result
 
@@ -115,12 +116,12 @@ class CompleteParser(object):
             self.complete_result.season, self.complete_result.episodes, self.complete_result.ab_episode_numbers = \
                 self.scene2tvdb(cur_show, self.raw_parse_result.series_name, self.raw_parse_result.season_number, self.raw_parse_result.episode_numbers, self.raw_parse_result.ab_episode_numbers)
         elif cur_show and cur_show.air_by_date:
-            _tmp_adb_season, _tmp_adb_episode = self._convertADB(self.parse_result.air_date)
+            _tmp_adb_season, _tmp_adb_episode = self._convertADB(cur_show, self.complete_result.parse_result.air_date)
             if _tmp_adb_season != None and _tmp_adb_episode != None:
                 self.complete_result.season = _tmp_adb_season
                 self.complete_result.episodes = _tmp_adb_episode
             else:
-                pass
+                self._log("Could not convert ADB to season and episode numbers from " + self.name_to_parse, logger.WARNING)
         else:
             self._log("Assuming tvdb numbers", logger.DEBUG)
             self.complete_result.season = self.raw_parse_result.season_number
@@ -154,33 +155,32 @@ class CompleteParser(object):
         self.complete_result.quality = common.Quality.nameQuality(self.name_to_parse, bool(cur_show and cur_show.is_anime))
         return self.complete_result
 
-    def _convertADB(self, adb_part):
+    def _convertADB(self, show, adb_part):
         self._log("Getting season and episodes for ADB episode: " + str(adb_part), logger.DEBUG)
-        if not self.show:
+        if not show:
             return (None, None)
 
         myDB = db.DBConnection()
-        sql_results = myDB.select("SELECT season, episode FROM tv_episodes WHERE showid = ? AND airdate = ?", [self.show.tvdbid, adb_part.toordinal()])
+        sql_results = myDB.select("SELECT season, episode FROM tv_episodes WHERE showid = ? AND airdate = ?", [show.tvdbid, adb_part.toordinal()])
         if len(sql_results) == 1:
             return (int(sql_results[0]["season"]), [int(sql_results[0]["episode"])])
 
-        self._log(u"Tried to look up the date for the episode " + self.name_to_parse + " but the database didn't give proper results, skipping it", logger.WARNING)
         if self.tvdbActiveLookUp:
             try:
                 # There's gotta be a better way of doing this but we don't wanna
                 # change the cache value elsewhere
                 ltvdb_api_parms = sickbeard.TVDB_API_PARMS.copy()
 
-                if self.lang:
+                if show.lang:
                     ltvdb_api_parms['language'] = self.lang
 
                 t = tvdb_api.Tvdb(**ltvdb_api_parms)
 
-                epObj = t[self.show.tvdbid].airedOn(adb_part)[0]
+                epObj = t[show.tvdbid].airedOn(adb_part)[0]
                 season = int(epObj["seasonnumber"])
                 episodes = [int(epObj["episodenumber"])]
             except tvdb_exceptions.tvdb_episodenotfound:
-                self._log(u"Unable to find episode with date " + str(episodes[0]) + " for show " + self.name + ", skipping", logger.WARNING)
+                self._log(u"Unable to find episode with date " + str(episodes[0]) + " for show " + self.name_to_parse + ", skipping", logger.WARNING)
                 return (None, None)
             except tvdb_exceptions.tvdb_error, e:
                 self._log(u"Unable to contact TVDB: " + ex(e), logger.WARNING)
@@ -188,6 +188,7 @@ class CompleteParser(object):
             else:
                 return (season, episodes)
         else:
+            self._log(u"Tried to look up the date for the episode " + self.name_to_parse + " but the database didn't give proper results, skipping it", logger.DEBUG)
             return(None, None)
 
     def parse_wrapper(self, show=None, toParse='', showList=[], tvdbActiveLookUp=False):
