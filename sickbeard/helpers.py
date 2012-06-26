@@ -114,8 +114,8 @@ def sanitizeFileName (name):
     name = re.sub(r'[\\/\*]', '-', name)
     name = re.sub(r'[:"<>|?]', '', name)
     
-    # remove leading/trailing periods
-    name = re.sub(r'(^\.+|\.+$)', '', name)
+    # remove leading/trailing periods and spaces
+    name = name.strip(' .')
     
     return name
 
