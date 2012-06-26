@@ -35,10 +35,10 @@ a {
 }
 /* these are for inc_top.tmpl */
 #upgrade-notification {
+  position: fixed;
   line-height: 0.5em;
-  color: #57442b;
+  color: #000;
   font-size: 1em;
-  font-weight: 700;
   height: 0px;
   text-align: center;
   width: 100%;
@@ -47,7 +47,12 @@ a {
   padding: 0;
 }
 #upgrade-notification div {
-  background-color: #c6b695;
+  background-image: -moz-linear-gradient(#fdf0d5, #fff9ee) !important;
+  background-image: linear-gradient(#fdf0d5, #fff9ee) !important;
+  background-image: -webkit-linear-gradient(#fdf0d5, #fff9ee) !important;
+  background-image: -o-linear-gradient(#fdf0d5, #fff9ee) !important;
+  filter: progid:dximagetransform.microsoft.gradient(startColorstr=#fdf0d5, endColorstr=#fff9ee) !important;
+  -ms-filter: progid:dximagetransform.microsoft.gradient(startColorstr=#fdf0d5, endColorstr=#fff9ee) !important;
   border-bottom: 1px solid #af986b;
   padding: 7px 0;
 }
@@ -62,8 +67,8 @@ a {
   background-image: linear-gradient(#555555, #333333) !important;
   background-image: -webkit-linear-gradient(#555555, #333333) !important;
   background-image: -o-linear-gradient(#555555, #333333) !important;
-  filter: progid:dximagetransform.microsoft.gradient(startColorstr=#555555, endColorstr=#333333) !important;
-  -ms-filter: progid:dximagetransform.microsoft.gradient(startColorstr=#555555, endColorstr=#333333) !important;
+  filter: progid:dximagetransform.microsoft.gradient(startColorstr=#fdf0d5, endColorstr=#fff9ee) !important;
+  -ms-filter: progid:dximagetransform.microsoft.gradient(startColorstr=#fdf0d5, endColorstr=#fff9ee) !important;
   border-bottom: 1px solid #CACACA;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
   height: 58px;
@@ -241,8 +246,8 @@ div select option {
   background-image: linear-gradient(#555555, #333333) !important;
   background-image: -webkit-linear-gradient(#555555, #333333) !important;
   background-image: -o-linear-gradient(#555555, #333333) !important;
-  filter: progid:dximagetransform.microsoft.gradient(startColorstr=#555555, endColorstr=#333333) !important;
-  -ms-filter: progid:dximagetransform.microsoft.gradient(startColorstr=#555555, endColorstr=#333333) !important;
+  filter: progid:dximagetransform.microsoft.gradient(startColorstr=#fdf0d5, endColorstr=#fff9ee) !important;
+  -ms-filter: progid:dximagetransform.microsoft.gradient(startColorstr=#fdf0d5, endColorstr=#fff9ee) !important;
   color: #fff;
   text-shadow: -1px -1px 0 rgba(0, 0, 0, 0.3);
   text-align: left;
@@ -303,8 +308,8 @@ div select option {
   background-image: linear-gradient(#a3e532, #90cc2a) !important;
   background-image: -webkit-linear-gradient(#a3e532, #90cc2a) !important;
   background-image: -o-linear-gradient(#a3e532, #90cc2a) !important;
-  filter: progid:dximagetransform.microsoft.gradient(startColorstr=#555555, endColorstr=#333333) !important;
-  -ms-filter: progid:dximagetransform.microsoft.gradient(startColorstr=#555555, endColorstr=#333333) !important;
+  filter: progid:dximagetransform.microsoft.gradient(startColorstr=#fdf0d5, endColorstr=#fff9ee) !important;
+  -ms-filter: progid:dximagetransform.microsoft.gradient(startColorstr=#fdf0d5, endColorstr=#fff9ee) !important;
   -moz-border-radius: 3px;
   -webkit-border-radius: 3px;
   border-radius: 3px;
@@ -639,8 +644,8 @@ a.whitelink {
   background-image: linear-gradient(#fdf0d5, #fff9ee) !important;
   background-image: -webkit-linear-gradient(#fdf0d5, #fff9ee) !important;
   background-image: -o-linear-gradient(#fdf0d5, #fff9ee) !important;
-  filter: progid:dximagetransform.microsoft.gradient(startColorstr=#555555, endColorstr=#333333) !important;
-  -ms-filter: progid:dximagetransform.microsoft.gradient(startColorstr=#555555, endColorstr=#333333) !important;
+  filter: progid:dximagetransform.microsoft.gradient(startColorstr=#fdf0d5, endColorstr=#fff9ee) !important;
+  -ms-filter: progid:dximagetransform.microsoft.gradient(startColorstr=#fdf0d5, endColorstr=#fff9ee) !important;
   -moz-border-radius: 7px;
   -webkit-border-radius: 7px;
   border-radius: 7px;
@@ -679,8 +684,8 @@ a.whitelink {
   background-image: linear-gradient(#d3ffd7, #c2edc6) !important;
   background-image: -webkit-linear-gradient(#d3ffd7, #c2edc6) !important;
   background-image: -o-linear-gradient(#d3ffd7, #c2edc6) !important;
-  filter: progid:dximagetransform.microsoft.gradient(startColorstr=#555555, endColorstr=#333333) !important;
-  -ms-filter: progid:dximagetransform.microsoft.gradient(startColorstr=#555555, endColorstr=#333333) !important;
+  filter: progid:dximagetransform.microsoft.gradient(startColorstr=#fdf0d5, endColorstr=#fff9ee) !important;
+  -ms-filter: progid:dximagetransform.microsoft.gradient(startColorstr=#fdf0d5, endColorstr=#fff9ee) !important;
   padding: 15px 10px;
   text-align: left;
 }
@@ -689,8 +694,8 @@ a.whitelink {
   background-image: linear-gradient(#ffd3d3, #edc4c4) !important;
   background-image: -webkit-linear-gradient(#ffd3d3, #edc4c4) !important;
   background-image: -o-linear-gradient(#ffd3d3, #edc4c4) !important;
-  filter: progid:dximagetransform.microsoft.gradient(startColorstr=#555555, endColorstr=#333333) !important;
-  -ms-filter: progid:dximagetransform.microsoft.gradient(startColorstr=#555555, endColorstr=#333333) !important;
+  filter: progid:dximagetransform.microsoft.gradient(startColorstr=#fdf0d5, endColorstr=#fff9ee) !important;
+  -ms-filter: progid:dximagetransform.microsoft.gradient(startColorstr=#fdf0d5, endColorstr=#fff9ee) !important;
   padding: 15px 10px;
   text-align: left;
 }
