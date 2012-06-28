@@ -11,6 +11,12 @@
 #import os.path
 #include $os.path.join($sickbeard.PROG_DIR, "data/interfaces/default/inc_top.tmpl")
 
+#if $varExists('header') 
+	<h1 class="header">$header</h1>
+#else 
+	<h1 class="title">$title</h1>
+#end if
+
 <script type="text/javascript" charset="utf-8">
 <!--
 \$(document).ready(function(){
@@ -44,7 +50,7 @@
 
         \$('#tvdbLangSelect').change(function() { searchTvdb() });
   });
-	
+
 });
 //-->
 </script>
@@ -58,7 +64,6 @@ Quality:
 #set $qualities = $common.Quality.splitQuality(int($show.quality))
 #set global $anyQualities = $qualities[0]
 #set global $bestQualities = $qualities[1]
-
 #include $os.path.join($sickbeard.PROG_DIR, "data/interfaces/default/inc_qualityChooser.tmpl")
 Scene Exception: <br />
 <input type="text" id="SceneName"> 
@@ -79,7 +84,6 @@ So if the original name is valid in addition to the exception you will have to<b
 put both of them in the exception list.<br />
 <br />
 <br />
-
 Language: <select name="tvdbLang" id="tvdbLangSelect"></select><br />
 Note: This will only affect the language of the retrieved metadata file contents and episode filenames.<br />
 This <b>DOES NOT</b> allow Sick Beard to download non-english TV episodes!<br />
@@ -92,8 +96,7 @@ Air by date:
 <input type="checkbox" name="air_by_date" #if $show.air_by_date == 1 then "checked=\"checked\"" else ""# /><br />
 (check this if the show is released as Show.03.02.2010 rather than Show.S02E03) 
 <br /><br />
-<input type="submit" value="Submit" id="submit"/>
-
+<input type="submit" id="submit" value="Submit" />
 </form>
 
 <script type="text/javascript" charset="utf-8">

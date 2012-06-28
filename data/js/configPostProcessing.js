@@ -44,11 +44,11 @@ $(document).ready(function(){
 
   $('#naming_quality').click(function(){
         $(this).setExampleText();
-    });
-    
+    });  
+
   $('#naming_release_group').click(function(){
         $(this).setExampleText();
-    });        
+    });  
 
   $('#naming_multi_ep_type').change(function(){
         $(this).setExampleText();

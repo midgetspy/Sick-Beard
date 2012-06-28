@@ -89,10 +89,13 @@ $(document).ready(function(){
         $.get(sbRoot+"/home/testSABnzbd", {'host': sab_host, 'username': sab_username, 'password': sab_password, 'apikey': sab_apiKey}, 
         function (data){ $('#testSABnzbd-result').html(data); });
     });
+    
 
     $('#torrent_method').change($(this).torrent_method_handler);
     
-    $(this).torrent_method_handler();    
+    $('#use_torrents').click(function(){
+    	toggle_torrent_title();
+    });
 
     $('#testTorrent').click(function(){
         $('#testTorrent-result').html(loading);
@@ -104,5 +107,7 @@ $(document).ready(function(){
         $.get(sbRoot+"/home/testTorrent", {'torrent_method': torrent_method, 'host': torrent_host, 'username': torrent_username, 'password': torrent_password}, 
         function (data){ $('#testTorrent-result').html(data); });
     });
+
+    toggle_torrent_title();
 
 });
