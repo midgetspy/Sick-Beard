@@ -82,6 +82,10 @@ class TVShow(object):
         self.saveToDB()
 
     def _getLocation(self):
+        # no dir check needed if missing show dirs are created during post-processing
+        if sickbeard.CREATE_MISSING_SHOW_DIRS:
+            return self._location
+        
         if ek.ek(os.path.isdir, self._location):
             return self._location
         else:
@@ -94,7 +98,8 @@ class TVShow(object):
 
     def _setLocation(self, newLocation):
         logger.log(u"Setter sets location to " + newLocation, logger.DEBUG)
-        if ek.ek(os.path.isdir, newLocation):
+        # Don't validate dir if user wants to add shows without creating a dir
+        if sickbeard.ADD_SHOWS_WO_DIR or ek.ek(os.path.isdir, newLocation):
             self._location = newLocation
             self._isDirGood = True
         else:
@@ -150,7 +155,7 @@ class TVShow(object):
 
         return result
 
-    def writeMetadata(self):
+    def writeMetadata(self, show_only=False):
 
         if not ek.ek(os.path.isdir, self._location):
             logger.log(str(self.tvdbid) + u": Show dir doesn't exist, skipping NFO generation")
@@ -159,8 +164,9 @@ class TVShow(object):
         self.getImages()
 
         self.writeShowNFO()
-        self.writeEpisodeNFOs()
-
+        
+        if not show_only:
+            self.writeEpisodeNFOs()
 
     def writeEpisodeNFOs (self):
 
@@ -688,8 +694,8 @@ class TVShow(object):
 
     def refreshDir(self):
 
-        # make sure the show dir is where we think it is
-        if not ek.ek(os.path.isdir, self._location):
+        # make sure the show dir is where we think it is unless dirs are created on the fly
+        if not ek.ek(os.path.isdir, self._location) and not sickbeard.CREATE_MISSING_SHOW_DIRS:
             return False
 
         # load from dir
@@ -739,7 +745,7 @@ class TVShow(object):
         logger.log(str(self.tvdbid) + ": Loading all episodes with a location from the database")
 
         myDB = db.DBConnection()
-        sqlResults = myDB.select("SELECT * FROM tv_episodes WHERE showid = ? AND location != ''", [self.tvdbid])
+        sqlResults = myDB.select("SELECT * FROM tv_episodes WHERE showid = ? AND location != '' ORDER BY episode ASC", [self.tvdbid])
 
         # build list of locations
         fileLocations = {}
@@ -886,7 +892,7 @@ class TVShow(object):
         curStatus, curQuality = Quality.splitCompositeStatus(epStatus)
 
         # if we are re-downloading then we only want it if it's in our bestQualities list and better than what we have
-        if curStatus in Quality.SNATCHED + Quality.DOWNLOADED and quality in bestQualities and quality > curQuality:
+        if curStatus in Quality.DOWNLOADED + Quality.SNATCHED + Quality.SNATCHED_PROPER and quality in bestQualities and quality > curQuality:
             logger.log(u"We already have this ep but the new one is better quality, saying yes", logger.DEBUG)
             return True
 
@@ -1142,7 +1148,8 @@ class TVEpisode(object):
         #early conversion to int so that episode doesn't get marked dirty
         self.tvdbid = int(myEp["id"])
         
-        if not ek.ek(os.path.isdir, self.show._location):
+        #don't update show status if show dir is missing, unless missing show dirs are created during post-processing
+        if not ek.ek(os.path.isdir, self.show._location) and not sickbeard.CREATE_MISSING_SHOW_DIRS:
             logger.log(u"The show dir is missing, not bothering to change the episode statuses since it'd probably be invalid")
             return
 
