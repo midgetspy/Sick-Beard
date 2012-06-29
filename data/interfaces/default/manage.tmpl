@@ -8,12 +8,8 @@
 #import os.path
 #include $os.path.join($sickbeard.PROG_DIR, "data/interfaces/default/inc_top.tmpl")
 
-<script type="text/javascript" src="$sbRoot/js/lib/jquery.dataTables.min.js"></script>
-<script type="text/javascript" src="$sbRoot/js/jquery.dataTables.sorting.js"></script>
-
 <script type="text/javascript" charset="utf-8">
 <!--
-/*
 \$.tablesorter.addParser({
     id: 'showNames',
     is: function(s) {
@@ -55,73 +51,7 @@
             9: { sorter: false},
             10: { sorter: false}
         }
-    });
- });
-*/
-
-\$(document).ready(function() 
-{ 
-    \$("#massUpdateTable").dataTable({
-        "bPaginate": false,
-        "bInfo": false,
-        "bFilter": false,
-        "bAutoWidth": false,
-        "bProcessing": false,
-        "sDom": "lftipr",
-        "bJQueryUI": true,
-
-        // use localstorage to save state
-        "bStateSave": true,
-        "fnStateSave": function (oSettings, oData) {
-            localStorage.setItem( 'DataTables_'+window.location.pathname, JSON.stringify(oData) );
-        },
-        "fnStateLoad": function (oSettings) {
-            var data = localStorage.getItem('DataTables_'+window.location.pathname);
-            return JSON.parse(data);
-        },
-
-
-        "aoColumnDefs": [
-            {
-                "sClass": "center",
-                "aTargets": [0, 1, 3, 4, 5, 6, 7, 8, 9, 10]
-            },
-
-            { "asSorting": [ "desc", "asc" ], "aTargets": [0] },
-            
-            {
-                "bSortable": false,
-                "bSearchable": false,
-                "aTargets": [0, 7, 8, 9, 10]
-            },
-            
-            { 
-                "sType": "quality",
-                "bUseRendered": false,
-
-                // render the quality in a span
-                "fnRender": function ( oObj, sVal ) {
-                    return '<span class="quality '+sVal+'">'+sVal+'</span>';
-                },
-                "aDataSort": [3, 1],
-                "aTargets": [ 3 ],
-            },
-        
-            {
-                "sType": "alt-string",
-                "bUseRendered": true,
-                "aTargets": [4, 5],
-            },
-        
-            { 
-                "sType": "titles",
-                "bUseRendered": false,
-                "aTargets": [ 6 ],
-            },
-            
-        ]
-    });
-     
+    }); 
 });
 //-->
 </script>
@@ -129,7 +59,7 @@
 
 <form name="massUpdateForm" method="post" action="massUpdate">
 
-<table id="massUpdateTable" cellspacing="1" border="0" cellpadding="0">
+<table id="massUpdateTable" class="sickbeardTable tablesorter" cellspacing="1" border="0" cellpadding="0">
   <thead>
     <tr>
       <th width="1%">Edit&nbsp;<input type="checkbox" class="bulkCheck" id="editCheck" /></th>
@@ -180,26 +110,22 @@ $myShowList.sort(lambda x, y: cmp(x.name, y.name))
 #set $curDelete = "<input type=\"checkbox\" class=\"deleteCheck\" id=\"delete-"+str($curShow.tvdbid)+"\" "+$curDelete_disabled+"/>"
 
   <tr>
-    <td><input type="checkbox" class="editCheck" id="edit-$curShow.tvdbid" /></td>
-    <td><img src="$sbRoot/images/flags/${curShow.lang}.png" width="16" height="11" alt="$curShow.lang" /></td>
+    <td align="center"><input type="checkbox" class="editCheck" id="edit-$curShow.tvdbid" /></td>
+    <td align="center"><img src="$sbRoot/images/flags/${curShow.lang}.png" width="16" height="11" alt="$curShow.lang" /></td>
     <td class="tvShow"><a href="$sbRoot/home/displayShow?show=$curShow.tvdbid">$curShow.name</a></td>
-#if False and $curShow.quality in $qualityPresets:
-    <td><span class="quality $qualityPresetStrings[$curShow.quality]">$qualityPresetStrings[$curShow.quality]</span></td>
-#elif False:
-    <td><span class="quality Custom">Custom</span></td>
-#elif $curShow.quality in $qualityPresets:
-    <td>$qualityPresetStrings[$curShow.quality]</td>
+#if $curShow.quality in $qualityPresets:
+    <td align="center"><span class="quality $qualityPresetStrings[$curShow.quality]">$qualityPresetStrings[$curShow.quality]</span></td>
 #else:
-    <td>Custom</td>
+    <td align="center"><span class="quality Custom">Custom</span></td>
 #end if 
-    <td><img src="$sbRoot/images/#if int($curShow.seasonfolders) == 1 then "yes16.png\" alt=\"Y\"" else "no16.png\" alt=\"N\""# width="16" height="16" /></td>
-    <td><img src="$sbRoot/images/#if int($curShow.paused) == 1 then "yes16.png\" alt=\"Y\"" else "no16.png\" alt=\"N\""# width="16" height="16" /></td>
-    <td>$curShow.status</td>
-    <td>$curUpdate</td>
-    <td>$curRefresh</td>
-    <td>$curRename</td>
+    <td align="center"><img src="$sbRoot/images/#if int($curShow.seasonfolders) == 1 then "yes16.png\" alt=\"Y\"" else "no16.png\" alt=\"N\""# width="16" height="16" /></td>
+    <td align="center"><img src="$sbRoot/images/#if int($curShow.paused) == 1 then "yes16.png\" alt=\"Y\"" else "no16.png\" alt=\"N\""# width="16" height="16" /></td>
+    <td align="center">$curShow.status</td>
+    <td align="center">$curUpdate</td>
+    <td align="center">$curRefresh</td>
+    <td align="center">$curRename</td>
 <!--    <td align="center"><input type="checkbox" class="metadataCheck" id="metadata-$curShow.tvdbid" /></td>//-->
-    <td>$curDelete</td>
+    <td align="center">$curDelete</td>
   </tr>
 #end for
 </tbody>

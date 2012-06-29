@@ -18,10 +18,7 @@
 
 from __future__ import with_statement
 
-
-import binascii
 import traceback
-
 
 import sickbeard
 
@@ -181,13 +178,6 @@ class QueueItemAdd(ShowQueueItem):
 
         # this will initialize self.show to None
         ShowQueueItem.__init__(self, ShowQueueActions.ADD, self.show)
-
-    def createCRC(self):
-        
-        obj_string = ":".join([str(x) for x in [self.tvdb_id, self.showDir, self.quality]])
-        if self.show:
-            obj_string += ":" + self.show.createCRC()
-        return "%08x" % (binascii.crc32(obj_string) & 0xffffffff)
         
     def _getName(self):
         """

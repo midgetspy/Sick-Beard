@@ -23,7 +23,6 @@ import datetime
 import threading
 import re
 import glob
-import binascii
 
 import sickbeard
 
@@ -81,14 +80,6 @@ class TVShow(object):
         self.loadFromDB()
 
         self.saveToDB()
-
-    def createCRC(self):
-        
-        try:
-            obj_string = ":".join([str(x) for x in [self.name.encode(sickbeard.SYS_ENCODING), self.location.encode(sickbeard.SYS_ENCODING), self.quality, self.paused, self.network, self.status, self.genre]])
-        except exceptions.ShowDirNotFoundException:
-            obj_string = ""
-        return "%08x" % (binascii.crc32(obj_string) & 0xffffffff)
 
     def _getLocation(self):
         # no dir check needed if missing show dirs are created during post-processing
