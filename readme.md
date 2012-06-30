@@ -31,6 +31,7 @@ Sick Beard makes use of the following projects:
 * [SocksiPy][socks]
 * [adba][adba_url]
 * [python-dateutil][dateutil]
+* [jsonrpclib][jsonrpclib]
 
 ## Dependencies
 
@@ -54,3 +55,4 @@ If you find a bug please report it or it'll never get fixed. Verify that it hasn
 [googleissues]: http://code.google.com/p/sickbeard/issues/list
 [googlenewissue]: http://code.google.com/p/sickbeard/issues/entry
 [adba_url]: https://github.com/lad1337/adba
+[jsonrpclib]: https://github.com/joshmarshall/jsonrpclib
