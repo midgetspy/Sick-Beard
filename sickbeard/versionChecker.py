@@ -330,7 +330,9 @@ class GitUpdateManager(UpdateManager):
             message = "or else you're ahead of master"
 
         elif self._num_commits_behind > 0:
-            message = "you're "+str(self._num_commits_behind)+' commits behind'
+            message = "you're %d commit" % self._num_commits_behind
+            if self._num_commits_behind > 1: message += 's'
+            message += ' behind'
 
         else:
             return
