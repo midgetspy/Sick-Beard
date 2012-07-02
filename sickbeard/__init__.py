@@ -227,6 +227,17 @@ PROWL_NOTIFY_ONDOWNLOAD = False
 PROWL_API = None
 PROWL_PRIORITY = 0
 
+USE_EMAIL = False
+EMAIL_NOTIFY_ONSNATCH = False
+EMAIL_NOTIFY_ONDOWNLOAD = False
+EMAIL_HOST = None
+EMAIL_PORT = 25
+EMAIL_SSL = False
+EMAIL_USER = None
+EMAIL_PASSWORD = None
+EMAIL_FROM = None
+EMAIL_SUBJECT = 'Sickbeard Notification'
+
 USE_TWITTER = False
 TWITTER_NOTIFY_ONSNATCH = False
 TWITTER_NOTIFY_ONDOWNLOAD = False
@@ -406,6 +417,7 @@ def initialize(consoleLogging=True):
                 RENAME_EPISODES, properFinderScheduler, PROVIDER_ORDER, autoPostProcesserScheduler, \
                 NAMING_EP_NAME, NAMING_SEP_TYPE, NAMING_USE_PERIODS, WOMBLE, \
                 NZBSRUS, NZBSRUS_UID, NZBSRUS_HASH, NAMING_QUALITY, providerList, newznabProviderList, \
+		USE_EMAIL, EMAIL_HOST, EMAIL_PORT, EMAIL_SSL, EMAIL_USER, EMAIL_PASSWORD, EMAIL_SUBJECT, EMAIL_FROM, EMAIL_NOTIFY_ONSNATCH, EMAIL_NOTIFY_ONDOWNLOAD, \
                 NAMING_DATES, EXTRA_SCRIPTS, USE_TWITTER, TWITTER_USERNAME, TWITTER_PASSWORD, TWITTER_PREFIX, \
                 USE_NOTIFO, NOTIFO_USERNAME, NOTIFO_APISECRET, NOTIFO_NOTIFY_ONDOWNLOAD, NOTIFO_NOTIFY_ONSNATCH, \
                 USE_BOXCAR, BOXCAR_USERNAME, BOXCAR_PASSWORD, BOXCAR_NOTIFY_ONDOWNLOAD, BOXCAR_NOTIFY_ONSNATCH, \
@@ -614,6 +626,17 @@ def initialize(consoleLogging=True):
         PROWL_NOTIFY_ONDOWNLOAD = bool(check_setting_int(CFG, 'Prowl', 'prowl_notify_ondownload', 0))
         PROWL_API = check_setting_str(CFG, 'Prowl', 'prowl_api', '')
         PROWL_PRIORITY = check_setting_str(CFG, 'Prowl', 'prowl_priority', "0")
+
+	USE_EMAIL = bool(check_setting_int(CFG, 'Email', 'use_email', 0))
+	EMAIL_NOTIFY_ONSNATCH = bool(check_setting_int(CFG, 'Email', 'email_notify_onsnatch', 0))
+	EMAIL_NOTIFY_ONDOWNLOAD = bool(check_setting_int(CFG, 'Email', 'email_notify_ondownload', 0)) 
+	EMAIL_HOST = check_setting_str(CFG, 'Email', 'email_host', '')
+	EMAIL_PORT = check_setting_int(CFG, 'Email', 'email_port', 25)
+	EMAIL_SSL = bool(check_setting_int(CFG, 'Email', 'email_ssl', 0))
+	EMAIL_USER = check_setting_str(CFG, 'Email', 'email_user', '')
+	EMAIL_PASSWORD = check_setting_str(CFG, 'Email', 'email_password', '')
+	EMAIL_FROM = check_setting_str(CFG, 'Email', 'email_from', '')
+	EMAIL_SUBJECT = check_setting_str(CFG, 'Email', 'email_subject', '')
 
         USE_TWITTER = bool(check_setting_int(CFG, 'Twitter', 'use_twitter', 0))
         TWITTER_NOTIFY_ONSNATCH = bool(check_setting_int(CFG, 'Twitter', 'twitter_notify_onsnatch', 0))
@@ -1150,6 +1173,18 @@ def save_config():
     new_config['Prowl']['prowl_notify_ondownload'] = int(PROWL_NOTIFY_ONDOWNLOAD) 
     new_config['Prowl']['prowl_api'] = PROWL_API
     new_config['Prowl']['prowl_priority'] = PROWL_PRIORITY
+
+    new_config['Email'] = {}
+    new_config['Email']['use_email'] = int(USE_EMAIL)
+    new_config['Email']['email_notify_onsnatch'] = int(EMAIL_NOTIFY_ONSNATCH)
+    new_config['Email']['email_notify_ondownload'] = int(EMAIL_NOTIFY_ONDOWNLOAD)
+    new_config['Email']['email_host'] = EMAIL_HOST
+    new_config['Email']['email_port'] = int(EMAIL_PORT)
+    new_config['Email']['email_ssl'] = int(EMAIL_SSL)
+    new_config['Email']['email_user'] = EMAIL_USER
+    new_config['Email']['email_password'] = EMAIL_PASSWORD
+    new_config['Email']['email_subject'] = EMAIL_SUBJECT
+    new_config['Email']['email_from'] = EMAIL_FROM
 
     new_config['Twitter'] = {}
     new_config['Twitter']['use_twitter'] = int(USE_TWITTER)
