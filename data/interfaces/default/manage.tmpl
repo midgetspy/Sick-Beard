@@ -1,11 +1,10 @@
 #import sickbeard
 #from sickbeard.common import *
 #set global $title="Mass Update"
-#set global $header="Mass Update"
 
 #set global $sbPath="../.."
 
-#set global $topmenu="manage"
+#set global $topmenu="manage"#
 #import os.path
 #include $os.path.join($sickbeard.PROG_DIR, "data/interfaces/default/inc_top.tmpl")
 
@@ -57,11 +56,7 @@
 //-->
 </script>
 <script type="text/javascript" src="$sbRoot/js/massUpdate.js"></script>
-#if $varExists('header') 
-	<h1 class="header">$header</h1>
-#else 
-	<h1 class="title">$title</h1>
-#end if
+
 <form name="massUpdateForm" method="post" action="massUpdate">
 
 <table id="massUpdateTable" class="sickbeardTable tablesorter" cellspacing="1" border="0" cellpadding="0">
@@ -71,7 +66,7 @@
       <th class="nowrap">Lang</th>
       <th class="nowrap">Show Name</th>
       <th>Quality</th>
-      <th>Season folders</th>
+      <th>Season<br/>Folders</th>
       <th>Paused</th>
       <th>Status</th>
       <th width="1%">Update&nbsp;<input type="checkbox" class="bulkCheck" id="updateCheck" /></th>

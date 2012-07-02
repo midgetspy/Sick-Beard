@@ -117,4 +117,5 @@
 			return this;
 		}
 	});
+
 })(jQuery);

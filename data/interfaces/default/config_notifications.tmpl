@@ -9,24 +9,19 @@
 
 <script type="text/javascript" src="$sbRoot/js/configNotifications.js"></script>
 <script type="text/javascript" src="$sbRoot/js/config.js"></script>
-#if $varExists('header') 
-	<h1 class="header">$header</h1>
-#else 
-	<h1 class="title">$title</h1>
-#end if
+
 <div id="config">
     <div id="config-content">
         <form id="configForm" action="saveNotifications" method="post">
             <div id="config-components">
-				<ul>
-					<li><a href="#tabs-1">Home Theater</a></li>
-					<li><a href="#tabs-2">Devices</a></li>
-					<li><a href="#tabs-3">Online</a></li>
-				</ul>
 
-                <div id="tabs-1">
+
+            <br />
+            <h1>Home Theater</h1>
+            <br />
+
+
                 <div class="component-group clearfix">
-                
                     <div class="component-group-desc">
                         <h3><a href="http://xbmc.org/" onclick="window.open(this.href, '_blank'); return false;"><img src="$sbRoot/images/notifiers/xbmc.gif" alt="" title="XBMC" width="16" height="16" /> XBMC </a></h3>
                         <p>A free and open source cross-platform media center and home entertainment system software with a 10-foot user interface designed for the living-room TV.</p>
@@ -343,10 +338,14 @@
 
                     </fieldset>
                 </div><!-- /component-group //-->
-			</div>
-			
-			<div id="tabs-2">
-				<div class="component-group clearfix">
+
+
+                <br />
+                <h1>Devices</h1>
+                <br />
+
+
+                <div class="component-group clearfix">
                     <div class="component-group-desc">
                         <h3><a href="http://growl.info/" onclick="window.open(this.href, '_blank'); return false;"><img src="$sbRoot/images/notifiers/growl.gif" alt="" title="Growl" width="16" height="16" /> Growl </a></h3>
                         <p>A cross-platform unobtrusive global notification system.</p>
@@ -725,11 +724,15 @@
 
                     </fieldset>
                 </div><!-- /nma component-group //-->
-			</div>
-			
-            <div id="tabs-3">
-            	<div class="component-group clearfix">
-                   	<div class="component-group-desc">
+
+
+                <br />
+                <h1>Online</h1>
+                <br />
+
+
+                <div class="component-group clearfix">
+                    <div class="component-group-desc">
                         <h3><a href="http://www.twitter.com/" onclick="window.open(this.href, '_blank'); return false;"><img src="$sbRoot/images/notifiers/twitter.gif" alt="" title="Twitter" width="16" height="16" /> Twitter </a></h3>
                         <p>A social networking and microblogging service, enabling its users to send and read other users' messages called tweets.</p>
                     </div>
@@ -856,9 +859,5 @@
     </div>
 </div>
 <div class="clearfix"></div>
-<script type="text/javascript" charset="utf-8">
-<!--
-    jQuery('#config-components').tabs();
-//-->
-</script>
+
 #include $os.path.join($sickbeard.PROG_DIR, "data/interfaces/default/inc_bottom.tmpl")
