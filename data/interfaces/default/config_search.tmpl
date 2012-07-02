@@ -86,8 +86,8 @@
                                 <span class="component-title jumbo">NZB Method:</span>
                                 <span class="component-desc">
                                     <select name="nzb_method" id="nzb_method">
-                                    #set $nzb_method_text = {'blackhole': "Black hole", 'sabnzbd': "SABnzbd", 'nzbget': "NZBget"}
-                                    #for $curAction in ('sabnzbd', 'blackhole', 'nzbget'):
+                                    #set $nzb_method_text = {'blackhole': "Black hole", 'sabnzbd': "SABnzbd", 'nzbget': "NZBget", 'strm': "XBMC STRM"}
+                                    #for $curAction in ('sabnzbd', 'blackhole', 'nzbget', 'strm'):
                                       #if $sickbeard.NZB_METHOD == $curAction:
                                         #set $nzb_method = "selected=\"selected\""
                                       #else
@@ -109,6 +109,19 @@
                                 <label class="nocheck clearfix">
                                     <span class="component-title">&nbsp;</span>
                                     <span class="component-desc">The directory where Sick Beard should store your <i>NZB</i> files.</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div id="strm_settings">
+                            <div class="field-pair">
+                                <label class="nocheck clearfix">
+                                    <span class="component-title">Pneumatic NZB Location</span>
+                                    <input type="text" name="pneu_nzb_dir" id="pneu_nzb_dir" value="$sickbeard.PNEU_NZB_DIR" size="45" />
+                                </label>
+                                <label class="nocheck clearfix">
+                                    <span class="component-title">&nbsp;</span>
+                                    <span class="component-desc">The directory where Pneumatic looks for your <i>NZB</i> files.</span>
                                 </label>
                             </div>
                         </div>
