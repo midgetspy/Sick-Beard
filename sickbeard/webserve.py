@@ -912,6 +912,7 @@ class ConfigPostProcessing:
         sickbeard.metadata_provider_dict['MediaBrowser'].set_config(mediabrowser_data)
 
 
+
         sickbeard.metadata_provider_dict['Synology'].set_config(synology_data)
         sickbeard.metadata_provider_dict['Sony PS3'].set_config(sony_ps3_data)
         sickbeard.metadata_provider_dict['WDTV'].set_config(wdtv_data)
@@ -1216,7 +1217,9 @@ class ConfigNotifications:
                           use_trakt=None, trakt_username=None, trakt_password=None, trakt_api=None,
                           use_pytivo=None, pytivo_notify_onsnatch=None, pytivo_notify_ondownload=None, pytivo_update_library=None, 
                           pytivo_host=None, pytivo_share_name=None, pytivo_tivo_name=None,
-                          use_nma=None, nma_notify_onsnatch=None, nma_notify_ondownload=None, nma_api=None, nma_priority=0, use_email=None, email_notify_onsnatch=None, email_notify_ondownload=None, email_host=None, email_port=25, email_from=None, email_subject=None, email_tls=None, email_user=None, email_password=None ):
+                          use_nma=None, nma_notify_onsnatch=None, nma_notify_ondownload=None, nma_api=None, nma_priority=0, use_email=None,
+                          email_notify_onsnatch=None, email_notify_ondownload=None, email_host=None, email_port=25, email_from=None, email_subject=None,
+                          email_tls=None, email_user=None, email_password=None, email_list=None ):
 
         results = []
 
@@ -1460,6 +1463,7 @@ class ConfigNotifications:
         sickbeard.EMAIL_TLS = email_tls
         sickbeard.EMAIL_USER = email_user
         sickbeard.EMAIL_PASSWORD = email_password
+        sickbeard.EMAIL_LIST = email_list
 
         sickbeard.USE_TWITTER = use_twitter
         sickbeard.TWITTER_NOTIFY_ONSNATCH = twitter_notify_onsnatch

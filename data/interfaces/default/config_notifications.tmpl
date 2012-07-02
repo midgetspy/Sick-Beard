@@ -806,7 +806,7 @@
                                 </label>
                                 <label class="nocheck clearfix">
                                     <span class="component-title">&nbsp;</span>
-                                    <span class="component-desc">Check if your SMTP server requires SSL connection.</span>
+                                    <span class="component-desc">Check to use TLS authentication.</span>
                                 </label>
                             </div>
                             <div class="field-pair">
@@ -816,7 +816,7 @@
                                 </label>
                                 <label class="nocheck clearfix">
                                     <span class="component-title">&nbsp;</span>
-                                    <span class="component-desc">Your SMTP server username.</span>
+                                    <span class="component-desc">Your SMTP server username; used with TLS only.</span>
                                 </label>
                             </div>
                             <div class="field-pair">
@@ -826,9 +826,20 @@
                                 </label>
                                 <label class="nocheck clearfix">
                                     <span class="component-title">&nbsp;</span>
-                                    <span class="component-desc">Your SMTP server password.</span>
+                                    <span class="component-desc">Your SMTP server password; used with TLS only.</span>
                                 </label>
                             </div>
+                            <div class="field-pair">
+                                <label class="nocheck clearfix">
+                                    <span class="component-title">Global Email List</span>
+                                    <input type="text" name="email_list" id="email_list" value="$sickbeard.EMAIL_LIST" size="35" />
+                                </label>
+                                <label class="nocheck clearfix">
+                                    <span class="component-title">&nbsp;</span>
+                                    <span class="component-desc">All emails here receive notifications for ALL shows.</span>
+                                </label>
+                            </div>
+
                             <div class="testNotification" id="testEmail-result">Click below to test.</div>
                             <input type="button" value="Test Email" id="testEmail" />
                             <input type="submit" class="config_submitter" value="Save Changes" />

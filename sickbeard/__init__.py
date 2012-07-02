@@ -237,6 +237,7 @@ EMAIL_USER = None
 EMAIL_PASSWORD = None
 EMAIL_FROM = None
 EMAIL_SUBJECT = 'Sickbeard Notification'
+EMAIL_LIST = None
 
 USE_TWITTER = False
 TWITTER_NOTIFY_ONSNATCH = False
@@ -417,7 +418,7 @@ def initialize(consoleLogging=True):
                 RENAME_EPISODES, properFinderScheduler, PROVIDER_ORDER, autoPostProcesserScheduler, \
                 NAMING_EP_NAME, NAMING_SEP_TYPE, NAMING_USE_PERIODS, WOMBLE, \
                 NZBSRUS, NZBSRUS_UID, NZBSRUS_HASH, NAMING_QUALITY, providerList, newznabProviderList, \
-		USE_EMAIL, EMAIL_HOST, EMAIL_PORT, EMAIL_TLS, EMAIL_USER, EMAIL_PASSWORD, EMAIL_SUBJECT, EMAIL_FROM, EMAIL_NOTIFY_ONSNATCH, EMAIL_NOTIFY_ONDOWNLOAD, \
+		USE_EMAIL, EMAIL_HOST, EMAIL_PORT, EMAIL_TLS, EMAIL_USER, EMAIL_PASSWORD, EMAIL_SUBJECT, EMAIL_FROM, EMAIL_NOTIFY_ONSNATCH, EMAIL_NOTIFY_ONDOWNLOAD, EMAIL_LIST, \
                 NAMING_DATES, EXTRA_SCRIPTS, USE_TWITTER, TWITTER_USERNAME, TWITTER_PASSWORD, TWITTER_PREFIX, \
                 USE_NOTIFO, NOTIFO_USERNAME, NOTIFO_APISECRET, NOTIFO_NOTIFY_ONDOWNLOAD, NOTIFO_NOTIFY_ONSNATCH, \
                 USE_BOXCAR, BOXCAR_USERNAME, BOXCAR_PASSWORD, BOXCAR_NOTIFY_ONDOWNLOAD, BOXCAR_NOTIFY_ONSNATCH, \
@@ -637,6 +638,7 @@ def initialize(consoleLogging=True):
 	EMAIL_PASSWORD = check_setting_str(CFG, 'Email', 'email_password', '')
 	EMAIL_FROM = check_setting_str(CFG, 'Email', 'email_from', '')
 	EMAIL_SUBJECT = check_setting_str(CFG, 'Email', 'email_subject', '')
+	EMAIL_LIST = check_setting_str(CFG, 'Email', 'email_list', '')
 
         USE_TWITTER = bool(check_setting_int(CFG, 'Twitter', 'use_twitter', 0))
         TWITTER_NOTIFY_ONSNATCH = bool(check_setting_int(CFG, 'Twitter', 'twitter_notify_onsnatch', 0))
@@ -1185,6 +1187,7 @@ def save_config():
     new_config['Email']['email_password'] = EMAIL_PASSWORD
     new_config['Email']['email_subject'] = EMAIL_SUBJECT
     new_config['Email']['email_from'] = EMAIL_FROM
+    new_config['Email']['email_list'] = EMAIL_LIST
 
     new_config['Twitter'] = {}
     new_config['Twitter']['use_twitter'] = int(USE_TWITTER)
