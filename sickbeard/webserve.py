@@ -1144,7 +1144,7 @@ class ConfigProviders:
                       nzbs_r_us_uid=None, nzbs_r_us_hash=None, newznab_string=None,
                       tvtorrents_digest=None, tvtorrents_hash=None, 
                       thepiratebay_trusted=None, thepiratebay_proxy=None, thepiratebay_proxy_url=None,
-                      btn_user_id=None, btn_auth_token=None, btn_passkey=None, btn_authkey=None,
+                      btn_api_key=None,
                       dtt_norar = None, dtt_single = None,newzbin_username=None, newzbin_password=None,
                       provider_order=None):
 
@@ -1252,10 +1252,7 @@ class ConfigProviders:
 
         sickbeard.DTT_SINGLE = dtt_single    
 
-        sickbeard.BTN_USER_ID = btn_user_id.strip()
-        sickbeard.BTN_AUTH_TOKEN = btn_auth_token.strip()
-        sickbeard.BTN_PASSKEY = btn_passkey.strip()
-        sickbeard.BTN_AUTHKEY = btn_authkey.strip()
+        sickbeard.BTN_API_KEY = btn_api_key.strip()
 
         sickbeard.NZBSRUS_UID = nzbs_r_us_uid.strip()
         sickbeard.NZBSRUS_HASH = nzbs_r_us_hash.strip()
@@ -1876,14 +1873,17 @@ class NewHomeAddShows:
             ui.notifications.error("Unable to add show", "Folder "+show_dir+" exists already")
             redirect('/home/addShows/existingShows')
         
-        # create the dir and make sure it worked
-        dir_exists = helpers.makeDir(show_dir)
-        if not dir_exists:
-            logger.log(u"Unable to create the folder "+show_dir+", can't add the show", logger.ERROR)
-            ui.notifications.error("Unable to add show", "Unable to create the folder "+show_dir+", can't add the show")
-            redirect("/home")
+        # don't create show dir if config says not to
+        if sickbeard.ADD_SHOWS_WO_DIR:
+            logger.log(u"Skipping initial creation of "+show_dir+" due to config.ini setting")
         else:
-            helpers.chmodAsParent(show_dir)
+            dir_exists = helpers.makeDir(show_dir)
+            if not dir_exists:
+                logger.log(u"Unable to create the folder "+show_dir+", can't add the show", logger.ERROR)
+                ui.notifications.error("Unable to add show", "Unable to create the folder "+show_dir+", can't add the show")
+                redirect("/home")
+            else:
+                helpers.chmodAsParent(show_dir)
 
         # prepare the inputs for passing along
         if seasonFolders == "on":

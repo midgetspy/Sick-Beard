@@ -1,0 +1,191 @@
+.tvshowDiv {
+    display: block;
+    clear: both;
+    border-left: 1px solid #CCCCCC;
+    border-right: 1px solid #CCCCCC;
+    border-bottom: 1px solid #CCCCCC;
+    margin: auto;
+    padding: 0px;
+    text-align: left;
+    width: 750px;
+}
+
+.tvshowDiv a, .tvshowDiv a:link, .tvshowDiv a:visited, .tvshowDiv a:hover  {
+    text-decoration: none;
+    background: none;
+}
+
+.tvshowTitle a {
+    color: #000000;
+    float: left; 
+    padding-top: 3px; 
+    line-height: 1.2em;
+    font-size: 1.1em;
+    text-shadow: -1px -1px 0 #FFF);
+}
+
+.tvshowTitleIcons {
+    float: right;
+    padding: 3px 5px;
+}
+
+.tvshowDiv .title { 
+    font-weight: 900;
+    color: #333;
+}
+.imgWrapper {
+	background: url("../images/loading.gif") no-repeat scroll center center #FFFFFF;
+    border: 3px solid #FFFFFF;
+    box-shadow: 1px 1px 2px 0 #555555;
+    float: left;
+    height: 50px;
+    overflow: hidden;
+    text-indent: -3000px;
+    width: 50px;
+}
+.imgWrapper .posterThumb {
+	float: left;
+    min-height: 100%;
+    min-width: 100%;
+    width: 50px;
+    height: auto;
+    position: relative;
+    border: none;
+    vertical-align: middle;
+}
+.posterThumb {
+    -ms-interpolation-mode: bicubic; /* make scaling look nicer for ie */
+    vertical-align: top;
+    height: auto;
+    width: 160px;
+    border-top: 1px solid #ccc; 
+    border-right: 1px solid #ccc;
+}
+.bannerThumb {
+    -ms-interpolation-mode: bicubic; /* make scaling look nicer for ie */
+    vertical-align: top;
+    height: auto;
+    width: 750px;
+    /* margin-bottom: 1px; */
+}
+
+.tvshowDiv th {
+    color: #000;
+    letter-spacing: 1px;
+    text-align: left;
+    background-color: #333333;
+}
+
+.tvshowDiv th.nobg {
+    background: #efefef;
+    border-top: 1px solid #666;
+    text-align: center;
+}
+
+.tvshowDiv td {
+    border-top: 1px solid #d2ebe8;
+    background: #fff;
+    padding: 10px;
+    color: #000;
+}
+
+.tvshowDiv td.next_episode {
+    width: 100%;
+    border-top: 1px solid #ccc;
+    background: #F5FAFA;
+    color: #000;
+}
+
+h1.day {
+    font-weight: bold;
+    padding: 4px;
+    letter-spacing: 1px;
+    background-image: -moz-linear-gradient(#555555, #333333) !important;
+  	background-image: linear-gradient(#555555, #333333) !important;
+  	background-image: -webkit-linear-gradient(#555555, #333333) !important;
+  	background-image: -o-linear-gradient(#555555, #333333) !important;
+  	filter: progid:dximagetransform.microsoft.gradient(startColorstr=#555555, endColorstr=#333333) !important;
+  	-ms-filter: progid:dximagetransform.microsoft.gradient(startColorstr=#555555, endColorstr=#333333) !important;
+  	color: #fff;
+  	text-shadow: -1px -1px 0 rgba(0, 0, 0, 0.3);
+    text-align: center;
+}
+
+h1.network {
+   font-weight: bold;
+   padding: 4px;
+   letter-spacing: 1px;
+   background-image: -moz-linear-gradient(#555555, #333333) !important;
+   	background-image: linear-gradient(#555555, #333333) !important;
+   	background-image: -webkit-linear-gradient(#555555, #333333) !important;
+   	background-image: -o-linear-gradient(#555555, #333333) !important;
+   	filter: progid:dximagetransform.microsoft.gradient(startColorstr=#555555, endColorstr=#333333) !important;
+   	-ms-filter: progid:dximagetransform.microsoft.gradient(startColorstr=#555555, endColorstr=#333333) !important;
+   	color: #fff;
+   	text-shadow: -1px -1px 0 rgba(0, 0, 0, 0.3);
+   text-align: center;
+}
+
+.ep_listing {
+    width: auto;
+    border: 1px solid #CCCCCC;
+    margin-bottom: 10px;
+    /* margin: 10px; */
+    /* overflow: hidden; */
+    padding: 10px;
+}
+
+.h2footer .listing_default,
+.h2footer .listing_current,
+.h2footer .listing_waiting,
+.h2footer .listing_overdue,
+.h2footer .listing_toofar {
+	padding: 2px 10px;
+	display: inline-block;
+	font-size: 13px;
+	font-weight: bold;
+	-moz-border-radius: 5px;
+	-webkit-border-radius: 5px;
+	border-radius: 5px;
+}
+
+.listing_default {
+    background-color: #F5F1E4;    
+    color: #cec198;
+}
+
+.listing_current {
+    background-color: #E2FFD8;
+    color: #AAD450;
+}
+
+.listing_waiting {
+    background-color: #99ff99;
+}
+
+.listing_overdue {
+    background-color: #FDEBF3;
+    color: #F49AC1;
+}
+
+.listing_toofar {
+      background-color: #E9F7FB;
+      color: #90D5EC;
+}
+
+.listing_unknown {
+    background-color: #ffdc89;
+}
+
+span.pause {
+    color: #FF0000;
+    font-size: 12px;
+}
+
+.ep_summaryTrigger {
+    float: left;
+    padding-top: 5px;
+}
+.ep_summary {
+    padding-top: 5px;
+}

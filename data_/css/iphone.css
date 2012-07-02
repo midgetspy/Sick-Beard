@@ -1,0 +1,24 @@
+body {
+width: 100%;
+padding: 0;
+margin: 0;
+font-size: 10px; 
+line-height:10px;
+}
+
+.MainMenu a, .SubMenu a { padding: 2px; font-weight: normal;  }
+#btnExistingShow, #btnNewShow { min-height: 150px; }
+
+.sickbeardTable {
+margin-left:1%;
+margin-right:1%;
+width:98%;
+}
+
+table {
+margin:0;
+font-size: 10px;
+}
+
+#outerWrapper { width: 98%; padding-left: 1%; padding-right: 1%; }
+
