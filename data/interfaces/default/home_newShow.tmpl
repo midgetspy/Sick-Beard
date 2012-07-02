@@ -1,7 +1,8 @@
 #import os.path
 #import urllib
 #import sickbeard
-#set global $title="New Show"
+#set global $header="New Show"
+#set global $title=""
 
 #set global $sbPath="../.."
 
@@ -11,12 +12,16 @@
 
 #include $os.path.join($sickbeard.PROG_DIR, "data/interfaces/default/inc_top.tmpl")
 
-<link rel="stylesheet" type="text/css" href="$sbRoot/css/lib/formwizard.css" />
-<script type="text/javascript" src="$sbRoot/js/lib/formwizard.js"></script>
+<link rel="stylesheet" type="text/css" href="$sbRoot/css/formwizard.css" />
+<script type="text/javascript" src="$sbRoot/js/formwizard.js"></script>
 <script type="text/javascript" src="$sbRoot/js/qualityChooser.js"></script>
 <script type="text/javascript" src="$sbRoot/js/newShow.js"></script>
 <script type="text/javascript" src="$sbRoot/js/addShowOptions.js"></script> 
-   
+   #if $varExists('header') 
+   	<h1 class="header">$header</h1>
+   #else 
+   	<h1 class="title">$title</h1>
+   #end if
 <div id="displayText">aoeu</div>
 <br />
 

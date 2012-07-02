@@ -7,7 +7,7 @@
     margin: auto;
     padding: 0px;
     text-align: left;
-    width: 606px;
+    width: 750px;
 }
 
 .tvshowDiv a, .tvshowDiv a:link, .tvshowDiv a:visited, .tvshowDiv a:hover  {
@@ -16,13 +16,12 @@
 }
 
 .tvshowTitle a {
-    color: #FFFFFF;
+    color: #000000;
     float: left; 
     padding-top: 3px; 
-    padding-left: 8px; 
     line-height: 1.2em;
     font-size: 1.1em;
-    text-shadow: -1px -1px 0 rgba(0,0,0,0.3);
+    text-shadow: -1px -1px 0 #FFF);
 }
 
 .tvshowTitleIcons {
@@ -34,20 +33,39 @@
     font-weight: 900;
     color: #333;
 }
-
+.imgWrapper {
+	background: url("../images/loading.gif") no-repeat scroll center center #FFFFFF;
+    border: 3px solid #FFFFFF;
+    box-shadow: 1px 1px 2px 0 #555555;
+    float: left;
+    height: 50px;
+    overflow: hidden;
+    text-indent: -3000px;
+    width: 50px;
+}
+.imgWrapper .posterThumb {
+	float: left;
+    min-height: 100%;
+    min-width: 100%;
+    width: 50px;
+    height: auto;
+    position: relative;
+    border: none;
+    vertical-align: middle;
+}
 .posterThumb {
     -ms-interpolation-mode: bicubic; /* make scaling look nicer for ie */
     vertical-align: top;
-    height: 200px;
-    width: 136px;
+    height: auto;
+    width: 160px;
     border-top: 1px solid #ccc; 
     border-right: 1px solid #ccc;
 }
 .bannerThumb {
     -ms-interpolation-mode: bicubic; /* make scaling look nicer for ie */
     vertical-align: top;
-    height: 112px;
-    width: 606px;
+    height: auto;
+    width: 750px;
     /* margin-bottom: 1px; */
 }
 
@@ -82,18 +100,30 @@ h1.day {
     font-weight: bold;
     padding: 4px;
     letter-spacing: 1px;
-    background-color: #9CB5CF;
-    color: #000;
+    background-image: -moz-linear-gradient(#555555, #333333) !important;
+  	background-image: linear-gradient(#555555, #333333) !important;
+  	background-image: -webkit-linear-gradient(#555555, #333333) !important;
+  	background-image: -o-linear-gradient(#555555, #333333) !important;
+  	filter: progid:dximagetransform.microsoft.gradient(startColorstr=#555555, endColorstr=#333333) !important;
+  	-ms-filter: progid:dximagetransform.microsoft.gradient(startColorstr=#555555, endColorstr=#333333) !important;
+  	color: #fff;
+  	text-shadow: -1px -1px 0 rgba(0, 0, 0, 0.3);
     text-align: center;
 }
 
 h1.network {
-    font-weight: bold;
-    padding: 4px;
-    letter-spacing: 1px;
-    background-color: #8FBFAF;
-    color: #000;
-    text-align: center;
+   font-weight: bold;
+   padding: 4px;
+   letter-spacing: 1px;
+   background-image: -moz-linear-gradient(#555555, #333333) !important;
+   	background-image: linear-gradient(#555555, #333333) !important;
+   	background-image: -webkit-linear-gradient(#555555, #333333) !important;
+   	background-image: -o-linear-gradient(#555555, #333333) !important;
+   	filter: progid:dximagetransform.microsoft.gradient(startColorstr=#555555, endColorstr=#333333) !important;
+   	-ms-filter: progid:dximagetransform.microsoft.gradient(startColorstr=#555555, endColorstr=#333333) !important;
+   	color: #fff;
+   	text-shadow: -1px -1px 0 rgba(0, 0, 0, 0.3);
+   text-align: center;
 }
 
 .ep_listing {
@@ -105,12 +135,28 @@ h1.network {
     padding: 10px;
 }
 
+.h2footer .listing_default,
+.h2footer .listing_current,
+.h2footer .listing_waiting,
+.h2footer .listing_overdue,
+.h2footer .listing_toofar {
+	padding: 2px 10px;
+	display: inline-block;
+	font-size: 13px;
+	font-weight: bold;
+	-moz-border-radius: 5px;
+	-webkit-border-radius: 5px;
+	border-radius: 5px;
+}
+
 .listing_default {
-    background-color: #F5F1E4;
+    background-color: #F5F1E4;    
+    color: #cec198;
 }
 
 .listing_current {
-    background-color: #ddffdd;
+    background-color: #E2FFD8;
+    color: #AAD450;
 }
 
 .listing_waiting {
@@ -118,11 +164,13 @@ h1.network {
 }
 
 .listing_overdue {
-    background-color: #ffdddd;
+    background-color: #FDEBF3;
+    color: #F49AC1;
 }
 
 .listing_toofar {
-      background-color: #ddddff;
+      background-color: #E9F7FB;
+      color: #90D5EC;
 }
 
 .listing_unknown {
@@ -139,6 +187,5 @@ span.pause {
     padding-top: 5px;
 }
 .ep_summary {
-    margin-left: 25px;
     padding-top: 5px;
 }

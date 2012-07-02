@@ -429,7 +429,7 @@ def findSeason(show, season):
             # If this is a torrent all we can do is leech the entire torrent, user will have to select which eps not do download in his torrent client
             else:
                 
-                # Season result from BTN must be a full-season torrent, creating multi-ep result for it.
+                # Season result from Torrent Provider must be a full-season torrent, creating multi-ep result for it.
                 logger.log(u"Adding multi-ep result for full-season torrent. Set the episodes you don't want to 'don't download' in your torrent client if desired!")
                 epObjs = []
                 for curEpNum in allEps:
@@ -483,7 +483,7 @@ def findSeason(show, season):
 
             logger.log(u"Multi-ep check result is multiNeededEps: "+str(multiNeededEps)+", multiNotNeededEps: "+str(multiNotNeededEps), logger.DEBUG)
 
-            if not neededEps:
+            if not multiNeededEps:
                 logger.log(u"All of these episodes were covered by another multi-episode nzbs, ignoring this multi-ep result", logger.DEBUG)
                 continue
 

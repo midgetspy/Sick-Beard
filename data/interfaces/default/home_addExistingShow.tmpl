@@ -27,6 +27,11 @@
 });
 //-->
 </script>
+#if $varExists('header') 
+	<h1 class="header">$header</h1>
+#else 
+	<h1 class="title">$title</h1>
+#end if
 
 <div id="tabs">
     <ul>

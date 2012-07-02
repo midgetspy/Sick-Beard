@@ -9,7 +9,11 @@
 #set global $topmenu="config"#
 #import os.path
 #include $os.path.join($sickbeard.PROG_DIR, "data/interfaces/default/inc_top.tmpl")
-
+#if $varExists('header') 
+	<h1 class="header">$header</h1>
+#else 
+	<h1 class="title">$title</h1>
+#end if
 <script type="text/javascript" src="$sbRoot/js/configProviders.js"></script>
 <script type="text/javascript" src="$sbRoot/js/config.js"></script>
 <script type="text/javascript" charset="utf-8">
@@ -30,6 +34,13 @@ var show_nzb_providers = #if $sickbeard.USE_NZBS then "true" else "false"#;
 <form id="configForm" action="saveProviders" method="post">
 
             <div id="config-components">
+                <ul>
+                	<li><a href="#core-component-group1">Provider Priorities</a></li>
+                	<li><a href="#core-component-group2">Configure Built-In PRoviders</a></li>
+                  #if $sickbeard.USE_NZBS
+                	<li><a href="#core-component-group3">Configure Custom Newznab Providers</a></li>
+                  #end if
+                </ul>
                 
                 <div id="core-component-group1" class="component-group clearfix">
 
@@ -196,7 +207,6 @@ var show_nzb_providers = #if $sickbeard.USE_NZBS then "true" else "false"#;
                         </div>
 </div>
 
-
 <div class="providerDiv" id="thepiratebayDiv">
                         <div class="field-pair">
                             <input type="checkbox" class="enabler" name="thepiratebay_proxy" id="thepiratebay_proxy" #if $sickbeard.THEPIRATEBAY_PROXY then "checked=\"checked\"" else ""#/>
@@ -316,7 +326,6 @@ var show_nzb_providers = #if $sickbeard.USE_NZBS then "true" else "false"#;
 
                     </fieldset>
                 </div><!-- /component-group3 //-->
-
 #end if
                     
             <br/><input type="submit" class="config_submitter" value="Save Changes" /><br/>
@@ -326,5 +335,9 @@ var show_nzb_providers = #if $sickbeard.USE_NZBS then "true" else "false"#;
 </form>
 </div></div>
 <div class="clearfix"></div>
-
+<script type="text/javascript" charset="utf-8">
+<!--
+    jQuery('#config-components').tabs();
+//-->
+</script>
 #include $os.path.join($sickbeard.PROG_DIR, "data/interfaces/default/inc_bottom.tmpl")

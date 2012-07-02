@@ -2,6 +2,7 @@
 #import datetime
 #from sickbeard.common import *
 #set global $title="Manage Searches"
+#set global $header="Manage Searches"
 
 #set global $sbPath=".."
 
@@ -10,7 +11,11 @@
 #include $os.path.join($sickbeard.PROG_DIR, "data/interfaces/default/inc_top.tmpl")
 
 <script type="text/javascript" src="$sbRoot/js/plotTooltip.js"></script>
-
+#if $varExists('header') 
+	<h1 class="header">$header</h1>
+#else 
+	<h1 class="title">$title</h1>
+#end if
 
 <b>Backlog Search:</b><br />
 
