@@ -64,7 +64,41 @@ $(document).ready(function(){
         $.get(sbRoot+"/home/testLibnotify",
         function(message){ $('#testLibnotify-result').html(message); });
     });
-  
+
+    $('#testEmail').click(function(){
+        var status = $('#testEmail-result');
+        status.html(loading);
+        var host = $("#email_host").val();
+        host = host.length > 0 ? host : null;
+        var port = $("#email_port").val();
+        port = port.length > 0 ? port : null;
+        var tls  = $("#email_tls").attr('checked') != undefined ? 1 : 0;
+        var from = $("#email_from").val();
+        from = from.length > 0 ? from : 'root@localhost';
+        var user = $("#email_user").val().trim();
+        var pwd = $("#email_password").val();
+        
+        var err = '';
+        if(host == null)
+            err += '<li style="color: red;">You must specify an SMTP hostname!</li>';
+        if(port == null)
+            err += '<li style="color: red;">You must specify an SMTP port!</li>';
+        else if(port.match(/^\d+$/) == null || parseInt(port) > 65535)
+            err += '<li style="color: red;">SMTP port must be between 0 and 65535!</li>';
+        if(err.length > 0) {
+            err = '<ol>' + err + '</ol>';
+            status.html(err);
+        } else { 
+            var to = prompt('Enter an email address to send the test to:', null);
+            if(to == null || to.length == 0 || to.match(/.*@.*/) == null)
+                status.html('<p style="color: red;">You must provide a recipient email address!</p>');
+            else {
+                $.get(sbRoot+"/home/testEmail", {host: host, port: port, smtp_from: from, use_tls: tls, user: user, pwd: pwd, to: to}, 
+                    function(msg){ $('#testEmail-result').html(msg); });
+            }
+        }
+    });  
+    
     $('#twitterStep1').click(function(){
         $('#testTwitter-result').html(loading);
         var twitter1_result = $.get(sbRoot+"/home/twitterStep1", function (data){window.open(data)})

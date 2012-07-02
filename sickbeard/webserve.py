@@ -911,6 +911,7 @@ class ConfigPostProcessing:
         sickbeard.metadata_provider_dict['XBMC'].set_config(xbmc_data)
         sickbeard.metadata_provider_dict['MediaBrowser'].set_config(mediabrowser_data)
 
+
         sickbeard.metadata_provider_dict['Synology'].set_config(synology_data)
         sickbeard.metadata_provider_dict['Sony PS3'].set_config(sony_ps3_data)
         sickbeard.metadata_provider_dict['WDTV'].set_config(wdtv_data)
@@ -1215,7 +1216,7 @@ class ConfigNotifications:
                           use_trakt=None, trakt_username=None, trakt_password=None, trakt_api=None,
                           use_pytivo=None, pytivo_notify_onsnatch=None, pytivo_notify_ondownload=None, pytivo_update_library=None, 
                           pytivo_host=None, pytivo_share_name=None, pytivo_tivo_name=None,
-                          use_nma=None, nma_notify_onsnatch=None, nma_notify_ondownload=None, nma_api=None, nma_priority=0, use_email=None, email_notify_onsnatch=None, email_notify_ondownload=None, email_host=None, email_port=25, email_from=None, email_subject=None, email_ssl=None, email_user=None, email_password=None ):
+                          use_nma=None, nma_notify_onsnatch=None, nma_notify_ondownload=None, nma_api=None, nma_priority=0, use_email=None, email_notify_onsnatch=None, email_notify_ondownload=None, email_host=None, email_port=25, email_from=None, email_subject=None, email_tls=None, email_user=None, email_password=None ):
 
         results = []
 
@@ -1308,10 +1309,10 @@ class ConfigNotifications:
         else:
             use_email = 0
 
-        if email_ssl == "on":
-            email_ssl = 1
+        if email_tls == "on":
+            email_tls = 1
         else:
-            email_ssl = 0
+            email_tls = 0
 	
         if twitter_notify_onsnatch == "on":
             twitter_notify_onsnatch = 1
@@ -1456,7 +1457,7 @@ class ConfigNotifications:
         sickbeard.EMAIL_PORT = email_port
         sickbeard.EMAIL_FROM = email_from
         sickbeard.EMAIL_SUBJECT = email_subject
-        sickbeard.EMAIL_SSL = email_ssl
+        sickbeard.EMAIL_TLS = email_tls
         sickbeard.EMAIL_USER = email_user
         sickbeard.EMAIL_PASSWORD = email_password
 
@@ -2111,8 +2112,13 @@ class Home:
             return "Error sending Pushover notification"
 
     @cherrypy.expose
-    def testEmail(self):
-        return "Dummy test passed!"
+    def testEmail(self, host=None, port=None, smtp_from=None, use_tls=None, user=None, pwd=None, to=None):
+        cherrypy.response.headers['Cache-Control'] = "max-age=0,no-cache,no-store"
+
+        if notifiers.email_notifier.test_notify(host, port, smtp_from, use_tls, user, pwd, to):
+            return 'Test email sent successfully! Check inbox.'
+        else:
+            return 'Error sending test email! Verify settings and see Sick Beard log for more details.'
 
     @cherrypy.expose
     def twitterStep1(self):
