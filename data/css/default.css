@@ -598,7 +598,7 @@ td.tvShow a {
   cursor: pointer;
   vertical-align: top;
   position: relative;
-  top: 0px;
+  top: 3px;
   filter: alpha(opacity=85);
   -moz-opacity: 0.5 !important;
   -khtml-opacity: 0.5 !important;
