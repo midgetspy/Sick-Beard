@@ -913,6 +913,7 @@ class ConfigPostProcessing:
 
 
 
+
         sickbeard.metadata_provider_dict['Synology'].set_config(synology_data)
         sickbeard.metadata_provider_dict['Sony PS3'].set_config(sony_ps3_data)
         sickbeard.metadata_provider_dict['WDTV'].set_config(wdtv_data)
@@ -2122,7 +2123,7 @@ class Home:
         if notifiers.email_notifier.test_notify(host, port, smtp_from, use_tls, user, pwd, to):
             return 'Test email sent successfully! Check inbox.'
         else:
-            return 'Error sending test email! Verify settings and see Sick Beard log for more details.'
+            return 'ERROR: %s' % notifiers.email_notifier.last_err
 
     @cherrypy.expose
     def twitterStep1(self):

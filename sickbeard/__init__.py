@@ -418,7 +418,7 @@ def initialize(consoleLogging=True):
                 RENAME_EPISODES, properFinderScheduler, PROVIDER_ORDER, autoPostProcesserScheduler, \
                 NAMING_EP_NAME, NAMING_SEP_TYPE, NAMING_USE_PERIODS, WOMBLE, \
                 NZBSRUS, NZBSRUS_UID, NZBSRUS_HASH, NAMING_QUALITY, providerList, newznabProviderList, \
-		USE_EMAIL, EMAIL_HOST, EMAIL_PORT, EMAIL_TLS, EMAIL_USER, EMAIL_PASSWORD, EMAIL_SUBJECT, EMAIL_FROM, EMAIL_NOTIFY_ONSNATCH, EMAIL_NOTIFY_ONDOWNLOAD, EMAIL_LIST, \
+                USE_EMAIL, EMAIL_HOST, EMAIL_PORT, EMAIL_TLS, EMAIL_USER, EMAIL_PASSWORD, EMAIL_SUBJECT, EMAIL_FROM, EMAIL_NOTIFY_ONSNATCH, EMAIL_NOTIFY_ONDOWNLOAD, EMAIL_LIST, \
                 NAMING_DATES, EXTRA_SCRIPTS, USE_TWITTER, TWITTER_USERNAME, TWITTER_PASSWORD, TWITTER_PREFIX, \
                 USE_NOTIFO, NOTIFO_USERNAME, NOTIFO_APISECRET, NOTIFO_NOTIFY_ONDOWNLOAD, NOTIFO_NOTIFY_ONSNATCH, \
                 USE_BOXCAR, BOXCAR_USERNAME, BOXCAR_PASSWORD, BOXCAR_NOTIFY_ONDOWNLOAD, BOXCAR_NOTIFY_ONSNATCH, \
@@ -628,17 +628,17 @@ def initialize(consoleLogging=True):
         PROWL_API = check_setting_str(CFG, 'Prowl', 'prowl_api', '')
         PROWL_PRIORITY = check_setting_str(CFG, 'Prowl', 'prowl_priority', "0")
 
-	USE_EMAIL = bool(check_setting_int(CFG, 'Email', 'use_email', 0))
-	EMAIL_NOTIFY_ONSNATCH = bool(check_setting_int(CFG, 'Email', 'email_notify_onsnatch', 0))
-	EMAIL_NOTIFY_ONDOWNLOAD = bool(check_setting_int(CFG, 'Email', 'email_notify_ondownload', 0)) 
-	EMAIL_HOST = check_setting_str(CFG, 'Email', 'email_host', '')
-	EMAIL_PORT = check_setting_int(CFG, 'Email', 'email_port', 25)
-	EMAIL_TLS = bool(check_setting_int(CFG, 'Email', 'email_tls', 0))
-	EMAIL_USER = check_setting_str(CFG, 'Email', 'email_user', '')
-	EMAIL_PASSWORD = check_setting_str(CFG, 'Email', 'email_password', '')
-	EMAIL_FROM = check_setting_str(CFG, 'Email', 'email_from', '')
-	EMAIL_SUBJECT = check_setting_str(CFG, 'Email', 'email_subject', '')
-	EMAIL_LIST = check_setting_str(CFG, 'Email', 'email_list', '')
+        USE_EMAIL = bool(check_setting_int(CFG, 'Email', 'use_email', 0))
+        EMAIL_NOTIFY_ONSNATCH = bool(check_setting_int(CFG, 'Email', 'email_notify_onsnatch', 0))
+        EMAIL_NOTIFY_ONDOWNLOAD = bool(check_setting_int(CFG, 'Email', 'email_notify_ondownload', 0)) 
+        EMAIL_HOST = check_setting_str(CFG, 'Email', 'email_host', '')
+        EMAIL_PORT = check_setting_int(CFG, 'Email', 'email_port', 25)
+        EMAIL_TLS = bool(check_setting_int(CFG, 'Email', 'email_tls', 0))
+        EMAIL_USER = check_setting_str(CFG, 'Email', 'email_user', '')
+        EMAIL_PASSWORD = check_setting_str(CFG, 'Email', 'email_password', '')
+        EMAIL_FROM = check_setting_str(CFG, 'Email', 'email_from', '')
+        EMAIL_SUBJECT = check_setting_str(CFG, 'Email', 'email_subject', '')
+        EMAIL_LIST = check_setting_str(CFG, 'Email', 'email_list', '')
 
         USE_TWITTER = bool(check_setting_int(CFG, 'Twitter', 'use_twitter', 0))
         TWITTER_NOTIFY_ONSNATCH = bool(check_setting_int(CFG, 'Twitter', 'twitter_notify_onsnatch', 0))

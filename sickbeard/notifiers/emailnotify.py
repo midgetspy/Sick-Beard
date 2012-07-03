@@ -25,31 +25,15 @@ from sickbeard import logger
 from sickbeard.exceptions import ex
 
 class EmailNotifier:
-
+    def __init__(self):
+        self.last_err = None
+        
     def test_notify(self, host, port, smtp_from, use_tls, user, pwd, to):
-        logger.log('HOST: %s; PORT: %s; FROM: %s, TLS: %s, USER: %s (%d), PWD: %s, TO: %s' % (host, port, smtp_from, use_tls, user, len(user), pwd, to), logger.DEBUG)        
         msg = MIMEText('This is a test message from Sick Beard.  If you\'re reading this, the test succeeded!')
         msg['Subject'] = 'Test Message from Sick Beard'
         msg['From'] = smtp_from
         msg['To'] = to
-        srv = smtplib.SMTP(host, int(port))
-        srv.set_debuglevel(1)
-        try:
-            if use_tls == '1' or (len(user) > 0 and len(pwd) > 0):
-                srv.ehlo()
-                logger.log('Sent initial EHLO command!', logger.DEBUG)
-            if use_tls == '1':
-                srv.starttls()
-                logger.log('Sent STARTTLS command!', logger.DEBUG)
-            if len(user) > 0 and len(pwd) > 0:
-                srv.login(user, pwd)
-                logger.log('Sent LOGIN command!', logger.DEBUG)
-            srv.sendmail(smtp_from, [to], msg.as_string())
-            srv.quit()
-            return True
-        except Exception as e:
-            logger.log('Erroring sending test email: %s' % e, logger.ERROR)
-            return False
+        return self._sendmail(host, port, smtp_from, use_tls, user, pwd, [to], msg, True)
 
     def notify_snatch(self, ep_name, title="Snatched:"):
         """
@@ -58,8 +42,19 @@ class EmailNotifier:
         ep_name: The name of the episode that was snatched
         title: The title of the notification (optional)
         """
-        #if sickbeard.NOTIFO_NOTIFY_ONSNATCH:
-        #    self._notifyNotifo(title, ep_name)
+        if sickbeard.EMAIL_NOTIFY_ONSNATCH:
+            to = self._generate_recepients()
+            if len(to) == 0:
+                logger.log('Skipping email notify because there are no configured recepients!', logger.WARN)
+            else:
+                msg = MIMEText("'%s' snatched!" % ep_name)
+                msg['Subject'] = 'Sick Beard has snatched a new episode!'
+                msg['From'] = sickbeard.EMAIL_FROM
+                msg['To'] = ','.join(to)
+                if self._sendmail(sickbeard.EMAIL_HOST, sickbeard.EMAIL_PORT, sickbeard.EMAIL_FROM, sickbeard.EMAIL_TLS, sickbeard.EMAIL_USER, sickbeard.EMAIL_PASSWORD, to, msg):
+                    logger.log("Snatch notification sent to [%s] for '%s'" % (to, ep_name), logger.DEBUG)
+                else:
+                    logger.log("Snatch notification ERROR: %s" % self.last_err, logger.ERROR)                
 
     def notify_download(self, ep_name, title="Completed:"):
         """
@@ -68,7 +63,50 @@ class EmailNotifier:
         ep_name: The name of the episode that was downloaded
         title: The title of the notification (optional)
         """
-        #if sickbeard.NOTIFO_NOTIFY_ONDOWNLOAD:
-        #    self._notifyNotifo(title, ep_name)       
+        if sickbeard.EMAIL_NOTIFY_ONDOWNLOAD:
+            to = self._generate_recepients()
+            if len(to) == 0:
+                logger.log('Skipping email notify because there are no configured recepients!', logger.WARN)
+            else:
+                msg = MIMEText("'%s' downloaded!" % ep_name)
+                msg['Subject'] = 'Sick Beard has downloaded a new episode!'
+                msg['From'] = sickbeard.EMAIL_FROM
+                msg['To'] = ','.join(to)
+                if self._sendmail(sickbeard.EMAIL_HOST, sickbeard.EMAIL_PORT, sickbeard.EMAIL_FROM, sickbeard.EMAIL_TLS, sickbeard.EMAIL_USER, sickbeard.EMAIL_PASSWORD, to, msg):
+                    logger.log("Download notification sent to [%s] for '%s'" % (to, ep_name), logger.DEBUG)
+                else:
+                    logger.log("Download notification ERROR: %s" % self.last_err, logger.ERROR)
+
+    def _generate_recepients(self):
+        addrs = []
+        # Grab the global recipients
+        for addr in sickbeard.EMAIL_LIST.split(','):
+            if(len(addr.strip()) > 0):
+                addrs.append(addr)
+        addrs = set(addrs)
+        logger.log('Notification recepients: %s' % addrs, logger.DEBUG)
+        return addrs
+    
+    def _sendmail(self, host, port, smtp_from, use_tls, user, pwd, to, msg, smtpDebug=False):
+        logger.log('HOST: %s; PORT: %s; FROM: %s, TLS: %s, USER: %s, PWD: %s, TO: %s' % (host, port, smtp_from, use_tls, user, pwd, to), logger.DEBUG)
+        srv = smtplib.SMTP(host, int(port))
+        if smtpDebug:
+            srv.set_debuglevel(1)
+        try:
+            if (use_tls == '1' or use_tls == True) or (len(user) > 0 and len(pwd) > 0):
+                srv.ehlo()
+                logger.log('Sent initial EHLO command!', logger.DEBUG)
+            if use_tls == '1' or use_tls == True:
+                srv.starttls()
+                logger.log('Sent STARTTLS command!', logger.DEBUG)
+            if len(user) > 0 and len(pwd) > 0:
+                srv.login(user, pwd)
+                logger.log('Sent LOGIN command!', logger.DEBUG)
+            srv.sendmail(smtp_from, to, msg.as_string())
+            srv.quit()
+            return True
+        except Exception as e:
+            self.last_err = '%s' % e
+            return False
 
 notifier = EmailNotifier
