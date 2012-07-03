@@ -177,6 +177,30 @@ h1.network {
     background-color: #ffdc89;
 }
 
+tr.listing_default {
+    color: #000000;
+}
+
+tr.listing_current {
+    color: #000000;
+}
+
+tr.listing_waiting {
+    color: #000000;
+}
+
+tr.listing_overdue {
+    color: #000000;
+}
+
+tr.listing_toofar {
+    color: #000000;
+}
+
+tr.listing_unknown {
+    color: #000000;
+}
+
 span.pause {
     color: #FF0000;
     font-size: 12px;

@@ -99,8 +99,8 @@ a {
   top: 42px;
 }
 .navShows {
-  margin-top: -25px;
-  margin-bottom: 40px;
+  margin-top: -5px;
+  margin-bottom: 30px;
 }
 .tvshowImg {
   background: url("../images/loading.gif") no-repeat scroll center center #ffffff;
@@ -147,6 +147,7 @@ h1.title {
 }
 h1.header {
   padding-bottom: 4px;
+  margin-top: 12px;
   margin-bottom: 12px;
   font-size: 30px;
   font-family: "Trebuchet MS", Helvetica, Arial, sans-serif;
