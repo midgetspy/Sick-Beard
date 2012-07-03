@@ -196,7 +196,7 @@ $(document).ready(function(){
             for(var s in list) {
                 if(s.charAt(0) == '_')
                     continue;
-                html += '<option value="' + list[s].id + '">' + list[s].name + '</option>';
+                html += '<option value="' + list[s].id + '">' + $('<div/>').text(list[s].name).html() + '</option>';
             }
             $('#email_show').html(html);
             $('#email_show_list').val('');

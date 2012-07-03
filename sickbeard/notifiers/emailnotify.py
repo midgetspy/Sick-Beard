@@ -22,7 +22,9 @@ from email.mime.text import MIMEText
 import sickbeard
 
 from sickbeard import logger
+from sickbeard import db
 from sickbeard.exceptions import ex
+from sickbeard import config
 
 class EmailNotifier:
     def __init__(self):
@@ -43,7 +45,8 @@ class EmailNotifier:
         title: The title of the notification (optional)
         """
         if sickbeard.EMAIL_NOTIFY_ONSNATCH:
-            to = self._generate_recepients()
+            show = self._parseEp(ep_name)
+            to = self._generate_recepients(show)
             if len(to) == 0:
                 logger.log('Skipping email notify because there are no configured recepients!', logger.WARN)
             else:
@@ -64,7 +67,8 @@ class EmailNotifier:
         title: The title of the notification (optional)
         """
         if sickbeard.EMAIL_NOTIFY_ONDOWNLOAD:
-            to = self._generate_recepients()
+            show = self._parseEp(ep_name)
+            to = self._generate_recepients(show)
             if len(to) == 0:
                 logger.log('Skipping email notify because there are no configured recepients!', logger.WARN)
             else:
@@ -77,12 +81,22 @@ class EmailNotifier:
                 else:
                     logger.log("Download notification ERROR: %s" % self.last_err, logger.ERROR)
 
-    def _generate_recepients(self):
+    def _generate_recepients(self, show):
         addrs = []
+
         # Grab the global recipients
         for addr in sickbeard.EMAIL_LIST.split(','):
             if(len(addr.strip()) > 0):
                 addrs.append(addr)
+
+        # Grab the recipients for the show
+        mydb = db.DBConnection()
+        for s in show:
+            for subs in mydb.select("SELECT notify_list FROM tv_shows WHERE show_name = ?", (s,)):
+                for addr in subs['notify_list'].split(','):
+                    if(len(addr.strip()) > 0):
+                        addrs.append(addr)
+                        
         addrs = set(addrs)
         logger.log('Notification recepients: %s' % addrs, logger.DEBUG)
         return addrs
@@ -109,4 +123,11 @@ class EmailNotifier:
             self.last_err = '%s' % e
             return False
 
+    def _parseEp(self, ep_name):
+        sep = config.naming_sep_type[sickbeard.NAMING_SEP_TYPE]
+        titles = ep_name.split(sep)
+        titles.sort(key=len, reverse=True)
+        logger.log("TITLES: %s" % titles, logger.DEBUG)
+        return titles
+        
 notifier = EmailNotifier
