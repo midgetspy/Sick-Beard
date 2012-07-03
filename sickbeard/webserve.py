@@ -914,6 +914,7 @@ class ConfigPostProcessing:
 
 
 
+
         sickbeard.metadata_provider_dict['Synology'].set_config(synology_data)
         sickbeard.metadata_provider_dict['Sony PS3'].set_config(sony_ps3_data)
         sickbeard.metadata_provider_dict['WDTV'].set_config(wdtv_data)
@@ -1220,7 +1221,7 @@ class ConfigNotifications:
                           pytivo_host=None, pytivo_share_name=None, pytivo_tivo_name=None,
                           use_nma=None, nma_notify_onsnatch=None, nma_notify_ondownload=None, nma_api=None, nma_priority=0, use_email=None,
                           email_notify_onsnatch=None, email_notify_ondownload=None, email_host=None, email_port=25, email_from=None, email_subject=None,
-                          email_tls=None, email_user=None, email_password=None, email_list=None ):
+                          email_tls=None, email_user=None, email_password=None, email_list=None, email_show_list=None, email_show=None ):
 
         results = []
 
@@ -1317,6 +1318,11 @@ class ConfigNotifications:
             email_tls = 1
         else:
             email_tls = 0
+
+        # Update per show notifications, if provided
+        if int(email_show) >= 0:
+            mydb = db.DBConnection()
+            mydb.action("UPDATE tv_shows SET notify_list = ? WHERE show_id = ?", (email_show_list, int(email_show)))
 	
         if twitter_notify_onsnatch == "on":
             twitter_notify_onsnatch = 1
@@ -1821,6 +1827,7 @@ class NewHomeAddShows:
         
         # blanket policy - if the dir exists you should have used "add existing show" numbnuts
         if ek.ek(os.path.isdir, show_dir) and not fullShowPath:
+
             ui.notifications.error("Unable to add show", "Folder "+show_dir+" exists already")
             redirect('/home/addShows/existingShows')
         
@@ -2116,6 +2123,20 @@ class Home:
         else:
             return "Error sending Pushover notification"
 
+    @cherrypy.expose
+    def loadShowNotifyLists(self):
+        cherrypy.response.headers['Cache-Control'] = "max-age=0,no-cache,no-store"
+
+        mydb = db.DBConnection()
+        rows = mydb.select("SELECT show_id, show_name, notify_list FROM tv_shows")
+        data = {}
+        size = 0
+        for r in rows:
+            data[r['show_id']] = {'id': r['show_id'], 'name': r['show_name'], 'list': r['notify_list']}
+            size += 1
+        data['_size'] = size
+        return json.dumps(data)
+        
     @cherrypy.expose
     def testEmail(self, host=None, port=None, smtp_from=None, use_tls=None, user=None, pwd=None, to=None):
         cherrypy.response.headers['Cache-Control'] = "max-age=0,no-cache,no-store"
