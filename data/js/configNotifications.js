@@ -1,7 +1,7 @@
 $(document).ready(function(){
     var loading = '<img src="'+sbRoot+'/images/loading16.gif" height="16" width="16" />';
     var notify_data = null;
-    alert('Here!');
+
     $('#testGrowl').click(function(){
         $('#testGrowl-result').html(loading);
         var growl_host = $("#growl_host").val();
