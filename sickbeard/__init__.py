@@ -1015,10 +1015,10 @@ def save_config():
     new_config['NZBsRUS']['nzbsrus_uid'] = NZBSRUS_UID
     new_config['NZBsRUS']['nzbsrus_hash'] = NZBSRUS_HASH
 
-    new_config['OMGWTFNZBs'] = {}
-    new_config['OMGWTFNZBs']['omgwtfnzbs'] =  int(OMGWTFNZBS)
-    new_config['OMGWTFNZBs']['omgwtfnzbs_uid']  = OMGWTFNZBS_UID
-    new_config['OMGWTFNZBs']['omgwtfnzbs_hash'] = OMGWTFNZBS_HASH
+    new_config['OMGWTFNZBS'] = {}
+    new_config['OMGWTFNZBS']['omgwtfnzbs'] =  int(OMGWTFNZBS)
+    new_config['OMGWTFNZBS']['omgwtfnzbs_uid']  = OMGWTFNZBS_UID
+    new_config['OMGWTFNZBS']['omgwtfnzbs_hash'] = OMGWTFNZBS_HASH
 
     new_config['NZBMatrix'] = {}
     new_config['NZBMatrix']['nzbmatrix'] = int(NZBMATRIX)
