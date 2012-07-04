@@ -10,7 +10,16 @@
 
 <div id="summary" class="align-left">
 <table class="infoTable" cellspacing="1" border="0" cellpadding="0">
-    <tr><td class="infoTableHeader">SB Version: </td><td class="infoTableCell">alpha ($sickbeard.version.SICKBEARD_VERSION) <!-- &ndash; build.date //--></td></tr>
+    <tr><td class="infoTableHeader">SB Version: </td><td class="infoTableCell">
+        alpha ($sickbeard.version.SICKBEARD_VERSION)
+        #if $sickbeard.versionCheckScheduler.action.install_type != 'win' and not $sickbeard.versionCheckScheduler.action.updater._cur_commit_hash:
+            #$sickbeard.versionCheckScheduler.action.updater._find_installed_version()
+        #end if
+        #if $sickbeard.versionCheckScheduler.action.updater._cur_commit_hash:
+            $sickbeard.versionCheckScheduler.action.updater._cur_commit_hash
+        #end if
+        <!-- &ndash; build.date //-->
+     </td></tr>
     <tr><td class="infoTableHeader">SB Config file: </td><td class="infoTableCell">$sickbeard.CONFIG_FILE</td></tr>
     <tr><td class="infoTableHeader">SB Database file: </td><td class="infoTableCell">$db.dbFilename()</td></tr>
     <tr><td class="infoTableHeader">SB Cache Dir: </td><td class="infoTableCell">$sickbeard.CACHE_DIR</td></tr>
