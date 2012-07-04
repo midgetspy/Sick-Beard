@@ -915,6 +915,7 @@ class ConfigPostProcessing:
 
 
 
+
         sickbeard.metadata_provider_dict['Synology'].set_config(synology_data)
         sickbeard.metadata_provider_dict['Sony PS3'].set_config(sony_ps3_data)
         sickbeard.metadata_provider_dict['WDTV'].set_config(wdtv_data)
@@ -1220,7 +1221,7 @@ class ConfigNotifications:
                           use_pytivo=None, pytivo_notify_onsnatch=None, pytivo_notify_ondownload=None, pytivo_update_library=None, 
                           pytivo_host=None, pytivo_share_name=None, pytivo_tivo_name=None,
                           use_nma=None, nma_notify_onsnatch=None, nma_notify_ondownload=None, nma_api=None, nma_priority=0, use_email=None,
-                          email_notify_onsnatch=None, email_notify_ondownload=None, email_host=None, email_port=25, email_from=None, email_subject=None,
+                          email_notify_onsnatch=None, email_notify_ondownload=None, email_host=None, email_port=25, email_from=None,
                           email_tls=None, email_user=None, email_password=None, email_list=None, email_show_list=None, email_show=None ):
 
         results = []
@@ -1371,6 +1372,7 @@ class ConfigNotifications:
         else:
             pushover_notify_onsnatch = 0
 
+
         if pushover_notify_ondownload == "on":
             pushover_notify_ondownload = 1
         else:
@@ -1466,7 +1468,6 @@ class ConfigNotifications:
         sickbeard.EMAIL_HOST = email_host
         sickbeard.EMAIL_PORT = email_port
         sickbeard.EMAIL_FROM = email_from
-        sickbeard.EMAIL_SUBJECT = email_subject
         sickbeard.EMAIL_TLS = email_tls
         sickbeard.EMAIL_USER = email_user
         sickbeard.EMAIL_PASSWORD = email_password
