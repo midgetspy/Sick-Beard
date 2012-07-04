@@ -115,8 +115,8 @@ class ShowQueue(generic_queue.GenericQueue):
 
         return queueItemObj
 
-    def addShow(self, tvdb_id, showDir, default_status=None, quality=None, season_folders=None, lang="en"):
-        queueItemObj = QueueItemAdd(tvdb_id, showDir, default_status, quality, season_folders, lang)
+    def addShow(self, tvdb_id, showDir, default_status=None, quality=None, flatten_folders=None, lang="en"):
+        queueItemObj = QueueItemAdd(tvdb_id, showDir, default_status, quality, flatten_folders, lang)
         
         self.add_item(queueItemObj)
 
@@ -165,13 +165,13 @@ class ShowQueueItem(generic_queue.QueueItem):
 
 
 class QueueItemAdd(ShowQueueItem):
-    def __init__(self, tvdb_id, showDir, default_status, quality, season_folders, lang):
+    def __init__(self, tvdb_id, showDir, default_status, quality, flatten_folders, lang):
 
         self.tvdb_id = tvdb_id
         self.showDir = showDir
         self.default_status = default_status
         self.quality = quality
-        self.season_folders = season_folders
+        self.flatten_folders = flatten_folders
         self.lang = lang
 
         self.show = None
@@ -242,7 +242,7 @@ class QueueItemAdd(ShowQueueItem):
             # set up initial values
             self.show.location = self.showDir
             self.show.quality = self.quality if self.quality else sickbeard.QUALITY_DEFAULT
-            self.show.seasonfolders = self.season_folders if self.season_folders != None else sickbeard.SEASON_FOLDERS_DEFAULT
+            self.show.flatten_folders = self.flatten_folders if self.flatten_folders != None else sickbeard.FLATTEN_FOLDERS_DEFAULT
             self.show.paused = False
             
             # be smartish about this
@@ -347,7 +347,8 @@ class QueueItemRename(ShowQueueItem):
 
         logger.log(u"Performing rename on "+self.show.name)
 
-        self.show.fixEpisodeNames()
+        for cur_ep_obj in self.show.loadEpisodesFromDir():
+            cur_ep_obj.rename()
 
         self.inProgress = False
 
