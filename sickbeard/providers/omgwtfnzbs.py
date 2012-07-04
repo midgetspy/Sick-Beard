@@ -61,6 +61,7 @@ class OmgWtfNzbsCache(tvcache.TVCache):
 
 		url = self.provider.url + 'rss-search.php?'
 		urlArgs = {'catid': '19,20',
+            'search': '',
 				   'user': sickbeard.OMGWTFNZBS_UID,
 				   'api': sickbeard.OMGWTFNZBS_HASH}
 
