@@ -60,7 +60,7 @@ class OmgWtfNzbsCache(tvcache.TVCache):
 	def _getRSSData(self):
 
 		url = self.provider.url + 'rss-search.php?'
-		urlArgs = {'cat': '19,20',
+    urlArgs = {'catid': '19,20', 'search': '',
 				   'user': sickbeard.OMGWTFNZBS_UID,
 				   'api': sickbeard.OMGWTFNZBS_HASH}
 
