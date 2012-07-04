@@ -227,7 +227,7 @@ class BacklogQueueItem(generic_queue.QueueItem):
                 highestBestQuality = 0
 
             # if we need a better one then say yes
-            if (curStatus in (common.DOWNLOADED, common.SNATCHED) and curQuality < highestBestQuality) or curStatus == common.WANTED:
+            if (curStatus in (common.DOWNLOADED, common.SNATCHED, common.SNATCHED_PROPER) and curQuality < highestBestQuality) or curStatus == common.WANTED:
                 wantSeason = True
                 break
 
