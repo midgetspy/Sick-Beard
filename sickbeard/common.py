@@ -53,6 +53,19 @@ ARCHIVED = 6 # episodes that you don't have locally (counts toward download comp
 IGNORED = 7 # episodes that you don't want included in your download stats
 SNATCHED_PROPER = 9 # qualified with quality
 
+NAMING_REPEAT = 1
+NAMING_EXTEND = 2
+NAMING_DUPLICATE = 4
+NAMING_LIMITED_EXTEND = 8
+NAMING_SEPARATED_REPEAT = 16
+
+multiEpStrings = {}
+multiEpStrings[NAMING_REPEAT] = "Repeat"
+multiEpStrings[NAMING_SEPARATED_REPEAT] = "Repeat (Separated)"
+multiEpStrings[NAMING_DUPLICATE] = "Duplicate"
+multiEpStrings[NAMING_EXTEND] = "Extend"
+multiEpStrings[NAMING_LIMITED_EXTEND] = "Extend (Limited)"
+
 class Quality:
 
     NONE = 0
