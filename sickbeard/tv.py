@@ -116,19 +116,20 @@ class TVShow(object):
                 self.episodes[curSeason][curEp] = None
                 del myEp
 
+    def getAllEpisodes(self, season=None):
 
-    def getAllEpisodes(self):
-        
         myDB = db.DBConnection()
-        results = myDB.select("SELECT season, episode FROM tv_episodes WHERE showid = ?", [self.tvdbid])
+        if season == None:
+            results = myDB.select("SELECT season, episode FROM tv_episodes WHERE showid = ?", [self.tvdbid])
+        else:
+            results = myDB.select("SELECT season, episode FROM tv_episodes WHERE showid = ? AND season = ?", [self.tvdbid, season])
 
         ep_list = []
-
         for cur_result in results:
             cur_ep = self.getEpisode(int(cur_result["season"]), int(cur_result["episode"]))
             if cur_ep:
                 ep_list.append(cur_ep)
-        
+
         return ep_list
 
 
