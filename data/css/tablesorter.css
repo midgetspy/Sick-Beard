@@ -10,7 +10,7 @@ table.tablesorter {
   border-spacing: 0;
 }
 table.tablesorter td {
-  font-size: 12px;
+  font-size: 14px;
   padding: 8px 10px;
 }
 /* remove extra border from left edge */
@@ -36,7 +36,7 @@ table.tablesorter .tablesorter-header {
   cursor: pointer;
 }
 table.tablesorter .tablesorter-header-inner {
-/*  padding: 0px 18px 0px 4px; */
+  padding: 0px 18px 0px 4px; 
 }
 table.tablesorter th.tablesorter-headerSortUp .tablesorter-header-inner {
   background: url(../images/tablesorter/asc.gif) no-repeat right center;
@@ -90,7 +90,7 @@ table.tablesorter tr.tablesorter-filter td {
 }
 /* xtra css for sb */
 .tablesorter-header-inner {
-  text-align: left;
+  text-align: center;
   white-space: nowrap;
   padding: 0 2px;
 }
