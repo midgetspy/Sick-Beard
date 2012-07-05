@@ -756,6 +756,18 @@ class PostProcessor(object):
             except OSError, IOError:
                 raise exceptions.PostProcessingFailed("Unable to delete the existing files")
         
+        # if the show directory doesn't exist then make it if allowed
+        if not ek.ek(os.path.isdir, ep_obj.show.location) and sickbeard.CREATE_MISSING_SHOW_DIRS:
+            self._log(u"Show directory doesn't exist, creating it", logger.DEBUG)
+            try:
+                ek.ek(os.mkdir, ep_obj.show.location)
+                
+            except OSError, IOError:
+                raise exceptions.PostProcessingFailed("Unable to create the show directory: "+ep_obj.show.location)
+        
+            # get metadata for the show (but not episode because it hasn't been fully processed)
+            ep_obj.show.writeMetadata(True)
+            
         # find the destination folder
         try:
             dest_path = self._find_ep_destination_folder(ep_obj)

@@ -169,15 +169,16 @@ class KICKASSProvider(generic.TorrentProvider):
         try:
             return self.downloadFromTorrentCache(result.name, url)
         except Exception, e:
-            try:
-                url = "http://torrage.com/" + result.url.replace('http://torcache.net/','')
-                return self.downloadFromTorrentCache(result.name, url)
-            except Exception, e:
-                try:
-                    url = "http://zoink.it/" + result.url.replace('http://torcache.net/','')
-                    return self.downloadFromTorrentCache(result.name, url)
-                except Exception, e:
-                    return False
+            return False
+            #try:
+            #    url = "http://torrage.com/" + result.url.replace('http://torcache.net/','')
+            #    return self.downloadFromTorrentCache(result.name, url)
+            #except Exception, e:
+            #    try:
+            #        url = "http://zoink.it/" + result.url.replace('http://torcache.net/','')
+            #        return self.downloadFromTorrentCache(result.name, url)
+            #    except Exception, e:
+            #        return False
         
 class KICKASSCache(tvcache.TVCache):
 
