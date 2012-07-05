@@ -98,6 +98,7 @@
 
 h1.day {
     font-weight: bold;
+    margin-top: 10px;
     padding: 4px;
     letter-spacing: 1px;
     background-image: -moz-linear-gradient(#555555, #333333) !important;
@@ -207,9 +208,11 @@ span.pause {
 }
 
 .ep_summaryTrigger {
-    float: left;
-    padding-top: 5px;
+/*    float: left; 
+    padding-top: 9px;*/
+    margin-top: -3px;
 }
 .ep_summary {
+    margin-left: 10px;
     padding-top: 5px;
 }

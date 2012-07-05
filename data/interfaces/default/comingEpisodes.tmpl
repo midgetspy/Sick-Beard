@@ -152,6 +152,14 @@
 <!--
 \$(document).ready(function(){ 
   \$('#sbRoot').ajaxEpSearch({'size': 16, 'loadingImage': 'loading16_333333.gif'});
+  \$(".ep_summary").hide();
+  \$(".ep_summaryTrigger").click(function() {
+    \$(this).next(".ep_summary").slideToggle('normal', function() {
+        \$(this).prev(".ep_summaryTrigger").attr('src', function(i, src) {
+            return \$(this).next(".ep_summary").is(':visible') ? src.replace('plus','minus') : src.replace('minus','plus');
+        });
+    });
+  });
 });
 //-->
 </script>
@@ -237,22 +245,23 @@
           	  </span>
           	</div>
             <span class="title">Next Episode:</span> <span><%=str(cur_result["season"])+"x"+"%02i" % int(cur_result["episode"]) %> - $cur_result["name"] ($datetime.date.fromordinal(int($cur_result["airdate"])))</span>
-          </td>
-        </tr>
-        <tr>
-          <td style="vertical-align: top;">
-            <span class="title">Airs:</span> <span>$cur_result["airs"] on $cur_result["network"]</span>
-#if int($cur_result["quality"]) in $qualityPresets:
- [<span class="title">$qualityPresetStrings[int($cur_result["quality"])]</span>]<br />
-#else:
- [<span class="title">Custom</span>]<br />
-#end if
+            <div class="clearfix">
+	            <span class="title">Airs:</span> <span>$cur_result["airs"] on $cur_result["network"]</span>
+	        </div>
+            <div class="clearfix">
+	            <span class="title">Quality:</span>
+	            #if int($cur_result["quality"]) in $qualityPresets:
+	             <span class="quality $qualityPresetStrings[int($cur_result["quality"])]">$qualityPresetStrings[int($cur_result["quality"])]</span>
+	            #else:
+    			 <span class="quality Custom">Custom</span>
+	            #end if
+	        </div>
             #if $cur_result["description"] == '':
                 <div class="ep_summary" style="margin-left:0;display:block !important;">[There is no summary added for this episode]</div>
             #else:
-                <div class="ep_summary">$cur_result["description"]</div>
+            	<span class="title">Plot:</span>
+                <img class="ep_summaryTrigger" src="$sbRoot/images/plus.png" height="16" width="16" alt="" title="Toggle Summary" /><div class="ep_summary">$cur_result["description"]</div>
             #end if
-            <br/>
           </td>
         </tr>
       </table>

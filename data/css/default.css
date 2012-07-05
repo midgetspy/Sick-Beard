@@ -79,12 +79,18 @@ a {
 #header .wrapper {
   margin: 0 auto;
   position: relative;
-/*  width: 960px;*/
   width: 960px;
 }
 #header a:hover {
   background: none;
 }
+
+#header .showInfo .checkboxControls {
+  margin: 0 auto;
+  position: relative;
+  width: 960px;
+}
+
 #logo {
   float: left;
   position: relative;
@@ -162,7 +168,7 @@ h2 {
   font-weight: 700;
 }
 .h2footer {
-  margin: -33px 5px 6px 0px;
+  margin: -35px 5px 6px 0px;
 }
 .h2footer select {
   margin-top: -6px;
@@ -267,6 +273,7 @@ div select option {
 }
 .sickbeardTable td.status_column {
   line-height: normal;
+  text-align: center;
 }
 .sickbeardTable td small {
   font-size: 11px;
@@ -276,12 +283,18 @@ div select option {
 .row {
   clear: left;
 }
+
 .plotInfo {
   cursor: help;
   float: right;
   font-weight: 700;
   position: relative;
 }
+
+.sickbeardTable td.plotInfo {
+  align: center;
+}
+
 #actions .selectAll {
   margin-right: 10px;
   border-right: 1px solid #eee;
