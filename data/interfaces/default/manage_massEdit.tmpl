@@ -21,7 +21,7 @@
 <form action="massEditSubmit" method="post">
 <input type="hidden" name="toEdit" value="$showList" />
 
-<div class="optionWrapper">
+<div class="optionWrapper clearfix">
 <span class="selectTitle">Root Directories <span class="separator">*</span></span><br />
         #for $cur_dir in $root_dir_list:
         #set $cur_index = $root_dir_list.index($cur_dir)
@@ -70,13 +70,8 @@
     </div>
 </div>
 
-<<<<<<< HEAD
-<div class="optionWrapper">
-<span class="selectTitle">Flatten Folders <span class="separator">*</span></span>
-=======
 <div class="optionWrapper clearfix">
-<span class="selectTitle">Season Folders <span class="separator">*</span></span>
->>>>>>> ee5b4a5... CSS consolidation and cleaned up some js for the config page, made the enabler look a little nicer when showing divs. Ran code through jsLint.
+<span class="selectTitle">Flatten Folders <span class="separator">*</span></span>
     <div class="selectChoices">
         <select id="edit_flatten_folders" name="flatten_folders">
             <option value="keep">&lt; keep &gt;</option>

@@ -186,10 +186,10 @@ table.tablesorter th.tablesorter-headerSortDown {
   /* background-image: url(../images/tablesorter/desc.gif); */
 }
 /* Zebra Widget - row alternating colors */
-table.tablesorter tr.odd td {
+table.tablesorter tr.odd, .sickbeardTable tr.odd {
   background-color: #f5f1e4;
 }
-table.tablesorter tr.even td {
+table.tablesorter tr.even, .sickbeardTable tr.even {
   background-color: #dfdacf;
 }
 /* filter widget */
@@ -602,7 +602,7 @@ config*.tmpl
   float: left;
   margin-right: 6px;
 }
-#config label.nocheck, #config div #customQuality, .metadataDiv, .providerDiv {
+#config .nocheck, #config div #customQuality, .metadataDiv, .providerDiv {
   padding-left: 20px;
 }
 #config label span.component-title {
@@ -621,6 +621,13 @@ config*.tmpl
 .component-group-save {
   float: right;
   padding-top: 10px;
+}
+select .selected {
+  font-weight: 700;
+}
+.jumbo {
+  font-size: 15px !important;
+  line-height: 24px;
 }
 
 /* =======================================================================
@@ -793,6 +800,39 @@ config_notifications.tmpl
 }
 
 /* =======================================================================
+config_postProcessing.tmpl
+========================================================================== */
+#config div.example {
+  padding: 10px; background-color: #efefef;
+}
+.Key {
+  width: 100%;
+  padding: 6px;
+  font-family: sans-serif;
+  font-size: 13px;
+  background-color: #f4f4f4;
+  border: 1px solid #ccc;
+  border-collapse: collapse;
+  border-spacing: 0;
+}
+.Key th, .tableHeader {
+  padding: 3px 9px;
+  margin: 0;
+  color: #fff;
+  text-align: center;
+  background: none repeat scroll 0 0 #666;
+}
+.Key td {
+  padding: 1px 5px !important;
+}
+.Key tr {
+  border-bottom: 1px solid #ccc;
+}
+.Key tr.even {
+  background-color: #dfdede;
+}
+
+/* =======================================================================
 config_providers.tmpl
 ========================================================================== */
 #config-components > h2 {
@@ -813,10 +853,6 @@ config_providers.tmpl
 }
 .imgLink img {
   padding: 0 2px 2px;
-}
-.component-title.jumbo {
-  font-size: 15px !important;
-  line-height: 24px;
 }
 /* fix drop target height */
 #providerOrderList .ui-state-highlight {
@@ -1179,6 +1215,7 @@ input[disabled], select[disabled], textarea[disabled], input[readonly], select[r
 .dropdown-menu .active > a:hover {
   color: #fff;
   text-decoration: none;
+  background-color: #333;
 }
 /*
 .dropdown-menu li > a:hover > [class^="icon-"],
