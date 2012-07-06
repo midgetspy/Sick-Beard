@@ -414,6 +414,18 @@ def moveFile(srcFile, destFile):
         copyFile(srcFile, destFile)
         ek.ek(os.unlink, srcFile)
 
+def copyDir(srcDir, destDir):
+    try:
+        ek.ek(shutil.copytree, srcDir, destDir)
+    except OSError:
+        logger.log(u"Failed copying " + srcDir + " to " + destDir)
+
+def moveDir(srcDir, destDir):
+    try:
+        ek.ek(shutil.move, srcDir, destDir)
+    except OSError:
+        logger.log(u"Failed moving " + srcDir + " to " + destDir)
+
 def make_dirs(path):
     """
     Creates any folders that are missing and assigns them the permissions of their

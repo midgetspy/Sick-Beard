@@ -406,6 +406,11 @@ class TVShow(object):
             logger.log(str(self.tvdbid) + ": That isn't even a real file dude... " + file)
             return None
 
+        # If working with movedir, pass the current folder
+        if sickbeard.MOVE_ENTIRE_DIR:
+            fileName = file
+            file = os.path.dirname(file)
+
         logger.log(str(self.tvdbid) + ": Creating episode object from " + file, logger.DEBUG)
 
         try:
@@ -501,7 +506,7 @@ class TVShow(object):
 
 
             # check for status/quality changes as long as it's a new file
-            elif not same_file and sickbeard.helpers.isMediaFile(file) and curEp.status not in Quality.DOWNLOADED + [ARCHIVED, IGNORED]:
+            elif not same_file and (sickbeard.helpers.isMediaFile(file) or sickbeard.helpers.isMediaFile(fileName)) and curEp.status not in Quality.DOWNLOADED + [ARCHIVED, IGNORED]:
 
                 oldStatus, oldQuality = Quality.splitCompositeStatus(curEp.status)
                 newQuality = Quality.nameQuality(file)
@@ -766,7 +771,9 @@ class TVShow(object):
 
             # if the path doesn't exist or if it's not in our show dir
             if not ek.ek(os.path.isfile, curLoc) or not os.path.normpath(curLoc).startswith(os.path.normpath(self.location)):
-
+                if sickbeard.MOVE_ENTIRE_DIR:
+                    if ek.ek(os.path.isdir, curLog):
+                        return
                 with curEp.lock:
                     # if it used to have a file associated with it and it doesn't anymore then set it to IGNORED
                     if curEp.location and curEp.status in Quality.DOWNLOADED:
