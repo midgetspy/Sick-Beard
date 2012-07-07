@@ -67,7 +67,7 @@ result_type_map = {RESULT_SUCCESS: "success",
 
 class Api:
     """ api class that returns json results """
-    version = 0.3
+    version = 3 # use an int since float-point is unpredictible
     intent = 4
 
     @cherrypy.expose
