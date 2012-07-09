@@ -92,6 +92,7 @@
 .tvshowDiv td.next_episode {
     width: 100%;
     border-top: 1px solid #ccc;
+    vertical-align: top;
     background: #F5FAFA;
     color: #000;
 }
