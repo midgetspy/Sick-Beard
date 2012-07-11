@@ -88,7 +88,7 @@
 //-->
 </script>
 
-<table id="showListTable" class="sickbeardTable tablesorter" cellspacing="1" border="0" cellpadding="0">
+<table id="showListTable" class="tablesorter" cellspacing="1" border="0" cellpadding="0">
 
   <thead><tr><th class="nowrap">Next Ep</th><th>Show</th><th>Network</th><th>Quality</th><th>Downloads</th><th>Active</th><th>Status</th></tr></thead>
   <tfoot>
@@ -176,5 +176,5 @@ $myShowList.sort(lambda x, y: cmp(x.name, y.name))
 </tbody>
 </table>
 
-<script type="text/javascript" src="$sbRoot/js/tableClick.js"></script>
+<script type="text/javascript" src="$sbRoot/js/tableClick.js?$sbPID"></script>
 #include $os.path.join($sickbeard.PROG_DIR, "data/interfaces/default/inc_bottom.tmpl")

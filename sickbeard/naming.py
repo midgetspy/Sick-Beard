@@ -36,8 +36,8 @@ name_presets = ('%SN - %Sx%0E - %EN',
                 )
 
 name_abd_presets = ('%SN - %A-D - %EN',
-                    '%S.N.%A.D.%E.N',
-                    '%Y/%0M/%S.N.%A.D.%E.N.%Q.N-%RG'
+                    '%S.N.%A.D.%E.N.%Q.N',
+                    '%Y/%0M/%S.N.%A.D.%E.N-%RG'
                     )
 
 class TVShow():
