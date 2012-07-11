@@ -1,1 +1,1 @@
-SICKBEARD_VERSION = "merges alpha"
+SICKBEARD_VERSION = "master"
