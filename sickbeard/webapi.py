@@ -1472,21 +1472,25 @@ class CMD_SickBeardSearchTVDB(ApiCall):
             finalURL = baseURL + urllib.urlencode(params)
             urlData = sickbeard.helpers.getURL(finalURL)
 
-            try:
-                seriesXML = etree.ElementTree(etree.XML(urlData))
-            except Exception, e:
-                logger.log(u"API :: Unable to parse XML for some reason: " + ex(e) + " from XML: " + urlData, logger.ERROR)
-                return _responds(RESULT_FAILURE, msg="Unable to read result from tvdb")
+            if urlData is None:
+                return _responds(RESULT_FAILURE, msg="Did not get result from tvdb")
+            else:
+                try:
+                    seriesXML = etree.ElementTree(etree.XML(urlData))
+                except Exception, e:
+                    logger.log(u"API :: Unable to parse XML for some reason: " + ex(e) + " from XML: " + urlData, logger.ERROR)
+                    return _responds(RESULT_FAILURE, msg="Unable to read result from tvdb")
 
-            series = seriesXML.getiterator('Series')
-            results = []
-            for curSeries in series:
-                results.append({"tvdbid": int(curSeries.findtext('seriesid')),
-                                "name": curSeries.findtext('SeriesName'),
-                                "first_aired": curSeries.findtext('FirstAired')})
+                series = seriesXML.getiterator('Series')
+                results = []
+                for curSeries in series:
+                    results.append({"tvdbid": int(curSeries.findtext('seriesid')),
+                                    "name": curSeries.findtext('SeriesName'),
+                                    "first_aired": curSeries.findtext('FirstAired')})
 
-            lang_id = self.valid_languages[self.lang]
-            return _responds(RESULT_SUCCESS, {"results": results, "langid": lang_id})
+                lang_id = self.valid_languages[self.lang]
+                return _responds(RESULT_SUCCESS, {"results": results, "langid": lang_id})
+
         elif self.tvdbid:
             # There's gotta be a better way of doing this but we don't wanna
             # change the language value elsewhere
