@@ -108,10 +108,10 @@ class GenericProvider:
 
         result = None
 
-        try:
-            result = helpers.getURL(url, headers)
-        except (urllib2.HTTPError, IOError), e:
-            logger.log(u"Error loading "+self.name+" URL: " + str(sys.exc_info()) + " - " + ex(e), logger.ERROR)
+        result = helpers.getURL(url, headers)
+
+        if result is None:
+            logger.log(u"Error loading "+self.name+" URL: " + url, logger.ERROR)
             return None
 
         return result
