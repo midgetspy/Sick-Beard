@@ -67,7 +67,9 @@ class synoIndexNotifier:
 
     def makeObject(self, cmd_arg, cur_path):
         if sickbeard.USE_SYNOINDEX:
-            synoindex_cmd = ['/usr/syno/bin/synoindex', cmd_arg, ek.ek(os.path.abspath, cur_path)]
+            #walkaround for utf-8
+            mypath = ek.ek(os.path.abspath, cur_path)
+            synoindex_cmd = ['/usr/syno/bin/synoindex', cmd_arg, mypath.encode('utf-8')]
             logger.log(u"Executing command "+str(synoindex_cmd))
             logger.log(u"Absolute path to command: "+ek.ek(os.path.abspath, synoindex_cmd[0]), logger.DEBUG)
             try:
