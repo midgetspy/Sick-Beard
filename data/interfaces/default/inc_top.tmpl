@@ -1,62 +1,63 @@
 #import sickbeard.version
-#import sickbeard
-#import urllib
+<!DOCTYPE HTML>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <title>Sick Beard - alpha $sickbeard.version.SICKBEARD_VERSION - $title</title>
+        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta name="robots" content="noindex">
+        <!--[if lt IE 9]>
+            <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+        <![endif]-->
 
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml"> 
-<head>
-    <title>Sick Beard - alpha $sickbeard.version.SICKBEARD_VERSION - $title</title>
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <link rel="shortcut icon" href="$sbRoot/images/favicon.ico" />
-    <link rel="apple-touch-icon" href="$sbRoot/images/sickbeard_touch_icon.png" />
-    <link rel="stylesheet" type="text/css" href="$sbRoot/css/default.css" />
-    <link rel="stylesheet" type="text/css" href="$sbRoot/css/browser.css" />
-    <link rel="stylesheet" type="text/css" href="$sbRoot/css/comingEpisodes.css" />
-    <link rel="stylesheet" type="text/css" href="$sbRoot/css/config.css" />
-    <link rel="stylesheet" type="text/css" href="$sbRoot/css/lib/jquery.pnotify.default.css" />
-    <link rel="stylesheet" type="text/css" href="$sbRoot/css/lib/smooth-grinder/jquery-ui-1.8.17.custom.css" />
-    <link rel="stylesheet" type="text/css" href="$sbRoot/css/lib/superfish.css" />
-    <link rel="stylesheet" type="text/css" href="$sbRoot/css/tablesorter.css"/>
-    <link rel="stylesheet" type="text/css" href="$sbRoot/css/lib/jquery.qtip2.css"/>
-    <link rel="stylesheet" type="text/css" media="only screen and (max-device-width: 480px)" href="$sbRoot/css/iphone.css" />
+        <link rel="shortcut icon" href="$sbRoot/images/ico/favicon.ico">
+        <link rel="apple-touch-icon-precomposed" sizes="144x144" href="$sbRoot/images/ico/apple-touch-icon-144x144-precomposed.png">
+        <link rel="apple-touch-icon-precomposed" sizes="114x114" href="$sbRoot/images/ico/apple-touch-icon-114x114-precomposed.png">
+        <link rel="apple-touch-icon-precomposed" sizes="72x72" href="$sbRoot/images/ico/apple-touch-icon-72x72-precomposed.png">
+        <link rel="apple-touch-icon-precomposed" href="$sbRoot/images/ico/apple-touch-icon-57x57-precomposed.png">
+
+        <link rel="stylesheet" type="text/css" href="$sbRoot/css/lib/bootstrap.css?$sbPID"/>
+        <link rel="stylesheet" type="text/css" href="$sbRoot/css/lib/jquery.pnotify.default.css?$sbPID" />
+        <link rel="stylesheet" type="text/css" href="$sbRoot/css/lib/jquery-ui-1.8.21.custom.css?$sbPID" />
+        <link rel="stylesheet" type="text/css" href="$sbRoot/css/lib/jquery.qtip.css?$sbPID"/>
+        <link rel="stylesheet" type="text/css" href="$sbRoot/css/style.css?$sbPID"/>
 
 <style type="text/css">
 <!--
 #contentWrapper { background: url("$sbRoot/images/bg.gif") repeat scroll 0 0 transparent; }
 
-.sf-sub-indicator { background: url("$sbRoot/images/arrows.png") no-repeat -10px -100px; }
-.sf-shadow ul { background: url("$sbRoot/images/shadow.png") no-repeat bottom right; }
-th.tablesorter-header { background-image: url("$sbRoot/images/tablesorter/bg.gif"); }
-th.tablesorter-headerSortUp { background-image: url("$sbRoot/images/tablesorter/asc.gif"); }
-th.tablesorter-headerSortDown { background-image: url("$sbRoot/images/tablesorter/desc.gif"); }
+[class^="icon-"], [class*=" icon-"] { background-image: url("$sbRoot/images/glyphicons-halflings.png"); }
+.icon-white { background-image: url("$sbRoot/images/glyphicons-halflings-white.png"); }
+.dropdown-menu li > a:hover > [class^="icon-"], .dropdown-menu li > a:hover > [class*=" icon-"] { background-image: url("$sbRoot/images/glyphicons-halflings-white.png"); }
+[class^="icon16-"], [class*=" icon16-"] { background-image: url("$sbRoot/images/glyphicons-config.png"); }
 
 .ui-autocomplete-loading { background: white url("$sbRoot/images/loading16.gif") right center no-repeat; }
 .browserDialog.busy .ui-dialog-buttonpane { background: url("$sbRoot/images/loading.gif") 10px 50% no-repeat !important; }
-.ui-dialog, .ui-dialog-buttonpane { background: #eceadf url("$sbRoot/css/lib/smooth-grinder/images/ui-bg_fine-grain_10_eceadf_60x60.png") 50% 50% repeat !important; }
+.ui-dialog, .ui-dialog-buttonpane { background: #eceadf url("$sbRoot/css/lib/images/ui-bg_fine-grain_10_eceadf_60x60.png") 50% 50% repeat !important; }
 .ui-accordion-content, .ui-tabs-panel { background: #ededed !important; background-image: none !important; }
 
-.ui-widget-content { border: 1px solid #aaaaaa; background: #dcdcdc url("$sbRoot/css/lib/smooth-grinder/images/ui-bg_highlight-soft_75_dcdcdc_1x100.png") 50% top repeat-x; color: #222222; }
-.ui-widget-header { border: 1px solid #aaaaaa; background: #ffffff url("$sbRoot/css/lib/smooth-grinder/images/ui-bg_flat_0_ffffff_40x100.png") 50% 50% repeat-x; color: #222222; font-weight: bold; }
+.ui-widget-content { border: 1px solid #aaaaaa; background: #dcdcdc url("$sbRoot/css/lib/images/ui-bg_highlight-soft_75_dcdcdc_1x100.png") 50% top repeat-x; color: #222222; }
+.ui-widget-header { border: 1px solid #aaaaaa; background: #ffffff url("$sbRoot/css/lib/images/ui-bg_flat_0_ffffff_40x100.png") 50% 50% repeat-x; color: #222222; font-weight: bold; }
 
-.ui-state-default, .ui-widget-content .ui-state-default, .ui-widget-header .ui-state-default { border: 1px solid #aaaaaa; background: #efefef url("$sbRoot/css/lib/smooth-grinder/images/ui-bg_highlight-soft_75_efefef_1x100.png") 50% 50% repeat-x; font-weight: bold; color: #222222; }
-.ui-state-hover, .ui-widget-content .ui-state-hover, .ui-widget-header .ui-state-hover, .ui-state-focus, .ui-widget-content .ui-state-focus, .ui-widget-header .ui-state-focus { border: 1px solid #999999; background: #dddddd url("$sbRoot/css/lib/smooth-grinder/images/ui-bg_highlight-soft_75_dddddd_1x100.png") 50% 50% repeat-x; font-weight: bold; color: #222222; }
-.ui-state-active, .ui-widget-content .ui-state-active, .ui-widget-header .ui-state-active { border: 1px solid #aaaaaa; background: #dfdfdf url("$sbRoot/css/lib/smooth-grinder/images/ui-bg_inset-soft_75_dfdfdf_1x100.png") 50% 50% repeat-x; font-weight: bold; color: #140f06; }
+.ui-state-default, .ui-widget-content .ui-state-default, .ui-widget-header .ui-state-default { border: 1px solid #aaaaaa; background: #efefef url("$sbRoot/css/lib/images/ui-bg_highlight-soft_75_efefef_1x100.png") 50% 50% repeat-x; font-weight: bold; color: #222222; }
+.ui-state-hover, .ui-widget-content .ui-state-hover, .ui-widget-header .ui-state-hover, .ui-state-focus, .ui-widget-content .ui-state-focus, .ui-widget-header .ui-state-focus { border: 1px solid #999999; background: #dddddd url("$sbRoot/css/lib/images/ui-bg_highlight-soft_75_dddddd_1x100.png") 50% 50% repeat-x; font-weight: bold; color: #222222; }
+.ui-state-active, .ui-widget-content .ui-state-active, .ui-widget-header .ui-state-active { border: 1px solid #aaaaaa; background: #dfdfdf url("$sbRoot/css/lib/images/ui-bg_inset-soft_75_dfdfdf_1x100.png") 50% 50% repeat-x; font-weight: bold; color: #140f06; }
 
-.ui-state-highlight, .ui-widget-content .ui-state-highlight, .ui-widget-header .ui-state-highlight {border: 1px solid #aaaaaa; background: #fbf9ee url("$sbRoot/css/lib/smooth-grinder/images/ui-bg_glass_55_fbf9ee_1x400.png") 50% 50% repeat-x; color: #363636; }
-.ui-state-error, .ui-widget-content .ui-state-error, .ui-widget-header .ui-state-error {border: 1px solid #aaaaaa; background: #fef1ec url("$sbRoot/css/lib/smooth-grinder/images/ui-bg_glass_95_fef1ec_1x400.png") 50% 50% repeat-x; color: #8c291d; }
+.ui-state-highlight, .ui-widget-content .ui-state-highlight, .ui-widget-header .ui-state-highlight {border: 1px solid #aaaaaa; background: #fbf9ee url("$sbRoot/css/lib/images/ui-bg_glass_55_fbf9ee_1x400.png") 50% 50% repeat-x; color: #363636; }
+.ui-state-error, .ui-widget-content .ui-state-error, .ui-widget-header .ui-state-error {border: 1px solid #aaaaaa; background: #fef1ec url("$sbRoot/css/lib/images/ui-bg_glass_95_fef1ec_1x400.png") 50% 50% repeat-x; color: #8c291d; }
 
-.ui-icon { width: 16px; height: 16px; background-image: url("$sbRoot/css/lib/smooth-grinder/images/ui-icons_222222_256x240.png"); }
-.ui-widget-content .ui-icon {background-image: url("$sbRoot/css/lib/smooth-grinder/images/ui-icons_222222_256x240.png"); }
-.ui-widget-header .ui-icon {background-image: url("$sbRoot/css/lib/smooth-grinder/images/ui-icons_222222_256x240.png"); }
-.ui-state-default .ui-icon { background-image: url("$sbRoot/css/lib/smooth-grinder/images/ui-icons_8c291d_256x240.png"); }
-.ui-state-hover .ui-icon, .ui-state-focus .ui-icon {background-image: url("$sbRoot/css/lib/smooth-grinder/images/ui-icons_222222_256x240.png"); }
-.ui-state-active .ui-icon {background-image: url("$sbRoot/css/lib/smooth-grinder/images/ui-icons_8c291d_256x240.png"); }
-.ui-state-highlight .ui-icon {background-image: url("$sbRoot/css/lib/smooth-grinder/images/ui-icons_2e83ff_256x240.png"); }
-.ui-state-error .ui-icon, .ui-state-error-text .ui-icon {background-image: url("$sbRoot/css/lib/smooth-grinder/images/ui-icons_cd0a0a_256x240.png"); }
+.ui-icon { width: 16px; height: 16px; background-image: url("$sbRoot/css/lib/images/ui-icons_222222_256x240.png"); }
+.ui-widget-content .ui-icon {background-image: url("$sbRoot/css/lib/images/ui-icons_222222_256x240.png"); }
+.ui-widget-header .ui-icon {background-image: url("$sbRoot/css/lib/images/ui-icons_222222_256x240.png"); }
+.ui-state-default .ui-icon { background-image: url("$sbRoot/css/lib/images/ui-icons_8c291d_256x240.png"); }
+.ui-state-hover .ui-icon, .ui-state-focus .ui-icon {background-image: url("$sbRoot/css/lib/images/ui-icons_222222_256x240.png"); }
+.ui-state-active .ui-icon {background-image: url("$sbRoot/css/lib/images/ui-icons_8c291d_256x240.png"); }
+.ui-state-highlight .ui-icon {background-image: url("$sbRoot/css/lib/images/ui-icons_2e83ff_256x240.png"); }
+.ui-state-error .ui-icon, .ui-state-error-text .ui-icon {background-image: url("$sbRoot/css/lib/images/ui-icons_cd0a0a_256x240.png"); }
 
-.ui-widget-overlay { background: #aaaaaa url("$sbRoot/css/lib/smooth-grinder/images/ui-bg_flat_0_000000_40x100.png") 50% 50% repeat; opacity: .35;filter:Alpha(Opacity=35); }
-.ui-widget-shadow { margin: -8px 0 0 -8px; padding: 8px; background: #000000 url("$sbRoot/css/lib/smooth-grinder/images/ui-bg_flat_0_000000_40x100.png") 50% 50% repeat-x; opacity: .35;filter:Alpha(Opacity=35); -moz-border-radius: 8px; -khtml-border-radius: 8px; -webkit-border-radius: 8px; border-radius: 8px; }
+.ui-widget-overlay { background: #aaaaaa url("$sbRoot/css/lib/images/ui-bg_flat_0_000000_40x100.png") 50% 50% repeat; opacity: .35;filter:Alpha(Opacity=35); }
+.ui-widget-shadow { margin: -8px 0 0 -8px; padding: 8px; background: #000000 url("$sbRoot/css/lib/images/ui-bg_flat_0_000000_40x100.png") 50% 50% repeat-x; opacity: .35;filter:Alpha(Opacity=35); -moz-border-radius: 8px; -khtml-border-radius: 8px; -webkit-border-radius: 8px; border-radius: 8px; }
 
 #if $sickbeard.NEWEST_VERSION_STRING:
 .ui-pnotify { top: 30px !important; }
@@ -64,80 +65,46 @@ th.tablesorter-headerSortDown { background-image: url("$sbRoot/images/tablesorte
 //--> 
 </style>
 
-    <script type="text/javascript" src="$sbRoot/js/lib/jquery-1.7.1.min.js"></script>
-    <script type="text/javascript" src="$sbRoot/js/lib/jquery-ui-1.8.17.custom.min.js"></script>
-    <script type="text/javascript" src="$sbRoot/js/lib/superfish-1.4.8.js"></script>
-    <script type="text/javascript" src="$sbRoot/js/lib/supersubs-0.2b.js"></script>
-    <script type="text/javascript" src="$sbRoot/js/lib/jquery.cookie.js"></script>
-    <script type="text/javascript" src="$sbRoot/js/lib/jquery.cookiejar.js"></script>
-    <script type="text/javascript" src="$sbRoot/js/lib/jquery.json-2.2.min.js"></script>
-    <script type="text/javascript" src="$sbRoot/js/lib/jquery.selectboxes.min.js"></script>
-    <script type="text/javascript" src="$sbRoot/js/lib/jquery.tablesorter-2.1.10.min.js"></script>
-    <script type="text/javascript" src="$sbRoot/js/lib/jquery.tablesorter.widgets.min.js"></script>
-    <script type="text/javascript" src="$sbRoot/js/lib/jquery.qtip-2011-11-14.min.js"></script>
-    <script type="text/javascript" src="$sbRoot/js/lib/jquery.pnotify-1.0.2.min.js"></script>
-    <script type="text/javascript" src="$sbRoot/js/lib/jquery.expand-1.3.8.js"></script>
-    <script type="text/javascript" src="$sbRoot/js/lib/jquery.form-2.92.js"></script>
+    <script type="text/javascript" src="$sbRoot/js/lib/jquery-1.7.2.min.js?$sbPID"></script>
+    <script type="text/javascript" src="$sbRoot/js/lib/jquery-ui-1.8.21.custom.min.js?$sbPID"></script>
+    <script type="text/javascript" src="$sbRoot/js/lib/bootstrap.min.js?$sbPID"></script>
+    <script type="text/javascript" src="$sbRoot/js/lib/jquery.cookie.js?$sbPID"></script>
+    <script type="text/javascript" src="$sbRoot/js/lib/jquery.cookiejar.js?$sbPID"></script>
+    <script type="text/javascript" src="$sbRoot/js/lib/jquery.json-2.2.min.js?$sbPID"></script>
+    <script type="text/javascript" src="$sbRoot/js/lib/jquery.selectboxes.min.js?$sbPID"></script>
+    <script type="text/javascript" src="$sbRoot/js/lib/jquery.tablesorter-2.1.19.min.js?$sbPID"></script>
+    <script type="text/javascript" src="$sbRoot/js/lib/jquery.tablesorter.widgets.min.js?$sbPID"></script>
+    <script type="text/javascript" src="$sbRoot/js/lib/jquery.qtip-2012-04-26.min.js?$sbPID"></script>
+    <script type="text/javascript" src="$sbRoot/js/lib/jquery.pnotify-1.2.0.min.js?$sbPID"></script>
+    <script type="text/javascript" src="$sbRoot/js/lib/jquery.expand-1.3.8.js?$sbPID"></script>
+    <script type="text/javascript" src="$sbRoot/js/lib/jquery.form-2.92.js?$sbPID"></script>
 
     <script type="text/javascript" charset="utf-8">
     <!--
-        sbRoot = "$sbRoot";
+        sbRoot = "$sbRoot"; // needed for browser.js & ajaxNotifications.js
         //HTML for scrolltopcontrol, which is auto wrapped in DIV w/ ID="topcontrol"
         top_image_html = '<img src="$sbRoot/images/top.gif" style="width:31px; height:11px" alt="Jump to top" />'; 
     //-->
     </script>
-    <script type="text/javascript" src="$sbRoot/js/lib/jquery.scrolltopcontrol-1.1.js"></script>
-    <script type="text/javascript" src="$sbRoot/js/browser.js"></script>
-    <script type="text/javascript" src="$sbRoot/js/ajaxNotifications.js"></script>
-    
-<script type="text/javascript">
-<!--
-    \$(document).ready(function(){ 
-        \$("ul.sf-menu").supersubs({ 
-            minWidth:    12,   // minimum width of sub-menus in em units 
-            maxWidth:    27,   // maximum width of sub-menus in em units 
-            extraWidth:  1     // extra width can ensure lines don't sometimes turn over 
-                               // due to slight rounding differences and font-family 
-        }).superfish({
-            delay:         150,
-            disableHI:     true, 
-            animation:   {opacity:'show',height:'show'},
-            speed:       'fast',
-            dropShadows: false
-        });
-        \$("#MainMenu.sf-menu ul li a").mouseover(function(){
-            imgsrc = \$(this).children("img").attr("src");
-            if(imgsrc!=null) {
-                matches = imgsrc.match(/_over/);
-                if (!matches) {
-                    imgsrcON = imgsrc.replace(/.png$/ig,"_over.png");
-                    \$(this).children("img").attr("src", imgsrcON);
-                }
-                \$("#MainMenu.sf-menu ul li a").mouseout(function(){
-                    \$(this).children("img").attr("src", imgsrc);
-                });
-            }
-        });
-        \$("#MainMenu.sf-menu ul li img").each(function() {
-            rollsrc = \$(this).attr("src");
-            rollON = rollsrc.replace(/.png$/ig,"_over.png");
-            \$("<img>").attr("src", rollON);
-        });
+    <script type="text/javascript" src="$sbRoot/js/lib/jquery.scrolltopcontrol-1.1.js?$sbPID"></script>
+    <script type="text/javascript" src="$sbRoot/js/browser.js?$sbPID"></script>
+    <script type="text/javascript" src="$sbRoot/js/ajaxNotifications.js?$sbPID"></script>
+    <script type="text/javascript">
+    <!--
+        \$(document).ready(function(){ 
+            \$("#NAV$topmenu").addClass("active");
 
-        \$("#NAV$topmenu").addClass("current");
+            \$("a.confirm").bind("click",function(e) {
+                e.preventDefault();
+                var target = \$( this ).attr('href');
+                if ( confirm("Are you sure you want to " + \$(this).text() + "?") )
+                    location.href = target;
+                return false;
+            });
 
-        \$("a.confirm").bind("click",function(e) {
-            \$('#MainMenu.sf-menu').hideSuperfishUl();
-            e.preventDefault();
-            var target = \$( this ).attr('href');
-            if ( confirm("Are you sure you want to " + \$(this).text() + "?") )
-                location.href = target;
-            return false;
         });
-
-    });
-//-->
-</script>
+    //-->
+    </script>
 </head>
 
 <body>
@@ -151,74 +118,116 @@ th.tablesorter-headerSortDown { background-image: url("$sbRoot/images/tablesorte
 #end if
 <div id="header">
     <a name="top"></a>
-    <span id="logo"><a href="$sbRoot/home/" title="Sick Beard homepage"><img alt="Sick Beard" src="$sbRoot/images/sickbeard_small.png" width="150" /></a></span>
-    <span id="versiontext">alpha $sickbeard.version.SICKBEARD_VERSION</span>
+    <span id="logo"><a href="$sbRoot/home/" title="Sick Beard homepage"><img alt="Sick Beard" src="$sbRoot/images/sickbeard.png" width="150" height="72" /></a></span>
+    <span id="versiontext">alpha <a href="https://github.com/midgetspy/Sick-Beard/wiki/ChangeLog" onclick="window.open(this.href, '_blank'); return false;">$sickbeard.version.SICKBEARD_VERSION</a></span>
 </div>
-<ul id="MainMenu" class="sf-menu">
-            <li id="NAVsystem" class="first"><a href="#" class="navIcon" onclick="return false;"><img src="$sbRoot/images/menu/system18.png" alt="" width="18" height="18" /></a>
-                <ul>
-                        <li><a href="$sbRoot/manage/manageSearches/forceVersionCheck"><img src="$sbRoot/images/menu/update16.png" alt="" width="16" height="16" />Force Version Check</a></li>
-                        <li><a href="$sbRoot/home/restart/?pid=$sbPID" class="confirm"><img src="$sbRoot/images/menu/restart16.png" alt="" width="16" height="16" />Restart</a></li>
-                        <li><a href="$sbRoot/home/shutdown/" class="confirm"><img src="$sbRoot/images/menu/shutdown16.png" alt="" width="16" height="16" />Shutdown</a></li>
-                </ul>
-            </li>
-            <li id="NAVhome"><a href="$sbRoot/home/">Home</a>
-                <ul>
-                        <li><a href="$sbRoot/home/"><img src="$sbRoot/images/menu/home16.png" alt="" width="16" height="16" />Home</a></li>
-                        <li><a href="$sbRoot/home/addShows/"><img src="$sbRoot/images/menu/addshow16.png" alt="" width="16" height="16" />Add Shows</a></li>
-                        <li><a href="$sbRoot/home/postprocess/"><img src="$sbRoot/images/menu/postprocess16.png" alt="" width="16" height="16" />Manual Post-Processing</a></li>
-                </ul>
-            </li>
-            <li id="NAVcomingEpisodes"><a href="$sbRoot/comingEpisodes/">Coming Episodes</a></li>
-            <li id="NAVhistory"><a href="$sbRoot/history/">History</a></li>
-            <li id="NAVmanage"><a href="$sbRoot/manage/">Manage</a>
-                <ul>
-                        <li><a href="$sbRoot/manage/"><img src="$sbRoot/images/menu/manage16.png" alt="" width="16" height="16" />Mass Update</a></li>
-                        <li><a href="$sbRoot/manage/backlogOverview/"><img src="$sbRoot/images/menu/backlog_view16.png" alt="" width="16" height="16" />Backlog Overview</a></li>
-                        <li><a href="$sbRoot/manage/manageSearches/"><img src="$sbRoot/images/menu/managesearches16.png" alt="" width="16" height="16" />Manage Searches</a></li>
-                        <li><a href="$sbRoot/manage/episodeStatuses/"><img src="$sbRoot/images/menu/backlog16.png" alt="" width="16" height="16" />Episode Status Management</a></li>
-                </ul>
-            </li>
-            <li id="NAVconfig"><a href="$sbRoot/config/">Config</a>
-                <ul>
-                        <li><a href="$sbRoot/config/"><img src="$sbRoot/images/menu/config_index16.png" alt="" width="16" height="16" />Help &amp; Info</a></li>
-                        <li><a href="$sbRoot/config/general/"><img src="$sbRoot/images/menu/config16.png" alt="" width="16" height="16" />General</a></li>
-                        <li><a href="$sbRoot/config/search/"><img src="$sbRoot/images/menu/config16.png" alt="" width="16" height="16" />Search Settings</a></li>
-                        <li><a href="$sbRoot/config/providers/"><img src="$sbRoot/images/menu/config16.png" alt="" width="16" height="16" />Search Providers</a></li>
-                        <li><a href="$sbRoot/config/postProcessing/"><img src="$sbRoot/images/menu/config16.png" alt="" width="16" height="16" />Post Processing</a></li>
-                        <li><a href="$sbRoot/config/notifications/"><img src="$sbRoot/images/menu/config16.png" alt="" width="16" height="16" />Notifications</a></li>
-                </ul>
-            </li>
-            <li id="NAVerrorlogs"><a href="$sbRoot/errorlogs/">$logPageTitle</a>
-                <ul>
-                        <li><a href="$sbRoot/errorlogs/"><img src="$sbRoot/images/menu/viewlog_errors16.png" alt="" width="16" height="16" />View Log (Errors)</a></li>
-                        <li><a href="$sbRoot/errorlogs/viewlog/"><img src="$sbRoot/images/menu/viewlog16.png" alt="" width="16" height="16" />View Log</a></li>
-                </ul>
-            </li>
-            <li id="donate"><a href="https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&amp;hosted_button_id=JA8M7VDY89SQ4" onclick="window.open(this.href); return false;"><img src="$sbRoot/images/paypal/btn_donate_LG.gif" alt="[donate]" /></a></li>
-</ul>
+
+    <div class="navbar">
+        <div class="navbar-inner">
+            <div class="container">
+                <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </a>
+
+                <!--
+                <a class="brand" href="$sbRoot/home/" title="Sick Beard"><img alt="Sick Beard" src="$sbRoot/images/sickbeard.png" width="150" height="72" /></a>
+                -->
+
+                <div class="nav-collapse">
+                    <ul class="nav">
+                        <li class="divider-vertical"></li>
+                        <li id="NAVsystem" class="dropdown">
+                            <a data-toggle="dropdown" class="dropdown-toggle" href="#" onclick="return false;"><img src="$sbRoot/images/menu/system18.png" alt="" width="18" height="18" /> <b class="caret"></b></a>
+                            <ul class="dropdown-menu">
+                                <li><a href="$sbRoot/manage/manageSearches/forceVersionCheck"><i class="icon-check"></i> Force Version Check</a></li>
+                                <li><a href="$sbRoot/home/restart/?pid=$sbPID" class="confirm"><i class="icon-repeat"></i> Restart</a></li>
+                                <li><a href="$sbRoot/home/shutdown/" class="confirm"><i class="icon-off"></i> Shutdown</a></li>
+                            </ul>
+                        </li>
+                        <li class="divider-vertical"></li>
+                        <li id="NAVhome" class="dropdown">
+                            <a data-toggle="dropdown" class="dropdown-toggle disabled" href="$sbRoot/home/">Home <b class="caret"></b></a>
+                            <ul class="dropdown-menu">
+                                <li><a href="$sbRoot/home/"><i class="icon-home"></i> Home</a></li>
+                                <li><a href="$sbRoot/home/addShows/"><i class="icon-plus-sign"></i> Add Shows</a></li>
+                                <li><a href="$sbRoot/home/postprocess/"><i class="icon-random"></i> Manual Post-Processing</a></li>
+                            </ul>
+                        </li>
+                        <li class="divider-vertical"></li>
+                        <li id="NAVcomingEpisodes">
+                            <a href="$sbRoot/comingEpisodes/">Coming Episodes</a>
+                        </li>
+                        <li class="divider-vertical"></li>
+                        <li id="NAVhistory">
+                            <a href="$sbRoot/history/">History</a>
+                        </li>
+                        <li class="divider-vertical"></li>
+                        <li id="NAVmanage" class="dropdown">
+                            <a data-toggle="dropdown" class="dropdown-toggle disabled" href="$sbRoot/manage/">Manage <b class="caret"></b></a>
+                            <ul class="dropdown-menu">
+                                <li><a href="$sbRoot/manage/"><i class="icon-tasks"></i> Mass Update</a></li>
+                                <li><a href="$sbRoot/manage/backlogOverview/"><i class="icon-retweet"></i> Backlog Overview</a></li>
+                                <li><a href="$sbRoot/manage/manageSearches/"><i class="icon-search"></i> Manage Searches</a></li>
+                                <li><a href="$sbRoot/manage/episodeStatuses/"><i class="icon-list-alt"></i> Episode Status Management</a></li>
+                            </ul>
+                        </li>
+                        <li class="divider-vertical"></li>
+                        <li id="NAVconfig" class="dropdown">
+                            <a data-toggle="dropdown" class="dropdown-toggle disabled" href="$sbRoot/config/">Config <b class="caret"></b></a>
+                            <ul class="dropdown-menu">
+                                <li><a href="$sbRoot/config/"><i class="icon-question-sign"></i> Help &amp; Info</a></li>
+                                <li><a href="$sbRoot/config/general/"><i class="icon-cog"></i> General</a></li>
+                                <li><a href="$sbRoot/config/search/"><i class="icon-cog"></i> Search Settings</a></li>
+                                <li><a href="$sbRoot/config/providers/"><i class="icon-cog"></i> Search Providers</a></li>
+                                <li><a href="$sbRoot/config/postProcessing/"><i class="icon-cog"></i> Post Processing</a></li>
+                                <li><a href="$sbRoot/config/notifications/"><i class="icon-cog"></i> Notifications</a></li>
+                            </ul>
+                        </li>
+                        <li class="divider-vertical"></li>
+                        <li id="NAVerrorlogs" class="dropdown">
+                            <a data-toggle="dropdown" class="dropdown-toggle disabled" href="$sbRoot/errorlogs/">$logPageTitle <b class="caret"></b></a>
+                            <ul class="dropdown-menu">
+                                <li><a href="$sbRoot/errorlogs/"><i class="icon-file"></i> View Log (Errors)</a></li>
+                                <li><a href="$sbRoot/errorlogs/viewlog/"><i class="icon-file"></i> View Log</a></li>
+                            </ul>
+                        </li>
+                        <li class="divider-vertical"></li>
+                    </ul>
+                    <ul class="nav pull-right">
+                        <li>
+                            <a id="navDonate" href="https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&amp;hosted_button_id=JA8M7VDY89SQ4" onclick="window.open(this.href); return false;"><img src="$sbRoot/images/paypal/btn_donate_LG.gif" alt="[donate]" height="26" width="92" /></a>
+                        </li>
+                    </ul>
+                </div><!-- /nav-collapse -->
+
+            </div><!-- /container -->
+        </div><!-- /navbar-inner -->
+    </div><!-- /navbar -->
+
 #if $varExists('submenu'):
-<div id="SubMenu">
-<span>
-#set $first = True
-#for $menuItem in $submenu:
-    #if 'requires' not in $menuItem or $menuItem.requires():
-        #if type($menuItem.path) == dict:
-            #if $first then "" else "</span>| <span>"#<b>$menuItem.title</b>
-            #set $first = False
-            #set $inner_first = True
-            #for $cur_link in $menuItem.path:
-                #if $inner_first then "" else "&middot; "#<a class="inner" href="$sbRoot/$menuItem.path[$cur_link]">$cur_link</a>
-                #set $inner_first = False
-            #end for
-        #else
-            #if $first then "" else "| "#<a href="$sbRoot/$menuItem.path" #if 'confirm' in $menuItem then "class=\"confirm\"" else "" #>$menuItem.title</a>
-            #set $first = False
+    <div id="SubMenu">
+        <span>
+    #set $first = True
+    #for $menuItem in $submenu:
+        #if 'requires' not in $menuItem or $menuItem.requires():
+            #if type($menuItem.path) == dict:
+                #if $first then "" else "</span>| <span>"#<b>$menuItem.title</b>
+                #set $first = False
+                #set $inner_first = True
+                #for $cur_link in $menuItem.path:
+                    #if $inner_first then "" else "&middot; "#<a class="inner" href="$sbRoot/$menuItem.path[$cur_link]">$cur_link</a>
+                    #set $inner_first = False
+                #end for
+            #else
+                #if $first then "" else "| "#<a href="$sbRoot/$menuItem.path" #if 'confirm' in $menuItem then "class=\"confirm\"" else "" #>$menuItem.title</a>
+                #set $first = False
+            #end if
         #end if
-    #end if
-#end for
-</span>
-</div>
+    #end for
+        </span>
+    </div>
 #end if
 
 <div id="contentWrapper">

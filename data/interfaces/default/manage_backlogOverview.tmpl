@@ -30,13 +30,16 @@
 #continue
 #end if
 
-  <tr class="seasonheader">
+  <tr>
     <td colspan="3" class="align-left">
-        <br/><h2><a href="$sbRoot/home/displayShow?show=$curShow.tvdbid">$curShow.name</a></h2>
-        <div class="float-right">
-            <span class="wanted nowrap">Wanted: <b>$showCounts[$curShow.tvdbid][$Overview.WANTED]</b></span>
-            <span class="qual nowrap">Low Quality: <b>$showCounts[$curShow.tvdbid][$Overview.QUAL]</b></span>
-            <a href="$sbRoot/manage/backlogShow?tvdb_id=$curShow.tvdbid"><img alt="[force backlog]" height="20" src="$sbRoot/images/forceBacklog20.png" title="Force Backlog" /></a>
+        <br/>
+        <h2 class="backlogShow">
+            <a href="$sbRoot/home/displayShow?show=$curShow.tvdbid">$curShow.name</a>
+        </h2>
+        <div class="float-right clearfix">
+            <label for="wanted" class="checkbox inline wanted">Wanted: <b>$showCounts[$curShow.tvdbid][$Overview.WANTED]</b></label>
+            <label for="qual" class="checkbox inline qual">Low Quality: <b>$showCounts[$curShow.tvdbid][$Overview.QUAL]</b></label>
+            <a class="btn btn-mini btn-inverse forceBacklog" href="$sbRoot/manage/backlogShow?tvdb_id=$curShow.tvdbid"><i class="icon-play-circle icon-white"></i> Force Backlog</a>
         </div>
     </td>
   </tr>
