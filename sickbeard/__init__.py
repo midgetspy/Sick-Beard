@@ -56,6 +56,7 @@ MY_FULLNAME = None
 MY_NAME = None
 MY_ARGS = []
 SYS_ENCODING = ''
+_CONFIG_SYS_ENCODING = ''
 DATA_DIR = ''
 CREATEPID = False
 PIDFILE = ''
@@ -427,7 +428,7 @@ def initialize(consoleLogging=True):
                 NEWZBIN, NEWZBIN_USERNAME, NEWZBIN_PASSWORD,FANZUB, GIT_PATH, MOVE_ASSOCIATED_FILES, \
                 COMING_EPS_LAYOUT, COMING_EPS_SORT, COMING_EPS_DISPLAY_PAUSED, METADATA_WDTV, METADATA_TIVO, IGNORE_WORDS, \
                 ANIMESUPPORT, USE_ANIDB, ANIDB_USERNAME, ANIDB_PASSWORD, ANIDB_USE_MYLIST, ANIME_SPLIT_HOME, CREATE_MISSING_SHOW_DIRS, \
-                ADD_SHOWS_WO_DIR
+                ADD_SHOWS_WO_DIR, SYS_ENCODING, _CONFIG_SYS_ENCODING
 
         if __INITIALIZED__:
             return False
@@ -476,6 +477,10 @@ def initialize(consoleLogging=True):
         
         HTTPS_CERT = check_setting_str(CFG, 'General', 'https_cert', 'server.crt')
         HTTPS_KEY = check_setting_str(CFG, 'General', 'https_key', 'server.key')
+        
+        _CONFIG_SYS_ENCODING = check_setting_str(CFG, 'General', 'sys_encoding', '')
+        if _CONFIG_SYS_ENCODING:
+            SYS_ENCODING = _CONFIG_SYS_ENCODING
 
         ACTUAL_CACHE_DIR = check_setting_str(CFG, 'General', 'cache_dir', 'cache')
         # fix bad configs due to buggy code
@@ -1078,6 +1083,7 @@ def save_config():
     new_config['General']['naming_dates'] = int(NAMING_DATES)
     new_config['General']['naming_anime'] = int(NAMING_ANIME)
     new_config['General']['launch_browser'] = int(LAUNCH_BROWSER)
+    new_config['General']['sys_encoding'] = _CONFIG_SYS_ENCODING
 
     new_config['General']['use_banner'] = int(USE_BANNER)
     new_config['General']['use_listview'] = int(USE_LISTVIEW)
