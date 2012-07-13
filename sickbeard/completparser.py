@@ -408,7 +408,16 @@ class CompleteResult(object):
         return 0
 
     def _isProper(self):
-        return bool(self.parse_result and self.parse_result.extra_info and re.search('(^|[\. _-])(proper|repack)([\. _-]|$)', self.parse_result.extra_info, re.I) != None)
+        if self.show and self.show.is_anime: # animes dont have the word proper or something but put a version number behind the episode number
+            version = False
+            if self.parse_result and self.parse_result.version:
+                try:
+                    version = int(self.parse_result.version)
+                except ValueError:
+                    return False
+            return bool(version)
+        else:
+            return bool(self.parse_result and self.parse_result.extra_info and re.search('(^|[\. _-])(proper|repack)([\. _-]|$)', self.parse_result.extra_info, re.I) != None)
 
     def _getReleaseGroup(self):
         return self.parse_result.release_group
@@ -420,7 +429,7 @@ class CompleteResult(object):
         return bool(self.season != None and self.episodes)
 
     def __nonzero__(self):
-        return bool(self.show and self.parse_result and self.season != None and self.episodes)
+        return bool(self.show and self.parse_result and self.sxxexx)
 
     tvdbid = property(_getTVDBID)
     is_proper = property(_isProper)

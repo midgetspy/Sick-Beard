@@ -253,6 +253,7 @@ class NameParser(object):
         final_result.series_name = self._combine_results(dir_name_result, file_name_result, 'series_name')
         final_result.extra_info = self._combine_results(dir_name_result, file_name_result, 'extra_info')
         final_result.release_group = self._combine_results(dir_name_result, file_name_result, 'release_group')
+        final_result.version = self._combine_results(dir_name_result, file_name_result, 'version')
 
         final_result.which_regex = []
         if final_result == file_name_result:
@@ -281,7 +282,8 @@ class ParseResult(object):
                  extra_info=None,
                  release_group=None,
                  air_date=None,
-                 ab_episode_numbers=None
+                 ab_episode_numbers=None,
+                 version=None
                  ):
 
         self.original_name = original_name
@@ -300,6 +302,7 @@ class ParseResult(object):
 
         self.extra_info = extra_info
         self.release_group = release_group
+        self.version = version
         
         self.air_date = air_date
         

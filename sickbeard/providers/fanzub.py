@@ -111,32 +111,6 @@ class Fanzub(generic.NZBProvider):
 
         return results
 
-    def findPropers(self, date=None):
-
-        results = []
-
-        for i in [2, 3, 4]: # we will look for a version 2, 3 and 4
-            """
-            because of this the proper search failed !!
-            well more precisly because _doSearch does not accept a dict rather then a string
-            params = {
-                "q":"v"+str(i).encode('utf-8')
-                  }
-            """
-            for curResult in self._doSearch("v" + str(i)):
-
-                match = re.search('(\w{3}, \d{1,2} \w{3} \d{4} \d\d:\d\d:\d\d) [\+\-]\d{4}', curResult.findtext('pubDate'))
-                if not match:
-                    continue
-
-                dateString = match.group(1)
-                resultDate = parseDate(dateString).replace(tzinfo=None)
-
-                if date == None or resultDate > date:
-                    results.append(classes.Proper(curResult.findtext('title'), curResult.findtext('link'), resultDate))
-
-        return results
-
 class FanzubCache(tvcache.TVCache):
 
     def __init__(self, provider):

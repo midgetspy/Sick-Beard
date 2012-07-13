@@ -44,7 +44,7 @@ class CacheDBConnection(db.DBConnection):
 
         # Create the table if it's not already there
         try:
-            sql = "CREATE TABLE "+providerName+" (name TEXT, season NUMERIC, episodes TEXT, tvrid NUMERIC, tvdbid NUMERIC, url TEXT, time NUMERIC, quality TEXT, release_group TEXT);"
+            sql = "CREATE TABLE "+providerName+" (name TEXT, season NUMERIC, episodes TEXT, tvrid NUMERIC, tvdbid NUMERIC, url TEXT, time NUMERIC, quality TEXT, release_group TEXT, proper NUMERIC);"
             self.connection.execute(sql)
             self.connection.commit()
         except sqlite3.OperationalError, e:
@@ -190,12 +190,14 @@ class TVCache():
         This dosen't mean the parsed result is usefull
         """
         myDB = self._getDB()
-
+        show = None
+        if tvdb_id:
+            show = helpers.findCertainShow(sickbeard.showList, tvdb_id)
         # if we don't have complete info then parse the filename to get it
         for curName in [name] + extraNames:
-            cp = CompleteParser()
+            cp = CompleteParser(show=show)
             cpr = cp.parse(curName)
-            if cpr:
+            if cpr.sxxexx and cpr.parse_result:
                 break
         else:
             return False
@@ -203,9 +205,9 @@ class TVCache():
         episodeText = "|"+"|".join(map(str, cpr.episodes))+"|"
         # get the current timestamp
         curTimestamp = int(time.mktime(datetime.datetime.today().timetuple()))
-        myDB.action("INSERT INTO "+self.providerID+" (name, season, episodes, tvrid, tvdbid, url, time, quality, release_group) VALUES (?,?,?,?,?,?,?,?,?)",
-                    [name, cpr.season, episodeText, 0, cpr.tvdbid, url, curTimestamp, cpr.quality, cpr.release_group])
-
+        myDB.action("INSERT INTO "+self.providerID+" (name, season, episodes, tvrid, tvdbid, url, time, quality, release_group, proper) VALUES (?,?,?,?,?,?,?,?,?,?)",
+                    [name, cpr.season, episodeText, 0, cpr.tvdbid, url, curTimestamp, cpr.quality, cpr.release_group, int(cpr.is_proper)])
+        
 
     def searchCache(self, episode, manualSearch=False):
         neededEps = self.findNeededEpisodes(episode, manualSearch)
@@ -215,7 +217,7 @@ class TVCache():
 
         myDB = self._getDB()
 
-        sql = "SELECT * FROM "+self.providerID+" WHERE name LIKE '%.PROPER.%' OR name LIKE '%.REPACK.%'"
+        sql = "SELECT * FROM "+self.providerID+" WHERE proper = 1"
 
         if date != None:
             sql += " AND time >= "+str(int(time.mktime(date.timetuple())))
