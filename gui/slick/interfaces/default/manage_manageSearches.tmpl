@@ -1,0 +1,49 @@
+#import sickbeard
+#import datetime
+#from sickbeard.common import *
+#set global $title="Manage Searches"
+
+#set global $sbPath=".."
+
+#set global $topmenu="manage"#
+#import os.path
+#include $os.path.join($sickbeard.PROG_DIR, "gui/slick/interfaces/default/inc_top.tmpl")
+
+<script type="text/javascript" src="$sbRoot/js/plotTooltip.js?$sbPID"></script>
+
+
+<h3>Backlog Search:</h3>
+<a class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-icon-primary" href="$sbRoot/manage/manageSearches/pauseBacklog?paused=#if $backlogPaused then "0" else "1"#">
+<span class="ui-button-icon-primary ui-icon #if $backlogPaused then "ui-icon-play" else "ui-icon-pause"#"></span>
+<span style="display: inline;" class="ui-button-text">#if $backlogPaused then "Unpause" else "Pause"# </span>
+</a>
+#if not $backlogRunning:
+Not in progress<br />
+#else:
+#if $backlogPaused then "Paused: " else ""#
+Currently running<br />
+#end if
+
+<br />
+<h3>Daily Episode Search:</h3>
+<a class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-icon-primary" href="$sbRoot/manage/manageSearches/forceSearch">
+<span class="ui-button-icon-primary ui-icon ui-icon-info"></span>
+<span style="display: inline;" class="ui-button-text">Force</span>
+</a> 
+#if not $searchStatus:
+Not in progress<br />
+#else:
+In Progress<br />
+#end if
+<br />
+
+<h3>Version Check:</h3>
+<a class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-icon-primary" href="$sbRoot/manage/manageSearches/forceVersionCheck">
+<span class="ui-button-icon-primary ui-icon ui-icon-circle-check"></span>
+<span style="display: inline;" class="ui-button-text">Force Check</span>
+</a>
+<br />
+
+<br />
+
+#include $os.path.join($sickbeard.PROG_DIR, "gui/slick/interfaces/default/inc_bottom.tmpl")

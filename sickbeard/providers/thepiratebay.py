@@ -67,7 +67,7 @@ class ThePirateBayProvider(generic.TorrentProvider):
         return sickbeard.THEPIRATEBAY
         
     def imageName(self):
-        return 'thepiratebay.gif'
+        return 'thepiratebay.png'
     
     def getQuality(self, item):
         

@@ -46,7 +46,6 @@ from sickbeard.webserveInit import initWebServer
 from lib.configobj import ConfigObj
 
 
-
 signal.signal(signal.SIGINT, sickbeard.sig_handler)
 signal.signal(signal.SIGTERM, sickbeard.sig_handler)
 
@@ -268,11 +267,13 @@ def main():
         else:
             webhost = '0.0.0.0'
 
+    logger.log(u'Gui Name: '+sickbeard.GUI_NAME, logger.MESSAGE )
+
     try:
         initWebServer({
                 'port': startPort,
                 'host': webhost,
-                'data_root': os.path.join(sickbeard.PROG_DIR, 'data'),
+                'data_root': os.path.join(sickbeard.PROG_DIR, 'gui/'+sickbeard.GUI_NAME),
                 'web_root': sickbeard.WEB_ROOT,
                 'log_dir': log_dir,
                 'username': sickbeard.WEB_USERNAME,

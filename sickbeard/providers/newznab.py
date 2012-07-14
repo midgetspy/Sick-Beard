@@ -62,8 +62,8 @@ class NewznabProvider(generic.NZBProvider):
 
 	def imageName(self):
 		if ek.ek(os.path.isfile, ek.ek(os.path.join, sickbeard.PROG_DIR, 'data', 'images', 'providers', self.getID()+'.gif')):
-			return self.getID()+'.gif'
-		return 'newznab.gif'
+			return self.getID()+'.png'
+		return 'newznab.png'
 
 	def isEnabled(self):
 		return self.enabled

@@ -113,6 +113,9 @@ def initWebServer(options = {}):
                 cherrypy.config.update({ 'log.access_file': os.path.join(options['log_dir'], "cherrypy.log") })
                 logger.log('Using %s for cherrypy log' % cherrypy.config['log.access_file'])
 
+        logger.log(u'Gui Data Root: '+options['data_root'], logger.MESSAGE )
+        logger.log(u'Gui Name: '+sickbeard.GUI_NAME, logger.MESSAGE )
+        
         conf = {
                         '/': {
                                 'tools.staticdir.root': options['data_root'],
