@@ -254,3 +254,27 @@ countryList = {'Australia': 'AU',
                'USA': 'US'
                }
 
+class QueuePriority:
+    DEFAULT = -100
+    PAUSED = -2
+    LOW = -1
+    NORMAL = 0
+    HIGH = 1
+    FORCE = 2
+    
+    queuePriorityStrings = {DEFAULT: "Default",
+                            HIGH: "High"}
+    
+    queuePriorityStringsAllSAB = {DEFAULT: "Default",
+                                  HIGH: "High",
+                                  NORMAL: "Normal",
+                                  LOW: "Low",
+                                  PAUSED: "Paused",
+                                  FORCE: "Force"}
+    @staticmethod
+    def getQueuePriorities(all_sab=False):
+        if all_sab:
+            return QueuePriority.queuePriorityStringsAllSAB
+        else:
+            return QueuePriority.queuePriorityStrings
+    

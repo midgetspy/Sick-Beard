@@ -67,6 +67,8 @@ class TVShow(object):
         self.paused = 0
         self.air_by_date = 0
         self.lang = lang
+        self.priority_older = int(sickbeard.QUEUE_PRIORITY_OLDER)
+        self.priority_recent = int(sickbeard.QUEUE_PRIORITY_RECENT)
 
         self.lock = threading.Lock()
         self._isDirGood = False
@@ -589,6 +591,8 @@ class TVShow(object):
             if self.lang == "":
                 self.lang = sqlResults[0]["lang"]
 
+            self.priority_recent = int(sqlResults[0]["priority_recent"])
+            self.priority_older = int(sqlResults[0]["priority_older"])
 
     def loadFromTVDB(self, cache=True, tvapi=None, cachedSeason=None):
 
@@ -799,7 +803,9 @@ class TVShow(object):
                         "air_by_date": self.air_by_date,
                         "startyear": self.startyear,
                         "tvr_name": self.tvrname,
-                        "lang": self.lang
+                        "lang": self.lang,
+                        "priority_recent": self.priority_recent,
+                        "priority_older": self.priority_older
                         }
 
         myDB.upsert("tv_shows", newValueDict, controlValueDict)

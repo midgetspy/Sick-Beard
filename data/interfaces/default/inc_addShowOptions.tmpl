@@ -21,6 +21,10 @@
             </label>
         </div>
 
+		#set global $select_priority_recent = $sickbeard.QUEUE_PRIORITY_RECENT 
+		#set global $select_priority_older = $sickbeard.QUEUE_PRIORITY_OLDER
+		#include $os.path.join($sickbeard.PROG_DIR, "data/interfaces/default/inc_queuePriorityChooser.tmpl")
+		
         #set $qualities = $Quality.splitQuality($sickbeard.QUALITY_DEFAULT)
         #set global $anyQualities = $qualities[0]
         #set global $bestQualities = $qualities[1]

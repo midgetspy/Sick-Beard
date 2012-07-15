@@ -630,7 +630,7 @@ class ConfigGeneral:
         sickbeard.ROOT_DIRS = rootDirString
     
     @cherrypy.expose
-    def saveAddShowDefaults(self, defaultFlattenFolders, defaultStatus, anyQualities, bestQualities):
+    def saveAddShowDefaults(self, defaultFlattenFolders, defaultStatus, anyQualities, bestQualities, queuePriorityRecent, queuePriorityOlder):
 
         if anyQualities:
             anyQualities = anyQualities.split(',')
@@ -653,6 +653,9 @@ class ConfigGeneral:
             defaultFlattenFolders = 0
 
         sickbeard.FLATTEN_FOLDERS_DEFAULT = int(defaultFlattenFolders)
+
+        sickbeard.QUEUE_PRIORITY_RECENT = int(queuePriorityRecent)
+        sickbeard.QUEUE_PRIORITY_OLDER = int(queuePriorityOlder)
 
     @cherrypy.expose
     def generateKey(self):
@@ -1682,7 +1685,7 @@ class NewHomeAddShows:
     @cherrypy.expose
     def addNewShow(self, whichSeries=None, tvdbLang="en", rootDir=None, defaultStatus=None,
                    anyQualities=None, bestQualities=None, flatten_folders=None, fullShowPath=None,
-                   other_shows=None, skipShow=None):
+                   other_shows=None, skipShow=None, priority_recent=None, priority_older=None):
         """
         Receive tvdb id, dir, and other options and create a show from them. If extra show dirs are
         provided then it forwards back to newShow, if not it goes to /home.
@@ -1760,9 +1763,15 @@ class NewHomeAddShows:
         if type(bestQualities) != list:
             bestQualities = [bestQualities]
         newQuality = Quality.combineQualities(map(int, anyQualities), map(int, bestQualities))
-        
+
+        if priority_recent == None:
+            priority_recent = sickbeard.QUEUE_PRIORITY_RECENT
+
+        if priority_older == None:
+            priority_older = sickbeard.QUEUE_PRIORITY_OLDER
+
         # add the show
-        sickbeard.showQueueScheduler.action.addShow(tvdb_id, show_dir, int(defaultStatus), newQuality, flatten_folders, tvdbLang) #@UndefinedVariable
+        sickbeard.showQueueScheduler.action.addShow(tvdb_id, show_dir, int(defaultStatus), newQuality, flatten_folders, tvdbLang, int(priority_recent), int(priority_older)) #@UndefinedVariable
         ui.notifications.message('Show added', 'Adding the specified show into '+show_dir)
 
         return finishAddShow()
@@ -1833,7 +1842,7 @@ class NewHomeAddShows:
             show_dir, tvdb_id, show_name = cur_show
 
             # add the show
-            sickbeard.showQueueScheduler.action.addShow(tvdb_id, show_dir, SKIPPED, sickbeard.QUALITY_DEFAULT, sickbeard.FLATTEN_FOLDERS_DEFAULT) #@UndefinedVariable
+            sickbeard.showQueueScheduler.action.addShow(tvdb_id, show_dir, SKIPPED, sickbeard.QUALITY_DEFAULT, sickbeard.FLATTEN_FOLDERS_DEFAULT, sickbeard.QUEUE_PRIORITY_RECENT, sickbeard.QUEUE_PRIORITY_OLDER) #@UndefinedVariable
             num_added += 1
          
         if num_added:
@@ -2258,7 +2267,7 @@ class Home:
         return result['description'] if result else 'Episode not found.'
 
     @cherrypy.expose
-    def editShow(self, show=None, location=None, anyQualities=[], bestQualities=[], flatten_folders=None, paused=None, directCall=False, air_by_date=None, tvdbLang=None):
+    def editShow(self, show=None, location=None, anyQualities=[], bestQualities=[], flatten_folders=None, paused=None, directCall=False, air_by_date=None, tvdbLang=None, priority_recent=None, priority_older=None):
 
         if show == None:
             errString = "Invalid show ID: "+str(show)
@@ -2319,6 +2328,12 @@ class Home:
         if type(bestQualities) != list:
             bestQualities = [bestQualities]
 
+        if priority_recent == None:
+            priority_recent = sickbeard.QUEUE_PRIORITY_RECENT
+
+        if priority_older == None:
+            priority_older = sickbeard.QUEUE_PRIORITY_OLDER
+
         errors = []
         with showObj.lock:
             newQuality = Quality.combineQualities(map(int, anyQualities), map(int, bestQualities))
@@ -2335,6 +2350,9 @@ class Home:
             showObj.paused = paused
             showObj.air_by_date = air_by_date
             showObj.lang = tvdb_lang
+
+            showObj.priority_recent = int(priority_recent)
+            showObj.priority_older = int(priority_older)
 
             # if we change location clear the db of episodes, change it, write to db, and rescan
             if os.path.normpath(showObj._location) != os.path.normpath(location):
