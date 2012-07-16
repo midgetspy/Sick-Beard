@@ -460,7 +460,7 @@ class AddSizeAndSceneNameFields(FixAirByDateSetting):
         for cur_result in empty_results:
             
             ep_file_name = ek.ek(os.path.basename, cur_result["location"])
-            ep_file_name = ek.ek(os.path.splitext, ep_file_name)[0]
+            ep_file_name = os.path.splitext(ep_file_name)[0]
             
             # I only want to find real scene names here so anything with a space in it is out
             if ' ' in ep_file_name:
