@@ -587,10 +587,10 @@ def sanitizeSceneName (name, ezrss=False):
     """
 
     if not ezrss:
-        bad_chars = ",:()'!?"
+        bad_chars = u",:()'!?\u2019"
     # ezrss leaves : and ! in their show names as far as I can tell
     else:
-        bad_chars = ",()'?"
+        bad_chars = u",()'?\u2019"
 
     # strip out any bad chars
     for x in bad_chars:
