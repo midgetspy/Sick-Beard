@@ -1,0 +1,40 @@
+Episode Naming
+
+Show Name		%SN		Show Name
+				%S.N	Show.Name
+				%S_N	Show_Name
+Episode Name	%EN		Episode Name
+				%E.N	Episode.Name
+				%E_N	Episode_Name
+Season Number	%S		1
+				%0S		01
+Episode Number	%E		5
+				%0E		05
+Quality			%Q		720p BluRay
+
+Use lower case if you want lower case names (eg. %sn, %e.n, %q etc)
+
+Date format:
+- 2010-11-23
+- 2010.11.23
+- 2010_11_23
+- 2010 11 23
+
+Multi-ep:
+- repeat (1x2x3x4)
+- extend (1x2-3-4)
+- duplicate (1x2 1x3 1x4)
+
+PP-only stuff:
+
+%OF		Original_File_Name
+%RG		Release_Group
+
+
+Validation:
+- season/episode can only occur once
+- episode MUST occur once
+
+Also:
+- remove season folder option, require users to put it in the ep naming
+- on rename, show proposed changes and ask about folder sorting too

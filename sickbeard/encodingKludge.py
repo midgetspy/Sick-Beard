@@ -16,7 +16,7 @@
 # You should have received a copy of the GNU General Public License
 # along with Sick Beard.  If not, see <http://www.gnu.org/licenses/>.
 
-import os
+import os, traceback
 
 from sickbeard import logger
 import sickbeard
@@ -48,16 +48,15 @@ def fixListEncodings(x):
 
 
 def ek(func, *args):
-    result = None
 
-    if os.name == 'nt':
-        result = func(*args)
-    else:
-        result = func(*[x.encode(sickbeard.SYS_ENCODING) if type(x) in (str, unicode) else x for x in args])
+    def changeByteStringToUnicode(obj):
+        if type(obj) == str:
+            logger.log(u"A bytestring was used as an argument for function "+func.__name__+": "+repr(obj), logger.WARNING)
+            logger.log(''.join(traceback.format_stack()), logger.DEBUG)
+            return obj.decode(sickbeard.SYS_ENCODING)
+        else:
+            return obj
 
-    if type(result) == list:
-        return fixListEncodings(result)
-    elif type(result) == str:
-        return fixStupidEncodings(result)
-    else:
-        return result
+    args = map(changeByteStringToUnicode, args)
+
+    return func(*args)
