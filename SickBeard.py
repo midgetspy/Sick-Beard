@@ -120,6 +120,16 @@ def main():
     sickbeard.CREATEPID = False
     sickbeard.DAEMON = False
 
+    if not hasattr(sys,"setdefaultencoding"):
+        reload(sys)
+
+    try:
+        sys.setdefaultencoding('utf-8')
+    except:
+        print 'Sorry, you MUST add the Sick Beard folder to the PYTHONPATH environment variable'
+        print 'or find another way to force Python to use UTF-8 for string encoding.'
+        sys.exit(1)
+ 
     sickbeard.SYS_ENCODING = None
 
     try:

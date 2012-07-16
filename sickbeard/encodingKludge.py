@@ -41,7 +41,7 @@ def fixStupidEncodings(x, silent=False):
     return None
 
 def fixListEncodings(x):
-    if type(x) != list:
+    if type(x) != list and type(x) != tuple:
         return x
     else:
         return filter(lambda x: x != None, map(fixStupidEncodings, x))
