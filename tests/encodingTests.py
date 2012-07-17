@@ -1,3 +1,5 @@
+# coding=UTF-8
+
 import unittest
 import sys, os, locale
 
@@ -18,9 +20,22 @@ if not sickbeard.SYS_ENCODING or sickbeard.SYS_ENCODING in ('ANSI_X3.4-1968', 'U
 
 class EncodingTests(unittest.TestCase):
     
+    test_filename = u'test.\xee\xe2\xe9\xe8.txt'
+    test_path_unicode = u'test_data' + os.sep + u'encoding_tests'
+    test_path_bytestring = str(test_path_unicode)
+    
+    def setUp(self):
+        print "setting up"
+        f = open(self.test_path_unicode + os.sep + self.test_filename, 'w')
+        f.write('test data')
+        f.close()
+    
+    def tearDown(self):
+        os.remove(self.test_path_unicode + os.sep + self.test_filename)
+    
     def test_unicode(self):
-        ufiles = os.listdir(u'test_data\\encoding_tests')
-        files = os.listdir('test_data\\encoding_tests')
+        ufiles = os.listdir(self.test_path_unicode)
+        files = os.listdir(self.test_path_bytestring)
         
         print
         print 'Testing that the encoding', sickbeard.SYS_ENCODING, 'behaves as we expect it would'
@@ -28,8 +43,8 @@ class EncodingTests(unittest.TestCase):
         self.assertEqual(ufiles[0], files[0].decode(sickbeard.SYS_ENCODING))
 
     def test_ek(self):
-        str_file = ek.ek(os.listdir, 'test_data\\encoding_tests')[0]
-        unicode_file = ek.ek(os.listdir, u'test_data\\encoding_tests')[0]
+        str_file = ek.ek(os.listdir, self.test_path_bytestring)[0]
+        unicode_file = ek.ek(os.listdir, self.test_path_unicode)[0]
 
         # no matter if we give unicode or not we should get unicode back
         self.assertEqual(u'test.\xee\xe2\xe9\xe8.txt', unicode_file)
