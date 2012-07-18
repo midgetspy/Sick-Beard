@@ -55,7 +55,7 @@ def ek(func, *args):
     else:
         result = func(*[x.encode(sickbeard.SYS_ENCODING) if type(x) in (str, unicode) else x for x in args])
 
-    if type(result) == in (list, tuple):
+    if type(result) in (list, tuple):
         return fixListEncodings(result)
     elif type(result) == str:
         return fixStupidEncodings(result)
