@@ -481,7 +481,12 @@ class Tvdb:
         else:
             self.config['url_getSeries'] = "%(base_url)s/api/GetSeries.php?seriesname=%%s&language=%(language)s" % self.config
 
-        self.config['url_epInfo'] = "%(base_url)s/api/%(apikey)s/series/%%s/all/%%s.xml" % self.config
+        #self.config['url_epInfo'] = "%(base_url)s/api/%(apikey)s/series/%%s/all/%%s.xml" % self.config
+        USE_ALL_ZIP = 1;
+        if USE_ALL_ZIP:
+          self.config['url_epInfo'] = "%(base_url)s/api/%(apikey)s/series/%%s/all/%%s.zip" % self.config
+        else:
+          self.config['url_epInfo'] = "%(base_url)s/api/%(apikey)s/series/%%s/all/%%s.xml" % self.config
 
         self.config['url_seriesInfo'] = "%(base_url)s/api/%(apikey)s/series/%%s/%%s.xml" % self.config
         self.config['url_actorsInfo'] = "%(base_url)s/api/%(apikey)s/series/%%s/actors.xml" % self.config
@@ -532,10 +537,26 @@ class Tvdb:
         
         return str(resp)
 
+    def _getetsrc_from_zip(self, url, zipped_data):
+      """processes zipped_data as a ZipFile and extracts the xml file based on the name in the last path segment of the url
+             e.g. if the url is http://www.thetvdb.com/somethin/somewhere/abc.zip
+                  It will try and extract a file called abc.xml
+        """
+      from StringIO import StringIO
+      from zipfile import ZipFile
+      s = StringIO(zipped_data)
+      z = ZipFile(s)
+      file_name = "%s.xml" % url.split('/')[-1].split('.')[0]
+      return z.read(file_name)
+
     def _getetsrc(self, url):
         """Loads a URL using caching, returns an ElementTree of the source
         """
         src = self._loadUrl(url)
+        
+        if url.split(".")[-1] == "zip":
+          src = self._getetsrc_from_zip(url, src)        
+        
         try:
             return ElementTree.fromstring(src.rstrip('\r'))
         except SyntaxError:
