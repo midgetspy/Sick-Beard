@@ -89,13 +89,12 @@ replace with: <b><%=", ".join([Quality.qualityStrings[x] for x in bestQualities]
     <tr><td class="showLegend">Flatten files (no folders): </td><td><img src="$sbRoot/images/#if $show.flatten_folders == 1 or $sickbeard.NAMING_FORCE_FOLDERS then "yes16.png\" alt=\"Y" else "no16.png\" alt=\"N"#" width="16" height="16" /></td></tr>
     <tr><td class="showLegend">Paused: </td><td><img src="$sbRoot/images/#if int($show.paused) == 1 then "yes16.png\" alt=\"Y" else "no16.png\" alt=\"N"#" width="16" height="16" /></td></tr>
     <tr><td class="showLegend">Air-by-Date: </td><td><img src="$sbRoot/images/#if int($show.air_by_date) == 1 then "yes16.png\" alt=\"Y" else "no16.png\" alt=\"N"#" width="16" height="16" /></td></tr>
-#if $sickbeard.USE_NZBS and sickbeard.NZB_METHOD != "blackhole":
+#if $sickbeard.DISPLAY_QUEUE_PRIORITIES and $sickbeard.USE_NZBS and sickbeard.NZB_METHOD != "blackhole":
 	<tr><td class="showLegend">Queue Priority Recent Eps: </td><td>$QueuePriority.queuePriorityStringsAllSAB[$show.priority_recent]</td></tr>
 	<tr><td class="showLegend">Queue Priority Older Eps: </td><td>$QueuePriority.queuePriorityStringsAllSAB[$show.priority_older]</td></tr>
 #end if
 </table>
 </div>
-
 <div class="float-left">
 Change selected episodes to 
 <select id="statusSelect">

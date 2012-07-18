@@ -1,5 +1,5 @@
 $(document).ready(function(){
-	if (use_nzbs && nzb_method != "blackhole") {
+	if (display_priorities && use_nzbs && nzb_method != "blackhole") {
 		$('#queuePriorities').show();
 	}else{
 		$('#queuePriorities').hide();

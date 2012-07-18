@@ -154,6 +154,7 @@ DEFAULT_SEARCH_FREQUENCY = 60
 
 QUEUE_PRIORITY_RECENT = None
 QUEUE_PRIORITY_OLDER = None
+DISPLAY_QUEUE_PRIORITIES = None
 
 EZRSS = False
 TVTORRENTS = False
@@ -319,7 +320,7 @@ def initialize(consoleLogging=True):
                 showUpdateScheduler, __INITIALIZED__, LAUNCH_BROWSER, showList, loadingShowList, \
                 NZBS, NZBS_UID, NZBS_HASH, EZRSS, TVTORRENTS, TVTORRENTS_DIGEST, TVTORRENTS_HASH, BTN, BTN_API_KEY, TORRENT_DIR, USENET_RETENTION, SOCKET_TIMEOUT, \
                 SEARCH_FREQUENCY, DEFAULT_SEARCH_FREQUENCY, BACKLOG_SEARCH_FREQUENCY, \
-                QUEUE_PRIORITY_RECENT, QUEUE_PRIORITY_OLDER, QUALITY_DEFAULT, FLATTEN_FOLDERS_DEFAULT, STATUS_DEFAULT, \
+                QUEUE_PRIORITY_RECENT, QUEUE_PRIORITY_OLDER, DISPLAY_QUEUE_PRIORITIES, QUALITY_DEFAULT, FLATTEN_FOLDERS_DEFAULT, STATUS_DEFAULT, \
                 GROWL_NOTIFY_ONSNATCH, GROWL_NOTIFY_ONDOWNLOAD, TWITTER_NOTIFY_ONSNATCH, TWITTER_NOTIFY_ONDOWNLOAD, \
                 USE_GROWL, GROWL_HOST, GROWL_PASSWORD, USE_PROWL, PROWL_NOTIFY_ONSNATCH, PROWL_NOTIFY_ONDOWNLOAD, PROWL_API, PROWL_PRIORITY, PROG_DIR, NZBMATRIX, NZBMATRIX_USERNAME, \
                 USE_PYTIVO, PYTIVO_NOTIFY_ONSNATCH, PYTIVO_NOTIFY_ONDOWNLOAD, PYTIVO_UPDATE_LIBRARY, PYTIVO_HOST, PYTIVO_SHARE_NAME, PYTIVO_TIVO_NAME, \
@@ -456,7 +457,8 @@ def initialize(consoleLogging=True):
 
         QUEUE_PRIORITY_RECENT = check_setting_int(CFG, 'General', 'queue_priority_recent', 1)
         QUEUE_PRIORITY_OLDER = check_setting_int(CFG, 'General', 'queue_priority_older', -100)
-
+        DISPLAY_QUEUE_PRIORITIES = bool(check_setting_int(CFG, 'General', 'display_queue_priorities', 0))
+        
         NZB_DIR = check_setting_str(CFG, 'Blackhole', 'nzb_dir', '')
         TORRENT_DIR = check_setting_str(CFG, 'Blackhole', 'torrent_dir', '')
 
@@ -955,6 +957,7 @@ def save_config():
     new_config['General']['download_propers'] = int(DOWNLOAD_PROPERS)
     new_config['General']['queue_priority_recent'] = int(QUEUE_PRIORITY_RECENT)
     new_config['General']['queue_priority_older'] = int(QUEUE_PRIORITY_OLDER)
+    new_config['General']['display_queue_priorities'] = int(DISPLAY_QUEUE_PRIORITIES)
     new_config['General']['quality_default'] = int(QUALITY_DEFAULT)
     new_config['General']['status_default'] = int(STATUS_DEFAULT)
     new_config['General']['flatten_folders_default'] = int(FLATTEN_FOLDERS_DEFAULT)

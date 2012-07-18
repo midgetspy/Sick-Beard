@@ -4,8 +4,9 @@
 #set $priorities = $QueuePriority.getQueuePriorities($sickbeard.NZB_METHOD == "sabnzbd")
 <script type="text/javascript" charset="utf-8">
 <!--
-nzb_method = "$sickbeard.NZB_METHOD"
-use_nzbs = "$sickbeard.USE_NZBS"
+display_priorities = #if $sickbeard.DISPLAY_QUEUE_PRIORITIES then "true" else "false"#;
+nzb_method = "$sickbeard.NZB_METHOD";
+use_nzbs = #if $sickbeard.USE_NZBS then "true" else "false"#;
 //-->
 </script>
 <script type="text/javascript" src="$sbRoot/js/queuePriorityChooser.js?$sbPID"></script>
