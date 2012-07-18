@@ -1460,7 +1460,7 @@ def HomeMenu():
         { 'title': 'Update XBMC',            'path': 'home/updateXBMC/', 'requires': haveXBMC                   },
         { 'title': 'Update Plex',            'path': 'home/updatePLEX/', 'requires': havePLEX                   },
         { 'title': 'Restart',                'path': 'home/restart/?pid='+str(sickbeard.PID), 'confirm': True   },
-        { 'title': 'Shutdown',               'path': 'home/shutdown/', 'confirm': True                          },
+        { 'title': 'Shutdown',               'path': 'home/shutdown/?pid='+str(sickbeard.PID), 'confirm': True                          },
     ]
 
 class HomePostProcess:
@@ -2122,7 +2122,10 @@ class Home:
             return "Test NMA notice failed"
 
     @cherrypy.expose
-    def shutdown(self):
+    def shutdown(self, pid=None):
+
+        if str(pid) != str(sickbeard.PID):
+            redirect("/home")
 
         threading.Timer(2, sickbeard.invoke_shutdown).start()
 
