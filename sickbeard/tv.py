@@ -226,6 +226,9 @@ class TVShow(object):
             except exceptions.EpisodeDeletedException:
                 logger.log(u"The episode deleted itself when I tried making an object for it", logger.DEBUG)
 
+            if curEpisode is None:
+                continue
+
             # see if we should save the release name in the db
             ep_file_name = ek.ek(os.path.basename, curEpisode.location)
             ep_file_name = ek.ek(os.path.splitext, ep_file_name)[0]
@@ -238,7 +241,7 @@ class TVShow(object):
                 pass
         
             if not ' ' in ep_file_name and parse_result and parse_result.release_group:
-                logger.log(u"Name "+ep_file_name+" gave release group of "+parse_result.release_group+", seems valid", logger.DEBUG)
+                logger.log(u"Name " + ep_file_name + " gave release group of " + parse_result.release_group + ", seems valid", logger.DEBUG)
                 curEpisode.release_name = ep_file_name
 
             # store the reference in the show
