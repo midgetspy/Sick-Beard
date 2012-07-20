@@ -309,7 +309,7 @@ class TVShow(object):
         ltvdb_api_parms = sickbeard.TVDB_API_PARMS.copy()
 
         if not cache:
-            ltvdb_api_parms['cache'] = 'recache'
+            ltvdb_api_parms['cache'] = False
 
         if self.lang:
             ltvdb_api_parms['language'] = self.lang
@@ -601,7 +601,7 @@ class TVShow(object):
             ltvdb_api_parms = sickbeard.TVDB_API_PARMS.copy()
 
             if not cache:
-                ltvdb_api_parms['cache'] = 'recache'
+                ltvdb_api_parms['cache'] = False
             
             if self.lang:
                 ltvdb_api_parms['language'] = self.lang
@@ -1083,7 +1083,7 @@ class TVEpisode(object):
                     ltvdb_api_parms = sickbeard.TVDB_API_PARMS.copy()
 
                     if not cache:
-                        ltvdb_api_parms['cache'] = 'recache'
+                        ltvdb_api_parms['cache'] = False
 
                     if tvdb_lang:
                             ltvdb_api_parms['language'] = tvdb_lang
