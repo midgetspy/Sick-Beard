@@ -29,7 +29,7 @@ class TwitterTorrentsProvider(generic.TorrentProvider):
 
     def __init__(self):
 
-        generic.TorrentProvider.__init__(self, "Twitter (torrents)")
+        generic.TorrentProvider.__init__(self, "TwitterTorrents")
 
         self.supportsBacklog = False
 
@@ -52,7 +52,8 @@ class TwitterTorrentsProvider(generic.TorrentProvider):
         # handle if it's a twiiter feed
         title, url = title.rsplit('http://',1)
         url = 'http://'+url
-        title = title.replace(sickbeard.TWITTERTORRENTS_ID,'')
+        id = sickbeard.TWITTERTORRENTS_ID if sickbeard.TWITTERTORRENTS_ID else 'eztv_it'
+        title = title.replace(id,'')
         title = title.strip(':').strip().strip('-').strip()
         logger.log(u"Extracted the name "+title+" from the torrent link", logger.DEBUG)
 
@@ -71,7 +72,9 @@ class TwitterTorrentsCache(tvcache.TVCache):
     def _getRSSData(self):
         # can also support http://search.twitter.com/search.rss?q=daily+from:eztv_it
 
-        url = 'http://api.twitter.com/1/statuses/user_timeline.rss?screen_name=%s'%sickbeard.TWITTERTORRENTS_ID
+        id = sickbeard.TWITTERTORRENTS_ID if sickbeard.TWITTERTORRENTS_ID else 'eztv_it'
+
+        url = 'http://api.twitter.com/1/statuses/user_timeline.rss?screen_name=%s'%id
 
         logger.log(u"Twitter (torrents) cache update URL: "+ url, logger.DEBUG)
 

@@ -1092,6 +1092,7 @@ class ConfigProviders:
     def saveProviders(self, nzbmatrix_username=None, nzbmatrix_apikey=None,
                       nzbs_r_us_uid=None, nzbs_r_us_hash=None, newznab_string=None,
                       tvtorrents_digest=None, tvtorrents_hash=None,
+                      twittertorrents_id=None,
  					  btn_api_key=None,
                       newzbin_username=None, newzbin_password=None,
                       provider_order=None):
@@ -1155,7 +1156,7 @@ class ConfigProviders:
                 sickbeard.EZRSS = curEnabled
             elif curProvider == 'tvtorrents':
                 sickbeard.TVTORRENTS = curEnabled
-            elif curProvider == 'twitter__torrents_':
+            elif curProvider == 'twittertorrents':
                 sickbeard.TWITTERTORRENTS = curEnabled
             elif curProvider == 'btn':
                 sickbeard.BTN = curEnabled
@@ -1167,7 +1168,7 @@ class ConfigProviders:
         sickbeard.TVTORRENTS_DIGEST = tvtorrents_digest.strip()
         sickbeard.TVTORRENTS_HASH = tvtorrents_hash.strip()
 
-        sickbeard.TVTORRENTS_ID = twittertorrents_digest.strip()
+        sickbeard.TWITTERTORRENTS_ID = twittertorrents_id.strip()
 
         sickbeard.BTN_API_KEY = btn_api_key.strip()
 
