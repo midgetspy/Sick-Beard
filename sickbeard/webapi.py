@@ -2035,6 +2035,7 @@ class CMD_ShowSeasons(ApiCall):
              "requiredParameters": {"tvdbid": {"desc": "thetvdb.com unique id of a show"},
                                   },
              "optionalParameters": {"season": {"desc": "the season number"},
+                                    "full": {"desc": "include full episode details"}
                                   }
              }
 
@@ -2043,6 +2044,7 @@ class CMD_ShowSeasons(ApiCall):
         self.tvdbid, args = self.check_params(args, kwargs, "tvdbid", None, True, "int", [])
         # optional
         self.season, args = self.check_params(args, kwargs, "season", None, False, "int", [])
+        self.full, args = self.check_params(args, kwargs, "full", False, False, "bool", [])
         # super, missing, help
         ApiCall.__init__(self, args, kwargs)
 
@@ -2053,9 +2055,17 @@ class CMD_ShowSeasons(ApiCall):
             return _responds(RESULT_FAILURE, msg="Show not found")
 
         myDB = db.DBConnection(row_type="dict")
+        query = {
+            "select": "name, episode, airdate, status, season",
+            "where":  "showid = ?",
+            "args":   [self.tvdbid]
+        }
+
+        if self.full:
+            query["select"] += ", description, location"
 
         if self.season == None:
-            sqlResults = myDB.select("SELECT name, episode, airdate, status, season FROM tv_episodes WHERE showid = ?", [self.tvdbid])
+            sqlResults = myDB.select("SELECT %(select)s FROM tv_episodes WHERE %(where)s" % query, query["args"])
             seasons = {}
             for row in sqlResults:
                 status, quality = Quality.splitCompositeStatus(int(row["status"]))
@@ -2071,7 +2081,9 @@ class CMD_ShowSeasons(ApiCall):
                 seasons[curSeason][curEpisode] = row
 
         else:
-            sqlResults = myDB.select("SELECT name, episode, airdate, status FROM tv_episodes WHERE showid = ? AND season = ?", [self.tvdbid, self.season])
+            query["where"] += " AND season = ?"
+            query["args"].append(self.season)
+            sqlResults = myDB.select("SELECT %(select)s FROM tv_episodes WHERE %(where)s" % query, query["args"])
             if len(sqlResults) is 0:
                 return _responds(RESULT_FAILURE, msg="Season not found")
             seasons = {}
