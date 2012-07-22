@@ -18,6 +18,7 @@
 
 __all__ = ['ezrss',
            'tvtorrents',
+           'twittertorrents',
            'nzbmatrix',
            'nzbs_org_old',
            'nzbsrus',

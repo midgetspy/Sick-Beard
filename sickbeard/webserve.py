@@ -1155,6 +1155,8 @@ class ConfigProviders:
                 sickbeard.EZRSS = curEnabled
             elif curProvider == 'tvtorrents':
                 sickbeard.TVTORRENTS = curEnabled
+            elif curProvider == 'twitter__torrents_':
+                sickbeard.TWITTERTORRENTS = curEnabled
             elif curProvider == 'btn':
                 sickbeard.BTN = curEnabled
             elif curProvider in newznabProviderDict:
@@ -1164,6 +1166,8 @@ class ConfigProviders:
 
         sickbeard.TVTORRENTS_DIGEST = tvtorrents_digest.strip()
         sickbeard.TVTORRENTS_HASH = tvtorrents_hash.strip()
+
+        sickbeard.TVTORRENTS_ID = twittertorrents_digest.strip()
 
         sickbeard.BTN_API_KEY = btn_api_key.strip()
 
