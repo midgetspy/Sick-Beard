@@ -16,9 +16,8 @@
 # You should have received a copy of the GNU General Public License
 # along with Sick Beard.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
 import urllib
+import email.utils
 import datetime
 import re
 import os
@@ -29,7 +28,7 @@ import sickbeard
 import generic
 
 from sickbeard import classes
-from sickbeard.helpers import sanitizeSceneName
+from sickbeard import helpers
 from sickbeard import scene_exceptions
 from sickbeard import encodingKludge as ek
 
@@ -37,6 +36,7 @@ from sickbeard import exceptions
 from sickbeard import logger
 from sickbeard import tvcache
 from sickbeard.exceptions import ex
+
 
 class NewznabProvider(generic.NZBProvider):
 
@@ -48,7 +48,7 @@ class NewznabProvider(generic.NZBProvider):
 
         self.url = url
         self.key = key
-        
+
         # if a provider doesn't need an api key then this can be false
         self.needs_auth = True
 
@@ -61,8 +61,8 @@ class NewznabProvider(generic.NZBProvider):
         return self.name + '|' + self.url + '|' + self.key + '|' + str(int(self.enabled))
 
     def imageName(self):
-        if ek.ek(os.path.isfile, ek.ek(os.path.join, sickbeard.PROG_DIR, 'data', 'images', 'providers', self.getID()+'.png')):
-            return self.getID()+'.png'
+        if ek.ek(os.path.isfile, ek.ek(os.path.join, sickbeard.PROG_DIR, 'data', 'images', 'providers', self.getID() + '.png')):
+            return self.getID() + '.png'
         return 'newznab.png'
 
     def isEnabled(self):
@@ -72,22 +72,22 @@ class NewznabProvider(generic.NZBProvider):
 
         if not show:
             return [{}]
-        
+
         to_return = []
 
         # add new query strings for exceptions
         name_exceptions = scene_exceptions.get_scene_exceptions(show.tvdbid) + [show.name]
         for cur_exception in name_exceptions:
-        
+
             cur_params = {}
-    
+
             # search directly by tvrage id
             if show.tvrid:
                 cur_params['rid'] = show.tvrid
             # if we can't then fall back on a very basic name search
             else:
-                cur_params['q'] = sanitizeSceneName(cur_exception).replace('.', '_')
-    
+                cur_params['q'] = helpers.sanitizeSceneName(cur_exception).replace('.', '_')
+
             if season != None:
                 # air-by-date means &season=2010&q=2010.03, no other way to do it atm
                 if show.air_by_date:
@@ -101,29 +101,29 @@ class NewznabProvider(generic.NZBProvider):
 
             # hack to only add a single result if it's a rageid search
             if not ('rid' in cur_params and to_return):
-                to_return.append(cur_params) 
+                to_return.append(cur_params)
 
         return to_return
 
     def _get_episode_search_strings(self, ep_obj):
-        
+
         params = {}
 
         if not ep_obj:
             return [params]
-        
+
         # search directly by tvrage id
         if ep_obj.show.tvrid:
             params['rid'] = ep_obj.show.tvrid
         # if we can't then fall back on a very basic name search
         else:
-            params['q'] = sanitizeSceneName(ep_obj.show.name).replace('.', '_')
+            params['q'] = helpers.sanitizeSceneName(ep_obj.show.name).replace('.', '_')
 
         if ep_obj.show.air_by_date:
             date_str = str(ep_obj.airdate)
-            
+
             params['season'] = date_str.partition('-')[0]
-            params['ep'] = date_str.partition('-')[2].replace('-','/')
+            params['ep'] = date_str.partition('-')[2].replace('-', '/')
         else:
             params['season'] = ep_obj.season
             params['ep'] = ep_obj.episode
@@ -136,13 +136,13 @@ class NewznabProvider(generic.NZBProvider):
             # add new query strings for exceptions
             name_exceptions = scene_exceptions.get_scene_exceptions(ep_obj.show.tvdbid)
             for cur_exception in name_exceptions:
-                
-                # don't add duplicates 
+
+                # don't add duplicates
                 if cur_exception == ep_obj.show.name:
                     continue
 
                 cur_return = params.copy()
-                cur_return['q'] = sanitizeSceneName(cur_exception).replace('.', '_')
+                cur_return['q'] = helpers.sanitizeSceneName(cur_exception).replace('.', '_')
                 to_return.append(cur_return)
 
         return to_return
@@ -160,23 +160,27 @@ class NewznabProvider(generic.NZBProvider):
         if parsedXML.documentElement.tagName == 'error':
             code = parsedXML.documentElement.getAttribute('code')
             if code == '100':
-                raise exceptions.AuthException("Your API key for "+self.name+" is incorrect, check your config.")
+                raise exceptions.AuthException("Your API key for " + self.name + " is incorrect, check your config.")
             elif code == '101':
-                raise exceptions.AuthException("Your account on "+self.name+" has been suspended, contact the administrator.")
+                raise exceptions.AuthException("Your account on " + self.name + " has been suspended, contact the administrator.")
             elif code == '102':
-                raise exceptions.AuthException("Your account isn't allowed to use the API on "+self.name+", contact the administrator")
+                raise exceptions.AuthException("Your account isn't allowed to use the API on " + self.name + ", contact the administrator")
             else:
-                logger.log(u"Unknown error given from "+self.name+": "+parsedXML.documentElement.getAttribute('description'), logger.ERROR)
+                logger.log(u"Unknown error given from " + self.name + ": "+parsedXML.documentElement.getAttribute('description'), logger.ERROR)
                 return False
 
         return True
 
-    def _doSearch(self, search_params, show=None):
+    def _doSearch(self, search_params, show=None, max_age=0):
 
         params = {"t": "tvsearch",
                   "maxage": sickbeard.USENET_RETENTION,
                   "limit": 100,
                   "cat": '5030,5040'}
+
+        # if max_age is set, use it, don't allow it to be missing
+        if max_age or not params['maxage']:
+            params['maxage'] = max_age
 
         # hack this in for now
         if self.getID() == 'nzbs_org':
@@ -193,7 +197,7 @@ class NewznabProvider(generic.NZBProvider):
         logger.log(u"Search url: " + searchURL, logger.DEBUG)
 
         data = self.getURL(searchURL)
-        
+
         if not data:
             return []
 
@@ -205,15 +209,15 @@ class NewznabProvider(generic.NZBProvider):
             parsedXML = parseString(data)
             items = parsedXML.getElementsByTagName('item')
         except Exception, e:
-            logger.log(u"Error trying to load "+self.name+" RSS feed: "+ex(e), logger.ERROR)
-            logger.log(u"RSS data: "+data, logger.DEBUG)
+            logger.log(u"Error trying to load " + self.name + " RSS feed: " + ex(e), logger.ERROR)
+            logger.log(u"RSS data: " + data, logger.DEBUG)
             return []
 
         if not self._checkAuthFromData(data):
             return []
 
         if parsedXML.documentElement.tagName != 'rss':
-            logger.log(u"Resulting XML from "+self.name+" isn't RSS, not parsing it", logger.ERROR)
+            logger.log(u"Resulting XML from " + self.name + " isn't RSS, not parsing it", logger.ERROR)
             return []
 
         results = []
@@ -222,7 +226,7 @@ class NewznabProvider(generic.NZBProvider):
             (title, url) = self._get_title_and_url(curItem)
 
             if not title or not url:
-                logger.log(u"The XML returned from the "+self.name+" RSS feed is incomplete, this result is unusable: "+data, logger.ERROR)
+                logger.log(u"The XML returned from the " + self.name + " RSS feed is incomplete, this result is unusable: " + data, logger.ERROR)
                 continue
 
             results.append(curItem)
@@ -231,22 +235,41 @@ class NewznabProvider(generic.NZBProvider):
 
     def findPropers(self, date=None):
 
-        return []
-
+        search_terms = ['.proper.', '.repack.']
         results = []
 
-        for curResult in self._doGeneralSearch("proper repack"):
+        cache_results = self.cache.listPropers(date)
+        results = [classes.Proper(x['name'], x['url'], datetime.datetime.fromtimestamp(x['time'])) for x in cache_results]
 
-            match = re.search('(\w{3}, \d{1,2} \w{3} \d{4} \d\d:\d\d:\d\d) [\+\-]\d{4}', curResult.findtext('pubDate'))
-            if not match:
-                continue
+        for term in search_terms:
+            for curResult in self._doSearch({'q': term}, max_age=4):
 
-            resultDate = datetime.datetime.strptime(match.group(1), "%a, %d %b %Y %H:%M:%S")
+                (title, url) = self._get_title_and_url(curResult)
 
-            if date == None or resultDate > date:
-                results.append(classes.Proper(curResult.findtext('title'), curResult.findtext('link'), resultDate))
+                description_node = curResult.getElementsByTagName('pubDate')[0]
+                descriptionStr = helpers.get_xml_text(description_node)
+
+                try:
+                    # we could probably do dateStr = descriptionStr but we want date in this format
+                    dateStr = re.search('(\w{3}, \d{1,2} \w{3} \d{4} \d\d:\d\d:\d\d) [\+\-]\d{4}', descriptionStr).group(1)
+                except:
+                    dateStr = None
+
+                if not dateStr:
+                    logger.log(u"Unable to figure out the date for entry " + title + ", skipping it")
+                    continue
+                else:
+
+                    resultDate = email.utils.parsedate(dateStr)
+                    if resultDate:
+                        resultDate = datetime.datetime(*resultDate[0:6])
+
+                if date == None or resultDate > date:
+                    search_result = classes.Proper(title, url, resultDate)
+                    results.append(search_result)
 
         return results
+
 
 class NewznabCache(tvcache.TVCache):
 
@@ -272,7 +295,7 @@ class NewznabCache(tvcache.TVCache):
 
         url = self.provider.url + 'api?' + urllib.urlencode(params)
 
-        logger.log(self.provider.name + " cache update URL: "+ url, logger.DEBUG)
+        logger.log(self.provider.name + " cache update URL: " + url, logger.DEBUG)
 
         data = self.provider.getURL(url)
 
