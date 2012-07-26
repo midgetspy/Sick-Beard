@@ -1,0 +1,38 @@
+#import sickbeard
+#from sickbeard.common import QueuePriority
+
+#set $priorities = $QueuePriority.getQueuePriorities($sickbeard.NZB_METHOD == "sabnzbd")
+<script type="text/javascript" charset="utf-8">
+<!--
+display_priorities = #if $sickbeard.DISPLAY_QUEUE_PRIORITIES then "true" else "false"#;
+nzb_method = "$sickbeard.NZB_METHOD";
+use_nzbs = #if $sickbeard.USE_NZBS then "true" else "false"#;
+//-->
+</script>
+<script type="text/javascript" src="$sbRoot/js/queuePriorityChooser.js?$sbPID"></script>
+<div id="queuePriorities">
+	<div class="field-pair">
+		<label for="priorityRecent" class="nocheck clearfix">
+		<span class="component-title">
+		<select name="priority_recent" id="priorityRecent">
+		#for $priority_value, $priority_string in $priorities.iteritems():
+		<option #if $select_priority_recent == $priority_value then "selected=\"selected\"" else ""# value="$priority_value" >$priority_string</option>
+		#end for
+		</select>
+		</span>
+		<span class="component-desc">Download queue priority for episodes that have aired within the last 7 days</span>
+		</label>
+	</div>
+	<div class="field-pair">
+		<label for="priorityOlder" class="nocheck clearfix">
+		<span class="component-title">
+		<select name="priority_older"  id="priorityOlder"> 
+		#for $priority_value, $priority_string in $priorities.iteritems():
+		<option #if $select_priority_older == $priority_value then "selected=\"selected\"" else ""# value="$priority_value" >$priority_string</option>
+		#end for
+		</select>
+		</span>
+		<span class="component-desc">Download queue priority for episodes that aired more than 7 days ago</span>
+		</label>
+	</div>
+</div>

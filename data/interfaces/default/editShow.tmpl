@@ -72,6 +72,11 @@ Air by date:
 <input type="checkbox" name="air_by_date" #if $show.air_by_date == 1 then "checked=\"checked\"" else ""# /><br />
 (check this if the show is released as Show.03.02.2010 rather than Show.S02E03) 
 <br /><br />
+
+#set global $select_priority_recent = $show.priority_recent 
+#set global $select_priority_older = $show.priority_older
+#include $os.path.join($sickbeard.PROG_DIR, "data/interfaces/default/inc_queuePriorityChooser.tmpl")
+<br />
 <input class="btn" type="submit" value="Submit" />
 </form>
 
