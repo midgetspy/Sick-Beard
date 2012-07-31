@@ -30,22 +30,114 @@ from sickbeard.exceptions import ex
 
 from sickbeard import logger
 
+from sickbeard import ui, search_queue
+from sickbeard.common import WANTED, statusStrings
+
+
 def logHelper (logMessage, logLevel=logger.MESSAGE):
     logger.log(logMessage, logLevel)
     return logMessage + u"\n"
 
-def processDir (dirName, nzbName=None, recurse=False):
+def setWanted(show, season, episode):
+    returnStr = ''
+    if show == None or season == None or episode == None:
+        errMsg = "Programming error: invalid setWanted paramaters"
+        ui.notifications.error('Error', errMsg)
+        returnStr += logHelper(u"Programming error: invalid setWanted paramaters")
+        return returnStr
+
+    showObj = sickbeard.helpers.findCertainShow(sickbeard.showList, show)
+
+    if showObj == None:
+        errMsg = "Show not in show list"
+        ui.notifications.error('Error', errMsg)
+        returnStr += logHelper(u"Error: show not in show list", logger.ERROR)
+        return returnStr
+
+    returnStr += logHelper(u"Attempting to set status on episode "+str(episode)+" to "+statusStrings[WANTED], logger.DEBUG)
+
+    epObj = showObj.getEpisode(season, episode)
+
+    if epObj == None:
+        returnStr += logHelper(u"Error: Episode couldn't be retrieved", logger.ERROR)
+        return returnStr
+
+    # figure out what segment the episode is in and remember it so we can backlog it
+    if epObj.show.air_by_date:
+        ep_segment = str(epObj.airdate)[:7]
+    else:
+        ep_segment = epObj.season
+
+
+    with epObj.lock:
+        epObj.status = int(WANTED)
+        epObj.saveToDB()
+
+    msg = "Backlog was automatically started for the following seasons of <b>"+showObj.name+"</b>:<br />"
+    msg += "<li>Season "+str(ep_segment)+"</li>"
+    returnStr += logHelper(u"Sending backlog for "+showObj.name+" season "+str(ep_segment)+" because some eps were set to wanted")
+    cur_backlog_queue_item = search_queue.BacklogQueueItem(showObj, ep_segment)
+    sickbeard.searchQueueScheduler.action.add_item(cur_backlog_queue_item)
+    msg += "</ul>"
+
+    ui.notifications.message("Backlog started", msg)
+
+    returnStr += logHelper(u"Successfully set to wanted", logger.DEBUG)
+
+    return returnStr
+
+def processDir (dirName, nzbName=None, recurse=False, failed=False):
     """
     Scans through the files in dirName and processes whatever media files it finds
     
     dirName: The folder name to look in
     nzbName: The NZB name which resulted in this folder being downloaded
     recurse: Boolean for whether we should descend into subfolders or not
+    failed: Boolean for whether or not the download failed
     """
 
     returnStr = ''
 
     returnStr += logHelper(u"Processing folder "+dirName, logger.DEBUG)
+
+    if failed:
+        if nzbName != None:
+            # Assume we're being passed an nzb name
+            # Will break on files w/o extensions but w/ periods in their name
+            if '.' in nzbName:
+                nzbName = nzbName.rpartition(".")[0]
+        else:
+            # Assume folder name = resource name
+            nzbName = ek.ek(os.path.basename, dirName)
+            returnStr += logHelper(u"nzb name not provided. Guessing from dir name: " + nzbName)
+
+        returnStr += logHelper(u"Failed download detected: " + nzbName)
+
+        myDB = db.DBConnection()
+        myDB.select("UPDATE history SET failed=1 WHERE resource=?", [nzbName])
+
+        if sickbeard.DELETE_FAILED:
+            returnStr += logHelper(u"Deleting folder of failed download " + dirName, logger.DEBUG)
+            try:
+                shutil.rmtree(dirName)
+            except (OSError, IOError), e:
+                returnStr += logHelper(u"Warning: Unable to remove the failed folder " + dirName + ": " + ex(e), logger.WARNING)
+
+        returnStr += logHelper(u"Setting episode back to Wanted")
+
+        sql_results = myDB.select("SELECT showid, season, episode FROM history WHERE resource=?", [nzbName])
+
+        if len(sql_results) == 0:
+            returnStr += logHelper(u"Not found in history, still considered Snatched: " + nzbName, logger.ERROR)
+            return returnStr
+
+        show = sql_results[0]["showid"]
+        season = sql_results[0]["season"]
+        episode = sql_results[0]["episode"]
+
+        returnStr += setWanted(show, season, episode)
+
+        return returnStr
 
     # if they passed us a real dir then assume it's the one we want
     if ek.ek(os.path.isdir, dirName):
@@ -62,11 +154,7 @@ def processDir (dirName, nzbName=None, recurse=False):
         returnStr += logHelper(u"Unable to figure out what folder to process. If your downloader and Sick Beard aren't on the same PC make sure you fill out your TV download dir in the config.", logger.DEBUG)
         return returnStr
 
-    # TODO: check if it's failed and deal with it if it is
-    if ek.ek(os.path.basename, dirName).startswith('_FAILED_'):
-        returnStr += logHelper(u"The directory name indicates it failed to extract, cancelling", logger.DEBUG)
-        return returnStr
-    elif ek.ek(os.path.basename, dirName).startswith('_UNDERSIZED_'):
+    if ek.ek(os.path.basename, dirName).startswith('_UNDERSIZED_'):
         returnStr += logHelper(u"The directory name indicates that it was previously rejected for being undersized, cancelling", logger.DEBUG)
         return returnStr
     elif ek.ek(os.path.basename, dirName).startswith('_UNPACK_'):

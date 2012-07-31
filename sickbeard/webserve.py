@@ -848,7 +848,7 @@ class ConfigPostProcessing:
     def savePostProcessing(self, naming_pattern=None, naming_multi_ep=None,
                     xbmc_data=None, mediabrowser_data=None, synology_data=None, sony_ps3_data=None, wdtv_data=None, tivo_data=None,
                     use_banner=None, keep_processed_dir=None, process_automatically=None, rename_episodes=None,
-                    move_associated_files=None, tv_download_dir=None, naming_custom_abd=None, naming_abd_pattern=None):
+                    move_associated_files=None, tv_download_dir=None, naming_custom_abd=None, naming_abd_pattern=None, delete_failed=None):
 
         results = []
 
@@ -885,11 +885,17 @@ class ConfigPostProcessing:
         else:
             naming_custom_abd = 0
 
+        if delete_failed == "on":
+            delete_failed = 1
+        else:
+            delete_failed = 0
+
         sickbeard.PROCESS_AUTOMATICALLY = process_automatically
         sickbeard.KEEP_PROCESSED_DIR = keep_processed_dir
         sickbeard.RENAME_EPISODES = rename_episodes
         sickbeard.MOVE_ASSOCIATED_FILES = move_associated_files
         sickbeard.NAMING_CUSTOM_ABD = naming_custom_abd
+        sickbeard.DELETE_FAILED = delete_failed
 
         sickbeard.metadata_provider_dict['XBMC'].set_config(xbmc_data)
         sickbeard.metadata_provider_dict['MediaBrowser'].set_config(mediabrowser_data)
@@ -1470,12 +1476,17 @@ class HomePostProcess:
         return _munge(t)
 
     @cherrypy.expose
-    def processEpisode(self, dir=None, nzbName=None, jobName=None, quiet=None):
+    def processEpisode(self, dirName=None, nzbName=None, jobName=None, quiet=None, failed="0"):
 
-        if not dir:
+        if failed == "0":
+            failed = False
+        else:
+            failed = True
+
+        if not dirName:
             redirect("/home/postprocess")
         else:
-            result = processTV.processDir(dir, nzbName)
+            result = processTV.processDir(dirName, nzbName, failed=failed)
             if quiet != None and int(quiet) == 1:
                 return result
 
