@@ -22,10 +22,17 @@
 import sys
 import autoProcessTV
 
-if len(sys.argv) < 2:
-    print "No folder supplied - is this being called from SABnzbd?"
+if len(sys.argv) < 8:
+    print "Not enough arguments received from SABnzbd. Please update it."
     sys.exit()
-elif len(sys.argv) >= 3:
-    autoProcessTV.processEpisode(sys.argv[1], sys.argv[2])
 else:
-    autoProcessTV.processEpisode(sys.argv[1])
+    autoProcessTV.processEpisode(sys.argv[1], sys.argv[2], sys.argv[7])
+
+# SABnzbd argv:
+# 1	The final directory of the job (full path)
+# 2	The original name of the NZB file
+# 3	Clean version of the job name (no path info and ".nzb" removed)
+# 4	Indexer's report number (if supported)
+# 5	User-defined category
+# 6	Group that the NZB was posted in e.g. alt.binaries.x
+# 7	Status of post processing. 0 = OK, 1=failed verification, 2=failed unpack, 3=1+21
