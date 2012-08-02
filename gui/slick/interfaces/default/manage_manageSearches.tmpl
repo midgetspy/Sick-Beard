@@ -2,7 +2,7 @@
 #import datetime
 #from sickbeard.common import *
 #set global $title="Manage Searches"
-
+#set global $header="Manage Searches"
 #set global $sbPath=".."
 
 #set global $topmenu="manage"#
@@ -10,13 +10,14 @@
 #include $os.path.join($sickbeard.PROG_DIR, "gui/slick/interfaces/default/inc_top.tmpl")
 
 <script type="text/javascript" src="$sbRoot/js/plotTooltip.js?$sbPID"></script>
-
+   #if $varExists('header') 
+   	<h1 class="header">$header</h1>
+   #else 
+   	<h1 class="title">$title</h1>
+   #end if
 
 <h3>Backlog Search:</h3>
-<a class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-icon-primary" href="$sbRoot/manage/manageSearches/pauseBacklog?paused=#if $backlogPaused then "0" else "1"#">
-<span class="ui-button-icon-primary ui-icon #if $backlogPaused then "ui-icon-play" else "ui-icon-pause"#"></span>
-<span style="display: inline;" class="ui-button-text">#if $backlogPaused then "Unpause" else "Pause"# </span>
-</a>
+<a class="btn" href="$sbRoot/manage/manageSearches/pauseBacklog?paused=#if $backlogPaused then "0" else "1"#"><i class="#if $backlogPaused then "icon-play" else "icon-pause"#"></i> #if $backlogPaused then "Unpause" else "Pause"#</a> 
 #if not $backlogRunning:
 Not in progress<br />
 #else:
@@ -26,10 +27,7 @@ Currently running<br />
 
 <br />
 <h3>Daily Episode Search:</h3>
-<a class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-icon-primary" href="$sbRoot/manage/manageSearches/forceSearch">
-<span class="ui-button-icon-primary ui-icon ui-icon-info"></span>
-<span style="display: inline;" class="ui-button-text">Force</span>
-</a> 
+<a class="btn" href="$sbRoot/manage/manageSearches/forceSearch"><i class="icon-exclamation-sign"></i> Force</a> 
 #if not $searchStatus:
 Not in progress<br />
 #else:
@@ -38,10 +36,7 @@ In Progress<br />
 <br />
 
 <h3>Version Check:</h3>
-<a class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-icon-primary" href="$sbRoot/manage/manageSearches/forceVersionCheck">
-<span class="ui-button-icon-primary ui-icon ui-icon-circle-check"></span>
-<span style="display: inline;" class="ui-button-text">Force Check</span>
-</a>
+<a class="btn" href="$sbRoot/manage/manageSearches/forceVersionCheck"><i class="icon-check"></i> Force Check</a>
 <br />
 
 <br />

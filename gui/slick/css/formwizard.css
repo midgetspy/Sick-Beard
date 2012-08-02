@@ -4,11 +4,13 @@ overflow: auto;
 width: 800px;
 border-width:0;
 padding:5px;
+top: -25px !important;
 }
 
 legend.legendStep{
 font:bold 16px Arial;
-color: #57442B;
+color: #343434;
+display: none;
 }
 
 div.stepsguide{ /*div that contains all the "steps" text located at top of form */ 
@@ -25,14 +27,14 @@ font: bold 24px Arial;
 float:left;
 }
 div.stepsguide .step p {
-border-bottom: 4px solid #57442B;
+border-bottom: 4px solid #222222;
 }
 
 div.stepsguide .disabledstep{
 color:#C4C4C4;
 }
 div.stepsguide .disabledstep p {
-border-bottom: 4px solid #8A775E;
+border-bottom: 4px solid #C4C4C4;
 }
 
 div.stepsguide .step .smalltext{
@@ -53,7 +55,7 @@ border-radius:6px;
 -webkit-border-radius:6px;
 -moz-border-radius:6px;
 padding:3px 6px;
-background:#57442B;
+background:#343434;
 color:white;
 cursor:hand;
 cursor:pointer;
@@ -61,9 +63,30 @@ cursor:pointer;
 
 .stepDiv {padding: 15px;}
 
+input:not(.btn){float:left;margin-right:6px;margin-top:5px;padding-top:4px;padding-bottom:4px;padding-right:4px;padding-left:4px;border-bottom-left-radius:3px;border-bottom-right-radius:3px;border-top-left-radius:3px;border-top-right-radius:3px;border-top-width: 1px;
+    border-left-width: 1px;
+    border-left-style: solid;
+    border-bottom-color: #CCCCCC;
+    border-right-color: #CCCCCC;
+    border-left-color: #CCCCCC;
+    border-right-style: solid;
+    border-bottom-left-radius: 3px;
+    border-bottom-right-radius: 3px;
+    border-bottom-style: solid;
+    border-bottom-width: 1px;
+    border-right-width: 1px;
+    border-right-style: solid;
+    border-right-width-value: 1px;
+    border-top-color: #CCCCCC;
+    border-top-left-radius: 3px;
+    border-top-right-radius: 3px;
+    border-top-style: solid;
+    border-top-width: 1px;
+}
+
 /* step 3 related */
 
-#customQualityWrapper { height: 175px; overflow: auto; }
+#customQualityWrapper { /*height: 190px*/; overflow: auto; }
 #customQualityWrapper div.component-group-desc{float:left;width:165px;}
-#customQualityWrapper div.component-group-desc p{width:85%;font-size:1.2em;color:#666;margin:.8em 0;}
+#customQualityWrapper div.component-group-desc p{width:85%;font-size:1em;color:#666;margin:.8em 0;}
 #customQualityWrapper div.component-group-desc p.note{width:90%;font-size:1.2em;color:#333;margin:.8em 0;}

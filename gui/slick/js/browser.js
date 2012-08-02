@@ -163,7 +163,7 @@
         options = $.extend(options, {initialDir: initialDir});
 
         // append the browse button and give it a click behavior
-        return options.field.addClass('fileBrowserField').after($('<input type="button" value="Browse&hellip;" class="fileBrowser" />').click(function () {
+        return options.field.addClass('fileBrowserField').after($('<input type="button" value="Browse&hellip;" class="btn fileBrowser" />').click(function () {
             $(this).nFileBrowser(callback, options);
             return false;
         }));

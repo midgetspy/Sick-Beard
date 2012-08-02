@@ -6,9 +6,9 @@ $(document).ready(function(){
 
     $(".enabler").click(function() {
         if ($(this).prop('checked'))
-            $('#content_'+$(this).attr('id')).show();
+            $('#content_'+$(this).attr('id')).fadeIn("fast", "linear");
         else
-            $('#content_'+$(this).attr('id')).hide();
+            $('#content_'+$(this).attr('id')).fadeOut("fast", "linear");
   });
 
     // bind 'myForm' and provide a simple callback function 

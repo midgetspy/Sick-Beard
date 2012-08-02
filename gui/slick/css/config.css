@@ -1,10 +1,12 @@
 #config{text-align:center;padding:0 0px 20px 0;font-size: 12px;}
-#config *{font-family:Verdana, sans-serif;}
+#config /**{font-family:Verdana, sans-serif;}*/
+#config *{font-family: "Helvetica Neue", Helvetica, Arial, Geneva, sans-serif;}
+#config a:hover {color: #005580 !important;/*text-decoration: underline;*/}
 #config h3 a {text-decoration: none;font-size: 18px;}
 #config h3 img {vertical-align: text-bottom; padding-right: 5px;}
 #config ul{list-style-type:none;}
 #config h3{font-size:1.5em;color:#000;}
-#config h4{font-size:1em;color:#333;text-transform:uppercase;margin:0 0 .2em;}
+#config h4{font-size:1em;color:#333;text-transform:uppercase;margin:0 0 .2em;line-height: 12px;margin-top: 2px;}
 #config h5{font-size:1em;color:#000;margin:0 0 .2em;}
 #config p{font-size:1.2em;line-height:1.3;}
 #config .path{font-size:1em;color:#333;font-family:Verdana;}
@@ -17,17 +19,38 @@
 #config .component-group-desc{float:left;width:235px;}
 #config .component-group-desc h3{font-size:1.5em;}
 #config .component-group-desc p{width:85%;font-size:1.0em;color:#666;margin:.8em 0;}
-#config .component-group-desc p.note{width:90%;font-size:1.2em;color:#333;margin:.8em 0;}
+#config .component-group-desc p.note{width:90%;/*font-size:1.2em*/;color:#333;margin:.8em 0;}
 #config .component-group-list{float:left;width:600px;margin-top:16px;}
+
 #config fieldset{border:0;outline:0;}
 #config div.field-pair{margin:.9em 0 1.4em;}
-#config div.field-pair input{float:left;margin-right:6px;margin-top:5px;}
+#config div.field-pair input:not(.btn){float:left;margin-right:6px;margin-top:5px;padding-top:4px;padding-bottom:4px;padding-right:4px;padding-left:4px;border-bottom-left-radius:3px;border-bottom-right-radius:3px;border-top-left-radius:3px;border-top-right-radius:3px;border-top-width: 1px;
+    border-left-width: 1px;
+    border-left-style: solid;
+    border-bottom-color: #CCCCCC;
+    border-right-color: #CCCCCC;
+    border-left-color: #CCCCCC;
+    border-right-style: solid;
+    border-bottom-left-radius: 3px;
+    border-bottom-right-radius: 3px;
+    border-bottom-style: solid;
+    border-bottom-width: 1px;
+    border-right-width: 1px;
+    border-right-style: solid;
+    border-right-width-value: 1px;
+    border-top-color: #CCCCCC;
+    border-top-left-radius: 3px;
+    border-top-right-radius: 3px;
+    border-top-style: solid;
+    border-top-width: 1px;
+}
 #config label.nocheck,#config div.providerDiv,#config div #customQuality{padding-left:20px;}
-#config label span.component-title{font-size:1.0em;font-weight:700;float:left;width:175px;margin-right:10px;}
-#config label span.component-desc{font-size:1.1em; margin-left:190px; display:block; font-size:11px;}
+#config label span.component-title{font-size:13px;font-weight:700;float:left;width:175px;margin-right:10px;}
+#config label span.component-desc{font-size:11px; margin-left:190px; display:block; font-size:11px;}
 #config label.nocheck span.component-desc{margin-left:170px;}
-#config div.field-pair select{font-size:1.1em;border:1px solid #d4d0c8;}
-#config div.field-pair select option{line-height:1.4;padding:0 10px; border-bottom: 1px dotted #D7D7D7;}
+#config div.field-pair select{font-size:12px;}
+/* #config div.field-pair select{/*font-size:1.1em*//*;border:1px solid #d4d0c8;padding-top:4px;padding-bottom:4px;padding-right:4px;padding-left:4px;border-bottom-left-radius:3px;border-bottom-right-radius:3px;border-top-left-radius:3px;border-top-right-radius:3px;}
+#config div.field-pair select option{line-height:1.4;padding:0 10px; border-bottom: 1px dotted #D7D7D7;}*/
 #config-settings{float:right;width:200px;background:#fffae5;border-bottom:1px dotted #666;border-top:1px solid #999;margin-right:20px;padding:20px 0 30px;}
 #config-settings .config-settings-group{border-bottom:1px dotted #999;padding-bottom:15px;margin:0 15px 15px;}
 #config-settings .config-settings-group h2{margin-bottom:0;}
@@ -40,7 +63,7 @@
 * html .clearfix{height:1%;}
 /* End hide from IE-mac */
 #provider_order_list{list-style-type:none;width:250px;margin:0;padding:0;}
-#provider_order_list li{font-size:1.3em;height:1.3em;font-family:Verdana;margin:0 5px 5px;padding:6px;}
+#provider_order_list li{font-size:15px;font-weight:bold;height:1.3em;font-family:Verdana;margin:0 5px 5px;padding:6px;}
 #provider_order_list input{margin:0px 2px;}
 .providerDiv{display:none;padding-left:20px;}
 #config div.metadataDiv{display:none;}
@@ -64,4 +87,40 @@
     text-align: center;
     font-size: 1.3em;
     background: #ffecac;
+}
+
+[class^="icon16-"], [class*=" icon16-"] {
+    background-image: url("/images/glyphicons-config.png");
+    background-position: -40px 0;
+    background-repeat: no-repeat;
+    display: inline-block;
+    height: 16px;
+    line-height: 16px;
+    vertical-align: text-top;
+    width: 16px;
+}
+
+.icon16-github {
+    background-position: 0 0;
+}
+.icon16-mirc {
+    background-position: -20px 0;
+}
+.icon16-sb {
+    background-position: -40px 0;
+}
+.icon16-web {
+    background-position: -60px 0;
+}
+.icon16-win {
+    background-position: -80px 0;
+}
+
+#config span.path {
+    background-color: #F5F1E4;
+    color: #6666FF;
+    padding-bottom: 3px;
+    padding-left: 6px;
+    padding-right: 6px;
+    padding-top: 3px;
 }

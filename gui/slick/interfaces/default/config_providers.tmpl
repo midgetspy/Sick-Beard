@@ -36,7 +36,7 @@ var show_nzb_providers = #if $sickbeard.USE_NZBS then "true" else "false"#;
             <div id="config-components">
                 <ul>
                 	<li><a href="#core-component-group1">Provider Priorities</a></li>
-                	<li><a href="#core-component-group2">Configure Built-In PRoviders</a></li>
+                	<li><a href="#core-component-group2">Configure Built-In Providers</a></li>
                   #if $sickbeard.USE_NZBS
                 	<li><a href="#core-component-group3">Configure Custom Newznab Providers</a></li>
                   #end if
@@ -47,13 +47,21 @@ var show_nzb_providers = #if $sickbeard.USE_NZBS then "true" else "false"#;
                     <div class="component-group-desc">
                         <h3>Provider Priorities</h3>
                         <p>Check off and drag the providers into the order you want them to be used.</p>
-                        <p class="note">At least one provider is required but two are recommended.</p>
-                        <p>NZB/Torrent providers can be toggled in <a href="$sbRoot/config/search">Search Settings</a></p>
-                        <p class="note"><span style="color: #654B24; font-size: 16px;">*</span> Provider does not support backlog searches at this time.</p>
-                        <p class="note"><span style="color: #654B24; font-size: 16px;">**</span> Provider supports <b>limited</b> backlog searches, all episodes/qualities may not be available.</p>
+                        <p>At least one provider is required but two are recommended.</p>
+
+                        #if not $sickbeard.USE_NZBS or not $sickbeard.USE_TORRENTS:
+                        <blockquote style="margin: 20px 0;">NZB/Torrent providers can be toggled in <b><a href="$sbRoot/config/search">Search Settings</a></b></blockquote>
+                        #else:
+                        <br/>
+                        #end if
+
+                        <div>
+                            <h4 class="note">*</h4><p class="note">Provider does not support backlog searches at this time.</p>
+                            <h4 class="note">**</h4><p class="note">Provider supports <b>limited</b> backlog searches, all episodes/qualities may not be available.</p>
+                        </div>
                     </div>
 
-                    <fieldset class="component-group-list">
+                    <fieldset class="component-group-list" style="margin-left: 50px; margin-top:36px">
                         <ul id="provider_order_list">
                         #for $curProvider in $sickbeard.providers.sortedProviderList():
                             #if $curProvider.providerType == $GenericProvider.NZB and not $sickbeard.USE_NZBS:
@@ -73,7 +81,7 @@ var show_nzb_providers = #if $sickbeard.USE_NZBS then "true" else "false"#;
                         #end for
                         </ul>
                         <input type="hidden" name="provider_order" id="provider_order" value="<%=" ".join([x.getID()+':'+str(int(x.isEnabled())) for x in sickbeard.providers.sortedProviderList()])%>"/>
-                        <br/><input type="submit" class="config_submitter" value="Save Changes" /><br/>
+                        <br/><input type="submit" class="btn config_submitter" value="Save Changes" /><br/>
                     </fieldset>
                 </div><!-- /component-group1 //-->
 
@@ -267,7 +275,7 @@ var show_nzb_providers = #if $sickbeard.USE_NZBS then "true" else "false"#;
 
 <!-- end div for editing providers -->
 
-                    <input type="submit" class="config_submitter" value="Save Changes" /><br/>
+                    <input type="submit" class="btn config_submitter" value="Save Changes" /><br/>
             
                     </fieldset>
                 </div><!-- /component-group2 //-->
@@ -318,10 +326,10 @@ var show_nzb_providers = #if $sickbeard.USE_NZBS then "true" else "false"#;
                             </label>
                         </div>
             <div id="newznab_add_div">
-                <input type="button" class="newznab_save" id="newznab_add" value="Add" />
+                <input class="btn" type="button" class="newznab_save" id="newznab_add" value="Add" />
             </div>
             <div id="newznab_update_div" style="display: none;">
-                <input type="button" class="newznab_delete" id="newznab_delete" value="Delete" />
+                <input class="btn" type="button" class="newznab_delete" id="newznab_delete" value="Delete" />
             </div> 
 </div>
 
@@ -329,7 +337,7 @@ var show_nzb_providers = #if $sickbeard.USE_NZBS then "true" else "false"#;
                 </div><!-- /component-group3 //-->
 #end if
                     
-            <br/><input type="submit" class="config_submitter" value="Save Changes" /><br/>
+            <br/><input type="submit" class="btn config_submitter" value="Save Changes" /><br/>
                 
             </div><!-- /config-components //-->
 

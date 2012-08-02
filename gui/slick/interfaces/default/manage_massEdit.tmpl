@@ -26,7 +26,7 @@
         #for $cur_dir in $root_dir_list:
         #set $cur_index = $root_dir_list.index($cur_dir)
         <div style="padding: 6px 0 3px 25px;">
-            <input type="button" class="edit_root_dir" id="edit_root_dir_$cur_index" value="Edit" />
+            <input class="btn edit_root_dir" type="button" class="edit_root_dir" id="edit_root_dir_$cur_index" value="Edit" />
             $cur_dir => <span id="display_new_root_dir_$cur_index">$cur_dir</span>
         </div>
         <input type="hidden" name="orig_root_dir_$cur_index" value="$cur_dir" />
@@ -99,7 +99,7 @@
 </div>
 
 <div class="optionWrapper" style="text-align: center;">
-    <input type="submit" value="Submit" /><br />
+    <input type="submit" value="Submit" class="btn btn-primary" /><br />
 </div>
 
 </form>

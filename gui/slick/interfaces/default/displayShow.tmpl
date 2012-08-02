@@ -110,12 +110,6 @@ replace with: <b><%=", ".join([Quality.qualityStrings[x] for x in bestQualities]
 #end if
 </table>
 </div>
-	<div class="float-right" id="checkboxControls">
-	<label for="wanted"><span class="wanted">Wanted: <b>$epCounts[$Overview.WANTED]</b> <input type="checkbox" id="wanted" checked="checked" /></span></label>
-	<label for="qual"><span class="qual">Low Quality: <b>$epCounts[$Overview.QUAL]</b> <input type="checkbox" id="qual" checked="checked" /></span></label>
-	<label for="good"><span class="good">Downloaded: <b>$epCounts[$Overview.GOOD]</b> <input type="checkbox" id="good" checked="checked" /></span></label>
-	<label for="skipped"><span class="skipped">Skipped: <b>$epCounts[$Overview.SKIPPED]</b> <input type="checkbox" id="skipped" checked="checked" /></span></label>
-	</div>
 </div>
 
 
@@ -124,24 +118,33 @@ replace with: <b><%=", ".join([Quality.qualityStrings[x] for x in bestQualities]
 
 
 <div style="clear:both;" class="clearfix"></div>
-<div class="float-right" id="actions">
-<span class="selectAll"><a href="#" onclick="return false;" class="seriesCheck">Select Filtered Episodes</a></span> 
-<span class="clearAll"><a href="#" onclick="return false;" class="clearAll">Clear All</a></span>
-</div>
 
 <div class="float-left">
-Change selected episodes to 
-<select id="statusSelect">
-#for $curStatus in [$WANTED, $SKIPPED, $ARCHIVED, $IGNORED] + $Quality.DOWNLOADED:
-#if $curStatus == $DOWNLOADED:
-#continue
-#end if
-<option value="$curStatus">$statusStrings[$curStatus]</option>
-#end for
-</select>
-<input type="hidden" id="showID" value="$show.tvdbid" />
-<input type="button" id="changeStatus" value="Go" /><br />
+	Change selected episodes to 
+	<select id="statusSelect">
+	#for $curStatus in [$WANTED, $SKIPPED, $ARCHIVED, $IGNORED] + $Quality.DOWNLOADED:
+	#if $curStatus == $DOWNLOADED:
+	#continue
+	#end if
+	<option value="$curStatus">$statusStrings[$curStatus]</option>
+	#end for
+	</select>
+	<input type="hidden" id="showID" value="$show.tvdbid" />
+	<input class="btn" type="button" id="changeStatus" value="Go" />
 </div>
+
+	<div class="float-right clearfix" id="checkboxControls" style="margin-top: 3px;">
+		<label for="wanted"><span class="wanted">Wanted: <b>$epCounts[$Overview.WANTED]</b> <input type="checkbox" id="wanted" checked="checked" /></span></label>
+		<label for="qual"><span class="qual">Low Quality: <b>$epCounts[$Overview.QUAL]</b> <input type="checkbox" id="qual" checked="checked" /></span></label>
+		<label for="good"><span class="good">Downloaded: <b>$epCounts[$Overview.GOOD]</b> <input type="checkbox" id="good" checked="checked" /></span></label>
+		<label for="skipped"><span class="skipped">Skipped: <b>$epCounts[$Overview.SKIPPED]</b> <input type="checkbox" id="skipped" checked="checked" /></span></label>
+    </div>
+    <div class="pull-right">
+        <button class="btn btn-mini seriesCheck"><a>Select Filtered Episodes</a></button> 
+        <button class="btn btn-mini clearAll"><a>Clear All</a></button>
+	</div>
+<br />	
+
 <table class="sickbeardTable" cellspacing="1" border="0" cellpadding="0">
     
 #for $epResult in $sqlResults:
