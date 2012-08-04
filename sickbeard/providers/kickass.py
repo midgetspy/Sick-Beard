@@ -152,7 +152,7 @@ class KICKASSProvider(generic.TorrentProvider):
         
     def _get_title_and_url(self, item):
         title = item.findtext('title')
-        url = item.findtext('torrentLink').replace('&amp;','&')
+        url = item.find('enclosure').attrib["url"].replace('&amp;','&')
 
         return (title, url)
 
@@ -170,15 +170,6 @@ class KICKASSProvider(generic.TorrentProvider):
             return self.downloadFromTorrentCache(result.name, url)
         except Exception, e:
             return False
-            #try:
-            #    url = "http://torrage.com/" + result.url.replace('http://torcache.net/','')
-            #    return self.downloadFromTorrentCache(result.name, url)
-            #except Exception, e:
-            #    try:
-            #        url = "http://zoink.it/" + result.url.replace('http://torcache.net/','')
-            #        return self.downloadFromTorrentCache(result.name, url)
-            #    except Exception, e:
-            #        return False
         
 class KICKASSCache(tvcache.TVCache):
 

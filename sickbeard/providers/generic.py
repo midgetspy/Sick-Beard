@@ -412,5 +412,5 @@ class TorrentProvider(GenericProvider):
             helpers.chmodAsParent(torrentFileName)
             return self._verify_download(torrentFileName)
         except Exception, e:
-            logger.log("Unable to download or save torrent: "+str(e).decode('utf-8') + str(data).decode('utf-8'), logger.ERROR)
+            logger.log("Unable to download or save torrent: "+str(e).decode('utf-8'), logger.ERROR)
             raise
