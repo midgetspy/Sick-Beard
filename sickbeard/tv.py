@@ -1452,5 +1452,7 @@ class TVEpisode(object):
         if naming_use_periods:
             finalName = re.sub("\s+", ".", finalName)
 
+        finalName = ''.join(i for i in finalName if i not in r'\/:*?"<>|')
+
         return finalName
 
