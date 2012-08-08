@@ -148,7 +148,7 @@ class PostProcessor(object):
         
         Returns: A list containing all files which are associated to the given file
         """
-    
+
         if not file_path:
             return []
 
@@ -164,6 +164,9 @@ class PostProcessor(object):
         base_name = re.sub(r'[\[\]\*\?]', r'[\g<0>]', base_name)
     
         for associated_file_path in ek.ek(glob.glob, base_name+'*'):
+            # only add associated to list
+            if associated_file_path == file_path:
+                continue
             # only list it if the only non-shared part is the extension
             if '.' in associated_file_path[len(base_name):]:
                 continue
@@ -179,20 +182,19 @@ class PostProcessor(object):
         file_path: The file to delete
         associated_files: True to delete all files which differ only by extension, False to leave them
         """
-        
+
         if not file_path:
             return
-        
+
         # figure out which files we want to delete
+        file_list = [file_path]
         if associated_files:
-            file_list = self._list_associated_files(file_path)
-        else:
-            file_list = [file_path]
+            file_list = file_list + self._list_associated_files(file_path)
 
         if not file_list:
-            self._log(u"There were no files associated with "+file_path+", not deleting anything", logger.DEBUG)
+            self._log(u"There were no files associated with " + file_path + ", not deleting anything", logger.DEBUG)
             return
-        
+
         # delete the file and any other files which we want to delete
         for cur_file in file_list:
             self._log(u"Deleting file "+cur_file, logger.DEBUG)
@@ -221,13 +223,12 @@ class PostProcessor(object):
             self._log(u"Must provide an action for the combined file operation", logger.ERROR)
             return
 
+        file_list = [file_path]
         if associated_files:
-            file_list = self._list_associated_files(file_path)
-        else:
-            file_list = [file_path]
+            file_list = file_list + self._list_associated_files(file_path)
 
         if not file_list:
-            self._log(u"There were no files associated with "+file_path+", not moving anything", logger.DEBUG)
+            self._log(u"There were no files associated with " + file_path + ", not moving anything", logger.DEBUG)
             return
         
         # deal with all files
