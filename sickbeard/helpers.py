@@ -433,7 +433,7 @@ def make_dirs(path):
     parents
     """
 
-    logger.log(u"Checking if the path "+path+" already exists", logger.DEBUG)
+    logger.log(u"Checking if the path " + path + " already exists", logger.DEBUG)
 
     sofar = ''
     folder_list = path.split(os.path.sep)
@@ -447,10 +447,12 @@ def make_dirs(path):
             continue
 
         try:
-            logger.log(u"Folder "+sofar+" didn't exist, creating it", logger.DEBUG)
+            logger.log(u"Folder " + sofar + " didn't exist, creating it", logger.DEBUG)
             ek.ek(os.mkdir, sofar)
-            chmodAsParent(sofar)
-        except OSError, IOError:
+            # use normpath to remove end separator, otherwise checks permissions against itself
+            chmodAsParent(ek.ek(os.path.normpath, sofar))
+        except (OSError, IOError), e:
+            logger.log(u"Failed creating " + sofar + " : " + ex(e), logger.ERROR)
             return False
     
     return True
