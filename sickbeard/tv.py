@@ -1003,24 +1003,25 @@ class TVEpisode(object):
 
         sqlResult = self.loadFromDB(season, episode)
 
-        # only load from NFO if we didn't load from DB
-        if ek.ek(os.path.isfile, self.location) and self.name == "":
-            try:
-                self.loadFromNFO(self.location)
-            except exceptions.NoNFOException:
-                logger.log(str(self.show.tvdbid) + ": There was an error loading the NFO for episode " + str(season) + "x" + str(episode), logger.ERROR)
-                pass
+        if not sqlResult:
+            # only load from NFO if we didn't load from DB
+            if ek.ek(os.path.isfile, self.location):
+                try:
+                    self.loadFromNFO(self.location)
+                except exceptions.NoNFOException:
+                    logger.log(str(self.show.tvdbid) + ": There was an error loading the NFO for episode " + str(season) + "x" + str(episode), logger.ERROR)
+                    pass
 
-        # if we tried loading it from NFO and didn't find the NFO, use TVDB
-        if self.hasnfo == False:
-            try:
-                result = self.loadFromTVDB(season, episode)
-            except exceptions.EpisodeDeletedException:
-                result = False
+                # if we tried loading it from NFO and didn't find the NFO, use TVDB
+                if self.hasnfo == False:
+                    try:
+                        result = self.loadFromTVDB(season, episode)
+                    except exceptions.EpisodeDeletedException:
+                        result = False
 
-            # if we failed TVDB, NFO *and* SQL then fail
-            if result == False and not sqlResult:
-                raise exceptions.EpisodeNotFoundException("Couldn't find episode " + str(season) + "x" + str(episode))
+                    # if we failed SQL *and* NFO, TVDB then fail
+                    if result == False:
+                        raise exceptions.EpisodeNotFoundException("Couldn't find episode " + str(season) + "x" + str(episode))
         
         # don't update if not needed
         if self.dirty:
