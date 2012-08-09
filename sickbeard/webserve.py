@@ -2561,6 +2561,9 @@ class Home:
         if showObj == None:
             return _genericMessage("Error", "Show not in show list")
 
+        # Make sure episode location in database is same as files on disk
+        showObj.refreshDir()
+
         ep_obj_list = []
 
         myDB = db.DBConnection()
@@ -2572,12 +2575,11 @@ class Home:
             return _genericMessage("Error", "Can't rename episodes when the show dir is missing.")
 
         for cur_ep in ep_list:
-
             # get the episode object
             cur_ep_obj = showObj.makeEpFromFile(cur_ep["location"])
-            
+
             ep_obj_list.append(cur_ep_obj)
-                
+
         t = PageTemplate(file="testRename.tmpl")
         t.submenu = [ { 'title': 'Edit', 'path': 'home/editShow?show=%d'%showObj.tvdbid } ]
         t.ep_obj_list = ep_obj_list
