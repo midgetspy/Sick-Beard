@@ -104,8 +104,9 @@ class NMJv2Notifier:
                 time.sleep (300.0 / 1000.0)
                 handle2 = urllib2.urlopen(req)
                 response2 = handle2.read()
-                return1 = len(response1)
-                return2 = len(response2)
+                # searching for string directly instead of parsing XML due to syntax error in XML response
+                return1 = response1.find("<returnValue>0</returnValue>")
+                return2 = response2.find("<returnValue>0</returnValue>")
                 if return1 > 0 and return2 > 0:
                     logger.log(u"NMJ scan update command send to host: %s" % (host))
                     return True
