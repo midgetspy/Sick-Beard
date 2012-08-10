@@ -28,6 +28,7 @@ import notifo
 import boxcar
 import pushover
 import nmj
+import nmjv2
 import synoindex
 import trakt
 import pytivo
@@ -45,6 +46,7 @@ boxcar_notifier = boxcar.BoxcarNotifier()
 pushover_notifier = pushover.PushoverNotifier()
 libnotify_notifier = libnotify.LibnotifyNotifier()
 nmj_notifier = nmj.NMJNotifier()
+nmjv2_notifier = nmjv2.NMJv2Notifier()
 synoindex_notifier = synoindex.synoIndexNotifier()
 trakt_notifier = trakt.TraktNotifier()
 pytivo_notifier = pytivo.pyTivoNotifier()
@@ -60,6 +62,7 @@ notifiers = [
     prowl_notifier,
     twitter_notifier,
     nmj_notifier,
+    nmjv2_notifier,
     synoindex_notifier,
     boxcar_notifier,
     pushover_notifier,

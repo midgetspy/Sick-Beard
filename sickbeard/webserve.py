@@ -1147,7 +1147,7 @@ class ConfigNotifications:
                           use_boxcar=None, boxcar_notify_onsnatch=None, boxcar_notify_ondownload=None, boxcar_username=None,
                           use_pushover=None, pushover_notify_onsnatch=None, pushover_notify_ondownload=None, pushover_userkey=None,
                           use_libnotify=None, libnotify_notify_onsnatch=None, libnotify_notify_ondownload=None,
-                          use_nmj=None, nmj_host=None, nmj_database=None, nmj_mount=None, use_synoindex=None,
+                          use_nmj=None, nmj_host=None, nmj_database=None, nmj_mount=None, use_nmjv2=None, nmjv2_host=None, nmjv2_database=None, use_synoindex=None,
                           use_trakt=None, trakt_username=None, trakt_password=None, trakt_api=None,
                           use_pytivo=None, pytivo_notify_onsnatch=None, pytivo_notify_ondownload=None, pytivo_update_library=None, 
                           pytivo_host=None, pytivo_share_name=None, pytivo_tivo_name=None,
@@ -1289,6 +1289,11 @@ class ConfigNotifications:
             use_nmj = 1
         else:
             use_nmj = 0
+            
+        if use_nmjv2 == "on":
+            use_nmjv2 = 1
+        else:
+            use_nmjv2 = 0
 
         if use_synoindex == "on":
             use_synoindex = 1
@@ -1393,6 +1398,10 @@ class ConfigNotifications:
         sickbeard.NMJ_HOST = nmj_host
         sickbeard.NMJ_DATABASE = nmj_database
         sickbeard.NMJ_MOUNT = nmj_mount
+
+        sickbeard.USE_NMJv2 = use_nmjv2
+        sickbeard.NMJv2_HOST = nmjv2_host
+        sickbeard.NMJv2_DATABASE = nmjv2_database
 
         sickbeard.USE_SYNOINDEX = use_synoindex
 
@@ -2101,6 +2110,25 @@ class Home:
         else:
             return '{"message": "Failed! Make sure your Popcorn is on and NMJ is running. (see Log & Errors -> Debug for detailed info)", "database": "", "mount": ""}'
 
+    @cherrypy.expose
+    def testNMJv2(self, host=None):
+        cherrypy.response.headers['Cache-Control'] = "max-age=0,no-cache,no-store"
+        
+        result = notifiers.nmjv2_notifier.test_notify(urllib.unquote_plus(host))
+        if result:
+            return "Successfull started the scan update"
+        else:
+            return "Test failed to start the scan update"
+        
+    @cherrypy.expose
+    def settingsNMJv2(self, host=None):
+        cherrypy.response.headers['Cache-Control'] = "max-age=0,no-cache,no-store"
+
+        result = notifiers.nmjv2_notifier.notify_settings(urllib.unquote_plus(host))
+        if result:
+            return '{"message": "Database found on %(host)s", "database": "%(database)s"}' % {"host": host, "database": sickbeard.NMJv2_DATABASE}
+        else:
+            return '{"message": "Failed! Make sure your Popcorn is on and NMJ is running. (see Log & Errors -> Debug for detailed info)", "database": "", "mount": ""}'
     @cherrypy.expose
     def testTrakt(self, api=None, username=None, password=None):
         cherrypy.response.headers['Cache-Control'] = "max-age=0,no-cache,no-store"

@@ -258,6 +258,57 @@
                     </fieldset>
                 </div><!-- /nmj component-group //-->
 
+				<div class="component-group clearfix">
+                    <div class="component-group-desc">
+                        <h3><a href="http://www.popcornhour.com/" onclick="window.open(this.href, '_blank'); return false;"><img src="$sbRoot/images/notifiers/nmj.gif" alt="" title="Networked Media Jukebox" width="16" height="16" /> NMJv2 </a></h3>
+                        <p>The Networked Media Jukebox, or NMJv2, is the official media jukebox interface made available for the Popcorn Hour 300-series.</p>
+                    </div>
+                    <fieldset class="component-group-list">
+                        <div class="field-pair">
+                            <input type="checkbox" class="enabler" name="use_nmjv2" id="use_nmjv2" #if $sickbeard.USE_NMJv2 then "checked=\"checked\"" else ""# />
+                            <label class="clearfix" for="use_nmjv2">
+                                <span class="component-title">Enable</span>
+                                <span class="component-desc">Should Sick Beard send update commands to NMJv2?</span>
+                            </label>
+                        </div>
+
+                        <div id="content_use_nmjv2">
+                            <div class="field-pair">
+                                <label class="nocheck clearfix">
+                                    <span class="component-title">Popcorn IP address</span>
+                                    <input type="text" name="nmjv2_host" id="nmjv2_host" value="$sickbeard.NMJv2_HOST" size="35" />
+                                </label>
+                                <label class="nocheck clearfix">
+                                    <span class="component-title">&nbsp;</span>
+                                    <span class="component-desc">IP of Popcorn 300-series (eg. 192.168.1.100)</span>
+                                </label>
+                            </div>
+                              <div class="field-pair">
+                                <label class="nocheck clearfix">
+                                    <span class="component-title">Find Database</span>
+                                  <input type="button" value="Find Database" id="settingsNMJv2" />
+                                </label>
+                                <label class="nocheck clearfix">
+                                    <span class="component-title">&nbsp;</span>
+                                    <span class="component-desc">The Popcorn Hour device must be powered on.</span>
+                                </label>
+                            </div>
+                            <div class="field-pair">
+                                <label class="nocheck clearfix">
+                                <span class="component-title">NMJv2 Database</span>
+                                <input type="text" name="nmjv2_database" id="nmjv2_database" value="$sickbeard.NMJv2_DATABASE" size="35" #if $sickbeard.NMJv2_DATABASE then "readonly=\"readonly\"" else ""# /></label>
+                                <label class="nocheck clearfix">
+                                    <span class="component-title">&nbsp;</span>
+                                    <span class="component-desc">Automatically filled via the 'Find Database' button.</span>
+                                </label>
+                            </div>
+						<div class="testNotification" id="testNMJv2-result">Click below to test.</div>
+						<input type="button" value="Test NMJv2" id="testNMJv2" />
+						<input type="submit" class="config_submitter" value="Save Changes" />
+                        </div><!-- /content_use_nmjv2 //-->
+
+                    </fieldset>
+                </div><!-- /nmjv2 component-group //-->
 
                 <div class="component-group clearfix">
                     <div class="component-group-desc">
