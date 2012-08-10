@@ -41,7 +41,7 @@ def fixStupidEncodings(x, silent=False):
     return None
 
 def fixListEncodings(x):
-    if type(x) != list:
+    if type(x) != list and type(x) != tuple:
         return x
     else:
         return filter(lambda x: x != None, map(fixStupidEncodings, x))
@@ -55,7 +55,7 @@ def ek(func, *args):
     else:
         result = func(*[x.encode(sickbeard.SYS_ENCODING) if type(x) in (str, unicode) else x for x in args])
 
-    if type(result) == list:
+    if type(result) in (list, tuple):
         return fixListEncodings(result)
     elif type(result) == str:
         return fixStupidEncodings(result)

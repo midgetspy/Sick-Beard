@@ -23,9 +23,10 @@ $(function () {
             position: {
                 viewport: $(window),
                 my: 'left center',
+                effect: false,
                 adjust: {
-                    y: -6,
-                    x: 3
+                    y: -8,
+                    x: 0
                 }
             },
             style: {

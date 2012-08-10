@@ -27,6 +27,8 @@ simple_test_cases = {
               'Show Name - S06E01 - -30-': parser.ParseResult(None, 'Show Name', 6, [1], '30-' ),
               'Show-Name-S06E01-720p': parser.ParseResult(None, 'Show-Name', 6, [1], '720p' ),
               'Show-Name-S06E01-1080i': parser.ParseResult(None, 'Show-Name', 6, [1], '1080i' ),
+              'Show.Name.S06E01.Other.WEB-DL': parser.ParseResult(None, 'Show Name', 6, [1], 'Other.WEB-DL' ),
+              'Show.Name.S06E01 Some-Stuff Here': parser.ParseResult(None, 'Show Name', 6, [1], 'Some-Stuff Here' ),
               },
               
               'fov': {
@@ -40,18 +42,21 @@ simple_test_cases = {
               'Show-Name-1x02-720p': parser.ParseResult(None, 'Show-Name', 1, [2], '720p'),
               'Show-Name-1x02-1080i': parser.ParseResult(None, 'Show-Name', 1, [2], '1080i'),
               'Show Name [05x12] Ep Name': parser.ParseResult(None, 'Show Name', 5, [12], 'Ep Name'),
+              'Show.Name.1x02.WEB-DL': parser.ParseResult(None, 'Show Name', 1, [2], 'WEB-DL'),
               },
 
               'standard_repeat': {
               'Show.Name.S01E02.S01E03.Source.Quality.Etc-Group': parser.ParseResult(None, 'Show Name', 1, [2,3], 'Source.Quality.Etc', 'Group'),
               'Show.Name.S01E02.S01E03': parser.ParseResult(None, 'Show Name', 1, [2,3]),
               'Show Name - S01E02 - S01E03 - S01E04 - Ep Name': parser.ParseResult(None, 'Show Name', 1, [2,3,4], 'Ep Name'),
+              'Show.Name.S01E02.S01E03.WEB-DL': parser.ParseResult(None, 'Show Name', 1, [2,3], 'WEB-DL'),
               },
               
               'fov_repeat': {
               'Show.Name.1x02.1x03.Source.Quality.Etc-Group': parser.ParseResult(None, 'Show Name', 1, [2,3], 'Source.Quality.Etc', 'Group'),
               'Show.Name.1x02.1x03': parser.ParseResult(None, 'Show Name', 1, [2,3]),
               'Show Name - 1x02 - 1x03 - 1x04 - Ep Name': parser.ParseResult(None, 'Show Name', 1, [2,3,4], 'Ep Name'),
+              'Show.Name.1x02.1x03.WEB-DL': parser.ParseResult(None, 'Show Name', 1, [2,3], 'WEB-DL'),
               },
 
               'bare': {
@@ -71,20 +76,23 @@ simple_test_cases = {
               'no_season': {
               'Show Name - 01 - Ep Name': parser.ParseResult(None, 'Show Name', None, [1], 'Ep Name'),
               '01 - Ep Name': parser.ParseResult(None, None, None, [1], 'Ep Name'),
+              'Show Name - 01 - Ep Name - WEB-DL': parser.ParseResult(None, 'Show Name', None, [1], 'Ep Name - WEB-DL'),
               },
 
               'no_season_general': {
-              'Deconstructed.E07.1080i.HDTV.DD5.1.MPEG2-TrollHD': parser.ParseResult(None, 'Deconstructed', None, [7], '1080i.HDTV.DD5.1.MPEG2', 'TrollHD'),
               'Show.Name.E23.Source.Quality.Etc-Group': parser.ParseResult(None, 'Show Name', None, [23], 'Source.Quality.Etc', 'Group'),
               'Show Name - Episode 01 - Ep Name': parser.ParseResult(None, 'Show Name', None, [1], 'Ep Name'),
               'Show.Name.Part.3.Source.Quality.Etc-Group': parser.ParseResult(None, 'Show Name', None, [3], 'Source.Quality.Etc', 'Group'),
               'Show.Name.Part.1.and.Part.2.Blah-Group': parser.ParseResult(None, 'Show Name', None, [1,2], 'Blah', 'Group'),
               'Show.Name.Part.IV.Source.Quality.Etc-Group': parser.ParseResult(None, 'Show Name', None, [4], 'Source.Quality.Etc', 'Group'),
+              'Deconstructed.E07.1080i.HDTV.DD5.1.MPEG2-TrollHD': parser.ParseResult(None, 'Deconstructed', None, [7], '1080i.HDTV.DD5.1.MPEG2', 'TrollHD'),
+              'Show.Name.E23.WEB-DL': parser.ParseResult(None, 'Show Name', None, [23], 'WEB-DL'),
               },
 
               'no_season_multi_ep': {
               'Show.Name.E23-24.Source.Quality.Etc-Group': parser.ParseResult(None, 'Show Name', None, [23,24], 'Source.Quality.Etc', 'Group'),
               'Show Name - Episode 01-02 - Ep Name': parser.ParseResult(None, 'Show Name', None, [1,2], 'Ep Name'),
+              'Show.Name.E23-24.WEB-DL': parser.ParseResult(None, 'Show Name', None, [23,24], 'WEB-DL'),
               },
 
               'season_only': {
@@ -99,6 +107,7 @@ simple_test_cases = {
               'Show.Name.2010.23.11.Source.Quality.Etc-Group': parser.ParseResult(None, 'Show Name', None, [], 'Source.Quality.Etc', 'Group', datetime.date(2010,11,23)),
               'Show Name - 2010-11-23 - Ep Name': parser.ParseResult(None, 'Show Name', extra_info = 'Ep Name', air_date = datetime.date(2010,11,23)),
               '2010-11-23 - Ep Name': parser.ParseResult(None, extra_info = 'Ep Name', air_date = datetime.date(2010,11,23)),
+              'Show.Name.2010.11.23.WEB-DL': parser.ParseResult(None, 'Show Name', None, [], 'WEB-DL', None, datetime.date(2010,11,23)),
                }
               }
 
@@ -127,6 +136,9 @@ combination_test_cases = [
                            parser.ParseResult(None, '30 Rock', 4, [22]),
                            ['fov']),
                            
+                          ('Season 2\\Show Name - 03-04 - Ep Name.ext',
+                           parser.ParseResult(None, 'Show Name', 2, [3,4], extra_info = 'Ep Name'),
+                           ['no_season', 'season_only']),
                           ]
 
 unicode_test_cases = [
@@ -325,11 +337,11 @@ if __name__ == '__main__':
         suite = unittest.TestLoader().loadTestsFromTestCase(BasicTests)
     unittest.TextTestRunner(verbosity=2).run(suite)
 
-    suite = unittest.TestLoader().loadTestsFromTestCase(ComboTests)
-    unittest.TextTestRunner(verbosity=2).run(suite)
+    #suite = unittest.TestLoader().loadTestsFromTestCase(ComboTests)
+    #unittest.TextTestRunner(verbosity=2).run(suite)
 
-    suite = unittest.TestLoader().loadTestsFromTestCase(UnicodeTests)
-    unittest.TextTestRunner(verbosity=2).run(suite)
+    #suite = unittest.TestLoader().loadTestsFromTestCase(UnicodeTests)
+    #unittest.TextTestRunner(verbosity=2).run(suite)
 
-    suite = unittest.TestLoader().loadTestsFromTestCase(FailureCaseTests)
-    unittest.TextTestRunner(verbosity=2).run(suite)
+    #suite = unittest.TestLoader().loadTestsFromTestCase(FailureCaseTests)
+    #unittest.TextTestRunner(verbosity=2).run(suite)
