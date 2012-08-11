@@ -84,37 +84,59 @@ class NMJv2Notifier:
         Sends a NMJ update command to the specified machine
         
         host: The hostname/IP to send the request to (no port)
-        database: The database to send the requst to
-        mount: The mount URL to use (optional)
         
         Returns: True if the request succeeded, False otherwise
         """
         
-        # if a mount URL is provided then attempt to open a handle to that URL
-        if host:
-            try:
-                url_scandir = "http://" + host + ":8008/metadata_database?arg0=update_scandir&arg1="+ sickbeard.NMJv2_DATABASE +"&arg2=&arg3=update_all"
-                logger.log(u"NMJ scan update command send to host: %s" % (host))
-                url_updatedb = "http://" + host + ":8008/metadata_database?arg0=scanner_start&arg1="+ sickbeard.NMJv2_DATABASE +"&arg2=background&arg3="
-                logger.log(u"Try to mount network drive via url: %s" % (host), logger.DEBUG)
-                prereq = urllib2.Request(url_scandir)
-                req = urllib2.Request(url_updatedb)
-                handle1 = urllib2.urlopen(prereq)
-                response1 = handle1.read()
-                time.sleep (300.0 / 1000.0)
-                handle2 = urllib2.urlopen(req)
-                response2 = handle2.read()
-                # searching for string directly instead of parsing XML due to syntax error in XML response
-                return1 = response1.find("<returnValue>0</returnValue>")
-                return2 = response2.find("<returnValue>0</returnValue>")
-                if return1 > 0 and return2 > 0:
-                    logger.log(u"NMJ scan update command send to host: %s" % (host))
-                    return True
-                else:
-                    logger.log(u"Warning: Couldn't contact popcorn hour on host %s: %s" % (host, e))
-                    return False
-            except:
-                pass
+        try:
+            url_scandir = "http://" + host + ":8008/metadata_database?arg0=update_scandir&arg1="+ sickbeard.NMJv2_DATABASE +"&arg2=&arg3=update_all"
+            logger.log(u"NMJ scan update command send to host: %s" % (host))
+            url_updatedb = "http://" + host + ":8008/metadata_database?arg0=scanner_start&arg1="+ sickbeard.NMJv2_DATABASE +"&arg2=background&arg3="
+            logger.log(u"Try to mount network drive via url: %s" % (host), logger.DEBUG)
+            prereq = urllib2.Request(url_scandir)
+            req = urllib2.Request(url_updatedb)
+            handle1 = urllib2.urlopen(prereq)
+            response1 = handle1.read()
+            time.sleep (300.0 / 1000.0)
+            handle2 = urllib2.urlopen(req)
+            response2 = handle2.read()
+        except IOError, e:
+            logger.log(u"Warning: Couldn't contact popcorn hour on host %s: %s" % (host, e))
+            return False
+        try:            
+            et = etree.fromstring(response1)
+            result1 = et.findtext("returnValue")
+        except SyntaxError, e:
+             logger.log(u"Unable to parse XML returned from the Popcorn Hour: update_scandir, %s" % (e), logger.ERROR)
+             return False
+        try:            
+            et = etree.fromstring(response2)
+            result2 = et.findtext("returnValue")
+        except SyntaxError, e:
+            logger.log(u"Unable to parse XML returned from the Popcorn Hour: scanner_start, %s" % (e), logger.ERROR)
+            return False
+                
+        # if the result was a number then consider that an error
+        error_codes=["8","11","22","49","50","51","60"]
+        error_messages=["Invalid parameter(s)/argument(s)",
+                        "Invalid database path",
+                        "Insufficient size",
+                        "Database write error",
+                        "Database read error",
+                        "Open fifo pipe failed",
+                        "Read only file system"]
+        if int(result1) > 0:
+            index=error_codes.index(result1)
+            logger.log(u"Popcorn Hour returned an error: %s" % (error_messages[index]))
+            return False
+        else:
+            if int(result2) > 0:
+                index=error_codes.index(result2)
+                logger.log(u"Popcorn Hour returned an error: %s" % (error_messages[index]))
+                return False
+            else:
+                logger.log(u"NMJv2 started background scan")
+                return True
 
     def _notifyNMJ(self, host=None, force=False):
         """
