@@ -2561,26 +2561,23 @@ class Home:
         if showObj == None:
             return _genericMessage("Error", "Show not in show list")
 
-        ep_obj_list = []
-
-        myDB = db.DBConnection()
-        ep_list = myDB.select("SELECT * FROM tv_episodes WHERE showid = ? AND location != '' GROUP BY location ORDER BY season*1000+episode", [show])
-
         try:
             show_loc = showObj.location #@UnusedVariable
         except exceptions.ShowDirNotFoundException:
             return _genericMessage("Error", "Can't rename episodes when the show dir is missing.")
 
-        for cur_ep in ep_list:
+        ep_obj_rename_list = []
 
-            # get the episode object
-            cur_ep_obj = showObj.makeEpFromFile(cur_ep["location"])
-            
-            ep_obj_list.append(cur_ep_obj)
-                
+        ep_obj_list = showObj.getAllEpisodes()
+
+        for cur_ep_obj in ep_obj_list:
+            # Only want to rename if we have a location
+            if cur_ep_obj.location:
+                ep_obj_rename_list.append(cur_ep_obj)
+
         t = PageTemplate(file="testRename.tmpl")
-        t.submenu = [ { 'title': 'Edit', 'path': 'home/editShow?show=%d'%showObj.tvdbid } ]
-        t.ep_obj_list = ep_obj_list
+        t.submenu = [{'title': 'Edit', 'path': 'home/editShow?show=%d' % showObj.tvdbid}]
+        t.ep_obj_list = ep_obj_rename_list
         t.show = showObj
 
         return _munge(t)
