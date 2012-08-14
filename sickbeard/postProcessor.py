@@ -11,7 +11,7 @@
 # Sick Beard is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#  GNU General Public License for more details.
+# GNU General Public License for more details.
 #
 # You should have received a copy of the GNU General Public License
 # along with Sick Beard.  If not, see <http://www.gnu.org/licenses/>.
@@ -60,12 +60,13 @@ class PostProcessor(object):
     FOLDER_NAME = 2
     FILE_NAME = 3
 
-    def __init__(self, file_path, nzb_name = None):
+    def __init__(self, file_path, nzb_name = None, failed = False):
         """
         Creates a new post processor with the given file path and optionally an NZB name.
         
         file_path: The path to the file to be processed
         nzb_name: The name of the NZB which resulted in this file being downloaded (optional)
+        failed: Boolean indicating a failed download (bad NZB)
         """
         # absolute path to the folder that is being processed
         self.folder_path = ek.ek(os.path.dirname, ek.ek(os.path.abspath, file_path))
@@ -81,6 +82,9 @@ class PostProcessor(object):
     
         # name of the NZB that resulted in this folder
         self.nzb_name = nzb_name
+
+        # True if the download failed from a bad NZB
+        self.failed = failed
     
         self.in_history = False
         self.release_group = None
@@ -721,6 +725,16 @@ class PostProcessor(object):
         # retrieve/create the corresponding TVEpisode objects
         ep_obj = self._get_ep_obj(tvdb_id, season, episodes)
 
+        if self.failed:
+            for curEp in [ep_obj] + ep_obj.relatedEps:
+                self._log(u"Setting episode back to wanted: "+curEp.name)
+                with curEp.lock:
+                    curEp.status = int(common.WANTED)
+                    curEp.saveToDB()
+           
+            # we 'succeeded' in the sense that no errors were encountered
+            return True
+        
         # get the quality of the episode we're processing
         new_ep_quality = self._get_quality(ep_obj)
         logger.log(u"Quality of the episode we're processing: " + str(new_ep_quality), logger.DEBUG)
@@ -768,7 +782,7 @@ class PostProcessor(object):
             self._log(u"Show directory doesn't exist, creating it", logger.DEBUG)
             try:
                 ek.ek(os.mkdir, ep_obj.show._location)
-
+                
             except (OSError, IOError):
                 raise exceptions.PostProcessingFailed("Unable to create the show directory: " + ep_obj.show._location)
 
