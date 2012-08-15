@@ -29,6 +29,10 @@ class DBBasicTests(test.SickbeardTestDBCase):
 
     def test_select(self):
         self.db.select("SELECT * FROM tv_episodes WHERE showid = ? AND location != ''", [0000])
+    
+    def tearDown(self):
+        self.db.connection.close()
+        super(DBBasicTests, self).tearDown()
 
 
 if __name__ == '__main__':
