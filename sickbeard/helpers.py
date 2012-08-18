@@ -488,6 +488,7 @@ def rename_ep_file(cur_path, new_path):
     
     return True
     
+
 def delete_empty_folders(check_empty_dir):
     """
     Walks backwards up the path and deletes any empty folders found.
@@ -505,7 +506,8 @@ def delete_empty_folders(check_empty_dir):
         except (WindowsError, OSError), e:
             logger.log(u"Unable to delete "+check_empty_dir+": "+repr(e)+" / "+str(e), logger.WARNING)
             break
-        check_empty_dir = os.path.basename(check_empty_dir)
+        check_empty_dir = os.path.dirname(check_empty_dir)
+
 
 def chmodAsParent(childPath):
     if os.name == 'nt' or os.name == 'ce':
