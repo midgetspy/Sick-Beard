@@ -320,14 +320,13 @@ body {
 #content {
   width: 90%;
   min-width: 875px;
-  min-height: 200px;
-  padding: 10px 15px 15px;
-  margin-right: auto;
-  margin-left: auto;
-  clear: both;
+  padding: 15px;
   background: #fff;
   border-right: 1px solid #b3b3b3;
   border-left: 1px solid #b3b3b3;
+  margin-left: auto;
+  margin-right: auto;
+  clear: both;
 }
 
 /* =======================================================================
@@ -335,8 +334,7 @@ inc_bottom.tmpl
 ========================================================================== */
 .footer {
   width: 100%;
-  padding: 5px 0;
-  clear: both;
+  padding: 6px 0;
   color: #4e4e4e;
   text-align: center;
   background-color: #f5f1e4;
@@ -921,7 +919,7 @@ div.metadataDiv .disabled {
 }
 
 /* =======================================================================
-used all over
+global -- used all over
 ========================================================================== */
 .sickbeardTable {
   width: 100%;
