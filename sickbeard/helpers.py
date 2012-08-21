@@ -435,6 +435,10 @@ def make_dirs(path):
 
     logger.log(u"Checking if the path " + path + " already exists", logger.DEBUG)
 
+    if os.name == 'nt' or os.name == 'ce':
+        os.makedirs(path)
+        return
+
     sofar = ''
     folder_list = path.split(os.path.sep)
 
