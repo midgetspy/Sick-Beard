@@ -435,9 +435,9 @@ def make_dirs(path):
 
     logger.log(u"Checking if the path " + path + " already exists", logger.DEBUG)
 
-    # Windows, create all missing folders
-    if os.name == 'nt' or os.name == 'ce':
-        if not ek.ek(os.path.isdir, path):
+    if not ek.ek(os.path.isdir, path):
+        # Windows, create all missing folders
+        if os.name == 'nt' or os.name == 'ce':
             try:
                 logger.log(u"Folder " + path + " didn't exist, creating it", logger.DEBUG)
                 ek.ek(os.makedirs, path)
@@ -445,27 +445,27 @@ def make_dirs(path):
                 logger.log(u"Failed creating " + path + " : " + ex(e), logger.ERROR)
                 return False
 
-    # not Windows, also set permissions for every missing folder
-    else:
-        sofar = ''
-        folder_list = path.split(os.path.sep)
+        # not Windows, create all missing folders and set permissions
+        else:
+            sofar = ''
+            folder_list = path.split(os.path.sep)
 
-        # look through each subfolder and make sure they all exist
-        for cur_folder in folder_list:
-            sofar += cur_folder + os.path.sep;
+            # look through each subfolder and make sure they all exist
+            for cur_folder in folder_list:
+                sofar += cur_folder + os.path.sep;
 
-            # if it exists then just keep walking down the line
-            if ek.ek(os.path.isdir, sofar):
-                continue
+                # if it exists then just keep walking down the line
+                if ek.ek(os.path.isdir, sofar):
+                    continue
 
-            try:
-                logger.log(u"Folder " + sofar + " didn't exist, creating it", logger.DEBUG)
-                ek.ek(os.mkdir, sofar)
-                # use normpath to remove end separator, otherwise checks permissions against itself
-                chmodAsParent(ek.ek(os.path.normpath, sofar))
-            except (OSError, IOError), e:
-                logger.log(u"Failed creating " + sofar + " : " + ex(e), logger.ERROR)
-                return False
+                try:
+                    logger.log(u"Folder " + sofar + " didn't exist, creating it", logger.DEBUG)
+                    ek.ek(os.mkdir, sofar)
+                    # use normpath to remove end separator, otherwise checks permissions against itself
+                    chmodAsParent(ek.ek(os.path.normpath, sofar))
+                except (OSError, IOError), e:
+                    logger.log(u"Failed creating " + sofar + " : " + ex(e), logger.ERROR)
+                    return False
 
     return True
 
