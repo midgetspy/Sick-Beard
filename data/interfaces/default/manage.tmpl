@@ -37,15 +37,15 @@
         sortList: [[2,0]],
         textExtraction: {
             1: function(node) { return \$(node).find("img").attr("alt"); },
-            3: function(node) { return \$(node).find("span").text().toLowerCase(); },
-            4: function(node) { return \$(node).find("img").attr("alt"); },
+            2: function(node) { return \$(node).find("img").attr("alt"); },
+            4: function(node) { return \$(node).find("span").text().toLowerCase(); },
             5: function(node) { return \$(node).find("img").attr("alt"); }
         },
         widgets: ['zebra', 'stickyHeaders'],
         headers: {
             0: { sorter: false},
-            2: { sorter: 'showNames'},
-            3: { sorter: 'quality'},
+            3: { sorter: 'showNames'},
+            4: { sorter: 'quality'},
             7: { sorter: false},
             8: { sorter: false},
             9: { sorter: false},
@@ -66,10 +66,10 @@
         <input type="checkbox" class="bulkCheck" id="editCheck" />
       </th>
       <th class="nowrap">Lang</th>
+      <th>Paused</th>
       <th class="nowrap">Show Name</th>
       <th>Quality</th>
       <th>Flatten Folders</th>
-      <th>Paused</th>
       <th>Status</th>
       <th width="1%">Update<br/>
         <input type="checkbox" class="bulkCheck" id="updateCheck" />
@@ -121,6 +121,7 @@ $myShowList.sort(lambda x, y: cmp(x.name, y.name))
   <tr>
     <td align="center"><input type="checkbox" class="editCheck" id="edit-$curShow.tvdbid" /></td>
     <td align="center"><img src="$sbRoot/images/flags/${curShow.lang}.png" width="16" height="11" alt="$curShow.lang" /></td>
+    <td align="center"><img src="$sbRoot/images/#if int($curShow.paused) == 1 then "yes16.png\" alt=\"Y\"" else "no16.png\" alt=\"N\""# width="16" height="16" /></td>
     <td class="tvShow"><a href="$sbRoot/home/displayShow?show=$curShow.tvdbid">$curShow.name</a></td>
 #if $curShow.quality in $qualityPresets:
     <td align="center"><span class="quality $qualityPresetStrings[$curShow.quality]">$qualityPresetStrings[$curShow.quality]</span></td>
@@ -128,7 +129,6 @@ $myShowList.sort(lambda x, y: cmp(x.name, y.name))
     <td align="center"><span class="quality Custom">Custom</span></td>
 #end if 
     <td align="center"><img src="$sbRoot/images/#if int($curShow.flatten_folders) == 1 then "yes16.png\" alt=\"Y\"" else "no16.png\" alt=\"N\""# width="16" height="16" /></td>
-    <td align="center"><img src="$sbRoot/images/#if int($curShow.paused) == 1 then "yes16.png\" alt=\"Y\"" else "no16.png\" alt=\"N\""# width="16" height="16" /></td>
     <td align="center">$curShow.status</td>
     <td align="center">$curUpdate</td>
     <td align="center">$curRefresh</td>
