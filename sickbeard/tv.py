@@ -1162,13 +1162,13 @@ class TVEpisode(object):
                 # and it hasn't aired yet set the status to UNAIRED
                 logger.log(u"Episode airs in the future, changing status from " + str(self.status) + " to " + str(UNAIRED), logger.DEBUG)
                 self.status = UNAIRED
-            # if there's no airdate then set it to skipped (and respect ignored)
+            # if there's no airdate then set it to unaired (and respect ignored)
             elif self.airdate == datetime.date.fromordinal(1):
                 if self.status == IGNORED:
                     logger.log(u"Episode has no air date, but it's already marked as ignored", logger.DEBUG)
                 else:
-                    logger.log(u"Episode has no air date, automatically marking it skipped", logger.DEBUG)
-                    self.status = SKIPPED
+                    logger.log(u"Episode has no air date, automatically marking it unaired", logger.DEBUG)
+                    self.status = UNAIRED 
             # if we don't have the file and the airdate is in the past
             else:
                 if self.status == UNAIRED:
