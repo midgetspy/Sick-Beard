@@ -435,26 +435,38 @@ def make_dirs(path):
 
     logger.log(u"Checking if the path " + path + " already exists", logger.DEBUG)
 
-    sofar = ''
-    folder_list = path.split(os.path.sep)
+    # Windows, create all missing folders
+    if os.name == 'nt' or os.name == 'ce':
+        if not ek.ek(os.path.isdir, path):
+            try:
+                logger.log(u"Folder " + path + " didn't exist, creating it", logger.DEBUG)
+                ek.ek(os.makedirs, path)
+            except (OSError, IOError), e:
+                logger.log(u"Failed creating " + path + " : " + ex(e), logger.ERROR)
+                return False
 
-    # look through each subfolder and make sure they all exist
-    for cur_folder in folder_list:
-        sofar += cur_folder + os.path.sep;
+    # not Windows, also set permissions for every missing folder
+    else:
+        sofar = ''
+        folder_list = path.split(os.path.sep)
 
-        # if it exists then just keep walking down the line
-        if ek.ek(os.path.isdir, sofar):
-            continue
+        # look through each subfolder and make sure they all exist
+        for cur_folder in folder_list:
+            sofar += cur_folder + os.path.sep;
 
-        try:
-            logger.log(u"Folder " + sofar + " didn't exist, creating it", logger.DEBUG)
-            ek.ek(os.mkdir, sofar)
-            # use normpath to remove end separator, otherwise checks permissions against itself
-            chmodAsParent(ek.ek(os.path.normpath, sofar))
-        except (OSError, IOError), e:
-            logger.log(u"Failed creating " + sofar + " : " + ex(e), logger.ERROR)
-            return False
-    
+            # if it exists then just keep walking down the line
+            if ek.ek(os.path.isdir, sofar):
+                continue
+
+            try:
+                logger.log(u"Folder " + sofar + " didn't exist, creating it", logger.DEBUG)
+                ek.ek(os.mkdir, sofar)
+                # use normpath to remove end separator, otherwise checks permissions against itself
+                chmodAsParent(ek.ek(os.path.normpath, sofar))
+            except (OSError, IOError), e:
+                logger.log(u"Failed creating " + sofar + " : " + ex(e), logger.ERROR)
+                return False
+
     return True
 
 def rename_ep_file(cur_path, new_path):
