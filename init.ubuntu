@@ -1,5 +1,5 @@
-#! /bin/sh
-
+#!/bin/sh
+#
 ### BEGIN INIT INFO
 # Provides:          sickbeard
 # Required-Start:    $local_fs $network $remote_fs
@@ -12,16 +12,10 @@
 # Description:       starts instance of Sick Beard using start-stop-daemon
 ### END INIT INFO
 
-############### EDIT ME ##################
-# path to app
-APP_PATH=PATH_TO_SICKBEARD_DIRECTORY
-
-# path to python bin
-DAEMON=/usr/bin/python
-
-# Path to store PID file
-PID_FILE=/var/run/sickbeard/sickbeard.pid
-PID_PATH=`dirname $PID_FILE`
+# Source SickBeard configuration
+if [ -f /etc/default/sickbeard ]; then
+        . /etc/default/sickbeard
+fi
 
 # script name
 NAME=sickbeard
@@ -29,21 +23,54 @@ NAME=sickbeard
 # app name
 DESC=SickBeard
 
-# user
-RUN_AS=SICKBEARD_USER
+## Don't edit this file
+## Edit user configuation in /etc/default/sickbeard to change
+##
+## SB_USER=
+## SB_HOME=
+## SB_DATA=
+## SB_PIDFILE=
+## PYTHON_BIN=
+## SB_OPTS=
+## SSD_OPTS=
+##
+## EXAMPLE if want to run as different user
+## add SB_USER=username to /etc/default/sickbeard
+## otherwise default sickbeard is used
 
-# data directory
-DATA_DIR=~/.sickbeard
+## the defaults
+# Run as username 
+RUN_AS=${SB_USER-sickbeard}
 
-# startup args
-DAEMON_OPTS=" SickBeard.py -q --daemon --pidfile=${PID_FILE} --datadir=${DATA_DIR}"
+# path to app SB_APP=path_to_app_SickBeard.py
+APP_PATH=${SB_HOME-/opt/sickbeard}
 
-############### END EDIT ME ##################
+# data directory where sickbeard.db, cache and logs are stored
+DATA_DIR=${SB_DATA-/opt/sickbeard}
+
+# Path to store PID file
+PID_FILE=${SB_PIDFILE-/var/run/sickbeard/sickbeard.pid}
+
+# path to python bin
+DAEMON=${PYTHON_BIN-/usr/bin/python}
+
+# extra daemon option like: SB_OPTS=" --config=/home/sickbeard/config.ini"
+EXTRA_DAEMON_OPTS=${SB_OPTS-}
+
+# extra start-stop-daemon option like START_OPTS=" --group=users"
+EXTRA_SSD_OPTS=${SSD_OPTS-}
+##
+
+PID_PATH=`dirname $PID_FILE`
+DAEMON_OPTS=" SickBeard.py -q --daemon --nolaunch --pidfile=${PID_FILE} --datadir=${DATA_DIR} ${EXTRA_DAEMON_OPTS}"
+
+##
 
 test -x $DAEMON || exit 0
 
 set -e
 
+# create PID directory if not exist and ensure the SickBeard user can write to it
 if [ ! -d $PID_PATH ]; then
     mkdir -p $PID_PATH
     chown $RUN_AS $PID_PATH
@@ -65,7 +92,7 @@ fi
 case "$1" in
   start)
         echo "Starting $DESC"
-        start-stop-daemon -d $APP_PATH -c $RUN_AS --start --pidfile $PID_FILE --exec $DAEMON -- $DAEMON_OPTS
+        start-stop-daemon -d $APP_PATH -c $RUN_AS $EXTRA_SSD_OPTS --start --pidfile $PID_FILE --exec $DAEMON -- $DAEMON_OPTS
         ;;
   stop)
         echo "Stopping $DESC"
@@ -75,7 +102,7 @@ case "$1" in
   restart|force-reload)
         echo "Restarting $DESC"
         start-stop-daemon --stop --pidfile $PID_FILE --retry 15
-        start-stop-daemon -d $APP_PATH -c $RUN_AS --start --pidfile $PID_FILE --exec $DAEMON -- $DAEMON_OPTS
+        start-stop-daemon -d $APP_PATH -c $RUN_AS $EXTRA_SSD_OPTS --start --pidfile $PID_FILE --exec $DAEMON -- $DAEMON_OPTS
         ;;
   *)
         N=/etc/init.d/$NAME
