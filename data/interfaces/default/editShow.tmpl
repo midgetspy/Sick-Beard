@@ -65,14 +65,14 @@ Note: This will only affect the language of the retrieved metadata file contents
 This <b>DOES NOT</b> allow Sick Beard to download non-english TV episodes!<br />
 <br />
 <br />
-Use Season Folders: <input type="checkbox" name="seasonfolders" #if $show.seasonfolders == 1 then "checked=\"checked\"" else ""# /><br /><br />
+Flatten files (no folders): <input type="checkbox" name="flatten_folders" #if $show.flatten_folders == 1 and not $sickbeard.NAMING_FORCE_FOLDERS then "checked=\"checked\"" else ""# #if $sickbeard.NAMING_FORCE_FOLDERS then "disabled=\"disabled\"" else ""#/><br /><br />
 Paused: <input type="checkbox" name="paused" #if $show.paused == 1 then "checked=\"checked\"" else ""# /><br /><br />
 
 Air by date: 
 <input type="checkbox" name="air_by_date" #if $show.air_by_date == 1 then "checked=\"checked\"" else ""# /><br />
 (check this if the show is released as Show.03.02.2010 rather than Show.S02E03) 
 <br /><br />
-<input type="submit" value="Submit" />
+<input class="btn" type="submit" value="Submit" />
 </form>
 
 <script type="text/javascript" charset="utf-8">

@@ -1,7 +1,7 @@
 #import sickbeard
 #from sickbeard.common import Quality, qualityPresets, qualityPresetStrings
 
-<script type="text/javascript" src="$sbRoot/js/qualityChooser.js"></script>
+<script type="text/javascript" src="$sbRoot/js/qualityChooser.js?$sbPID"></script>
 
 <div class="field-pair">
     <label for="qualityPreset" class="nocheck clearfix">
@@ -23,31 +23,28 @@
 <div id="customQualityWrapper">
 
 <div id="customQuality">
+    <div class="component-group-desc">
+        <p>One of the <b>Initial</b> quality selections must be obtained before Sick Beard will attempt to process the <b>Archive</b> selections.</p>
+    </div>
 
-<div class="component-group-desc">
-    <p>One of the <b>Initial</b> quality selections must be obtained before Sick Beard will attempt to process the <b>Archive</b> selections.</p>
-</div>
+        <div style="padding-right: 40px; text-align: center;" class="float-left">
+            <h4>Initial</h4>
+            #set $anyQualityList = filter(lambda x: x > $Quality.NONE, $Quality.qualityStrings)
+            <select id="anyQualities" name="anyQualities" multiple="multiple" size="$len($anyQualityList)">
+            #for $curQuality in sorted($anyQualityList):
+                <option value="$curQuality" #if $curQuality in $anyQualities then "selected=\"selected\"" else ""#>$Quality.qualityStrings[$curQuality]</option>
+            #end for
+            </select>
+        </div>
 
-<div class="float-left" style="margin-left: 50px;">
-<h3 style="text-align: center;">Initial</h3>
-#set $anyQualityList = filter(lambda x: x > $Quality.NONE, $Quality.qualityStrings)
-<select id="anyQualities" name="anyQualities" multiple="multiple" size="$len($anyQualityList)">
-#for $curQuality in sorted($anyQualityList):
-<option value="$curQuality" #if $curQuality in $anyQualities then "selected=\"selected\"" else ""#>$Quality.qualityStrings[$curQuality]</option>
-#end for
-</select>
-</div>
-
-<div class="float-left" style="margin-left: 50px;">
-<h3 style="text-align: center;">Archive</h3>
-#set $bestQualityList = filter(lambda x: x > $Quality.SDTV, $Quality.qualityStrings)
-<select id="bestQualities" name="bestQualities" multiple="multiple" size="$len($bestQualityList)">
-#for $curQuality in sorted($bestQualityList):
-<option value="$curQuality" #if $curQuality in $bestQualities then "selected=\"selected\"" else ""#>$Quality.qualityStrings[$curQuality]</option>
-#end for
-</select>
-</div>
-
-</div>
-<br style="clear:both;"/>
+        <div style="text-align: center;" class="float-left">
+            <h4>Archive</h4>
+            #set $bestQualityList = filter(lambda x: x > $Quality.SDTV, $Quality.qualityStrings)
+            <select id="bestQualities" name="bestQualities" multiple="multiple" size="$len($bestQualityList)">
+            #for $curQuality in sorted($bestQualityList):
+                <option value="$curQuality" #if $curQuality in $bestQualities then "selected=\"selected\"" else ""#>$Quality.qualityStrings[$curQuality]</option>
+            #end for
+            </select>
+        </div>
+    </div>
 </div><br />

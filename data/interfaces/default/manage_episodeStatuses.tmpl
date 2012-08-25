@@ -12,7 +12,7 @@
 #if not $whichStatus or ($whichStatus and not $ep_counts):
 
 #if $whichStatus:
-<h2>None of your episodes have status $common.statusStrings[$int($whichStatus)]</h2>
+<h3>None of your episodes have status $common.statusStrings[$int($whichStatus)]</h3>
 <br />
 #end if
 
@@ -22,17 +22,17 @@ Manage episodes with status <select name="whichStatus">
 <option value="$curStatus">$common.statusStrings[$curStatus]</option>
 #end for
 </select>
-<input type="submit" value="Manage" /> 
+<input class="btn" type="submit" value="Manage" /> 
 </form>
 
 #else
 
-<script type="text/javascript" src="$sbRoot/js/manageEpisodeStatuses.js"></script>
+<script type="text/javascript" src="$sbRoot/js/manageEpisodeStatuses.js?$sbPID"></script>
 
 <form action="$sbRoot/manage/changeEpisodeStatuses" method="post">
 <input type="hidden" id="oldStatus" name="oldStatus" value="$whichStatus" />
 
-<h2>Shows containing $common.statusStrings[$int($whichStatus)] episodes</h2>
+<h3>Shows containing $common.statusStrings[$int($whichStatus)] episodes</h3>
 
 <br />
 
@@ -53,7 +53,7 @@ $statusList.remove($int($whichStatus))
 <option value="$curStatus">$common.statusStrings[$curStatus]</option>
 #end for
 </select>
-<input type="submit" value="Go" />
+<input class="btn" type="submit" value="Go" />
 
 <br /><br /><br />
 
@@ -61,7 +61,7 @@ $statusList.remove($int($whichStatus))
 #for $cur_tvdb_id in $sorted_show_ids:
  <tr id="$cur_tvdb_id">
   <th><input type="checkbox" class="allCheck" id="allCheck-$cur_tvdb_id" name="$cur_tvdb_id-all" checked="checked" /></th>
-  <th colspan="2" style="width: 100%; text-align: left;"><a class="whitelink" href="$sbRoot/home/displayShow?show=$cur_tvdb_id">$show_names[$cur_tvdb_id]</a> ($ep_counts[$cur_tvdb_id]) <input type="button" class="get_more_eps" id="$cur_tvdb_id" value="Expand" /></th>
+  <th colspan="2" style="width: 100%; text-align: left;"><a class="whitelink" href="$sbRoot/home/displayShow?show=$cur_tvdb_id">$show_names[$cur_tvdb_id]</a> ($ep_counts[$cur_tvdb_id]) <input type="button" class="btn get_more_eps" id="$cur_tvdb_id" value="Expand" /></th>
  </tr>
 #end for
 </table>

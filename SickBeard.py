@@ -128,10 +128,20 @@ def main():
     except (locale.Error, IOError):
         pass
 
-    # for OSes that are poorly configured I'll just force UTF-8
+    # for OSes that are poorly configured I'll just randomly force UTF-8
     if not sickbeard.SYS_ENCODING or sickbeard.SYS_ENCODING in ('ANSI_X3.4-1968', 'US-ASCII', 'ASCII'):
         sickbeard.SYS_ENCODING = 'UTF-8'
 
+    if not hasattr(sys,"setdefaultencoding"):
+        reload(sys)
+
+    try:
+        sys.setdefaultencoding(sickbeard.SYS_ENCODING)
+    except:
+        print 'Sorry, you MUST add the Sick Beard folder to the PYTHONPATH environment variable'
+        print 'or find another way to force Python to use '+sickbeard.SYS_ENCODING+' for string encoding.'
+        sys.exit(1)
+ 
     # need console logging for SickBeard.py and SickBeard-console.exe
     consoleLogging = (not hasattr(sys, "frozen")) or (sickbeard.MY_NAME.lower().find('-console') > 0)
 
