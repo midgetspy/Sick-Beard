@@ -1475,7 +1475,7 @@ class HomePostProcess:
     @cherrypy.expose
     def processEpisode(self, dir=None, nzbName=None, jobName=None, quiet=None):
 
-        if dir == None:
+        if not dir:
             redirect("/home/postprocess")
         else:
             result = processTV.processDir(dir, nzbName)
