@@ -412,14 +412,12 @@ def initialize(consoleLogging=True):
             proxy_url = proxies['ftp']
 
         # Set our common tvdb_api options here
-        TVDB_API_PARMS = {'cache': True,
-                          'apikey': TVDB_API_KEY,
+        TVDB_API_PARMS = {'apikey': TVDB_API_KEY,
                           'language': 'en',
-                          'cache_dir': False,
-                          'http_proxy': proxy_url}
-        
+                          'useZip': True}
+
         if CACHE_DIR:
-            TVDB_API_PARMS['cache_dir'] = os.path.join(CACHE_DIR, 'tvdb')
+            TVDB_API_PARMS['cache'] = os.path.join(CACHE_DIR, 'tvdb')
 
         QUALITY_DEFAULT = check_setting_int(CFG, 'General', 'quality_default', SD)
         STATUS_DEFAULT = check_setting_int(CFG, 'General', 'status_default', SKIPPED)
