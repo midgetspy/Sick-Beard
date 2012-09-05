@@ -91,13 +91,11 @@ def getShowImage(url, imgNum=None):
         tempURL = url
 
     logger.log(u"Getting show image at "+tempURL, logger.DEBUG)
-    try:
-        image_data = helpers.getURL(tempURL)
-    except urllib2.URLError, e:
+
+    image_data = helpers.getURL(tempURL)
+
+    if image_data is None:
         logger.log(u"There was an error trying to retrieve the image, aborting", logger.ERROR)
-        return None
-    except urllib2.HTTPError, e:
-        logger.log(u"Unable to access image at "+tempURL+", assuming it doesn't exist: "+ex(e), logger.ERROR)
         return None
 
     return image_data

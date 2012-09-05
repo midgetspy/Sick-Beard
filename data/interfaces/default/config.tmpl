@@ -9,25 +9,40 @@
 #include $os.path.join($sickbeard.PROG_DIR, "data/interfaces/default/inc_top.tmpl")
 
 <div id="summary" class="align-left">
-<table class="infoTable" cellspacing="1" border="0" cellpadding="0">
-    <tr><td class="infoTableHeader">SB Version: </td><td class="infoTableCell">alpha ($sickbeard.version.SICKBEARD_VERSION) <!-- &ndash; build.date //--></td></tr>
-    <tr><td class="infoTableHeader">SB Config file: </td><td class="infoTableCell">$sickbeard.CONFIG_FILE</td></tr>
-    <tr><td class="infoTableHeader">SB Database file: </td><td class="infoTableCell">$db.dbFilename()</td></tr>
-    <tr><td class="infoTableHeader">SB Cache Dir: </td><td class="infoTableCell">$sickbeard.CACHE_DIR</td></tr>
-    <tr><td class="infoTableHeader">SB Arguments: </td><td class="infoTableCell">$sickbeard.MY_ARGS</td></tr>
-    <tr><td class="infoTableHeader">SB Web Root: </td><td class="infoTableCell">$sickbeard.WEB_ROOT</td></tr>
-    <tr><td class="infoTableHeader">Python Version: </td><td class="infoTableCell">$sys.version[:120]</td></tr>
-    <tr class="infoTableSeperator"><td class="infoTableHeader">Homepage </td><td class="infoTableCell"><a href="http://www.sickbeard.com/">http://www.sickbeard.com/</a></td></tr>
-    <tr><td class="infoTableHeader">Forums </td><td class="infoTableCell"><a href="http://sickbeard.com/forums/">http://sickbeard.com/forums/</a></td></tr>
-    <tr><td class="infoTableHeader">Source </td><td class="infoTableCell"><a href="https://github.com/midgetspy/Sick-Beard/">https://github.com/midgetspy/Sick-Beard/</a></td></tr>
-    <tr><td class="infoTableHeader">Bug Tracker &amp;<br/> Windows Builds </td><td class="infoTableCell"><a href="http://code.google.com/p/sickbeard/">http://code.google.com/p/sickbeard/</a></td></tr>
-    <tr><td class="infoTableHeader">Internet Relay Chat </td><td class="infoTableCell"><a href="irc://irc.freenode.net/#sickbeard"><i>#sickbeard</i> on <i>irc.freenode.net</i></a></td></tr>
-</table>
+    <table class="infoTable">
+        <tr>
+          <td class="infoTableHeader">SB Version: </td>
+          <td>
+            alpha ($sickbeard.version.SICKBEARD_VERSION)
+            #if $sickbeard.versionCheckScheduler.action.install_type != 'win' and not $sickbeard.versionCheckScheduler.action.updater._cur_commit_hash:
+                #$sickbeard.versionCheckScheduler.action.updater._find_installed_version()
+            #end if
+            #if $sickbeard.versionCheckScheduler.action.updater._cur_commit_hash:
+                $sickbeard.versionCheckScheduler.action.updater._cur_commit_hash
+            #end if
+          </td>
+        </tr>
+        <tr><td class="infoTableHeader">SB Config file: </td><td>$sickbeard.CONFIG_FILE</td></tr>
+        <tr><td class="infoTableHeader">SB Database file: </td><td>$db.dbFilename()</td></tr>
+        <tr><td class="infoTableHeader">SB Cache Dir: </td><td>$sickbeard.CACHE_DIR</td></tr>
+        <tr><td class="infoTableHeader">SB Arguments: </td><td>$sickbeard.MY_ARGS</td></tr>
+        <tr><td class="infoTableHeader">SB Web Root: </td><td>$sickbeard.WEB_ROOT</td></tr>
+        <tr><td class="infoTableHeader">Python Version: </td><td>$sys.version[:120]</td></tr>
+        <tr class="infoTableSeperator"><td class="infoTableHeader"><i class="icon16-sb"></i> Homepage </td><td><a href="http://www.sickbeard.com/">http://www.sickbeard.com/</a></td></tr>
+        <tr><td class="infoTableHeader"><i class="icon16-web"></i> Forums </td><td><a href="http://sickbeard.com/forums/">http://sickbeard.com/forums/</a></td></tr>
+        <tr><td class="infoTableHeader"><i class="icon16-github"></i> Source </td><td><a href="https://github.com/midgetspy/Sick-Beard/">https://github.com/midgetspy/Sick-Beard/</a></td></tr>
+        <tr><td class="infoTableHeader"><i class="icon16-win"></i> Bug Tracker &amp;<br/> Windows Builds </td><td><a href="http://code.google.com/p/sickbeard/">http://code.google.com/p/sickbeard/</a></td></tr>
+        <tr><td class="infoTableHeader"><i class="icon16-mirc"></i> Internet Relay Chat </td><td><a href="irc://irc.freenode.net/#sickbeard"><i>#sickbeard</i> on <i>irc.freenode.net</i></a></td></tr>
+    </table>
 </div>
 
-<table class="infoTable" cellspacing="1" border="0" cellpadding="0"><tr>
-    <td><a href="https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&amp;hosted_button_id=JA8M7VDY89SQ4" onclick="window.open(this.href); return false;"><img src="$sbRoot/images/paypal/btn_donateCC_LG.gif" alt="[donate]" /></a></td>
-    <td>Sickbeard is free, but you can contribute by giving a <b><a href="https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&amp;hosted_button_id=JA8M7VDY89SQ4" onclick="window.open(this.href); return false;">donation</a></b>.</td>
-</tr></table>
+<div class="container padding" style="width: 600px;">
+    <table class="infoTable">
+        <tr>
+            <td><a href="https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&amp;hosted_button_id=JA8M7VDY89SQ4" onclick="window.open(this.href); return false;"><img src="$sbRoot/images/paypal/btn_donateCC_LG.gif" alt="[donate]" /></a></td>
+            <td>Sick Beard is free, but you can contribute by giving a <b><a href="https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&amp;hosted_button_id=JA8M7VDY89SQ4" onclick="window.open(this.href); return false;">donation</a></b>.</td>
+        </tr>
+    </table>
+</div>
 
 #include $os.path.join($sickbeard.PROG_DIR, "data/interfaces/default/inc_bottom.tmpl")

@@ -61,7 +61,7 @@ class GenericProvider:
         return re.sub("[^\w\d_]", "_", name).lower()
 
     def imageName(self):
-        return self.getID() + '.gif'
+        return self.getID() + '.png'
 
     def _checkAuth(self):
         return
@@ -108,10 +108,10 @@ class GenericProvider:
 
         result = None
 
-        try:
-            result = helpers.getURL(url, headers)
-        except (urllib2.HTTPError, IOError), e:
-            logger.log(u"Error loading "+self.name+" URL: " + str(sys.exc_info()) + " - " + ex(e), logger.ERROR)
+        result = helpers.getURL(url, headers)
+
+        if result is None:
+            logger.log(u"Error loading "+self.name+" URL: " + url, logger.ERROR)
             return None
 
         return result
@@ -222,7 +222,7 @@ class GenericProvider:
 
         self._checkAuth()
 
-        logger.log(u"Searching "+self.name+" for " + episode.prettyName(True))
+        logger.log(u"Searching "+self.name+" for " + episode.prettyName())
 
         self.cache.updateCache()
         results = self.cache.searchCache(episode, manualSearch)

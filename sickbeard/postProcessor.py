@@ -55,6 +55,11 @@ class PostProcessor(object):
     DOESNT_EXIST = 4
 
     IGNORED_FILESTRINGS = [ "/.AppleDouble/", ".DS_Store" ]
+
+    NZB_NAME = 1
+    FOLDER_NAME = 2
+    FILE_NAME = 3
+
     def __init__(self, file_path, nzb_name = None):
         """
         Creates a new post processor with the given file path and optionally an NZB name.
@@ -80,6 +85,10 @@ class PostProcessor(object):
         self.in_history = False
         self.release_group = None
         self.is_proper = False
+
+        self.good_results = {self.NZB_NAME: False,
+                             self.FOLDER_NAME: False,
+                             self.FILE_NAME: False}
     
         self.log = ''
     
@@ -133,13 +142,13 @@ class PostProcessor(object):
 
     def _list_associated_files(self, file_path):
         """
-        For a given file path searches for files with the same name but different extension and returns them.
+        For a given file path searches for files with the same name but different extension and returns their absolute paths
         
         file_path: The file to check for associated files
         
         Returns: A list containing all files which are associated to the given file
         """
-    
+
         if not file_path:
             return []
 
@@ -147,10 +156,17 @@ class PostProcessor(object):
     
         base_name = file_path.rpartition('.')[0]+'.'
         
+        # don't strip it all and use cwd by accident
+        if not base_name:
+            return []
+        
         # don't confuse glob with chars we didn't mean to use
         base_name = re.sub(r'[\[\]\*\?]', r'[\g<0>]', base_name)
     
         for associated_file_path in ek.ek(glob.glob, base_name+'*'):
+            # only add associated to list
+            if associated_file_path == file_path:
+                continue
             # only list it if the only non-shared part is the extension
             if '.' in associated_file_path[len(base_name):]:
                 continue
@@ -161,25 +177,24 @@ class PostProcessor(object):
 
     def _delete(self, file_path, associated_files=False):
         """
-        Deletes the file and optionall all associated files.
+        Deletes the file and optionally all associated files.
         
         file_path: The file to delete
         associated_files: True to delete all files which differ only by extension, False to leave them
         """
-        
+
         if not file_path:
             return
-        
+
         # figure out which files we want to delete
+        file_list = [file_path]
         if associated_files:
-            file_list = self._list_associated_files(file_path)
-        else:
-            file_list = [file_path]
+            file_list = file_list + self._list_associated_files(file_path)
 
         if not file_list:
-            self._log(u"There were no files associated with "+file_path+", not deleting anything", logger.DEBUG)
+            self._log(u"There were no files associated with " + file_path + ", not deleting anything", logger.DEBUG)
             return
-        
+
         # delete the file and any other files which we want to delete
         for cur_file in file_list:
             self._log(u"Deleting file "+cur_file, logger.DEBUG)
@@ -188,6 +203,10 @@ class PostProcessor(object):
                 # do the library update for synoindex
                 notifiers.synoindex_notifier.deleteFile(cur_file)
                 
+        
+        # clean up any left over folders
+        helpers.delete_empty_folders(ek.ek(os.path.dirname, file_path))
+        
     def _combined_file_operation (self, file_path, new_path, new_base_name, associated_files=False, action=None):
         """
         Performs a generic operation (move or copy) on a file. Can rename the file as well as change its location,
@@ -204,15 +223,15 @@ class PostProcessor(object):
             self._log(u"Must provide an action for the combined file operation", logger.ERROR)
             return
 
+        file_list = [file_path]
         if associated_files:
-            file_list = self._list_associated_files(file_path)
-        else:
-            file_list = [file_path]
+            file_list = file_list + self._list_associated_files(file_path)
 
         if not file_list:
-            self._log(u"There were no files associated with "+file_path+", not moving anything", logger.DEBUG)
+            self._log(u"There were no files associated with " + file_path + ", not moving anything", logger.DEBUG)
             return
         
+        # deal with all files
         for cur_file_path in file_list:
 
             cur_file_name = ek.ek(os.path.basename, cur_file_path)
@@ -275,49 +294,6 @@ class PostProcessor(object):
 
         self._combined_file_operation(file_path, new_path, new_base_name, associated_files, action=_int_copy)
 
-    def _find_ep_destination_folder(self, ep_obj):
-        """
-        Finds the final folder where the episode should go. If season folders are enabled
-        and an existing season folder can be found then it is used, otherwise a new one
-        is created in accordance with the config settings. If season folders aren't enabled
-        then this function should simply return the show dir.
-        
-        ep_obj: The TVEpisode object to figure out the location for 
-        """
-        
-        # if we're supposed to put it in a season folder then figure out what folder to use
-        season_folder = ''
-        if ep_obj.show.seasonfolders:
-    
-            # search the show dir for season folders
-            for curDir in ek.ek(os.listdir, ep_obj.show.location):
-    
-                if not ek.ek(os.path.isdir, ek.ek(os.path.join, ep_obj.show.location, curDir)):
-                    continue
-    
-                # if it's a season folder, check if it's the one we want
-                match = re.match(".*season\s*(\d+)", curDir, re.IGNORECASE)
-                if match:
-                    # if it's the correct season folder then stop looking
-                    if int(match.group(1)) == int(ep_obj.season):
-                        season_folder = curDir
-                        break
-    
-            # if we couldn't find the right one then just use the season folder defaut format
-            if season_folder == '':
-                # for air-by-date shows use the year as the season folder
-                if ep_obj.show.air_by_date:
-                    season_folder = str(ep_obj.airdate.year)
-                else:
-                    try:
-                        season_folder = sickbeard.SEASON_FOLDERS_FORMAT % (ep_obj.season)
-                    except TypeError:
-                        logger.log(u"Error: Your season folder format is incorrect, try setting it back to the default")
-        
-        dest_folder = ek.ek(os.path.join, ep_obj.show.location, season_folder)
-        
-        return dest_folder
-
     def _history_lookup(self):
         """
         Look up the NZB name in the history and see if it contains a record for self.nzb_name
@@ -356,6 +332,14 @@ class PostProcessor(object):
             self.in_history = True
             to_return = (tvdb_id, season, [])
             self._log("Found result in history: "+str(to_return), logger.DEBUG)
+
+            if curName == self.nzb_name:
+                self.good_results[self.NZB_NAME] = True
+            elif curName == self.folder_name:
+                self.good_results[self.FOLDER_NAME] = True
+            elif curName == self.file_name:
+                self.good_results[self.FILE_NAME] = True
+
             return to_return
         
         self.in_history = False
@@ -400,9 +384,29 @@ class PostProcessor(object):
         
         def _finalize(parse_result):
             self.release_group = parse_result.release_group
+            
+            # remember whether it's a proper
             if parse_result.extra_info:
                 self.is_proper = re.search('(^|[\. _-])(proper|repack)([\. _-]|$)', parse_result.extra_info, re.I) != None
-        
+            
+            # if the result is complete then remember that for later
+            if parse_result.series_name and parse_result.season_number != None and parse_result.episode_numbers and parse_result.release_group:
+                test_name = os.path.basename(name)
+                if test_name == self.nzb_name:
+                    self.good_results[self.NZB_NAME] = True
+                elif test_name == self.folder_name:
+                    self.good_results[self.FOLDER_NAME] = True
+                elif test_name == self.file_name:
+                    self.good_results[self.FILE_NAME] = True
+                else:
+                    logger.log(u"Nothing was good, found "+repr(test_name)+" and wanted either "+repr(self.nzb_name)+", "+repr(self.folder_name)+", or "+repr(self.file_name))
+            else:
+                logger.log("Parse result not suficent(all folowing have to be set). will not save release name", logger.DEBUG)
+                logger.log("Parse result(series_name): " + str(parse_result.series_name), logger.DEBUG)
+                logger.log("Parse result(season_number): " + str(parse_result.season_number), logger.DEBUG)
+                logger.log("Parse result(episode_numbers): " + str(parse_result.episode_numbers), logger.DEBUG)
+                logger.log("Parse result(release_group): " + str(parse_result.release_group), logger.DEBUG)
+                
         # for each possible interpretation of that scene name
         for cur_name in name_list:
             self._log(u"Checking scene exceptions for a match on "+cur_name, logger.DEBUG)
@@ -465,10 +469,10 @@ class PostProcessor(object):
         
                         # try to look up the nzb in history
         attempt_list = [self._history_lookup,
-    
-                        # try to analyze the episode name
-                        lambda: self._analyze_name(self.file_path),
 
+                        # try to analyze the nzb name
+                        lambda: self._analyze_name(self.nzb_name),
+    
                         # try to analyze the file name
                         lambda: self._analyze_name(self.file_name),
 
@@ -478,8 +482,9 @@ class PostProcessor(object):
                         # try to analyze the file+dir names together
                         lambda: self._analyze_name(self.file_path),
 
-                        # try to analyze the nzb name
-                        lambda: self._analyze_name(self.nzb_name),
+                        # try to analyze the dir + file name together as one name
+                        lambda: self._analyze_name(self.folder_name + u' ' + self.file_name)
+
                         ]
     
         # attempt every possible method to get our info
@@ -524,13 +529,15 @@ class PostProcessor(object):
                     epObj = t[tvdb_id].airedOn(episodes[0])[0]
                     season = int(epObj["seasonnumber"])
                     episodes = [int(epObj["episodenumber"])]
-                    self._log(u"Got season "+str(season)+" episodes "+str(episodes), logger.DEBUG)
+                    self._log(u"Got season " + str(season) + " episodes " + str(episodes), logger.DEBUG)
                 except tvdb_exceptions.tvdb_episodenotfound, e:
-                    self._log(u"Unable to find episode with date "+str(episodes[0])+u" for show "+str(tvdb_id)+u", skipping", logger.DEBUG)
-
+                    self._log(u"Unable to find episode with date " + str(episodes[0]) + u" for show " + str(tvdb_id) + u", skipping", logger.DEBUG)
                     # we don't want to leave dates in the episode list if we couldn't convert them to real episode numbers
                     episodes = []
-
+                    continue
+                except tvdb_exceptions.tvdb_error, e:
+                    logger.log(u"Unable to contact TVDB: " + ex(e), logger.WARNING)
+                    episodes = []
                     continue
 
             # if there's no season then we can hopefully just use 1 automatically
@@ -589,7 +596,7 @@ class PostProcessor(object):
             if root_ep == None:
                 root_ep = curEp
                 root_ep.relatedEps = []
-            else:
+            elif curEp not in root_ep.relatedEps:
                 root_ep.relatedEps.append(curEp)
         
         return root_ep
@@ -757,46 +764,61 @@ class PostProcessor(object):
                 raise exceptions.PostProcessingFailed("Unable to delete the existing files")
         
         # if the show directory doesn't exist then make it if allowed
-        if not ek.ek(os.path.isdir, ep_obj.show.location) and sickbeard.CREATE_MISSING_SHOW_DIRS:
+        if not ek.ek(os.path.isdir, ep_obj.show._location) and sickbeard.CREATE_MISSING_SHOW_DIRS:
             self._log(u"Show directory doesn't exist, creating it", logger.DEBUG)
             try:
-                ek.ek(os.mkdir, ep_obj.show.location)
+                ek.ek(os.mkdir, ep_obj.show._location)
                 
             except OSError, IOError:
-                raise exceptions.PostProcessingFailed("Unable to create the show directory: "+ep_obj.show.location)
+                raise exceptions.PostProcessingFailed("Unable to create the show directory: " + ep_obj.show._location)
         
             # get metadata for the show (but not episode because it hasn't been fully processed)
             ep_obj.show.writeMetadata(True)
             
+        # update the ep info before we rename so the quality & release name go into the name properly
+        for cur_ep in [ep_obj] + ep_obj.relatedEps:
+            with cur_ep.lock:
+                cur_release_name = None
+                
+                # use the best possible representation of the release name
+                if self.good_results[self.NZB_NAME]:
+                    cur_release_name = self.nzb_name
+                elif self.good_results[self.FOLDER_NAME]:
+                    cur_release_name = self.folder_name
+                elif self.good_results[self.FILE_NAME]:
+                    cur_release_name = self.file_name
+                    # take the extension off the filename, it's not needed
+                    if '.' in self.file_name:
+                        cur_release_name = self.file_name.rpartition('.')[0]
+
+                if cur_release_name:
+                    self._log("Found release name "+cur_release_name, logger.DEBUG)
+                    cur_ep.release_name = cur_release_name
+                else:
+                    logger.log("good results: "+repr(self.good_results), logger.DEBUG)
+
+                cur_ep.status = common.Quality.compositeStatus(common.DOWNLOADED, new_ep_quality)
+                
+                cur_ep.saveToDB()
+
         # find the destination folder
         try:
-            dest_path = self._find_ep_destination_folder(ep_obj)
+            proper_path = ep_obj.proper_path()
+            proper_absolute_path = ek.ek(os.path.join, ep_obj.show.location, proper_path)
+            
+            dest_path = ek.ek(os.path.dirname, proper_absolute_path)
         except exceptions.ShowDirNotFoundException:
             raise exceptions.PostProcessingFailed(u"Unable to post-process an episode if the show dir doesn't exist, quitting")
             
         self._log(u"Destination folder for this episode: "+dest_path, logger.DEBUG)
-        
-        # if the dir doesn't exist (new season folder) then make it
-        if not ek.ek(os.path.isdir, dest_path):
-            self._log(u"Season folder didn't exist, creating it", logger.DEBUG)
-            try:
-                ek.ek(os.mkdir, dest_path)
-                helpers.chmodAsParent(dest_path)
-                # do the library update for synoindex
-                notifiers.synoindex_notifier.addFolder(dest_path)
-            except OSError, IOError:
-                raise exceptions.PostProcessingFailed("Unable to create the episode's destination folder: "+dest_path)
 
-        # update the statuses before we rename so the quality goes into the name properly
-        for cur_ep in [ep_obj] + ep_obj.relatedEps:
-            with cur_ep.lock:
-                cur_ep.status = common.Quality.compositeStatus(common.DOWNLOADED, new_ep_quality)
-                cur_ep.saveToDB()
+        # create any folders we need
+        helpers.make_dirs(dest_path)
 
         # figure out the base name of the resulting episode file
         if sickbeard.RENAME_EPISODES:
             orig_extension = self.file_name.rpartition('.')[-1]
-            new_base_name = helpers.sanitizeFileName(ep_obj.prettyName())
+            new_base_name = ek.ek(os.path.basename, proper_path)
             new_file_name = new_base_name + '.' + orig_extension
 
         else:
@@ -820,10 +842,10 @@ class PostProcessor(object):
                 cur_ep.saveToDB()
         
         # log it to history
-        history.logDownload(ep_obj, self.file_path)
+        history.logDownload(ep_obj, self.file_path, new_ep_quality, self.release_group)
 
         # send notifications
-        notifiers.notify_download(ep_obj.prettyName(True))
+        notifiers.notify_download(ep_obj.prettyName())
 
         # generate nfo/tbn
         ep_obj.createMetaFiles()

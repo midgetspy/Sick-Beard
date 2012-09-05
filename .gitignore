@@ -2,7 +2,7 @@
 ######################
 cache/*
 cache.db*
-config.ini
+config.ini*
 Logs/*
 sickbeard.db*
 autoProcessTV/autoProcessTV.cfg

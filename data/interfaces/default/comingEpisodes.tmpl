@@ -9,20 +9,20 @@
 #import os.path
 #include $os.path.join($sickbeard.PROG_DIR, "data/interfaces/default/inc_top.tmpl")
 #set $sort = $sickbeard.COMING_EPS_SORT
-<script type="text/javascript" src="$sbRoot/js/ajaxEpSearch.js"></script>
+<script type="text/javascript" src="$sbRoot/js/ajaxEpSearch.js?$sbPID"></script>
 
 <div class="h2footer align-right">
     <b>Key:</b> 
-    <span class="listing_overdue">Past</span>
-    <span class="listing_current">Current</span>
-    <span class="listing_default">Future</span>
-    <span class="listing_toofar">Distant</span>
-    <!-- <span class="listing_unknown">Unknown</span> //-->
+    <span class="listing-overdue">Past</span>
+    <span class="listing-current">Current</span>
+    <span class="listing-default">Future</span>
+    <span class="listing-toofar">Distant</span>
+    <!-- <span class="listing-unknown">Unknown</span> //-->
 </div>
 
 #if $layout == 'list':
 <!-- start list view //-->
-<script type="text/javascript" src="$sbRoot/js/plotTooltip.js"></script>
+<script type="text/javascript" src="$sbRoot/js/plotTooltip.js?$sbPID"></script>
 <script type="text/javascript" charset="utf-8">
 <!--
 \$.tablesorter.addParser({
@@ -81,12 +81,12 @@
 //-->
 </script>
 
-    #set $show_div = "listing_default"
+    #set $show_div = "listing-default"
 
 <input type="hidden" id="sbRoot" value="$sbRoot" />
 
 <br/>
-    <table id="showListTable" class="sickbeardTable tablesorter" cellspacing="1" border="0" cellpadding="0">
+    <table id="showListTable" class="tablesorter" cellspacing="1" border="0" cellpadding="0">
     <thead><tr><th>Airdate</th><th>Show</th><th class="nowrap">Next Ep</th><th>Next Ep Name</th><th>Network</th><th>Quality</th><th>tvDB</th><th>Search</th></tr></thead>
     <tbody>
 
@@ -98,14 +98,14 @@
 
         #set $cur_ep_airdate = int($cur_result["airdate"])
             #if $cur_ep_airdate < $today:
-                #set $show_div = "listing_overdue"
+                #set $show_div = "listing-overdue"
             #elif $cur_ep_airdate >= $next_week:
-                #set $show_div = "listing_toofar"
+                #set $show_div = "listing-toofar"
             #elif $cur_ep_airdate >= $today and $cur_ep_airdate < $next_week:
                 #if $cur_ep_airdate == $today:
-                    #set $show_div = "listing_current"
+                    #set $show_div = "listing-current"
                 #else:
-                    #set $show_div = "listing_default"
+                    #set $show_div = "listing-default"
                 #end if
             #end if
 
@@ -134,7 +134,7 @@
         </td>
         <td align="center"><a href="http://www.thetvdb.com/?tab=series&amp;id=${cur_result["showid"]}" onclick="window.open(this.href, '_blank'); return false;" title="http://www.thetvdb.com/?tab=series&amp;id=${cur_result["showid"]}"><img alt="[info]" height="16" width="16" src="$sbRoot/images/thetvdb16.png" /></a></td>
         <td align="center">
-        <a href="$sbRoot/home/searchEpisode?show=${cur_result["showid"]}&amp;season=$cur_result["season"]&amp;episode=$cur_result["episode"]" title="Manual Search" id="forceUpdate-${cur_result["showid"]}" class="forceUpdate epSearch"><img alt="[search]" height="16" width="16" src="$sbRoot/images/search32.png" id="forceUpdateImage-${cur_result["showid"]}" /></a>
+        <a href="$sbRoot/home/searchEpisode?show=${cur_result["showid"]}&amp;season=$cur_result["season"]&amp;episode=$cur_result["episode"]" title="Manual Search" id="forceUpdate-${cur_result["showid"]}" class="forceUpdate epSearch"><img alt="[search]" height="16" width="16" src="$sbRoot/images/search16.png" id="forceUpdateImage-${cur_result["showid"]}" /></a>
         </td>
       </tr>
     <!-- end $cur_result["show_name"] //-->
@@ -148,11 +148,11 @@
 <!--
 \$(document).ready(function(){ 
   \$('#sbRoot').ajaxEpSearch({'size': 16, 'loadingImage': 'loading16_333333.gif'});
-  \$(".ep_summary").hide();
-  \$(".ep_summaryTrigger").click(function() {
-    \$(this).next(".ep_summary").slideToggle('normal', function() {
-        \$(this).prev(".ep_summaryTrigger").attr('src', function(i, src) {
-            return \$(this).next(".ep_summary").is(':visible') ? src.replace('plus','minus') : src.replace('minus','plus');
+  \$(".epSummary").hide();
+  \$(".epSummaryTrigger").click(function() {
+    \$(this).next(".epSummary").slideToggle('normal', function() {
+        \$(this).prev(".epSummaryTrigger").attr('src', function(i, src) {
+            return \$(this).next(".epSummary").is(':visible') ? src.replace('plus','minus') : src.replace('minus','plus');
         });
     });
   });
@@ -163,7 +163,7 @@
     #set $cur_segment = None
     #set $too_late_header = False
     #set $missed_header = False
-    #set $show_div = "ep_listing listing_default"
+    #set $show_div = "epListing listing-default"
 
     #if $sort == "show": 
         <br/><br/>
@@ -178,17 +178,17 @@
 
         #if $sort == "network":
             #if $cur_result["network"] and $cur_segment != $cur_result["network"]:
-                <br /><h1 class="network">$cur_result["network"]</h1>
+                <br /><h2 class="network">$cur_result["network"]</h2>
                 #set $cur_ep_airdate = int($cur_result["airdate"])
                 #if $cur_ep_airdate < $today:
-                    #set $show_div = "ep_listing listing_overdue"
+                    #set $show_div = "epListing listing-overdue"
                 #elif $cur_ep_airdate >= $next_week:
-                    #set $show_div = "ep_listing listing_toofar"
+                    #set $show_div = "epListing listing-toofar"
                 #elif $cur_ep_airdate >= $today and $cur_ep_airdate < $next_week:
                     #if $cur_ep_airdate == $today:
-                        #set $show_div = "ep_listing listing_current"
+                        #set $show_div = "epListing listing-current"
                     #else:
-                        #set $show_div = "ep_listing listing_default"
+                        #set $show_div = "epListing listing-default"
                     #end if
                 #end if
                 #set $cur_segment = $cur_result["network"]
@@ -197,27 +197,27 @@
             #set $cur_ep_airdate = int($cur_result["airdate"])
             #if $cur_segment != $cur_ep_airdate:
                 #if $cur_ep_airdate < $today and not $missed_header:
-                    <br /><h1 class="day">Missed</h1>
+                    <br /><h2 class="day">Missed</h2>
                     #set $missed_header = True
-                    #set $show_div = "ep_listing listing_overdue"
+                    #set $show_div = "epListing listing-overdue"
                 #elif $cur_ep_airdate >= $next_week and not $too_late_header:
-                    <br /><h1 class="day">Later</h1>
-                    #set $show_div = "ep_listing listing_toofar"
+                    <br /><h2 class="day">Later</h2>
+                    #set $show_div = "epListing listing-toofar"
                     #set $too_late_header = True
                 #elif $cur_ep_airdate >= $today and $cur_ep_airdate < $next_week:
                     #if $cur_ep_airdate == $today:
-                    <br /><h1 class="day">$datetime.date.fromordinal($cur_ep_airdate).strftime("%A").decode($sickbeard.SYS_ENCODING) <span style="font-size: 12px;">[today]</span></h1>
-                        #set $show_div = "ep_listing listing_current"
+                    <br /><h2 class="day">$datetime.date.fromordinal($cur_ep_airdate).strftime("%A").decode($sickbeard.SYS_ENCODING) <span style="font-size: 12px;">[today]</span></h2>
+                        #set $show_div = "epListing listing-current"
                     #else:
-                    <br /><h1 class="day">$datetime.date.fromordinal($cur_ep_airdate).strftime("%A").decode($sickbeard.SYS_ENCODING)</h1>
-                        #set $show_div = "ep_listing listing_default"
+                    <br /><h2 class="day">$datetime.date.fromordinal($cur_ep_airdate).strftime("%A").decode($sickbeard.SYS_ENCODING)</h2>
+                        #set $show_div = "epListing listing-default"
                     #end if
                 #end if
                 #set $cur_segment = $cur_ep_airdate
             #end if
         #end if
 
-    <div class="$show_div" id="listing_${cur_result["showid"]}">
+    <div class="$show_div" id="listing-${cur_result["showid"]}">
       <div class="tvshowDiv">
       <table width="100%" border="0" cellpadding="0" cellspacing="0">
         <tr>
@@ -229,7 +229,7 @@
             </a></span>
             <span class="tvshowTitleIcons">
                 <a href="http://www.thetvdb.com/?tab=series&amp;id=${cur_result["showid"]}" onclick="window.open(this.href, '_blank'); return false;" title="http://www.thetvdb.com/?tab=series&amp;id=${cur_result["showid"]}"><img alt="[tvdb]" height="16" width="16" src="$sbRoot/images/thetvdb16.png" /></a>
-                <span><a href="$sbRoot/home/searchEpisode?show=${cur_result["showid"]}&amp;season=$cur_result["season"]&amp;episode=$cur_result["episode"]" title="Manual Search" id="forceUpdate-${cur_result["showid"]}" class="epSearch forceUpdate"><img alt="[search]" height="16" width="16" src="$sbRoot/images/search32.png" id="forceUpdateImage-${cur_result["showid"]}" /></a></span>
+                <span><a href="$sbRoot/home/searchEpisode?show=${cur_result["showid"]}&amp;season=$cur_result["season"]&amp;episode=$cur_result["episode"]" title="Manual Search" id="forceUpdate-${cur_result["showid"]}" class="epSearch forceUpdate"><img alt="[search]" height="16" width="16" src="$sbRoot/images/search16.png" id="forceUpdateImage-${cur_result["showid"]}" /></a></span>
             </span>
           </th>
         </tr>
@@ -241,7 +241,7 @@
         </tr>
         <tr>
 #end if          
-          <td class="next_episode">
+          <td class="nextEp">
             <span class="title">Next Episode:</span> <span><%=str(cur_result["season"])+"x"+"%02i" % int(cur_result["episode"]) %> - $cur_result["name"] ($datetime.date.fromordinal(int($cur_result["airdate"])))</span>
           </td>
         </tr>
@@ -254,9 +254,9 @@
  [<span class="title">Custom</span>]<br />
 #end if
             #if $cur_result["description"] == '':
-                <div class="ep_summary" style="margin-left:0;display:block !important;">[There is no summary added for this episode]</div>
+                <div class="epSummary" style="margin-left:0;display:block !important;">[There is no summary added for this episode]</div>
             #else:
-                <img class="ep_summaryTrigger" src="$sbRoot/images/plus.png" height="16" width="16" alt="" title="Toggle Summary" /><div class="ep_summary">$cur_result["description"]</div>
+                <img class="epSummaryTrigger" src="$sbRoot/images/plus.png" height="16" width="16" alt="" title="Toggle Summary" /><div class="epSummary">$cur_result["description"]</div>
             #end if
             <br/>
           </td>
@@ -279,5 +279,5 @@ window.setInterval( "location.reload(true)", 600000); // Refresh every 10 minute
 //-->
 </script>
 
-<script type="text/javascript" src="$sbRoot/js/tableClick.js"></script>
+<script type="text/javascript" src="$sbRoot/js/tableClick.js?$sbPID"></script>
 #include $os.path.join($sickbeard.PROG_DIR, "data/interfaces/default/inc_bottom.tmpl")
