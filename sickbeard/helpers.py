@@ -16,7 +16,6 @@
 # You should have received a copy of the GNU General Public License
 # along with Sick Beard.  If not, see <http://www.gnu.org/licenses/>.
 
-
 import StringIO, zlib, gzip
 import os
 import stat
@@ -24,18 +23,20 @@ import urllib, urllib2
 import re, socket
 import shutil
 import traceback
+import time, sys
+
+from httplib import BadStatusLine
 
 from xml.dom.minidom import Node
 
 import sickbeard
 
-from sickbeard.exceptions import MultipleShowObjectsException
+from sickbeard.exceptions import MultipleShowObjectsException, ex
 from sickbeard import logger, classes
 from sickbeard.common import USER_AGENT, mediaExtensions, XML_NSMAP
 
 from sickbeard import db
 from sickbeard import encodingKludge as ek
-from sickbeard.exceptions import ex
 
 from lib.tvdb_api import tvdb_api, tvdb_exceptions
 
@@ -129,12 +130,12 @@ def getURL (url, headers=[]):
     opener.addheaders = [('User-Agent', USER_AGENT), ('Accept-Encoding', 'gzip,deflate')]
     for cur_header in headers:
         opener.addheaders.append(cur_header)
-    usock = opener.open(url)
-    url = usock.geturl()
-
-    encoding = usock.info().get("Content-Encoding")
 
     try:
+        usock = opener.open(url)
+        url = usock.geturl()
+        encoding = usock.info().get("Content-Encoding")
+
         if encoding in ('gzip', 'x-gzip', 'deflate'):
             content = usock.read()
             if encoding == 'deflate':
@@ -145,15 +146,26 @@ def getURL (url, headers=[]):
 
         else:
             result = usock.read()
-            usock.close()
+
+        usock.close()
+
+    except urllib2.HTTPError, e:
+        logger.log(u"HTTP error " + str(e.code) + " while loading URL " + url, logger.WARNING)
+        return None
+    except urllib2.URLError, e:
+        logger.log(u"URL error " + str(e.reason) + " while loading URL " + url, logger.WARNING)
+        return None
+    except BadStatusLine:
+        logger.log(u"BadStatusLine error while loading URL " + url, logger.WARNING)
+        return None
     except socket.timeout:
-        logger.log(u"Timed out while loading URL "+url, logger.WARNING)
+        logger.log(u"Timed out while loading URL " + url, logger.WARNING)
         return None
     except ValueError:
-        logger.log(u"Unknown error while loading URL "+url, logger.WARNING)
+        logger.log(u"Unknown error while loading URL " + url, logger.WARNING)
         return None
     except Exception:
-        logger.log(u"Unknown exception while loading URL "+url+": "+traceback.format_exc(), logger.WARNING)
+        logger.log(u"Unknown exception while loading URL " + url + ": " + traceback.format_exc(), logger.WARNING)
         return None
 
     return result
@@ -415,22 +427,99 @@ def moveFile(srcFile, destFile):
         copyFile(srcFile, destFile)
         ek.ek(os.unlink, srcFile)
 
-def rename_file(old_path, new_name):
+def make_dirs(path):
+    """
+    Creates any folders that are missing and assigns them the permissions of their
+    parents
+    """
 
-    old_path_list = ek.ek(os.path.split, old_path)
-    old_file_ext = os.path.splitext(old_path_list[1])[1]
+    logger.log(u"Checking if the path " + path + " already exists", logger.DEBUG)
 
-    new_path = ek.ek(os.path.join, old_path_list[0], sanitizeFileName(new_name) + old_file_ext)
+    if not ek.ek(os.path.isdir, path):
+        # Windows, create all missing folders
+        if os.name == 'nt' or os.name == 'ce':
+            try:
+                logger.log(u"Folder " + path + " didn't exist, creating it", logger.DEBUG)
+                ek.ek(os.makedirs, path)
+            except (OSError, IOError), e:
+                logger.log(u"Failed creating " + path + " : " + ex(e), logger.ERROR)
+                return False
 
-    logger.log(u"Renaming from " + old_path + " to " + new_path)
+        # not Windows, create all missing folders and set permissions
+        else:
+            sofar = ''
+            folder_list = path.split(os.path.sep)
 
+            # look through each subfolder and make sure they all exist
+            for cur_folder in folder_list:
+                sofar += cur_folder + os.path.sep;
+
+                # if it exists then just keep walking down the line
+                if ek.ek(os.path.isdir, sofar):
+                    continue
+
+                try:
+                    logger.log(u"Folder " + sofar + " didn't exist, creating it", logger.DEBUG)
+                    ek.ek(os.mkdir, sofar)
+                    # use normpath to remove end separator, otherwise checks permissions against itself
+                    chmodAsParent(ek.ek(os.path.normpath, sofar))
+                except (OSError, IOError), e:
+                    logger.log(u"Failed creating " + sofar + " : " + ex(e), logger.ERROR)
+                    return False
+
+    return True
+
+def rename_ep_file(cur_path, new_path):
+    """
+    Creates all folders needed to move a file to its new location, renames it, then cleans up any folders
+    left that are now empty.
+    
+    cur_path: The absolute path to the file you want to move/rename
+    new_path: The absolute path to the destination for the file WITHOUT THE EXTENSION
+    """
+    
+    logger.log(u"Renaming file from "+cur_path+" to "+new_path)
+    
+    new_dest_dir, new_dest_name = os.path.split(new_path) #@UnusedVariable
+    cur_file_name, cur_file_ext = os.path.splitext(cur_path) #@UnusedVariable
+    
+    # put the extension on the incoming file
+    new_path += cur_file_ext
+    
+    make_dirs(os.path.dirname(new_path))
+    
+    # move the file
     try:
-        ek.ek(os.rename, old_path, new_path)
+        ek.ek(os.rename, cur_path, new_path)
     except (OSError, IOError), e:
-        logger.log(u"Failed renaming " + old_path + " to " + new_path + ": " + ex(e), logger.ERROR)
+        logger.log(u"Failed renaming " + cur_path + " to " + new_path + ": " + ex(e), logger.ERROR)
         return False
+    
+    # clean up any old folders that are empty
+    delete_empty_folders(ek.ek(os.path.dirname, cur_path))
+    
+    return True
+    
 
-    return new_path
+def delete_empty_folders(check_empty_dir):
+    """
+    Walks backwards up the path and deletes any empty folders found.
+    
+    check_empty_dir: The path to clean (absolute path to a folder)
+    """
+    
+    logger.log(u"Trying to clean any empty folders under "+check_empty_dir)
+    
+    # as long as the folder exists and doesn't contain any files, delete it
+    while os.path.isdir(check_empty_dir) and not os.listdir(check_empty_dir):
+        logger.log(u"Deleting empty folder: "+check_empty_dir)
+        try:
+            os.rmdir(check_empty_dir)
+        except (WindowsError, OSError), e:
+            logger.log(u"Unable to delete "+check_empty_dir+": "+repr(e)+" / "+str(e), logger.WARNING)
+            break
+        check_empty_dir = os.path.dirname(check_empty_dir)
+
 
 def chmodAsParent(childPath):
     if os.name == 'nt' or os.name == 'ce':
@@ -514,10 +603,10 @@ def sanitizeSceneName (name, ezrss=False):
     """
 
     if not ezrss:
-        bad_chars = ",:()'!?"
+        bad_chars = u",:()'!?\u2019"
     # ezrss leaves : and ! in their show names as far as I can tell
     else:
-        bad_chars = ",()'?"
+        bad_chars = u",()'?\u2019"
 
     # strip out any bad chars
     for x in bad_chars:
@@ -573,3 +662,27 @@ def get_xml_text(node):
         if child_node.nodeType in (Node.CDATA_SECTION_NODE, Node.TEXT_NODE):
             text += child_node.data
     return text.strip()
+
+def backupVersionedFile(oldFile, version):
+    numTries = 0
+    
+    newFile = oldFile + '.' + 'v'+str(version)
+    
+    while not ek.ek(os.path.isfile, newFile):
+        if not ek.ek(os.path.isfile, oldFile):
+            break
+
+        try:
+            logger.log(u"Attempting to back up "+oldFile+" before migration...")
+            shutil.copy(oldFile, newFile)
+            logger.log(u"Done backup, proceeding with migration.")
+            break
+        except Exception, e:
+            logger.log(u"Error while trying to back up "+oldFile+": "+ex(e))
+            numTries += 1
+            time.sleep(1)
+            logger.log(u"Trying again.")
+
+        if numTries >= 10:
+            logger.log(u"Unable to back up "+oldFile+", please do it manually.")
+            sys.exit(1)

@@ -67,7 +67,7 @@ result_type_map = {RESULT_SUCCESS: "success",
 
 class Api:
     """ api class that returns json results """
-    version = 0.2
+    version = 3 # use an int since float-point is unpredictible
     intent = 4
 
     @cherrypy.expose
@@ -167,7 +167,7 @@ class Api:
             callback = request.params.get('callback') or request.params.get('jsonp')
             if callback != None:
                 out = callback + '(' + out + ');' # wrap with JSONP call if requested
-        except Exception, e: # if we fail to generate the output fake a error
+        except Exception, e: # if we fail to generate the output fake an error
             logger.log(u"API :: " + traceback.format_exc(), logger.DEBUG)
             out = '{"result":"' + result_type_map[RESULT_ERROR] + '", "message": "error while composing output: "' + ex(e) + '"}'
         return out
@@ -493,6 +493,13 @@ class TVDBShorthandWrapper(ApiCall):
 #     helper functions         #
 ################################
 
+def _sizeof_fmt(num):
+    for x in ['bytes', 'KB', 'MB', 'GB', 'TB']:
+        if num < 1024.00:
+            return "%3.2f %s" % (num, x)
+        num /= 1024.00
+
+
 def _is_int(data):
     try:
         int(data)
@@ -799,7 +806,7 @@ class CMD_Episode(ApiCall):
             return _responds(RESULT_FAILURE, msg="Show not found")
 
         myDB = db.DBConnection(row_type="dict")
-        sqlResults = myDB.select("SELECT name, description, airdate, status, location FROM tv_episodes WHERE showid = ? AND episode = ? AND season = ?", [self.tvdbid, self.e, self.s])
+        sqlResults = myDB.select("SELECT name, description, airdate, status, location, file_size, release_name FROM tv_episodes WHERE showid = ? AND episode = ? AND season = ?", [self.tvdbid, self.e, self.s])
         if not len(sqlResults) == 1:
             raise ApiError("Episode not found")
         episode = sqlResults[0]
@@ -814,7 +821,7 @@ class CMD_Episode(ApiCall):
         if bool(self.fullPath) == True and showPath:
             pass
         elif bool(self.fullPath) == False and showPath:
-            #i am using the length because lstrip removes to much
+            # using the length because lstrip removes to much
             showPathLength = len(showPath) + 1 # the / or \ yeah not that nice i know
             episode["location"] = episode["location"][showPathLength:]
         elif not showPath: # show dir is broken ... episode path will be empty
@@ -824,6 +831,7 @@ class CMD_Episode(ApiCall):
         status, quality = Quality.splitCompositeStatus(int(episode["status"]))
         episode["status"] = _get_status_Strings(status)
         episode["quality"] = _get_quality_string(quality)
+        episode["file_size_human"] = _sizeof_fmt(episode["file_size"])
 
         myDB.connection.close()
         return _responds(RESULT_SUCCESS, episode)
@@ -875,26 +883,29 @@ class CMD_EpisodeSearch(ApiCall):
 
 
 class CMD_EpisodeSetStatus(ApiCall):
-    _help = {"desc": "set status of an episode",
+    _help = {"desc": "set status of an episode or season (when no ep is provided)",
              "requiredParameters": {"tvdbid": {"desc": "thetvdb.com unique id of a show"},
                                    "season": {"desc": "the season number"},
-                                   "episode": {"desc": "the episode number"},
                                    "status": {"desc": "the status values: wanted, skipped, archived, ignored"}
-                                  }
+                                  },
+             "optionalParameters": {"episode": {"desc": "the episode number"},
+                                    "force": {"desc": "should we replace existing (downloaded) episodes or not"}
+                                     }
              }
 
     def __init__(self, args, kwargs):
         # required
         self.tvdbid, args = self.check_params(args, kwargs, "tvdbid", None, True, "int", [])
         self.s, args = self.check_params(args, kwargs, "season", None, True, "int", [])
-        self.e, args = self.check_params(args, kwargs, "episode", None, True, "int", [])
         self.status, args = self.check_params(args, kwargs, "status", None, True, "string", ["wanted", "skipped", "archived", "ignored"])
         # optional
+        self.e, args = self.check_params(args, kwargs, "episode", None, False, "int", [])
+        self.force, args = self.check_params(args, kwargs, "force", 0, False, "bool", [])
         # super, missing, help
         ApiCall.__init__(self, args, kwargs)
 
     def run(self):
-        """ set status of an episode """
+        """ set status of an episode or a season (when no ep is provided) """
         showObj = sickbeard.helpers.findCertainShow(sickbeard.showList, int(self.tvdbid))
         if not showObj:
             return _responds(RESULT_FAILURE, msg="Show not found")
@@ -904,47 +915,67 @@ class CMD_EpisodeSetStatus(ApiCall):
             if str(statusStrings[status]).lower() == str(self.status).lower():
                 self.status = status
                 break
-        # this should be obsolete bcause of the above
-        if not self.status in statusStrings.statusStrings:
-            return _responds(RESULT_FAILURE, msg="Invalid Status")
+        else: # if we dont break out of the for loop we got here.
+            # the allowed values has at least one item that could not be matched against the internal status strings
+            raise ApiError("The status string could not be matched to a status. Report to Devs!")
 
-        epObj = showObj.getEpisode(int(self.s), int(self.e))
-        if epObj == None:
-            return _responds(RESULT_FAILURE, msg="Episode not found")
+        ep_list = []
+        if self.e:
+            epObj = showObj.getEpisode(self.s, self.e)
+            if epObj == None:
+                return _responds(RESULT_FAILURE, msg="Episode not found")
+            ep_list = [epObj]
+        else:
+            # get all episode numbers frome self,season
+            ep_list = showObj.getAllEpisodes(season=self.s)
 
-        #only allow the status options we want
-        if int(self.status) not in (3, 5, 6, 7):
-            return _responds(RESULT_FAILURE, msg="Show not found")
+        def _epResult(result_code, ep, msg=""):
+            return {'season': ep.season, 'episode': ep.episode, 'status': _get_status_Strings(ep.status), 'result': result_type_map[result_code], 'message': msg}
 
-        segment_list = []
-        if int(self.status) == WANTED:
-            # figure out what segment the episode is in and remember it so we can backlog it
-            if epObj.show.air_by_date:
-                ep_segment = str(epObj.airdate)[:7]
-            else:
-                ep_segment = epObj.season
+        ep_results = []
+        failure = False
+        start_backlog = False
+        ep_segment = None
+        for epObj in ep_list:
+            if ep_segment == None and self.status == WANTED:
+                # figure out what segment the episode is in and remember it so we can backlog it
+                if showObj.air_by_date:
+                    ep_segment = str(epObj.airdate)[:7]
+                else:
+                    ep_segment = epObj.season
 
-            if ep_segment not in segment_list:
-                segment_list.append(ep_segment)
+            with epObj.lock:
+                # don't let them mess up UNAIRED episodes
+                if epObj.status == UNAIRED:
+                    if self.e != None: # setting the status of a unaired is only considert a failure if we directly wanted this episode, but is ignored on a season request
+                        ep_results.append(_epResult(RESULT_FAILURE, epObj, "Refusing to change status because it is UNAIRED"))
+                        failure = True
+                    continue
 
-        with epObj.lock:
-            # don't let them mess up UNAIRED episodes
-            if epObj.status == UNAIRED:
-                return _responds(RESULT_FAILURE, msg="Refusing to change status because it is UNAIRED")
+                # allow the user to force setting the status for an already downloaded episode
+                if epObj.status in Quality.DOWNLOADED and not self.force:
+                    ep_results.append(_epResult(RESULT_FAILURE, epObj, "Refusing to change status because it is already marked as DOWNLOADED"))
+                    failure = True
+                    continue
 
-            if int(self.status) in Quality.DOWNLOADED and epObj.status not in Quality.SNATCHED + Quality.SNATCHED_PROPER + Quality.DOWNLOADED + [IGNORED] and not ek.ek(os.path.isfile, epObj.location):
-                return _responds(RESULT_FAILURE, msg="Refusing to change status to DOWNLOADED because it's not SNATCHED/DOWNLOADED")
+                epObj.status = self.status
+                epObj.saveToDB()
 
-            epObj.status = int(self.status)
-            epObj.saveToDB()
+                if self.status == WANTED:
+                    start_backlog = True
+                ep_results.append(_epResult(RESULT_SUCCESS, epObj))
 
-            for cur_segment in segment_list:
-                cur_backlog_queue_item = search_queue.BacklogQueueItem(showObj, cur_segment)
-                sickbeard.searchQueueScheduler.action.add_item(cur_backlog_queue_item) #@UndefinedVariable
-                logger.log(u"API :: Starting backlog for " + showObj.name + " season " + str(cur_segment) + " because some eps were set to wanted")
-                return _responds(RESULT_SUCCESS, msg="Episode status changed to Wanted, and backlog started")
+        extra_msg = ""
+        if start_backlog:
+            cur_backlog_queue_item = search_queue.BacklogQueueItem(showObj, ep_segment)
+            sickbeard.searchQueueScheduler.action.add_item(cur_backlog_queue_item) #@UndefinedVariable
+            logger.log(u"API :: Starting backlog for " + showObj.name + " season " + str(ep_segment) + " because some episodes were set to WANTED")
+            extra_msg = " Backlog started"
 
-        return _responds(RESULT_SUCCESS, msg="Episode status successfully changed to " + statusStrings[epObj.status])
+        if failure:
+            return _responds(RESULT_FAILURE, ep_results, 'Failed to set all or some status. Check data.' + extra_msg)
+        else:
+            return _responds(RESULT_SUCCESS, msg='All status set successfully.' + extra_msg)
 
 
 class CMD_Exceptions(ApiCall):
@@ -1318,7 +1349,7 @@ class CMD_SickBeardGetDefaults(ApiCall):
 
         anyQualities, bestQualities = _mapQuality(sickbeard.QUALITY_DEFAULT)
 
-        data = {"status": statusStrings[sickbeard.STATUS_DEFAULT].lower(), "season_folders": int(sickbeard.SEASON_FOLDERS_DEFAULT), "initial": anyQualities, "archive": bestQualities, "future_show_paused": int(sickbeard.COMING_EPS_DISPLAY_PAUSED) }
+        data = {"status": statusStrings[sickbeard.STATUS_DEFAULT].lower(), "flatten_folders": int(sickbeard.FLATTEN_FOLDERS_DEFAULT), "initial": anyQualities, "archive": bestQualities, "future_show_paused": int(sickbeard.COMING_EPS_DISPLAY_PAUSED) }
         return _responds(RESULT_SUCCESS, data)
 
 
@@ -1441,21 +1472,25 @@ class CMD_SickBeardSearchTVDB(ApiCall):
             finalURL = baseURL + urllib.urlencode(params)
             urlData = sickbeard.helpers.getURL(finalURL)
 
-            try:
-                seriesXML = etree.ElementTree(etree.XML(urlData))
-            except Exception, e:
-                logger.log(u"API :: Unable to parse XML for some reason: " + ex(e) + " from XML: " + urlData, logger.ERROR)
-                return _responds(RESULT_FAILURE, msg="Unable to read result from tvdb")
+            if urlData is None:
+                return _responds(RESULT_FAILURE, msg="Did not get result from tvdb")
+            else:
+                try:
+                    seriesXML = etree.ElementTree(etree.XML(urlData))
+                except Exception, e:
+                    logger.log(u"API :: Unable to parse XML for some reason: " + ex(e) + " from XML: " + urlData, logger.ERROR)
+                    return _responds(RESULT_FAILURE, msg="Unable to read result from tvdb")
 
-            series = seriesXML.getiterator('Series')
-            results = []
-            for curSeries in series:
-                results.append({"tvdbid": int(curSeries.findtext('seriesid')),
-                                "name": curSeries.findtext('SeriesName'),
-                                "first_aired": curSeries.findtext('FirstAired')})
+                series = seriesXML.getiterator('Series')
+                results = []
+                for curSeries in series:
+                    results.append({"tvdbid": int(curSeries.findtext('seriesid')),
+                                    "name": curSeries.findtext('SeriesName'),
+                                    "first_aired": curSeries.findtext('FirstAired')})
 
-            lang_id = self.valid_languages[self.lang]
-            return _responds(RESULT_SUCCESS, {"results": results, "langid": lang_id})
+                lang_id = self.valid_languages[self.lang]
+                return _responds(RESULT_SUCCESS, {"results": results, "langid": lang_id})
+
         elif self.tvdbid:
             # There's gotta be a better way of doing this but we don't wanna
             # change the language value elsewhere
@@ -1486,7 +1521,7 @@ class CMD_SickBeardSetDefaults(ApiCall):
     _help = {"desc": "set sickbeard user defaults",
              "optionalParameters": {"initial": {"desc": "initial quality for the show"},
                                     "archive": {"desc": "archive quality for the show"},
-                                    "season_folder": {"desc": "use season subfolders within the show directory"},
+                                    "flatten_folders": {"desc": "flatten subfolders within the show directory"},
                                     "status": {"desc": "status of missing episodes"}
                                     }
              }
@@ -1497,7 +1532,7 @@ class CMD_SickBeardSetDefaults(ApiCall):
         self.initial, args = self.check_params(args, kwargs, "initial", None, False, "list", ["sdtv", "sddvd", "hdtv", "hdwebdl", "hdbluray", "fullhdbluray", "unknown", "any"])
         self.archive, args = self.check_params(args, kwargs, "archive", None, False, "list", ["sddvd", "hdtv", "hdwebdl", "hdbluray", "fullhdbluray", "unknown", "any"])
         self.future_show_paused, args = self.check_params(args, kwargs, "future_show_paused", None, False, "bool", [])
-        self.season_folder, args = self.check_params(args, kwargs, "season_folder", None, False, "bool", [])
+        self.flatten_folders, args = self.check_params(args, kwargs, "flatten_folders", None, False, "bool", [])
         self.status, args = self.check_params(args, kwargs, "status", None, False, "string", ["wanted", "skipped", "archived", "ignored"])
         # super, missing, help
         ApiCall.__init__(self, args, kwargs)
@@ -1541,8 +1576,8 @@ class CMD_SickBeardSetDefaults(ApiCall):
                 raise ApiError("Status Prohibited")
             sickbeard.STATUS_DEFAULT = self.status
 
-        if self.season_folder != None:
-            sickbeard.SEASON_FOLDERS_DEFAULT = int(self.season_folder)
+        if self.flatten_folders != None:
+            sickbeard.FLATTEN_FOLDERS_DEFAULT = int(self.flatten_folders)
 
         if self.future_show_paused != None:
             sickbeard.COMING_EPS_DISPLAY_PAUSED = int(self.future_show_paused)
@@ -1609,7 +1644,7 @@ class CMD_Show(ApiCall):
         showDict["show_name"] = showObj.name
         showDict["paused"] = showObj.paused
         showDict["air_by_date"] = showObj.air_by_date
-        showDict["season_folders"] = showObj.seasonfolders
+        showDict["flatten_folders"] = showObj.flatten_folders
         #clean up tvdb horrible airs field
         showDict["airs"] = str(showObj.airs).replace('am', ' AM').replace('pm', ' PM').replace('  ', ' ')
         showDict["tvrage_id"] = showObj.tvrid
@@ -1635,7 +1670,7 @@ class CMD_ShowAddExisting(ApiCall):
                                 },
              "optionalParameters": {"initial": {"desc": "initial quality for the show"},
                                     "archive": {"desc": "archive quality for the show"},
-                                    "season_folder": {"desc": "use season subfolders for the show"}
+                                    "flatten_folders": {"desc": "flatten subfolders for the show"}
                                     }
              }
 
@@ -1646,7 +1681,7 @@ class CMD_ShowAddExisting(ApiCall):
         # optional
         self.initial, args = self.check_params(args, kwargs, "initial", None, False, "list", ["sdtv", "sddvd", "hdtv", "hdwebdl", "hdbluray", "fullhdbluray", "unknown", "any"])
         self.archive, args = self.check_params(args, kwargs, "archive", None, False, "list", ["sddvd", "hdtv", "hdwebdl", "hdbluray", "fullhdbluray", "unknown", "any"])
-        self.season_folder, args = self.check_params(args, kwargs, "season_folder", str(sickbeard.SEASON_FOLDERS_DEFAULT), False, "bool", [])
+        self.flatten_folders, args = self.check_params(args, kwargs, "flatten_folders", str(sickbeard.FLATTEN_FOLDERS_DEFAULT), False, "bool", [])
         # super, missing, help
         ApiCall.__init__(self, args, kwargs)
 
@@ -1693,7 +1728,7 @@ class CMD_ShowAddExisting(ApiCall):
         if iqualityID or aqualityID:
             newQuality = Quality.combineQualities(iqualityID, aqualityID)
 
-        sickbeard.showQueueScheduler.action.addShow(int(self.tvdbid), self.location, SKIPPED, newQuality, int(self.season_folder)) #@UndefinedVariable
+        sickbeard.showQueueScheduler.action.addShow(int(self.tvdbid), self.location, SKIPPED, newQuality, int(self.flatten_folders)) #@UndefinedVariable
         return _responds(RESULT_SUCCESS, {"name": tvdbName}, tvdbName + " has been queued to be added")
 
 
@@ -1704,7 +1739,7 @@ class CMD_ShowAddNew(ApiCall):
              "optionalParameters": {"initial": {"desc": "initial quality for the show"},
                                     "location": {"desc": "base path for where the show folder is to be created"},
                                     "archive": {"desc": "archive quality for the show"},
-                                    "season_folder": {"desc": "use season subfolders for the show"},
+                                    "flatten_folders": {"desc": "flatten subfolders for the show"},
                                     "status": {"desc": "status of missing episodes"},
                                     "lang": {"desc": "the 2 letter lang abbreviation id"}
                                     }
@@ -1723,7 +1758,7 @@ class CMD_ShowAddNew(ApiCall):
         self.location, args = self.check_params(args, kwargs, "location", None, False, "string", [])
         self.initial, args = self.check_params(args, kwargs, "initial", None, False, "list", ["sdtv", "sddvd", "hdtv", "hdwebdl", "hdbluray", "fullhdbluray", "unknown", "any"])
         self.archive, args = self.check_params(args, kwargs, "archive", None, False, "list", ["sddvd", "hdtv", "hdwebdl", "hdbluray", "fullhdbluray", "unknown", "any"])
-        self.season_folder, args = self.check_params(args, kwargs, "season_folder", str(sickbeard.SEASON_FOLDERS_DEFAULT), False, "bool", [])
+        self.flatten_folders, args = self.check_params(args, kwargs, "flatten_folders", str(sickbeard.FLATTEN_FOLDERS_DEFAULT), False, "bool", [])
         self.status, args = self.check_params(args, kwargs, "status", None, False, "string", ["wanted", "skipped", "archived", "ignored"])
         self.lang, args = self.check_params(args, kwargs, "lang", "en", False, "string", self.valid_languages.keys())
         # super, missing, help
@@ -1811,7 +1846,7 @@ class CMD_ShowAddNew(ApiCall):
             else:
                 helpers.chmodAsParent(showPath)
 
-        sickbeard.showQueueScheduler.action.addShow(int(self.tvdbid), showPath, newStatus, newQuality, int(self.season_folder), self.lang) #@UndefinedVariable
+        sickbeard.showQueueScheduler.action.addShow(int(self.tvdbid), showPath, newStatus, newQuality, int(self.flatten_folders), self.lang) #@UndefinedVariable
         return _responds(RESULT_SUCCESS, {"name": tvdbName}, tvdbName + " has been queued to be added")
 
 

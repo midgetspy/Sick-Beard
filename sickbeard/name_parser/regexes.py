@@ -29,7 +29,8 @@ ep_regexes = [
                ([. _-]+s(?P=season_num)[. _-]*             # S01 and optional separator
                e(?P<extra_ep_num>\d+))+                    # E03/etc and separator
                [. _-]*((?P<extra_info>.+?)                 # Source_Quality_Etc-
-               ((?<![. _-])-(?P<release_group>[^-]+))?)?$  # Group
+               ((?<![. _-])(?<!WEB)                        # Make sure this is really the release group
+               -(?P<release_group>[^- ]+))?)?$              # Group
                '''),
               
               ('fov_repeat',
@@ -42,7 +43,8 @@ ep_regexes = [
                ([. _-]+(?P=season_num)x                    # 1x
                (?P<extra_ep_num>\d+))+                     # 03/etc and separator
                [. _-]*((?P<extra_info>.+?)                 # Source_Quality_Etc-
-               ((?<![. _-])-(?P<release_group>[^-]+))?)?$  # Group
+               ((?<![. _-])(?<!WEB)                        # Make sure this is really the release group
+               -(?P<release_group>[^- ]+))?)?$              # Group
                '''),
               
               ('standard',
@@ -59,7 +61,8 @@ ep_regexes = [
                (([. _-]*e|-)                               # linking e/- char
                (?P<extra_ep_num>(?!(1080|720)[pi])\d+))*   # additional E03/etc
                [. _-]*((?P<extra_info>.+?)                 # Source_Quality_Etc-
-               ((?<![. _-])-(?P<release_group>[^-]+))?)?$  # Group
+               ((?<![. _-])(?<!WEB)                        # Make sure this is really the release group
+               -(?P<release_group>[^- ]+))?)?$              # Group
                '''),
 
               ('fov',
@@ -76,7 +79,8 @@ ep_regexes = [
                (?!(1080|720)[pi])(?!(?<=x)264)             # ignore obviously wrong multi-eps
                \d+))*                                      # additional x03/etc
                [\]. _-]*((?P<extra_info>.+?)               # Source_Quality_Etc-
-               ((?<![. _-])-(?P<release_group>[^-]+))?)?$  # Group
+               ((?<![. _-])(?<!WEB)                        # Make sure this is really the release group
+               -(?P<release_group>[^- ]+))?)?$              # Group
                '''),
         
               ('scene_date_format',
@@ -88,7 +92,8 @@ ep_regexes = [
                (?P<air_month>\d{2})[. _-]+                 # 11 and separator
                (?P<air_day>\d{2})                          # 23 and separator
                [. _-]*((?P<extra_info>.+?)                 # Source_Quality_Etc-
-               ((?<![. _-])-(?P<release_group>[^-]+))?)?$  # Group
+               ((?<![. _-])(?<!WEB)                        # Make sure this is really the release group
+               -(?P<release_group>[^- ]+))?)?$              # Group
                '''),
               
               ('stupid',
@@ -118,7 +123,8 @@ ep_regexes = [
                s(eason[. _-])?                             # S01/Season 01
                (?P<season_num>\d+)[. _-]*                  # S01 and optional separator
                [. _-]*((?P<extra_info>.+?)                 # Source_Quality_Etc-
-               ((?<![. _-])-(?P<release_group>[^-]+))?)?$  # Group
+               ((?<![. _-])(?<!WEB)                        # Make sure this is really the release group
+               -(?P<release_group>[^- ]+))?)?$              # Group
                '''
                ),
 
@@ -129,10 +135,11 @@ ep_regexes = [
                ^((?P<series_name>.+?)[. _-]+)?             # Show_Name and separator
                (e(p(isode)?)?|part|pt)[. _-]?              # e, ep, episode, or part
                (?P<ep_num>(\d+|[ivx]+))                    # first ep num
-               ((([. _-]+(and|&|to)[. _-]+)|-)                # and/&/to joiner
+               ((([. _-]+(and|&|to)[. _-]+)|-)             # and/&/to joiner
                (?P<extra_ep_num>(?!(1080|720)[pi])(\d+|[ivx]+))[. _-])            # second ep num
                ([. _-]*(?P<extra_info>.+?)                 # Source_Quality_Etc-
-               ((?<![. _-])-(?P<release_group>[^-]+))?)?$  # Group
+               ((?<![. _-])(?<!WEB)                        # Make sure this is really the release group
+               -(?P<release_group>[^- ]+))?)?$              # Group
                '''
                ),
 
@@ -149,7 +156,8 @@ ep_regexes = [
                (?P<extra_ep_num>(?!(1080|720)[pi])
                (\d+|([ivx]+(?=[. _-]))))[. _-])*            # second ep num
                ([. _-]*(?P<extra_info>.+?)                 # Source_Quality_Etc-
-               ((?<![. _-])-(?P<release_group>[^-]+))?)?$  # Group
+               ((?<![. _-])(?<!WEB)                        # Make sure this is really the release group
+               -(?P<release_group>[^- ]+))?)?$              # Group
                '''
                ),
 
@@ -166,11 +174,14 @@ ep_regexes = [
               ('no_season',
                # Show Name - 01 - Ep Name
                # 01 - Ep Name
+               # 01 - Ep Name
                '''
-               ^((?P<series_name>.+?)[. _-]+)?             # Show_Name and separator
-               (?P<ep_num>\d{2})                           # 02
+               ^((?P<series_name>.+?)(?:[. _-]{2,}|[. _]))?             # Show_Name and separator
+               (?P<ep_num>\d{1,2})                           # 02
+               (?:-(?P<extra_ep_num>\d{1,2}))?               # 02
                [. _-]+((?P<extra_info>.+?)                 # Source_Quality_Etc-
-               ((?<![. _-])-(?P<release_group>[^-]+))?)?$  # Group
+               ((?<![. _-])(?<!WEB)                        # Make sure this is really the release group
+               -(?P<release_group>[^- ]+))?)?$              # Group
                '''
                ),
               ]

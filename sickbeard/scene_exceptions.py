@@ -72,6 +72,7 @@ def retrieve_exceptions():
     
     # each exception is on one line with the format tvdb_id: 'show name 1', 'show name 2', etc
     for cur_line in open_url.readlines():
+        cur_line = cur_line.decode('utf-8')
         tvdb_id, sep, aliases = cur_line.partition(':') #@UnusedVariable
         
         if not aliases:
