@@ -49,7 +49,7 @@ def fixListEncodings(x):
 def callPeopleStupid(x):
     try:
         return x.encode(sickbeard.SYS_ENCODING)
-    except UnicodeDecodeError:
+    except UnicodeEncodeError:
         logger.log(u"YOUR COMPUTER SUCKS! Your data is being corrupted by a bad locale/encoding setting. Report this error on the forums or IRC please: "+repr(x)+", "+sickbeard.SYS_ENCODING, logger.ERROR)
         return x.encode(sickbeard.SYS_ENCODING, 'ignore')
 
