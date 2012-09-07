@@ -437,7 +437,7 @@ class AddSizeAndSceneNameFields(FixAirByDateSetting):
                 continue
             
             # if there is no size yet then populate it for us
-            if (not cur_ep["file_size"] or not int(cur_ep["file_size"]) and ek.ek(os.path.isfile, cur_ep["location"]):
+            if not cur_ep["file_size"] or not int(cur_ep["file_size"]) and ek.ek(os.path.isfile, cur_ep["location"]):
                 cur_size = ek.ek(os.path.getsize, cur_ep["location"])
                 self.connection.action("UPDATE tv_episodes SET file_size = ? WHERE episode_id = ?", [cur_size, int(cur_ep["episode_id"])])
 
