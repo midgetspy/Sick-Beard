@@ -2173,8 +2173,7 @@ class Home:
             showObj = sickbeard.helpers.findCertainShow(sickbeard.showList, int(show))
 
             if showObj == None:
-
-                return _genericMessage("Error", "Unable to find the specified show.")
+                return _genericMessage("Error", "Show not in show list")
 
         myDB = db.DBConnection()
 
