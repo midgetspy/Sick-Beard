@@ -345,10 +345,19 @@ class QueueItemRename(ShowQueueItem):
 
         ShowQueueItem.execute(self)
 
-        logger.log(u"Performing rename on "+self.show.name)
+        logger.log(u"Performing rename on " + self.show.name)
 
-        for cur_ep_obj in self.show.loadEpisodesFromDir():
-            cur_ep_obj.rename()
+        try:
+            show_loc = self.show.location
+        except exceptions.ShowDirNotFoundException:
+            logger.log(u"Can't perform rename on " + self.show.name + " when the show dir is missing.", logger.WARNING)
+            return
+
+        ep_obj_list = self.show.getAllEpisodes()
+        for cur_ep_obj in ep_obj_list:
+        # Only want to rename if we have a location
+            if cur_ep_obj.location:
+                cur_ep_obj.rename()
 
         self.inProgress = False
 
