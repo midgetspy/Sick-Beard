@@ -17,47 +17,47 @@ if [ -f /etc/default/sickbeard ]; then
         . /etc/default/sickbeard
 fi
 
-# script name
+# Script name
 NAME=sickbeard
 
-# app name
+# App name
 DESC=SickBeard
 
 ## Don't edit this file
 ## Edit user configuation in /etc/default/sickbeard to change
 ##
-## SB_USER=
-## SB_HOME=
-## SB_DATA=
-## SB_PIDFILE=
-## PYTHON_BIN=
-## SB_OPTS=
-## SSD_OPTS=
+## SB_USER=             # Run as username $RUN_AS
+## SB_HOME=             # Path to SickBeard.py
+## SB_DATA=             # Data directory where sickbeard.db, cache and logs are stored
+## SB_PIDFILE=          # Path to store PID file
+## PYTHON_BIN=          # Path to python bin
+## SB_OPTS=             # extra daemon option like:" --config=/home/sickbeard/config.ini"
+## SSD_OPTS=            # extra start-stop-daemon option like: " --group=users"
 ##
 ## EXAMPLE if want to run as different user
 ## add SB_USER=username to /etc/default/sickbeard
 ## otherwise default sickbeard is used
 
-## the defaults
+## The defaults
 # Run as username 
 RUN_AS=${SB_USER-sickbeard}
 
-# path to app SB_APP=path_to_app_SickBeard.py
+# Path to app SB_APP=path_to_app_SickBeard.py
 APP_PATH=${SB_HOME-/opt/sickbeard}
 
-# data directory where sickbeard.db, cache and logs are stored
+# Data directory where sickbeard.db, cache and logs are stored
 DATA_DIR=${SB_DATA-/opt/sickbeard}
 
 # Path to store PID file
 PID_FILE=${SB_PIDFILE-/var/run/sickbeard/sickbeard.pid}
 
-# path to python bin
+# Path to python bin
 DAEMON=${PYTHON_BIN-/usr/bin/python}
 
-# extra daemon option like: SB_OPTS=" --config=/home/sickbeard/config.ini"
+# Extra daemon option like: SB_OPTS=" --config=/home/sickbeard/config.ini"
 EXTRA_DAEMON_OPTS=${SB_OPTS-}
 
-# extra start-stop-daemon option like START_OPTS=" --group=users"
+# Extra start-stop-daemon option like SSD_OPTS=" --group=users"
 EXTRA_SSD_OPTS=${SSD_OPTS-}
 ##
 
@@ -70,7 +70,7 @@ test -x $DAEMON || exit 0
 
 set -e
 
-# create PID directory if not exist and ensure the SickBeard user can write to it
+# Create PID directory if not exist and ensure the SickBeard user can write to it
 if [ ! -d $PID_PATH ]; then
     mkdir -p $PID_PATH
     chown $RUN_AS $PID_PATH
