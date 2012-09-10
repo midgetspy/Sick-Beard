@@ -120,9 +120,9 @@ class TVShow(object):
 
         myDB = db.DBConnection()
         if season == None:
-            results = myDB.select("SELECT season, episode FROM tv_episodes WHERE showid = ?", [self.tvdbid])
+            results = myDB.select("SELECT season, episode FROM tv_episodes WHERE showid = ? ORDER BY season DESC, episode DESC", [self.tvdbid])
         else:
-            results = myDB.select("SELECT season, episode FROM tv_episodes WHERE showid = ? AND season = ?", [self.tvdbid, season])
+            results = myDB.select("SELECT season, episode FROM tv_episodes WHERE showid = ? AND season = ? ORDER BY season DESC, episode DESC", [self.tvdbid, season])
 
         ep_list = []
         for cur_result in results:
