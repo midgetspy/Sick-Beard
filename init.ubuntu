@@ -16,8 +16,7 @@
 if [ -f /etc/default/sickbeard ]; then
         . /etc/default/sickbeard
 else
-	echo "Please create config in /etc/default/sickbeard";
-	exit 1
+	echo "/etc/default/sickbeard not found using default settings.";
 fi
 
 
