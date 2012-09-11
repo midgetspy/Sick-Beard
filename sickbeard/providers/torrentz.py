@@ -151,16 +151,17 @@ class TORRENTZProvider(generic.TorrentProvider):
     
     def downloadResult(self, result):
         url = ""
+        torrentHash = result.url.replace('http://torrentz.eu/','').upper()
         try:
-            url = "http://torrage.com/torrent/" + result.url.replace('http://torrentz.eu/','').upper() + '.' + self.providerType
+            url = "http://torrage.com/torrent/" + torrentHash + '.' + self.providerType
             return self.downloadFromTorrentCache(result.name, url)
         except Exception, e:
             try:
-                url = "http://zoink.it/torrent/" + result.url.replace('http://torrentz.eu/','').upper() + '.' + self.providerType
+                url = "http://zoink.it/torrent/" + torrentHash + '.' + self.providerType
                 return self.downloadFromTorrentCache(result.name, url)
             except Exception, e:
                 try:
-                    url = "http://torcache.net/torrent/" + result.url.replace('http://torrentz.eu/','').upper() + '.' + self.providerType
+                    url = "http://torcache.net/torrent/" + torrentHash + '.' + self.providerType
                     return self.downloadFromTorrentCache(result.name, url)
                 except Exception, e:
                     return False
