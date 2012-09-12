@@ -116,18 +116,33 @@ class TVShow(object):
                 self.episodes[curSeason][curEp] = None
                 del myEp
 
-    def getAllEpisodes(self, season=None):
+    def getAllEpisodes(self, season=None, has_location=False):
 
         myDB = db.DBConnection()
-        if season == None:
-            results = myDB.select("SELECT season, episode FROM tv_episodes WHERE showid = ? ORDER BY season DESC, episode DESC", [self.tvdbid])
-        else:
-            results = myDB.select("SELECT season, episode FROM tv_episodes WHERE showid = ? AND season = ? ORDER BY season DESC, episode DESC", [self.tvdbid, season])
+
+        sql_selection = "SELECT season, episode FROM tv_episodes WHERE showid = " + str(self.tvdbid)
+
+        if season is not None:
+            sql_selection = sql_selection + " AND season = " + str(season)
+        if has_location:
+            sql_selection = sql_selection + " AND location != '' "
+
+        # need ORDER episode ASC to rename multi-episodes in order S01E01-02
+        sql_selection = sql_selection + " ORDER BY season ASC, episode ASC"
+
+        results = myDB.select(sql_selection)
 
         ep_list = []
         for cur_result in results:
             cur_ep = self.getEpisode(int(cur_result["season"]), int(cur_result["episode"]))
             if cur_ep:
+                # if there is a location, check if it's shared (multi-episodes) and put them in relatedEps
+                if cur_ep.location:
+                    related_eps_result = myDB.select("SELECT * FROM tv_episodes WHERE showid = ? AND season = ? AND location = ? AND episode != ? ORDER BY episode ASC", [self.tvdbid, cur_ep.season, cur_ep.location, cur_ep.episode])
+                    for cur_related_ep in related_eps_result:
+                        related_ep = self.getEpisode(int(cur_related_ep["season"]), int(cur_related_ep["episode"]))
+                        if related_ep not in cur_ep.relatedEps:
+                            cur_ep.relatedEps.append(related_ep)
                 ep_list.append(cur_ep)
 
         return ep_list
