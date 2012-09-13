@@ -120,7 +120,12 @@ class TVShow(object):
 
         myDB = db.DBConnection()
 
-        sql_selection = "SELECT season, episode FROM tv_episodes WHERE showid = " + str(self.tvdbid)
+        sql_selection = "SELECT season, episode, "
+
+        # subselection to detect multi-episodes early, share_location > 0
+        sql_selection = sql_selection + " (SELECT COUNT (*) FROM tv_episodes WHERE showid = tve.showid AND season = tve.season AND location != '' AND location = tve.location AND episode != tve.episode) AS share_location "
+
+        sql_selection = sql_selection + " FROM tv_episodes tve WHERE showid = " + str(self.tvdbid)
 
         if season is not None:
             sql_selection = sql_selection + " AND season = " + str(season)
@@ -136,13 +141,14 @@ class TVShow(object):
         for cur_result in results:
             cur_ep = self.getEpisode(int(cur_result["season"]), int(cur_result["episode"]))
             if cur_ep:
-                # if there is a location, check if it's shared (multi-episodes) and put them in relatedEps
                 if cur_ep.location:
-                    related_eps_result = myDB.select("SELECT * FROM tv_episodes WHERE showid = ? AND season = ? AND location = ? AND episode != ? ORDER BY episode ASC", [self.tvdbid, cur_ep.season, cur_ep.location, cur_ep.episode])
-                    for cur_related_ep in related_eps_result:
-                        related_ep = self.getEpisode(int(cur_related_ep["season"]), int(cur_related_ep["episode"]))
-                        if related_ep not in cur_ep.relatedEps:
-                            cur_ep.relatedEps.append(related_ep)
+                    # if there is a location, check if it's a multi-episode (share_location > 0) and put them in relatedEps
+                    if cur_result["share_location"] > 0:
+                        related_eps_result = myDB.select("SELECT * FROM tv_episodes WHERE showid = ? AND season = ? AND location = ? AND episode != ? ORDER BY episode ASC", [self.tvdbid, cur_ep.season, cur_ep.location, cur_ep.episode])
+                        for cur_related_ep in related_eps_result:
+                            related_ep = self.getEpisode(int(cur_related_ep["season"]), int(cur_related_ep["episode"]))
+                            if related_ep not in cur_ep.relatedEps:
+                                cur_ep.relatedEps.append(related_ep)
                 ep_list.append(cur_ep)
 
         return ep_list
