@@ -85,7 +85,7 @@
                                 <span class="component-title jumbo">Configure Provider:</span>
                                 <span class="component-desc">
                                     #set $provider_config_list = []
-                                    #for $cur_provider in ("nzbs_r_us", "newzbin", "nzbmatrix", "tvtorrents", "btn"):
+                                    #for $cur_provider in ("nzbs_r_us", "newzbin", "nzbmatrix", "hdbits", "tvtorrents", "btn"):
                                         #set $cur_provider_obj = $sickbeard.providers.getProviderClass($cur_provider)
                                         #if $cur_provider_obj.providerType == $GenericProvider.NZB and not $sickbeard.USE_NZBS:
                                             #continue
@@ -186,6 +186,15 @@
                             </label>
                         </div>
                     </div><!-- /nzbs_r_usDiv //-->
+
+                    <div class="providerDiv" id="hdbitsDiv">
+                        <div class="field-pair">
+                            <label class="clearfix">
+                                <span class="component-title">HDBits Passkey:</span>
+                                <input class="component-desc" type="text" name="hdbits_passkey" value="$sickbeard.HDBITS_PASSKEY" size="40" />
+                            </label>
+                        </div>
+                    </div><!-- /hdbitsDiv //-->
 
                     <div class="providerDiv" id="tvtorrentsDiv">
                         <div class="field-pair">
