@@ -283,46 +283,51 @@ class ConfigMigrator():
         """
         Reads in the old naming settings from your config and generates a new config template from them.
         """
-        
+
         sickbeard.NAMING_PATTERN = self._name_to_pattern()
-        logger.log("Based on your old settings I'm setting your new naming pattern to: "+sickbeard.NAMING_PATTERN)
-        
+        logger.log("Based on your old settings I'm setting your new naming pattern to: " + sickbeard.NAMING_PATTERN)
+
         sickbeard.NAMING_CUSTOM_ABD = bool(check_setting_int(self.config_obj, 'General', 'naming_dates', 0))
-        
+
         if sickbeard.NAMING_CUSTOM_ABD:
             sickbeard.NAMING_ABD_PATTERN = self._name_to_pattern(True)
-            logger.log("Adding a custom air-by-date naming pattern to your config: "+sickbeard.NAMING_ABD_PATTERN)
+            logger.log("Adding a custom air-by-date naming pattern to your config: " + sickbeard.NAMING_ABD_PATTERN)
         else:
             sickbeard.NAMING_ABD_PATTERN = naming.name_abd_presets[0]
-        
+
         sickbeard.NAMING_MULTI_EP = int(check_setting_int(self.config_obj, 'General', 'naming_multi_ep_type', 1))
-        
+
         # see if any of their shows used season folders
         myDB = db.DBConnection()
         season_folder_shows = myDB.select("SELECT * FROM tv_shows WHERE flatten_folders = 0")
-        
+
         # if any shows had season folders on then prepend season folder to the pattern
         if season_folder_shows:
-        
+
             old_season_format = check_setting_str(self.config_obj, 'General', 'season_folders_format', 'Season %02d')
-            
-            new_season_format = old_season_format % 9
-            new_season_format = new_season_format.replace('09', '%0S')
-            new_season_format = new_season_format.replace('9', '%S')
-            logger.log(u"Changed season folder format from "+old_season_format+" to "+new_season_format+", prepending it to your naming config")
-        
-            sickbeard.NAMING_PATTERN = new_season_format + os.sep + sickbeard.NAMING_PATTERN
-        
+
+            if old_season_format:
+                try:
+                    new_season_format = old_season_format % 9
+                    new_season_format = new_season_format.replace('09', '%0S')
+                    new_season_format = new_season_format.replace('9', '%S')
+
+                    logger.log(u"Changed season folder format from " + old_season_format + " to " + new_season_format + ", prepending it to your naming config")
+                    sickbeard.NAMING_PATTERN = new_season_format + os.sep + sickbeard.NAMING_PATTERN
+
+                except (TypeError, ValueError):
+                    logger.log(u"Can't change " + old_season_format + " to new season format", logger.ERROR)
+
         # if no shows had it on then don't flatten any shows and don't put season folders in the config
         else:
-        
+
             logger.log(u"No shows were using season folders before so I'm disabling flattening on all shows")
-        
+
             # don't flatten any shows at all
             myDB.action("UPDATE tv_shows SET flatten_folders = 0")
 
         sickbeard.NAMING_FORCE_FOLDERS = naming.check_force_season_folders()
-        
+
     def _name_to_pattern(self, abd=False):
 
         # get the old settings from the file
