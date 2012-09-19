@@ -202,11 +202,7 @@ class PostProcessor(object):
                 ek.ek(os.remove, cur_file)
                 # do the library update for synoindex
                 notifiers.synoindex_notifier.deleteFile(cur_file)
-                
-        
-        # clean up any left over folders
-        helpers.delete_empty_folders(ek.ek(os.path.dirname, file_path))
-        
+
     def _combined_file_operation (self, file_path, new_path, new_base_name, associated_files=False, action=None):
         """
         Performs a generic operation (move or copy) on a file. Can rename the file as well as change its location,
@@ -760,9 +756,12 @@ class PostProcessor(object):
         for cur_ep in [ep_obj] + ep_obj.relatedEps:
             try:
                 self._delete(cur_ep.location, associated_files=True)
+                # clean up any left over folders
+                if cur_ep.location:
+                    helpers.delete_empty_folders(ek.ek(os.path.dirname, cur_ep.location), keep_dir=ep_obj.show._location)
             except OSError, IOError:
                 raise exceptions.PostProcessingFailed("Unable to delete the existing files")
-        
+
         # if the show directory doesn't exist then make it if allowed
         if not ek.ek(os.path.isdir, ep_obj.show._location) and sickbeard.CREATE_MISSING_SHOW_DIRS:
             self._log(u"Show directory doesn't exist, creating it", logger.DEBUG)
