@@ -55,13 +55,19 @@
 #if len($epList) > 1:
     #set $epList = [$min($epList), $max($epList)]
 #end if
-        <tr class="season-$curSeason #if $odd then "odd" else "even"#">
+        <tr class="season-$curSeason 
+            #if $curLoc == $newLoc:
+                #if $odd then "odd" else "even"#
+            #else
+                wanted
+            #end if
+        ">
             <td width="1%" valign="top">
                 <input type="checkbox" class="epCheck" id="<%=str(cur_ep_obj.season) + 'x' + str(cur_ep_obj.episode)%>" name="<%=str(cur_ep_obj.season) + "x" + str(cur_ep_obj.episode) %>" />
             </td>
             <td align="center" valign="top" class="nowrap"><%= "-".join(map(str, epList)) %></td>
             <td width="50%" valign="top">$curLoc</td>
-            <td width="50%" valign="top" class="#if $curLoc == $newLoc then "" else "wanted"#">$newLoc</td>
+            <td width="50%" valign="top">$newLoc</td>
             </td>
         </tr>
     </tbody>
