@@ -29,6 +29,7 @@
 #for $cur_ep_obj in $ep_obj_list:
 #set $curLoc = $cur_ep_obj.location[len($cur_ep_obj.show.location)+1:]
 #set $curExt = $curLoc.split('.')[-1]
+#set $newLoc = $cur_ep_obj.proper_path() + '.' + $curExt
 
 #if int($cur_ep_obj.season) != $curSeason:
     <thead>
@@ -60,7 +61,7 @@
             </td>
             <td align="center" valign="top" class="nowrap"><%= "-".join(map(str, epList)) %></td>
             <td width="50%" valign="top">$curLoc</td>
-            <td width="50%" valign="top">$cur_ep_obj.proper_path().$curExt</td>
+            <td width="50%" valign="top" class="#if $curLoc == $newLoc then "" else "wanted"#">$newLoc</td>
             </td>
         </tr>
     </tbody>
