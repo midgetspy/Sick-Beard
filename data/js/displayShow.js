@@ -11,6 +11,33 @@ $(document).ready(function(){
         $(this).val('jump');
     });
 
+    function editShowAjax(data) {
+        var show = $('#showID').attr('value');
+        data['directCall'] = 'true';
+
+        $.ajax({
+            type    : 'POST',
+            url     : 'editShow?show=' + show,
+            data    : data,
+            success : function() { document.location.reload(true); }
+        });
+    }
+
+    $('#showPaused').click(function() {
+        var newValue = ($(this).find("img").attr('alt') == 'N') ? 'on' : 'off';
+        editShowAjax({paused: newValue});
+    });
+
+    $('#flattenFolders').click(function() {
+        var newValue = ($(this).find("img").attr('alt') == 'N') ? 'on' : 'off';
+        editShowAjax({flatten_folders: newValue});
+    });
+
+    $('#airByDate').click(function() {
+        var newValue = ($(this).find("img").attr('alt') == 'N') ? 'on' : 'off';
+        editShowAjax({air_by_date: newValue});
+    });
+
     $("#prevShow").click(function(){
         $('#pickShow option:selected').prev('option').attr('selected', 'selected');
         $("#pickShow").change();
