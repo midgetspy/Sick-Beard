@@ -58,7 +58,7 @@ class GrowlNotifier:
         if options['priority']:
             notice.add_header('Notification-Priority',options['priority'])
         if options['icon']:
-            notice.add_header('Notification-Icon', 'https://github.com/midgetspy/Sick-Beard/raw/master/data/images/sickbeard_touch_icon.png')
+            notice.add_header('Notification-Icon', 'https://raw.github.com/midgetspy/Sick-Beard/master/data/images/sickbeard.png')
     
         if message:
             notice.add_header('Notification-Text',message)
