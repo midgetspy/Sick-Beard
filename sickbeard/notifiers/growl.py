@@ -58,7 +58,7 @@ class GrowlNotifier:
         if options['priority']:
             notice.add_header('Notification-Priority',options['priority'])
         if options['icon']:
-            notice.add_header('Notification-Icon', 'https://github.com/midgetspy/Sick-Beard/raw/master/data/images/sickbeard_touch_icon.png')
+            notice.add_header('Notification-Icon', 'https://raw.github.com/midgetspy/Sick-Beard/master/data/images/sickbeard.png')
     
         if message:
             notice.add_header('Notification-Text',message)
@@ -157,7 +157,7 @@ class GrowlNotifier:
         #Send Registration
         register = gntp.GNTPRegister()
         register.add_header('Application-Name', opts['app'])
-        register.add_header('Application-Icon', 'https://github.com/midgetspy/Sick-Beard/raw/master/data/images/sickbeard_touch_icon.png')
+        register.add_header('Application-Icon', 'https://raw.github.com/midgetspy/Sick-Beard/master/data/images/sickbeard.png')
         
         register.add_notification('Test', True)
         register.add_notification(common.notifyStrings[common.NOTIFY_SNATCH], True)
