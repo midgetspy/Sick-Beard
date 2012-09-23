@@ -16,6 +16,8 @@
 # You should have received a copy of the GNU General Public License
 # along with Sick Beard.  If not, see <http://www.gnu.org/licenses/>.
 
+import datetime
+
 import sickbeard
 import os.path
 
@@ -414,6 +416,16 @@ class FixAirByDateSetting(SetNzbTorrentSettings):
             if cur_show["genre"] and "talk show" in cur_show["genre"].lower():
                 self.connection.action("UPDATE tv_shows SET air_by_date = ? WHERE tvdb_id = ?", [1, cur_show["tvdb_id"]])
         
+        self.incDBVersion()
+class AddSubtitlesSupport(FixAirByDateSetting):    
+    def test(self):
+        return self.checkDBVersion() >= 10
+
+    def execute(self):
+        self.connection.action('ALTER TABLE tv_shows ADD subtitles INTEGER NOT NULL DEFAULT 0')
+        self.connection.action('ALTER TABLE tv_episodes ADD subtitles TEXT NOT NULL DEFAULT ""')
+        self.connection.action('ALTER TABLE tv_episodes ADD subtitles_searchcount INTEGER NOT NULL DEFAULT 0')
+        self.connection.action('ALTER TABLE tv_episodes ADD subtitles_lastsearch TIMESTAMP NOT NULL DEFAULT "' + str(datetime.datetime.min) + '"')
         self.incDBVersion()
 
 class AddSizeAndSceneNameFields(FixAirByDateSetting):

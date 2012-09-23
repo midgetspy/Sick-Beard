@@ -54,6 +54,9 @@ class ShowQueue(generic_queue.GenericQueue):
 
     def isInRenameQueue(self, show):
         return self._isInQueue(show, (ShowQueueActions.RENAME,))
+    
+    def isInSubtitleQueue(self, show):
+        return self._isInQueue(show, (ShowQueueActions.SUBTITLE,))
 
     def isBeingAdded(self, show):
         return self._isBeingSomethinged(show, (ShowQueueActions.ADD,))
@@ -66,6 +69,9 @@ class ShowQueue(generic_queue.GenericQueue):
 
     def isBeingRenamed(self, show):
         return self._isBeingSomethinged(show, (ShowQueueActions.RENAME,))
+    
+    def isBeingSubtitled(self, show):
+        return self._isBeingSomethinged(show, (ShowQueueActions.SUBTITLE,))
 
     def _getLoadingShowList(self):
         return [x for x in self.queue+[self.currentItem] if x != None and x.isLoading]
@@ -114,9 +120,17 @@ class ShowQueue(generic_queue.GenericQueue):
         self.add_item(queueItemObj)
 
         return queueItemObj
+    
+    def downloadSubtitles(self, show, force=False):
 
-    def addShow(self, tvdb_id, showDir, default_status=None, quality=None, flatten_folders=None, lang="en"):
-        queueItemObj = QueueItemAdd(tvdb_id, showDir, default_status, quality, flatten_folders, lang)
+        queueItemObj = QueueItemSubtitle(show)
+
+        self.add_item(queueItemObj)
+
+        return queueItemObj
+
+    def addShow(self, tvdb_id, showDir, default_status=None, quality=None, flatten_folders=None, subtitles=None, lang="en"):
+        queueItemObj = QueueItemAdd(tvdb_id, showDir, default_status, quality, flatten_folders, lang, subtitles)
         
         self.add_item(queueItemObj)
 
@@ -128,12 +142,14 @@ class ShowQueueActions:
     UPDATE=3
     FORCEUPDATE=4
     RENAME=5
+    SUBTITLE=6
     
     names = {REFRESH: 'Refresh',
                     ADD: 'Add',
                     UPDATE: 'Update',
                     FORCEUPDATE: 'Force Update',
                     RENAME: 'Rename',
+                    SUBTITLE: 'Subtitle',
                     }
 
 class ShowQueueItem(generic_queue.QueueItem):
@@ -145,6 +161,7 @@ class ShowQueueItem(generic_queue.QueueItem):
     - show being refreshed
     - show being updated
     - show being force updated
+    - show being subtitled
     """
     def __init__(self, action_id, show):
         generic_queue.QueueItem.__init__(self, ShowQueueActions.names[action_id], action_id)
@@ -165,7 +182,7 @@ class ShowQueueItem(generic_queue.QueueItem):
 
 
 class QueueItemAdd(ShowQueueItem):
-    def __init__(self, tvdb_id, showDir, default_status, quality, flatten_folders, lang):
+    def __init__(self, tvdb_id, showDir, default_status, quality, flatten_folders, lang, subtitles):
 
         self.tvdb_id = tvdb_id
         self.showDir = showDir
@@ -173,6 +190,7 @@ class QueueItemAdd(ShowQueueItem):
         self.quality = quality
         self.flatten_folders = flatten_folders
         self.lang = lang
+        self.subtitles = subtitles
 
         self.show = None
 
@@ -241,6 +259,7 @@ class QueueItemAdd(ShowQueueItem):
 
             # set up initial values
             self.show.location = self.showDir
+            self.show.subtitles = self.subtitles if self.subtitles != None else sickbeard.SUBTITLES_DEFAULT
             self.show.quality = self.quality if self.quality else sickbeard.QUALITY_DEFAULT
             self.show.flatten_folders = self.flatten_folders if self.flatten_folders != None else sickbeard.FLATTEN_FOLDERS_DEFAULT
             self.show.paused = False
@@ -375,6 +394,20 @@ class QueueItemRename(ShowQueueItem):
 
         for cur_ep_obj in ep_obj_rename_list:
             cur_ep_obj.rename()
+
+        self.inProgress = False
+
+class QueueItemSubtitle(ShowQueueItem):
+    def __init__(self, show=None):
+        ShowQueueItem.__init__(self, ShowQueueActions.SUBTITLE, show)
+
+    def execute(self):
+
+        ShowQueueItem.execute(self)
+
+        logger.log(u"Downloading subtitles for "+self.show.name)
+
+        self.show.downloadSubtitles()
 
         self.inProgress = False
 

@@ -15,6 +15,7 @@
 	<h1 class="title">$title</h1>
 #end if
 <script type="text/javascript" src="$sbRoot/js/configProviders.js?$sbPID"></script>
+<script type="text/javascript" src="$sbRoot/js/configServices.js?$sbPID"></script>
 <script type="text/javascript" src="$sbRoot/js/config.js?$sbPID"></script>
 <script type="text/javascript" charset="utf-8">
 <!--
@@ -62,25 +63,61 @@ var show_nzb_providers = #if $sickbeard.USE_NZBS then "true" else "false"#;
                     </div>
 
                     <fieldset class="component-group-list" style="margin-left: 50px; margin-top:36px">
-                        <ul id="provider_order_list">
-                        #for $curProvider in $sickbeard.providers.sortedProviderList():
-                            #if $curProvider.providerType == $GenericProvider.NZB and not $sickbeard.USE_NZBS:
-                                #continue
-                            #elif $curProvider.providerType == $GenericProvider.TORRENT and not $sickbeard.USE_TORRENTS:
-                                #continue
-                            #end if
-                            #set $curName = $curProvider.getID()
-                          <li class="ui-state-default" id="$curName">
-                            <input type="checkbox" id="enable_$curName" class="provider_enabler" #if $curProvider.isEnabled() then "checked=\"checked\"" else ""#/>
-                            <a href="$curProvider.url" class="imgLink" target="_new"><img src="$sbRoot/images/providers/$curProvider.imageName()" alt="$curProvider.name" title="$curProvider.name" width="16" height="16" /></a>
-                            $curProvider.name
-                            #if not $curProvider.supportsBacklog then "*" else ""#
-                            #if $curProvider.name == "EZRSS" or $curProvider.name == "ThePirateBay" or $curProvider.name == "DailyTvTorrents" then "**" else ""#
-                            <span class="ui-icon ui-icon-arrowthick-2-n-s pull-right"></span>
-                          </li>
-                        #end for
-                        </ul>
-                        <input type="hidden" name="provider_order" id="provider_order" value="<%=" ".join([x.getID()+':'+str(int(x.isEnabled())) for x in sickbeard.providers.sortedProviderList()])%>"/>
+                        #if sickbeard.USE_NZBS or sickbeard.USE_TORRENTS:
+                        <span id="provider_group">
+	                        <label>
+	                        	#if sickbeard.USE_NZBS:
+	                        		NZB
+	                        	#end if
+	                        	#if sickbeard.USE_NZBS and sickbeard.USE_TORRENTS:
+	                        	&
+	                        	#end if
+	                        	#if sickbeard.USE_TORRENTS:
+	                        		Torrents
+	                        	#end if	
+	                        	</label>
+	                        <ul id="provider_order_list">
+	                        #for $curProvider in $sickbeard.providers.sortedProviderList():
+	                            #if $curProvider.providerType == $GenericProvider.NZB and not $sickbeard.USE_NZBS:
+	                                #continue
+	                            #elif $curProvider.providerType == $GenericProvider.TORRENT and not $sickbeard.USE_TORRENTS:
+	                                #continue
+	                            #end if
+	                            #set $curName = $curProvider.getID()
+	                          <li class="ui-state-default" id="$curName">
+	                            <input type="checkbox" id="enable_$curName" class="provider_enabler" #if $curProvider.isEnabled() then "checked=\"checked\"" else ""#/>
+	                            <a href="$curProvider.url" class="imgLink" target="_new"><img src="$sbRoot/images/providers/$curProvider.imageName()" alt="$curProvider.name" title="$curProvider.name" width="16" height="16" /></a>
+	                            $curProvider.name
+	                            #if not $curProvider.supportsBacklog then "*" else ""#
+	                            #if $curProvider.name == "EZRSS" or $curProvider.name == "ThePirateBay" or $curProvider.name == "DailyTvTorrents" then "**" else ""#
+	                            <span class="ui-icon ui-icon-arrowthick-2-n-s pull-right"></span>
+	                          </li>
+	                        #end for
+	                        </ul>
+                            <input type="hidden" name="provider_order" id="provider_order" value="<%=" ".join([x.getID()+':'+str(int(x.isEnabled())) for x in sickbeard.providers.sortedProviderList()])%>"/>
+                        </span>
+                        #end if
+                        #if $sickbeard.USE_SUBTITLES:
+                        <span id="service_group">
+	                        <label>Subtitles</label>
+	                        <ul id="service_order_list">
+	                        #for $curService in $sickbeard.subtitles.sortedServiceList():
+	                            #set $curName = $curService.id
+	                          <li class="ui-state-default" id="$curName">
+	                            <input type="checkbox" id="enable_$curName" class="service_enabler" #if $curService.enabled then "checked=\"checked\"" else ""#/>
+	                            <a href="$curService.url" class="imgLink" target="_new">
+	                            	<img src="$sbRoot/images/subtitles/$curService.image" alt="$curService.name" title="$curService.name" width="16" height="16" />
+	                            </a>
+	                            $curService.name
+	                            #if not $curService.api_based then "***" else ""#
+	                            
+	                            <span class="ui-icon ui-icon-arrowthick-2-n-s pull-right"></span>
+	                          </li>
+	                        #end for
+	                        </ul>
+	                        <input type="hidden" name="service_order" id="service_order" value="<%=" ".join([x.get('id')+':'+str(int(x.get('enabled'))) for x in sickbeard.subtitles.sortedServiceList()])%>"/>
+                        </span>
+                        #end if
                         <br/><input type="submit" class="btn config_submitter" value="Save Changes" /><br/>
                     </fieldset>
                 </div><!-- /component-group1 //-->

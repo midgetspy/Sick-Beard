@@ -50,6 +50,9 @@
             7: { sorter: false},
             8: { sorter: false},
             9: { sorter: false}
+#if $sickbeard.USE_SUBTITLES:
+            11: { sorter: false},
+#end if
         }
     }); 
 });
@@ -78,6 +81,9 @@
       <th width="1%">Update<br/><input type="checkbox" class="bulkCheck" id="updateCheck" /></th>
       <th width="1%">Rescan<br/><input type="checkbox" class="bulkCheck" id="refreshCheck" /></th>
       <th width="1%">Rename<br/><input type="checkbox" class="bulkCheck" id="renameCheck" /></th>
+#if $sickbeard.USE_SUBTITLES:
+      <th width="1%">Subtitle&nbsp;<input type="checkbox" class="bulkCheck" id="subtitleCheck" /></th>
+#end if
 <!--      <th>Force Metadata Regen <input type="checkbox" class="bulkCheck" id="metadataCheck" /></th>//-->
       <th width="1%">Delete<br/><input type="checkbox" class="bulkCheck" id="deleteCheck" /></th>
     </tr>
@@ -85,7 +91,7 @@
 <tfoot>
   <tr>
     <td rowspan="1" colspan="1" class="align-center alt"><input class="btn" type="button" value="Edit Selected" id="submitMassEdit" /></td>
-    <td rowspan="1" colspan="10" class="align-right alt"><input class="btn btn-primary" type="button" value="Submit" id="submitMassUpdate" /></td>
+    <td rowspan="1" colspan="#if $sickbeard.USE_SUBTITLES then 11 else 10#" align="right"><input type="button" value="Submit" id="submitMassUpdate" /></td>
   </tr>
 </tfoot>
   <tbody>
@@ -96,6 +102,7 @@ $myShowList.sort(lambda x, y: cmp(x.name, y.name))
 #set $curUpdate_disabled = ""
 #set $curRefresh_disabled = ""
 #set $curRename_disabled = ""
+#set $curSubtitle_disabled = ""
 #set $curDelete_disabled = ""
 
 #if $sickbeard.showQueueScheduler.action.isBeingUpdated($curShow) or $sickbeard.showQueueScheduler.action.isInUpdateQueue($curShow):
@@ -110,6 +117,10 @@ $myShowList.sort(lambda x, y: cmp(x.name, y.name))
   #set $curRename = "disabled=\"disabled\" "
 #end if
 #set $curRename = "<input type=\"checkbox\" class=\"renameCheck\" id=\"rename-"+str($curShow.tvdbid)+"\" "+$curRename_disabled+"/>"
+#if $sickbeard.showQueueScheduler.action.isBeingSubtitled($curShow) or $sickbeard.showQueueScheduler.action.isInSubtitleQueue($curShow):
+  #set $curSubtitle_disabled = "disabled=\"disabled\" "
+#end if
+#set $curSubtitle = "<input type=\"checkbox\" class=\"subtitleCheck\" id=\"subtitle-"+str($curShow.tvdbid)+"\" "+$curSubtitle_disabled+"/>"
 #if $sickbeard.showQueueScheduler.action.isBeingRenamed($curShow) or $sickbeard.showQueueScheduler.action.isInRenameQueue($curShow) or $sickbeard.showQueueScheduler.action.isInRefreshQueue($curShow):
   #set $curDelete = "disabled=\"disabled\" "
 #end if
@@ -130,6 +141,9 @@ $myShowList.sort(lambda x, y: cmp(x.name, y.name))
     <td align="center">$curUpdate</td>
     <td align="center">$curRefresh</td>
     <td align="center">$curRename</td>
+#if $sickbeard.USE_SUBTITLES:
+    <td align="center">$curSubtitle</td>
+#end if
 <!--    <td align="center"><input type="checkbox" class="metadataCheck" id="metadata-$curShow.tvdbid" /></td>//-->
     <td align="center">$curDelete</td>
   </tr>

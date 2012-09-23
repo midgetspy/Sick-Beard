@@ -1,4 +1,6 @@
 #import sickbeard
+#from sickbeard import subtitles
+#from lib import subliminal
 #set global $title="Config - Episode Search"
 #set global $header="Search Options"
 
@@ -9,7 +11,34 @@
 #include $os.path.join($sickbeard.PROG_DIR, "gui/slick/interfaces/default/inc_top.tmpl")
 
 <script type="text/javascript" src="$sbRoot/js/configSearch.js?$sbPID"></script>
+<script type="text/javascript" src="$sbRoot/js/configServices.js?$sbPID"></script>
 <script type="text/javascript" src="$sbRoot/js/config.js?$sbPID"></script>
+
+<script type="text/javascript" src="$sbRoot/js/jquery.tokeninput.js"></script>
+<link rel="stylesheet" type="text/css" href="$sbRoot/css/token-input-facebook.css" />
+
+<script type="text/javascript">
+  	\$(document).ready(function() {
+		\$("#subtitles_languages").tokenInput(
+				[
+	                <%=",\r\n".join("{id: \"" + lang[0] + "\", name: \"" + lang[3] + "\"}" for lang in subliminal.language.LANGUAGES)%>
+	            ],
+	            {
+					theme: "facebook",
+					method: "POST",
+	            	hintText: "Write to search a language and select it",
+					preventDuplicates: true,
+	            	prePopulate:
+	            		
+		            		[
+		            			<%=
+		            					",\r\n".join("{id: \"" + lang + "\", name: \"" + subtitles.getLanguageName(lang) + "\"}" for lang in sickbeard.SUBTITLES_LANGUAGES) if sickbeard.SUBTITLES_LANGUAGES != '' else ''
+		            			%>
+		            		]
+	            }
+            );
+	});
+</script>
 #if $varExists('header') 
 	<h1 class="header">$header</h1>
 #else 
@@ -25,6 +54,7 @@
                 	<li><a href="#core-component-group1">Episode Search</a></li>
                 	<li><a href="#core-component-group2">NZB Search</a></li>
                 	<li><a href="#core-component-group3">Torrent Search</a></li>
+                	<li><a href="#core-component-group4">Subtitles Search</a></li>
                 </ul>
                 
                 
@@ -367,6 +397,46 @@
                     </div>                       
                     </fieldset>
                 </div><!-- /component-group3 //-->
+                
+                <div id="core-component-group4" class="component-group clearfix">
+
+                    <div class="component-group-desc">
+                        <h3>Subtitles Search</h3>
+                        <p>Settings that dictate how Sick Beard handles subtitles search results.</p>
+                    </div>
+                    
+					<fieldset class="component-group-list">
+			            <div class="field-pair">
+                            <input type="checkbox"#if $sickbeard.USE_SUBTITLES then " checked=\"checked\"" else ""# id="use_subtitles" name="use_subtitles">
+                            <label for="use_subtitles" class="clearfix">
+                                <span class="component-title">Search Subtitles</span>
+                            </label>
+                        </div>
+                        
+                        <div id="content_use_subtitles">
+                        	<div class="component-group clearfix">
+	                        	<div class="field-pair">
+		                            <label class="nocheck clearfix">
+		                                <span class="component-title">Languages</span>
+		                                <input type="text" id="subtitles_languages" name="subtitles_languages" style="border: 0px none"/>
+		                            </label>
+		                        </div>
+				            	<div class="field-pair">
+		                            <input type="checkbox" #if $sickbeard.SUBTITLES_MULTI then "checked=\"checked\"" else ""# id="subtitles_multi" name="subtitles_multi">
+		                            <label for="subtitles_multi" class="clearfix">
+		                                <span class="component-title">Enable Multi-language</span>
+		                                <span class="component-desc">Download subtitles in multiple languages? (e.g. .en.srt, .fr.srt)</span>
+	                            	</label>
+	                        	</div>
+                        		<label class="nocheck clearfix">
+	                                <span class="component-title">Subtitles subdirectory</span>
+	                                <input type="text" size="30" value="$sickbeard.SUBTITLES_SUBDIR" id="subtitles_subdir" name="subtitles_subdir">
+	                                <span class="component-desc">Subdirectory inside show path to download subtitles. If is empty the subtitles will be download in same path as episode.</span>
+	                            </label>
+                        	</div>
+                        </div>
+                    </fieldset>
+                </div><!-- /component-group4 //-->
 
                 <!--<div class="title-group clearfix" id="no-torrents">
                     <div class="ui-corner-all config_message">Note: Sick Beard works better with Usenet than with Torrents, <a href="http://www.sickbeard.com/usenet.html" target="_blank">here's why</a>.</div>

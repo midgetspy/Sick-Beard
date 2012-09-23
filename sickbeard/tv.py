@@ -23,12 +23,15 @@ import datetime
 import threading
 import re
 import glob
+import traceback
 
 import sickbeard
 
 import xml.etree.cElementTree as etree
 
 from name_parser.parser import NameParser, InvalidNameException
+
+from lib import subliminal
 
 from lib.tvdb_api import tvdb_api, tvdb_exceptions
 
@@ -38,6 +41,7 @@ from sickbeard.exceptions import ex
 from sickbeard import tvrage
 from sickbeard import image_cache
 from sickbeard import postProcessor
+from sickbeard import subtitles
 
 from sickbeard import encodingKludge as ek
 
@@ -66,6 +70,7 @@ class TVShow(object):
         self.startyear = 0
         self.paused = 0
         self.air_by_date = 0
+        self.subtitles = int(sickbeard.SUBTITLES_DEFAULT)
         self.lang = lang
 
         self.lock = threading.Lock()
@@ -179,6 +184,13 @@ class TVShow(object):
 
         return self.episodes[season][episode]
 
+    def getEpisodeFromLocation(self, location):
+        print self.getEpisode(1, 1)
+        for season in self.episodes:
+            for episode in self.episodes[season]:
+                if self.getEpisode(season, episode).location == location:
+                    return self.getEpisode(season, episode)
+
     def writeShowNFO(self):
 
         result = False
@@ -268,6 +280,12 @@ class TVShow(object):
 
             # store the reference in the show
             if curEpisode != None:
+                if self.subtitles:
+                    try:
+                        curEpisode.refreshSubtitles()
+                    except:
+                        logger.log(str(self.tvdbid) + ": Could not refresh subtitles", logger.ERROR)
+                        logger.log(traceback.format_exc(), logger.DEBUG)
                 curEpisode.saveToDB()
 
 
@@ -601,6 +619,10 @@ class TVShow(object):
             self.air_by_date = sqlResults[0]["air_by_date"]
             if self.air_by_date == None:
                 self.air_by_date = 0
+            
+            self.subtitles = sqlResults[0]["subtitles"]
+            if self.subtitles == None:
+                self.subtitles = 0
 
             self.quality = int(sqlResults[0]["quality"])
             self.flatten_folders = int(sqlResults[0]["flatten_folders"])
@@ -797,14 +819,53 @@ class TVShow(object):
                     if curEp.location and curEp.status in Quality.DOWNLOADED:
                         logger.log(str(self.tvdbid) + ": Location for " + str(season) + "x" + str(episode) + " doesn't exist, removing it and changing our status to IGNORED", logger.DEBUG)
                         curEp.status = IGNORED
+                        curEp.subtitles = list()
+                        curEp.subtitles_searchcount = 0
+                        curEp.subtitles_lastsearch = str(datetime.datetime.min)
                     curEp.location = ''
                     curEp.hasnfo = False
                     curEp.hastbn = False
                     curEp.release_name = ''
                     curEp.saveToDB()
 
-    def saveToDB(self):
+    def downloadSubtitles(self):
+        #TODO: Add support for force option
+        if not ek.ek(os.path.isdir, self._location):
+            logger.log(str(self.tvdbid) + ": Show dir doesn't exist, can't download subtitles", logger.DEBUG)
+            return
+        logger.log(str(self.tvdbid) + ": Downloading subtitles", logger.DEBUG)
+        
+        
+        try:
+            subtitles = subliminal.download_subtitles([self._location], languages=sickbeard.SUBTITLES_LANGUAGES, services=sickbeard.subtitles.getEnabledServiceList(), force=False, multi=sickbeard.SUBTITLES_MULTI, cache_dir=sickbeard.CACHE_DIR)
 
+        except Exception as e:
+            logger.log("Error occurred when downloading subtitles: " + str(e), logger.DEBUG)
+            return
+            
+        for video in subtitles:
+            helpers.chmodAsParent(video.path)
+            for subtitle in subtitles.get(video):
+                if sickbeard.SUBTITLES_SUBDIR != None and sickbeard.SUBTITLES_SUBDIR != '':
+                    subsDir = ek.ek(os.path.join, os.path.dirname(video.path), sickbeard.SUBTITLES_SUBDIR)
+                    if not ek.ek(os.path.isdir, subsDir):
+                        ek.ek(os.mkdir, subsDir)
+                    helpers.chmodAsParent(subsDir)
+                    helpers.moveFile(subtitle.path, ek.ek(os.path.join,subsDir, os.path.basename(subtitle.path)))
+
+        if subtitles:
+            logger.log(str(self.tvdbid) + ": Downloaded %d subtitles" % len(subtitles), logger.DEBUG)
+        else:
+            logger.log(str(self.tvdbid) + ": No subtitles downloaded", logger.DEBUG)
+        
+        # refresh episodes with new subtitles
+        for location in set([x.path for x in subtitles]):
+            episode = self.makeEpFromFile(location)
+            if episode:
+                episode.refreshSubtitles()
+                episode.saveToDB()
+
+    def saveToDB(self):
         logger.log(str(self.tvdbid) + ": Saving show info to database", logger.DEBUG)
 
         myDB = db.DBConnection()
@@ -822,6 +883,7 @@ class TVShow(object):
                         "flatten_folders": self.flatten_folders,
                         "paused": self.paused,
                         "air_by_date": self.air_by_date,
+						"subtitles": self.subtitles,
                         "startyear": self.startyear,
                         "tvr_name": self.tvrname,
                         "lang": self.lang
@@ -943,6 +1005,9 @@ class TVEpisode(object):
         self._season = season
         self._episode = episode
         self._description = ""
+        self._subtitles = list()
+        self._subtitles_searchcount = 0
+        self._subtitles_lastsearch = str(datetime.datetime.min)
         self._airdate = datetime.date.fromordinal(1)
         self._hasnfo = False
         self._hastbn = False
@@ -969,6 +1034,9 @@ class TVEpisode(object):
     season = property(lambda self: self._season, dirty_setter("_season"))
     episode = property(lambda self: self._episode, dirty_setter("_episode"))
     description = property(lambda self: self._description, dirty_setter("_description"))
+    subtitles = property(lambda self: self._subtitles, dirty_setter("_subtitles"))
+    subtitles_searchcount = property(lambda self: self._subtitles_searchcount, dirty_setter("_subtitles_searchcount"))
+    subtitles_lastsearch = property(lambda self: self._subtitles_lastsearch, dirty_setter("_subtitles_lastsearch"))
     airdate = property(lambda self: self._airdate, dirty_setter("_airdate"))
     hasnfo = property(lambda self: self._hasnfo, dirty_setter("_hasnfo"))
     hastbn = property(lambda self: self._hastbn, dirty_setter("_hastbn"))
@@ -990,6 +1058,35 @@ class TVEpisode(object):
             self.file_size = 0
 
     location = property(lambda self: self._location, _set_location)
+    def refreshSubtitles(self):
+        """Look for subtitles files and refresh the subtitles property"""
+        self.subtitles = subtitles.subtitlesLanguages(self.location)
+
+    def downloadSubtitles(self, file_path):
+        #TODO: Add support for force option
+        if not ek.ek(os.path.isfile, file_path):
+            logger.log(str(self.show.tvdbid) + ": Episode file doesn't exist, can't download subtitles for episode " + str(self.season) + "x" + str(self.episode), logger.DEBUG)
+            return
+        logger.log(str(self.show.tvdbid) + ": Downloading subtitles for episode " + str(self.season) + "x" + str(self.episode), logger.DEBUG)
+        
+        try:
+            subtitles = subliminal.download_subtitles([file_path], languages=sickbeard.SUBTITLES_LANGUAGES, services=sickbeard.subtitles.getEnabledServiceList(), force=False, multi=sickbeard.SUBTITLES_MULTI, cache_dir=sickbeard.CACHE_DIR)
+
+        except Exception as e:
+            logger.log("Error occurred when downloading subtitles: " + str(e), logger.DEBUG)
+            return
+        
+        # Check if needs to create subtitles directory
+        
+        if subtitles:
+            logger.log(str(self.show.tvdbid) + ": Downloaded " + str(subtitles) + " subtitles for episode " + str(self.season) + "x" + str(self.episode), logger.DEBUG)
+        else:
+            logger.log(str(self.show.tvdbid) + ": No subtitles downloaded for episode " + str(self.season) + "x" + str(self.episode), logger.DEBUG)
+        
+        self.refreshSubtitles()
+        self.subtitles_searchcount = self.subtitles_searchcount + 1
+        self.subtitles_lastsearch = datetime.datetime.now()
+        self.saveToDB()
 
     def checkForMetaFiles(self):
 
@@ -1069,6 +1166,10 @@ class TVEpisode(object):
             self.description = sqlResults[0]["description"]
             if self.description == None:
                 self.description = ""
+            if sqlResults[0]["subtitles"] != None and sqlResults[0]["subtitles"] != '':
+                self.subtitles = sqlResults[0]["subtitles"].split(",")
+            self.subtitles_searchcount = sqlResults[0]["subtitles_searchcount"]
+            self.subtitles_lastsearch = sqlResults[0]["subtitles_lastsearch"]
             self.airdate = datetime.date.fromordinal(int(sqlResults[0]["airdate"]))
             #logger.log(u"1 Status changes from " + str(self.status) + " to " + str(sqlResults[0]["status"]), logger.DEBUG)
             self.status = int(sqlResults[0]["status"])
@@ -1287,6 +1388,9 @@ class TVEpisode(object):
         toReturn += str(self.show.name) + " - " + str(self.season) + "x" + str(self.episode) + " - " + str(self.name) + "\n"
         toReturn += "location: " + str(self.location) + "\n"
         toReturn += "description: " + str(self.description) + "\n"
+        toReturn += "subtitles: " + str(",".join(self.subtitles)) + "\n"
+        toReturn += "subtitles_searchcount: " + str(self.subtitles_searchcount) + "\n"
+        toReturn += "subtitles_lastsearch: " + str(self.subtitles_lastsearch) + "\n"
         toReturn += "airdate: " + str(self.airdate.toordinal()) + " (" + str(self.airdate) + ")\n"
         toReturn += "hasnfo: " + str(self.hasnfo) + "\n"
         toReturn += "hastbn: " + str(self.hastbn) + "\n"
@@ -1357,9 +1461,13 @@ class TVEpisode(object):
         logger.log(u"STATUS IS " + str(self.status), logger.DEBUG)
 
         myDB = db.DBConnection()
+        
         newValueDict = {"tvdbid": self.tvdbid,
                         "name": self.name,
                         "description": self.description,
+                        "subtitles": ",".join([sub.alpha3 for sub in self.subtitles]),
+                        "subtitles_searchcount": self.subtitles_searchcount,
+                        "subtitles_lastsearch": self.subtitles_lastsearch,
                         "airdate": self.airdate.toordinal(),
                         "hasnfo": self.hasnfo,
                         "hastbn": self.hastbn,
