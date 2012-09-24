@@ -144,10 +144,21 @@ $myShowList.sort(lambda x, y: cmp(x.name, y.name))
   #set $nom = 0
   #set $den = 1
 #end if
+#if len($curEp) != 0:
+  #set $airDateDelta = $curEp[0].airdate - datetime.date.today()
+  #if $airDateDelta.days > 1
+    #set $daysStr = 's'
+  #else
+    #set $daysStr = ''
+  #end if
+  #set $nextEp = str($airDateDelta.days) + ' day' + $daysStr + ' (' + str($curEp[0].airdate) + ')'
+#else
+  #set $nextEp = ''
+#end if
 
 
   <tr>
-    <td align="center" class="nowrap">#if len($curEp) != 0 then $curEp[0].airdate else ""#</td>
+    <td align="center" class="nowrap">$nextEp</td>
     <td class="tvShow"><a href="$sbRoot/home/displayShow?show=$curShow.tvdbid">$curShow.name</a></td>
     <td>$curShow.network</td>
 #if $curShow.quality in $qualityPresets:
