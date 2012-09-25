@@ -1446,9 +1446,18 @@ class TVEpisode(object):
         
         def us(name):
             return re.sub('[ -]','_', name)
-        
+
+        def release_name(name):
+            if name and name.lower().endswith('.nzb'):
+                name = name.rpartition('.')[0]
+            return name
+
         def release_group(name):
+            if not name:
+                return ''
+
             np = NameParser(name)
+
             try:
                 parse_result = np.parse(name)
             except InvalidNameException, e:
@@ -1475,7 +1484,7 @@ class TVEpisode(object):
                    '%0S': '%02d' % self.season,
                    '%E': str(self.episode),
                    '%0E': '%02d' % self.episode,
-                   '%RN': self.release_name,
+                   '%RN': release_name(self.release_name),
                    '%RG': release_group(self.release_name),
                    '%AD': str(self.airdate).replace('-', ' '),
                    '%A.D': str(self.airdate).replace('-', '.'),
@@ -1497,11 +1506,11 @@ class TVEpisode(object):
 
         # do the replacements
         for cur_replacement in sorted(replace_map.keys(), reverse=True):
-            result_name = result_name.replace(cur_replacement, helpers.sanitizeFileName(replace_map[cur_replacement]))
-            result_name = result_name.replace(cur_replacement.lower(), helpers.sanitizeFileName(replace_map[cur_replacement].lower()))
+            result_name = result_name.replace(cur_replacement, replace_map[cur_replacement])
+            result_name = result_name.replace(cur_replacement.lower(), replace_map[cur_replacement].lower())
 
-        return result_name
-        
+        return helpers.sanitizeFileName(result_name)
+
     def _format_pattern(self, pattern=None, multi=None):
         """
         Manipulates an episode naming pattern and then fills the template in
