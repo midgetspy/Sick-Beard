@@ -2585,6 +2585,10 @@ class Home:
                 else:
                     ep_obj_rename_list.append(cur_ep_obj)
 
+        if ep_obj_rename_list:
+            # present season DESC episode DESC on screen
+            ep_obj_rename_list.reverse()
+
         t = PageTemplate(file="testRename.tmpl")
         t.submenu = [{'title': 'Edit', 'path': 'home/editShow?show=%d' % showObj.tvdbid}]
         t.ep_obj_list = ep_obj_rename_list

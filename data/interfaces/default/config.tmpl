@@ -13,9 +13,9 @@
         <tr>
           <td class="infoTableHeader">SB Version: </td>
           <td>
-            alpha ($sickbeard.version.SICKBEARD_VERSION)
+            alpha ($sickbeard.version.SICKBEARD_VERSION) -- $sickbeard.versionCheckScheduler.action.install_type : 
             #if $sickbeard.versionCheckScheduler.action.install_type != 'win' and not $sickbeard.versionCheckScheduler.action.updater._cur_commit_hash:
-                #$sickbeard.versionCheckScheduler.action.updater._find_installed_version()
+                $sickbeard.versionCheckScheduler.action.updater._find_installed_version()
             #end if
             #if $sickbeard.versionCheckScheduler.action.updater._cur_commit_hash:
                 $sickbeard.versionCheckScheduler.action.updater._cur_commit_hash
