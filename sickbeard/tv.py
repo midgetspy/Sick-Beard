@@ -1680,7 +1680,11 @@ class TVEpisode(object):
         Renames an episode file and all related files to the location and filename as specified
         in the naming settings.
         """
-        
+
+        if not ek.ek(os.path.isfile, self.location):
+            logger.log(u"Can't perform rename on " + self.location + " when it doesn't exist, skipping", logger.WARNING)
+            return
+
         proper_path = self.proper_path()
         absolute_proper_path = ek.ek(os.path.join, self.show.location, proper_path)
         absolute_current_path_no_ext, file_ext = os.path.splitext(self.location)
@@ -1690,7 +1694,7 @@ class TVEpisode(object):
         if absolute_current_path_no_ext.startswith(self.show.location):
             current_path = absolute_current_path_no_ext[len(self.show.location):]
 
-        logger.log(u"Renaming/moving episode from the base path "+self.location+" to "+absolute_proper_path, logger.DEBUG)
+        logger.log(u"Renaming/moving episode from the base path " + self.location + " to " + absolute_proper_path, logger.DEBUG)
 
         # if it's already named correctly then don't do anything
         if proper_path == current_path:
@@ -1698,16 +1702,16 @@ class TVEpisode(object):
             return
 
         related_files = postProcessor.PostProcessor(self.location)._list_associated_files(self.location)
-        logger.log(u"Files associated to "+self.location+": "+str(related_files), logger.DEBUG)
+        logger.log(u"Files associated to " + self.location + ": " + str(related_files), logger.DEBUG)
 
         # move the ep file
         result = helpers.rename_ep_file(self.location, absolute_proper_path)
-        
+
         # move related files
         for cur_related_file in related_files:
             cur_result = helpers.rename_ep_file(cur_related_file, absolute_proper_path)
             if cur_result == False:
-                logger.log(str(self.tvdbid) + ": Unable to rename file "+cur_related_file, logger.ERROR)
+                logger.log(str(self.tvdbid) + ": Unable to rename file " + cur_related_file, logger.ERROR)
 
         # save the ep
         with self.lock:
@@ -1717,7 +1721,7 @@ class TVEpisode(object):
                     relEp.location = absolute_proper_path + file_ext
 
         # in case something changed with the metadata just do a quick check
-        for curEp in [self]+self.relatedEps:
+        for curEp in [self] + self.relatedEps:
             curEp.checkForMetaFiles()
 
         # save any changes to the database
