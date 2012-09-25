@@ -24,6 +24,7 @@ import threading
 import re
 import glob
 import traceback
+import shutil
 
 import sickbeard
 
@@ -47,6 +48,8 @@ from sickbeard import encodingKludge as ek
 
 from common import Quality, Overview
 from common import DOWNLOADED, SNATCHED, SNATCHED_PROPER, ARCHIVED, IGNORED, UNAIRED, WANTED, SKIPPED, UNKNOWN
+from shutil import move
+
 from common import NAMING_DUPLICATE, NAMING_EXTEND, NAMING_LIMITED_EXTEND, NAMING_SEPARATED_REPEAT
 
 class TVShow(object):
@@ -287,7 +290,7 @@ class TVShow(object):
                         logger.log(str(self.tvdbid) + ": Could not refresh subtitles", logger.ERROR)
                         logger.log(traceback.format_exc(), logger.DEBUG)
                 curEpisode.saveToDB()
-
+                
 
     def loadEpisodesFromDB(self):
 
@@ -838,20 +841,18 @@ class TVShow(object):
         
         try:
             subtitles = subliminal.download_subtitles([self._location], languages=sickbeard.SUBTITLES_LANGUAGES, services=sickbeard.subtitles.getEnabledServiceList(), force=False, multi=sickbeard.SUBTITLES_MULTI, cache_dir=sickbeard.CACHE_DIR)
-
+            
+            if sickbeard.SUBTITLES_SUBDIR:
+                for subtitle in subtitles:
+                    subs_new_path = ek.ek(os.path.join, self._location, sickbeard.SUBTITLES_SUBDIR)
+                    if not ek.ek(os.path.isdir, subs_new_path):
+                        ek.ek(os.mkdir, subs_new_path)
+                    new_file_path = ek.ek(os.path.join, subs_new_path, os.path.basename(subtitle))
+                    move(subtitle.path, new_file_path)
+                
         except Exception as e:
             logger.log("Error occurred when downloading subtitles: " + str(e), logger.DEBUG)
             return
-            
-        for video in subtitles:
-            helpers.chmodAsParent(video.path)
-            for subtitle in subtitles.get(video):
-                if sickbeard.SUBTITLES_SUBDIR != None and sickbeard.SUBTITLES_SUBDIR != '':
-                    subsDir = ek.ek(os.path.join, os.path.dirname(video.path), sickbeard.SUBTITLES_SUBDIR)
-                    if not ek.ek(os.path.isdir, subsDir):
-                        ek.ek(os.mkdir, subsDir)
-                    helpers.chmodAsParent(subsDir)
-                    helpers.moveFile(subtitle.path, ek.ek(os.path.join,subsDir, os.path.basename(subtitle.path)))
 
         if subtitles:
             logger.log(str(self.tvdbid) + ": Downloaded %d subtitles" % len(subtitles), logger.DEBUG)
@@ -863,6 +864,8 @@ class TVShow(object):
             episode = self.makeEpFromFile(location)
             if episode:
                 episode.refreshSubtitles()
+                episode.subtitles_searchcount = episode.subtitles_searchcount + 1
+                episode.subtitles_lastsearch = datetime.datetime.now()
                 episode.saveToDB()
 
     def saveToDB(self):
@@ -1071,12 +1074,17 @@ class TVEpisode(object):
         
         try:
             subtitles = subliminal.download_subtitles([file_path], languages=sickbeard.SUBTITLES_LANGUAGES, services=sickbeard.subtitles.getEnabledServiceList(), force=False, multi=sickbeard.SUBTITLES_MULTI, cache_dir=sickbeard.CACHE_DIR)
-
+            
+            if sickbeard.SUBTITLES_SUBDIR:
+                for subtitle in subtitles:
+                    subs_new_path = ek.ek(os.path.join, os.path.dirname(file_path), sickbeard.SUBTITLES_SUBDIR)
+                    if not ek.ek(os.path.isdir, subs_new_path):
+                        ek.ek(os.mkdir, subs_new_path)
+                    new_file_path = ek.ek(os.path.join, subs_new_path, os.path.basename(subtitle))
+                    move(subtitle.path, new_file_path)
         except Exception as e:
             logger.log("Error occurred when downloading subtitles: " + str(e), logger.DEBUG)
             return
-        
-        # Check if needs to create subtitles directory
         
         if subtitles:
             logger.log(str(self.show.tvdbid) + ": Downloaded " + str(subtitles) + " subtitles for episode " + str(self.season) + "x" + str(self.episode), logger.DEBUG)
@@ -1087,6 +1095,7 @@ class TVEpisode(object):
         self.subtitles_searchcount = self.subtitles_searchcount + 1
         self.subtitles_lastsearch = datetime.datetime.now()
         self.saveToDB()
+
 
     def checkForMetaFiles(self):
 
@@ -1465,7 +1474,7 @@ class TVEpisode(object):
         newValueDict = {"tvdbid": self.tvdbid,
                         "name": self.name,
                         "description": self.description,
-                        "subtitles": ",".join([sub.alpha3 for sub in self.subtitles]),
+                        "subtitles": ",".join([(sub.alpha3 if sub != 'und' else 'und') for sub in self.subtitles]),
                         "subtitles_searchcount": self.subtitles_searchcount,
                         "subtitles_lastsearch": self.subtitles_lastsearch,
                         "airdate": self.airdate.toordinal(),

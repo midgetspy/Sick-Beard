@@ -26,6 +26,8 @@ import mimetypes
 import os
 import struct
 
+from sickbeard import encodingKludge as ek
+import sickbeard
 
 __all__ = ['EXTENSIONS', 'MIMETYPES', 'Video', 'Episode', 'Movie', 'UnknownVideo',
            'scan', 'hash_opensubtitles', 'hash_thesubdb']
@@ -138,6 +140,10 @@ class Video(object):
         if folder == '':
             folder = '.'
         existing = [f for f in os.listdir(folder) if f.startswith(basename)]
+        if sickbeard.SUBTITLES_SUBDIR:
+            subsDir = ek.ek(os.path.join, folder, sickbeard.SUBTITLES_SUBDIR)
+            if ek.ek(os.path.isdir, subsDir):
+                existing.extend([f for f in os.listdir(subsDir) if f.startswith(basename)])
         for path in existing:
             for ext in subtitles.EXTENSIONS:
                 if path.endswith(ext):
