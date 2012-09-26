@@ -113,7 +113,7 @@ def sendTORRENT(torrent):
     path = sickbeard.TORRENT_PATH
     ratio = sickbeard.TORRENT_RATIO
     paused = sickbeard.TORRENT_PAUSED
-    log = "Torrent will be added with path:" + sickbeard.TORRENT_PATH + ", ratio:" + sickbeard.TORRENT_RATIO + "and paused" +  str(sickbeard.TORRENT_PAUSED)
+    log = "Torrent will be added with path:" + path + ", ratio: " + ratio + "and paused = " +  str(paused)
     logger.log(log, logger.DEBUG)
     try:
         host = urlparse(sickbeard.TORRENT_HOST)
@@ -130,8 +130,10 @@ def sendTORRENT(torrent):
     else:
         change_params['seedRatioMode'] = 1
 
-    if not (paused == ''):
+    if paused == '':
         params['paused'] = 0
+    else:
+        params['paused'] = paused
 
     if not (path == ''):
         params['download-dir'] = path
