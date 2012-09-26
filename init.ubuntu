@@ -106,6 +106,14 @@ case "$1" in
         start-stop-daemon --stop --pidfile $PID_FILE --retry 15
         start-stop-daemon -d $APP_PATH -c $RUN_AS $EXTRA_SSD_OPTS --start --pidfile $PID_FILE --exec $DAEMON -- $DAEMON_OPTS
         ;;
+    status)
+	    if [ -e $PID_FILE ]; then
+		    PID=`cat $PID_FILE`
+		    echo "$DESC is running! (pid: $PID)"
+        else 
+            echo "$DESC is NOT running!"    
+        fi
+		;;
     *)
         N=/etc/init.d/$NAME
         echo "Usage: $N {start|stop|restart|force-reload}" >&2
