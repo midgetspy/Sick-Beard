@@ -377,7 +377,7 @@ class PostProcessor(object):
     def _analyze_anidb(self,filePath):
         #TODO: rewrite this
         return (None, None, None)
-        
+        """        
         if not helpers.set_up_anidb_connection():
             return (None, None, None)
         
@@ -391,23 +391,23 @@ class PostProcessor(object):
         else:
             self.anidbEpisode = ep
             
-            # if the result is complete then remember that for later
-            if parse_result.series_name and parse_result.season_number != None and parse_result.episode_numbers and parse_result.release_group:
-                test_name = os.path.basename(name)
-                if test_name == self.nzb_name:
-                    self.good_results[self.NZB_NAME] = True
-                elif test_name == self.folder_name:
-                    self.good_results[self.FOLDER_NAME] = True
-                elif test_name == self.file_name:
-                    self.good_results[self.FILE_NAME] = True
-                else:
-                    logger.log(u"Nothing was good, found "+repr(test_name)+" and wanted either "+repr(self.nzb_name)+", "+repr(self.folder_name)+", or "+repr(self.file_name))
+        # if the result is complete then remember that for later
+        if parse_result.series_name and parse_result.season_number != None and parse_result.episode_numbers and parse_result.release_group:
+            test_name = os.path.basename(name)
+            if test_name == self.nzb_name:
+                self.good_results[self.NZB_NAME] = True
+            elif test_name == self.folder_name:
+                self.good_results[self.FOLDER_NAME] = True
+            elif test_name == self.file_name:
+                self.good_results[self.FILE_NAME] = True
             else:
-                logger.log("Parse result not suficent(all folowing have to be set). will not save release name", logger.DEBUG)
-                logger.log("Parse result(series_name): " + str(parse_result.series_name), logger.DEBUG)
-                logger.log("Parse result(season_number): " + str(parse_result.season_number), logger.DEBUG)
-                logger.log("Parse result(episode_numbers): " + str(parse_result.episode_numbers), logger.DEBUG)
-                logger.log("Parse result(release_group): " + str(parse_result.release_group), logger.DEBUG)
+                logger.log(u"Nothing was good, found "+repr(test_name)+" and wanted either "+repr(self.nzb_name)+", "+repr(self.folder_name)+", or "+repr(self.file_name))
+        else:
+            logger.log("Parse result not suficent(all folowing have to be set). will not save release name", logger.DEBUG)
+            logger.log("Parse result(series_name): " + str(parse_result.series_name), logger.DEBUG)
+            logger.log("Parse result(season_number): " + str(parse_result.season_number), logger.DEBUG)
+            logger.log("Parse result(episode_numbers): " + str(parse_result.episode_numbers), logger.DEBUG)
+            logger.log("Parse result(release_group): " + str(parse_result.release_group), logger.DEBUG)
                 
         #TODO: clean code. it looks like it's from hell
         for name in ep.allNames:
@@ -437,7 +437,7 @@ class PostProcessor(object):
             self._log(u"Lookup successful, using anidb filename "+str(ep.anidb_file_name), logger.DEBUG)
             return self._analyze_name(ep.anidb_file_name)
         raise InvalidNameException
-
+        """
     
     def _build_anidb_episode(self,connection,filePath):
         ep = adba.Episode(connection,filePath=filePath,
@@ -478,7 +478,7 @@ class PostProcessor(object):
                         "anidb":lambda : self._analyze_anidb(self.file_path),
                        
                         # try to analyze the dir + file name together as one name
-                        lambda: self._analyze_name(self.folder_name + u' ' + self.file_name)
+                        "path":lambda : self._analyze_name(self.folder_name + u' ' + self.file_name)
                         }
         return attempt_list
     

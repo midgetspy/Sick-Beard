@@ -35,13 +35,14 @@ import sickbeard
 
 import xml.etree.cElementTree as etree
 
-from name_parser.parser import InvalidNameException
-
 from lib.tvdb_api import tvdb_api, tvdb_exceptions
 
 from sickbeard import db
 from sickbeard import helpers, exceptions, logger
 from sickbeard.exceptions import ex
+
+from sickbeard.name_parser.parser import NameParser, InvalidNameException
+
 from sickbeard import tvrage
 from sickbeard import image_cache
 from sickbeard import postProcessor
