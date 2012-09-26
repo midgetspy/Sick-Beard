@@ -1048,7 +1048,7 @@ class ConfigProviders:
                       nzbs_r_us_uid=None, nzbs_r_us_hash=None, newznab_string=None,
                       tvtorrents_digest=None, tvtorrents_hash=None,
  					  btn_api_key=None,
-                      newzbin_username=None, newzbin_password=None,
+                      dtt_norar = None, dtt_single = None, newzbin_username=None, newzbin_password=None,
                       provider_order=None):
 
         results = []
@@ -1114,6 +1114,8 @@ class ConfigProviders:
                 sickbeard.TORRENTZ = curEnabled
             elif curProvider == 'tvtorrents':
                 sickbeard.TVTORRENTS = curEnabled
+            elif curProvider == 'dailytvtorrents':
+                sickbeard.DTT = curEnabled
             elif curProvider == 'btn':
                 sickbeard.BTN = curEnabled
             elif curProvider in newznabProviderDict:
@@ -1123,7 +1125,20 @@ class ConfigProviders:
 
         sickbeard.TVTORRENTS_DIGEST = tvtorrents_digest.strip()
         sickbeard.TVTORRENTS_HASH = tvtorrents_hash.strip()
+        
+        if dtt_norar == "on":
+            dtt_norar = 1
+        else:
+            dtt_norar = 0
 
+        sickbeard.DTT_NORAR = dtt_norar
+            
+        if dtt_single == "on":
+            dtt_single = 1
+        else:
+            dtt_single = 0
+
+        sickbeard.DTT_SINGLE = dtt_single    
         sickbeard.BTN_API_KEY = btn_api_key.strip()
 
         sickbeard.NZBSRUS_UID = nzbs_r_us_uid.strip()
