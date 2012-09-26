@@ -8,12 +8,12 @@
 #import os.path
 #include $os.path.join($sickbeard.PROG_DIR, "data/interfaces/default/inc_top.tmpl")
 
-<script type="text/javascript" src="$sbRoot/js/configSearch.js"></script>
-<script type="text/javascript" src="$sbRoot/js/config.js"></script>
+<script type="text/javascript" src="$sbRoot/js/configSearch.js?$sbPID"></script>
+<script type="text/javascript" src="$sbRoot/js/config.js?$sbPID"></script>
 
 <div id="config">
 <div id="config-content">
-<h5>All non-absolute folder locations are relative to " <span class="path">$sickbeard.DATA_DIR</span> "</h5>
+<h5>All non-absolute folder locations are relative to <span class="path">$sickbeard.DATA_DIR</span></h5>
 
 <form id="configForm" action="saveSearch" method="post">
 
@@ -38,7 +38,7 @@
                         <div class="field-pair">
                             <label class="nocheck clearfix">
                                 <span class="component-title">Search Frequency</span>
-                                <input type="text" name="search_frequency" value="$sickbeard.SEARCH_FREQUENCY" size="5" />
+                                <input type="number" name="search_frequency" value="$sickbeard.SEARCH_FREQUENCY" size="5" min="10" class="input-small" />
                             </label>
                             <label class="nocheck clearfix">
                                 <span class="component-title">&nbsp;</span>
@@ -49,7 +49,7 @@
                         <div class="field-pair">
                             <label class="nocheck clearfix">
                                 <span class="component-title">Usenet Retention</span>
-                                <input type="text" name="usenet_retention" value="$sickbeard.USENET_RETENTION" size="5" />
+                                <input type="number" name="usenet_retention" value="$sickbeard.USENET_RETENTION" size="5" min="0" class="input-small" />
                             </label>
                             <label class="nocheck clearfix">
                                 <span class="component-title">&nbsp;</span>
@@ -58,7 +58,7 @@
                         </div>
 
                         <div class="clearfix"></div>
-                        <input type="submit" class="config_submitter" value="Save Changes" /><br/>
+                        <input type="submit" class="btn config_submitter" value="Save Changes" /><br/>
                         
                     </fieldset>
                 </div><!-- /component-group1 //-->
@@ -85,8 +85,8 @@
                             <label class="clearfix" for="nzb_method">
                                 <span class="component-title jumbo">NZB Method:</span>
                                 <span class="component-desc">
-                                    <select name="nzb_method" id="nzb_method">
-                                    #set $nzb_method_text = {'blackhole': "Black hole", 'sabnzbd': "SABnzbd", 'nzbget': "NZBget"}
+                                    <select name="nzb_method" id="nzb_method" class="input-medium" >
+                                    #set $nzb_method_text = {'blackhole': "Black Hole", 'sabnzbd': "SABnzbd", 'nzbget': "NZBget"}
                                     #for $curAction in ('sabnzbd', 'blackhole', 'nzbget'):
                                       #if $sickbeard.NZB_METHOD == $curAction:
                                         #set $nzb_method = "selected=\"selected\""
@@ -104,7 +104,7 @@
                             <div class="field-pair">
                                 <label class="nocheck clearfix">
                                     <span class="component-title">NZB Black Hole</span>
-                                    <input type="text" name="nzb_dir" id="nzb_dir" value="$sickbeard.NZB_DIR" size="45" />
+                                    <input type="text" name="nzb_dir" id="nzb_dir" value="$sickbeard.NZB_DIR" size="35" />
                                 </label>
                                 <label class="nocheck clearfix">
                                     <span class="component-title">&nbsp;</span>
@@ -216,16 +216,16 @@
                         <div class="clearfix"></div>
                         
                         <div class="testNotification" id="testSABnzbd-result">Click below to test.</div>
-                        <input type="button" value="Test SABnzbd" id="testSABnzbd" class="test-button"/>
-                        <input type="submit" class="config_submitter" value="Save Changes" /><br/>
+                        <input type="button" value="Test SABnzbd" id="testSABnzbd" class="btn test-button"/>
+                        <input type="submit" class="btn config_submitter" value="Save Changes" /><br/>
                         
                         </div><!-- /content_use_nzbs //-->
                         
                     </fieldset>
                 </div><!-- /component-group2 //-->
 
-                <div class="title-group clearfix" id="no-torrents">
-                    <div class="ui-corner-all config_message">Note: Sick Beard works better with Usenet than with Torrents, <a href="http://www.sickbeard.com/usenet.html" target="_blank">here's why</a>.</div>
+                <div class="alert alert-danger" id="no-torrents">
+                    <strong>Note:</strong> Sick Beard works better with Usenet than with Torrents, <a href="http://www.sickbeard.com/usenet.html" target="_blank"><b>here's why</b></a>.
                 </div>
 
                 <div id="core-component-group3" class="component-group clearfix">
@@ -249,7 +249,7 @@
                         <div class="field-pair">
                             <label class="nocheck clearfix">
                                 <span class="component-title">Torrent Black Hole</span>
-                                <input type="text" name="torrent_dir" id="torrent_dir" value="$sickbeard.TORRENT_DIR" size="45" />
+                                <input type="text" name="torrent_dir" id="torrent_dir" value="$sickbeard.TORRENT_DIR" size="35" />
                             </label>
                             <label class="nocheck clearfix">
                                 <span class="component-title">&nbsp;</span>
@@ -258,25 +258,25 @@
                         </div>
                         
                         <div class="clearfix"></div>
-                        <input type="submit" class="config_submitter" value="Save Changes" /><br/>
+                        <input type="submit" class="btn config_submitter" value="Save Changes" /><br/>
                         </div><!-- /content_use_torrents //-->
                         
                     </fieldset>
                 </div><!-- /component-group3 //-->
 
-            <br/><input type="submit" class="config_submitter" value="Save Changes" /><br/>
+                <div class="component-group-save">
+                    <input type="submit" class="btn config_submitter" value="Save Changes" />
+                </div><br />
 
             </div><!-- /config-components //-->
 
 </form>
 </div></div>
-<div class="clearfix"></div>
 
 <script type="text/javascript" charset="utf-8">
 <!--
     jQuery('#nzb_dir').fileBrowser({ title: 'Select NZB Black Hole/Watch Directory' });
     jQuery('#torrent_dir').fileBrowser({ title: 'Select Torrent Black Hole/Watch Directory' });
-    jQuery('#tv_download_dir').fileBrowser({ title: 'Select TV Download Directory' });
 //-->
 </script>
 

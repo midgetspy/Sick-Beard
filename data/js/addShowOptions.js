@@ -9,7 +9,7 @@ $(document).ready(function(){
         $.get(sbRoot+'/config/general/saveAddShowDefaults', {defaultStatus: $('#statusSelect').val(),
                                                              anyQualities: anyQualArray.join(','),
                                                              bestQualities: bestQualArray.join(','),
-                                                             defaultSeasonFolders: $('#seasonFolders').prop('checked'),
+                                                             defaultFlattenFolders: $('#flatten_folders').prop('checked'),
                                                              anime: $('#anime').prop('checked')
                                                              } );
         $(this).attr('disabled', true);
@@ -19,7 +19,7 @@ $(document).ready(function(){
         });
     });
 
-    $('#statusSelect, #qualityPreset, #seasonFolders, #anyQualities, #bestQualities, #anime').change(function(){
+    $('#statusSelect, #qualityPreset, #flatten_folders, #anyQualities, #bestQualities, #anime').change(function(){
         $('#saveDefaultsButton').attr('disabled', false);
     });
 

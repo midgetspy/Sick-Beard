@@ -66,6 +66,7 @@ except ImportError:
 # Build the appropriate socket wrapper for ssl
 try:
     import ssl # python 2.6
+    ssl_SSLError = ssl.SSLError
     _ssl_wrap_socket = ssl.wrap_socket
 except ImportError:
     def _ssl_wrap_socket(sock, key_file, cert_file):
@@ -864,22 +865,40 @@ the same interface as FileCache."""
     def _conn_request(self, conn, request_uri, method, body, headers):
         for i in range(2):
             try:
+                if conn.sock is None:
+                  conn.connect()
                 conn.request(method, request_uri, body, headers)
+            except socket.timeout:
+                raise
             except socket.gaierror:
                 conn.close()
                 raise ServerNotFoundError("Unable to find the server at %s" % conn.host)
+            except ssl_SSLError:
+                conn.close()
+                raise
             except socket.error, e:
-                if not hasattr(e, 'errno'): # I don't know what this is so lets raise it if it happens
+                err = 0
+                if hasattr(e, 'args'):
+                    err = getattr(e, 'args')[0]
+                else:
+                    err = e.errno
+                if err == errno.ECONNREFUSED: # Connection refused
                     raise
-                elif e.errno == errno.ECONNREFUSED: # Connection refused
-                    raise
-                # Just because the server closed the connection doesn't apparently mean
-                # that the server didn't send a response.
-                pass
             except httplib.HTTPException:
                 # Just because the server closed the connection doesn't apparently mean
                 # that the server didn't send a response.
-                pass
+                if conn.sock is None:
+                    if i == 0:
+                        conn.close()
+                        conn.connect()
+                        continue
+                    else:
+                        conn.close()
+                        raise
+                if i == 0:
+                    conn.close()
+                    conn.connect()
+                    continue
             try:
                 response = conn.getresponse()
             except (socket.error, httplib.HTTPException):

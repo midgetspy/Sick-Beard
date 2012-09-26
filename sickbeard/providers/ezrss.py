@@ -45,7 +45,7 @@ class EZRSSProvider(generic.TorrentProvider):
         return sickbeard.EZRSS
         
     def imageName(self):
-        return 'ezrss.gif'
+        return 'ezrss.png'
       
     def getQuality(self, item):
         
