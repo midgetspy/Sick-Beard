@@ -310,8 +310,8 @@ class GitUpdateManager(UpdateManager):
         gh = github.GitHub()
 
         # find newest commit
-	logger.log(u"Checking updates on junalmeida/Sick-Beard/" + self.branch);
-        for curCommit in gh.commits('junalmeida', 'Sick-Beard', self.branch):
+	logger.log(u"Checking updates on LennartMart/Sick-Beard/" + self.branch);
+        for curCommit in gh.commits('LennartMart', 'Sick-Beard', self.branch):
             if not self._newest_commit_hash:
                 self._newest_commit_hash = curCommit['sha']
                 if not self._cur_commit_hash:
@@ -447,7 +447,7 @@ class SourceUpdateManager(GitUpdateManager):
         Downloads the latest source tarball from github and installs it over the existing version.
         """
 
-        tar_download_url = 'https://github.com/junalmeida/Sick-Beard/tarball/'+version.SICKBEARD_VERSION
+        tar_download_url = 'https://github.com/LennartMart/Sick-Beard/tarball/'+version.SICKBEARD_VERSION
         sb_update_dir = os.path.join(sickbeard.PROG_DIR, 'sb-update')
         version_path = os.path.join(sickbeard.PROG_DIR, 'version.txt')
 
