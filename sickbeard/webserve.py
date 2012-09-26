@@ -2914,17 +2914,17 @@ class Home:
         # try do download subtitles for that episode
         previous_subtitles = ep_obj.subtitles
         try:
-            ep_obj.downloadSubtitles()
+            ep_obj.downloadSubtitles(ep_obj.location)
         except:
             return json.dumps({'result': 'failure'})
 
         # return the correct json value
         if previous_subtitles != ep_obj.subtitles:
-            status = 'New subtitles downloaded: %s' % ','.join(sorted(list(set(ep_obj.subtitles).difference(previous_subtitles))))
+            status = 'New subtitles downloaded: %s' % ','.join([x.alpha3 for x in sorted(list(set(ep_obj.subtitles).difference(previous_subtitles)))])
         else:
             status = 'No subtitles downloaded'
         ui.notifications.message('Subtitles Search', status)
-        return json.dumps({'result': status, 'subtitles': ','.join(ep_obj.subtitles)})
+        return json.dumps({'result': status, 'subtitles': ','.join([x.alpha3 for x in ep_obj.subtitles])})
 
     @cherrypy.expose
     def mergeEpisodeSubtitles(self, show=None, season=None, episode=None):

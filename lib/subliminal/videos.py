@@ -29,6 +29,7 @@ import struct
 from sickbeard import encodingKludge as ek
 import sickbeard
 
+
 __all__ = ['EXTENSIONS', 'MIMETYPES', 'Video', 'Episode', 'Movie', 'UnknownVideo',
            'scan', 'hash_opensubtitles', 'hash_thesubdb']
 logger = logging.getLogger(__name__)

@@ -843,12 +843,13 @@ class TVShow(object):
             subtitles = subliminal.download_subtitles([self._location], languages=sickbeard.SUBTITLES_LANGUAGES, services=sickbeard.subtitles.getEnabledServiceList(), force=False, multi=sickbeard.SUBTITLES_MULTI, cache_dir=sickbeard.CACHE_DIR)
             
             if sickbeard.SUBTITLES_SUBDIR:
-                for subtitle in subtitles:
-                    subs_new_path = ek.ek(os.path.join, self._location, sickbeard.SUBTITLES_SUBDIR)
-                    if not ek.ek(os.path.isdir, subs_new_path):
-                        ek.ek(os.mkdir, subs_new_path)
-                    new_file_path = ek.ek(os.path.join, subs_new_path, os.path.basename(subtitle))
-                    move(subtitle.path, new_file_path)
+                for video in subtitles:
+                    for subtitle in subtitles.get(video):
+                        subs_new_path = ek.ek(os.path.join, self._location, sickbeard.SUBTITLES_SUBDIR)
+                        if not ek.ek(os.path.isdir, subs_new_path):
+                            ek.ek(os.mkdir, subs_new_path)
+                        new_file_path = ek.ek(os.path.join, subs_new_path, os.path.basename(subtitle.path))
+                        move(subtitle.path, new_file_path)
                 
         except Exception as e:
             logger.log("Error occurred when downloading subtitles: " + str(e), logger.DEBUG)
@@ -1076,12 +1077,14 @@ class TVEpisode(object):
             subtitles = subliminal.download_subtitles([file_path], languages=sickbeard.SUBTITLES_LANGUAGES, services=sickbeard.subtitles.getEnabledServiceList(), force=False, multi=sickbeard.SUBTITLES_MULTI, cache_dir=sickbeard.CACHE_DIR)
             
             if sickbeard.SUBTITLES_SUBDIR:
-                for subtitle in subtitles:
-                    subs_new_path = ek.ek(os.path.join, os.path.dirname(file_path), sickbeard.SUBTITLES_SUBDIR)
-                    if not ek.ek(os.path.isdir, subs_new_path):
-                        ek.ek(os.mkdir, subs_new_path)
-                    new_file_path = ek.ek(os.path.join, subs_new_path, os.path.basename(subtitle))
-                    move(subtitle.path, new_file_path)
+                for video in subtitles:
+                    for subtitle in subtitles.get(video):
+                        subs_new_path = ek.ek(os.path.join, os.path.dirname(file_path), sickbeard.SUBTITLES_SUBDIR)
+                        if not ek.ek(os.path.isdir, subs_new_path):
+                            ek.ek(os.mkdir, subs_new_path)
+                        new_file_path = ek.ek(os.path.join, subs_new_path, os.path.basename(subtitle.path))
+                        move(subtitle.path, new_file_path)
+
         except Exception as e:
             logger.log("Error occurred when downloading subtitles: " + str(e), logger.DEBUG)
             return

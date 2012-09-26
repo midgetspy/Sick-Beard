@@ -66,21 +66,21 @@ class Subtitulos(ServiceBase):
         subtitles = []
         for sub in soup('div', {'id': 'version'}):
             sub_keywords = split_keyword(self.release_pattern.search(sub.find('p', {'class': 'title-sub'}).contents[1]).group(1).lower())
-            if not keywords & sub_keywords:
+            if keywords and not keywords & sub_keywords:
                 logger.debug(u'None of subtitle keywords %r in %r' % (sub_keywords, keywords))
                 continue
-            for html_language in sub.findAllNext('ul', {'class': 'sslist'}):
-                language = self.get_language(html_language.findNext('li', {'class': 'li-idioma'}).find('strong').contents[0].string.strip())
+            for html_language in sub.find_all_next('ul', {'class': 'sslist'}):
+                language = self.get_language(html_language.find_next('li', {'class': 'li-idioma'}).find('strong').contents[0].string.strip())
                 if language not in languages:
                     logger.debug(u'Language %r not in wanted languages %r' % (language, languages))
                     continue
-                html_status = html_language.findNext('li', {'class': 'li-estado green'})
+                html_status = html_language.find_next('li', {'class': 'li-estado'})
                 status = html_status.contents[0].string.strip()
                 if status != 'Completado':
                     logger.debug(u'Wrong subtitle status %s' % status)
                     continue
                 path = get_subtitle_path(filepath, language, self.config.multi)
-                subtitle = ResultSubtitle(path, language, self.__class__.__name__.lower(), html_status.findNext('span', {'class': 'descargar green'}).find('a')['href'],
+                subtitle = ResultSubtitle(path, language, self.__class__.__name__.lower(), html_status.find_next('span', {'class': 'descargar green'}).find('a')['href'],
                                           keywords=sub_keywords)
                 subtitles.append(subtitle)
         return subtitles

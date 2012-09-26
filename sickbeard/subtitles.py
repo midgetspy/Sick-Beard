@@ -36,16 +36,14 @@ def sortedServiceList():
     curIndex = 0
     for curService in sickbeard.SUBTITLES_SERVICES_LIST:
         if curService in servicesMapping:
-            curServiceDict = {'id': curService, 'image': curService+'.png', 'name': servicesMapping[curService], 'enabled': sickbeard.SUBTITLES_SERVICES_ENABLED[curIndex] == 1,
-                'api_based': servicesMapping[curService] in subliminal.SERVICES, 'url': __import__('lib.subliminal.services.' + curService, globals=globals(), locals=locals(), fromlist=['Service'], level=-1).Service.site_url}
+            curServiceDict = {'id': curService, 'image': curService+'.png', 'name': servicesMapping[curService], 'enabled': sickbeard.SUBTITLES_SERVICES_ENABLED[curIndex] == 1, 'api_based': servicesMapping[curService] in subliminal.SERVICES, 'url': __import__('lib.subliminal.services.' + curService, globals=globals(), locals=locals(), fromlist=['Service'], level=-1).Service.site_url}
             newList.append(curServiceDict)
         curIndex += 1
 
     # add any services that are missing from that list
     for curService in servicesMapping.keys():
         if curService not in [x['id'] for x in newList]:
-            curServiceDict = {'id': curService, 'image': curService+'.png', 'name': servicesMapping[curService], 'enabled': False,
-                'api_based': servicesMapping[curService] in subliminal.SERVICES, 'url': __import__('lib.subliminal.services.' + curService, globals=globals(), locals=locals(), fromlist=['Service'], level=-1).Service.site_url}
+            curServiceDict = {'id': curService, 'image': curService+'.png', 'name': servicesMapping[curService], 'enabled': False, 'api_based': servicesMapping[curService] in subliminal.SERVICES, 'url': ''}
             newList.append(curServiceDict)
 
     return newList
