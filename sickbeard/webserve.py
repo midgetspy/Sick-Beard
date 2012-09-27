@@ -1284,22 +1284,23 @@ class ConfigNotifications:
         return _munge(t)
 
     @cherrypy.expose
-    def saveNotifications(self, use_xbmc=None, xbmc_notify_onsnatch=None, xbmc_notify_ondownload=None,
+    def saveNotifications(self, use_xbmc=None, xbmc_notify_onsnatch=None, xbmc_notify_ondownload=None, xbmc_notify_onsubtitledownload=None,
                           xbmc_update_library=None, xbmc_update_full=None, xbmc_host=None, xbmc_username=None, xbmc_password=None,
-                          use_plex=None, plex_notify_onsnatch=None, plex_notify_ondownload=None, plex_update_library=None,
+                          use_plex=None, plex_notify_onsnatch=None, plex_notify_ondownload=None, plex_notify_onsubtitledownload=None, plex_update_library=None,
                           plex_server_host=None, plex_host=None, plex_username=None, plex_password=None,
-                          use_growl=None, growl_notify_onsnatch=None, growl_notify_ondownload=None, growl_host=None, growl_password=None, 
-                          use_prowl=None, prowl_notify_onsnatch=None, prowl_notify_ondownload=None, prowl_api=None, prowl_priority=0, 
-                          use_twitter=None, twitter_notify_onsnatch=None, twitter_notify_ondownload=None, 
-                          use_notifo=None, notifo_notify_onsnatch=None, notifo_notify_ondownload=None, notifo_username=None, notifo_apisecret=None,
-                          use_boxcar=None, boxcar_notify_onsnatch=None, boxcar_notify_ondownload=None, boxcar_username=None,
-                          use_pushover=None, pushover_notify_onsnatch=None, pushover_notify_ondownload=None, pushover_userkey=None,
-                          use_libnotify=None, libnotify_notify_onsnatch=None, libnotify_notify_ondownload=None,
+                          use_growl=None, growl_notify_onsnatch=None, growl_notify_ondownload=None, growl_notify_onsubtitledownload=None, growl_host=None, growl_password=None, 
+                          use_prowl=None, prowl_notify_onsnatch=None, prowl_notify_ondownload=None, prowl_notify_onsubtitledownload=None, prowl_api=None, prowl_priority=0, 
+                          use_twitter=None, twitter_notify_onsnatch=None, twitter_notify_ondownload=None, twitter_notify_onsubtitledownload=None, 
+                          use_notifo=None, notifo_notify_onsnatch=None, notifo_notify_ondownload=None, notifo_notify_onsubtitledownload=None, notifo_username=None, notifo_apisecret=None,
+                          use_boxcar=None, boxcar_notify_onsnatch=None, boxcar_notify_ondownload=None, boxcar_notify_onsubtitledownload=None, boxcar_username=None,
+                          use_pushover=None, pushover_notify_onsnatch=None, pushover_notify_ondownload=None, pushover_notify_onsubtitledownload=None, pushover_userkey=None,
+                          use_libnotify=None, libnotify_notify_onsnatch=None, libnotify_notify_ondownload=None, libnotify_notify_onsubtitledownload=None,
                           use_nmj=None, nmj_host=None, nmj_database=None, nmj_mount=None, use_synoindex=None,
                           use_trakt=None, trakt_username=None, trakt_password=None, trakt_api=None,
-                          use_pytivo=None, pytivo_notify_onsnatch=None, pytivo_notify_ondownload=None, pytivo_update_library=None, 
+                          use_synologynotifier=None, synologynotifier_notify_onsnatch=None, synologynotifier_notify_ondownload=None, synologynotifier_notify_onsubtitledownload=None,
+                          use_pytivo=None, pytivo_notify_onsnatch=None, pytivo_notify_ondownload=None, pytivo_notify_onsubtitledownload=None, pytivo_update_library=None, 
                           pytivo_host=None, pytivo_share_name=None, pytivo_tivo_name=None,
-                          use_nma=None, nma_notify_onsnatch=None, nma_notify_ondownload=None, nma_api=None, nma_priority=0 ):
+                          use_nma=None, nma_notify_onsnatch=None, nma_notify_ondownload=None, nma_notify_onsubtitledownload=None, nma_api=None, nma_priority=0 ):
 
         results = []
 
@@ -1312,6 +1313,11 @@ class ConfigNotifications:
             xbmc_notify_ondownload = 1
         else:
             xbmc_notify_ondownload = 0
+
+        if xbmc_notify_onsubtitledownload == "on":
+            xbmc_notify_onsubtitledownload = 1
+        else:
+            xbmc_notify_onsubtitledownload = 0
 
         if xbmc_update_library == "on":
             xbmc_update_library = 1
@@ -1343,6 +1349,11 @@ class ConfigNotifications:
         else:
             plex_notify_ondownload = 0
 
+        if plex_notify_onsubtitledownload == "on":
+            plex_notify_onsubtitledownload = 1
+        else:
+            plex_notify_onsubtitledownload = 0
+
         if use_plex == "on":
             use_plex = 1
         else:
@@ -1358,6 +1369,11 @@ class ConfigNotifications:
         else:
             growl_notify_ondownload = 0
 
+        if growl_notify_onsubtitledownload == "on":
+            growl_notify_onsubtitledownload = 1
+        else:
+            growl_notify_onsubtitledownload = 0
+
         if use_growl == "on":
             use_growl = 1
         else:
@@ -1372,6 +1388,12 @@ class ConfigNotifications:
             prowl_notify_ondownload = 1
         else:
             prowl_notify_ondownload = 0
+        
+        if prowl_notify_onsubtitledownload == "on":
+            prowl_notify_onsubtitledownload = 1
+        else:
+            prowl_notify_onsubtitledownload = 0
+
         if use_prowl == "on":
             use_prowl = 1
         else:
@@ -1386,6 +1408,12 @@ class ConfigNotifications:
             twitter_notify_ondownload = 1
         else:
             twitter_notify_ondownload = 0
+        
+        if twitter_notify_onsubtitledownload == "on":
+            twitter_notify_onsubtitledownload = 1
+        else:
+            twitter_notify_onsubtitledownload = 0
+        
         if use_twitter == "on":
             use_twitter = 1
         else:
@@ -1400,6 +1428,12 @@ class ConfigNotifications:
             notifo_notify_ondownload = 1
         else:
             notifo_notify_ondownload = 0
+            
+        if notifo_notify_onsubtitledownload == "on":
+            notifo_notify_onsubtitledownload = 1
+        else:
+            notifo_notify_onsubtitledownload = 0
+            
         if use_notifo == "on":
             use_notifo = 1
         else:
@@ -1414,6 +1448,12 @@ class ConfigNotifications:
             boxcar_notify_ondownload = 1
         else:
             boxcar_notify_ondownload = 0
+
+        if boxcar_notify_onsubtitledownload == "on":
+            boxcar_notify_onsubtitledownload = 1
+        else:
+            boxcar_notify_onsubtitledownload = 0
+        
         if use_boxcar == "on":
             use_boxcar = 1
         else:
@@ -1428,6 +1468,12 @@ class ConfigNotifications:
             pushover_notify_ondownload = 1
         else:
             pushover_notify_ondownload = 0
+        
+        if pushover_notify_onsubtitledownload == "on":
+            pushover_notify_onsubtitledownload = 1
+        else:
+            pushover_notify_onsubtitledownload = 0
+
         if use_pushover == "on":
             use_pushover = 1
         else:
@@ -1442,6 +1488,26 @@ class ConfigNotifications:
             use_synoindex = 1
         else:
             use_synoindex = 0
+            
+        if use_synologynotifier == "on":
+            use_synologynotifier = 1
+        else:
+            use_synologynotifier = 0
+            
+        if synologynotifier_notify_onsnatch == "on":
+            synologynotifier_notify_onsnatch = 1
+        else:
+            synologynotifier_notify_onsnatch = 0
+
+        if synologynotifier_notify_ondownload == "on":
+            synologynotifier_notify_ondownload = 1
+        else:
+            synologynotifier_notify_ondownload = 0
+
+        if synologynotifier_notify_onsubtitledownload == "on":
+            synologynotifier_notify_onsubtitledownload = 1
+        else:
+            synologynotifier_notify_onsubtitledownload = 0
 
         if use_trakt == "on":
             use_trakt = 1
@@ -1463,6 +1529,11 @@ class ConfigNotifications:
         else:
             pytivo_notify_ondownload = 0
 
+        if pytivo_notify_onsubtitledownload == "on":
+            pytivo_notify_onsubtitledownload = 1
+        else:
+            pytivo_notify_onsubtitledownload = 0
+
         if pytivo_update_library == "on":
             pytivo_update_library = 1
         else:
@@ -1483,9 +1554,15 @@ class ConfigNotifications:
         else:
             nma_notify_ondownload = 0
 
+        if nma_notify_onsubtitledownload == "on":
+            nma_notify_onsubtitledownload = 1
+        else:
+            nma_notify_onsubtitledownload = 0
+
         sickbeard.USE_XBMC = use_xbmc
         sickbeard.XBMC_NOTIFY_ONSNATCH = xbmc_notify_onsnatch
         sickbeard.XBMC_NOTIFY_ONDOWNLOAD = xbmc_notify_ondownload
+        sickbeard.XBMC_NOTIFY_ONSUBTITLEDOWNLOAD = xbmc_notify_onsubtitledownload
         sickbeard.XBMC_UPDATE_LIBRARY = xbmc_update_library
         sickbeard.XBMC_UPDATE_FULL = xbmc_update_full
         sickbeard.XBMC_HOST = xbmc_host
@@ -1495,6 +1572,7 @@ class ConfigNotifications:
         sickbeard.USE_PLEX = use_plex
         sickbeard.PLEX_NOTIFY_ONSNATCH = plex_notify_onsnatch
         sickbeard.PLEX_NOTIFY_ONDOWNLOAD = plex_notify_ondownload
+        sickbeard.PLEX_NOTIFY_ONSUBTITLEDOWNLOAD = plex_notify_onsubtitledownload
         sickbeard.PLEX_UPDATE_LIBRARY = plex_update_library
         sickbeard.PLEX_HOST = plex_host
         sickbeard.PLEX_SERVER_HOST = plex_server_host
@@ -1503,39 +1581,44 @@ class ConfigNotifications:
 
         sickbeard.USE_GROWL = use_growl
         sickbeard.GROWL_NOTIFY_ONSNATCH = growl_notify_onsnatch
-        sickbeard.GROWL_NOTIFY_ONDOWNLOAD = growl_notify_ondownload
+        sickbeard.GROWL_NOTIFY_ONSUBTITLEDOWNLOAD = growl_notify_onsubtitledownload
         sickbeard.GROWL_HOST = growl_host
         sickbeard.GROWL_PASSWORD = growl_password
 
         sickbeard.USE_PROWL = use_prowl
         sickbeard.PROWL_NOTIFY_ONSNATCH = prowl_notify_onsnatch
-        sickbeard.PROWL_NOTIFY_ONDOWNLOAD = prowl_notify_ondownload
+        sickbeard.PROWL_NOTIFY_ONSUBTITLEDOWNLOAD = prowl_notify_onsubtitledownload
         sickbeard.PROWL_API = prowl_api
         sickbeard.PROWL_PRIORITY = prowl_priority
 
         sickbeard.USE_TWITTER = use_twitter
         sickbeard.TWITTER_NOTIFY_ONSNATCH = twitter_notify_onsnatch
         sickbeard.TWITTER_NOTIFY_ONDOWNLOAD = twitter_notify_ondownload
+        sickbeard.TWITTER_NOTIFY_ONSUBTITLEDOWNLOAD = twitter_notify_onsubtitledownload
 
         sickbeard.USE_NOTIFO = use_notifo
         sickbeard.NOTIFO_NOTIFY_ONSNATCH = notifo_notify_onsnatch
         sickbeard.NOTIFO_NOTIFY_ONDOWNLOAD = notifo_notify_ondownload
+        sickbeard.NOTIFO_NOTIFY_ONSUBTITLEDOWNLOAD = notifo_notify_onsubtitledownload
         sickbeard.NOTIFO_USERNAME = notifo_username
         sickbeard.NOTIFO_APISECRET = notifo_apisecret
 
         sickbeard.USE_BOXCAR = use_boxcar
         sickbeard.BOXCAR_NOTIFY_ONSNATCH = boxcar_notify_onsnatch
         sickbeard.BOXCAR_NOTIFY_ONDOWNLOAD = boxcar_notify_ondownload
+        sickbeard.BOXCAR_NOTIFY_ONSUBTITLEDOWNLOAD = boxcar_notify_onsubtitledownload
         sickbeard.BOXCAR_USERNAME = boxcar_username
 
         sickbeard.USE_PUSHOVER = use_pushover
         sickbeard.PUSHOVER_NOTIFY_ONSNATCH = pushover_notify_onsnatch
         sickbeard.PUSHOVER_NOTIFY_ONDOWNLOAD = pushover_notify_ondownload
+        sickbeard.PUSHOVER_NOTIFY_ONSUBTITLEDOWNLOAD = pushover_notify_onsubtitledownload
         sickbeard.PUSHOVER_USERKEY = pushover_userkey
 
         sickbeard.USE_LIBNOTIFY = use_libnotify == "on"
         sickbeard.LIBNOTIFY_NOTIFY_ONSNATCH = libnotify_notify_onsnatch == "on"
         sickbeard.LIBNOTIFY_NOTIFY_ONDOWNLOAD = libnotify_notify_ondownload == "on"
+        sickbeard.LIBNOTIFY_NOTIFY_ONSUBTITLEDOWNLOAD = libnotify_notify_onsubtitledownload == "on"
 
         sickbeard.USE_NMJ = use_nmj
         sickbeard.NMJ_HOST = nmj_host
@@ -1543,6 +1626,11 @@ class ConfigNotifications:
         sickbeard.NMJ_MOUNT = nmj_mount
 
         sickbeard.USE_SYNOINDEX = use_synoindex
+        
+        sickbeard.USE_SYNOLOGYNOTIFIER = use_synologynotifier
+        sickbeard.SYNOLOGYNOTIFIER_NOTIFY_ONSNATCH = synologynotifier_notify_onsnatch == "off"
+        sickbeard.SYNOLOGYNOTIFIER_NOTIFY_ONDOWNLOAD = synologynotifier_notify_ondownload ==  "off"
+        sickbeard.SYNOLOGYNOTIFIER_NOTIFY_ONSUBTITLEDOWNLOAD = synologynotifier_notify_onsubtitledownload ==  "off"
 
         sickbeard.USE_TRAKT = use_trakt
         sickbeard.TRAKT_USERNAME = trakt_username
@@ -1552,6 +1640,7 @@ class ConfigNotifications:
         sickbeard.USE_PYTIVO = use_pytivo
         sickbeard.PYTIVO_NOTIFY_ONSNATCH = pytivo_notify_onsnatch == "off"
         sickbeard.PYTIVO_NOTIFY_ONDOWNLOAD = pytivo_notify_ondownload ==  "off"
+        sickbeard.PYTIVO_NOTIFY_ONSUBTITLEDOWNLOAD = pytivo_notify_onsubtitledownload ==  "off"
         sickbeard.PYTIVO_UPDATE_LIBRARY = pytivo_update_library
         sickbeard.PYTIVO_HOST = pytivo_host
         sickbeard.PYTIVO_SHARE_NAME = pytivo_share_name
@@ -1560,6 +1649,7 @@ class ConfigNotifications:
         sickbeard.USE_NMA = use_nma
         sickbeard.NMA_NOTIFY_ONSNATCH = nma_notify_onsnatch
         sickbeard.NMA_NOTIFY_ONDOWNLOAD = nma_notify_ondownload
+        sickbeard.NMA_NOTIFY_ONSUBTITLEDOWNLOAD = nma_notify_onsubtitledownload
         sickbeard.NMA_API = nma_api
         sickbeard.NMA_PRIORITY = nma_priority
         

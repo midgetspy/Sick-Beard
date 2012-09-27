@@ -41,6 +41,7 @@ from sickbeard import helpers, exceptions, logger
 from sickbeard.exceptions import ex
 from sickbeard import tvrage
 from sickbeard import image_cache
+from sickbeard import notifiers
 from sickbeard import postProcessor
 from sickbeard import subtitles
 
@@ -186,13 +187,6 @@ class TVShow(object):
                 self.episodes[season][episode] = ep
 
         return self.episodes[season][episode]
-
-    def getEpisodeFromLocation(self, location):
-        print self.getEpisode(1, 1)
-        for season in self.episodes:
-            for episode in self.episodes[season]:
-                if self.getEpisode(season, episode).location == location:
-                    return self.getEpisode(season, episode)
 
     def writeShowNFO(self):
 
@@ -858,6 +852,8 @@ class TVShow(object):
 
         if subtitles:
             logger.log(str(self.tvdbid) + ": Downloaded %d subtitles" % len(subtitles), logger.DEBUG)
+            for video in subtitles:
+                notifiers.notify_subtitle_download(self.makeEpFromFile(video.path).prettyName(True), ",".join([subtitle.language.alpha3 for subtitle in subtitles]))
         else:
             logger.log(str(self.tvdbid) + ": No subtitles downloaded", logger.DEBUG)
         
@@ -1093,6 +1089,8 @@ class TVEpisode(object):
         
         if subtitles:
             logger.log(str(self.show.tvdbid) + ": Downloaded " + str(subtitles) + " subtitles for episode " + str(self.season) + "x" + str(self.episode), logger.DEBUG)
+            
+            notifiers.notify_subtitle_download(self.makeEpFromFile(video.path).prettyName(True), str(subtitles))
         else:
             logger.log(str(self.show.tvdbid) + ": No subtitles downloaded for episode " + str(self.season) + "x" + str(self.episode), logger.DEBUG)
         

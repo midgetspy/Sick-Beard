@@ -43,6 +43,10 @@ class XBMCNotifier:
     def notify_download(self, ep_name):
         if sickbeard.XBMC_NOTIFY_ONDOWNLOAD:
             self._notifyXBMC(ep_name, common.notifyStrings[common.NOTIFY_DOWNLOAD])
+            
+    def notify_episode_download(self, ep_name, lang):
+        if sickbeard.XBMC_NOTIFY_ONSUBTITLEDOWNLOAD:
+            self._notifyXBMC("Sick-Beard", ep_name + ": " + lang, common.notifyStrings[common.NOTIFY_DOWNLOAD])
 
     def test_notify(self, host, username, password):
         return self._notifyXBMC("Testing XBMC notifications from Sick Beard", "Test Notification", host, username, password, force=True)

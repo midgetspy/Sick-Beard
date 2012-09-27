@@ -43,6 +43,10 @@ class ProwlNotifier:
     def notify_download(self, ep_name):
         if sickbeard.PROWL_NOTIFY_ONDOWNLOAD:
             self._sendProwl(prowl_api=None, prowl_priority=None, event=common.notifyStrings[common.NOTIFY_DOWNLOAD], message=ep_name)
+    
+    def notify_subtitle_download(self, ep_name, lang):
+        if sickbeard.PROWL_NOTIFY_ONSUBTITLEDOWNLOAD:
+            self._sendProwl(prowl_api=None, prowl_priority=None, event=common.notifyStrings[common.NOTIFY_SUBTITLE_DOWNLOAD], message=ep_name + ": " + lang)
         
     def _sendProwl(self, prowl_api=None, prowl_priority=None, event=None, message=None, force=False):
         

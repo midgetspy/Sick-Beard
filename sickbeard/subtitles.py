@@ -19,6 +19,7 @@
 import datetime
 import sickbeard
 from sickbeard.common import *
+from sickbeard import notifiers
 from sickbeard import logger
 from sickbeard import helpers
 from sickbeard import encodingKludge as ek
@@ -152,6 +153,9 @@ class SubtitlesFinder():
 
         if subtitles:
             logger.log('Downloaded %d subtitles' % len(subtitles), logger.MESSAGE)
+            
+            for video in subtitles:
+                notifiers.notify_subtitle_download(self.makeEpFromFile(video.path).prettyName(True), ",".join([subtitle.language.alpha3 for subtitle in subtitles]))
         else:
             logger.log('No subtitles found', logger.MESSAGE)
 

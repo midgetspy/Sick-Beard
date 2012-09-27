@@ -24,7 +24,7 @@ import time
 import sickbeard
 
 from sickbeard import logger
-from sickbeard.common import notifyStrings, NOTIFY_SNATCH, NOTIFY_DOWNLOAD
+from sickbeard.common import notifyStrings, NOTIFY_SNATCH, NOTIFY_DOWNLOAD, NOTIFY_SUBTITLE_DOWNLOAD
 from sickbeard.exceptions import ex
 
 API_URL = "https://api.pushover.net/1/messages.json"
@@ -109,6 +109,10 @@ class PushoverNotifier:
     def notify_download(self, ep_name, title=notifyStrings[NOTIFY_DOWNLOAD]):
         if sickbeard.PUSHOVER_NOTIFY_ONDOWNLOAD:
             self._notifyPushover(title, ep_name)
+    
+    def notify_subtitle_download(self, ep_name, lang, title=notifyStrings[NOTIFY_SUBTITLE_DOWNLOAD]):
+        if sickbeard.PUSHOVER_NOTIFY_ONSUBTITLEDOWNLOAD:
+            self._notifyPushover(title, ep_name + ": " + lang)
 
     def _notifyPushover(self, title, message, userKey=None ):
         """

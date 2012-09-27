@@ -56,6 +56,13 @@
                                 </label>
                             </div>
                             <div class="field-pair">
+                                <input type="checkbox" name="xbmc_notify_onsubtitledownload" id="xbmc_notify_onsubtitledownload" #if $sickbeard.XBMC_NOTIFY_ONSUBTITLEDOWNLOAD then "checked=\"checked\"" else ""# />
+                                <label class="clearfix" for="xbmc_notify_onsubtitledownload">
+                                    <span class="component-title">Notify on Subtitle Download</span>
+                                    <span class="component-desc">Send notification when we finish a subtitle download?</span>
+                                </label>
+                            </div>
+                            <div class="field-pair">
                                 <input type="checkbox" name="xbmc_update_library" id="xbmc_update_library" #if $sickbeard.XBMC_UPDATE_LIBRARY then "checked=\"checked\"" else ""# />
                                 <label class="clearfix" for="xbmc_update_library">
                                     <span class="component-title">Update Library</span>
@@ -140,6 +147,13 @@
                                 <label class="clearfix" for="plex_notify_ondownload">
                                     <span class="component-title">Notify on Download</span>
                                     <span class="component-desc">Send notification when we finish a download?</span>
+                                </label>
+                            </div>
+                            <div class="field-pair">
+                                <input type="checkbox" name="plex_notify_onsubtitledownload" id="plex_notify_onsubtitledownload" #if $sickbeard.PLEX_NOTIFY_ONSUBTITLEDOWNLOAD then "checked=\"checked\"" else ""# />
+                                <label class="clearfix" for="plex_notify_onsubtitledownload">
+                                    <span class="component-title">Notify on Subtitle Download</span>
+                                    <span class="component-desc">Send notification when we finish a subtitle download?</span>
                                 </label>
                             </div>
                             <div class="field-pair">
@@ -284,10 +298,62 @@
 
                         <div id="content_use_synoindex">
                             <input type="submit" class="config_submitter btn" value="Save Changes" />
-                        </div><!-- /content_use_pytivo //-->
+                        </div><!-- /content_use_synoindex //-->
 
                     </fieldset>
                 </div><!-- /synoindex component-group //-->
+                
+                
+                <div class="component-group clearfix">
+                    <div class="component-group-desc">
+                        <h3><a href="http://synology.com/" onclick="window.open(this.href, '_blank'); return false;"><img src="$sbRoot/images/notifiers/synologynotifier.png" alt="" title="Synology Indexer"/> Synology Notifier </a></h3>
+                        <p>Synology Indexer is the daemon running on the Synology NAS to build its media database.</p>
+                    </div>
+
+                    <fieldset class="component-group-list">
+                        <div class="field-pair">
+                            <input type="checkbox" class="enabler" name="use_synologynotifier" id="use_synologynotifier" #if $sickbeard.USE_SYNOINDEX then "checked=\"checked\"" else ""# /> 
+                            <label class="clearfix" for="use_synologynotifier">
+                                <span class="component-title">Enable</span>
+                                <span class="component-desc">Should Sick Beard send notifications to the Synology DSM Notifier?<br /><br />
+                                </span>
+                            </label>
+                            <label class="nocheck clearfix" for="use_synologynotifier">
+                                <span class="component-title">&nbsp;</span>
+                                <span class="component-desc"><b>Note:</b> Requires SB to be running on your Synology NAS.</span>
+                            </label>
+                            
+                            <div id="content_use_synologynotifier">
+	                            <div class="field-pair">
+	                                <input type="checkbox" name="synologynotifier_notify_onsnatch" id="synologynotifier_notify_onsnatch" #if $sickbeard.SYNOLOGYNOTIFIER_NOTIFY_ONSNATCH then "checked=\"checked\"" else ""# />
+	                                <label class="clearfix" for="synologynotifier_notify_onsnatch">
+	                                    <span class="component-title">Notify on Snatch</span>
+	                                    <span class="component-desc">Send notification when we start a download?</span>
+	                                </label>
+	                            </div>
+	                            <div class="field-pair">
+	                                <input type="checkbox" name="synologynotifier_notify_ondownload" id="synologynotifier_notify_ondownload" #if $sickbeard.SYNOLOGYNOTIFIER_NOTIFY_ONDOWNLOAD then "checked=\"checked\"" else ""# />
+	                                <label class="clearfix" for="synologynotifier_notify_ondownload">
+	                                    <span class="component-title">Notify on Download</span>
+	                                    <span class="component-desc">Send notification when we finish a download?</span>
+	                                </label>
+	                            </div>
+	                            <div class="field-pair">
+	                                <input type="checkbox" name="synologynotifier_notify_onsubtitledownload" id="synologynotifier_notify_onsubtitledownload" #if $sickbeard.SYNOLOGYNOTIFIER_NOTIFY_ONSUBTITLEDOWNLOAD then "checked=\"checked\"" else ""# />
+	                                <label class="clearfix" for="synologynotifier_notify_onsubtitledownload">
+	                                    <span class="component-title">Notify on Subtitle Download</span>
+	                                    <span class="component-desc">Send notification when we finish a subtitle download?</span>
+	                                </label>
+	                            </div>
+                           	</div>
+                        </div>
+
+                        <div id="content_use_synoindex">
+                            <input type="submit" class="config_submitter btn" value="Save Changes" />
+                        </div><!-- /content_use_synologynotifier //-->
+
+                    </fieldset>
+                </div><!-- /synology notifier component-group //-->
 
 
                 <div class="component-group clearfix">
@@ -379,6 +445,13 @@
                                 </label>
                             </div>
                             <div class="field-pair">
+                                <input type="checkbox" name="growl_notify_onsubtitledownload" id="growl_notify_onsubtitledownload" #if $sickbeard.GROWL_NOTIFY_ONSUBTITLEDOWNLOAD then "checked=\"checked\"" else ""# />
+                                <label class="clearfix" for="growl_notify_onsubtitledownload">
+                                    <span class="component-title">Notify on Subtitle Download</span>
+                                    <span class="component-desc">Send notification when we finish a subtitle download?</span>
+                                </label>
+                            </div>
+                            <div class="field-pair">
                                 <label class="nocheck clearfix">
                                     <span class="component-title">Growl IP:Port</span>
                                     <input type="text" name="growl_host" id="growl_host" value="$sickbeard.GROWL_HOST" size="35" />
@@ -438,6 +511,13 @@
                                 <label class="clearfix" for="prowl_notify_ondownload">
                                     <span class="component-title">Notify on Download</span>
                                     <span class="component-desc">Send notification when we finish a download?</span>
+                                </label>
+                            </div>
+                            <div class="field-pair">
+                                <input type="checkbox" name="prowl_notify_onsubtitledownload" id="prowl_notify_onsubtitledownload" #if $sickbeard.PROWL_NOTIFY_ONSUBTITLEDOWNLOAD then "checked=\"checked\"" else ""# />
+                                <label class="clearfix" for="prowl_notify_onsubtitledownload">
+                                    <span class="component-title">Notify on Subtitle Download</span>
+                                    <span class="component-desc">Send notification when we finish a subtitle download?</span>
                                 </label>
                             </div>
                             <div class="field-pair">
@@ -505,6 +585,13 @@
                                 </label>
                             </div>
                             <div class="field-pair">
+                                <input type="checkbox" name="notifo_notify_onsubtitledownload" id="notifo_notify_onsubtitledownload" #if $sickbeard.NOTIFO_NOTIFY_ONSUBTITLEDOWNLOAD then "checked=\"checked\"" else ""# />
+                                <label class="clearfix" for="notifo_notify_onsubtitledownload">
+                                    <span class="component-title">Notify on Subtitle Download</span>
+                                    <span class="component-desc">Send notification when we finish a subtitle download?</span>
+                                </label>
+                            </div>
+                            <div class="field-pair">
                                 <label class="nocheck clearfix">
                                     <span class="component-title">Notifo Username</span>
                                     <input type="text" name="notifo_username" id="notifo_username" value="$sickbeard.NOTIFO_USERNAME" size="35" />
@@ -562,6 +649,13 @@
                                     <span class="component-desc">Send notification when we finish a download?</span>
                                 </label>
                             </div>
+                            <div class="field-pair">
+                                <input type="checkbox" name="libnotify_notify_onsubtitledownload" id="libnotify_notify_onsubtitledownload" #if $sickbeard.LIBNOTIFY_NOTIFY_ONSUBTITLEDOWNLOAD then "checked=\"checked\"" else ""# />
+                                <label class="clearfix" for="libnotify_notify_onsubtitledownload">
+                                    <span class="component-title">Notify on Subtitle Download</span>
+                                    <span class="component-desc">Send notification when we finish a subtitle download?</span>
+                                </label>
+                            </div>
                             <div class="testNotification" id="testLibnotify-result">Click below to test.</div>
                             <input  class="btn" type="button" value="Test Libnotify" id="testLibnotify" />
                             <input type="submit" class="config_submitter btn" value="Save Changes" />
@@ -598,6 +692,13 @@
                                 <label class="clearfix" for="pushover_notify_ondownload">
                                     <span class="component-title">Notify on Download</span>
                                     <span class="component-desc">Send notification when we finish a download?</span>
+                                </label>
+                            </div>
+                            <div class="field-pair">
+                                <input type="checkbox" name="pushover_notify_onsubtitledownload" id="pushover_notify_onsubtitledownload" #if $sickbeard.PUSHOVER_NOTIFY_ONSUBTITLEDOWNLOAD then "checked=\"checked\"" else ""# />
+                                <label class="clearfix" for="pushover_notify_onsubtitledownload">
+                                    <span class="component-title">Notify on Subtitle Download</span>
+                                    <span class="component-desc">Send notification when we finish a subtitle download?</span>
                                 </label>
                             </div>
                             <div class="field-pair">
@@ -648,6 +749,13 @@
                                 </label>
                             </div>
                             <div class="field-pair">
+                                <input type="checkbox" name="boxcar_notify_onsubtitledownload" id="boxcar_notify_onsubtitledownload" #if $sickbeard.BOXCAR_NOTIFY_ONSUBTITLEDOWNLOAD then "checked=\"checked\"" else ""# />
+                                <label class="clearfix" for="boxcar_notify_onsubtitledownload">
+                                    <span class="component-title">Notify on Subtitle Download</span>
+                                    <span class="component-desc">Send notification when we finish a subtitle download?</span>
+                                </label>
+                            </div>
+                            <div class="field-pair">
                                 <label class="nocheck clearfix">
                                     <span class="component-title">Boxcar Username</span>
                                     <input type="text" name="boxcar_username" id="boxcar_username" value="$sickbeard.BOXCAR_USERNAME" size="35" />
@@ -693,6 +801,13 @@
                                 <label class="clearfix" for="nma_notify_ondownload">
                                     <span class="component-title">Notify on Download</span>
                                     <span class="component-desc">Send notification when we finish a download?</span>
+                                </label>
+                            </div>
+                            <div class="field-pair">
+                                <input type="checkbox" name="nma_notify_onsubtitledownload" id="nma_notify_onsubtitledownload" #if $sickbeard.NMA_NOTIFY_ONSUBTITLEDOWNLOAD then "checked=\"checked\"" else ""# />
+                                <label class="clearfix" for="nma_notify_onsubtitledownload">
+                                    <span class="component-title">Notify on Subtitle Download</span>
+                                    <span class="component-desc">Send notification when we finish a subtitle download?</span>
                                 </label>
                             </div>
                             <div class="field-pair">
@@ -763,6 +878,13 @@
                                 <label class="clearfix" for="twitter_notify_ondownload">
                                     <span class="component-title">Notify on Download</span>
                                     <span class="component-desc">Send notification when we finish a download?</span>
+                                </label>
+                            </div>
+                            <div class="field-pair">
+                                <input type="checkbox" name="twitter_notify_onsubtitledownload" id="twitter_notify_onsubtitledownload" #if $sickbeard.TWITTER_NOTIFY_ONSUBTITLEDOWNLOAD then "checked=\"checked\"" else ""# />
+                                <label class="clearfix" for="twitter_notify_onsubtitledownload">
+                                    <span class="component-title">Notify on Subtitle Download</span>
+                                    <span class="component-desc">Send notification when we finish a subtitle download?</span>
                                 </label>
                             </div>
                             <div class="field-pair">

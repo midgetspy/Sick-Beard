@@ -39,6 +39,10 @@ class GrowlNotifier:
         if sickbeard.GROWL_NOTIFY_ONDOWNLOAD:
             self._sendGrowl(common.notifyStrings[common.NOTIFY_DOWNLOAD], ep_name)
 
+    def notify_subtitle_download(self, ep_name, lang):
+        if sickbeard.GROWL_NOTIFY_ONSUBTITLEDOWNLOAD:
+            self._sendGrowl(common.notifyStrings[common.NOTIFY_SUBTITLE_DOWNLOAD], ep_name + ": " + lang)
+
     def _send_growl(self, options,message=None):
                 
         #Send Notification
