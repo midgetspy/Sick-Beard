@@ -21,7 +21,7 @@
 import traceback
 import urllib
 import re
-
+from urllib2 import urlopen
 import xml.etree.cElementTree as etree
 
 import sickbeard
@@ -138,10 +138,21 @@ class TORRENTZProvider(generic.TorrentProvider):
     def _get_title_and_url(self, item):
         title = item.findtext('title')
         url = item.findtext('guid')
-        #Store the magnet link instead of torrentz.eu => direct to transmission/utorrent
+        #Storing the direct link.
         if url:
             torrentHash = url.replace('http://torrentz.eu/','').upper()
             url = "http://torrage.com/torrent/" + torrentHash + '.' + self.providerType
+            code = urlopen(url).code
+            if (code / 100 >= 4):
+                url = "http://zoink.it/torrent/" + torrentHash + '.' + self.providerType
+                code = urlopen(url).code
+                if (code / 100 >= 4):
+                    url = "http://torcache.net/torrent/" + torrentHash + '.' + self.providerType
+                    code = urlopen(url).code
+                    if (code / 100 >= 4):
+                        #there is nothing here
+                        url = ''
+                    
         return (title, url)
 
     def _extract_name_from_filename(self, filename):
