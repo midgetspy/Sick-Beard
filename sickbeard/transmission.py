@@ -106,6 +106,7 @@ class TransmissionRPC(object):
             'method': 'torrent-set',
             'tag': self.tag
         }
+        logger.log("Trying to set_torrent", logger.DEBUG)
         return self._request(post_data)
 
 def sendTORRENT(torrent):
@@ -141,7 +142,9 @@ def sendTORRENT(torrent):
     try:
         tc = TransmissionRPC(host.hostname, host.port, sickbeard.TORRENT_USERNAME, sickbeard.TORRENT_PASSWORD)
         torrent = tc.add_torrent(torrent.url, arguments=params)
+        logger.log("Adding torrent was a success", logger.DEBUG)
         tc.set_torrent(torrent["torrent-added"]["hashString"], change_params)
+        logger.log("Setting torrent was a success", logger.DEBUG)
         return True
     except Exception, e:
         logger.log("Unknown failure sending Torrent to Transmission. Return text is: " + str(e), logger.ERROR)
