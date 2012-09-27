@@ -140,15 +140,15 @@ class SubtitlesFinder():
         # download subtitles
         subtitles = subliminal.download_subtitles(locations, cache_dir=sickbeard.CACHE_DIR, workers=2, multi=sickbeard.SUBTITLES_MULTI, languages=sickbeard.SUBTITLES_LANGUAGES, services=sickbeard.subtitles.getEnabledServiceList())
 
-        for video in subtitles:
-            helpers.chmodAsParent(video.path)
-            for subtitle in subtitles.get(video):
-                if sickbeard.SUBTITLES_SUBDIR != None and sickbeard.SUBTITLES_SUBDIR != '':
-                    subsDir = ek.ek(os.path.join, os.path.dirname(video.path), sickbeard.SUBTITLES_SUBDIR)
-                    if not ek.ek(os.path.isdir, subsDir):
-                        ek.ek(os.mkdir, subsDir)
-                    helpers.chmodAsParent(subsDir)
-                    helpers.moveFile(subtitle.path, ek.ek(os.path.join,subsDir, os.path.basename(subtitle.path)))
+        if sickbeard.SUBTITLES_SUBDIR:
+            for video in subtitles:
+                subsDir = ek.ek(os.path.join, os.path.dirname(video.path), sickbeard.SUBTITLES_SUBDIR)
+                if not ek.ek(os.path.isdir, subsDir):
+                    ek.ek(os.mkdir, subsDir)
+                
+                for subtitle in subtitles.get(video):                    
+                    new_file_path = ek.ek(os.path.join,subsDir, os.path.basename(subtitle.path))
+                    helpers.moveFile(subtitle.path, new_file_path)
 
         if subtitles:
             logger.log('Downloaded %d subtitles' % len(subtitles), logger.MESSAGE)

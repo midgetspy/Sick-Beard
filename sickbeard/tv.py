@@ -844,12 +844,13 @@ class TVShow(object):
             
             if sickbeard.SUBTITLES_SUBDIR:
                 for video in subtitles:
+                    subs_new_path = ek.ek(os.path.join, os.path.dirname(video.path), sickbeard.SUBTITLES_SUBDIR)
+                    if not ek.ek(os.path.isdir, subs_new_path):
+                        ek.ek(os.mkdir, subs_new_path)
+                    
                     for subtitle in subtitles.get(video):
-                        subs_new_path = ek.ek(os.path.join, self._location, sickbeard.SUBTITLES_SUBDIR)
-                        if not ek.ek(os.path.isdir, subs_new_path):
-                            ek.ek(os.mkdir, subs_new_path)
                         new_file_path = ek.ek(os.path.join, subs_new_path, os.path.basename(subtitle.path))
-                        move(subtitle.path, new_file_path)
+                        helpers.moveFile(subtitle.path, new_file_path)
                 
         except Exception as e:
             logger.log("Error occurred when downloading subtitles: " + str(e), logger.DEBUG)
@@ -1078,12 +1079,13 @@ class TVEpisode(object):
             
             if sickbeard.SUBTITLES_SUBDIR:
                 for video in subtitles:
+                    subs_new_path = ek.ek(os.path.join, os.path.dirname(file_path), sickbeard.SUBTITLES_SUBDIR)
+                    if not ek.ek(os.path.isdir, subs_new_path):
+                        ek.ek(os.mkdir, subs_new_path)
+
                     for subtitle in subtitles.get(video):
-                        subs_new_path = ek.ek(os.path.join, os.path.dirname(file_path), sickbeard.SUBTITLES_SUBDIR)
-                        if not ek.ek(os.path.isdir, subs_new_path):
-                            ek.ek(os.mkdir, subs_new_path)
                         new_file_path = ek.ek(os.path.join, subs_new_path, os.path.basename(subtitle.path))
-                        move(subtitle.path, new_file_path)
+                        helpers.moveFile(subtitle.path, new_file_path)
 
         except Exception as e:
             logger.log("Error occurred when downloading subtitles: " + str(e), logger.DEBUG)
@@ -1477,7 +1479,7 @@ class TVEpisode(object):
         newValueDict = {"tvdbid": self.tvdbid,
                         "name": self.name,
                         "description": self.description,
-                        "subtitles": ",".join([(sub.alpha3 if sub != 'und' else 'und') for sub in self.subtitles]),
+                        "subtitles": ",".join([(sub.alpha3 if not isinstance(sub, str) else sub) for sub in self.subtitles]),
                         "subtitles_searchcount": self.subtitles_searchcount,
                         "subtitles_lastsearch": self.subtitles_lastsearch,
                         "airdate": self.airdate.toordinal(),
