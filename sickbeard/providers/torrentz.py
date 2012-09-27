@@ -143,13 +143,13 @@ class TORRENTZProvider(generic.TorrentProvider):
         if url:
             torrentHash = url.replace('http://torrentz.eu/','').upper()
             path = '/' + torrentHash + '.' + self.providerType
-            if self.get_status_code('http://torrage.com/torrent', path) == 200:
+            if self.get_status_code('torrage.com/torrent', path) == 200:
                 url = "http://torrage.com/torrent" + path
                 
-            elif self.get_status_code('http://zoink.it/torrent', path) == 200:
+            elif self.get_status_code('zoink.it/torrent', path) == 200:
                 url = "http://zoink.it/torrent" + path
                 
-            elif self.get_status_code('http://torcache.net/torrent', path) == 200:
+            elif self.get_status_code('torcache.net/torrent', path) == 200:
                 url = "http://torcache.net/torrent" + path
                 
             else:
