@@ -118,13 +118,13 @@ class SubtitlesFinder():
                 logger.log('Episode file does not exist, cannot download subtitles for episode %dx%d of show %s' % (epToSub['season'], epToSub['episode'], epToSub['show_name']), logger.DEBUG)
                 continue
             # Old shows rule
-            if epToSub['airdate_daydiff'] > 7 and epToSub['searchcount'] < 2 and now - epToSub['lastsearch'] > datetime.timedelta(hours=rules['old'][epToSub['searchcount']]):
+            if epToSub['airdate_daydiff'] > 7 and epToSub['searchcount'] < 2 and now - datetime.datetime.strptime(epToSub['lastsearch'], '%Y-%m-%d %H:%M:%S') > datetime.timedelta(hours=rules['old'][epToSub['searchcount']]):
                 logger.log('Downloading subtitles for episode %dx%d of show %s' % (epToSub['season'], epToSub['episode'], epToSub['show_name']), logger.DEBUG)
                 locations.append(epToSub['location'])
                 toRefresh.append((epToSub['showid'], epToSub['season'], epToSub['episode']))
                 continue
             # Recent shows rule
-            if epToSub['airdate_daydiff'] <= 7 and epToSub['searchcount'] < 7 and now - epToSub['lastsearch'] > datetime.timedelta(hours=rules['new'][epToSub['searchcount']]):
+            if epToSub['airdate_daydiff'] <= 7 and epToSub['searchcount'] < 7 and now - datetime.datetime.strptime(epToSub['lastsearch'], '%Y-%m-%d %H:%M:%S') > datetime.timedelta(hours=rules['new'][epToSub['searchcount']]):
                 logger.log('Downloading subtitles for episode %dx%d of show %s' % (epToSub['season'], epToSub['episode'], epToSub['show_name']), logger.DEBUG)
                 locations.append(epToSub['location'])
                 toRefresh.append((epToSub['showid'], epToSub['season'], epToSub['episode']))
@@ -138,7 +138,7 @@ class SubtitlesFinder():
             return
 
         # download subtitles
-        subtitles = subliminal.download_subtitles(locations, cache_dir=sickbeard.CACHE_DIR, workers=2, multi=sickbeard.SUBTITLES_MULTI, languages=sickbeard.SUBTITLES_LANGUAGES, services=sickbeard.subtitles.getEnabledServiceList())
+        subtitles = subliminal.download_subtitles(locations, cache_dir=sickbeard.CACHE_DIR, multi=sickbeard.SUBTITLES_MULTI, languages=sickbeard.SUBTITLES_LANGUAGES, services=sickbeard.subtitles.getEnabledServiceList())
 
         if sickbeard.SUBTITLES_SUBDIR:
             for video in subtitles:

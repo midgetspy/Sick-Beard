@@ -25,7 +25,7 @@ from bs4 import BeautifulSoup
 import guessit
 import logging
 import re
-from subliminal.subtitles import get_subtitle_path
+from ..subtitles import get_subtitle_path
 
 
 logger = logging.getLogger(__name__)
