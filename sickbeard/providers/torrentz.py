@@ -140,7 +140,8 @@ class TORRENTZProvider(generic.TorrentProvider):
         url = item.findtext('guid')
         #Store the magnet link instead of torrentz.eu => direct to transmission/utorrent
         if url:
-            url = url.replace('http://torrentz.eu/','magnet:?xt=urn:btih:').upper()
+            torrentHash = url.replace('http://torrentz.eu/','').upper()
+            url = "http://torrage.com/torrent/" + torrentHash + '.' + self.providerType
         return (title, url)
 
     def _extract_name_from_filename(self, filename):
@@ -153,10 +154,8 @@ class TORRENTZProvider(generic.TorrentProvider):
     
     def downloadResult(self, result):
         url = ""
-        torrentHash = result.url.replace('magnet:?xt=urn:btih:','').upper()
         try:
-            url = "http://torrage.com/torrent/" + torrentHash + '.' + self.providerType
-            return self.downloadFromTorrentCache(result.name, url)
+            return self.downloadFromTorrentCache(result.name, result.url)
         except Exception, e:
             try:
                 url = "http://zoink.it/torrent/" + torrentHash + '.' + self.providerType
