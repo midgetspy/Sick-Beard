@@ -21,7 +21,6 @@
 import traceback
 import urllib
 import re
-import httplib
 
 import xml.etree.cElementTree as etree
 
@@ -139,22 +138,7 @@ class TORRENTZProvider(generic.TorrentProvider):
     def _get_title_and_url(self, item):
         title = item.findtext('title')
         url = item.findtext('guid')
-        #Storing the direct link.
-        if url:
-            torrentHash = url.replace('http://torrentz.eu/','').upper()
-            path = '/' + torrentHash + '.' + self.providerType
-            if self.get_status_code('torrage.com/torrent', path) == 200:
-                url = "http://torrage.com/torrent" + path
-                
-            elif self.get_status_code('zoink.it/torrent', path) == 200:
-                url = "http://zoink.it/torrent" + path
-                
-            elif self.get_status_code('torcache.net/torrent', path) == 200:
-                url = "http://torcache.net/torrent" + path
-                
-            else:
-                url = ''
-                    
+
         return (title, url)
 
     def _extract_name_from_filename(self, filename):
@@ -164,24 +148,13 @@ class TORRENTZProvider(generic.TorrentProvider):
         if match:
             return match.group(1)
         return None
-
-    def get_status_code(self,host, path="/"):
-        """ This function retreives the status code of a website by requesting
-            HEAD data from the host. This means that it only requests the headers.
-            If the host cannot be reached or something else goes wrong, it returns
-            None instead.
-        """
-        try:
-            conn = httplib.HTTPConnection(host)
-            conn.request("HEAD", path)
-            return conn.getresponse().status
-        except StandardError:
-            return None
-        
+    
     def downloadResult(self, result):
         url = ""
+        torrentHash = result.url.replace('http://torrentz.eu/','').upper()
         try:
-            return self.downloadFromTorrentCache(result.name, result.url)
+            url = "http://torrage.com/torrent/" + torrentHash + '.' + self.providerType
+            return self.downloadFromTorrentCache(result.name, url)
         except Exception, e:
             try:
                 url = "http://zoink.it/torrent/" + torrentHash + '.' + self.providerType
@@ -192,7 +165,7 @@ class TORRENTZProvider(generic.TorrentProvider):
                     return self.downloadFromTorrentCache(result.name, url)
                 except Exception, e:
                     return False
-                
+
         
 class TORRENTZCache(tvcache.TVCache):
 
