@@ -144,6 +144,7 @@ def sendTORRENT(torrent):
         torrent = tc.add_torrent(torrent.url, arguments=params)
         logger.log("Adding torrent was a success", logger.DEBUG)
         tc.set_torrent(torrent["torrent-added"]["hashString"], change_params)
+        logger.log("HashString: " + torrent["torrent-added"]["hashString"], logger.DEBUG)
         logger.log("Setting torrent was a success", logger.DEBUG)
         return True
     except Exception, e:
