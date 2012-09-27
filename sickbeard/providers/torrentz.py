@@ -21,7 +21,8 @@
 import traceback
 import urllib
 import re
-from urllib2 import urlopen
+import httplib
+
 import xml.etree.cElementTree as etree
 
 import sickbeard
@@ -141,17 +142,16 @@ class TORRENTZProvider(generic.TorrentProvider):
         #Storing the direct link.
         if url:
             torrentHash = url.replace('http://torrentz.eu/','').upper()
-            url = "http://torrage.com/torrent/" + torrentHash + '.' + self.providerType
-            code = urlopen(url).code
-            if (code / 100 >= 4):
+            if get_status_code("http://torrage.com/torrent",'/' + torrentHash + '.' + self.providerType) == 200:
+                url = "http://torrage.com/torrent/" + torrentHash + '.' + self.providerType
+                
+            elif get_status_code("http://zoink.it/torrent",'/' + torrentHash + '.' + self.providerType) == 200:
                 url = "http://zoink.it/torrent/" + torrentHash + '.' + self.providerType
-                code = urlopen(url).code
-                if (code / 100 >= 4):
-                    url = "http://torcache.net/torrent/" + torrentHash + '.' + self.providerType
-                    code = urlopen(url).code
-                    if (code / 100 >= 4):
-                        #there is nothing here
-                        url = ''
+                
+            elif get_status_code("http://torcache.net/torrent",'/' + torrentHash + '.' + self.providerType) == 200:
+                url = "http://torcache.net/torrent/" + torrentHash + '.' + self.providerType
+            else:
+                url = ''
                     
         return (title, url)
 
@@ -162,7 +162,20 @@ class TORRENTZProvider(generic.TorrentProvider):
         if match:
             return match.group(1)
         return None
-    
+
+    def get_status_code(host, path="/"):
+        """ This function retreives the status code of a website by requesting
+            HEAD data from the host. This means that it only requests the headers.
+            If the host cannot be reached or something else goes wrong, it returns
+            None instead.
+        """
+        try:
+            conn = httplib.HTTPConnection(host)
+            conn.request("HEAD", path)
+            return conn.getresponse().status
+        except StandardError:
+            return None
+        
     def downloadResult(self, result):
         url = ""
         try:
@@ -177,7 +190,7 @@ class TORRENTZProvider(generic.TorrentProvider):
                     return self.downloadFromTorrentCache(result.name, url)
                 except Exception, e:
                     return False
-
+                
         
 class TORRENTZCache(tvcache.TVCache):
 
