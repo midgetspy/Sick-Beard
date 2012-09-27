@@ -111,7 +111,7 @@ $myShowList.sort(lambda x, y: cmp(x.name, y.name))
   #set $curRename = "disabled=\"disabled\" "
 #end if
 #set $curRename = "<input type=\"checkbox\" class=\"renameCheck\" id=\"rename-"+str($curShow.tvdbid)+"\" "+$curRename_disabled+"/>"
-#if $sickbeard.showQueueScheduler.action.isBeingSubtitled($curShow) or $sickbeard.showQueueScheduler.action.isInSubtitleQueue($curShow):
+#if not $curShow.subtitles or $sickbeard.showQueueScheduler.action.isBeingSubtitled($curShow) or $sickbeard.showQueueScheduler.action.isInSubtitleQueue($curShow):
   #set $curSubtitle_disabled = "disabled=\"disabled\" "
 #end if
 #set $curSubtitle = "<input type=\"checkbox\" class=\"subtitleCheck\" id=\"subtitle-"+str($curShow.tvdbid)+"\" "+$curSubtitle_disabled+"/>"
