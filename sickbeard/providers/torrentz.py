@@ -143,13 +143,13 @@ class TORRENTZProvider(generic.TorrentProvider):
         if url:
             torrentHash = url.replace('http://torrentz.eu/','').upper()
             path = '/' + torrentHash + '.' + self.providerType
-            if self.get_status_code("http://torrage.com/torrent", path) == 200:
+            if self.get_status_code('http://torrage.com/torrent', path) == 200:
                 url = "http://torrage.com/torrent" + path
                 
-            elif self.get_status_code("http://zoink.it/torrent", path) == 200:
+            elif self.get_status_code('http://zoink.it/torrent', path) == 200:
                 url = "http://zoink.it/torrent" + path
                 
-            elif self.get_status_code("http://torcache.net/torrent", path) == 200:
+            elif self.get_status_code('http://torcache.net/torrent', path) == 200:
                 url = "http://torcache.net/torrent" + path
                 
             else:
@@ -165,7 +165,7 @@ class TORRENTZProvider(generic.TorrentProvider):
             return match.group(1)
         return None
 
-    def get_status_code(host, path="/"):
+    def get_status_code(self,host, path="/"):
         """ This function retreives the status code of a website by requesting
             HEAD data from the host. This means that it only requests the headers.
             If the host cannot be reached or something else goes wrong, it returns
