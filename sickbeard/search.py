@@ -208,7 +208,7 @@ def pickBestResult(results, quality_list=None):
         if not bestResult or bestResult.quality < cur_result.quality and cur_result.quality != Quality.UNKNOWN:
             bestResult = cur_result
         elif bestResult.quality == cur_result.quality:
-            if "proper" in cur_result.name.lower() or "repack" in cur_result.name.lower():
+            if ("proper" not in bestResult.name.lower() and "repack" not in bestResult.name.lower()) and ("proper" in cur_result.name.lower() or "repack" in cur_result.name.lower()):
                 bestResult = cur_result
             elif "internal" in bestResult.name.lower() and "internal" not in cur_result.name.lower():
                 bestResult = cur_result
@@ -383,8 +383,12 @@ def findSeason(show, season):
             else:
                 anyWanted = True
 
-        # if we need every ep in the season and there's nothing better then just download this and be done with it
-        if allWanted and bestSeasonNZB.quality == highest_quality_overall:
+        # if we need every ep in the season check if single episode releases should be preferred over season releases (missing single episode releases will be picked individually from season release)
+        preferSingleEpisodesOverSeasonReleases = sickbeard.PREFER_EPISODE_RELEASES
+        logger.log(u"Prefer single episodes over season releases: "+str(preferSingleEpisodesOverSeasonReleases), logger.DEBUG)
+
+        # if we need every ep in the season and there's nothing better then just download this and be done with it (unless single episodes are preferred)
+        if allWanted and bestSeasonNZB.quality == highest_quality_overall and not preferSingleEpisodesOverSeasonReleases:
             logger.log(u"Every ep in this season is needed, downloading the whole NZB "+bestSeasonNZB.name)
             epObjs = []
             for curEpNum in allEps:
