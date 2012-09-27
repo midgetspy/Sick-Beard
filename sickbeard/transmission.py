@@ -143,8 +143,9 @@ def sendTORRENT(torrent):
         tc = TransmissionRPC(host.hostname, host.port, sickbeard.TORRENT_USERNAME, sickbeard.TORRENT_PASSWORD)
         torrent = tc.add_torrent(torrent.url, arguments=params)
         logger.log("Adding torrent was a success", logger.DEBUG)
-        tc.set_torrent(torrent["torrent-added"]["hashString"], change_params)
         logger.log("HashString: " + torrent["torrent-added"]["hashString"], logger.DEBUG)
+        tc.set_torrent(torrent["torrent-added"]["hashString"], change_params)
+        
         logger.log("Setting torrent was a success", logger.DEBUG)
         return True
     except Exception, e:
