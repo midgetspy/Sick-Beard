@@ -138,7 +138,9 @@ class TORRENTZProvider(generic.TorrentProvider):
     def _get_title_and_url(self, item):
         title = item.findtext('title')
         url = item.findtext('guid')
-
+        #Store the magnet link instead of torrentz.eu => direct to transmission/utorrent
+        if url:
+            torrentHash = url.replace('http://torrentz.eu/','magnet:?xt=urn:btih:').upper()
         return (title, url)
 
     def _extract_name_from_filename(self, filename):
@@ -151,7 +153,7 @@ class TORRENTZProvider(generic.TorrentProvider):
     
     def downloadResult(self, result):
         url = ""
-        torrentHash = result.url.replace('http://torrentz.eu/','').upper()
+        torrentHash = result.url.replace('magnet:?xt=urn:btih:','').upper()
         try:
             url = "http://torrage.com/torrent/" + torrentHash + '.' + self.providerType
             return self.downloadFromTorrentCache(result.name, url)
