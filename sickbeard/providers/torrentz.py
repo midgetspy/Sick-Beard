@@ -140,7 +140,7 @@ class TORRENTZProvider(generic.TorrentProvider):
         url = item.findtext('guid')
         #Store the magnet link instead of torrentz.eu => direct to transmission/utorrent
         if url:
-            torrentHash = url.replace('http://torrentz.eu/','magnet:?xt=urn:btih:').upper()
+            url = url.replace('http://torrentz.eu/','magnet:?xt=urn:btih:').upper()
         return (title, url)
 
     def _extract_name_from_filename(self, filename):
