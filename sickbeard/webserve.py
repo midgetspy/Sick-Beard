@@ -3004,7 +3004,7 @@ class Home:
         # try do download subtitles for that episode
         previous_subtitles = ep_obj.subtitles
         try:
-            ep_obj.downloadSubtitles(ep_obj.location)
+            ep_obj.downloadSubtitles()
         except:
             return json.dumps({'result': 'failure'})
 

@@ -1063,26 +1063,16 @@ class TVEpisode(object):
         """Look for subtitles files and refresh the subtitles property"""
         self.subtitles = subtitles.subtitlesLanguages(self.location)
 
-    def downloadSubtitles(self, file_path):
+    def downloadSubtitles(self):
         #TODO: Add support for force option
-        if not ek.ek(os.path.isfile, file_path):
+        if not ek.ek(os.path.isfile, self.location):
             logger.log(str(self.show.tvdbid) + ": Episode file doesn't exist, can't download subtitles for episode " + str(self.season) + "x" + str(self.episode), logger.DEBUG)
             return
         logger.log(str(self.show.tvdbid) + ": Downloading subtitles for episode " + str(self.season) + "x" + str(self.episode), logger.DEBUG)
         
         try:
-            subtitles = subliminal.download_subtitles([file_path], languages=sickbeard.SUBTITLES_LANGUAGES, services=sickbeard.subtitles.getEnabledServiceList(), force=False, multi=sickbeard.SUBTITLES_MULTI, cache_dir=sickbeard.CACHE_DIR)
+            subtitles = subliminal.download_subtitles([self.location], languages=sickbeard.SUBTITLES_LANGUAGES, services=sickbeard.subtitles.getEnabledServiceList(), force=False, multi=sickbeard.SUBTITLES_MULTI, cache_dir=sickbeard.CACHE_DIR)
             
-            if sickbeard.SUBTITLES_SUBDIR:
-                for video in subtitles:
-                    subs_new_path = ek.ek(os.path.join, os.path.dirname(file_path), sickbeard.SUBTITLES_SUBDIR)
-                    if not ek.ek(os.path.isdir, subs_new_path):
-                        ek.ek(os.mkdir, subs_new_path)
-
-                    for subtitle in subtitles.get(video):
-                        new_file_path = ek.ek(os.path.join, subs_new_path, os.path.basename(subtitle.path))
-                        helpers.moveFile(subtitle.path, new_file_path)
-
         except Exception as e:
             logger.log("Error occurred when downloading subtitles: " + str(e), logger.DEBUG)
             return
