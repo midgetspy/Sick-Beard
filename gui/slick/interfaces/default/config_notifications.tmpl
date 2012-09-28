@@ -307,7 +307,7 @@
                 <div class="component-group clearfix">
                     <div class="component-group-desc">
                         <h3><a href="http://synology.com/" onclick="window.open(this.href, '_blank'); return false;"><img src="$sbRoot/images/notifiers/synologynotifier.png" alt="" title="Synology Indexer"/> Synology Notifier </a></h3>
-                        <p>Synology Indexer is the daemon running on the Synology NAS to build its media database.</p>
+                        <p>Synology Notifier is the notification system of Synology DSM</p>
                     </div>
 
                     <fieldset class="component-group-list">
@@ -315,43 +315,38 @@
                             <input type="checkbox" class="enabler" name="use_synologynotifier" id="use_synologynotifier" #if $sickbeard.USE_SYNOINDEX then "checked=\"checked\"" else ""# /> 
                             <label class="clearfix" for="use_synologynotifier">
                                 <span class="component-title">Enable</span>
-                                <span class="component-desc">Should Sick Beard send notifications to the Synology DSM Notifier?<br /><br />
+                                <span class="component-desc">Should Sick Beard send notifications to the Synology Notifier?<br /><br />
                                 </span>
                             </label>
                             <label class="nocheck clearfix" for="use_synologynotifier">
                                 <span class="component-title">&nbsp;</span>
-                                <span class="component-desc"><b>Note:</b> Requires SB to be running on your Synology NAS.</span>
+                                <span class="component-desc"><b>Note:</b> Requires SB to be running on your Synology DSM.</span>
                             </label>
-                            
-                            <div id="content_use_synologynotifier">
-	                            <div class="field-pair">
-	                                <input type="checkbox" name="synologynotifier_notify_onsnatch" id="synologynotifier_notify_onsnatch" #if $sickbeard.SYNOLOGYNOTIFIER_NOTIFY_ONSNATCH then "checked=\"checked\"" else ""# />
-	                                <label class="clearfix" for="synologynotifier_notify_onsnatch">
-	                                    <span class="component-title">Notify on Snatch</span>
-	                                    <span class="component-desc">Send notification when we start a download?</span>
-	                                </label>
-	                            </div>
-	                            <div class="field-pair">
-	                                <input type="checkbox" name="synologynotifier_notify_ondownload" id="synologynotifier_notify_ondownload" #if $sickbeard.SYNOLOGYNOTIFIER_NOTIFY_ONDOWNLOAD then "checked=\"checked\"" else ""# />
-	                                <label class="clearfix" for="synologynotifier_notify_ondownload">
-	                                    <span class="component-title">Notify on Download</span>
-	                                    <span class="component-desc">Send notification when we finish a download?</span>
-	                                </label>
-	                            </div>
-	                            <div class="field-pair">
-	                                <input type="checkbox" name="synologynotifier_notify_onsubtitledownload" id="synologynotifier_notify_onsubtitledownload" #if $sickbeard.SYNOLOGYNOTIFIER_NOTIFY_ONSUBTITLEDOWNLOAD then "checked=\"checked\"" else ""# />
-	                                <label class="clearfix" for="synologynotifier_notify_onsubtitledownload">
-	                                    <span class="component-title">Notify on Subtitle Download</span>
-	                                    <span class="component-desc">Send notification when we finish a subtitle download?</span>
-	                                </label>
-	                            </div>
-                           	</div>
-                        </div>
-
-                        <div id="content_use_synoindex">
+                       	</div>
+                        <div id="content_use_synologynotifier">
+                            <div class="field-pair">
+                                <input type="checkbox" name="synologynotifier_notify_onsnatch" id="synologynotifier_notify_onsnatch" #if $sickbeard.SYNOLOGYNOTIFIER_NOTIFY_ONSNATCH then "checked=\"checked\"" else ""# />
+                                <label class="clearfix" for="synologynotifier_notify_onsnatch">
+                                    <span class="component-title">Notify on Snatch</span>
+                                    <span class="component-desc">Send notification when we start a download?</span>
+                                </label>
+                            </div>
+                            <div class="field-pair">
+                                <input type="checkbox" name="synologynotifier_notify_ondownload" id="synologynotifier_notify_ondownload" #if $sickbeard.SYNOLOGYNOTIFIER_NOTIFY_ONDOWNLOAD then "checked=\"checked\"" else ""# />
+                                <label class="clearfix" for="synologynotifier_notify_ondownload">
+                                    <span class="component-title">Notify on Download</span>
+                                    <span class="component-desc">Send notification when we finish a download?</span>
+                                </label>
+                            </div>
+                            <div class="field-pair">
+                                <input type="checkbox" name="synologynotifier_notify_onsubtitledownload" id="synologynotifier_notify_onsubtitledownload" #if $sickbeard.SYNOLOGYNOTIFIER_NOTIFY_ONSUBTITLEDOWNLOAD then "checked=\"checked\"" else ""# />
+                                <label class="clearfix" for="synologynotifier_notify_onsubtitledownload">
+                                    <span class="component-title">Notify on Subtitle Download</span>
+                                    <span class="component-desc">Send notification when we finish a subtitle download?</span>
+                                </label>
+                            </div>
                             <input type="submit" class="config_submitter btn" value="Save Changes" />
-                        </div><!-- /content_use_synologynotifier //-->
-
+                       	</div>
                     </fieldset>
                 </div><!-- /synology notifier component-group //-->
 

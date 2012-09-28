@@ -79,8 +79,8 @@
                                 <span class="component-title">Web Gui</span>
                                 <span class="component-desc">
 	                            <select name="web_guiname" id="web_guiname">
-								#set $web_gui_text = {'classic': "Classic", 'slick': "Slick"}
-                                #for $curGui in ('classic', 'slick'):
+								#set $web_gui_text = {'slick': "Slick"}
+                                #for $curGui in ('slick'):
                                 	<option value="$curGui" #if $web_gui_text[$curGui] == $sickbeard.GUI_NAME then "selected=\"selected\"" else ""#>$web_gui_text[$curGui]</option>
 	                            #end for
 	                            </select>

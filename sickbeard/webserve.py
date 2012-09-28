@@ -1628,9 +1628,9 @@ class ConfigNotifications:
         sickbeard.USE_SYNOINDEX = use_synoindex
         
         sickbeard.USE_SYNOLOGYNOTIFIER = use_synologynotifier
-        sickbeard.SYNOLOGYNOTIFIER_NOTIFY_ONSNATCH = synologynotifier_notify_onsnatch == "off"
-        sickbeard.SYNOLOGYNOTIFIER_NOTIFY_ONDOWNLOAD = synologynotifier_notify_ondownload ==  "off"
-        sickbeard.SYNOLOGYNOTIFIER_NOTIFY_ONSUBTITLEDOWNLOAD = synologynotifier_notify_onsubtitledownload ==  "off"
+        sickbeard.SYNOLOGYNOTIFIER_NOTIFY_ONSNATCH = synologynotifier_notify_onsnatch
+        sickbeard.SYNOLOGYNOTIFIER_NOTIFY_ONDOWNLOAD = synologynotifier_notify_ondownload
+        sickbeard.SYNOLOGYNOTIFIER_NOTIFY_ONSUBTITLEDOWNLOAD = synologynotifier_notify_onsubtitledownload
 
         sickbeard.USE_TRAKT = use_trakt
         sickbeard.TRAKT_USERNAME = trakt_username
