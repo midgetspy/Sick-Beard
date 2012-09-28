@@ -1090,7 +1090,7 @@ class TVEpisode(object):
         if subtitles:
             logger.log(str(self.show.tvdbid) + ": Downloaded " + str(subtitles) + " subtitles for episode " + str(self.season) + "x" + str(self.episode), logger.DEBUG)
             
-            notifiers.notify_subtitle_download(self.makeEpFromFile(video.path).prettyName(True), str(subtitles))
+            notifiers.notify_subtitle_download(self.prettyName(True), str(subtitles))
         else:
             logger.log(str(self.show.tvdbid) + ": No subtitles downloaded for episode " + str(self.season) + "x" + str(self.episode), logger.DEBUG)
         

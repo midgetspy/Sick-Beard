@@ -16,7 +16,7 @@ class NMA_Notifier:
         if sickbeard.NMA_NOTIFY_ONDOWNLOAD:
             self._sendNMA(nma_api=None, nma_priority=None, event=common.notifyStrings[common.NOTIFY_DOWNLOAD], message=ep_name)
 
-    def notify_download(self, ep_name, lang):
+    def notify_subtitle_download(self, ep_name, lang):
         if sickbeard.NMA_NOTIFY_ONSUBTITLEDOWNLOAD:
             self._sendNMA(nma_api=None, nma_priority=None, event=common.notifyStrings[common.NOTIFY_DOWNLOAD], message=ep_name + ": " + lang)
         
