@@ -49,11 +49,16 @@ class XBMCNotifier:
 
     def update_library(self, show_name):
         if sickbeard.XBMC_UPDATE_LIBRARY:
+            updated = False
             for curHost in [x.strip() for x in sickbeard.XBMC_HOST.split(",")]:
                 # do a per-show update first, if possible
-                if not self._update_library(curHost, showName=show_name) and sickbeard.XBMC_UPDATE_FULL:
+                updated = self._update_library(curHost, showName=show_name)
+                if not updated and sickbeard.XBMC_UPDATE_FULL:
                     # do a full update if requested
-                    self._update_library(curHost)
+                    updated = self._update_library(curHost)
+                if updated and sickbeard.XBMC_UPDATE_ONCE:
+                    logger.log(u"Stopped updating xbmc hosts becuase %s host updated" % curHost, logger.DEBUG)
+                    break
 
     def _username(self):
         return sickbeard.XBMC_USERNAME
