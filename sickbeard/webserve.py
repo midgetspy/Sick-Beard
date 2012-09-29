@@ -1108,7 +1108,7 @@ class ConfigNotifications:
 
     @cherrypy.expose
     def saveNotifications(self, use_xbmc=None, xbmc_notify_onsnatch=None, xbmc_notify_ondownload=None,
-                          xbmc_update_library=None, xbmc_update_full=None, xbmc_host=None, xbmc_username=None, xbmc_password=None,
+                          xbmc_update_library=None, xbmc_update_full=None, xbmc_update_once=None, xbmc_host=None, xbmc_username=None, xbmc_password=None,
                           use_plex=None, plex_notify_onsnatch=None, plex_notify_ondownload=None, plex_update_library=None,
                           plex_server_host=None, plex_host=None, plex_username=None, plex_password=None,
                           use_growl=None, growl_notify_onsnatch=None, growl_notify_ondownload=None, growl_host=None, growl_password=None, 
@@ -1145,6 +1145,11 @@ class ConfigNotifications:
             xbmc_update_full = 1
         else:
             xbmc_update_full = 0
+
+        if xbmc_update_once == "on":
+            xbmc_update_once = 1
+        else:
+            xbmc_update_once = 0
 
         if use_xbmc == "on":
             use_xbmc = 1
@@ -1311,6 +1316,7 @@ class ConfigNotifications:
         sickbeard.XBMC_NOTIFY_ONDOWNLOAD = xbmc_notify_ondownload
         sickbeard.XBMC_UPDATE_LIBRARY = xbmc_update_library
         sickbeard.XBMC_UPDATE_FULL = xbmc_update_full
+        sickbeard.XBMC_UPDATE_ONCE = xbmc_update_once
         sickbeard.XBMC_HOST = xbmc_host
         sickbeard.XBMC_USERNAME = xbmc_username
         sickbeard.XBMC_PASSWORD = xbmc_password
@@ -2426,13 +2432,13 @@ class Home:
 
     @cherrypy.expose
     def updateXBMC(self, showName=None):
-        # TODO: configure that each host can have different options / username / pw
-        # only send update to first host in the list -- workaround for xbmc sql backend users
-        firstHost = sickbeard.XBMC_HOST.split(",")[0].strip()
-        if notifiers.xbmc_notifier.update_library(showName=showName):
-            ui.notifications.message("Library update command sent to XBMC host: " + firstHost)
+        hosts = notifiers.xbmc_notifier.update_library(showName=showName)
+        #filters out unsuccessful hosts and joins them
+        result = ', '.join([x[0] for x in hosts if x[1]])
+        if result:
+            ui.notifications.message("Library update command sent to XBMC host(s): " + result)
         else:
-            ui.notifications.error("Unable to contact XBMC host: " + firstHost)
+            ui.notifications.error("Unable to contact any XBMC hosts: " + sickbeard.XBMC_HOST)
         redirect('/home')
 
     @cherrypy.expose
