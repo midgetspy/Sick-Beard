@@ -1,5 +1,5 @@
 /*!
- * jQuery UI CSS Framework 1.8.23
+ * jQuery UI CSS Framework 1.8.24
  *
  * Copyright 2012, AUTHORS.txt (http://jqueryui.com/about)
  * Dual licensed under the MIT or GPL Version 2 licenses.
@@ -39,7 +39,7 @@
 
 
 /*!
- * jQuery UI CSS Framework 1.8.23
+ * jQuery UI CSS Framework 1.8.24
  *
  * Copyright 2012, AUTHORS.txt (http://jqueryui.com/about)
  * Dual licensed under the MIT or GPL Version 2 licenses.
@@ -47,7 +47,7 @@
  *
  * http://docs.jquery.com/UI/Theming/API
  *
- * To view and modify this theme, visit http://jqueryui.com/themeroller/?ctl=themeroller&ctl=themeroller&ctl=themeroller&ctl=themeroller&ctl=themeroller&ctl=themeroller&ctl=themeroller&ctl=themeroller&ctl=themeroller&ctl=themeroller&ctl=themeroller&ffDefault=Verdana,Arial,sans-serif&fwDefault=bold&fsDefault=1.1em&cornerRadius=4px&bgColorHeader=ffffff&bgTextureHeader=01_flat.png&bgImgOpacityHeader=0&borderColorHeader=aaaaaa&fcHeader=222222&iconColorHeader=222222&bgColorContent=dcdcdc&bgTextureContent=03_highlight_soft.png&bgImgOpacityContent=75&borderColorContent=aaaaaa&fcContent=222222&iconColorContent=222222&bgColorDefault=efefef&bgTextureDefault=03_highlight_soft.png&bgImgOpacityDefault=75&borderColorDefault=aaaaaa&fcDefault=222222&iconColorDefault=8c291d&bgColorHover=dddddd&bgTextureHover=03_highlight_soft.png&bgImgOpacityHover=75&borderColorHover=999999&fcHover=222222&iconColorHover=222222&bgColorActive=dfdfdf&bgTextureActive=05_inset_soft.png&bgImgOpacityActive=75&borderColorActive=aaaaaa&fcActive=140f06&iconColorActive=8c291d&bgColorHighlight=fbf9ee&bgTextureHighlight=02_glass.png&bgImgOpacityHighlight=55&borderColorHighlight=aaaaaa&fcHighlight=363636&iconColorHighlight=2e83ff&bgColorError=fef1ec&bgTextureError=02_glass.png&bgImgOpacityError=95&borderColorError=aaaaaa&fcError=8c291d&iconColorError=cd0a0a&bgColorOverlay=6e4f1c&bgTextureOverlay=01_flat.png&bgImgOpacityOverlay=0&opacityOverlay=35&bgColorShadow=000000&bgTextureShadow=01_flat.png&bgImgOpacityShadow=0&opacityShadow=35&thicknessShadow=8px&offsetTopShadow=-8px&offsetLeftShadow=-8px&cornerRadiusShadow=8px
+ * To view and modify this theme, visit http://jqueryui.com/themeroller/?ctl=themeroller&ffDefault=Verdana,Arial,sans-serif&fwDefault=bold&fsDefault=1.1em&cornerRadius=4px&bgColorHeader=ffffff&bgTextureHeader=01_flat.png&bgImgOpacityHeader=0&borderColorHeader=aaaaaa&fcHeader=222222&iconColorHeader=222222&bgColorContent=dcdcdc&bgTextureContent=03_highlight_soft.png&bgImgOpacityContent=75&borderColorContent=aaaaaa&fcContent=222222&iconColorContent=222222&bgColorDefault=efefef&bgTextureDefault=03_highlight_soft.png&bgImgOpacityDefault=75&borderColorDefault=aaaaaa&fcDefault=222222&iconColorDefault=8c291d&bgColorHover=dddddd&bgTextureHover=03_highlight_soft.png&bgImgOpacityHover=75&borderColorHover=999999&fcHover=222222&iconColorHover=222222&bgColorActive=dfdfdf&bgTextureActive=05_inset_soft.png&bgImgOpacityActive=75&borderColorActive=aaaaaa&fcActive=140f06&iconColorActive=8c291d&bgColorHighlight=fbf9ee&bgTextureHighlight=02_glass.png&bgImgOpacityHighlight=55&borderColorHighlight=aaaaaa&fcHighlight=363636&iconColorHighlight=2e83ff&bgColorError=fef1ec&bgTextureError=02_glass.png&bgImgOpacityError=95&borderColorError=aaaaaa&fcError=8c291d&iconColorError=cd0a0a&bgColorOverlay=6e4f1c&bgTextureOverlay=01_flat.png&bgImgOpacityOverlay=0&opacityOverlay=35&bgColorShadow=000000&bgTextureShadow=01_flat.png&bgImgOpacityShadow=0&opacityShadow=35&thicknessShadow=8px&offsetTopShadow=-8px&offsetLeftShadow=-8px&cornerRadiusShadow=8px
  */
 
 
@@ -290,7 +290,7 @@
 .ui-widget-shadow { margin: -8px 0 0 -8px; padding: 8px; background: #000000 url(images/ui-bg_flat_0_000000_40x100.png) 50% 50% repeat-x; opacity: .35;filter:Alpha(Opacity=35); -moz-border-radius: 8px; -khtml-border-radius: 8px; -webkit-border-radius: 8px; border-radius: 8px; }
 */
 /*!
- * jQuery UI Resizable 1.8.23
+ * jQuery UI Resizable 1.8.24
  *
  * Copyright 2012, AUTHORS.txt (http://jqueryui.com/about)
  * Dual licensed under the MIT or GPL Version 2 licenses.
@@ -309,7 +309,7 @@
 .ui-resizable-sw { cursor: sw-resize; width: 9px; height: 9px; left: -5px; bottom: -5px; }
 .ui-resizable-nw { cursor: nw-resize; width: 9px; height: 9px; left: -5px; top: -5px; }
 .ui-resizable-ne { cursor: ne-resize; width: 9px; height: 9px; right: -5px; top: -5px;}/*!
- * jQuery UI Selectable 1.8.23
+ * jQuery UI Selectable 1.8.24
  *
  * Copyright 2012, AUTHORS.txt (http://jqueryui.com/about)
  * Dual licensed under the MIT or GPL Version 2 licenses.
@@ -319,7 +319,7 @@
  */
 .ui-selectable-helper { position: absolute; z-index: 100; border:1px dotted black; }
 /*!
- * jQuery UI Autocomplete 1.8.23
+ * jQuery UI Autocomplete 1.8.24
  *
  * Copyright 2012, AUTHORS.txt (http://jqueryui.com/about)
  * Dual licensed under the MIT or GPL Version 2 licenses.
@@ -333,7 +333,7 @@
 * html .ui-autocomplete { width:1px; } /* without this, the menu expands to 100% in IE6 */
 
 /*
- * jQuery UI Menu 1.8.23
+ * jQuery UI Menu 1.8.24
  *
  * Copyright 2010, AUTHORS.txt (http://jqueryui.com/about)
  * Dual licensed under the MIT or GPL Version 2 licenses.
@@ -372,7 +372,7 @@
 	margin: -1px;
 }
 /*!
- * jQuery UI Button 1.8.23
+ * jQuery UI Button 1.8.24
  *
  * Copyright 2012, AUTHORS.txt (http://jqueryui.com/about)
  * Dual licensed under the MIT or GPL Version 2 licenses.
@@ -410,7 +410,7 @@ input.ui-button { padding: .4em 1em; }
 /* workarounds */
 button.ui-button::-moz-focus-inner { border: 0; padding: 0; } /* reset extra padding in Firefox */
 /*!
- * jQuery UI Dialog 1.8.23
+ * jQuery UI Dialog 1.8.24
  *
  * Copyright 2012, AUTHORS.txt (http://jqueryui.com/about)
  * Dual licensed under the MIT or GPL Version 2 licenses.
@@ -431,7 +431,7 @@ button.ui-button::-moz-focus-inner { border: 0; padding: 0; } /* reset extra pad
 .ui-dialog .ui-resizable-se { width: 14px; height: 14px; right: 3px; bottom: 3px; }
 .ui-draggable .ui-dialog-titlebar { cursor: move; }
 /*!
- * jQuery UI Tabs 1.8.23
+ * jQuery UI Tabs 1.8.24
  *
  * Copyright 2012, AUTHORS.txt (http://jqueryui.com/about)
  * Dual licensed under the MIT or GPL Version 2 licenses.
@@ -449,7 +449,7 @@ button.ui-button::-moz-focus-inner { border: 0; padding: 0; } /* reset extra pad
 .ui-tabs .ui-tabs-panel { display: block; border-width: 0; padding: 1em 1.4em; background: none; }
 .ui-tabs .ui-tabs-hide { display: none !important; }
 /*!
- * jQuery UI Progressbar 1.8.23
+ * jQuery UI Progressbar 1.8.24
  *
  * Copyright 2012, AUTHORS.txt (http://jqueryui.com/about)
  * Dual licensed under the MIT or GPL Version 2 licenses.
