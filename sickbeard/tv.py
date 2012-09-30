@@ -24,7 +24,6 @@ import threading
 import re
 import glob
 import traceback
-import shutil
 
 import sickbeard
 
@@ -49,7 +48,6 @@ from sickbeard import encodingKludge as ek
 
 from common import Quality, Overview
 from common import DOWNLOADED, SNATCHED, SNATCHED_PROPER, ARCHIVED, IGNORED, UNAIRED, WANTED, SKIPPED, UNKNOWN
-from shutil import move
 
 from common import NAMING_DUPLICATE, NAMING_EXTEND, NAMING_LIMITED_EXTEND, NAMING_SEPARATED_REPEAT
 
@@ -1467,7 +1465,7 @@ class TVEpisode(object):
         newValueDict = {"tvdbid": self.tvdbid,
                         "name": self.name,
                         "description": self.description,
-                        "subtitles": ",".join([(sub.alpha3 if not isinstance(sub, str) else sub) for sub in self.subtitles]),
+                        "subtitles": ",".join([sub for sub in self.subtitles]),
                         "subtitles_searchcount": self.subtitles_searchcount,
                         "subtitles_lastsearch": self.subtitles_lastsearch,
                         "airdate": self.airdate.toordinal(),

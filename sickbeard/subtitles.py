@@ -77,7 +77,7 @@ def subtitlesLanguages(video_path):
     languages = set()
     for subtitle in subtitles:
         if subtitle.language:
-            languages.add(subtitle.language)
+            languages.add(subtitle.language.alpha3)
         else:
             languages.add(SINGLE)
     return list(languages)
