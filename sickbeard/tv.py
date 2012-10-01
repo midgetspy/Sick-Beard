@@ -861,7 +861,7 @@ class TVShow(object):
             if episode:
                 episode.refreshSubtitles()
                 episode.subtitles_searchcount = episode.subtitles_searchcount + 1
-                episode.subtitles_lastsearch = datetime.datetime.now()
+                episode.subtitles_lastsearch = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
                 episode.saveToDB()
 
     def saveToDB(self):
@@ -1084,7 +1084,7 @@ class TVEpisode(object):
         
         self.refreshSubtitles()
         self.subtitles_searchcount = self.subtitles_searchcount + 1
-        self.subtitles_lastsearch = datetime.datetime.now()
+        self.subtitles_lastsearch = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         self.saveToDB()
 
 

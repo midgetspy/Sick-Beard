@@ -1581,12 +1581,14 @@ class ConfigNotifications:
 
         sickbeard.USE_GROWL = use_growl
         sickbeard.GROWL_NOTIFY_ONSNATCH = growl_notify_onsnatch
+        sickbeard.GROWL_NOTIFY_ONDOWNLOAD = growl_notify_ondownload
         sickbeard.GROWL_NOTIFY_ONSUBTITLEDOWNLOAD = growl_notify_onsubtitledownload
         sickbeard.GROWL_HOST = growl_host
         sickbeard.GROWL_PASSWORD = growl_password
 
         sickbeard.USE_PROWL = use_prowl
         sickbeard.PROWL_NOTIFY_ONSNATCH = prowl_notify_onsnatch
+        sickbeard.PROWL_NOTIFY_ONDOWNLOAD = prowl_notify_ondownload
         sickbeard.PROWL_NOTIFY_ONSUBTITLEDOWNLOAD = prowl_notify_onsubtitledownload
         sickbeard.PROWL_API = prowl_api
         sickbeard.PROWL_PRIORITY = prowl_priority
