@@ -1691,7 +1691,10 @@ class TVEpisode(object):
             pattern = sickbeard.NAMING_PATTERN
         
         if multi == None:
-            multi = sickbeard.NAMING_MULTI_EP
+            if self.show.is_anime:
+                multi = sickbeard.NAMING_ANIME_MULTI_EP
+            else:
+                multi = sickbeard.NAMING_MULTI_EP
         
         replace_map = self._replace_map()
 
@@ -1720,7 +1723,7 @@ class TVEpisode(object):
         for cur_name_group in name_groups:
             logger.log("cur_name_group: " + cur_name_group, logger.DEBUG)
             season_format = sep = ep_sep = ep_format = None
-        
+            
             season_ep_regex = '''
                                 (?P<pre_sep>[ _.-]*)
                                 ((?:s(?:eason|eries)?\s*)?%0?S(?![._]?N))
@@ -1769,7 +1772,6 @@ class TVEpisode(object):
             # start with the ep string, eg. E03
             ep_string = self._format_string(ep_format.upper(), replace_map)
             for other_ep in self.relatedEps:
-                
                 # for limited extend we only append the last ep
                 if multi == NAMING_LIMITED_EXTEND and other_ep != self.relatedEps[-1]:
                     continue
@@ -1784,7 +1786,7 @@ class TVEpisode(object):
                 # add "E04"
                 ep_string += ep_sep
                 ep_string += other_ep._format_string(ep_format.upper(), other_ep._replace_map())
-
+                
             if season_ep_match:
                 regex_replacement = r'\g<pre_sep>\g<2>\g<3>' + ep_string + r'\g<post_sep>'
             elif ep_only_match:
@@ -1794,10 +1796,15 @@ class TVEpisode(object):
             cur_name_group_result = re.sub('(?i)(?x)'+regex_used, regex_replacement, cur_name_group)
             #cur_name_group_result = cur_name_group.replace(ep_format, ep_string)
             logger.log(u"found "+ep_format+" as the ep pattern using "+regex_used+" and replaced it with "+regex_replacement+" to result in "+cur_name_group_result+" from "+cur_name_group, logger.DEBUG)
+            cur_name_group_result = cur_name_group_result
             result_name = result_name.replace(cur_name_group, cur_name_group_result)
 
+        ab_string = "%A"
+        for other_ep in self.relatedEps:
+            ab_string += "-" + other_ep._format_string("%A", other_ep._replace_map())
+        result_name = result_name.replace("%A", ab_string)
+
         result_name = self._format_string(result_name, replace_map)
-        
         return result_name
 
     def proper_path(self):
@@ -1846,6 +1853,8 @@ class TVEpisode(object):
             # we only use ABD if it's enabled, this is an ABD show, AND this is not a multi-ep
             if self.show.air_by_date and sickbeard.NAMING_CUSTOM_ABD and not self.relatedEps:
                 pattern = sickbeard.NAMING_ABD_PATTERN
+            elif self.show.is_anime:
+                pattern = sickbeard.NAMING_ANIME_PATTERN
             else:
                 pattern = sickbeard.NAMING_PATTERN
 

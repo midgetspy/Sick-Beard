@@ -36,11 +36,10 @@ name_presets = ('%SN - %Sx%0E - %EN',
                 'Season %0S/%S.N.S%0SE%0E.%Q.N-%RG'
                 )
 
-name_anime_presets = ('%SN - %Sx%0E - %A - %EN',
+name_anime_presets = ('%SN - s%Se%0E - %A',
                       '%S.N.S%0SE%0E.%A.%E.N',
-                      '%Sx%0E - %A - %EN',
                       'S%0SE%0E - %A - %EN',
-                      '%RG/%S.N.S%0SE%0E.%A.%Q.N-%RG'
+                      '%RG/%S.N.S%0SE%0E.%A.%Q.N'
                       )
 
 name_abd_presets = ('%SN - %A-D - %EN',
@@ -54,6 +53,7 @@ class TVShow():
         self.genre = "Comedy"
         self.air_by_date = 0
         self.is_anime = anime
+        self.test_obj = True
 
 class TVEpisode(tv.TVEpisode):
     def __init__(self, season, episode, name, absolute_number, anime=False):
@@ -142,7 +142,9 @@ def validate_name(pattern, multi=None, file_only=False, abd=False, anime=False):
     
     cp = CompleteParser(ep.show)
     cpr = cp.parse(new_name)
-    if not cpr.sxxexx and cpr.release_group:
+    
+    if not cpr.parse_result:
+        logger.log(u"fail 1", logger.DEBUG)
         return False
 
     logger.log(new_name + " vs " + str(cpr.parse_result), logger.DEBUG)
@@ -151,7 +153,10 @@ def validate_name(pattern, multi=None, file_only=False, abd=False, anime=False):
         if cpr.air_date != ep.airdate:
             return False
     elif anime:
-        if not cpr.parse_result.is_anime:
+        
+        logger.log(u"##############fail 2" + str(cpr.ab_episode_numbers) + " vs related "+ str([x.absolute_number for x in [ep] + ep.relatedEps]), logger.DEBUG)
+        if cpr.ab_episode_numbers != [x.absolute_number for x in [ep] + ep.relatedEps]:
+            logger.log(u"fail 2", logger.DEBUG)
             return False
     else:
         if cpr.season != ep.season:
@@ -164,7 +169,7 @@ def validate_name(pattern, multi=None, file_only=False, abd=False, anime=False):
 
 def _generate_sample_ep(multi=None, abd=False, anime=False):
     # make a fake episode object
-    ep = TVEpisode(2, 3, "Ep Name", 100, anime)
+    ep = TVEpisode(2, 3, "Ep Name", 99, anime)
     ep._status = Quality.compositeStatus(DOWNLOADED, Quality.HDTV)
     ep._airdate = datetime.date(2011, 3, 9)
     if abd:
@@ -181,11 +186,11 @@ def _generate_sample_ep(multi=None, abd=False, anime=False):
         else:
             ep._release_name = 'Show.Name.S02E03E04E05.HDTV.XviD-RLSGROUP'
 
-        secondEp = TVEpisode(2, 4, "Ep Name (2)", 101, anime)
+        secondEp = TVEpisode(2, 4, "Ep Name (2)", 100, anime)
         secondEp._status = Quality.compositeStatus(DOWNLOADED, Quality.HDTV)
         secondEp._release_name = ep._release_name
 
-        thirdEp = TVEpisode(2, 5, "Ep Name (3)", 102, anime)
+        thirdEp = TVEpisode(2, 5, "Ep Name (3)", 101, anime)
         thirdEp._status = Quality.compositeStatus(DOWNLOADED, Quality.HDTV)
         thirdEp._release_name = ep._release_name
 

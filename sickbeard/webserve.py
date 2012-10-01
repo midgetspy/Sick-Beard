@@ -873,7 +873,8 @@ class ConfigPostProcessing:
     def savePostProcessing(self, naming_pattern=None, naming_multi_ep=None,
                     xbmc_data=None, mediabrowser_data=None, synology_data=None, sony_ps3_data=None, wdtv_data=None, tivo_data=None,
                     use_banner=None, keep_processed_dir=None, process_automatically=None, rename_episodes=None,
-                    move_associated_files=None, tv_download_dir=None, naming_custom_abd=None, naming_abd_pattern=None):
+                    move_associated_files=None, tv_download_dir=None, naming_custom_abd=None, naming_abd_pattern=None,
+                    naming_anime_multi_ep=None, naming_anime_pattern=None):
 
         results = []
 
@@ -929,6 +930,13 @@ class ConfigPostProcessing:
             sickbeard.NAMING_FORCE_FOLDERS = naming.check_force_season_folders()
         else:
             results.append("You tried saving an invalid naming config, not saving your naming settings")
+        
+        if self.isNamingValid(naming_anime_pattern, naming_anime_multi_ep) != "invalid":
+            sickbeard.NAMING_ANIME_PATTERN = naming_anime_pattern
+            sickbeard.NAMING_ANIME_MULTI_EP = int(naming_anime_multi_ep)
+            sickbeard.NAMING_FORCE_FOLDERS = naming.check_force_season_folders(sickbeard.NAMING_ANIME_PATTERN)
+        else:
+            results.append("You tried saving an invalid anime naming config, not saving your anime naming settings")
 
         if self.isNamingValid(naming_abd_pattern, None, True) != "invalid":
             sickbeard.NAMING_ABD_PATTERN = naming_abd_pattern

@@ -206,7 +206,7 @@ $(document).ready(function () {
     $('#naming_custom_anime').change(function () {
         setup_anime_naming();
     });
-    
+
     $('#naming_multi_ep').change(fill_examples);
     $('#naming_pattern').focusout(fill_examples);
     $('#naming_pattern').keyup(function () {
@@ -214,7 +214,7 @@ $(document).ready(function () {
             fill_examples();
         }, 500);
     });
-
+    
     $('#naming_abd_pattern').focusout(fill_examples);
     $('#naming_abd_pattern').keyup(function () {
         typewatch(function () {
@@ -222,6 +222,7 @@ $(document).ready(function () {
         }, 500);
     });
 
+    $('#naming_anime_multi_ep').change(fill_examples);
     $('#naming_anime_pattern').focusout(fill_examples);
     $('#naming_anime_pattern').keyup(function () {
         typewatch(function () {

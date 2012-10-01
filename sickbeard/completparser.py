@@ -36,7 +36,7 @@ from lib.tvdb_api import tvdb_api, tvdb_exceptions
 
 class CompleteParser(object):
 
-    def __init__(self, show=None, showList=None, tvdbActiveLookUp=False, log=None):
+    def __init__(self, show=None, showList=None, tvdbActiveLookUp=False, log=None, unsafe=False):
         # first init log
         if type(log) in (FunctionType, MethodType):# if we get a function or a method use that.
             self._log = log
@@ -52,6 +52,7 @@ class CompleteParser(object):
             self.showList = sickbeard.showList
         self.tvdbActiveLookUp = tvdbActiveLookUp
         self._parse_mode = None
+        self.unsafe = unsafe
 
     def _log(self, toLog, logLevel=logger.MESSAGE):
         logger.log(toLog, logLevel)
@@ -62,9 +63,6 @@ class CompleteParser(object):
         try:
             result = self._parse(name_to_parse)
         except Exception, e:
-            print "####"
-            print traceback.format_exc()
-            print "####"
             self.complete_result.lock.release()
             self._log(u"Error during parsing. Error will raise again. traceback:", logger.ERROR)
             self._log(traceback.format_exc(), logger.ERROR)
@@ -150,10 +148,11 @@ class CompleteParser(object):
                 self.complete_result.episodes = self.raw_parse_result.episode_numbers
 
         if not cur_show:
-            self._log("No show couldn't be matched. assuming tvdb numbers", logger.DEBUG)
+            self._log("No show could be matched. assuming tvdb numbers", logger.DEBUG)
             # we will use the stuff from the parser
             self.complete_result.season = self.raw_parse_result.season_number
             self.complete_result.episodes = self.raw_parse_result.episode_numbers
+            self.complete_result.ab_episode_numbers = self.raw_parse_result.ab_episode_numbers
 
         self.complete_result.quality = common.Quality.nameQuality(self.name_to_parse, bool(cur_show and cur_show.is_anime))
         return self.complete_result
@@ -175,7 +174,7 @@ class CompleteParser(object):
                 ltvdb_api_parms = sickbeard.TVDB_API_PARMS.copy()
 
                 if show.lang:
-                    ltvdb_api_parms['language'] = self.lang
+                    ltvdb_api_parms['language'] = show.lang
 
                 t = tvdb_api.Tvdb(**ltvdb_api_parms)
 
@@ -218,10 +217,13 @@ class CompleteParser(object):
                 myParser = NameParser(regexMode=mode)
                 parse_result = myParser.parse(toParse)
             except InvalidNameException:
-                self._log(u"Could not parse '" + toParse + "' in regex mode: " + str(0), logger.DEBUG)
+                self._log(u"Could not parse '" + toParse + "' in regex mode: " + str(mode), logger.DEBUG)
             else:
-                show = self.get_show_by_name(parse_result.series_name, showList, tvdbActiveLookUp)
-                if show and show.is_anime:
+                found_show = self.get_show_by_name(parse_result.series_name, showList, tvdbActiveLookUp)
+                if found_show and found_show.is_anime:
+                    if mode == NameParser.ANIME_REGEX or mode == NameParser.NORMAL_REGEX:
+                        break
+                elif show.is_anime and show.test_obj:
                     if mode == NameParser.ANIME_REGEX or mode == NameParser.NORMAL_REGEX:
                         break
                 else:
@@ -231,7 +233,7 @@ class CompleteParser(object):
             raise InvalidNameException(u"Unable to parse " + toParse)
 
         self._parse_mode = mode
-        return (parse_result, show)
+        return (parse_result, found_show)
 
     def scene2tvdb(self, show, scene_name, season, episodes, absolute_numbers):
         # TODO: check if adb and make scene2tvdb useable with correct numbers

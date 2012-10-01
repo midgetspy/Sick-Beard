@@ -436,10 +436,8 @@
                         </div><!-- /naming_abd_different -->
                         
                         <div class="field-pair clearfix">
-                            <input type="checkbox" class="enabler" id="naming_custom_anime" name="naming_custom_anime" #if $sickbeard.NAMING_CUSTOM_ABD then "checked=\"checked\"" else ""#/>
                             <label class="clearfix" for="naming_custom_anime">
                                 <span class="component-title">Custom Anime</span>
-                                <span class="component-desc">Name Anime shows differently than regular shows?</span>
                             </label>
                         </div>
                         
@@ -452,12 +450,12 @@
                                             #set is_anime_custom = True
                                             #for $cur_preset in $naming.name_anime_presets:
                                                 #set $tmp = $naming.test_name($cur_preset)
-                                                #if $cur_preset == $sickbeard.NAMING_PATTERN:
+                                                #if $cur_preset == $sickbeard.NAMING_ANIME_PATTERN:
                                                     #set is_anime_custom = False
                                                 #end if
-                                                <option id="$cur_preset" #if $cur_preset == $sickbeard.NAMING_PATTERN then "selected=\"selected\"" else ""#>$os.path.join($tmp['dir'], $tmp['name'])</option>
+                                                <option id="$cur_preset" #if $cur_preset == $sickbeard.NAMING_ANIME_PATTERN then "selected=\"selected\"" else ""#>$os.path.join($tmp['dir'], $tmp['name'])</option>
                                             #end for
-                                            <option id="$sickbeard.NAMING_PATTERN" #if $is_anime_custom then "selected=\"selected\"" else ""#>Custom...</option>
+                                            <option id="$sickbeard.NAMING_ANIME_PATTERN" #if $is_anime_custom then "selected=\"selected\"" else ""#>Custom...</option>
                                         </select>
                                     </span>
                                 </label>
@@ -470,7 +468,7 @@
                                             &nbsp;
                                         </span>
                                         <span class="component-desc">
-                                            <input type="text" size="45" name="naming_anime_pattern" id="naming_anime_pattern" class="custom-pattern" value="$sickbeard.NAMING_PATTERN" />
+                                            <input type="text" size="45" name="naming_anime_pattern" id="naming_anime_pattern" class="custom-pattern" value="$sickbeard.NAMING_ANIME_PATTERN" />
                                             <img src="$sbRoot/images/legend16.png" width="16" height="16" alt="[Toggle Key]" id="show_naming_anime_key" title="Toggle Anime Naming Legend" style="padding: 6px 0 0 3px;" />
                                         </span>
                                     </label>
@@ -542,26 +540,31 @@
                                           <td>03</td>
                                         </tr>
                                         <tr>
+                                          <td class="align-right"><b>Absolute Number:</b></td>
+                                          <td>%A</td>
+                                          <td>099</td>
+                                        </tr>
+                                        <tr class="even">
                                           <td class="align-right"><b>Quality:</b></td>
                                           <td>%QN</td>
                                           <td>720p BluRay</td>
                                         </tr>
-                                        <tr class="even">
+                                        <tr>
                                           <td>&nbsp;</td>
                                           <td>%Q.N</td>
                                           <td>720p.BluRay</td>
                                         </tr>
-                                        <tr>
+                                        <tr  class="even">
                                           <td>&nbsp;</td>
                                           <td>%Q_N</td>
                                           <td>720p_BluRay</td>
                                         </tr>
-                                        <tr class="even">
+                                        <tr>
                                           <td class="align-right"><i class="icon-info-sign" title="Multi-EP style is ignored"></i> <b>Release Name:</b></td>
                                           <td>%RN</td>
                                           <td>Show.Name.S02E03.HDTV.XviD-RLSGROUP</td>
                                         </tr>
-                                        <tr>
+                                        <tr class="even">
                                           <td class="align-right"><i class="icon-info-sign" title="'SiCKBEARD' is used in place of RLSGROUP if it could not be properly detected"></i> <b>Release Group:</b></td>
                                           <td>%RG</td>
                                           <td>RLSGROUP</td>
@@ -578,7 +581,7 @@
                                     <span class="component-desc">
                                         <select id="naming_anime_multi_ep" name="naming_anime_multi_ep">
                                         #for $cur_multi_ep in sorted($multiEpStrings.items(), key=lambda x: x[1]):
-                                            <option value="$cur_multi_ep[0]" #if $cur_multi_ep[0] == $sickbeard.NAMING_MULTI_EP then "selected=\"selected\" class=\"selected\"" else ""#>$cur_multi_ep[1]</option>
+                                            <option value="$cur_multi_ep[0]" #if $cur_multi_ep[0] == $sickbeard.NAMING_ANIME_MULTI_EP then "selected=\"selected\" class=\"selected\"" else ""#>$cur_multi_ep[1]</option>
                                         #end for
                                         </select>
                                     </span>
