@@ -6,6 +6,7 @@ Sick Beard - Pistachitos
 Features added:
 
 * Search subtitles for each episode.
+* Notifications via Synology Notifier
 
 Sick Beard - Pistachitos makes use of the following projects:
 

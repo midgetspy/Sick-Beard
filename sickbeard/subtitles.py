@@ -120,13 +120,13 @@ class SubtitlesFinder():
                 continue
             
             # Old shows rule
-            if epToSub['airdate_daydiff'] > 7 and epToSub['searchcount'] < 2 and now - datetime.datetime.strptime(epToSub['lastsearch'], '%Y-%m-%d %H:%M:%S.%f') > datetime.timedelta(hours=rules['old'][epToSub['searchcount']]):
+            if epToSub['airdate_daydiff'] > 7 and epToSub['searchcount'] < 2 and now - datetime.datetime.strptime(epToSub['lastsearch'], '%Y-%m-%d %H:%M:%S') > datetime.timedelta(hours=rules['old'][epToSub['searchcount']]):
                 logger.log('Downloading subtitles for episode %dx%d of show %s' % (epToSub['season'], epToSub['episode'], epToSub['show_name']), logger.DEBUG)
                 locations.append(epToSub['location'])
                 toRefresh.append((epToSub['showid'], epToSub['season'], epToSub['episode']))
                 continue
             # Recent shows rule
-            if epToSub['airdate_daydiff'] <= 7 and epToSub['searchcount'] < 7 and now - datetime.datetime.strptime(epToSub['lastsearch'], '%Y-%m-%d %H:%M:%S.%f') > datetime.timedelta(hours=rules['new'][epToSub['searchcount']]):
+            if epToSub['airdate_daydiff'] <= 7 and epToSub['searchcount'] < 7 and now - datetime.datetime.strptime(epToSub['lastsearch'], '%Y-%m-%d %H:%M:%S') > datetime.timedelta(hours=rules['new'][epToSub['searchcount']]):
                 logger.log('Downloading subtitles for episode %dx%d of show %s' % (epToSub['season'], epToSub['episode'], epToSub['show_name']), logger.DEBUG)
                 locations.append(epToSub['location'])
                 toRefresh.append((epToSub['showid'], epToSub['season'], epToSub['episode']))
