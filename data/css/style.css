@@ -1198,22 +1198,15 @@ input[disabled], select[disabled], textarea[disabled], input[readonly], select[r
   background-color: #57442b;
   border-right: 1px solid #614e35;
 }
-.dropdown-menu a {
-  padding: 6px 15px;
-  color: #333;
-}
-.dropdown-menu li {
-  border-top: 1px solid #ccc;
-}
-.dropdown-menu li:first-child {
-  border-top: none;
-}
 .dropdown-menu li > a:hover,
 .dropdown-menu .active > a,
 .dropdown-menu .active > a:hover {
   color: #fff;
   text-decoration: none;
   background-color: #333;
+}
+ul.nav .dropdown-menu .divider {
+  margin: 5px 1px;
 }
 /*
 .dropdown-menu li > a:hover > [class^="icon-"],
