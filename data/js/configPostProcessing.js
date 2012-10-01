@@ -102,6 +102,58 @@ $(document).ready(function () {
 
     }
 
+    function fill_anime_examples() {
+        var pattern = $('#naming_anime_pattern').val();
+        var multi = $('#naming_anime_multi_ep :selected').val();
+
+        $.get(sbRoot + '/config/postProcessing/testNaming', {pattern: pattern, anime: 'True'},
+            function (data) {
+                if (data) {
+                    $('#naming_anime_example').text(data + '.ext');
+                    $('#naming_anime_example_div').show();
+                } else {
+                    $('#naming_anime_example_div').hide();
+                }
+            });
+        
+        $.get(sbRoot + '/config/postProcessing/testNaming', {pattern: pattern, multi: multi, anime: 'True'},
+                function (data) {
+                    if (data) {
+                        $('#naming_anime_example_multi').text(data + '.ext');
+                        $('#naming_anime_example_multi_div').show();
+                    } else {
+                        $('#naming_anime_example_multi_div').hide();
+                    }
+                });
+        
+        $.get(sbRoot + '/config/postProcessing/isNamingValid', {pattern: pattern,  multi: multi, anime: 'True'},
+            function (data) {
+                if (data == "invalid") {
+                    $('#naming_anime_pattern').qtip('option', {
+                        'content.text': 'This pattern is invalid.',
+                        'style.classes': 'ui-tooltip-rounded ui-tooltip-shadow ui-tooltip-red'
+                    });
+                    $('#naming_anime_pattern').qtip('toggle', true);
+                    $('#naming_anime_pattern').css('background-color', '#FFDDDD');
+                } else if (data == "seasonfolders") {
+                    $('#naming_anime_pattern').qtip('option', {
+                        'content.text': 'This pattern would be invalid without the folders, using it will force "Flatten" off for all shows.',
+                        'style.classes': 'ui-tooltip-rounded ui-tooltip-shadow ui-tooltip-red'
+                    });
+                    $('#naming_anime_pattern').qtip('toggle', true);
+                    $('#naming_anime_pattern').css('background-color', '#FFFFDD');
+                } else {
+                    $('#naming_anime_pattern').qtip('option', {
+                        'content.text': 'This pattern is valid.',
+                        'style.classes': 'ui-tooltip-rounded ui-tooltip-shadow ui-tooltip-green'
+                    });
+                    $('#naming_anime_pattern').qtip('toggle', false);
+                    $('#naming_anime_pattern').css('background-color', '#FFFFFF');
+                }
+            });
+
+    }
+
     function setup_naming() {
         // if it is a custom selection then show the text box
         if ($('#name_presets :selected').val() == "Custom...") {
@@ -124,6 +176,17 @@ $(document).ready(function () {
         fill_abd_examples();
     }
 
+    function setup_anime_naming() {
+        // if it is a custom selection then show the text box
+        if ($('#name_anime_presets :selected').val() == "Custom...") {
+            $('#naming_anime_custom').show();
+        } else {
+            $('#naming_anime_custom').hide();
+            $('#naming_anime_pattern').val($('#name_anime_presets :selected').attr('id'));
+        }
+        fill_anime_examples();
+    }
+
     $('#name_presets').change(function () {
         setup_naming();
     });
@@ -136,6 +199,14 @@ $(document).ready(function () {
         setup_abd_naming();
     });
 
+    $('#name_anime_presets').change(function () {
+        setup_anime_naming();
+    });
+
+    $('#naming_custom_anime').change(function () {
+        setup_anime_naming();
+    });
+    
     $('#naming_multi_ep').change(fill_examples);
     $('#naming_pattern').focusout(fill_examples);
     $('#naming_pattern').keyup(function () {
@@ -151,11 +222,21 @@ $(document).ready(function () {
         }, 500);
     });
 
+    $('#naming_anime_pattern').focusout(fill_examples);
+    $('#naming_anime_pattern').keyup(function () {
+        typewatch(function () {
+            fill_anime_examples();
+        }, 500);
+    });
+
     $('#show_naming_key').click(function () {
         $('#naming_key').toggle();
     });
     $('#show_naming_abd_key').click(function () {
         $('#naming_abd_key').toggle();
+    });
+    $('#show_naming_anime_key').click(function () {
+        $('#naming_anime_key').toggle();
     });
     $('#do_custom').click(function () {
         $('#naming_pattern').val($('#name_presets :selected').attr('id'));
@@ -164,6 +245,7 @@ $(document).ready(function () {
     });
     setup_naming();
     setup_abd_naming();
+    setup_anime_naming();
 
     // -- start of metadata options div toggle code --
     $('#metadataType').change(function () {

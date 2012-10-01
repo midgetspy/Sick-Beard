@@ -77,7 +77,7 @@ searchQueueScheduler = None
 properFinderScheduler = None
 autoPostProcesserScheduler = None
 
-showList = None
+showList = []
 loadingShowList = None
 
 providerList = []

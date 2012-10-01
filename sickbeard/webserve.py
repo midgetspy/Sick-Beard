@@ -950,19 +950,20 @@ class ConfigPostProcessing:
         redirect("/config/postProcessing/")
 
     @cherrypy.expose
-    def testNaming(self, pattern=None, multi=None, abd=False):
-
+    def testNaming(self, pattern=None, multi=None, abd=False, anime=False):
+        logger.log("testNaming", logger.DEBUG)
         if multi != None:
             multi = int(multi)
 
-        result = naming.test_name(pattern, multi, abd)
+        result = naming.test_name(pattern, multi, abd, anime)
 
-        result = ek.ek(os.path.join, result['dir'], result['name']) 
+        result = ek.ek(os.path.join, result['dir'], result['name'])
 
         return result
     
     @cherrypy.expose
-    def isNamingValid(self, pattern=None, multi=None, abd=False):
+    def isNamingValid(self, pattern=None, multi=None, abd=False, anime=False):
+        logger.log("isNamingValid", logger.DEBUG)
         if pattern == None:
             return "invalid"
         
@@ -970,7 +971,12 @@ class ConfigPostProcessing:
         if abd:
             is_valid = naming.check_valid_abd_naming(pattern)
             require_season_folders = False
-
+        elif anime:
+            # check validity of single and multi ep cases for the whole path
+            is_valid = naming.check_valid_anime_naming(pattern, multi)
+            logger.log("is_valid: "+str(is_valid), logger.DEBUG)
+            # check validity of single and multi ep cases for only the file name
+            require_season_folders = False
         else:
             # check validity of single and multi ep cases for the whole path
             is_valid = naming.check_valid_naming(pattern, multi)

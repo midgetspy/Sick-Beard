@@ -1617,17 +1617,25 @@ class TVEpisode(object):
             return re.sub('[ -]','_', name)
         
         def release_group(name):
+            cp = CompleteParser(self.show)
+            cpr = cp.parse(name)
+            if cpr.release_group:
+                return cpr.release_group
+            else:
+                return ''
+            """
             np = NameParser(name)
             try:
-                parse_result = np.parse(name)
+                cpr = cp.parse(name)
+                #parse_result = np.parse(name)
             except InvalidNameException, e:
                 logger.log(u"Unable to get parse release_group: "+ex(e), logger.DEBUG)
                 return ''
-
+            
             if not parse_result.release_group:
                 return ''
             return parse_result.release_group
-
+            """
         epStatus, epQual = Quality.splitCompositeStatus(self.status) #@UnusedVariable
         
         return {
@@ -1644,6 +1652,7 @@ class TVEpisode(object):
                    '%0S': '%02d' % self.season,
                    '%E': str(self.episode),
                    '%0E': '%02d' % self.episode,
+                   '%A': '%03d' % self.absolute_number,
                    '%RN': self.release_name,
                    '%RG': release_group(self.release_name),
                    '%AD': str(self.airdate).replace('-', ' '),
@@ -1670,13 +1679,13 @@ class TVEpisode(object):
             result_name = result_name.replace(cur_replacement.lower(), helpers.sanitizeFileName(replace_map[cur_replacement].lower()))
 
         return result_name
-        
+
     def _format_pattern(self, pattern=None, multi=None):
         """
         Manipulates an episode naming pattern and then fills the template in
         """
-        
-        logger.log(u"pattern: "+pattern, logger.DEBUG)
+
+        logger.log(u"pattern: " + pattern, logger.DEBUG)
         
         if pattern == None:
             pattern = sickbeard.NAMING_PATTERN
@@ -1693,20 +1702,23 @@ class TVEpisode(object):
             if self.show.air_by_date:
                 result_name = result_name.replace('%RN', '%S.N.%A.D.%E.N-SiCKBEARD')
                 result_name = result_name.replace('%rn', '%s.n.%A.D.%e.n-sickbeard')
+            elif self.show.is_anime:
+                result_name = result_name.replace('%RN', '[SiCKBEARD]%S.N.%A')
+                result_name = result_name.replace('%rn', '[sickbeard]%s.n.%A')
             else:
                 result_name = result_name.replace('%RN', '%S.N.S%0SE%0E.%E.N-SiCKBEARD')
                 result_name = result_name.replace('%rn', '%s.n.s%0se%0e.%e.n-sickbeard')
 
             result_name = result_name.replace('%RG', 'SiCKBEARD')
             result_name = result_name.replace('%rg', 'sickbeard')
-            logger.log(u"Episode has no release name, replacing it with a generic one: "+result_name, logger.DEBUG)
-        
+            logger.log(u"Episode has no release name, replacing it with a generic one: " + result_name, logger.DEBUG)
+
         # split off ep name part only
         name_groups = re.split(r'[\\/]', result_name)
         
         # figure out the double-ep numbering style for each group, if applicable
         for cur_name_group in name_groups:
-        
+            logger.log("cur_name_group: " + cur_name_group, logger.DEBUG)
             season_format = sep = ep_sep = ep_format = None
         
             season_ep_regex = '''
@@ -1830,24 +1842,23 @@ class TVEpisode(object):
         """
         Just the filename of the episode, formatted based on the naming settings
         """
-        
         if pattern == None:
             # we only use ABD if it's enabled, this is an ABD show, AND this is not a multi-ep
             if self.show.air_by_date and sickbeard.NAMING_CUSTOM_ABD and not self.relatedEps:
                 pattern = sickbeard.NAMING_ABD_PATTERN
             else:
                 pattern = sickbeard.NAMING_PATTERN
-            
+
         # split off the filename only, if they exist
         name_groups = re.split(r'[\\/]', pattern)
-        
+
         return self._format_pattern(name_groups[-1], multi)
+
     def rename(self):
         """
         Renames an episode file and all related files to the location and filename as specified
         in the naming settings.
         """
-        
         proper_path = self.proper_path()
         absolute_proper_path = ek.ek(os.path.join, self.show.location, proper_path)
         absolute_current_path_no_ext, file_ext = os.path.splitext(self.location)

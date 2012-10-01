@@ -62,6 +62,9 @@ class CompleteParser(object):
         try:
             result = self._parse(name_to_parse)
         except Exception, e:
+            print "####"
+            print traceback.format_exc()
+            print "####"
             self.complete_result.lock.release()
             self._log(u"Error during parsing. Error will raise again. traceback:", logger.ERROR)
             self._log(traceback.format_exc(), logger.ERROR)
@@ -422,6 +425,9 @@ class CompleteResult(object):
     def _getReleaseGroup(self):
         return self.parse_result.release_group
 
+    def _getAirDate(self):
+        return self.parse_result.air_date
+
     def _getSeriesName(self):
         return self.parse_result.series_name
 
@@ -434,6 +440,7 @@ class CompleteResult(object):
     tvdbid = property(_getTVDBID)
     is_proper = property(_isProper)
     release_group = property(_getReleaseGroup)
+    air_date = property(_getAirDate)
     series_name = property(_getSeriesName)
     sxxexx = property(_sxxexx)
 

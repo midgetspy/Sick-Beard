@@ -434,6 +434,174 @@
                             </div>
 
                         </div><!-- /naming_abd_different -->
+                        
+                        <div class="field-pair clearfix">
+                            <input type="checkbox" class="enabler" id="naming_custom_anime" name="naming_custom_anime" #if $sickbeard.NAMING_CUSTOM_ABD then "checked=\"checked\"" else ""#/>
+                            <label class="clearfix" for="naming_custom_anime">
+                                <span class="component-title">Custom Anime</span>
+                                <span class="component-desc">Name Anime shows differently than regular shows?</span>
+                            </label>
+                        </div>
+                        
+                        <div id="content_naming_custom_anime">
+                            <div class="field-pair">
+                                <label class="nocheck clearfix" for="name_anime_presets">
+                                    <span class="component-title">Name Pattern:</span>
+                                    <span class="component-desc">
+                                        <select id="name_anime_presets">
+                                            #set is_anime_custom = True
+                                            #for $cur_preset in $naming.name_anime_presets:
+                                                #set $tmp = $naming.test_name($cur_preset)
+                                                #if $cur_preset == $sickbeard.NAMING_PATTERN:
+                                                    #set is_anime_custom = False
+                                                #end if
+                                                <option id="$cur_preset" #if $cur_preset == $sickbeard.NAMING_PATTERN then "selected=\"selected\"" else ""#>$os.path.join($tmp['dir'], $tmp['name'])</option>
+                                            #end for
+                                            <option id="$sickbeard.NAMING_PATTERN" #if $is_anime_custom then "selected=\"selected\"" else ""#>Custom...</option>
+                                        </select>
+                                    </span>
+                                </label>
+                            </div>
+
+                            <div id="naming_anime_custom">
+                                <div class="field-pair clearfix" style="padding-top: 0;">
+                                    <label class="nocheck clearfix">
+                                        <span class="component-title">
+                                            &nbsp;
+                                        </span>
+                                        <span class="component-desc">
+                                            <input type="text" size="45" name="naming_anime_pattern" id="naming_anime_pattern" class="custom-pattern" value="$sickbeard.NAMING_PATTERN" />
+                                            <img src="$sbRoot/images/legend16.png" width="16" height="16" alt="[Toggle Key]" id="show_naming_anime_key" title="Toggle Anime Naming Legend" style="padding: 6px 0 0 3px;" />
+                                        </span>
+                                    </label>
+                                </div>
+
+                            <div id="naming_anime_key" class="nocheck clearfix" style="display: none;">
+                                      <table class="Key">
+                                    <thead>
+                                        <tr>
+                                          <th class="align-right">Meaning</th>
+                                          <th>Pattern</th>
+                                          <th width="60%">Result</th>
+                                        </tr>
+                                    </thead>
+                                    <tfoot>
+                                        <tr>
+                                          <th colspan="3">Use lower case if you want lower case names (eg. %sn, %e.n, %q_n etc)</th>
+                                        </tr>
+                                    </tfoot>
+                                    <tbody>
+                                        <tr>
+                                          <td class="align-right"><b>Show Name:</b></td>
+                                          <td>%SN</td>
+                                          <td>Show Name</td>
+                                        </tr>
+                                        <tr class="even">
+                                          <td>&nbsp;</td>
+                                          <td>%S.N</td>
+                                          <td>Show.Name</td>
+                                        </tr>
+                                        <tr>
+                                          <td>&nbsp;</td>
+                                          <td>%S_N</td>
+                                          <td>Show_Name</td>
+                                        </tr>
+                                        <tr class="even">
+                                          <td class="align-right"><b>Episode Name:</b></td>
+                                          <td>%EN</td>
+                                          <td>Episode Name</td>
+                                        </tr>
+                                        <tr>
+                                          <td>&nbsp;</td>
+                                          <td>%E.N</td>
+                                          <td>Episode.Name</td>
+                                        </tr>
+                                        <tr class="even">
+                                          <td>&nbsp;</td>
+                                          <td>%E_N</td>
+                                          <td>Episode_Name</td>
+                                        </tr>
+                                        <tr>
+                                          <td class="align-right"><b>Season Number:</b></td>
+                                          <td>%S</td>
+                                          <td>2</td>
+                                        </tr>
+                                        <tr class="even">
+                                          <td>&nbsp;</td>
+                                          <td>%0S</td>
+                                          <td>02</td>
+                                        </tr>
+                                        <tr>
+                                          <td class="align-right"><b>Episode Number:</b></td>
+                                          <td>%E</td>
+                                          <td>3</td>
+                                        </tr>
+                                        <tr class="even">
+                                          <td>&nbsp;</td>
+                                          <td>%0E</td>
+                                          <td>03</td>
+                                        </tr>
+                                        <tr>
+                                          <td class="align-right"><b>Quality:</b></td>
+                                          <td>%QN</td>
+                                          <td>720p BluRay</td>
+                                        </tr>
+                                        <tr class="even">
+                                          <td>&nbsp;</td>
+                                          <td>%Q.N</td>
+                                          <td>720p.BluRay</td>
+                                        </tr>
+                                        <tr>
+                                          <td>&nbsp;</td>
+                                          <td>%Q_N</td>
+                                          <td>720p_BluRay</td>
+                                        </tr>
+                                        <tr class="even">
+                                          <td class="align-right"><i class="icon-info-sign" title="Multi-EP style is ignored"></i> <b>Release Name:</b></td>
+                                          <td>%RN</td>
+                                          <td>Show.Name.S02E03.HDTV.XviD-RLSGROUP</td>
+                                        </tr>
+                                        <tr>
+                                          <td class="align-right"><i class="icon-info-sign" title="'SiCKBEARD' is used in place of RLSGROUP if it could not be properly detected"></i> <b>Release Group:</b></td>
+                                          <td>%RG</td>
+                                          <td>RLSGROUP</td>
+                                        </tr>
+                                    </tbody>
+                                  </table>
+                                  <br/>
+                                </div>
+                            </div><!-- /naming_anime_custom -->
+
+                            <div class="field-pair">
+                                <label class="nocheck clearfix" for="naming_multi_ep">
+                                    <span class="component-title">Multi-Episode Style:</span>
+                                    <span class="component-desc">
+                                        <select id="naming_anime_multi_ep" name="naming_anime_multi_ep">
+                                        #for $cur_multi_ep in sorted($multiEpStrings.items(), key=lambda x: x[1]):
+                                            <option value="$cur_multi_ep[0]" #if $cur_multi_ep[0] == $sickbeard.NAMING_MULTI_EP then "selected=\"selected\" class=\"selected\"" else ""#>$cur_multi_ep[1]</option>
+                                        #end for
+                                        </select>
+                                    </span>
+                                </label>
+                            </div>
+
+                            <div id="naming_anime_example_div">
+                                <h3>Sample:</h3>
+                                <div class="example">
+                                    <span class="jumbo" id="naming_anime_example">&nbsp;</span>
+                                </div>
+                                <br/>
+                            </div>
+    
+                            <div id="naming_anime_example_multi_div">
+                                <h3>Multi-EP sample:</h3>
+                                <div class="example">
+                                    <span class="jumbo" id="naming_anime_example_multi">&nbsp;</span>
+                                </div>
+                                <br/><br />
+                            </div>
+
+                        </div><!-- /naming_anime_different -->
 
                         <div class="clearfix"></div>
                         <input type="submit" class="btn config_submitter" value="Save Changes" /><br/>
@@ -447,43 +615,7 @@
                         <h3>Metadata</h3>
                         <p>The data associated to the data. These are files associated to a TV show in the form of images and text that, when supported, will enhance the viewing experience.</p>
                     </div>
-                        
-						<div class="field-pair">
-                            <input type="radio" name="naming_anime" id="naming_anime" value="1" #if $sickbeard.NAMING_ANIME == 1then "checked=\"checked\"" else ""#/>
-                            <label class="clearfix" for="naming_anime">
-                                <span class="component-title">Add Absolute Number</span>
-                                <span class="component-desc">Add the absolute number to the season/episode format?</span>
-                            </label>
-                            <label class="nocheck clearfix">
-                                <span class="component-title">&nbsp;</span>
-                                <span class="component-desc">Only applies to animes. (eg. S15E45 - 310 vs S15E45)</span>
-                            </label>
-                        </div>
-                        
-                        <div class="field-pair">
-                            <input type="radio" name="naming_anime" id="naming_anime_only" value="2" #if $sickbeard.NAMING_ANIME == 2 then "checked=\"checked\"" else ""#/>
-                            <label class="clearfix" for="naming_anime_only">
-                                <span class="component-title">Only Absolute Number</span>
-                                <span class="component-desc">Replace season/episode format with absolute number</span>
-                            </label>
-                            <label class="nocheck clearfix">
-                                <span class="component-title">&nbsp;</span>
-                                <span class="component-desc">Only applies to animes.</span>
-                            </label>
-                        </div>
-                                          
-                        <div class="field-pair">
-                            <input type="radio" name="naming_anime" id="naming_anime_none" value="3" #if $sickbeard.NAMING_ANIME == 3 then "checked=\"checked\"" else ""#/>
-                            <label class="clearfix" for="naming_anime_none">
-                                <span class="component-title">No Absolute Number</span>
-                                <span class="component-desc">Dont include the absolute number</span>
-                            </label>
-                            <label class="nocheck clearfix">
-                                <span class="component-title">&nbsp;</span>
-                                <span class="component-desc">Only applies to animes.</span>
-                            </label>
-                        </div>
-                        
+
                     <fieldset class="component-group-list">
                         <div class="field-pair clearfix">
                             <label class="clearfix">
