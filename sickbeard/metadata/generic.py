@@ -320,7 +320,7 @@ class GenericMetadata():
         object. If your _ep_data returns data in another format you'll need to
         override this method.
         """
-        
+              
         data = self._ep_data(ep_obj)
         
         if not data:
