@@ -85,4 +85,4 @@ def sendNZB(nzb):
         return True
     else:
         logger.log(u"NZBget could not add %s to the queue" % (nzb.name + ".nzb"), logger.ERROR)
-        return False
+        return False
