@@ -3006,17 +3006,27 @@ class Home:
         # try do download subtitles for that episode
         previous_subtitles = ep_obj.subtitles
         try:
-            ep_obj.downloadSubtitles()
+            subtitles = ep_obj.downloadSubtitles()
+            
+            if sickbeard.SUBTITLES_SUBDIR:
+                for video in subtitles:
+                    subs_new_path = ek.ek(os.path.join, os.path.dirname(video.path), sickbeard.SUBTITLES_SUBDIR)
+                    if not ek.ek(os.path.isdir, subs_new_path):
+                        ek.ek(os.mkdir, subs_new_path)
+                    
+                    for subtitle in subtitles.get(video):
+                        new_file_path = ek.ek(os.path.join, subs_new_path, os.path.basename(subtitle.path))
+                        helpers.moveFile(subtitle.path, new_file_path)
         except:
             return json.dumps({'result': 'failure'})
 
         # return the correct json value
         if previous_subtitles != ep_obj.subtitles:
-            status = 'New subtitles downloaded: %s' % ','.join([x.alpha3 for x in sorted(list(set(ep_obj.subtitles).difference(previous_subtitles)))])
+            status = 'New subtitles downloaded: %s' % ','.join([x for x in sorted(list(set(ep_obj.subtitles).difference(previous_subtitles)))])
         else:
             status = 'No subtitles downloaded'
         ui.notifications.message('Subtitles Search', status)
-        return json.dumps({'result': status, 'subtitles': ','.join([x.alpha3 for x in ep_obj.subtitles])})
+        return json.dumps({'result': status, 'subtitles': ','.join([x for x in ep_obj.subtitles])})
 
     @cherrypy.expose
     def mergeEpisodeSubtitles(self, show=None, season=None, episode=None):
