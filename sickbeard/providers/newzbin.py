@@ -138,7 +138,7 @@ class NewzbinProvider(generic.NZBProvider):
                             and ('720p' not in attrs['Video Fmt']) \
                             and ('1080p' not in attrs['Video Fmt']) \
                             and ('1080i' not in attrs['Video Fmt'])
-    						
+                            
         # Source: DVD
         source = 'Source' in attrs and 'DVD' in attrs['Source']
 
@@ -187,7 +187,7 @@ class NewzbinProvider(generic.NZBProvider):
         subs = 'Subtitles' not in attrs
 
         return video_fmt and source and subs
-		
+        
     def _is_720pBluRay(self, attrs):
 
         # Video Fmt: H.264/x264, 720p
