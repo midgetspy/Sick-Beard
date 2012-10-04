@@ -102,6 +102,8 @@ class NewzbinProvider(generic.NZBProvider):
             quality = Quality.HDTV
         elif self._is_WEBDL(attr_dict):
             quality = Quality.HDWEBDL
+        elif self._is_FULLHDWEBDL(attr_dict):
+            quality = Quality.FULLHDWEBDL
         elif self._is_720pBluRay(attr_dict):
             quality = Quality.HDBLURAY
         elif self._is_1080pBluRay(attr_dict):
@@ -172,6 +174,20 @@ class NewzbinProvider(generic.NZBProvider):
 
         return video_fmt and source and subs
 
+    def _is_FULLHDWEBDL(self, attrs):
+
+        # Video Fmt: H.264/x264, 720p
+        video_fmt = 'Video Fmt' in attrs and ('H.264/x264' in attrs['Video Fmt']) \
+                            and ('1080p' in attrs['Video Fmt'])
+
+        # Source: WEB-DL
+        source = 'Source' in attrs and 'WEB-DL' in attrs['Source']
+
+        # Subtitles: (None)
+        subs = 'Subtitles' not in attrs
+
+        return video_fmt and source and subs
+		
     def _is_720pBluRay(self, attrs):
 
         # Video Fmt: H.264/x264, 720p
