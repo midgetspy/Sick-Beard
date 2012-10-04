@@ -20,7 +20,7 @@
 
 import traceback
 import urllib
-import urllib.request
+import urllib2
 import re
 
 import xml.etree.cElementTree as etree
@@ -144,18 +144,18 @@ class TORRENTZProvider(generic.TorrentProvider):
         try:
             url = "http://torrage.com/torrent/" + torrentHash + '.' + self.providerType
             
-            urllib.request.urlopen(url)            
-        except urllib.error.HTTPError:
+            urllib2.urlopen(url)            
+        except urllib2.HTTPError:
             try:
                 url = "http://zoink.it/torrent/" + torrentHash + '.' + self.providerType
-                urllib.request.urlopen(url)                
-            except urllib.error.HTTPError:
+                urllib2.urlopen(url)                
+            except urllib2.HTTPError:
                 try:
                     url = "http://torcache.net/torrent/" + torrentHash + '.' + self.providerType
-                except urllib.error.HTTPError:
+                    urllib2.urlopen(url)  
+                except urllib2.HTTPError:
                     logger.log(u"No suitable URL for "+title, logger.DEBUG)
         
-        logger.log(u"Added for "+title+ " url " + url, logger.DEBUG)
         return (title, url)
 
     def _extract_name_from_filename(self, filename):
