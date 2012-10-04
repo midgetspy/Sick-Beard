@@ -1506,10 +1506,10 @@ class TVEpisode(object):
 
         # do the replacements
         for cur_replacement in sorted(replace_map.keys(), reverse=True):
-            result_name = result_name.replace(cur_replacement, replace_map[cur_replacement])
-            result_name = result_name.replace(cur_replacement.lower(), replace_map[cur_replacement].lower())
+            result_name = result_name.replace(cur_replacement, helpers.sanitizeFileName(replace_map[cur_replacement]))
+            result_name = result_name.replace(cur_replacement.lower(), helpers.sanitizeFileName(replace_map[cur_replacement].lower()))
 
-        return helpers.sanitizeFileName(result_name)
+        return result_name
 
     def _format_pattern(self, pattern=None, multi=None):
         """
