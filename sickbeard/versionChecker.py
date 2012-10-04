@@ -213,7 +213,7 @@ class GitUpdateManager(UpdateManager):
 
         self.git_url = 'http://code.google.com/p/sickbeard/downloads/list'
 
-        self.branch = self._find_git_branch()
+        self.branch = "develop"
 
     def _git_error(self):
         error_message = 'Unable to find your git executable - either delete your .git folder and run from source OR <a href="http://code.google.com/p/sickbeard/wiki/AdvancedSettings" onclick="window.open(this.href); return false;">set git_path in your config.ini</a> to enable updates.'

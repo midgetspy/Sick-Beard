@@ -20,6 +20,7 @@
 
 import traceback
 import urllib
+import urllib2
 import re
 
 import xml.etree.cElementTree as etree
@@ -137,8 +138,21 @@ class TORRENTZProvider(generic.TorrentProvider):
         
     def _get_title_and_url(self, item):
         title = item.findtext('title')
-        url = item.findtext('guid')
-
+        torrentz_url = item.findtext('guid')
+        url = ''
+        torrentHash = result.url.replace('http://torrentz.eu/','').upper()
+        try:
+            url = "http://torrage.com/torrent/" + torrentHash + '.' + self.providerType
+            urllib.request.urlopen(url)            
+        except urllib.error.HTTPError:
+            try:
+                url = "http://zoink.it/torrent/" + torrentHash + '.' + self.providerType
+                urllib.request.urlopen(url)                
+            except urllib.error.HTTPError:
+                try:
+                    url = "http://torcache.net/torrent/" + torrentHash + '.' + self.providerType
+                except urllib.error.HTTPError:
+                    logger.log(u"No suitable URL for "+title, logger.DEBUG)
         return (title, url)
 
     def _extract_name_from_filename(self, filename):
@@ -149,22 +163,6 @@ class TORRENTZProvider(generic.TorrentProvider):
             return match.group(1)
         return None
     
-    def downloadResult(self, result):
-        url = ""
-        torrentHash = result.url.replace('http://torrentz.eu/','').upper()
-        try:
-            url = "http://torrage.com/torrent/" + torrentHash + '.' + self.providerType
-            return self.downloadFromTorrentCache(result.name, url)
-        except Exception, e:
-            try:
-                url = "http://zoink.it/torrent/" + torrentHash + '.' + self.providerType
-                return self.downloadFromTorrentCache(result.name, url)
-            except Exception, e:
-                try:
-                    url = "http://torcache.net/torrent/" + torrentHash + '.' + self.providerType
-                    return self.downloadFromTorrentCache(result.name, url)
-                except Exception, e:
-                    return False
 
         
 class TORRENTZCache(tvcache.TVCache):
