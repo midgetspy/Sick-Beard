@@ -75,7 +75,7 @@ class Quality:
     HDWEBDL = 1<<3 # 8
     HDBLURAY = 1<<4 # 16
     FULLHDBLURAY = 1<<5 # 32
-    FULLHDWEBDL 1<<6 # 64
+    FULLHDWEBDL = 1<<6 # 64
 
     # put these bits at the other end of the spectrum, far enough out that they shouldn't interfere
     UNKNOWN = 1<<15
