@@ -202,11 +202,7 @@ class PostProcessor(object):
                 ek.ek(os.remove, cur_file)
                 # do the library update for synoindex
                 notifiers.synoindex_notifier.deleteFile(cur_file)
-                
-        
-        # clean up any left over folders
-        helpers.delete_empty_folders(ek.ek(os.path.dirname, file_path))
-        
+
     def _combined_file_operation (self, file_path, new_path, new_base_name, associated_files=False, action=None):
         """
         Performs a generic operation (move or copy) on a file. Can rename the file as well as change its location,
@@ -696,52 +692,52 @@ class PostProcessor(object):
             return True 
         
         return False
-    
+
     def process(self):
         """
         Post-process a given file
         """
-        
-        self._log(u"Processing "+self.file_path+" ("+str(self.nzb_name)+")")
-        
-        if os.path.isdir( self.file_path ):
-            self._log(u"File "+self.file_path+" seems to be a directory")
+
+        self._log(u"Processing " + self.file_path + " (" + str(self.nzb_name) + ")")
+
+        if os.path.isdir(self.file_path):
+            self._log(u"File " + self.file_path + " seems to be a directory")
             return False
         for ignore_file in self.IGNORED_FILESTRINGS:
             if ignore_file in self.file_path:
-                self._log(u"File "+self.file_path+" is ignored type, skipping" )
+                self._log(u"File " + self.file_path + " is ignored type, skipping")
                 return False
         # reset per-file stuff
         self.in_history = False
-        
+
         # try to find the file info
         (tvdb_id, season, episodes) = self._find_info()
-        
+
         # if we don't have it then give up
         if not tvdb_id or season == None or not episodes:
             return False
-        
+
         # retrieve/create the corresponding TVEpisode objects
         ep_obj = self._get_ep_obj(tvdb_id, season, episodes)
-        
+
         # get the quality of the episode we're processing
         new_ep_quality = self._get_quality(ep_obj)
-        logger.log(u"Quality of the episode we're processing: "+str(new_ep_quality), logger.DEBUG)
-        
+        logger.log(u"Quality of the episode we're processing: " + str(new_ep_quality), logger.DEBUG)
+
         # see if this is a priority download (is it snatched, in history, or PROPER)
-        priority_download = self._is_priority(ep_obj, new_ep_quality) 
-        self._log(u"Is ep a priority download: "+str(priority_download), logger.DEBUG)
-        
+        priority_download = self._is_priority(ep_obj, new_ep_quality)
+        self._log(u"Is ep a priority download: " + str(priority_download), logger.DEBUG)
+
         # set the status of the episodes
         for curEp in [ep_obj] + ep_obj.relatedEps:
             curEp.status = common.Quality.compositeStatus(common.SNATCHED, new_ep_quality)
-        
+
         # check for an existing file
         existing_file_status = self._checkForExistingFile(ep_obj.location)
 
         # if it's not priority then we don't want to replace smaller files in case it was a mistake
         if not priority_download:
-        
+
             # if there's an existing file that we don't want to replace stop here
             if existing_file_status in (PostProcessor.EXISTS_LARGER, PostProcessor.EXISTS_SAME):
                 self._log(u"File exists and we are not going to replace it because it's not smaller, quitting post-processing", logger.DEBUG)
@@ -751,38 +747,43 @@ class PostProcessor(object):
             elif existing_file_status != PostProcessor.DOESNT_EXIST:
                 self._log(u"Unknown existing file status. This should never happen, please log this as a bug.", logger.ERROR)
                 return False
-        
+
         # if the file is priority then we're going to replace it even if it exists
         else:
             self._log(u"This download is marked a priority download so I'm going to replace an existing file if I find one", logger.DEBUG)
-        
+
         # delete the existing file (and company)
         for cur_ep in [ep_obj] + ep_obj.relatedEps:
             try:
                 self._delete(cur_ep.location, associated_files=True)
-            except OSError, IOError:
+                # clean up any left over folders
+                if cur_ep.location:
+                    helpers.delete_empty_folders(ek.ek(os.path.dirname, cur_ep.location), keep_dir=ep_obj.show._location)
+            except (OSError, IOError):
                 raise exceptions.PostProcessingFailed("Unable to delete the existing files")
-        
+
         # if the show directory doesn't exist then make it if allowed
         if not ek.ek(os.path.isdir, ep_obj.show._location) and sickbeard.CREATE_MISSING_SHOW_DIRS:
             self._log(u"Show directory doesn't exist, creating it", logger.DEBUG)
             try:
                 ek.ek(os.mkdir, ep_obj.show._location)
-                
-            except OSError, IOError:
+
+            except (OSError, IOError):
                 raise exceptions.PostProcessingFailed("Unable to create the show directory: " + ep_obj.show._location)
-        
+
             # get metadata for the show (but not episode because it hasn't been fully processed)
             ep_obj.show.writeMetadata(True)
-            
+
         # update the ep info before we rename so the quality & release name go into the name properly
         for cur_ep in [ep_obj] + ep_obj.relatedEps:
             with cur_ep.lock:
                 cur_release_name = None
-                
+
                 # use the best possible representation of the release name
                 if self.good_results[self.NZB_NAME]:
                     cur_release_name = self.nzb_name
+                    if cur_release_name.lower().endswith('.nzb'):
+                        cur_release_name = cur_release_name.rpartition('.')[0]
                 elif self.good_results[self.FOLDER_NAME]:
                     cur_release_name = self.folder_name
                 elif self.good_results[self.FILE_NAME]:
@@ -792,25 +793,25 @@ class PostProcessor(object):
                         cur_release_name = self.file_name.rpartition('.')[0]
 
                 if cur_release_name:
-                    self._log("Found release name "+cur_release_name, logger.DEBUG)
+                    self._log("Found release name " + cur_release_name, logger.DEBUG)
                     cur_ep.release_name = cur_release_name
                 else:
-                    logger.log("good results: "+repr(self.good_results), logger.DEBUG)
+                    logger.log("good results: " + repr(self.good_results), logger.DEBUG)
 
                 cur_ep.status = common.Quality.compositeStatus(common.DOWNLOADED, new_ep_quality)
-                
+
                 cur_ep.saveToDB()
 
         # find the destination folder
         try:
             proper_path = ep_obj.proper_path()
             proper_absolute_path = ek.ek(os.path.join, ep_obj.show.location, proper_path)
-            
+
             dest_path = ek.ek(os.path.dirname, proper_absolute_path)
         except exceptions.ShowDirNotFoundException:
             raise exceptions.PostProcessingFailed(u"Unable to post-process an episode if the show dir doesn't exist, quitting")
-            
-        self._log(u"Destination folder for this episode: "+dest_path, logger.DEBUG)
+
+        self._log(u"Destination folder for this episode: " + dest_path, logger.DEBUG)
 
         # create any folders we need
         helpers.make_dirs(dest_path)
@@ -824,23 +825,23 @@ class PostProcessor(object):
         else:
             # if we're not renaming then there's no new base name, we'll just use the existing name
             new_base_name = None
-            new_file_name = self.file_name 
-                       
+            new_file_name = self.file_name
+
         try:
             # move the episode and associated files to the show dir
             if sickbeard.KEEP_PROCESSED_DIR:
                 self._copy(self.file_path, dest_path, new_base_name, sickbeard.MOVE_ASSOCIATED_FILES)
             else:
                 self._move(self.file_path, dest_path, new_base_name, sickbeard.MOVE_ASSOCIATED_FILES)
-        except OSError, IOError:
+        except (OSError, IOError):
             raise exceptions.PostProcessingFailed("Unable to move the files to their new home")
-        
+
         # put the new location in the database
         for cur_ep in [ep_obj] + ep_obj.relatedEps:
             with cur_ep.lock:
                 cur_ep.location = ek.ek(os.path.join, dest_path, new_file_name)
                 cur_ep.saveToDB()
-        
+
         # log it to history
         history.logDownload(ep_obj, self.file_path, new_ep_quality, self.release_group)
 
@@ -862,10 +863,10 @@ class PostProcessor(object):
 
         # do the library update for trakt
         notifiers.trakt_notifier.update_library(ep_obj)
-        
+
         # do the library update for pyTivo
         notifiers.pytivo_notifier.update_library(ep_obj)
-        
+
         self._run_extra_scripts(ep_obj)
 
         return True
