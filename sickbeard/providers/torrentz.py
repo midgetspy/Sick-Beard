@@ -140,7 +140,7 @@ class TORRENTZProvider(generic.TorrentProvider):
         title = item.findtext('title')
         torrentz_url = item.findtext('guid')
         url = ''
-        torrentHash = result.url.replace('http://torrentz.eu/','').upper()
+        torrentHash = torrentz_url.replace('http://torrentz.eu/','').upper()
         try:
             url = "http://torrage.com/torrent/" + torrentHash + '.' + self.providerType
             urllib.request.urlopen(url)            
