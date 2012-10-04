@@ -143,6 +143,7 @@ class TORRENTZProvider(generic.TorrentProvider):
         torrentHash = torrentz_url.replace('http://torrentz.eu/','').upper()
         try:
             url = "http://torrage.com/torrent/" + torrentHash + '.' + self.providerType
+            
             urllib.request.urlopen(url)            
         except urllib.error.HTTPError:
             try:
@@ -153,6 +154,8 @@ class TORRENTZProvider(generic.TorrentProvider):
                     url = "http://torcache.net/torrent/" + torrentHash + '.' + self.providerType
                 except urllib.error.HTTPError:
                     logger.log(u"No suitable URL for "+title, logger.DEBUG)
+        
+        logger.log(u"Added for "+title+ " url " + url, logger.DEBUG)
         return (title, url)
 
     def _extract_name_from_filename(self, filename):
