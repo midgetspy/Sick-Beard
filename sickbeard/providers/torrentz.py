@@ -20,7 +20,7 @@
 
 import traceback
 import urllib
-import urllib2
+import urllib.request
 import re
 
 import xml.etree.cElementTree as etree
