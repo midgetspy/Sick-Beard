@@ -39,7 +39,6 @@ from sickbeard.helpers import sanitizeSceneName
 class KICKASSProvider(generic.TorrentProvider):
 
     def __init__(self):
-
         generic.TorrentProvider.__init__(self, "Kickass")
         
         self.supportsBacklog = True
@@ -144,6 +143,7 @@ class KICKASSProvider(generic.TorrentProvider):
                     logger.log(u"Error trying to load KICKASS RSS feed item: "+str(e).decode('utf-8'), logger.ERROR)
                
             logger.log("KICKASS total torrents: %(count)d" % { 'count' : len(results) })
+            
             return results
         except Exception, e:
             logger.log(u"Error trying to load KICKASS: "+str(e).decode('utf-8'), logger.ERROR)
@@ -164,12 +164,7 @@ class KICKASSProvider(generic.TorrentProvider):
             return match.group(1)
         return None
     
-    def downloadResult(self, result):
-        url = result.url
-        try:
-            return self.downloadFromTorrentCache(result.name, url)
-        except Exception, e:
-            return False
+
         
 class KICKASSCache(tvcache.TVCache):
 
@@ -191,7 +186,7 @@ class KICKASSCache(tvcache.TVCache):
     def _parseItem(self, item):
         try:      
             title = helpers.get_xml_text(item.getElementsByTagName('title')[0])
-            url = helpers.get_xml_text(item.getElementsByTagName('torrentLink')[0]).replace('&amp;','&')
+            url = item.getElementsByTagName('enclosure')[0].getAttribute("url").replace('&amp;','&')
 
             if not title or not url:
                 logger.log(u"The XML returned from the KICKASS RSS feed is incomplete, this result is unusable", logger.ERROR)
@@ -205,5 +200,4 @@ class KICKASSCache(tvcache.TVCache):
             logger.log(u"Error trying to parse KICKASS cache: "+str(e).decode('utf-8'), logger.ERROR)
             traceback.print_exc()
             raise 
-
 provider = KICKASSProvider()

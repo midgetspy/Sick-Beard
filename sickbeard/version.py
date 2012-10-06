@@ -1,1 +1,1 @@
-SICKBEARD_VERSION = "torrentProviders with Transmission&utorrent support"
+SICKBEARD_VERSION = "torrentProviders"

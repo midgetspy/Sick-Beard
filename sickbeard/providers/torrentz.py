@@ -123,7 +123,7 @@ class TORRENTZProvider(generic.TorrentProvider):
                 try:
                     (title, url) = self._get_title_and_url(curItem)
                     if not title or not url:
-                        logger.log(u"The XML returned from the " + self.name + " RSS feed is incomplete.", logger.ERROR)
+                        #logger.log(u"The XML returned from the " + self.name + " RSS feed is incomplete: %(title)s %(url)s" % {'title': title, 'url': url}, logger.ERROR)
                         continue
                     results.append(curItem)
                 except Exception, e:
@@ -135,28 +135,35 @@ class TORRENTZProvider(generic.TorrentProvider):
             logger.log(u"Error trying to load " + self.name + ": "+str(e).decode('utf-8'), logger.ERROR)
             traceback.print_exc()
             raise 
-        
-    def _get_title_and_url(self, item):
-        title = item.findtext('title')
-        torrentz_url = item.findtext('guid')
+    
+    def _getTorrentzCache(self, torrentz_url):
         url = ''
         torrentHash = torrentz_url.replace('http://torrentz.eu/','').upper()
         try:
             url = "http://torrage.com/torrent/" + torrentHash + '.' + self.providerType
             
             urllib2.urlopen(url)            
-        except urllib2.HTTPError:
+        except urllib2.HTTPError, eA:
+            logger.log('Cannot find torrage for ' + torrentz_url + ':' + str(eA).decode('utf-8'), logger.DEBUG)
             try:
                 url = "http://zoink.it/torrent/" + torrentHash + '.' + self.providerType
                 urllib2.urlopen(url)                
-            except urllib2.HTTPError:
+            except urllib2.HTTPError, eB:
+                logger.log('Cannot find zoink for ' + torrentz_url + ':' + str(eB).decode('utf-8'), logger.DEBUG)
                 try:
                     url = "http://torcache.net/torrent/" + torrentHash + '.' + self.providerType
                     urllib2.urlopen(url)  
-                except urllib2.HTTPError:
-                    logger.log(u"No suitable URL for "+title, logger.DEBUG)
-                    #no suitabel URL = making it empty
+                except urllib2.HTTPError, eC:
+                    logger.log('Cannot find torcache for ' + torrentz_url + ':' + str(eC).decode('utf-8'), logger.DEBUG)
+                    logger.log(u"No suitable URL for "+torrentz_url, logger.DEBUG)
                     url = ''
+        return url
+        
+    def _get_title_and_url(self, item):
+        title = item.findtext('title')
+        torrentz_url = item.findtext('guid')
+        url = self._getTorrentzCache(torrentz_url)
+
         
         return (title, url)
 
@@ -190,10 +197,11 @@ class TORRENTZCache(tvcache.TVCache):
     def _parseItem(self, item):
         try:      
             title = helpers.get_xml_text(item.getElementsByTagName('title')[0])
-            url = helpers.get_xml_text(item.getElementsByTagName('guid')[0])
+            torrentz_url = helpers.get_xml_text(item.getElementsByTagName('guid')[0])
+            url = self.provider._getTorrentzCache(torrentz_url)
 
             if not title or not url:
-                logger.log(u"The XML returned from the " + self.provider.name + " RSS feed is incomplete, this result is unusable", logger.ERROR)
+                logger.log(u"The XML returned from the " + self.provider.name + " RSS feed is incomplete, this result is unusable: " + torrentz_url, logger.ERROR)
                 return
 
             logger.log(u"Adding item from " + self.provider.name + " RSS to cache: "+title, logger.DEBUG)
