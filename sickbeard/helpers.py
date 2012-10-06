@@ -552,6 +552,9 @@ def chmodAsParent(childPath):
         childMode = fileBitFilter(parentMode)
     else:
         childMode = parentMode
+        
+    if childMode & stat.S_ISVTX:
+        childMode &= ~(stat.S_ISVTX | stat.S_IWOTH)
 
     if childPath_mode == childMode:
         return
@@ -570,11 +573,7 @@ def chmodAsParent(childPath):
         logger.log(u"Failed to set permission for %s to %o" % (childPath, childMode), logger.ERROR)
 
 def fileBitFilter(mode):
-    for bit in [stat.S_IXUSR, stat.S_IXGRP, stat.S_IXOTH, stat.S_ISUID, stat.S_ISGID]:
-        if mode & bit:
-            mode -= bit
-
-    return mode
+    return mode & ~(stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH | stat.S_ISUID | stat.S_ISGID)
 
 def fixSetGroupID(childPath):
     if os.name == 'nt' or os.name == 'ce':
