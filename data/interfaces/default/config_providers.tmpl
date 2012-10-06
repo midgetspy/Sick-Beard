@@ -1,6 +1,8 @@
 #import sickbeard
 #from sickbeard.providers.generic import GenericProvider
-#set global $title="Config - Search Providers"
+
+#from sickbeard.providers import thepiratebay
+#set global $title="Config - Providers"
 #set global $header="Search Providers"
 
 #set global $sbPath="../.."
@@ -62,7 +64,7 @@
                             <a href="$curProvider.url" class="imgLink" target="_new"><img src="$sbRoot/images/providers/$curProvider.imageName()" alt="" title="$curProvider.name" width="16" height="16" /></a>
                             $curProvider.name
                             #if not $curProvider.supportsBacklog then "*" else ""#
-                            #if $curProvider.name == "EZRSS" or $curProvider.name == "DailyTvTorrents" then "**" else ""#
+                            #if $curProvider.name == "EZRSS" or $curProvider.name == "ThePirateBay" or $curProvider.name == "DailyTvTorrents" then "**" else ""#
                             <span class="ui-icon ui-icon-arrowthick-2-n-s pull-right"></span>
                           </li>
                         #end for
@@ -85,7 +87,7 @@
                                 <span class="component-title jumbo">Configure Provider:</span>
                                 <span class="component-desc">
                                     #set $provider_config_list = []
-                                    #for $cur_provider in ("nzbs_r_us", "newzbin", "nzbmatrix","dailytvtorrents", "tvtorrents", "btn"):
+                                    #for $cur_provider in ("nzbs_r_us", "newzbin", "nzbmatrix", "thepiratebay","dailytvtorrents", "tvtorrents", "btn"):
                                         #set $cur_provider_obj = $sickbeard.providers.getProviderClass($cur_provider)
                                         #if $cur_provider_obj.providerType == $GenericProvider.NZB and not $sickbeard.USE_NZBS:
                                             #continue
@@ -201,6 +203,36 @@
                             </label>
                         </div>
                     </div><!-- /tvtorrentsDiv //-->
+					<div class="providerDiv" id="thepiratebayDiv">
+                        <div class="field-pair">
+                            <input type="checkbox" class="enabler" name="thepiratebay_proxy" id="thepiratebay_proxy" #if $sickbeard.THEPIRATEBAY_PROXY then "checked=\"checked\"" else ""#/>
+                            <label class="clearfix" for="thepiratebay_proxy">
+                                <span class="component-title">Access TPB via Proxy</span>
+                                <span class="component-desc">To bypass Country Blocking Mechanism</span>
+                            </label>
+                        </div>
+
+                        <div class="field-pair" id="content_thepiratebay_proxy">
+                            <label class="nocheck clearfix">
+                                <span class="component-title">Proxy URL:</span>
+                                <span class="component-desc">
+	                            	<select name="thepiratebay_proxy_url" id="thepiratebay_proxy_url">
+                                	#for $i in $thepiratebay.proxy_dict.keys():
+                                  		<option value="$thepiratebay.proxy_dict[$i]" #if $thepiratebay.proxy_dict[$i] == $sickbeard.THEPIRATEBAY_PROXY_URL then "selected=\"selected\"" else ""#>$i</option>
+	                            	#end for
+	                            	</select>
+                               	</span>
+                            </label>
+                        </div>
+
+                        <div class="field-pair">
+                            <input type="checkbox" name="thepiratebay_trusted" id="thepiratebay_trusted" #if $sickbeard.THEPIRATEBAY_TRUSTED then "checked=\"checked\"" else ""#/>
+                            <label class="clearfix" for="thepiratebay_trusted">
+                                <span class="component-title">Trusted Download</span>
+                                <span class="component-desc">Download torrent only from trusted uploaders?</span>
+                            </label>
+                        </div>
+					</div>
 
                     <div class="providerDiv" id="btnDiv">
                         <div class="field-pair">

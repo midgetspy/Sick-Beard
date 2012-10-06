@@ -155,6 +155,8 @@ class TORRENTZProvider(generic.TorrentProvider):
                     urllib2.urlopen(url)  
                 except urllib2.HTTPError:
                     logger.log(u"No suitable URL for "+title, logger.DEBUG)
+                    #no suitabel URL = making it empty
+                    url = ''
         
         return (title, url)
 
