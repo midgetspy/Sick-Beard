@@ -1047,6 +1047,7 @@ class ConfigProviders:
     def saveProviders(self, nzbmatrix_username=None, nzbmatrix_apikey=None,
                       nzbs_r_us_uid=None, nzbs_r_us_hash=None, newznab_string=None,
                       tvtorrents_digest=None, tvtorrents_hash=None,
+                      thepiratebay_trusted=None, thepiratebay_proxy=None, thepiratebay_proxy_url=None,
  					  btn_api_key=None,
                       dtt_norar = None, dtt_single = None, newzbin_username=None, newzbin_password=None,
                       provider_order=None):
@@ -1112,6 +1113,8 @@ class ConfigProviders:
                 sickbeard.KICKASS = curEnabled
             elif curProvider == 'torrentz':
                 sickbeard.TORRENTZ = curEnabled
+            elif curProvider == 'thepiratebay':
+                sickbeard.THEPIRATEBAY = curEnabled 
             elif curProvider == 'tvtorrents':
                 sickbeard.TVTORRENTS = curEnabled
             elif curProvider == 'dailytvtorrents':
@@ -1125,6 +1128,22 @@ class ConfigProviders:
 
         sickbeard.TVTORRENTS_DIGEST = tvtorrents_digest.strip()
         sickbeard.TVTORRENTS_HASH = tvtorrents_hash.strip()
+        
+        if thepiratebay_trusted == "on":
+            thepiratebay_trusted = 1
+        else:
+            thepiratebay_trusted = 0
+
+        sickbeard.THEPIRATEBAY_TRUSTED = thepiratebay_trusted
+        
+        if thepiratebay_proxy == "on": 
+            thepiratebay_proxy = 1
+            sickbeard.THEPIRATEBAY_PROXY_URL = thepiratebay_proxy_url.strip()
+        else:
+            thepiratebay_proxy = 0
+            sickbeard.THEPIRATEBAY_PROXY_URL = ""
+            
+        sickbeard.THEPIRATEBAY_PROXY = thepiratebay_proxy    
         
         if dtt_norar == "on":
             dtt_norar = 1
