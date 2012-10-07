@@ -87,7 +87,7 @@
                                 <span class="component-title jumbo">Configure Provider:</span>
                                 <span class="component-desc">
                                     #set $provider_config_list = []
-                                    #for $cur_provider in ("nzbs_r_us", "newzbin", "nzbmatrix", "thepiratebay","dailytvtorrents", "tvtorrents", "btn"):
+                                    #for $cur_provider in ("nzbs_r_us", "newzbin", "nzbmatrix", "thepiratebay","dailytvtorrents", "torrentz", "tvtorrents", "btn"):
                                         #set $cur_provider_obj = $sickbeard.providers.getProviderClass($cur_provider)
                                         #if $cur_provider_obj.providerType == $GenericProvider.NZB and not $sickbeard.USE_NZBS:
                                             #continue
@@ -203,7 +203,8 @@
                             </label>
                         </div>
                     </div><!-- /tvtorrentsDiv //-->
-					<div class="providerDiv" id="thepiratebayDiv">
+                    
+		    <div class="providerDiv" id="thepiratebayDiv">
                         <div class="field-pair">
                             <input type="checkbox" class="enabler" name="thepiratebay_proxy" id="thepiratebay_proxy" #if $sickbeard.THEPIRATEBAY_PROXY then "checked=\"checked\"" else ""#/>
                             <label class="clearfix" for="thepiratebay_proxy">
@@ -232,7 +233,7 @@
                                 <span class="component-desc">Download torrent only from trusted uploaders?</span>
                             </label>
                         </div>
-					</div>
+		     </div><!-- /thepiratebayDiv //-->
 
                     <div class="providerDiv" id="btnDiv">
                         <div class="field-pair">
@@ -257,8 +258,17 @@
                                 <span class="component-desc">Download only single file release?</span>
                             </label>
                         </div>
-					</div>
+		    </div><!-- /dailytvtorrentsDiv //-->
 
+                    <div class="providerDiv" id="torrentzDiv">
+                        <div class="field-pair">
+                            <input type="checkbox" name="torrentz_verified" id="torrentz_verified" #if $sickbeard.TORRENTZ_VERIFIED then "checked=\"checked\"" else ""#/>
+                            <label class="clearfix" for="torrentz_verified">
+                                <span class="component-title">Only Verified</span>
+                                <span class="component-desc">Download only verified torrents?</span>
+                            </label>
+                        </div>
+		    </div><!-- /torrentzDiv //-->
 <!-- end div for editing providers -->
 
                     <input type="submit" class="btn config_submitter" value="Save Changes" /><br/>

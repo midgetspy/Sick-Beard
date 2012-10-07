@@ -1050,6 +1050,7 @@ class ConfigProviders:
                       thepiratebay_trusted=None, thepiratebay_proxy=None, thepiratebay_proxy_url=None,
  					  btn_api_key=None,
                       dtt_norar = None, dtt_single = None, newzbin_username=None, newzbin_password=None,
+                      torrentz_verified = None,
                       provider_order=None):
 
         results = []
@@ -1157,7 +1158,17 @@ class ConfigProviders:
         else:
             dtt_single = 0
 
-        sickbeard.DTT_SINGLE = dtt_single    
+        sickbeard.DTT_SINGLE = dtt_single
+        
+        
+            
+        if torrentz_verified == "on":
+            torrentz_verified = 1
+        else:
+            torrentz_verified = 0
+
+        sickbeard.TORRENTZ_VERIFIED = torrentz_verified
+        
         sickbeard.BTN_API_KEY = btn_api_key.strip()
 
         sickbeard.NZBSRUS_UID = nzbs_r_us_uid.strip()

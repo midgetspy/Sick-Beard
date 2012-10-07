@@ -94,10 +94,16 @@ class TORRENTZProvider(generic.TorrentProvider):
             if search_params:
                 params.update(search_params)
 
-            if not 'episode' in params:
-                searchURL = self.url + "feed?q=%(show_name)s S%(season)02d" % params
+            
+            if sickbeard.TORRENTZ_VERIFIED:
+                params.update({"baseurl" : "feed_verified"})
             else:
-                searchURL = self.url + "feed?q=%(show_name)s S%(season)02dE%(episode)02d" % params
+                params.update({"baseurl" : "feed"})
+
+            if not 'episode' in params:
+                searchURL = self.url + "%(baseurl)s?q=%(show_name)s S%(season)02d" % params
+            else:
+                searchURL = self.url + "%(baseurl)s?q=%(show_name)s S%(season)02dE%(episode)02d" % params
                 
             searchURL = searchURL.lower().replace(" ", "+")
             
@@ -187,8 +193,14 @@ class TORRENTZCache(tvcache.TVCache):
         self.minTime = 15
 
     def _getRSSData(self):
-        url = self.provider.url + 'feedA?q='
-
+        params = { }
+        
+        if sickbeard.TORRENTZ_VERIFIED:
+            params.update({"baseurl" : "feed_verified"})
+        else:
+            params.update({"baseurl" : "feedA"})
+        url = self.provider.url + '%(baseurl)s?q=' % params
+               
         logger.log(self.provider.name + u" cache update URL: " + url)
 
         data = self.provider.getURL(url)
