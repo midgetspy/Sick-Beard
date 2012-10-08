@@ -213,7 +213,7 @@ class TORRENTZCache(tvcache.TVCache):
             url = self.provider._getTorrentzCache(torrentz_url)
 
             if not title or not url:
-                logger.log(u"The XML returned from the " + self.provider.name + " RSS feed is incomplete, this result is unusable: " + torrentz_url, logger.ERROR)
+                #logger.log(u"The XML returned from the " + self.provider.name + " RSS feed is incomplete, this result is unusable: " + torrentz_url, logger.ERROR)
                 return
 
             logger.log(u"Adding item from " + self.provider.name + " RSS to cache: "+title, logger.DEBUG)
