@@ -120,7 +120,6 @@ class GenericProvider:
         """
         Save the result to disk.
         """
-
         logger.log(u"Downloading a result from " + self.name+" at " + result.url)
 
         data = self.getURL(result.url)
@@ -388,3 +387,5 @@ class TorrentProvider(GenericProvider):
         GenericProvider.__init__(self, name)
 
         self.providerType = GenericProvider.TORRENT
+
+

@@ -33,7 +33,30 @@ $(document).ready(function(){
         }
 
     }
+    $.fn.torrent_method_handler = function() {
+        
+        var selectedProvider = $('#torrent_method :selected').val();
 
+        if (selectedProvider == "blackhole") {
+            $('#t_blackhole_settings').show();
+            $('#torrent_settings').hide();
+        } else if (selectedProvider == "utorrent"){
+            $('#t_blackhole_settings').hide();
+            $('#torrent_settings').show();
+            $('#torrent_directory').hide();
+            $('#host_desc').text('uTorrent Host');
+            $('#username_desc').text('uTorrent Username');
+            $('#password_desc').text('uTorrent Password');
+        } else if (selectedProvider == "transmission"){
+            $('#t_blackhole_settings').hide();
+            $('#torrent_settings').show();
+            $('#torrent_directory').show();
+            $('#host_desc').html('Transmission Host');
+            $('#username_desc').text('Transmission Username');
+            $('#password_desc').text('Transmission Password');
+            $('#directory_desc').text('Transmission Directory');
+        }
+    }
     $('#nzb_method').change($(this).nzb_method_handler);
 
     $(this).nzb_method_handler();
@@ -49,10 +72,18 @@ $(document).ready(function(){
         function (data){ $('#testSABnzbd-result').html(data); });
     });
     
-    $('#use_torrents').click(function(){
-    	toggle_torrent_title();
+	$('#torrent_method').change($(this).torrent_method_handler);
+	$(this).torrent_method_handler(); 
+	
+	$('#testTorrent').click(function(){
+        $('#testTorrent-result').html(loading);
+        var torrent_method = $('#torrent_method :selected').val();        
+        var torrent_host = $("input=[name='torrent_host']").val();
+        var torrent_username = $("input=[name='torrent_username']").val();
+        var torrent_password = $("input=[name='torrent_password']").val();
+        
+        $.get(sbRoot+"/home/testTorrent", {'torrent_method': torrent_method, 'host': torrent_host, 'username': torrent_username, 'password': torrent_password}, 
+        function (data){ $('#testTorrent-result').html(data); });
     });
-    
-    toggle_torrent_title();
     
 });

@@ -18,12 +18,16 @@
 
 __all__ = ['ezrss',
            'tvtorrents',
+           'kickass',
+           'torrentz',
            'nzbmatrix',
            'nzbs_org_old',
            'nzbsrus',
            'womble',
            'newzbin',
            'btn',
+           'dtt',
+           'thepiratebay',
            ]
 
 import sickbeard

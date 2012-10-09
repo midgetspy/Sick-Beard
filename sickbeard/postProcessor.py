@@ -730,6 +730,10 @@ class PostProcessor(object):
 
         # set the status of the episodes
         for curEp in [ep_obj] + ep_obj.relatedEps:
+            splitStatus = common.Quality.splitCompositeStatus( curEp.status )
+            if splitStatus[0] == common.DOWNLOADED:
+                self._log( u"Skipped setting status to SNATCHED. Episode already DOWNLOADED", logger.DEBUG )
+                continue
             curEp.status = common.Quality.compositeStatus(common.SNATCHED, new_ep_quality)
 
         # check for an existing file
@@ -741,6 +745,7 @@ class PostProcessor(object):
             # if there's an existing file that we don't want to replace stop here
             if existing_file_status in (PostProcessor.EXISTS_LARGER, PostProcessor.EXISTS_SAME):
                 self._log(u"File exists and we are not going to replace it because it's not smaller, quitting post-processing", logger.DEBUG)
+                self._log(u"File is already saved as " + ep_obj.location + ", which is not smaller. No furter operation required")
                 return False
             elif existing_file_status == PostProcessor.EXISTS_SMALLER:
                 self._log(u"File exists and is smaller than the new file so I'm going to replace it", logger.DEBUG)

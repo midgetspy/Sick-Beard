@@ -32,7 +32,7 @@ import cherrypy.lib
 
 import sickbeard
 
-from sickbeard import config, sab
+from sickbeard import config, sab, utorrent, transmission
 from sickbeard import history, notifiers, processTV
 from sickbeard import ui
 from sickbeard import logger, helpers, exceptions, classes, db
@@ -764,7 +764,8 @@ class ConfigSearch:
     @cherrypy.expose
     def saveSearch(self, use_nzbs=None, use_torrents=None, nzb_dir=None, sab_username=None, sab_password=None,
                        sab_apikey=None, sab_category=None, sab_host=None, nzbget_password=None, nzbget_category=None, nzbget_host=None,
-                       torrent_dir=None, nzb_method=None, usenet_retention=None, search_frequency=None, download_propers=None):
+                       torrent_dir=None, torrent_username=None, torrent_password=None, torrent_host=None, torrent_path=None, torrent_ratio=None, torrent_paused=None,
+                       nzb_method=None, torrent_method=None, usenet_retention=None, search_frequency=None, download_propers=None):
 
         results = []
 
@@ -796,7 +797,8 @@ class ConfigSearch:
 
         sickbeard.USE_NZBS = use_nzbs
         sickbeard.USE_TORRENTS = use_torrents
-
+        sickbeard.TORRENT_METHOD = torrent_method
+        
         sickbeard.NZB_METHOD = nzb_method
         sickbeard.USENET_RETENTION = int(usenet_retention)
 
@@ -807,6 +809,22 @@ class ConfigSearch:
         sickbeard.SAB_APIKEY = sab_apikey.strip()
         sickbeard.SAB_CATEGORY = sab_category
 
+        sickbeard.TORRENT_USERNAME = torrent_username
+        sickbeard.TORRENT_PASSWORD = torrent_password
+        sickbeard.TORRENT_HOST = torrent_host
+        sickbeard.TORRENT_PATH = torrent_path
+        sickbeard.TORRENT_RATIO = torrent_ratio
+        if torrent_paused == "on":
+            torrent_paused = 1
+        else:
+            torrent_paused = 0
+        sickbeard.TORRENT_PAUSED = torrent_paused
+        if torrent_host and not re.match('https?://.*', torrent_host):
+            torrent_host = 'http://' + torrent_host
+        
+        if not torrent_host.endswith('/'):
+            torrent_host = torrent_host + '/'
+            
         if sab_host and not re.match('https?://.*', sab_host):
             sab_host = 'http://' + sab_host
 
@@ -1029,8 +1047,10 @@ class ConfigProviders:
     def saveProviders(self, nzbmatrix_username=None, nzbmatrix_apikey=None,
                       nzbs_r_us_uid=None, nzbs_r_us_hash=None, newznab_string=None,
                       tvtorrents_digest=None, tvtorrents_hash=None,
+                      thepiratebay_trusted=None, thepiratebay_proxy=None, thepiratebay_proxy_url=None,
  					  btn_api_key=None,
-                      newzbin_username=None, newzbin_password=None,
+                      dtt_norar = None, dtt_single = None, newzbin_username=None, newzbin_password=None,
+                      torrentz_verified = None,
                       provider_order=None):
 
         results = []
@@ -1090,8 +1110,16 @@ class ConfigProviders:
                 sickbeard.WOMBLE = curEnabled
             elif curProvider == 'ezrss':
                 sickbeard.EZRSS = curEnabled
+            elif curProvider == 'kickass':
+                sickbeard.KICKASS = curEnabled
+            elif curProvider == 'torrentz':
+                sickbeard.TORRENTZ = curEnabled
+            elif curProvider == 'thepiratebay':
+                sickbeard.THEPIRATEBAY = curEnabled 
             elif curProvider == 'tvtorrents':
                 sickbeard.TVTORRENTS = curEnabled
+            elif curProvider == 'dailytvtorrents':
+                sickbeard.DTT = curEnabled
             elif curProvider == 'btn':
                 sickbeard.BTN = curEnabled
             elif curProvider in newznabProviderDict:
@@ -1101,7 +1129,46 @@ class ConfigProviders:
 
         sickbeard.TVTORRENTS_DIGEST = tvtorrents_digest.strip()
         sickbeard.TVTORRENTS_HASH = tvtorrents_hash.strip()
+        
+        if thepiratebay_trusted == "on":
+            thepiratebay_trusted = 1
+        else:
+            thepiratebay_trusted = 0
 
+        sickbeard.THEPIRATEBAY_TRUSTED = thepiratebay_trusted
+        
+        if thepiratebay_proxy == "on": 
+            thepiratebay_proxy = 1
+            sickbeard.THEPIRATEBAY_PROXY_URL = thepiratebay_proxy_url.strip()
+        else:
+            thepiratebay_proxy = 0
+            sickbeard.THEPIRATEBAY_PROXY_URL = ""
+            
+        sickbeard.THEPIRATEBAY_PROXY = thepiratebay_proxy    
+        
+        if dtt_norar == "on":
+            dtt_norar = 1
+        else:
+            dtt_norar = 0
+
+        sickbeard.DTT_NORAR = dtt_norar
+            
+        if dtt_single == "on":
+            dtt_single = 1
+        else:
+            dtt_single = 0
+
+        sickbeard.DTT_SINGLE = dtt_single
+        
+        
+            
+        if torrentz_verified == "on":
+            torrentz_verified = 1
+        else:
+            torrentz_verified = 0
+
+        sickbeard.TORRENTZ_VERIFIED = torrentz_verified
+        
         sickbeard.BTN_API_KEY = btn_api_key.strip()
 
         sickbeard.NZBSRUS_UID = nzbs_r_us_uid.strip()
@@ -1890,7 +1957,7 @@ class ErrorLogs:
         finalData = []
 
         numLines = 0
-        lastLine = False
+        setAsideLines = []
         numToShow = min(maxLines, len(data))
 
         for x in reversed(data):
@@ -1900,19 +1967,19 @@ class ErrorLogs:
 
             if match:
                 level = match.group(6)
-                if level not in logger.reverseNames:
-                    lastLine = False
+                if level not in logger.reverseNames or logger.reverseNames[level] < minLevel:
+                    setAsideLines = []
                     continue
 
-                if logger.reverseNames[level] >= minLevel:
-                    lastLine = True
-                    finalData.append(x)
-                else:
-                    lastLine = False
-                    continue
+                finalData.append(x)
+                for y in setAsideLines:
+                    finalData.append(y)
+                
+                setAsideLines = []
 
-            elif lastLine:
-                finalData.append("AA"+x)
+            else:
+                setAsideLines.append(x)
+                continue
 
             numLines += 1
 
@@ -1970,6 +2037,18 @@ class Home:
         else:
             return "Unable to connect to host"
 
+    @cherrypy.expose
+    def testTorrent(self, torrent_method=None, host=None, username=None, password=None):
+        if not host.endswith("/"):
+            host = host + "/"
+        
+        if torrent_method == 'utorrent':
+            connection, accesMsg = utorrent.testAuthentication(host, username, password)
+        elif torrent_method == 'transmission':
+            connection, accesMsg = transmission.testAuthentication(host, username, password)
+
+        return accesMsg   
+    
     @cherrypy.expose
     def testGrowl(self, host=None, password=None):
         cherrypy.response.headers['Cache-Control'] = "max-age=0,no-cache,no-store"

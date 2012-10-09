@@ -31,6 +31,8 @@ from sickbeard import nzbget
 from sickbeard import history
 from sickbeard import notifiers
 from sickbeard import nzbSplitter
+from sickbeard import utorrent
+from sickbeard import transmission
 from sickbeard import ui
 from sickbeard import encodingKludge as ek
 from sickbeard import providers
@@ -114,9 +116,15 @@ def snatchEpisode(result, endStatus=SNATCHED):
             logger.log(u"Unknown NZB action specified in config: " + sickbeard.NZB_METHOD, logger.ERROR)
             dlResult = False
 
-    # torrents are always saved to disk
     elif result.resultType == "torrent":
-        dlResult = _downloadResult(result)
+        # torrents are always saved to disk
+        if sickbeard.TORRENT_METHOD == "blackhole": 
+            dlResult = _downloadResult(result)
+       # torrents are sending to torrent client
+        elif sickbeard.TORRENT_METHOD == "utorrent":
+            dlResult = utorrent.sendTORRENT(result)
+        elif sickbeard.TORRENT_METHOD == "transmission":
+            dlResult = transmission.sendTORRENT(result)
     else:
         logger.log(u"Unknown result type, unable to download it", logger.ERROR)
         dlResult = False
