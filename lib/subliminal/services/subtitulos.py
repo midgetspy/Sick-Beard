@@ -66,7 +66,7 @@ class Subtitulos(ServiceBase):
         subtitles = []
         for sub in soup('div', {'id': 'version'}):
             sub_keywords = split_keyword(self.release_pattern.search(sub.find('p', {'class': 'title-sub'}).contents[1]).group(1).lower())
-            if keywords and not keywords & sub_keywords:
+            if not keywords & sub_keywords:
                 logger.debug(u'None of subtitle keywords %r in %r' % (sub_keywords, keywords))
                 continue
             for html_language in sub.find_all_next('ul', {'class': 'sslist'}):
