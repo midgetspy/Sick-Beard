@@ -30,7 +30,8 @@ from threading import Lock
 
 # apparently py2exe won't build these unless they're imported somewhere
 from sickbeard import providers, metadata
-from providers import ezrss, tvtorrents, btn, nzbmatrix, nzbsrus, newznab, womble, newzbin, nzbs_org_old
+from providers import kickass, torrentz, dtt
+from providers import ezrss, tvtorrents, btn,thepiratebay, nzbmatrix, nzbsrus, newznab, womble, newzbin, nzbs_org_old
 from sickbeard.config import CheckSection, check_setting_int, check_setting_str, ConfigMigrator
 
 from sickbeard import searchCurrent, searchBacklog, showUpdater, versionChecker, properFinder, autoPostProcesser
@@ -139,6 +140,7 @@ TVDB_API_PARMS = {}
 
 USE_NZBS = None
 USE_TORRENTS = None
+TORRENT_METHOD = None
 
 NZB_METHOD = None
 NZB_DIR = None
@@ -153,9 +155,23 @@ MIN_SEARCH_FREQUENCY = 10
 DEFAULT_SEARCH_FREQUENCY = 60
 
 EZRSS = False
+DTT = False
+DTT_NORAR = False
+DTT_SINGLE = False
+
+THEPIRATEBAY = False
+THEPIRATEBAY_TRUSTED = False
+THEPIRATEBAY_PROXY = False
+THEPIRATEBAY_PROXY_URL = None
+
 TVTORRENTS = False
 TVTORRENTS_DIGEST = None
 TVTORRENTS_HASH = None
+
+KICKASS = False
+
+TORRENTZ = False
+TORRENTZ_VERIFIED = False
 
 BTN = False
 BTN_API_KEY = None
@@ -197,6 +213,13 @@ SAB_HOST = ''
 NZBGET_PASSWORD = None
 NZBGET_CATEGORY = None
 NZBGET_HOST = None
+
+TORRENT_USERNAME = None
+TORRENT_PASSWORD = None
+TORRENT_HOST = ''
+TORRENT_PATH = ''
+TORRENT_RATIO = ''
+TORRENT_PAUSED = False
 
 USE_XBMC = False
 XBMC_NOTIFY_ONSNATCH = False
@@ -305,8 +328,9 @@ def initialize(consoleLogging=True):
     with INIT_LOCK:
 
         global LOG_DIR, WEB_PORT, WEB_LOG, WEB_ROOT, WEB_USERNAME, WEB_PASSWORD, WEB_HOST, WEB_IPV6, USE_API, API_KEY, ENABLE_HTTPS, HTTPS_CERT, HTTPS_KEY, \
-                USE_NZBS, USE_TORRENTS, NZB_METHOD, NZB_DIR, DOWNLOAD_PROPERS, \
+                USE_NZBS, USE_TORRENTS, NZB_METHOD, NZB_DIR,TORRENT_METHOD, DOWNLOAD_PROPERS, \
                 SAB_USERNAME, SAB_PASSWORD, SAB_APIKEY, SAB_CATEGORY, SAB_HOST, \
+                TORRENT_USERNAME, TORRENT_PASSWORD, TORRENT_HOST, TORRENT_PATH, TORRENT_RATIO, TORRENT_PAUSED, \
                 NZBGET_PASSWORD, NZBGET_CATEGORY, NZBGET_HOST, currentSearchScheduler, backlogSearchScheduler, \
                 USE_XBMC, XBMC_NOTIFY_ONSNATCH, XBMC_NOTIFY_ONDOWNLOAD, XBMC_UPDATE_FULL, \
                 XBMC_UPDATE_LIBRARY, XBMC_HOST, XBMC_USERNAME, XBMC_PASSWORD, \
@@ -314,7 +338,8 @@ def initialize(consoleLogging=True):
                 USE_PLEX, PLEX_NOTIFY_ONSNATCH, PLEX_NOTIFY_ONDOWNLOAD, PLEX_UPDATE_LIBRARY, \
                 PLEX_SERVER_HOST, PLEX_HOST, PLEX_USERNAME, PLEX_PASSWORD, \
                 showUpdateScheduler, __INITIALIZED__, LAUNCH_BROWSER, showList, loadingShowList, \
-                NZBS, NZBS_UID, NZBS_HASH, EZRSS, TVTORRENTS, TVTORRENTS_DIGEST, TVTORRENTS_HASH, BTN, BTN_API_KEY, TORRENT_DIR, USENET_RETENTION, SOCKET_TIMEOUT, \
+                KICKASS, TORRENTZ, TORRENTZ_VERIFIED, \
+                NZBS, NZBS_UID, NZBS_HASH, EZRSS, DTT, DTT_NORAR, DTT_SINGLE, THEPIRATEBAY, THEPIRATEBAY_TRUSTED, THEPIRATEBAY_PROXY, THEPIRATEBAY_PROXY_URL, TVTORRENTS, TVTORRENTS_DIGEST, TVTORRENTS_HASH, BTN, BTN_API_KEY, TORRENT_DIR, USENET_RETENTION, SOCKET_TIMEOUT, \
                 SEARCH_FREQUENCY, DEFAULT_SEARCH_FREQUENCY, BACKLOG_SEARCH_FREQUENCY, \
                 QUALITY_DEFAULT, FLATTEN_FOLDERS_DEFAULT, STATUS_DEFAULT, \
                 GROWL_NOTIFY_ONSNATCH, GROWL_NOTIFY_ONDOWNLOAD, TWITTER_NOTIFY_ONSNATCH, TWITTER_NOTIFY_ONDOWNLOAD, \
@@ -434,13 +459,16 @@ def initialize(consoleLogging=True):
 
         TVDB_BASE_URL = 'http://www.thetvdb.com/api/' + TVDB_API_KEY
 
-        USE_NZBS = bool(check_setting_int(CFG, 'General', 'use_nzbs', 1))
-        USE_TORRENTS = bool(check_setting_int(CFG, 'General', 'use_torrents', 0))
+        USE_NZBS = bool(check_setting_int(CFG, 'General', 'use_nzbs', 0))
+        USE_TORRENTS = bool(check_setting_int(CFG, 'General', 'use_torrents', 1))
 
         NZB_METHOD = check_setting_str(CFG, 'General', 'nzb_method', 'blackhole')
         if NZB_METHOD not in ('blackhole', 'sabnzbd', 'nzbget'):
             NZB_METHOD = 'blackhole'
-
+        
+        TORRENT_METHOD = check_setting_str(CFG, 'General', 'torrent_method', 'blackhole')
+        if TORRENT_METHOD not in ('blackhole', 'utorrent', 'transmission'):
+            TORRENT_METHOD = 'blackhole'
         DOWNLOAD_PROPERS = bool(check_setting_int(CFG, 'General', 'download_propers', 1))
 
         USENET_RETENTION = check_setting_int(CFG, 'General', 'usenet_retention', 500)
@@ -463,13 +491,27 @@ def initialize(consoleLogging=True):
         EZRSS = bool(check_setting_int(CFG, 'General', 'use_torrent', 0))
         if not EZRSS:
             EZRSS = bool(check_setting_int(CFG, 'EZRSS', 'ezrss', 0))
+        
+        DTT = bool(check_setting_int(CFG, 'DTT', 'dtt', 0))
+        DTT_NORAR = bool(check_setting_int(CFG, 'DTT', 'dtt_norar', 0))
+        DTT_SINGLE = bool(check_setting_int(CFG, 'DTT', 'dtt_single', 0))
             
         TVTORRENTS = bool(check_setting_int(CFG, 'TVTORRENTS', 'tvtorrents', 0))    
         TVTORRENTS_DIGEST = check_setting_str(CFG, 'TVTORRENTS', 'tvtorrents_digest', '')
         TVTORRENTS_HASH = check_setting_str(CFG, 'TVTORRENTS', 'tvtorrents_hash', '')
 
+        THEPIRATEBAY = bool(check_setting_int(CFG, 'THEPIRATEBAY', 'thepiratebay', 0)) 
+        THEPIRATEBAY_TRUSTED = bool(check_setting_int(CFG, 'THEPIRATEBAY', 'thepiratebay_trusted', 0))         
+        THEPIRATEBAY_PROXY = bool(check_setting_int(CFG, 'THEPIRATEBAY', 'thepiratebay_proxy', 0))
+        THEPIRATEBAY_PROXY_URL = check_setting_str(CFG, 'THEPIRATEBAY', 'thepiratebay_proxy_url', '')
+
         BTN = bool(check_setting_int(CFG, 'BTN', 'btn', 0))    
         BTN_API_KEY = check_setting_str(CFG, 'BTN', 'btn_api_key', '')
+
+        KICKASS = bool(check_setting_int(CFG, 'KICKASS', 'kickass', 0))
+        
+        TORRENTZ = bool(check_setting_int(CFG, 'TORRENTZ', 'torrentz', 0))    
+        TORRENTZ_VERIFIED = bool(check_setting_int(CFG, 'TORRENTZ', 'torrentz_verified', 0))    
 
         NZBS = bool(check_setting_int(CFG, 'NZBs', 'nzbs', 0))
         NZBS_UID = check_setting_str(CFG, 'NZBs', 'nzbs_uid', '')
@@ -498,6 +540,13 @@ def initialize(consoleLogging=True):
         NZBGET_PASSWORD = check_setting_str(CFG, 'NZBget', 'nzbget_password', 'tegbzn6789')
         NZBGET_CATEGORY = check_setting_str(CFG, 'NZBget', 'nzbget_category', 'tv')
         NZBGET_HOST = check_setting_str(CFG, 'NZBget', 'nzbget_host', '')
+        
+        TORRENT_USERNAME = check_setting_str(CFG, 'TORRENT', 'torrent_username', '')
+        TORRENT_PASSWORD = check_setting_str(CFG, 'TORRENT', 'torrent_password', '')
+        TORRENT_HOST = check_setting_str(CFG, 'TORRENT', 'torrent_host', '')
+        TORRENT_PATH = check_setting_str(CFG, 'TORRENT', 'torrent_path', '')
+        TORRENT_RATIO = check_setting_str(CFG, 'TORRENT', 'torrent_ratio', '')
+        TORRENT_PAUSED = bool(check_setting_int(CFG, 'TORRENT', 'torrent_paused', 0)) 
 
         USE_XBMC = bool(check_setting_int(CFG, 'XBMC', 'use_xbmc', 0)) 
         XBMC_NOTIFY_ONSNATCH = bool(check_setting_int(CFG, 'XBMC', 'xbmc_notify_onsnatch', 0))
@@ -942,6 +991,7 @@ def save_config():
     new_config['General']['use_nzbs'] = int(USE_NZBS)
     new_config['General']['use_torrents'] = int(USE_TORRENTS)
     new_config['General']['nzb_method'] = NZB_METHOD
+    new_config['General']['torrent_method'] = TORRENT_METHOD
     new_config['General']['usenet_retention'] = int(USENET_RETENTION)
     new_config['General']['search_frequency'] = int(SEARCH_FREQUENCY)
     new_config['General']['download_propers'] = int(DOWNLOAD_PROPERS)
@@ -991,6 +1041,24 @@ def save_config():
     new_config['TVTORRENTS']['tvtorrents_digest'] = TVTORRENTS_DIGEST
     new_config['TVTORRENTS']['tvtorrents_hash'] = TVTORRENTS_HASH
 
+    new_config['KICKASS'] = {}
+    new_config['KICKASS']['kickass'] = int(KICKASS)
+
+    new_config['TORRENTZ'] = {}
+    new_config['TORRENTZ']['torrentz'] = int(TORRENTZ)
+    new_config['TORRENTZ']['torrentz_verified'] = int(TORRENTZ_VERIFIED)
+    
+    new_config['THEPIRATEBAY'] = {}
+    new_config['THEPIRATEBAY']['thepiratebay'] = int(THEPIRATEBAY)
+    new_config['THEPIRATEBAY']['thepiratebay_trusted'] = int(THEPIRATEBAY_TRUSTED)    
+    new_config['THEPIRATEBAY']['thepiratebay_proxy'] = int(THEPIRATEBAY_PROXY)
+    new_config['THEPIRATEBAY']['thepiratebay_proxy_url'] = THEPIRATEBAY_PROXY_URL
+    
+    new_config['DTT'] = {}
+    new_config['DTT']['dtt'] = int(DTT)
+    new_config['DTT']['dtt_norar'] = int(DTT_NORAR)
+    new_config['DTT']['dtt_single'] = int(DTT_SINGLE)
+    
     new_config['BTN'] = {}
     new_config['BTN']['btn'] = int(BTN)
     new_config['BTN']['btn_api_key'] = BTN_API_KEY
@@ -1029,6 +1097,14 @@ def save_config():
     new_config['NZBget']['nzbget_password'] = NZBGET_PASSWORD
     new_config['NZBget']['nzbget_category'] = NZBGET_CATEGORY
     new_config['NZBget']['nzbget_host'] = NZBGET_HOST
+    
+    new_config['TORRENT'] = {}
+    new_config['TORRENT']['torrent_username'] = TORRENT_USERNAME
+    new_config['TORRENT']['torrent_password'] = TORRENT_PASSWORD
+    new_config['TORRENT']['torrent_host'] = TORRENT_HOST
+    new_config['TORRENT']['torrent_path'] = TORRENT_PATH
+    new_config['TORRENT']['torrent_ratio'] = TORRENT_RATIO
+    new_config['TORRENT']['torrent_paused'] = int(TORRENT_PAUSED)
 
     new_config['XBMC'] = {}
     new_config['XBMC']['use_xbmc'] = int(USE_XBMC)

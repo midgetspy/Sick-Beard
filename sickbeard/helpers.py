@@ -501,24 +501,36 @@ def rename_ep_file(cur_path, new_path):
     return True
 
 
-def delete_empty_folders(check_empty_dir):
+def delete_empty_folders(check_empty_dir, keep_dir=None):
     """
     Walks backwards up the path and deletes any empty folders found.
-    
+
     check_empty_dir: The path to clean (absolute path to a folder)
+    keep_dir: Clean until this path is reached
     """
-    
-    logger.log(u"Trying to clean any empty folders under "+check_empty_dir)
-    
+
+    # treat check_empty_dir as empty when it only contains these items
+    ignore_items = []
+
+    logger.log(u"Trying to clean any empty folders under " + check_empty_dir)
+
     # as long as the folder exists and doesn't contain any files, delete it
-    while os.path.isdir(check_empty_dir) and not os.listdir(check_empty_dir):
-        logger.log(u"Deleting empty folder: "+check_empty_dir)
-        try:
-            os.rmdir(check_empty_dir)
-        except (WindowsError, OSError), e:
-            logger.log(u"Unable to delete "+check_empty_dir+": "+repr(e)+" / "+str(e), logger.WARNING)
+    while ek.ek(os.path.isdir, check_empty_dir) and check_empty_dir != keep_dir:
+
+        check_files = ek.ek(os.listdir, check_empty_dir)
+
+        if not check_files or (len(check_files) <= len(ignore_items) and all([check_file in ignore_items for check_file in check_files])):
+            # directory is empty or contains only ignore_items
+            try:
+                logger.log(u"Deleting empty folder: " + check_empty_dir)
+                # need shutil.rmtree when ignore_items is really implemented
+                ek.ek(os.rmdir, check_empty_dir)
+            except (WindowsError, OSError), e:
+                logger.log(u"Unable to delete " + check_empty_dir + ": " + repr(e) + " / " + str(e), logger.WARNING)
+                break
+            check_empty_dir = ek.ek(os.path.dirname, check_empty_dir)
+        else:
             break
-        check_empty_dir = os.path.dirname(check_empty_dir)
 
 
 def chmodAsParent(childPath):
