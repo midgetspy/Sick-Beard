@@ -289,11 +289,11 @@ class GitUpdateManager(UpdateManager):
         branch_info = self._run_git('symbolic-ref -q HEAD')
 
         if not branch_info or not branch_info[0]:
-            return 'master'
+            return 'torrentProviders'
 
         branch = branch_info[0].strip().replace('refs/heads/', '', 1)
 
-        return branch or 'master'
+        return branch or 'torrentProviders'
 
 
     def _check_github_for_update(self):
@@ -339,9 +339,9 @@ class GitUpdateManager(UpdateManager):
             return
 
         if self._newest_commit_hash:
-            url = 'http://github.com/midgetspy/Sick-Beard/compare/'+self._cur_commit_hash+'...'+self._newest_commit_hash
+            url = 'http://github.com/junalmeida/Sick-Beard/compare/'+self._cur_commit_hash+'...'+self._newest_commit_hash
         else:
-            url = 'http://github.com/midgetspy/Sick-Beard/commits/'
+            url = 'http://github.com/junalmeida/Sick-Beard/commits/'
 
         new_str = 'There is a <a href="'+url+'" onclick="window.open(this.href); return false;">newer version available</a> ('+message+')'
         new_str += "&mdash; <a href=\""+self.get_update_url()+"\">Update Now</a>"
