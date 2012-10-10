@@ -96,7 +96,7 @@ class TORRENTZProvider(generic.TorrentProvider):
 
             
             if sickbeard.TORRENTZ_VERIFIED:
-                params.update({"baseurl" : "feed_verified"})
+                params.update({"baseurl" : "feed_verifiedP"})
             else:
                 params.update({"baseurl" : "feed"})
 
@@ -105,7 +105,7 @@ class TORRENTZProvider(generic.TorrentProvider):
             else:
                 searchURL = self.url + "%(baseurl)s?q=%(show_name)s S%(season)02dE%(episode)02d" % params
                 
-            searchURL = searchURL.lower().replace(" ", "+")
+            searchURL = searchURL.replace(" ", "+")
             
             logger.log(u"Search string: " + searchURL)
 
