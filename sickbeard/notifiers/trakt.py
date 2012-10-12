@@ -17,7 +17,7 @@
 # along with Sick Beard.  If not, see <http://www.gnu.org/licenses/>.
 
 
-import urllib2
+import urllib2, base64
 
 from hashlib import sha1
 
@@ -124,16 +124,13 @@ class TraktNotifier:
         # replace the API string with what we found
         method = method.replace("%API%", api)
 
-        data["username"] = username
-        data["password"] = password
-
-        # take the URL params and make a json object out of them
-        encoded_data = json.dumps(data);
-
         # request the URL from trakt and parse the result as json
         try:
-            logger.log("trakt_notifier: Calling method http://api.trakt.tv/" + method + ", with data" + encoded_data, logger.DEBUG)
-            stream = urllib2.urlopen("http://api.trakt.tv/" + method, encoded_data)
+            logger.log("trakt_notifier: Calling method http://api.trakt.tv/" + method + ", with authentication data" + username + ":" + password, logger.DEBUG)
+            request = urllib2.Request("http://api.trakt.tv/" + method)
+            base64string = base64.encodestring('%s:%s' % (username, password)).replace('\n', '')
+            request.add_header("Authorization", "Basic %s" % base64string)
+            stream = urllib2.urlopen(request)
             resp = stream.read()
 
             resp = json.loads(resp)
