@@ -34,12 +34,14 @@ except:
     print "The Python module Cheetah is required"
     sys.exit(1)
 
+import os
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), 'lib')))
+
 # We only need this for compiling an EXE and I will just always do that on 2.6+
 if sys.hexversion >= 0x020600F0:
     from multiprocessing import freeze_support
 
 import locale
-import os
 import threading
 import time
 import signal

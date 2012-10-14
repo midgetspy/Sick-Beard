@@ -422,10 +422,10 @@ class AddSubtitlesSupport(FixAirByDateSetting):
         return self.checkDBVersion() >= 10
 
     def execute(self):
-        self.connection.action('ALTER TABLE tv_shows ADD subtitles INTEGER NOT NULL DEFAULT 0')
-        self.connection.action('ALTER TABLE tv_episodes ADD subtitles TEXT NOT NULL DEFAULT ""')
-        self.connection.action('ALTER TABLE tv_episodes ADD subtitles_searchcount INTEGER NOT NULL DEFAULT 0')
-        self.connection.action('ALTER TABLE tv_episodes ADD subtitles_lastsearch TIMESTAMP NOT NULL DEFAULT "' + str(datetime.datetime.min) + '"')
+        self.addColumn("tv_shows", "subtitles")
+        self.addColumn("tv_episodes", "subtitles", "TEXT", "")
+        self.addColumn("tv_episodes", "subtitles_searchcount")
+        self.addColumn("tv_episodes", "subtitles_lastsearch", "TIMESTAMP", str(datetime.datetime.min))
         self.incDBVersion()
 
 class AddSizeAndSceneNameFields(FixAirByDateSetting):
