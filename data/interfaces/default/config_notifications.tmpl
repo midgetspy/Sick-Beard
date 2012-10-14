@@ -740,6 +740,54 @@
                     </fieldset>
                 </div><!-- /nma component-group //-->
 
+                <div class="component-group clearfix">
+                    <div class="component-group-desc">
+                        <img class="notifier-icon" src="$sbRoot/images/notifiers/toasty.png" alt="" title="SuperToasty" />
+                        <h3><a href="http://supertoasty.com/" onclick="window.open(this.href, '_blank'); return false;">SuperToasty</a></h3>
+                        <p>A Toast Notifier for Windows Phone.</p>
+                    </div>
+                    <fieldset class="component-group-list">
+                        <div class="field-pair">
+                            <input type="checkbox" class="enabler" name="use_toasty" id="use_toasty" #if $sickbeard.USE_TOASTY then "checked=\"checked\"" else ""# /> 
+                            <label class="clearfix" for="use_toasty">
+                                <span class="component-title">Enable</span>
+                                <span class="component-desc">Should Sick Beard send SuperToasty notifications?</span>
+                            </label>
+                        </div>
+
+                        <div id="content_use_toasty">
+                            <div class="field-pair">
+                                <input type="checkbox" name="toasty_notify_onsnatch" id="toasty_notify_onsnatch" #if $sickbeard.TOASTY_NOTIFY_ONSNATCH then "checked=\"checked\"" else ""# /> 
+                                <label class="clearfix" for="toasty_notify_onsnatch">
+                                    <span class="component-title">Notify on Snatch</span>
+                                    <span class="component-desc">Send toast notification when we start a download?</span>
+                                </label>
+                            </div>
+                            <div class="field-pair">
+                                <input type="checkbox" name="toasty_notify_ondownload" id="toasty_notify_ondownload" #if $sickbeard.TOASTY_NOTIFY_ONDOWNLOAD then "checked=\"checked\"" else ""# />
+                                <label class="clearfix" for="toasty_notify_ondownload">
+                                    <span class="component-title">Notify on Download</span>
+                                    <span class="component-desc">Send toast notification when we finish a download?</span>
+                                </label>
+                            </div>
+                            <div class="field-pair">
+                                <label class="nocheck clearfix">
+                                    <span class="component-title">Toasty Device ID</span>
+                                    <input type="text" name="toasty_id" id="toasty_id" value="$sickbeard.toasty_id" size="35" />
+                                </label>
+                                <label class="nocheck clearfix">
+                                    <span class="component-title">&nbsp;</span>
+                                    <span class="component-desc">Find your Device ID in SuperToasty settings</span>
+                                </label>
+                            </div>
+                            <div class="testNotification" id="testToasty-result">Click below to test SuperToasty notifier.</div>
+                            <input type="button" class="btn" value="Test Toasty" id="testToasty" />
+                            <input type="submit" class="btn config_submitter" value="Save Changes" />
+                        </div><!-- /content_use_toasty //-->
+
+                    </fieldset>
+                </div><!-- /toasty component-group //-->
+                
                 <div class="component-group-save">
                     <input type="submit" class="btn config_submitter" value="Save Changes" />
                 </div><br />

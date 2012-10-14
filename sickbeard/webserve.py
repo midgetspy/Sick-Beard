@@ -1151,7 +1151,8 @@ class ConfigNotifications:
                           use_trakt=None, trakt_username=None, trakt_password=None, trakt_api=None,
                           use_pytivo=None, pytivo_notify_onsnatch=None, pytivo_notify_ondownload=None, pytivo_update_library=None, 
                           pytivo_host=None, pytivo_share_name=None, pytivo_tivo_name=None,
-                          use_nma=None, nma_notify_onsnatch=None, nma_notify_ondownload=None, nma_api=None, nma_priority=0 ):
+                          use_nma=None, nma_notify_onsnatch=None, nma_notify_ondownload=None, nma_api=None, nma_priority=0,
+                          use_toasty=None, toasty_notify_onsnatch=None, toasty_notify_ondownload=None, toasty_id=None ):
 
         results = []
 
@@ -1335,6 +1336,21 @@ class ConfigNotifications:
         else:
             nma_notify_ondownload = 0
 
+        if use_toasty == "on":
+            use_toasty = 1
+        else:
+            use_toasty = 0
+
+        if toasty_notify_onsnatch == "on":
+            toasty_notify_onsnatch = 1
+        else:
+            toasty_notify_onsnatch = 0
+
+        if toasty_notify_ondownload == "on":
+            toasty_notify_ondownload = 1
+        else:
+            toasty_notify_ondownload = 0
+
         sickbeard.USE_XBMC = use_xbmc
         sickbeard.XBMC_NOTIFY_ONSNATCH = xbmc_notify_onsnatch
         sickbeard.XBMC_NOTIFY_ONDOWNLOAD = xbmc_notify_ondownload
@@ -1414,7 +1430,12 @@ class ConfigNotifications:
         sickbeard.NMA_NOTIFY_ONDOWNLOAD = nma_notify_ondownload
         sickbeard.NMA_API = nma_api
         sickbeard.NMA_PRIORITY = nma_priority
-        
+
+        sickbeard.USE_TOASTY = use_toasty
+        sickbeard.TOASTY_NOTIFY_ONSNATCH = toasty_notify_onsnatch
+        sickbeard.TOASTY_NOTIFY_ONDOWNLOAD = toasty_notify_ondownload
+        sickbeard.toasty_id = toasty_id
+
         sickbeard.save_config()
 
         if len(results) > 0:
@@ -2120,6 +2141,16 @@ class Home:
             return "Test NMA notice sent successfully"
         else:
             return "Test NMA notice failed"
+
+    @cherrypy.expose
+    def testToasty(self, toasty_id=None):
+        cherrypy.response.headers['Cache-Control'] = "max-age=0,no-cache,no-store"
+
+        result = notifiers.toasty_notifier.test_notify(toasty_id)
+        if result:
+            return "SuperToasty test toast sent successfully"
+        else:
+            return "SuperToasty test toast failed"
 
     @cherrypy.expose
     def shutdown(self, pid=None):

@@ -142,4 +142,12 @@ $(document).ready(function(){
         var nma_result = $.get(sbRoot+"/home/testNMA", {'nma_api': nma_api, 'nma_priority': nma_priority}, 
         function (data){ $('#testNMA-result').html(data); });
     });
+
+    $('#testToasty').click(function(){
+        $('#testToasty-result').html(loading);
+        var toasty_id = $("#toasty_id").val();
+        var toasty_result = $.get(sbRoot+"/home/testToasty", { 'toasty_id': toasty_id },
+        function (data){ $('#testToasty-result').html(data); });
+    });
+
 });
