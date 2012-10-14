@@ -1890,7 +1890,7 @@ class ErrorLogs:
         finalData = []
 
         numLines = 0
-        lastLine = False
+        setAsideLines = []
         numToShow = min(maxLines, len(data))
 
         for x in reversed(data):
@@ -1900,19 +1900,19 @@ class ErrorLogs:
 
             if match:
                 level = match.group(6)
-                if level not in logger.reverseNames:
-                    lastLine = False
+                if level not in logger.reverseNames or logger.reverseNames[level] < minLevel:
+                    setAsideLines = []
                     continue
 
-                if logger.reverseNames[level] >= minLevel:
-                    lastLine = True
-                    finalData.append(x)
-                else:
-                    lastLine = False
-                    continue
+                finalData.append(x)
+                for y in setAsideLines:
+                    finalData.append(y)
+                
+                setAsideLines = []
 
-            elif lastLine:
-                finalData.append("AA"+x)
+            else:
+                setAsideLines.append(x)
+                continue
 
             numLines += 1
 
