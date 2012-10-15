@@ -156,7 +156,7 @@ class SubtitlesFinder():
             logger.log('Downloaded %d subtitles' % len(subtitles), logger.MESSAGE)
             
             for video in subtitles:
-                notifiers.notify_subtitle_download(os.path.basename(video.path).rpartition(".")[0], ",".join([subtitle.language.alpha3 for subtitle in subtitles]))
+                notifiers.notify_subtitle_download(os.path.basename(video.path).rpartition(".")[0], ",".join([subtitle.language.alpha3 for subtitle in subtitles.get(video)]))
         else:
             logger.log('No subtitles found', logger.MESSAGE)
 
