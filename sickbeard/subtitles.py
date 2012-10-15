@@ -113,7 +113,7 @@ class SubtitlesFinder():
         locations = []
         toRefresh = []
         rules = self._getRules()
-        now = datetime.datetime.now()
+        now = datetime.datetime.now();
         for epToSub in sqlResults:
             if not ek.ek(os.path.isfile, epToSub['location']):
                 logger.log('Episode file does not exist, cannot download subtitles for episode %dx%d of show %s' % (epToSub['season'], epToSub['episode'], epToSub['show_name']), logger.DEBUG)
@@ -177,7 +177,7 @@ class SubtitlesFinder():
             show = helpers.findCertainShow(sickbeard.showList, showid)
             episode = show.getEpisode(season, episode)
             episode.subtitles_searchcount = episode.subtitles_searchcount + 1
-            episode.subtitles_lastsearch = now
+            episode.subtitles_lastsearch = now.strftime("%Y-%m-%d %H:%M:%S")
             episode.refreshSubtitles()
             episode.saveToDB()
 
