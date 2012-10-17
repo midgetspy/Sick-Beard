@@ -108,6 +108,7 @@ class WindowsUpdateManager(UpdateManager):
 
     def __init__(self):
         self._cur_version = None
+        self._cur_commit_hash = None
         self._newest_version = None
 
         self.gc_url = 'http://code.google.com/p/sickbeard/downloads/list'
