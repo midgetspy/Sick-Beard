@@ -769,9 +769,10 @@ class ConfigSearch:
         for key, value in postData.items():
         	value = value.strip()
         	val = 1 if value == "on" else value
-        	if hasattr(config, 'change_' + key):
-        	  	ret, msg = getattr(config, 'change_' + key)(val)
-        	  	results.append(msg)
+        	if hasattr(config, 'change_' + key.upper()):
+        	  	ret, msg = getattr(config, 'change_' + key.upper())(val)
+        	  	if ret == False:
+        	  		results.append(msg)
         	elif hasattr(sickbeard, key.upper()):
         	  	setattr(sickbeard, key.upper(), val)
         	elif hasattr(sickbeard, key.lower()):
