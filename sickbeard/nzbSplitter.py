@@ -100,9 +100,9 @@ def stripNS(element, ns):
 
 def splitResult(result):
 
-    try:
-        urlData = helpers.getURL(result.url)
-    except urllib2.URLError:
+    urlData = helpers.getURL(result.url)
+
+    if urlData is None:
         logger.log(u"Unable to load url "+result.url+", can't download season NZB", logger.ERROR)
         return False
 

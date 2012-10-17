@@ -11,11 +11,10 @@
 
 #include $os.path.join($sickbeard.PROG_DIR, "data/interfaces/default/inc_top.tmpl")
 
-<link rel="stylesheet" type="text/css" href="$sbRoot/css/lib/formwizard.css" />
-<script type="text/javascript" src="$sbRoot/js/lib/formwizard.js"></script>
-<script type="text/javascript" src="$sbRoot/js/qualityChooser.js"></script>
-<script type="text/javascript" src="$sbRoot/js/newShow.js"></script>
-<script type="text/javascript" src="$sbRoot/js/addShowOptions.js"></script> 
+<script type="text/javascript" src="$sbRoot/js/lib/formwizard.js?$sbPID"></script>
+<script type="text/javascript" src="$sbRoot/js/qualityChooser.js?$sbPID"></script>
+<script type="text/javascript" src="$sbRoot/js/newShow.js?$sbPID"></script>
+<script type="text/javascript" src="$sbRoot/js/addShowOptions.js?$sbPID"></script> 
    
 <div id="displayText">aoeu</div>
 <br />
@@ -36,7 +35,7 @@
             <select name="tvdbLang" id="tvdbLangSelect">
                 <option value="en" selected="selected">en</option>
             </select><b>*</b>
-            <input type="button" id="searchName" value="Search" /><br /><br />
+            <input type="button" id="searchName" value="Search" class="btn" /><br /><br />
     
             <b>*</b> This will only affect the language of the retrieved metadata file contents and episode filenames.<br />
             This <b>DOES NOT</b> allow Sick Beard to download non-english TV episodes!<br />
@@ -76,12 +75,12 @@
 <br />
 
 <div style="width: 800px; text-align: center;">
-<input type="button" id="addShowButton" value="Add Show" disabled="disabled" />
+<input class="btn" type="button" id="addShowButton" value="Add Show" disabled="disabled" />
 #if $provided_show_dir:
-<input type="button" id="skipShowButton" value="Skip Show" />
+<input class="btn" type="button" id="skipShowButton" value="Skip Show" />
 #end if
 </div>
 
-<script type="text/javascript" src="$sbRoot/js/rootDirs.js"></script>
+<script type="text/javascript" src="$sbRoot/js/rootDirs.js?$sbPID"></script>
 
 #include $os.path.join($sickbeard.PROG_DIR, "data/interfaces/default/inc_bottom.tmpl")

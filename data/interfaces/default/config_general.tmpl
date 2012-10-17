@@ -12,11 +12,11 @@
 #set global $topmenu="config"#
 #include $os.path.join($sickbeard.PROG_DIR, "data/interfaces/default/inc_top.tmpl")
 
-<script type="text/javascript" src="$sbRoot/js/config.js"></script>
+<script type="text/javascript" src="$sbRoot/js/config.js?$sbPID"></script>
 
 <div id="config">
 <div id="config-content">
-<h5>All non-absolute folder locations are relative to " <span class="path">$sickbeard.DATA_DIR</span> "</h5>
+<h5>All non-absolute folder locations are relative to <span class="path">$sickbeard.DATA_DIR</span></h5>
 
 <form id="configForm" action="saveGeneral" method="post">
 
@@ -58,7 +58,7 @@
                             </label>
                         </div>
 
-                        <input type="submit" class="config_submitter" value="Save Changes" />
+                        <input type="submit" class="btn config_submitter" value="Save Changes" />
                     </fieldset>
                 </div><!-- /component-group1 //-->
 
@@ -154,7 +154,7 @@
                             </div>
                         </div>
 
-                        <input type="submit" class="config_submitter" value="Save Changes" />
+                        <input type="submit" class="btn config_submitter" value="Save Changes" />
                     </fieldset>
                 </div><!-- /component-group2 //-->
 
@@ -178,8 +178,8 @@
                         <div class="field-pair">
                             <label class="nocheck clearfix" for="api_key">
                                 <span class="component-title">API Key</span>
-                                <input type="text" name="api_key" id="api_key" value="$sickbeard.API_KEY" size="40" readonly="readonly" />
-                                <input type="button" id="generate_new_apikey" value="Generate">
+                                <input type="text" name="api_key" id="api_key" value="$sickbeard.API_KEY" size="35" readonly="readonly" />
+                                <input type="button" class="btn" id="generate_new_apikey" value="Generate">
                             </label>
                             <label class="nocheck clearfix">
                                 <span class="component-title">&nbsp;</span>
@@ -188,16 +188,18 @@
                         </div>
                         </div>
 
-                        <input type="submit" class="config_submitter" value="Save Changes" />
+                        <input type="submit" class="btn config_submitter" value="Save Changes" />
                     </fieldset>
                 </div><!-- /component-group4 //-->
 
-            <br/><input type="submit" class="config_submitter" value="Save Changes" /><br/>
+                <div class="component-group-save">
+                    <input type="submit" class="btn config_submitter" value="Save Changes" />
+                </div><br />
+
             </div><!-- /config-components -->
 
 </form>
 </div></div>
-<div class="clearfix"></div>
 
 <script type="text/javascript" charset="utf-8">
 <!--

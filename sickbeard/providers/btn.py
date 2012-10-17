@@ -1,5 +1,5 @@
 # coding=utf-8
-# Author: DaniÃ«l Heimans
+# Author: Daniël Heimans
 # URL: http://code.google.com/p/sickbeard
 #
 # This file is part of Sick Beard.
@@ -49,7 +49,7 @@ class BTNProvider(generic.TorrentProvider):
         return sickbeard.BTN
     
     def imageName(self):
-        return 'btn.gif'
+        return 'btn.png'
 
     def checkAuthFromData(self, data):
         result = True

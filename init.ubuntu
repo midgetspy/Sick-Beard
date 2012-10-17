@@ -1,5 +1,5 @@
-#! /bin/sh
-
+#!/bin/sh
+#
 ### BEGIN INIT INFO
 # Provides:          sickbeard
 # Required-Start:    $local_fs $network $remote_fs
@@ -12,38 +12,67 @@
 # Description:       starts instance of Sick Beard using start-stop-daemon
 ### END INIT INFO
 
-############### EDIT ME ##################
-# path to app
-APP_PATH=PATH_TO_SICKBEARD_DIRECTORY
+# Source SickBeard configuration
+if [ -f /etc/default/sickbeard ]; then
+    . /etc/default/sickbeard
+else
+    echo "/etc/default/sickbeard not found using default settings.";
+fi
 
-# path to python bin
-DAEMON=/usr/bin/python
-
-# Path to store PID file
-PID_FILE=/var/run/sickbeard/sickbeard.pid
-PID_PATH=`dirname $PID_FILE`
-
-# script name
+# Script name
 NAME=sickbeard
 
-# app name
+# App name
 DESC=SickBeard
 
-# user
-RUN_AS=SICKBEARD_USER
+## Don't edit this file
+## Edit user configuation in /etc/default/sickbeard to change
+##
+## SB_USER=         #$RUN_AS, username to run sickbeard under, the default is sickbeard
+## SB_HOME=         #$APP_PATH, the location of SickBeard.py, the default is /opt/sickbeard
+## SB_DATA=         #$DATA_DIR, the location of sickbeard.db, cache, logs, the default is /opt/sickbeard
+## SB_PIDFILE=      #$PID_FILE, the location of sickbeard.pid, the default is /var/run/sickbeard/sickbeard.pid
+## PYTHON_BIN=      #$DAEMON, the location of the python binary, the default is /usr/bin/python
+## SB_OPTS=         #$EXTRA_DAEMON_OPTS, extra cli option for sickbeard, i.e. " --config=/home/sickbeard/config.ini"
+## SSD_OPTS=        #$EXTRA_SSD_OPTS, extra start-stop-daemon option like " --group=users"
+##
+## EXAMPLE if want to run as different user
+## add SB_USER=username to /etc/default/sickbeard
+## otherwise default sickbeard is used
 
-# data directory
-DATA_DIR=~/.sickbeard
+## The defaults
+# Run as username 
+RUN_AS=${SB_USER-sickbeard}
 
-# startup args
-DAEMON_OPTS=" SickBeard.py -q --daemon --pidfile=${PID_FILE} --datadir=${DATA_DIR}"
+# Path to app SB_HOME=path_to_app_SickBeard.py
+APP_PATH=${SB_HOME-/opt/sickbeard}
 
-############### END EDIT ME ##################
+# Data directory where sickbeard.db, cache and logs are stored
+DATA_DIR=${SB_DATA-/opt/sickbeard}
+
+# Path to store PID file
+PID_FILE=${SB_PIDFILE-/var/run/sickbeard/sickbeard.pid}
+
+# path to python bin
+DAEMON=${PYTHON_BIN-/usr/bin/python}
+
+# Extra daemon option like: SB_OPTS=" --config=/home/sickbeard/config.ini"
+EXTRA_DAEMON_OPTS=${SB_OPTS-}
+
+# Extra start-stop-daemon option like START_OPTS=" --group=users"
+EXTRA_SSD_OPTS=${SSD_OPTS-}
+##
+
+PID_PATH=`dirname $PID_FILE`
+DAEMON_OPTS=" SickBeard.py -q --daemon --nolaunch --pidfile=${PID_FILE} --datadir=${DATA_DIR} ${EXTRA_DAEMON_OPTS}"
+
+##
 
 test -x $DAEMON || exit 0
 
 set -e
 
+# Create PID directory if not exist and ensure the SickBeard user can write to it
 if [ ! -d $PID_PATH ]; then
     mkdir -p $PID_PATH
     chown $RUN_AS $PID_PATH
@@ -55,29 +84,29 @@ if [ ! -d $DATA_DIR ]; then
 fi
 
 if [ -e $PID_FILE ]; then
-  PID=`cat $PID_FILE`
-  if ! kill -0 $PID > /dev/null 2>&1; then
-    echo "Removing stale $PID_FILE"
-    rm $PID_FILE
-  fi
+    PID=`cat $PID_FILE`
+    if ! kill -0 $PID > /dev/null 2>&1; then
+        echo "Removing stale $PID_FILE"
+        rm $PID_FILE
+    fi
 fi
 
 case "$1" in
-  start)
+    start)
         echo "Starting $DESC"
-        start-stop-daemon -d $APP_PATH -c $RUN_AS --start --pidfile $PID_FILE --exec $DAEMON -- $DAEMON_OPTS
+        start-stop-daemon -d $APP_PATH -c $RUN_AS $EXTRA_SSD_OPTS --start --pidfile $PID_FILE --exec $DAEMON -- $DAEMON_OPTS
         ;;
-  stop)
+    stop)
         echo "Stopping $DESC"
         start-stop-daemon --stop --pidfile $PID_FILE --retry 15
         ;;
 
-  restart|force-reload)
+    restart|force-reload)
         echo "Restarting $DESC"
         start-stop-daemon --stop --pidfile $PID_FILE --retry 15
-        start-stop-daemon -d $APP_PATH -c $RUN_AS --start --pidfile $PID_FILE --exec $DAEMON -- $DAEMON_OPTS
+        start-stop-daemon -d $APP_PATH -c $RUN_AS $EXTRA_SSD_OPTS --start --pidfile $PID_FILE --exec $DAEMON -- $DAEMON_OPTS
         ;;
-  *)
+    *)
         N=/etc/init.d/$NAME
         echo "Usage: $N {start|stop|restart|force-reload}" >&2
         exit 1

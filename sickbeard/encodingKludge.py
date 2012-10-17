@@ -41,11 +41,17 @@ def fixStupidEncodings(x, silent=False):
     return None
 
 def fixListEncodings(x):
-    if type(x) != list:
+    if type(x) != list and type(x) != tuple:
         return x
     else:
         return filter(lambda x: x != None, map(fixStupidEncodings, x))
 
+def callPeopleStupid(x):
+    try:
+        return x.encode(sickbeard.SYS_ENCODING)
+    except UnicodeEncodeError:
+        logger.log(u"YOUR COMPUTER SUCKS! Your data is being corrupted by a bad locale/encoding setting. Report this error on the forums or IRC please: "+repr(x)+", "+sickbeard.SYS_ENCODING, logger.ERROR)
+        return x.encode(sickbeard.SYS_ENCODING, 'ignore')
 
 def ek(func, *args):
     result = None
@@ -53,9 +59,9 @@ def ek(func, *args):
     if os.name == 'nt':
         result = func(*args)
     else:
-        result = func(*[x.encode(sickbeard.SYS_ENCODING) if type(x) in (str, unicode) else x for x in args])
+        result = func(*[callPeopleStupid(x) if type(x) in (str, unicode) else x for x in args])
 
-    if type(result) == list:
+    if type(result) in (list, tuple):
         return fixListEncodings(result)
     elif type(result) == str:
         return fixStupidEncodings(result)

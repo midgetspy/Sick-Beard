@@ -1,0 +1,77 @@
+#import sickbeard
+#from sickbeard import common
+#from sickbeard import exceptions
+#set global $title="Test Rename"
+#set global $header = '<a href="' + $sbRoot + '/home/displayShow?show=%d">%s</a>' % ($show.tvdbid, $show.name)
+#set global $sbPath=".."
+
+#set global $topmenu="home"#
+#import os.path
+#include $os.path.join($sickbeard.PROG_DIR, "data/interfaces/default/inc_top.tmpl")
+
+<input type="hidden" id="showID" value="$show.tvdbid" />
+
+<script type="text/javascript" src="$sbRoot/js/testRename.js"></script>
+
+<h3>Preview of the proposed name changes</h3>
+<blockquote style="margin-bottom: 0; color: #3A87AD;">
+#if int($show.air_by_date) == 1 and $sickbeard.NAMING_CUSTOM_ABD:
+    $sickbeard.NAMING_ABD_PATTERN
+#else
+    $sickbeard.NAMING_PATTERN
+#end if
+</blockquote>
+
+#set $curSeason = -1
+#set $odd = False
+<table id="testRenameTable" class="sickbeardTable" cellspacing="1" border="0" cellpadding="0">
+
+#for $cur_ep_obj in $ep_obj_list:
+#set $curLoc = $cur_ep_obj.location[len($cur_ep_obj.show.location)+1:]
+#set $curExt = $curLoc.split('.')[-1]
+#set $newLoc = $cur_ep_obj.proper_path() + '.' + $curExt
+
+#if int($cur_ep_obj.season) != $curSeason:
+    <thead>
+        <tr class="seasonheader" id="season-$cur_ep_obj.season">
+            <td colspan="4">
+                <br/>
+                <h2>#if int($cur_ep_obj.season) == 0 then "Specials" else "Season "+str($cur_ep_obj.season)#</h2>
+            </td>
+        </tr>
+        <tr id="season-$cur_ep_obj.season-cols">
+            <th width="1%"><input type="checkbox" class="seasonCheck" id="$cur_ep_obj.season" /></th>
+            <th class="nowrap">Episode</th>
+            <th class="nowrap">Old Location</th>
+            <th class="nowrap">New Location</th>
+        </tr>
+    </thead>
+#set $curSeason = int($cur_ep_obj.season)
+#end if
+    <tbody>
+#set $odd = not $odd
+#set $epStr = str($cur_ep_obj.season) + "x" + str($cur_ep_obj.episode)
+#set $epList = sorted([cur_ep_obj.episode] + [x.episode for x in cur_ep_obj.relatedEps])
+#if len($epList) > 1:
+    #set $epList = [$min($epList), $max($epList)]
+#end if
+        <tr class="season-$curSeason 
+            #if $curLoc == $newLoc:
+                #if $odd then "odd" else "even"#
+            #else
+                wanted
+            #end if
+        ">
+            <td width="1%" valign="top">
+                <input type="checkbox" class="epCheck" id="<%=str(cur_ep_obj.season) + 'x' + str(cur_ep_obj.episode)%>" name="<%=str(cur_ep_obj.season) + "x" + str(cur_ep_obj.episode) %>" />
+            </td>
+            <td align="center" valign="top" class="nowrap"><%= "-".join(map(str, epList)) %></td>
+            <td width="50%" valign="top">$curLoc</td>
+            <td width="50%" valign="top">$newLoc</td>
+        </tr>
+    </tbody>
+
+#end for
+</table><br />
+<input type="submit" value="Rename Selected" class="btn btn-danger">
+#include $os.path.join($sickbeard.PROG_DIR, "data/interfaces/default/inc_bottom.tmpl")

@@ -3,8 +3,7 @@
 #author:dbr/Ben
 #project:tvdb_api
 #repository:http://github.com/dbr/tvdb_api
-#license:Creative Commons GNU GPL v2
-# (http://creativecommons.org/licenses/GPL/2.0/)
+#license:unlicense (http://unlicense.org/)
 
 """Simple-to-use Python interface to The TVDB's API (www.thetvdb.com)
 
@@ -16,10 +15,9 @@ Example usage:
 u'Cabin Fever'
 """
 __author__ = "dbr/Ben"
-__version__ = "1.5"
+__version__ = "1.7.2"
 
-import os
-import sys
+import os, time
 import urllib
 import urllib2
 import StringIO
@@ -27,9 +25,7 @@ import tempfile
 import warnings
 import logging
 import datetime
-import time
-import traceback
-import socket
+import zipfile
 
 try:
     import xml.etree.cElementTree as ElementTree
@@ -42,20 +38,7 @@ except ImportError:
     gzip = None
 
 
-# Use local version for sickbeard, system version elsewhere
-try:
-    import lib.httplib2 as httplib2
-except ImportError:
-    import httplib2
-    
-# Try using local version, followed by system, and none if neither are found
-try:
-    import lib.socks as socks
-except ImportError:
-    try:
-        import socks as socks
-    except ImportError:
-        socks = None
+from tvdb_cache import CacheHandler
 
 from tvdb_ui import BaseUI, ConsoleUI
 from tvdb_exceptions import (tvdb_error, tvdb_userabort, tvdb_shownotfound,
@@ -66,36 +49,31 @@ lastTimeout = None
 def log():
     return logging.getLogger("tvdb_api")
 
-def clean_cache(cachedir):
-    '''
-    Clean any files in the cache older than 24 hrs
-    '''
-
-    # Does our cachedir exists
-    if not os.path.isdir(cachedir):
-        log().debug("Told to clean cache dir %s but it does not exist" %
-                cachedir)
-        return
-    now = time.time()
-    day = 86400
-
-    # Get all our cache files
-    files = os.listdir(cachedir)
-
-    for file in files:
-        ffile = os.path.join(cachedir,file)
-        # If modified time is > 24 hrs ago, die!
-        # log().debug("Comparing %s mtime" % ffile)
-        if now - os.stat(ffile).st_mtime > day:
-            try:
-                os.remove(ffile)
-            except:
-                raise tvdb_error("Couldn't remove %s" % ffile)
 
 class ShowContainer(dict):
     """Simple dict that holds a series of Show instances
     """
-    pass
+
+    def __init__(self):
+        self._stack = []
+        self._lastgc = time.time()
+
+    def __setitem__(self, key, value):
+        self._stack.append(key)
+
+        #keep only the 100th latest results
+        if time.time() - self._lastgc > 20:
+            tbd = self._stack[:-100]
+            i = 0
+            for o in tbd:
+                del self[o]
+                del self._stack[i]
+                i += 1
+
+            _lastgc = time.time()
+            del tbd
+                    
+        super(ShowContainer, self).__setitem__(key, value)
 
 
 class Show(dict):
@@ -196,6 +174,11 @@ class Show(dict):
 
 
 class Season(dict):
+    def __init__(self, show = None):
+        """The show attribute points to the parent show
+        """
+        self.show = show
+
     def __repr__(self):
         return "<Season instance (containing %s episodes)>" % (
             len(self.keys())
@@ -229,6 +212,11 @@ class Season(dict):
 
 
 class Episode(dict):
+    def __init__(self, season = None):
+        """The season attribute points to the parent season
+        """
+        self.season = season
+
     def __repr__(self):
         seasno = int(self.get(u'seasonnumber', 0))
         epno = int(self.get(u'episodenumber', 0))
@@ -311,15 +299,15 @@ class Tvdb:
                 select_first = False,
                 debug = False,
                 cache = True,
-                cache_dir = False,
                 banners = False,
                 actors = False,
                 custom_ui = None,
                 language = None,
                 search_all_languages = False,
                 apikey = None,
-                forceConnect = False,
-                http_proxy = None):
+                forceConnect=False,
+                useZip=False):
+
         """interactive (True/False):
             When True, uses built-in console UI is used to select the correct show.
             When False, the first search result is used.
@@ -335,14 +323,13 @@ class Tvdb:
                  >>> import logging
                  >>> logging.basicConfig(level = logging.DEBUG)
 
-        cache (True/False/Recache):
-            Retrieved XML are persisted to to disc. If true, stores in tvdb_api
-            folder under directory specified by cache_dir.  If False, disables
-            caching entirely.  If Refresh, requests a fresh copy and caches it
-            for further use.
-
-        cache_dir (str/unicode):
-            Location for the cache directory, defaults to systems TEMP_DIR.
+        cache (True/False/str/unicode/urllib2 opener):
+            Retrieved XML are persisted to to disc. If true, stores in
+            tvdb_api folder under your systems TEMP_DIR, if set to
+            str/unicode instance it will use this as the cache
+            location. If False, disables caching.  Can also be passed
+            an arbitrary Python object, which is used as a urllib2
+            opener, which should be created by urllib2.build_opener
 
         banners (True/False):
             Retrieves the banners for a show. These are accessed
@@ -385,11 +372,12 @@ class Tvdb:
             If true it will always try to connect to theTVDB.com even if we
             recently timed out. By default it will wait one minute before
             trying again, and any requests within that one minute window will
-            return an exception immediately. 
-            
-        http_proxy (str/unicode):
-            URL for an optional HTTP Proxy that may be used to retrieve the data
-            from thetvdb.com
+            return an exception immediately.
+
+        useZip (bool):
+            Download the zip archive where possibale, instead of the xml.
+            This is only used when all episodes are pulled.
+            And only the main language xml is used, the actor and banner xml are lost.
         """
         
         global lastTimeout
@@ -418,25 +406,38 @@ class Tvdb:
 
         self.config['search_all_languages'] = search_all_languages
 
-        if cache_dir:
-            self.config['cache_location'] = cache_dir
-        else:
+        self.config['useZip'] = useZip
+
+
+        if cache is True:
+            self.config['cache_enabled'] = True
             self.config['cache_location'] = self._getTempDir()
+            self.urlopener = urllib2.build_opener(
+                CacheHandler(self.config['cache_location'])
+            )
 
-        if cache:
-            self.config['cache_enabled'] = cache
-        else:
+        elif cache is False:
             self.config['cache_enabled'] = False
+            self.urlopener = urllib2.build_opener() # default opener with no caching
 
-        # Clean cache, this might need to be moved elsewhere
-        if self.config['cache_enabled'] and self.config['cache_location']:
-            # log().debug("Cleaning cache %s " % self.config['cache_location'])
-            clean_cache(self.config['cache_location'])
+        elif isinstance(cache, basestring):
+            self.config['cache_enabled'] = True
+            self.config['cache_location'] = cache
+            self.urlopener = urllib2.build_opener(
+                CacheHandler(self.config['cache_location'])
+            )
+
+        elif isinstance(cache, urllib2.OpenerDirector):
+            # If passed something from urllib2.build_opener, use that
+            log().debug("Using %r as urlopener" % cache)
+            self.config['cache_enabled'] = True
+            self.urlopener = cache
+
+        else:
+            raise ValueError("Invalid value for Cache %r (type was %s)" % (cache, type(cache)))
 
         self.config['banners_enabled'] = banners
         self.config['actors_enabled'] = actors
-        
-        self.config['http_proxy'] = http_proxy
 
         if self.config['debug_enabled']:
             warnings.warn("The debug argument to tvdb_api.__init__ will be removed in the next version. "
@@ -463,7 +464,7 @@ class Tvdb:
         'hu': 19, 'ja': 25, 'he': 24, 'ko': 32, 'sv': 8, 'sl': 30}
 
         if language is None:
-            self.config['language'] = None
+            self.config['language'] = 'en'
         else:
             if language not in self.config['valid_languages']:
                 raise ValueError("Invalid language %s, options are: %s" % (
@@ -477,17 +478,18 @@ class Tvdb:
         self.config['base_url'] = "http://www.thetvdb.com"
 
         if self.config['search_all_languages']:
-            self.config['url_getSeries'] = "%(base_url)s/api/GetSeries.php?seriesname=%%s&language=all" % self.config
+            self.config['url_getSeries'] = u"%(base_url)s/api/GetSeries.php?seriesname=%%s&language=all" % self.config
         else:
-            self.config['url_getSeries'] = "%(base_url)s/api/GetSeries.php?seriesname=%%s&language=%(language)s" % self.config
+            self.config['url_getSeries'] = u"%(base_url)s/api/GetSeries.php?seriesname=%%s&language=%(language)s" % self.config
 
-        self.config['url_epInfo'] = "%(base_url)s/api/%(apikey)s/series/%%s/all/%%s.xml" % self.config
+        self.config['url_epInfo'] = u"%(base_url)s/api/%(apikey)s/series/%%s/all/%%s.xml" % self.config
+        self.config['url_epInfo_zip'] = u"%(base_url)s/api/%(apikey)s/series/%%s/all/%%s.zip" % self.config
 
-        self.config['url_seriesInfo'] = "%(base_url)s/api/%(apikey)s/series/%%s/%%s.xml" % self.config
-        self.config['url_actorsInfo'] = "%(base_url)s/api/%(apikey)s/series/%%s/actors.xml" % self.config
+        self.config['url_seriesInfo'] = u"%(base_url)s/api/%(apikey)s/series/%%s/%%s.xml" % self.config
+        self.config['url_actorsInfo'] = u"%(base_url)s/api/%(apikey)s/series/%%s/actors.xml" % self.config
 
-        self.config['url_seriesBanner'] = "%(base_url)s/api/%(apikey)s/series/%%s/banners.xml" % self.config
-        self.config['url_artworkPrefix'] = "%(base_url)s/banners/%%s" % self.config
+        self.config['url_seriesBanner'] = u"%(base_url)s/api/%(apikey)s/series/%%s/banners.xml" % self.config
+        self.config['url_artworkPrefix'] = u"%(base_url)s/banners/%%s" % self.config
 
     #end __init__
 
@@ -496,52 +498,62 @@ class Tvdb:
         """
         return os.path.join(tempfile.gettempdir(), "tvdb_api")
 
-    def _loadUrl(self, url, recache = False):
+    def _loadUrl(self, url, recache = False, language=None):
         global lastTimeout
-        # Do we want caching?
-        if self.config['cache_enabled'] and self.config['cache_location']:
-            h_cache = self.config['cache_location']
-        else:
-            h_cache = False
-
-        if self.config['http_proxy'] != '' and self.config['http_proxy'] != None and socks != None:
-            parsedURI = socks.parseproxyuri(self.config['http_proxy'])
-            h = httplib2.Http(cache=h_cache,proxy_info=httplib2.ProxyInfo(socks.PROXY_TYPE_HTTP, parsedURI[1], int(parsedURI[2])))
-        else:
-            h = httplib2.Http(cache=h_cache)
-
-        # Handle a recache request, this will get fresh content and cache again
-        # if enabled
-        if str(self.config['cache_enabled']).lower() == 'recache' or recache:
-            h_header = {'cache-control':'no-cache'}
-        else:
-            h_header = {}
-
         try:
             log().debug("Retrieving URL %s" % url)
-            header, resp = h.request(url, headers=h_header)
-        except (socket.error, IOError, httplib2.HttpLib2Error), errormsg:
+            resp = self.urlopener.open(url)
+            if 'x-local-cache' in resp.headers:
+                log().debug("URL %s was cached in %s" % (
+                    url,
+                    resp.headers['x-local-cache'])
+                )
+                if recache:
+                    log().debug("Attempting to recache %s" % url)
+                    resp.recache()
+        except (IOError, urllib2.URLError), errormsg:
             if not str(errormsg).startswith('HTTP Error'):
                 lastTimeout = datetime.datetime.now()
-            raise tvdb_error("Could not connect to server %s: %s" % (url, errormsg))
-        except (AttributeError), errormsg:
-            raise tvdb_error("Silly upstream module timed out and didn't give a \
-            good error.  Failed hitting %s, error message: %s" % (url,
-                str(errormsg)))
+            raise tvdb_error("Could not connect to server: %s" % (errormsg))
         #end try
         
-        return str(resp)
+        # handle gzipped content,
+        # http://dbr.lighthouseapp.com/projects/13342/tickets/72-gzipped-data-patch
+        if 'gzip' in resp.headers.get("Content-Encoding", ''):
+            if gzip:
+                stream = StringIO.StringIO(resp.read())
+                gz = gzip.GzipFile(fileobj=stream)
+                return gz.read()
 
-    def _getetsrc(self, url):
+            raise tvdb_error("Received gzip data from thetvdb.com, but could not correctly handle it")
+
+        if 'application/zip' in resp.headers.get("Content-Type", ''):
+            try:
+                # TODO: The zip contains actors.xml and banners.xml, which are currently ignored [GH-20]
+                log().debug("We recived a zip file unpacking now ...")
+                zipdata = StringIO.StringIO()
+                zipdata.write(resp.read())
+                myzipfile = zipfile.ZipFile(zipdata)
+                return myzipfile.read('%s.xml' % language)
+            except zipfile.BadZipfile:
+                if 'x-local-cache' in resp.headers:
+                    resp.delete_cache()
+                raise tvdb_error("Bad zip file received from thetvdb.com, could not read it")
+
+        return resp.read()
+
+    def _getetsrc(self, url, language=None):
         """Loads a URL using caching, returns an ElementTree of the source
         """
-        src = self._loadUrl(url)
+        src = self._loadUrl(url, language=language)
         try:
-            return ElementTree.fromstring(src.rstrip('\r'))
+            # TVDB doesn't sanitize \r (CR) from user input in some fields,
+            # remove it to avoid errors. Change from SickBeard, from will14m
+            return ElementTree.fromstring(src.rstrip("\r"))
         except SyntaxError:
-            src = self._loadUrl(url, recache=True)
+            src = self._loadUrl(url, recache=True, language=language)
             try:
-                return ElementTree.fromstring(src.rstrip('\r'))
+                return ElementTree.fromstring(src.rstrip("\r"))
             except SyntaxError, exceptionmsg:
                 errormsg = "There was an error with the XML retrieved from thetvdb.com:\n%s" % (
                     exceptionmsg
@@ -552,7 +564,8 @@ class Tvdb:
                         self.config['cache_location']
                     )
 
-                errormsg += "\nIf this does not resolve the issue, please try again later."
+                errormsg += "\nIf this does not resolve the issue, please try again later. If the error persists, report a bug on"
+                errormsg += "\nhttp://dbr.lighthouseapp.com/projects/13342-tvdb_api/overview\n"
                 raise tvdb_error(errormsg)
     #end _getetsrc
 
@@ -574,9 +587,9 @@ class Tvdb:
         if sid not in self.shows:
             self.shows[sid] = Show()
         if seas not in self.shows[sid]:
-            self.shows[sid][seas] = Season()
+            self.shows[sid][seas] = Season(show = self.shows[sid])
         if ep not in self.shows[sid][seas]:
-            self.shows[sid][seas][ep] = Episode()
+            self.shows[sid][seas][ep] = Episode(season = self.shows[sid][seas])
         self.shows[sid][seas][ep][attrib] = value
     #end _set_item
 
@@ -611,6 +624,7 @@ class Tvdb:
         allSeries = []
         for series in seriesEt:
             result = dict((k.tag.lower(), k.text) for k in series.getchildren())
+            result['id'] = int(result['id'])
             result['lid'] = self.config['langabbv_to_id'][result['language']]
             log().debug('Found series %(seriesname)s' % result)
             allSeries.append(result)
@@ -739,6 +753,8 @@ class Tvdb:
 
         if self.config['language'] is None:
             log().debug('Config language is none, using show language')
+            if language is None:
+                raise tvdb_error("config['language'] was None, this should not happen")
             getShowInLanguage = language
         else:
             log().debug(
@@ -777,7 +793,13 @@ class Tvdb:
 
         # Parse episode data
         log().debug('Getting all episodes of %s' % (sid))
-        epsEt = self._getetsrc( self.config['url_epInfo'] % (sid, language) )
+
+        if self.config['useZip']:
+            url = self.config['url_epInfo_zip'] % (sid, language)
+        else:
+            url = self.config['url_epInfo'] % (sid, language)
+
+        epsEt = self._getetsrc( url, language=language)
 
         for cur_ep in epsEt.findall("Episode"):
             seas_no = int(cur_ep.find('SeasonNumber').text)

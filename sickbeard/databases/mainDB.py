@@ -17,40 +17,74 @@
 # along with Sick Beard.  If not, see <http://www.gnu.org/licenses/>.
 
 import sickbeard
-import shutil, time, os.path, sys
+import os.path
 
-from sickbeard import db
-from sickbeard import common
-from sickbeard import logger
+from sickbeard import db, common, helpers, logger
 from sickbeard.providers.generic import GenericProvider
 
 from sickbeard import encodingKludge as ek
-from sickbeard.exceptions import ex
+from sickbeard.name_parser.parser import NameParser, InvalidNameException 
 
 class MainSanityCheck(db.DBSanityCheck):
 
     def check(self):
+        self.fix_duplicate_shows()
         self.fix_duplicate_episodes()
+        self.fix_orphan_episodes()
+
+    def fix_duplicate_shows(self):
+
+        sqlResults = self.connection.select("SELECT show_id, tvdb_id, COUNT(tvdb_id) as count FROM tv_shows GROUP BY tvdb_id HAVING count > 1")
+
+        for cur_duplicate in sqlResults:
+
+            logger.log(u"Duplicate show detected! tvdb_id: " + str(cur_duplicate["tvdb_id"]) + u" count: " + str(cur_duplicate["count"]), logger.DEBUG)
+
+            cur_dupe_results = self.connection.select("SELECT show_id, tvdb_id FROM tv_shows WHERE tvdb_id = ? LIMIT ?",
+                                           [cur_duplicate["tvdb_id"], int(cur_duplicate["count"])-1]
+                                           )
+
+            for cur_dupe_id in cur_dupe_results:
+                logger.log(u"Deleting duplicate show with tvdb_id: " + str(cur_dupe_id["tvdb_id"]) + u" show_id: " + str(cur_dupe_id["show_id"]))
+                self.connection.action("DELETE FROM tv_shows WHERE show_id = ?", [cur_dupe_id["show_id"]])
+
+        else:
+            logger.log(u"No duplicate show, check passed")
 
     def fix_duplicate_episodes(self):
-    
-        sqlResults = self.connection.select("SELECT showid, season, episode, COUNT(*) as count FROM tv_episodes GROUP BY showid, season, episode HAVING COUNT(*) > 1")
-    
+
+        sqlResults = self.connection.select("SELECT showid, season, episode, COUNT(showid) as count FROM tv_episodes GROUP BY showid, season, episode HAVING count > 1")
+
         for cur_duplicate in sqlResults:
-    
-            logger.log(u"Duplicate episode detected! showid: "+str(cur_duplicate["showid"])+" season: "+str(cur_duplicate["season"])+" episode: "+str(cur_duplicate["episode"])+" count: "+str(cur_duplicate["count"]), logger.DEBUG)
-    
-            cur_dupe_results = self.connection.select("SELECT episode_id FROM tv_episodes WHERE showid = ? AND season = ? and episode = ? LIMIT ?",
+
+            logger.log(u"Duplicate episode detected! showid: " + str(cur_duplicate["showid"]) + u" season: "+str(cur_duplicate["season"]) + u" episode: "+str(cur_duplicate["episode"]) + u" count: " + str(cur_duplicate["count"]), logger.DEBUG)
+
+            cur_dupe_results = self.connection.select("SELECT episode_id FROM tv_episodes WHERE showid = ? AND season = ? and episode = ? ORDER BY episode_id DESC LIMIT ?",
                                            [cur_duplicate["showid"], cur_duplicate["season"], cur_duplicate["episode"], int(cur_duplicate["count"])-1]
                                            )
-            
+
             for cur_dupe_id in cur_dupe_results:
-                logger.log(u"Deleting episode with id "+str(cur_dupe_id["episode_id"]))
+                logger.log(u"Deleting duplicate episode with episode_id: " + str(cur_dupe_id["episode_id"]))
                 self.connection.action("DELETE FROM tv_episodes WHERE episode_id = ?", [cur_dupe_id["episode_id"]])
-        
+
         else:
             logger.log(u"No duplicate episode, check passed")
-        
+
+    def fix_orphan_episodes(self):
+
+        sqlResults = self.connection.select("SELECT episode_id, showid, tv_shows.tvdb_id FROM tv_episodes LEFT JOIN tv_shows ON tv_episodes.showid=tv_shows.tvdb_id WHERE tv_shows.tvdb_id is NULL")
+
+        for cur_orphan in sqlResults:
+            logger.log(u"Orphan episode detected! episode_id: " + str(cur_orphan["episode_id"]) + " showid: " + str(cur_orphan["showid"]), logger.DEBUG)
+            logger.log(u"Deleting orphan episode with episode_id: "+str(cur_orphan["episode_id"]))
+            self.connection.action("DELETE FROM tv_episodes WHERE episode_id = ?", [cur_orphan["episode_id"]])
+
+        else:
+            logger.log(u"No orphan episode, check passed")
+
+def backupDatabase(version):
+    helpers.backupVersionedFile(db.dbFilename(), version)
+
 # ======================
 # = Main DB Migrations =
 # ======================
@@ -129,25 +163,7 @@ class NewQualitySettings (NumericProviders):
 
     def execute(self):
 
-        numTries = 0
-        while not ek.ek(os.path.isfile, db.dbFilename(suffix='v0')):
-            if not ek.ek(os.path.isfile, db.dbFilename()):
-                break
-
-            try:
-                logger.log(u"Attempting to back up your sickbeard.db file before migration...")
-                shutil.copy(db.dbFilename(), db.dbFilename(suffix='v0'))
-                logger.log(u"Done backup, proceeding with migration.")
-                break
-            except Exception, e:
-                logger.log(u"Error while trying to back up your sickbeard.db: "+ex(e))
-                numTries += 1
-                time.sleep(1)
-                logger.log(u"Trying again.")
-
-            if numTries >= 10:
-                logger.log(u"Unable to back up your sickbeard.db file, please do it manually.")
-                sys.exit(1)
+        backupDatabase(0)
 
         # old stuff that's been removed from common but we need it to upgrade
         HD = 1
@@ -355,7 +371,6 @@ class PopulateRootDirs (AddLang):
         
         self.incDBVersion()
         
-
 class SetNzbTorrentSettings(PopulateRootDirs):
 
     def test(self):
@@ -397,4 +412,127 @@ class FixAirByDateSetting(SetNzbTorrentSettings):
             if cur_show["genre"] and "talk show" in cur_show["genre"].lower():
                 self.connection.action("UPDATE tv_shows SET air_by_date = ? WHERE tvdb_id = ?", [1, cur_show["tvdb_id"]])
         
+        self.incDBVersion()
+
+class AddSizeAndSceneNameFields(FixAirByDateSetting):
+
+    def test(self):
+        return self.checkDBVersion() >= 10
+    
+    def execute(self):
+
+        backupDatabase(10)
+
+        if not self.hasColumn("tv_episodes", "file_size"):
+            self.addColumn("tv_episodes", "file_size")
+
+        if not self.hasColumn("tv_episodes", "release_name"):
+            self.addColumn("tv_episodes", "release_name", "TEXT", "")
+
+        ep_results = self.connection.select("SELECT episode_id, location, file_size FROM tv_episodes")
+        
+        logger.log(u"Adding file size to all episodes in DB, please be patient")
+        for cur_ep in ep_results:
+            if not cur_ep["location"]:
+                continue
+            
+            # if there is no size yet then populate it for us
+            if (not cur_ep["file_size"] or not int(cur_ep["file_size"])) and ek.ek(os.path.isfile, cur_ep["location"]):
+                cur_size = ek.ek(os.path.getsize, cur_ep["location"])
+                self.connection.action("UPDATE tv_episodes SET file_size = ? WHERE episode_id = ?", [cur_size, int(cur_ep["episode_id"])])
+
+        # check each snatch to see if we can use it to get a release name from
+        history_results = self.connection.select("SELECT * FROM history WHERE provider != -1 ORDER BY date ASC")
+        
+        logger.log(u"Adding release name to all episodes still in history")
+        for cur_result in history_results:
+            # find the associated download, if there isn't one then ignore it
+            download_results = self.connection.select("SELECT resource FROM history WHERE provider = -1 AND showid = ? AND season = ? AND episode = ? AND date > ?",
+                                                    [cur_result["showid"], cur_result["season"], cur_result["episode"], cur_result["date"]])
+            if not download_results:
+                logger.log(u"Found a snatch in the history for "+cur_result["resource"]+" but couldn't find the associated download, skipping it", logger.DEBUG)
+                continue
+
+            nzb_name = cur_result["resource"]
+            file_name = ek.ek(os.path.basename, download_results[0]["resource"])
+            
+            # take the extension off the filename, it's not needed
+            if '.' in file_name:
+                file_name = file_name.rpartition('.')[0]
+
+            # find the associated episode on disk
+            ep_results = self.connection.select("SELECT episode_id, status FROM tv_episodes WHERE showid = ? AND season = ? AND episode = ? AND location != ''",
+                                                [cur_result["showid"], cur_result["season"], cur_result["episode"]])
+            if not ep_results:
+                logger.log(u"The episode "+nzb_name+" was found in history but doesn't exist on disk anymore, skipping", logger.DEBUG)
+                continue
+
+            # get the status/quality of the existing ep and make sure it's what we expect 
+            ep_status, ep_quality = common.Quality.splitCompositeStatus(int(ep_results[0]["status"]))
+            if ep_status != common.DOWNLOADED:
+                continue
+            
+            if ep_quality != int(cur_result["quality"]):
+                continue 
+
+            # make sure this is actually a real release name and not a season pack or something
+            for cur_name in (nzb_name, file_name):
+                logger.log(u"Checking if "+cur_name+" is actually a good release name", logger.DEBUG)
+                try:
+                    np = NameParser(False)
+                    parse_result = np.parse(cur_name)
+                except InvalidNameException:
+                    continue
+
+                if parse_result.series_name and parse_result.season_number != None and parse_result.episode_numbers and parse_result.release_group:
+                    # if all is well by this point we'll just put the release name into the database
+                    self.connection.action("UPDATE tv_episodes SET release_name = ? WHERE episode_id = ?", [cur_name, ep_results[0]["episode_id"]])
+                    break
+
+        # check each snatch to see if we can use it to get a release name from
+        empty_results = self.connection.select("SELECT episode_id, location FROM tv_episodes WHERE release_name = ''")
+        
+        logger.log(u"Adding release name to all episodes with obvious scene filenames")
+        for cur_result in empty_results:
+            
+            ep_file_name = ek.ek(os.path.basename, cur_result["location"])
+            ep_file_name = os.path.splitext(ep_file_name)[0]
+            
+            # I only want to find real scene names here so anything with a space in it is out
+            if ' ' in ep_file_name:
+                continue
+            
+            try:
+                np = NameParser(False)
+                parse_result = np.parse(ep_file_name)
+            except InvalidNameException:
+                continue
+        
+            if not parse_result.release_group:
+                continue
+            
+            logger.log(u"Name "+ep_file_name+" gave release group of "+parse_result.release_group+", seems valid", logger.DEBUG)
+            self.connection.action("UPDATE tv_episodes SET release_name = ? WHERE episode_id = ?", [ep_file_name, cur_result["episode_id"]])
+
+        self.incDBVersion()
+
+class RenameSeasonFolders(AddSizeAndSceneNameFields):
+
+    def test(self):
+        return self.checkDBVersion() >= 11
+    
+    def execute(self):
+        
+        # rename the column
+        self.connection.action("ALTER TABLE tv_shows RENAME TO tmp_tv_shows")
+        self.connection.action("CREATE TABLE tv_shows (show_id INTEGER PRIMARY KEY, location TEXT, show_name TEXT, tvdb_id NUMERIC, network TEXT, genre TEXT, runtime NUMERIC, quality NUMERIC, airs TEXT, status TEXT, flatten_folders NUMERIC, paused NUMERIC, startyear NUMERIC, tvr_id NUMERIC, tvr_name TEXT, air_by_date NUMERIC, lang TEXT)")
+        sql = "INSERT INTO tv_shows(show_id, location, show_name, tvdb_id, network, genre, runtime, quality, airs, status, flatten_folders, paused, startyear, tvr_id, tvr_name, air_by_date, lang) SELECT show_id, location, show_name, tvdb_id, network, genre, runtime, quality, airs, status, seasonfolders, paused, startyear, tvr_id, tvr_name, air_by_date, lang FROM tmp_tv_shows"
+        self.connection.action(sql)
+        
+        # flip the values to be opposite of what they were before
+        self.connection.action("UPDATE tv_shows SET flatten_folders = 2 WHERE flatten_folders = 1")
+        self.connection.action("UPDATE tv_shows SET flatten_folders = 1 WHERE flatten_folders = 0")
+        self.connection.action("UPDATE tv_shows SET flatten_folders = 0 WHERE flatten_folders = 2")
+        self.connection.action("DROP TABLE tmp_tv_shows")
+
         self.incDBVersion()

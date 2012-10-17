@@ -7,23 +7,24 @@
 #set global $topmenu="config"#
 #include $os.path.join($sickbeard.PROG_DIR, "data/interfaces/default/inc_top.tmpl")
 
-<script type="text/javascript" src="$sbRoot/js/configNotifications.js"></script>
-<script type="text/javascript" src="$sbRoot/js/config.js"></script>
+<script type="text/javascript" src="$sbRoot/js/configNotifications.js?$sbPID"></script>
+<script type="text/javascript" src="$sbRoot/js/config.js?$sbPID"></script>
 
 <div id="config">
     <div id="config-content">
         <form id="configForm" action="saveNotifications" method="post">
-            <div id="config-components">
+            <div id="config-components" class="notifier">
 
 
             <br />
-            <h1>Home Theater</h1>
+            <h2>Home Theater</h2>
             <br />
 
 
                 <div class="component-group clearfix">
                     <div class="component-group-desc">
-                        <h3><a href="http://xbmc.org/" onclick="window.open(this.href, '_blank'); return false;"><img src="$sbRoot/images/notifiers/xbmc.gif" alt="" title="XBMC" width="16" height="16" /> XBMC </a></h3>
+                        <img class="notifier-icon" src="$sbRoot/images/notifiers/xbmc.png" alt="" title="XBMC" />
+                        <h3><a href="http://xbmc.org/" onclick="window.open(this.href, '_blank'); return false;">XBMC</a></h3>
                         <p>A free and open source cross-platform media center and home entertainment system software with a 10-foot user interface designed for the living-room TV.</p>
                     </div>
                     <fieldset class="component-group-list">
@@ -99,8 +100,8 @@
                                 </label>
                             </div>
                             <div class="testNotification" id="testXBMC-result">Click below to test.</div>
-                            <input type="button" value="Test XBMC" id="testXBMC" />
-                            <input type="submit" class="config_submitter" value="Save Changes" />
+                            <input type="button" class="btn" value="Test XBMC" id="testXBMC" />
+                            <input type="submit" class="btn config_submitter" value="Save Changes" />
                         </div><!-- /content_use_xbmc //-->
 
                     </fieldset>
@@ -109,7 +110,8 @@
 
                 <div class="component-group clearfix">
                     <div class="component-group-desc">
-                        <h3><a href="http://www.plexapp.com/" onclick="window.open(this.href, '_blank'); return false;"><img src="$sbRoot/images/notifiers/plex.gif" alt="" title="Plex Media Server" width="16" height="16" /> Plex Media Server </a></h3>
+                        <img class="notifier-icon" src="$sbRoot/images/notifiers/plex.png" alt="" title="Plex Media Server" />
+                        <h3><a href="http://www.plexapp.com/" onclick="window.open(this.href, '_blank'); return false;">Plex Media Server</a></h3>
                         <p>Experience your media on a visually stunning, easy to use interface on your Mac connected to your TV. Your media library has never looked this good!</p>
                     </div>
                     <fieldset class="component-group-list">
@@ -184,8 +186,8 @@
                                 </label>
                             </div>
                             <div class="testNotification" id="testPLEX-result">Click below to test.</div>
-                            <input type="button" value="Test Plex Media Server" id="testPLEX" />
-                            <input type="submit" class="config_submitter" value="Save Changes" />
+                            <input type="button" class="btn" value="Test Plex Media Server" id="testPLEX" />
+                            <input type="submit" class="btn config_submitter" value="Save Changes" />
                         </div><!-- /content_use_plex -->
 
                     </fieldset>
@@ -194,7 +196,8 @@
 
                 <div class="component-group clearfix">
                     <div class="component-group-desc">
-                        <h3><a href="http://www.popcornhour.com/" onclick="window.open(this.href, '_blank'); return false;"><img src="$sbRoot/images/notifiers/nmj.gif" alt="" title="Networked Media Jukebox" width="16" height="16" /> NMJ </a></h3>
+                        <img class="notifier-icon" src="$sbRoot/images/notifiers/nmj.png" alt="" title="Networked Media Jukebox" />
+                        <h3><a href="http://www.popcornhour.com/" onclick="window.open(this.href, '_blank'); return false;">NMJ</a></h3>
                         <p>The Networked Media Jukebox, or NMJ, is the official media jukebox interface made available for the Popcorn Hour 200-series.</p>
                     </div>
                     <fieldset class="component-group-list">
@@ -220,7 +223,7 @@
                             <div class="field-pair">
                                 <label class="nocheck clearfix">
                                     <span class="component-title">Get Settings</span>
-                                    <input type="button" value="Get Settings" id="settingsNMJ" />
+                                    <input type="button" class="btn" value="Get Settings" id="settingsNMJ" />
                                 </label>
                                 <label class="nocheck clearfix">
                                     <span class="component-title">&nbsp;</span>
@@ -248,8 +251,8 @@
                                 </label>
                             </div>
                             <div class="testNotification" id="testNMJ-result">Click below to test.</div>
-                            <input type="button" value="Test NMJ" id="testNMJ" />
-                            <input type="submit" class="config_submitter" value="Save Changes" />
+                            <input type="button" class="btn" value="Test NMJ" id="testNMJ" />
+                            <input type="submit" class="btn config_submitter" value="Save Changes" />
                         </div><!-- /content_use_nmj //-->
 
                     </fieldset>
@@ -258,7 +261,8 @@
 
                 <div class="component-group clearfix">
                     <div class="component-group-desc">
-                        <h3><a href="http://synology.com/" onclick="window.open(this.href, '_blank'); return false;"><img src="$sbRoot/images/notifiers/synoindex.gif" alt="" title="Synology Indexer" width="16" height="16" /> Synology Indexer </a></h3>
+                        <img class="notifier-icon" src="$sbRoot/images/notifiers/synoindex.png" alt="" title="Synology Indexer" />
+                        <h3><a href="http://synology.com/" onclick="window.open(this.href, '_blank'); return false;">Synology Indexer</a></h3>
                         <p>Synology Indexer is the daemon running on the Synology NAS to build its media database.</p>
                     </div>
 
@@ -272,12 +276,12 @@
                             </label>
                             <label class="nocheck clearfix" for="use_synoindex">
                                 <span class="component-title">&nbsp;</span>
-                                <span class="component-desc">Note: Requires SB to be running on your Synology NAS.</span>
+                                <span class="component-desc"><b>Note:</b> Requires SB to be running on your Synology NAS.</span>
                             </label>
                         </div>
 
                         <div id="content_use_synoindex">
-                            <input type="submit" class="config_submitter" value="Save Changes" />
+                            <input type="submit" class="btn config_submitter" value="Save Changes" />
                         </div><!-- /content_use_pytivo //-->
 
                     </fieldset>
@@ -286,7 +290,8 @@
 
                 <div class="component-group clearfix">
                     <div class="component-group-desc">
-                        <h3><a href="http://pytivo.sourceforge.net/wiki/index.php/PyTivo" onclick="window.open(this.href, '_blank'); return false;"><img src="$sbRoot/images/notifiers/pytivo.gif" alt="" title="pyTivo" width="16" height="16" /> pyTivo </a></h3>
+                        <img class="notifier-icon" src="$sbRoot/images/notifiers/pytivo.png" alt="" title="pyTivo" />
+                        <h3><a href="http://pytivo.sourceforge.net/wiki/index.php/PyTivo" onclick="window.open(this.href, '_blank'); return false;">pyTivo</a></h3>
                         <p>pyTivo is both an HMO and GoBack server.  This notifier will load the completed downloads to your Tivo.</p>
                     </div>
                     <fieldset class="component-group-list">
@@ -330,24 +335,28 @@
                                 </label>
                                 <label class="nocheck clearfix">
                                     <span class="component-title">&nbsp;</span>
-                                    <span class="component-desc">Messages & Settings > Account & System Information > System Information > DVR name</span>
+                                    <span class="component-desc">Messages &amp; Settings > Account &amp; System Information > System Information > DVR name</span>
                                 </label>
                             </div>
-                            <input type="submit" class="config_submitter" value="Save Changes" />
+                            <input type="submit" class="btn config_submitter" value="Save Changes" />
                         </div><!-- /content_use_pytivo //-->
 
                     </fieldset>
                 </div><!-- /component-group //-->
 
+                <div class="component-group-save">
+                    <input type="submit" class="btn config_submitter" value="Save Changes" />
+                </div><br />
 
                 <br />
-                <h1>Devices</h1>
+                <h2>Devices</h2>
                 <br />
 
 
                 <div class="component-group clearfix">
                     <div class="component-group-desc">
-                        <h3><a href="http://growl.info/" onclick="window.open(this.href, '_blank'); return false;"><img src="$sbRoot/images/notifiers/growl.gif" alt="" title="Growl" width="16" height="16" /> Growl </a></h3>
+                        <img class="notifier-icon" src="$sbRoot/images/notifiers/growl.png" alt="" title="Growl" />
+                        <h3><a href="http://growl.info/" onclick="window.open(this.href, '_blank'); return false;">Growl</a></h3>
                         <p>A cross-platform unobtrusive global notification system.</p>
                     </div>
                     <fieldset class="component-group-list">
@@ -399,8 +408,8 @@
                                 </label>
                             </div>
                             <div class="testNotification" id="testGrowl-result">Click below to register and test Growl, this is required for Growl notifications to work.</div>
-                            <input type="button" value="Register Growl" id="testGrowl" />
-                            <input type="submit" class="config_submitter" value="Save Changes" />
+                            <input type="button" class="btn" value="Register Growl" id="testGrowl" />
+                            <input type="submit" class="btn config_submitter" value="Save Changes" />
                         </div><!-- /content_use_growl //-->
 
                     </fieldset>
@@ -409,7 +418,8 @@
 
                 <div class="component-group clearfix">
                     <div class="component-group-desc">
-                        <h3><a href="http://www.prowlapp.com/" onclick="window.open(this.href, '_blank'); return false;"><img src="$sbRoot/images/notifiers/prowl.gif" alt="Prowl" title="Prowl" width="16" height="16" /> Prowl</a></h3>
+                        <img class="notifier-icon" src="$sbRoot/images/notifiers/prowl.png" alt="Prowl" title="Prowl" />
+                        <h3><a href="http://www.prowlapp.com/" onclick="window.open(this.href, '_blank'); return false;">Prowl</a></h3>
                         <p>A Growl client for iOS.</p>
                     </div>
                     <fieldset class="component-group-list">
@@ -443,7 +453,7 @@
                                 </label>
                                 <label class="nocheck clearfix">
                                     <span class="component-title">&nbsp;</span>
-                                    <span class="component-desc">Get your key at: <a href="https://www.prowlapp.com/api_settings.php" onclick="window.open(this.href, '_blank'); return false;">https://www.prowlapp.com/api_settings.php</a></span>
+                                    <span class="component-desc">Get your key at: <a href="https://www.prowlapp.com/api_settings.php" onclick="window.open(this.href, '_blank'); return false;">https://prowlapp.com/api_settings.php</a></span>
                                 </label>
                             </div>
                             <div class="field-pair">
@@ -463,8 +473,8 @@
                                 </label>
                             </div>
                             <div class="testNotification" id="testProwl-result">Click below to test.</div>
-                            <input type="button" value="Test Prowl" id="testProwl" />
-                            <input type="submit" class="config_submitter" value="Save Changes" />
+                            <input type="button" class="btn" value="Test Prowl" id="testProwl" />
+                            <input type="submit" class="btn config_submitter" value="Save Changes" />
                         </div><!-- /content_use_prowl //-->
 
                     </fieldset>
@@ -473,7 +483,8 @@
 
                 <div class="component-group clearfix">
                     <div class="component-group-desc">
-                        <h3><a href="http://notifo.com/" onclick="window.open(this.href, '_blank'); return false;"><img src="$sbRoot/images/notifiers/notifo.gif" alt="" title="Notifo" width="16" height="16" /> Notifo </a></h3>
+                        <img class="notifier-icon" src="$sbRoot/images/notifiers/notifo.png" alt="" title="Notifo" />
+                        <h3><a href="http://notifo.com/" onclick="window.open(this.href, '_blank'); return false;">Notifo</a></h3>
                         <p>A platform for push-notifications to either mobile or desktop clients</p>
                     </div>
                     <fieldset class="component-group-list">
@@ -517,12 +528,12 @@
                                 </label>
                                 <label class="nocheck clearfix">
                                     <span class="component-title">&nbsp;</span>
-                                    <span class="component-desc">Get your API key at:  <a href="http://notifo.com/user/settings" onclick="window.open(this.href, '_blank'); return false;">http://notifo.com/user/settings</a></span>
+                                    <span class="component-desc">Get your key at:  <a href="http://notifo.com/user/settings" onclick="window.open(this.href, '_blank'); return false;">http://notifo.com/user/settings</a></span>
                                 </label>
                             </div>
                             <div class="testNotification" id="testNotifo-result">Click below to test.</div>
-                            <input type="button" value="Test Notifo" id="testNotifo" />
-                            <input type="submit" class="config_submitter" value="Save Changes" />
+                            <input type="button" class="btn" value="Test Notifo" id="testNotifo" />
+                            <input type="submit" class="btn config_submitter" value="Save Changes" />
                         </div><!-- /content_use_notifo //-->
 
                     </fieldset>
@@ -531,7 +542,8 @@
 
                 <div class="component-group clearfix">
                     <div class="component-group-desc">
-                        <h3><a href="http://library.gnome.org/devel/libnotify/" onclick="window.open(this.href, '_blank'); return false;"><img src="$sbRoot/images/notifiers/libnotify.gif" alt="" title="Libnotify" width="16" height="16" /> Libnotify </a></h3>
+                        <img class="notifier-icon" src="$sbRoot/images/notifiers/libnotify.png" alt="" title="Libnotify" />
+                        <h3><a href="http://library.gnome.org/devel/libnotify/" onclick="window.open(this.href, '_blank'); return false;">Libnotify</a></h3>
                         <p>The standard desktop notification API for Linux/*nix systems.  This notifier will only function if the pynotify module is installed (Ubuntu/Debian package <a href="apt:python-notify">python-notify</a>).</p>
                     </div>
                     <fieldset class="component-group-list">
@@ -559,8 +571,8 @@
                                 </label>
                             </div>
                             <div class="testNotification" id="testLibnotify-result">Click below to test.</div>
-                            <input type="button" value="Test Libnotify" id="testLibnotify" />
-                            <input type="submit" class="config_submitter" value="Save Changes" />
+                            <input type="button" class="btn" value="Test Libnotify" id="testLibnotify" />
+                            <input type="submit" class="btn config_submitter" value="Save Changes" />
                         </div><!-- /content_use_libnotify //-->
 
                     </fieldset>
@@ -569,7 +581,8 @@
 
                 <div class="component-group clearfix">
                     <div class="component-group-desc">
-                        <h3><a href="http://pushover.net/" onclick="window.open(this.href, '_blank'); return false;"><img src="$sbRoot/images/notifiers/pushover.gif" alt="" title="Pushover" width="16" height="16" /> Pushover </a></h3>
+                        <img class="notifier-icon" src="$sbRoot/images/notifiers/pushover.png" alt="" title="Pushover" />
+                        <h3><a href="http://pushover.net/" onclick="window.open(this.href, '_blank'); return false;">Pushover</a></h3>
                         <p>Pushover makes it easy to send real-time notifications to your Android and iOS devices.</p>
                     </div>
                     <fieldset class="component-group-list">
@@ -598,7 +611,7 @@
                             </div>
                             <div class="field-pair">
                                 <label class="nocheck clearfix">
-                                    <span class="component-title"></span>
+                                    <span class="component-title">&nbsp;</span>
                                     <input type="text" name="pushover_userkey" id="pushover_userkey" value="$sickbeard.PUSHOVER_USERKEY" size="35" />
                                 </label>
                                 <label class="nocheck clearfix">
@@ -607,8 +620,8 @@
                                 </label>
                             </div>
                             <div class="testNotification" id="testPushover-result">Click below to test.</div>
-                            <input type="button" value="Test Pushover" id="testPushover" />
-                            <input type="submit" class="config_submitter" value="Save Changes" />
+                            <input type="button" class="btn" value="Test Pushover" id="testPushover" />
+                            <input type="submit" class="btn config_submitter" value="Save Changes" />
                         </div><!-- /content_use_pushover //-->
 
                     </fieldset>
@@ -616,7 +629,8 @@
 
                 <div class="component-group clearfix">
                     <div class="component-group-desc">
-                        <h3><a href="http://boxcar.io/" onclick="window.open(this.href, '_blank'); return false;"><img src="$sbRoot/images/notifiers/boxcar.gif" alt="" title="Boxcar" width="16" height="16" /> Boxcar </a></h3>
+                        <img class="notifier-icon" src="$sbRoot/images/notifiers/boxcar.png" alt="" title="Boxcar" />
+                        <h3><a href="http://boxcar.io/" onclick="window.open(this.href, '_blank'); return false;">Boxcar</a></h3>
                         <p>Read your messages where and when you want them! A subscription will be send if needed.</p>
                     </div>
                     <fieldset class="component-group-list">
@@ -654,8 +668,8 @@
                                 </label>
                             </div>
                             <div class="testNotification" id="testBoxcar-result">Click below to test.</div>
-                            <input type="button" value="Test Boxcar" id="testBoxcar" />
-                            <input type="submit" class="config_submitter" value="Save Changes" />
+                            <input type="button" class="btn" value="Test Boxcar" id="testBoxcar" />
+                            <input type="submit" class="btn config_submitter" value="Save Changes" />
                         </div><!-- /content_use_boxcar //-->
 
                     </fieldset>
@@ -664,7 +678,8 @@
 
                 <div class="component-group clearfix">
                     <div class="component-group-desc">
-                        <h3><a href="http://nma.usk.bz" onclick="window.open(this.href, '_blank'); return false;"><img src="$sbRoot/images/notifiers/nma.jpg" alt="" title="NMA" width="16" height="16" /> Notify My Android </a></h3>
+                        <img class="notifier-icon" src="$sbRoot/images/notifiers/nma.png" alt="" title="NMA" />
+                        <h3><a href="http://nma.usk.bz" onclick="window.open(this.href, '_blank'); return false;">Notify My Android</a></h3>
                         <p>Notify My Android is a Prowl-like Android App and API that offers an easy way to send notifications from your application directly to your Android device.</p>
                     </div>
                     <fieldset class="component-group-list">
@@ -694,7 +709,7 @@
                             <div class="field-pair">
                                 <label class="nocheck clearfix">
                                        <span class="component-title">NMA API key:</span>
-                                    <input type="text" name="nma_api" id="nma_api" value="$sickbeard.NMA_API" size="55" />
+                                    <input type="text" name="nma_api" id="nma_api" value="$sickbeard.NMA_API" size="35" />
                                 </label>
                                 <label class="nocheck clearfix">
                                     <span class="component-title">&nbsp;</span>
@@ -718,22 +733,26 @@
                                 </label>
                             </div>
                             <div class="testNotification" id="testNMA-result">Click below to test.</div>
-                            <input type="button" value="Test NMA" id="testNMA" />
-                            <input type="submit" class="config_submitter" value="Save Changes" />
+                            <input type="button" class="btn" value="Test NMA" id="testNMA" />
+                            <input type="submit" class="btn config_submitter" value="Save Changes" />
                         </div><!-- /content_use_nma //-->
 
                     </fieldset>
                 </div><!-- /nma component-group //-->
 
+                <div class="component-group-save">
+                    <input type="submit" class="btn config_submitter" value="Save Changes" />
+                </div><br />
 
                 <br />
-                <h1>Online</h1>
+                <h2>Online</h2>
                 <br />
 
 
                 <div class="component-group clearfix">
                     <div class="component-group-desc">
-                        <h3><a href="http://www.twitter.com/" onclick="window.open(this.href, '_blank'); return false;"><img src="$sbRoot/images/notifiers/twitter.gif" alt="" title="Twitter" width="16" height="16" /> Twitter </a></h3>
+                        <img class="notifier-icon" src="$sbRoot/images/notifiers/twitter.png" alt="" title="Twitter" />
+                        <h3><a href="http://www.twitter.com/" onclick="window.open(this.href, '_blank'); return false;">Twitter</a></h3>
                         <p>A social networking and microblogging service, enabling its users to send and read other users' messages called tweets.</p>
                     </div>
                     <fieldset class="component-group-list">
@@ -770,7 +789,7 @@
                                 </label>
                                 <label class="nocheck clearfix">
                                     <span class="component-desc">Click the "Request Authorization" button.<br/> This will open a new page containing an auth key.<br/> Note: if nothing happens check your popup blocker.<br/></span>
-                                    <input type="button" value="Request Authorization" id="twitterStep1" />
+                                    <input type="button" class="btn" value="Request Authorization" id="twitterStep1" />
                                 </label>
                             </div>
                             <div class="field-pair">
@@ -779,10 +798,8 @@
                                 </label>
                                 <label class="nocheck clearfix">
                                     <span class="component-desc">Enter the key Twitter gave you below, and click "Verify Key".<br/></span>
-                                    <input type="text" id="twitter_key" value="" size="35" /><br />
-                                </label>
-                                <label class="nocheck clearfix">
-                                    <input type="button" value="Verify Key" id="twitterStep2" />
+                                    <input type="text" id="twitter_key" value="" size="35" />
+                                    <input type="button" class="btn" value="Verify Key" id="twitterStep2" />
                                 </label>
                             </div>
                             <div class="field-pair">
@@ -791,8 +808,8 @@
                                 </label>
                             </div>
                             <div class="testNotification" id="testTwitter-result">Click below to test.</div>
-                            <input type="button" value="Test Twitter" id="testTwitter" />
-                            <input type="submit" class="config_submitter" value="Save Changes" />
+                            <input type="button" class="btn" value="Test Twitter" id="testTwitter" />
+                            <input type="submit" class="btn config_submitter" value="Save Changes" />
                         </div><!-- /content_use_twitter //-->
 
                     </fieldset>
@@ -801,7 +818,8 @@
 
                 <div class="component-group clearfix">
                     <div class="component-group-desc">
-                        <h3><a href="http://trakt.tv/" onclick="window.open(this.href, '_blank'); return false;"><img src="$sbRoot/images/notifiers/trakt.gif" alt="" title="Trakt" width="16" height="16" /> Trakt </a></h3>
+                        <img class="notifier-icon" src="$sbRoot/images/notifiers/trakt.png" alt="" title="Trakt" />
+                        <h3><a href="http://trakt.tv/" onclick="window.open(this.href, '_blank'); return false;">Trakt</a></h3>
                         <p>trakt helps keep a record of what TV shows and movies you are watching. Based on your favorites, trakt recommends additional shows and movies you'll enjoy!</p>
                     </div>
                     <fieldset class="component-group-list">
@@ -845,15 +863,17 @@
                                 </label>
                             </div>
                             <div class="testNotification" id="testTrakt-result">Click below to test.</div>
-                            <input type="button" value="Test Trakt" id="testTrakt" />
-                            <input type="submit" class="config_submitter" value="Save Changes" />
+                            <input type="button" class="btn" value="Test Trakt" id="testTrakt" />
+                            <input type="submit" class="btn config_submitter" value="Save Changes" />
                         </div><!-- /content_use_trakt //-->
 
                     </fieldset>
                 </div><!-- /trakt component-group //-->
 
+                <div class="component-group-save">
+                    <input type="submit" class="btn config_submitter" value="Save Changes" />
+                </div><br />
 
-            <br/><input type="submit" class="config_submitter" value="Save Changes" /><br/>
             </div><!-- /config-components //-->
         </form>
     </div>

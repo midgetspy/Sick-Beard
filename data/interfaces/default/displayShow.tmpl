@@ -9,7 +9,7 @@
 #set global $topmenu="manageShows"#
 #include $os.path.join($sickbeard.PROG_DIR, "data/interfaces/default/inc_top.tmpl")
 
-<script type="text/javascript" src="$sbRoot/js/lib/jquery.bookmarkscroll.js"></script>
+<script type="text/javascript" src="$sbRoot/js/lib/jquery.bookmarkscroll.js?$sbPID"></script>
 
 
 <div class="h2footer align-right">
@@ -36,14 +36,16 @@
 </div><br/>
 
 #if $show_message:
-    <div id="show_message" class="ui-corner-all">$show_message</div><br />
+    <div class="alert alert-info">
+        $show_message
+    </div>
 #end if
 
 <input type="hidden" id="sbRoot" value="$sbRoot" />
 
-<script type="text/javascript" src="$sbRoot/js/displayShow.js"></script>
-<script type="text/javascript" src="$sbRoot/js/plotTooltip.js"></script>
-<script type="text/javascript" src="$sbRoot/js/ajaxEpSearch.js"></script>
+<script type="text/javascript" src="$sbRoot/js/displayShow.js?$sbPID"></script>
+<script type="text/javascript" src="$sbRoot/js/plotTooltip.js?$sbPID"></script>
+<script type="text/javascript" src="$sbRoot/js/ajaxEpSearch.js?$sbPID"></script>
 
 <div class="align-left"><b>Change Show:</b>
 <div class="navShow"><img id="prevShow" width="16" height="18" src="$sbRoot/images/prev.gif" alt="&lt;&lt;" title="Prev Show" /></div>
@@ -56,7 +58,7 @@
 </div>
 
 <div id="summary" class="align-left">
-<table class="infoTable" cellspacing="1" border="0" cellpadding="0">
+<table>
 #if $show.network and $show.airs:
     <tr><td class="showLegend">Airs: </td><td>$show.airs on $show.network</td></tr>
 #else if $show.network:
@@ -84,7 +86,7 @@ replace with: <b><%=", ".join([Quality.qualityStrings[x] for x in bestQualities]
 #end if
     </td></tr>
     <tr><td class="showLegend">Language:</td><td><img src="$sbRoot/images/flags/${show.lang}.png" width="16" height="11" alt="" /> $show.lang</td></tr>
-    <tr><td class="showLegend">Season Folders: </td><td><img src="$sbRoot/images/#if $show.seasonfolders == 1 then "yes16.png\" alt=\"Y" else "no16.png\" alt=\"N"#" width="16" height="16" /></td></tr>
+    <tr><td class="showLegend">Flatten Folders: </td><td><img src="$sbRoot/images/#if $show.flatten_folders == 1 or $sickbeard.NAMING_FORCE_FOLDERS then "yes16.png\" alt=\"Y" else "no16.png\" alt=\"N"#" width="16" height="16" /></td></tr>
     <tr><td class="showLegend">Paused: </td><td><img src="$sbRoot/images/#if int($show.paused) == 1 then "yes16.png\" alt=\"Y" else "no16.png\" alt=\"N"#" width="16" height="16" /></td></tr>
     <tr><td class="showLegend">Air-by-Date: </td><td><img src="$sbRoot/images/#if int($show.air_by_date) == 1 then "yes16.png\" alt=\"Y" else "no16.png\" alt=\"N"#" width="16" height="16" /></td></tr>
 </table>
@@ -101,25 +103,25 @@ Change selected episodes to
 #end for
 </select>
 <input type="hidden" id="showID" value="$show.tvdbid" />
-<input type="button" id="changeStatus" value="Go" /><br />
+<input type="button" class="btn" id="changeStatus" value="Go" /><br />
 <br />
 <br />
 </div>
 
 #set $curSeason = -1
-#set $odd = 0
 
-<div class="float-right" id="checkboxControls">
-<label for="wanted"><span class="wanted">Wanted: <b>$epCounts[$Overview.WANTED]</b> <input type="checkbox" id="wanted" checked="checked" /></span></label>
-<label for="qual"><span class="qual">Low Quality: <b>$epCounts[$Overview.QUAL]</b> <input type="checkbox" id="qual" checked="checked" /></span></label>
-<label for="good"><span class="good">Downloaded: <b>$epCounts[$Overview.GOOD]</b> <input type="checkbox" id="good" checked="checked" /></span></label>
-<label for="skipped"><span class="skipped">Skipped: <b>$epCounts[$Overview.SKIPPED]</b> <input type="checkbox" id="skipped" checked="checked" /></span></label>
-<br />
-<span class="selectAll"><a href="#" onclick="return false;" class="seriesCheck">Select Filtered Episodes</a></span> 
-<span class="clearAll"><a href="#" onclick="return false;" class="clearAll">Clear All</a></span>
+<div class="float-right clearfix" id="checkboxControls">
+    <div style="padding-bottom: 5px;">
+        <label for="wanted" class="checkbox inline wanted"><input type="checkbox" id="wanted" checked="checked" /> Wanted: <b>$epCounts[$Overview.WANTED]</b></label>
+        <label for="qual" class="checkbox inline qual"><input type="checkbox" id="qual" checked="checked" /> Low Quality: <b>$epCounts[$Overview.QUAL]</b></label>
+        <label for="good" class="checkbox inline good"><input type="checkbox" id="good" checked="checked" /> Downloaded: <b>$epCounts[$Overview.GOOD]</b></label>
+        <label for="skipped" class="checkbox inline skipped"><input type="checkbox" id="skipped" checked="checked" /> Skipped: <b>$epCounts[$Overview.SKIPPED]</b></label>
+    </div>
+    <div class="pull-right">
+        <button class="btn btn-mini seriesCheck"><a href="#" onclick="return false;">Select Filtered Episodes</a></button> 
+        <button class="btn btn-mini clearAll"><a href="#" onclick="return false;">Clear All</a></button>
+    </div>
 </div>
-
-<div style="clear:both;" class="clearfix"></div>
 
 <table class="sickbeardTable" cellspacing="1" border="0" cellpadding="0">
     
@@ -165,7 +167,7 @@ $epLoc
     <td class="status_column">$statusStrings[int($epResult["status"])]</td>
     <td align="center">
     #if int($epResult["season"]) != 0:
-      <a class="epSearch" href="searchEpisode?show=$show.tvdbid&amp;season=$epResult["season"]&amp;episode=$epResult["episode"]"><img src="$sbRoot/images/search32.png" height="16" alt="search" title="Manual Search" /></a>
+      <a class="epSearch" href="searchEpisode?show=$show.tvdbid&amp;season=$epResult["season"]&amp;episode=$epResult["episode"]"><img src="$sbRoot/images/search16.png" height="16" alt="search" title="Manual Search" /></a>
     #end if
     </td>
    </tr>
