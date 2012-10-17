@@ -782,12 +782,12 @@ class ConfigSearch:
         # handle some special cases
         sickbeard.USENET_RETENTION = int(postData.get('usenet_retention', 200))
 
-        if sab_host and not re.match('https?://.*', sab_host):
-            sab_host = 'http://' + sab_host
+        # this regex will match http or https urls or just a domain/address
+        regex = re.compile(r'^(http)?(?P<s>s|)?(://)?(?P<addr>[^/]*)/?')
+        # this substitution combined with above regex will return a '/' terminated url from given url or host
+        regex_sub = r'http\g<s>://\g<addr>/'
 
-        if not sab_host.endswith('/'):
-            sab_host = sab_host + '/'
-
+        sab_host = re.sub(regex, regex_sub, postData.get('sab_host', ''))
         sickbeard.SAB_HOST = sab_host
 
         sickbeard.save_config()
