@@ -762,50 +762,25 @@ class ConfigSearch:
         return _munge(t)
 
     @cherrypy.expose
-    def saveSearch(self, use_nzbs=None, use_torrents=None, nzb_dir=None, sab_username=None, sab_password=None,
-                       sab_apikey=None, sab_category=None, sab_host=None, nzbget_password=None, nzbget_category=None, nzbget_host=None,
-                       torrent_dir=None, nzb_method=None, usenet_retention=None, search_frequency=None, download_propers=None):
+    def saveSearch(self, **postData):
 
         results = []
 
-        if not config.change_NZB_DIR(nzb_dir):
-            results += ["Unable to create directory " + os.path.normpath(nzb_dir) + ", dir not changed."]
+        for key, value in postData.items():
+        	value = value.strip()
+        	val = 1 if value == "on" else value
+        	if hasattr(config, 'change_' + key):
+        	  	ret, msg = getattr(config, 'change_' + key)(val)
+        	  	results.append(msg)
+        	elif hasattr(sickbeard, key.upper()):
+        	  	setattr(sickbeard, key.upper(), val)
+        	elif hasattr(sickbeard, key.lower()):
+        	  	setattr(sickbeard, key.lower(), val)
+        	else:
+        	  	logger.log("Unknown search setting: " + key, logger.ERROR)
 
-        if not config.change_TORRENT_DIR(torrent_dir):
-            results += ["Unable to create directory " + os.path.normpath(torrent_dir) + ", dir not changed."]
-
-        config.change_SEARCH_FREQUENCY(search_frequency)
-
-        if download_propers == "on":
-            download_propers = 1
-        else:
-            download_propers = 0
-
-        if use_nzbs == "on":
-            use_nzbs = 1
-        else:
-            use_nzbs = 0
-
-        if use_torrents == "on":
-            use_torrents = 1
-        else:
-            use_torrents = 0
-
-        if usenet_retention == None:
-            usenet_retention = 200
-
-        sickbeard.USE_NZBS = use_nzbs
-        sickbeard.USE_TORRENTS = use_torrents
-
-        sickbeard.NZB_METHOD = nzb_method
-        sickbeard.USENET_RETENTION = int(usenet_retention)
-
-        sickbeard.DOWNLOAD_PROPERS = download_propers
-
-        sickbeard.SAB_USERNAME = sab_username
-        sickbeard.SAB_PASSWORD = sab_password
-        sickbeard.SAB_APIKEY = sab_apikey.strip()
-        sickbeard.SAB_CATEGORY = sab_category
+        # handle some special cases
+        sickbeard.USENET_RETENTION = int(postData.get('usenet_retention', 200))
 
         if sab_host and not re.match('https?://.*', sab_host):
             sab_host = 'http://' + sab_host
@@ -814,11 +789,6 @@ class ConfigSearch:
             sab_host = sab_host + '/'
 
         sickbeard.SAB_HOST = sab_host
-
-        sickbeard.NZBGET_PASSWORD = nzbget_password
-        sickbeard.NZBGET_CATEGORY = nzbget_category
-        sickbeard.NZBGET_HOST = nzbget_host
-
 
         sickbeard.save_config()
 
