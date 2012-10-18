@@ -91,7 +91,7 @@ class Addic7ed(ServiceBase):
                 continue
             sub_keywords = split_keyword(cells[4].text.strip().lower())
             #TODO: Maybe allow empty keywords here? (same in Subtitulos)
-            if not keywords & sub_keywords:
+            if keywords and not keywords & sub_keywords:
                 logger.debug(u'None of subtitle keywords %r in %r' % (sub_keywords, keywords))
                 continue
             sub_link = '%s/%s' % (self.server_url, cells[9].a['href'])

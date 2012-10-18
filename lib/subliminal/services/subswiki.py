@@ -78,7 +78,7 @@ class SubsWiki(ServiceBase):
         subtitles = []
         for sub in soup('td', {'class': 'NewsTitle'}):
             sub_keywords = split_keyword(sub.b.string.lower())
-            if not keywords & sub_keywords:
+            if keywords and not keywords & sub_keywords:
                 logger.debug(u'None of subtitle keywords %r in %r' % (sub_keywords, keywords))
                 continue
             for html_language in sub.parent.parent.find_all('td', {'class': 'language'}):
