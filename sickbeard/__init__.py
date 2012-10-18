@@ -391,20 +391,21 @@ def initialize(consoleLogging=True):
 
         socket.setdefaulttimeout(SOCKET_TIMEOUT)
 
-        CheckSection(CFG, 'General')
-        CheckSection(CFG, 'Blackhole')
-        CheckSection(CFG, 'Newzbin')
-        CheckSection(CFG, 'SABnzbd')
-        CheckSection(CFG, 'NZBget')
-        CheckSection(CFG, 'XBMC')
-        CheckSection(CFG, 'PLEX')
-        CheckSection(CFG, 'Growl')
-        CheckSection(CFG, 'Prowl')
-        CheckSection(CFG, 'Twitter')
-        CheckSection(CFG, 'NMJ')
-        CheckSection(CFG, 'Synology')
-        CheckSection(CFG, 'pyTivo')
-        CheckSection(CFG, 'NMA')
+        CheckSection('General')
+        CheckSection('Blackhole')
+        CheckSection('Newzbin')
+        CheckSection('SABnzbd')
+        CheckSection('NZBget')
+        CheckSection('XBMC')
+        CheckSection('PLEX')
+        CheckSection('Growl')
+        CheckSection('Prowl')
+        CheckSection('Twitter')
+        CheckSection('NMJ')
+        CheckSection('Synology')
+        CheckSection('SynologyNotifier')
+        CheckSection('pyTivo')
+        CheckSection('NMA')
         CheckSection('Subtitles')
 
         LOG_DIR = check_setting_str(CFG, 'General', 'log_dir', 'Logs')
@@ -1255,10 +1256,11 @@ def save_config():
     new_config['Synology'] = {}
     new_config['Synology']['use_synoindex'] = int(USE_SYNOINDEX)
 
-    new_config['Synology']['use_synologynotifier'] = int(USE_SYNOLOGYNOTIFIER)
-    new_config['Synology']['synologynotifier_notify_onsnatch'] = int(SYNOLOGYNOTIFIER_NOTIFY_ONSNATCH)
-    new_config['Synology']['synologynotifier_notify_ondownload'] = int(SYNOLOGYNOTIFIER_NOTIFY_ONDOWNLOAD)
-    new_config['Synology']['synologynotifier_notify_onsubtitledownload'] = int(SYNOLOGYNOTIFIER_NOTIFY_ONSUBTITLEDOWNLOAD)
+    new_config['SynologyNotifier'] = {}
+    new_config['SynologyNotifier']['use_synologynotifier'] = int(USE_SYNOLOGYNOTIFIER)
+    new_config['SynologyNotifier']['synologynotifier_notify_onsnatch'] = int(SYNOLOGYNOTIFIER_NOTIFY_ONSNATCH)
+    new_config['SynologyNotifier']['synologynotifier_notify_ondownload'] = int(SYNOLOGYNOTIFIER_NOTIFY_ONDOWNLOAD)
+    new_config['SynologyNotifier']['synologynotifier_notify_onsubtitledownload'] = int(SYNOLOGYNOTIFIER_NOTIFY_ONSUBTITLEDOWNLOAD)
 
     new_config['Trakt'] = {}
     new_config['Trakt']['use_trakt'] = int(USE_TRAKT)
