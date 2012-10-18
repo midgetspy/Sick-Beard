@@ -62,6 +62,11 @@ $(document).ready(function () {
     }
 
     function fill_abd_examples() {
+    	if (!$('#naming_custom_abd').prop('checked')) {
+    		$('#naming_abd_pattern').qtip('hide');
+    		return;
+    	}
+    	
         var pattern = $('#naming_abd_pattern').val();
 
         $.get(sbRoot + '/config/postProcessing/testNaming', {pattern: pattern, abd: 'True'},
