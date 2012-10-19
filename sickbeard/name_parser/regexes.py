@@ -178,7 +178,7 @@ ep_regexes = [
                '''
                ^((?P<series_name>.+?)(?:[. _-]{2,}|[. _]))?             # Show_Name and separator
                (?P<ep_num>\d{1,2})                           # 02
-               (?:-(?P<extra_ep_num>\d{1,2}))?               # 02
+               (?:-(?P<extra_ep_num>\d{1,2}))*               # 02
                [. _-]+((?P<extra_info>.+?)                 # Source_Quality_Etc-
                ((?<![. _-])(?<!WEB)                        # Make sure this is really the release group
                -(?P<release_group>[^- ]+))?)?$              # Group
