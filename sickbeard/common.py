@@ -58,6 +58,7 @@ NAMING_EXTEND = 2
 NAMING_DUPLICATE = 4
 NAMING_LIMITED_EXTEND = 8
 NAMING_SEPARATED_REPEAT = 16
+NAMING_LIMITED_EXTEND_E_PREFIXED = 32
 
 multiEpStrings = {}
 multiEpStrings[NAMING_REPEAT] = "Repeat"
@@ -65,6 +66,7 @@ multiEpStrings[NAMING_SEPARATED_REPEAT] = "Repeat (Separated)"
 multiEpStrings[NAMING_DUPLICATE] = "Duplicate"
 multiEpStrings[NAMING_EXTEND] = "Extend"
 multiEpStrings[NAMING_LIMITED_EXTEND] = "Extend (Limited)"
+multiEpStrings[NAMING_LIMITED_EXTEND_E_PREFIXED] = "Extend (Limited, E-prefixed)"
 
 class Quality:
 
