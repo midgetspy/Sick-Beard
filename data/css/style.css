@@ -122,10 +122,6 @@ div.formpaginate .prev, div.formpaginate .next {
   overflow: hidden;
   clear: both;
 }
-.stepDiv > #customQualityWrapper {
-  height: 190px;
-  overflow: auto;
-}
 #customQualityWrapper div.component-group-desc {
   float:left;
   width:165px;
