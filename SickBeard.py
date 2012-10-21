@@ -255,7 +255,7 @@ def main():
     if not os.path.isfile(sickbeard.CONFIG_FILE):
         logger.log(u"Unable to find '" + sickbeard.CONFIG_FILE + "' , all settings will be default!", logger.ERROR)
 
-    sickbeard.CFG = ConfigObj(sickbeard.CONFIG_FILE)
+    sickbeard.CFG = ConfigObj(sickbeard.CONFIG_FILE, encoding="UTF8")
 
     # Initialize the config and our threads
     sickbeard.initialize(consoleLogging=consoleLogging)
