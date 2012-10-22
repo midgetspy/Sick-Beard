@@ -64,7 +64,7 @@ class NZBIndexProvider(generic.NZBProvider):
 
     def _doSearch(self, curString, quotes=False, show=None):
 
-        term =  re.sub('[\.\-]', ' ', curString).encode('utf-8')
+        term =  re.sub('[\.\-\:]', ' ', curString).encode('utf-8')
         if quotes:
             term = "\""+term+"\""
 
