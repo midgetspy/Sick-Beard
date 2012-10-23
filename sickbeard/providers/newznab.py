@@ -40,25 +40,32 @@ from sickbeard.exceptions import ex
 
 class NewznabProvider(generic.NZBProvider):
 
-    def __init__(self, name, url, key=''):
+    def __init__(self, name, url, catIDs, enabled, key=''):
 
         generic.NZBProvider.__init__(self, name)
+        
+        
 
         self.cache = NewznabCache(self)
 
         self.url = url
         self.key = key
-        
+
         if not catIDs:
             self.catIDs = '5000'
             logger.log(u"Using fallback catID: 5000, please select a cat id to search in for provider [" + name + "]", logger.ERROR)
         else:       
             self.catIDs = catIDs
+            
 
         # if a provider doesn't need an api key then this can be false
         self.needs_auth = True
 
-        self.enabled = True
+        if enabled == 0:
+            self.enabled = False
+        else:
+            self.enabled = True
+
         self.supportsBacklog = True
 
         self.default = False
@@ -182,7 +189,7 @@ class NewznabProvider(generic.NZBProvider):
         params = {"t": "tvsearch",
                   "maxage": sickbeard.USENET_RETENTION,
                   "limit": 100,
-                  "cat": '5030,5040'}
+                  "cat": self.catIDs}
 
         # if max_age is set, use it, don't allow it to be missing
         if max_age or not params['maxage']:

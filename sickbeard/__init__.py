@@ -429,7 +429,7 @@ def initialize(consoleLogging=True):
 
         # Set our common tvdb_api options here
         TVDB_API_PARMS = {'apikey': TVDB_API_KEY,
-                          'language': 'en',
+                          'language': 'de',
                           'useZip': True}
 
         if CACHE_DIR:
@@ -503,7 +503,7 @@ def initialize(consoleLogging=True):
         NEWZBIN_USERNAME = check_setting_str(CFG, 'Newzbin', 'newzbin_username', '')
         NEWZBIN_PASSWORD = check_setting_str(CFG, 'Newzbin', 'newzbin_password', '')
 
-        NZBINDEX = bool(check_setting_int(CFG, 'NZBIndex', 'nzbindex', 0))
+        NZBINDEX = bool(check_setting_int(CFG, 'NZBIndex', 'nzbindex', 1))
         NZBSERIEN = bool(check_setting_int(CFG, 'NZBSerien', 'nzbserien', 0))
 
         KEREWS = bool(check_setting_int(CFG, 'KereWS', 'kerews', 0))

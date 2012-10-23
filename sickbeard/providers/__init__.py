@@ -39,13 +39,13 @@ def sortedProviderList():
 
     initialList = sickbeard.providerList + sickbeard.newznabProviderList
     providerDict = dict(zip([x.getID() for x in initialList], initialList))
-
     newList = []
 
     # add all modules in the priority list, in order
     for curModule in sickbeard.PROVIDER_ORDER:
         if curModule in providerDict:
             newList.append(providerDict[curModule])
+            
 
     # add any modules that are missing from that list
     for curModule in providerDict:
@@ -62,9 +62,7 @@ def getNewznabProviderList(data):
 
     defaultList = [makeNewznabProvider(x) for x in getDefaultNewznabProviders().split('!!!')]
     providerList = filter(lambda x: x, [makeNewznabProvider(x) for x in data.split('!!!')])
-
     providerDict = dict(zip([x.name for x in providerList], providerList))
-
     for curDefault in defaultList:
         if not curDefault:
             continue
@@ -103,7 +101,7 @@ def makeNewznabProvider(configString):
 
     newznab = sys.modules['sickbeard.providers.newznab']
 
-    newProvider = newznab.NewznabProvider(name, url, catIDs, key)
+    newProvider = newznab.NewznabProvider(name, url, catIDs, enabled, key)
     #newProvider.key = key
     #newProvider.catIDs = catIDs
     #newProvider.enabled = enabled == '1'
@@ -111,7 +109,7 @@ def makeNewznabProvider(configString):
     return newProvider
 
 def getDefaultNewznabProviders():
-    return 'Sick Beard Index|http://momo.sickbeard.com/|0|5000|0!!!NZBs.org|http://beta.nzbs.org/||5000|0'
+    return 'Sick Beard Index|http://momo.sickbeard.com/|0|5000|0!!!NZBs.org|http://beta.nzbs.org/|0|5000|0'
 
 
 
