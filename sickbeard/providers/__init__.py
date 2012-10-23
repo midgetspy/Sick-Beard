@@ -86,7 +86,7 @@ def getNewznabProviderList(data):
 
 
 def makeNewznabProvider(configString):
-
+    logger.log(configString)
     if not configString:
         return None
 

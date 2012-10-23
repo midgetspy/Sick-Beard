@@ -974,7 +974,7 @@ class ConfigProviders:
 
         providerDict = dict(zip([x.getID() for x in sickbeard.newznabProviderList], sickbeard.newznabProviderList))
 
-        tempProvider = newznab.NewznabProvider(name, '', '')
+        tempProvider = newznab.NewznabProvider(name, '', '', '')
 
         if tempProvider.getID() in providerDict:
             return json.dumps({'error': 'Exists as '+providerDict[tempProvider.getID()].name})
