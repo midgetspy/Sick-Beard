@@ -23,6 +23,7 @@ import datetime
 import threading
 import re
 import glob
+import time
 
 import sickbeard
 
@@ -67,6 +68,7 @@ class TVShow(object):
         self.paused = 0
         self.air_by_date = 0
         self.lang = lang
+        self.updatetime = None
 
         self.lock = threading.Lock()
         self._isDirGood = False
@@ -573,6 +575,9 @@ class TVShow(object):
             self.airs = sqlResults[0]["airs"]
             if self.airs == None:
                 self.airs = ""
+            self.updatetime = sqlResults[0]["updatetime"]
+            if self.updatetime is None:
+                self.updatetime = time.time()
             self.startyear = sqlResults[0]["startyear"]
             if self.startyear == None:
                 self.startyear = 0
@@ -797,6 +802,7 @@ class TVShow(object):
                         "runtime": self.runtime,
                         "quality": self.quality,
                         "airs": self.airs,
+                        "updatetime": self.updatetime,
                         "status": self.status,
                         "flatten_folders": self.flatten_folders,
                         "paused": self.paused,
