@@ -114,6 +114,7 @@ def getDefaultNewznabProviders():
     return 'Sick Beard Index|http://momo.sickbeard.com/|0|5000|0!!!NZBs.org|http://beta.nzbs.org/||5000|0'
 
 
+
 def getProviderModule(name):
     name = name.lower()
     prefix = "sickbeard.providers."

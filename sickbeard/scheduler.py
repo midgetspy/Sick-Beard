@@ -71,7 +71,7 @@ class Scheduler:
                     self.action.run()
                 except Exception, e:
                     logger.log(u"Exception generated in thread "+self.threadName+": " + ex(e), logger.ERROR)
-                    logger.log(traceback.format_exc(), logger.DEBUG)
+                    logger.log(repr(traceback.format_exc()), logger.DEBUG)
 
             if self.abort:
                 self.abort = False

@@ -177,7 +177,7 @@ class TIVOMetadata(generic.GenericMetadata):
             # Leave blank or omit for movies.
             #
             # Added season episode to title, so that the shows will sort correctly, as often the date information is wrong.
-            data += ("episodeTitle : " + config.naming_ep_type[sickbeard.NAMING_EP_TYPE] % {'seasonnumber': curEpToWrite.season, 'episodenumber': curEpToWrite.episode}  + " " + curEpToWrite.name + "\n")
+            data += ("episodeTitle : " + curEpToWrite._format_pattern('%Sx%0E %EN') + "\n")
             
             
             # This should be entered for episodic shows and omitted for movies. The standard tivo format is to enter 

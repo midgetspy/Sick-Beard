@@ -53,7 +53,6 @@ class XBMCNotifier:
                 # do a per-show update first, if possible
                 if not self._update_library(curHost, showName=show_name) and sickbeard.XBMC_UPDATE_FULL:
                     # do a full update if requested
-                    logger.log(u"Update of show directory failed on " + curHost + ", trying full update as requested", logger.ERROR)
                     self._update_library(curHost)
 
     def _username(self):
@@ -196,17 +195,20 @@ class XBMCNotifier:
                 updateCommand = {'command': 'ExecBuiltIn', 'parameter': 'XBMC.updatelibrary(video, %s)' % (unEncPath)}
                 request = self._sendToXBMC(updateCommand, host)
                 if not request:
+                    logger.log(u"Update of show directory failed on " + showName + " on " + host + " at " + unEncPath, logger.ERROR)
                     return False
                 # Sleep for a few seconds just to be sure xbmc has a chance to finish
                 # each directory
                 if len(paths) > 1:
                     time.sleep(5)
         else:
+            logger.log(u"Do a full update as requested", logger.DEBUG)
             logger.log(u"XBMC Updating " + host, logger.DEBUG)
             updateCommand = {'command': 'ExecBuiltIn', 'parameter': 'XBMC.updatelibrary(video)'}
             request = self._sendToXBMC(updateCommand, host)
     
             if not request:
+                logger.log(u"Full update failed on " + host, logger.ERROR)
                 return False
     
         return True

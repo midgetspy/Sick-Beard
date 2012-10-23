@@ -34,18 +34,18 @@
 \$(document).ready(function() 
 { 
     \$("#massUpdateTable:has(tbody tr)").tablesorter({
-        sortList: [[2,0]],
+        sortList: [[3,0]],
         textExtraction: {
             1: function(node) { return \$(node).find("img").attr("alt"); },
-            3: function(node) { return \$(node).find("span").text().toLowerCase(); },
-            4: function(node) { return \$(node).find("img").attr("alt"); },
+            2: function(node) { return \$(node).find("img").attr("alt"); },
+            4: function(node) { return \$(node).find("span").text().toLowerCase(); },
             5: function(node) { return \$(node).find("img").attr("alt"); }
         },
         widgets: ['zebra', 'stickyHeaders'],
         headers: {
             0: { sorter: false},
-            2: { sorter: 'showNames'},
-            3: { sorter: 'quality'},
+            3: { sorter: 'showNames'},
+            4: { sorter: 'quality'},
             7: { sorter: false},
             8: { sorter: false},
             9: { sorter: false},
@@ -55,31 +55,40 @@
 });
 //-->
 </script>
-<script type="text/javascript" src="$sbRoot/js/massUpdate.js"></script>
+<script type="text/javascript" src="$sbRoot/js/massUpdate.js?$sbPID"></script>
 
 <form name="massUpdateForm" method="post" action="massUpdate">
 
-<table id="massUpdateTable" class="sickbeardTable tablesorter" cellspacing="1" border="0" cellpadding="0">
+<table id="massUpdateTable" class="tablesorter" cellspacing="1" border="0" cellpadding="0">
   <thead>
     <tr>
-      <th width="1%">Edit&nbsp;<input type="checkbox" class="bulkCheck" id="editCheck" /></th>
+      <th width="1%">Edit<br/>
+        <input type="checkbox" class="bulkCheck" id="editCheck" />
+      </th>
       <th class="nowrap">Lang</th>
+      <th>Paused</th>
       <th class="nowrap">Show Name</th>
       <th>Quality</th>
-      <th>Season<br/>Folders</th>
-      <th>Paused</th>
+      <th>Flatten Folders</th>
       <th>Status</th>
-      <th width="1%">Update&nbsp;<input type="checkbox" class="bulkCheck" id="updateCheck" /></th>
-      <th width="1%">Rescan&nbsp;<input type="checkbox" class="bulkCheck" id="refreshCheck" /></th>
-      <th width="1%">Rename&nbsp;<input type="checkbox" class="bulkCheck" id="renameCheck" /></th>
-<!--      <th>Force Metadata Regen <input type="checkbox" class="bulkCheck" id="metadataCheck" /></th>//-->
-      <th width="1%">Delete&nbsp;<input type="checkbox" class="bulkCheck" id="deleteCheck" /></th>
+      <th width="1%">Update<br/>
+        <input type="checkbox" class="bulkCheck" id="updateCheck" />
+      </th>
+      <th width="1%">Rescan<br/>
+        <input type="checkbox" class="bulkCheck" id="refreshCheck" />
+      </th>
+      <th width="1%">Rename<br/>
+        <input type="checkbox" class="bulkCheck" id="renameCheck" />
+      </th>
+      <th width="1%">Delete<br/>
+        <input type="checkbox" class="bulkCheck" id="deleteCheck" />
+      </th>
     </tr>
   </thead>
 <tfoot>
   <tr>
-    <td rowspan="1" colspan="1" class="align-center alt"><input type="button" value="Edit Selected" id="submitMassEdit" /></td>
-    <td rowspan="1" colspan="10" class="align-right alt"><input type="button" value="Submit" id="submitMassUpdate" /></td>
+    <td rowspan="1" colspan="1" class="align-center"><input type="button" class="btn" value="Edit Selected" id="submitMassEdit" /></td>
+    <td rowspan="1" colspan="10" class="align-right"><input type="button" class="btn btn-primary" value="Submit" id="submitMassUpdate" /></td>
   </tr>
 </tfoot>
   <tbody>
@@ -112,14 +121,14 @@ $myShowList.sort(lambda x, y: cmp(x.name, y.name))
   <tr>
     <td align="center"><input type="checkbox" class="editCheck" id="edit-$curShow.tvdbid" /></td>
     <td align="center"><img src="$sbRoot/images/flags/${curShow.lang}.png" width="16" height="11" alt="$curShow.lang" /></td>
+    <td align="center"><img src="$sbRoot/images/#if int($curShow.paused) == 1 then "yes16.png\" alt=\"Y\"" else "no16.png\" alt=\"N\""# width="16" height="16" /></td>
     <td class="tvShow"><a href="$sbRoot/home/displayShow?show=$curShow.tvdbid">$curShow.name</a></td>
 #if $curShow.quality in $qualityPresets:
     <td align="center"><span class="quality $qualityPresetStrings[$curShow.quality]">$qualityPresetStrings[$curShow.quality]</span></td>
 #else:
     <td align="center"><span class="quality Custom">Custom</span></td>
 #end if 
-    <td align="center"><img src="$sbRoot/images/#if int($curShow.seasonfolders) == 1 then "yes16.png\" alt=\"Y\"" else "no16.png\" alt=\"N\""# width="16" height="16" /></td>
-    <td align="center"><img src="$sbRoot/images/#if int($curShow.paused) == 1 then "yes16.png\" alt=\"Y\"" else "no16.png\" alt=\"N\""# width="16" height="16" /></td>
+    <td align="center"><img src="$sbRoot/images/#if int($curShow.flatten_folders) == 1 then "yes16.png\" alt=\"Y\"" else "no16.png\" alt=\"N\""# width="16" height="16" /></td>
     <td align="center">$curShow.status</td>
     <td align="center">$curUpdate</td>
     <td align="center">$curRefresh</td>
@@ -133,5 +142,5 @@ $myShowList.sort(lambda x, y: cmp(x.name, y.name))
 
 </form>
 
-<script type="text/javascript" src="$sbRoot/js/tableClick.js"></script>
+<script type="text/javascript" src="$sbRoot/js/tableClick.js?$sbPID"></script>
 #include $os.path.join($sickbeard.PROG_DIR, "data/interfaces/default/inc_bottom.tmpl")

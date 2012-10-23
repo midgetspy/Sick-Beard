@@ -2,7 +2,7 @@
 ######################
 cache/*
 cache.db*
-config.ini
+config.ini*
 Logs/*
 sickbeard.db*
 autoProcessTV/autoProcessTV.cfg
@@ -25,6 +25,7 @@ tests/cache.db
 *.tmp
 *.wpr
 *.project
+*.pydevproject
 *.cproject
 *.tmproj
 *.tmproject

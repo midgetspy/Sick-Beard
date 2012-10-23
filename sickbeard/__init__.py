@@ -37,12 +37,14 @@ from threading import Lock
 # apparently py2exe won't build these unless they're imported somewhere
 from sickbeard import providers, metadata
 from providers import ezrss, tvtorrents, btn, nzbmatrix, nzbsrus, newznab, womble, newzbin, nzbs_org_old, nzbindex, nzbserien, kere_ws
+from sickbeard.config import CheckSection, check_setting_int, check_setting_str, ConfigMigrator
 
 from sickbeard import searchCurrent, searchBacklog, showUpdater, versionChecker, properFinder, autoPostProcesser
 from sickbeard import helpers, db, exceptions, show_queue, search_queue, scheduler
 from sickbeard import logger
+from sickbeard import naming
 
-from sickbeard.common import *
+from common import SD, SKIPPED, NAMING_REPEAT
 
 from sickbeard.databases import mainDB, cache_db
 
@@ -56,6 +58,9 @@ PID = None
 
 CFG = None
 CONFIG_FILE = None
+
+# this is the version of the config we EXPECT to find
+CONFIG_VERSION = 1
 
 PROG_DIR = '.'
 MY_FULLNAME = None
@@ -125,18 +130,14 @@ METADATA_SYNOLOGY = None
 
 QUALITY_DEFAULT = None
 STATUS_DEFAULT = None
-SEASON_FOLDERS_FORMAT = None
-SEASON_FOLDERS_DEFAULT = None
+FLATTEN_FOLDERS_DEFAULT = None
 PROVIDER_ORDER = []
 
-NAMING_SHOW_NAME = None
-NAMING_EP_NAME = None
-NAMING_EP_TYPE = None
-NAMING_MULTI_EP_TYPE = None
-NAMING_SEP_TYPE = None
-NAMING_USE_PERIODS = None
-NAMING_QUALITY = None
-NAMING_DATES = None
+NAMING_MULTI_EP = None
+NAMING_PATTERN = None
+NAMING_ABD_PATTERN = None
+NAMING_CUSTOM_ABD = None
+NAMING_FORCE_FOLDERS = False
 
 TVDB_API_KEY = '9DAF49C96CBF8DAC'
 TVDB_BASE_URL = None
@@ -310,88 +311,9 @@ IGNORE_WORDS = "french,core2hd,dutch,swedish"
 
 __INITIALIZED__ = False
 
-def CheckSection(sec):
-    """ Check if INI section exists, if not create it """
-    try:
-        CFG[sec]
-        return True
-    except:
-        CFG[sec] = {}
-        return False
-
-################################################################################
-# Check_setting_int                                                            #
-################################################################################
-def minimax(val, low, high):
-    """ Return value forced within range """
-    try:
-        val = int(val)
-    except:
-        val = 0
-    if val < low:
-        return low
-    if val > high:
-        return high
-    return val
-
-################################################################################
-# Check_setting_int                                                            #
-################################################################################
-def check_setting_int(config, cfg_name, item_name, def_val):
-    try:
-        my_val = int(config[cfg_name][item_name])
-    except:
-        my_val = def_val
-        try:
-            config[cfg_name][item_name] = my_val
-        except:
-            config[cfg_name] = {}
-            config[cfg_name][item_name] = my_val
-    logger.log(item_name + " -> " + str(my_val), logger.DEBUG)
-    return my_val
-
-################################################################################
-# Check_setting_float                                                          #
-################################################################################
-def check_setting_float(config, cfg_name, item_name, def_val):
-    try:
-        my_val = float(config[cfg_name][item_name])
-    except:
-        my_val = def_val
-        try:
-            config[cfg_name][item_name] = my_val
-        except:
-            config[cfg_name] = {}
-            config[cfg_name][item_name] = my_val
-
-    logger.log(item_name + " -> " + str(my_val), logger.DEBUG)
-    return my_val
-
-################################################################################
-# Check_setting_str                                                            #
-################################################################################
-def check_setting_str(config, cfg_name, item_name, def_val, log=True):
-    try:
-        my_val = config[cfg_name][item_name]
-    except:
-        my_val = def_val
-        try:
-            config[cfg_name][item_name] = my_val
-        except:
-            config[cfg_name] = {}
-            config[cfg_name][item_name] = my_val
-
-    if log:
-        logger.log(item_name + " -> " + my_val, logger.DEBUG)
-    else:
-        logger.log(item_name + " -> ******", logger.DEBUG)
-    return my_val
-
-
 def get_backlog_cycle_time():
     cycletime = SEARCH_FREQUENCY*2+7
     return max([cycletime, 720])
-
 
 def initialize(consoleLogging=True):
 
@@ -409,19 +331,18 @@ def initialize(consoleLogging=True):
                 showUpdateScheduler, __INITIALIZED__, LAUNCH_BROWSER, showList, loadingShowList, \
                 NZBS, NZBS_UID, NZBS_HASH, EZRSS, TVTORRENTS, TVTORRENTS_DIGEST, TVTORRENTS_HASH, BTN, BTN_API_KEY, TORRENT_DIR, USENET_RETENTION, SOCKET_TIMEOUT, \
                 SEARCH_FREQUENCY, DEFAULT_SEARCH_FREQUENCY, BACKLOG_SEARCH_FREQUENCY, \
-                QUALITY_DEFAULT, SEASON_FOLDERS_FORMAT, SEASON_FOLDERS_DEFAULT, STATUS_DEFAULT, \
+                QUALITY_DEFAULT, FLATTEN_FOLDERS_DEFAULT, STATUS_DEFAULT, \
                 GROWL_NOTIFY_ONSNATCH, GROWL_NOTIFY_ONDOWNLOAD, TWITTER_NOTIFY_ONSNATCH, TWITTER_NOTIFY_ONDOWNLOAD, \
                 USE_GROWL, GROWL_HOST, GROWL_PASSWORD, USE_PROWL, PROWL_NOTIFY_ONSNATCH, PROWL_NOTIFY_ONDOWNLOAD, PROWL_API, PROWL_PRIORITY, PROG_DIR, NZBMATRIX, NZBMATRIX_USERNAME, \
                 USE_PYTIVO, PYTIVO_NOTIFY_ONSNATCH, PYTIVO_NOTIFY_ONDOWNLOAD, PYTIVO_UPDATE_LIBRARY, PYTIVO_HOST, PYTIVO_SHARE_NAME, PYTIVO_TIVO_NAME, \
                 USE_NMA, NMA_NOTIFY_ONSNATCH, NMA_NOTIFY_ONDOWNLOAD, NMA_API, NMA_PRIORITY, \
                 NZBMATRIX_APIKEY, NZBINDEX, NZBSERIEN, versionCheckScheduler, VERSION_NOTIFY, PROCESS_AUTOMATICALLY, \
                 KEEP_PROCESSED_DIR, TV_DOWNLOAD_DIR, TVDB_BASE_URL, MIN_SEARCH_FREQUENCY, \
-                showQueueScheduler, searchQueueScheduler, ROOT_DIRS, \
-                NAMING_SHOW_NAME, NAMING_EP_TYPE, NAMING_MULTI_EP_TYPE, CACHE_DIR, ACTUAL_CACHE_DIR, TVDB_API_PARMS, \
+                showQueueScheduler, searchQueueScheduler, ROOT_DIRS, CACHE_DIR, ACTUAL_CACHE_DIR, TVDB_API_PARMS, \
+                NAMING_PATTERN, NAMING_MULTI_EP, NAMING_FORCE_FOLDERS, NAMING_ABD_PATTERN, NAMING_CUSTOM_ABD, \
                 RENAME_EPISODES, properFinderScheduler, PROVIDER_ORDER, autoPostProcesserScheduler, \
-                NAMING_EP_NAME, NAMING_SEP_TYPE, NAMING_USE_PERIODS, WOMBLE, \
-                NZBSRUS, NZBSRUS_UID, NZBSRUS_HASH, NAMING_QUALITY, providerList, newznabProviderList, \
-                NAMING_DATES, EXTRA_SCRIPTS, USE_TWITTER, TWITTER_USERNAME, TWITTER_PASSWORD, TWITTER_PREFIX, \
+                NZBSRUS, NZBSRUS_UID, NZBSRUS_HASH, WOMBLE, providerList, newznabProviderList, \
+                EXTRA_SCRIPTS, USE_TWITTER, TWITTER_USERNAME, TWITTER_PASSWORD, TWITTER_PREFIX, \
                 USE_NOTIFO, NOTIFO_USERNAME, NOTIFO_APISECRET, NOTIFO_NOTIFY_ONDOWNLOAD, NOTIFO_NOTIFY_ONSNATCH, \
                 USE_BOXCAR, BOXCAR_USERNAME, BOXCAR_PASSWORD, BOXCAR_NOTIFY_ONDOWNLOAD, BOXCAR_NOTIFY_ONSNATCH, \
                 USE_PUSHOVER, PUSHOVER_USERKEY, PUSHOVER_NOTIFY_ONDOWNLOAD, PUSHOVER_NOTIFY_ONSNATCH, \
@@ -436,21 +357,21 @@ def initialize(consoleLogging=True):
 
         socket.setdefaulttimeout(SOCKET_TIMEOUT)
 
-        CheckSection('General')
-        CheckSection('Blackhole')
-        CheckSection('Newzbin')
-        CheckSection('KereWS')
-        CheckSection('SABnzbd')
-        CheckSection('NZBget')
-        CheckSection('XBMC')
-        CheckSection('PLEX')
-        CheckSection('Growl')
-        CheckSection('Prowl')
-        CheckSection('Twitter')
-        CheckSection('NMJ')
-        CheckSection('Synology')
-        CheckSection('pyTivo')
-        CheckSection('NMA')
+        CheckSection(CFG, 'General')
+        CheckSection(CFG, 'Blackhole')
+        CheckSection(CFG, 'Newzbin')
+        CheckSection(CFG, 'KereWS')
+        CheckSection(CFG, 'SABnzbd')
+        CheckSection(CFG, 'NZBget')
+        CheckSection(CFG, 'XBMC')
+        CheckSection(CFG, 'PLEX')
+        CheckSection(CFG, 'Growl')
+        CheckSection(CFG, 'Prowl')
+        CheckSection(CFG, 'Twitter')
+        CheckSection(CFG, 'NMJ')
+        CheckSection(CFG, 'Synology')
+        CheckSection(CFG, 'pyTivo')
+        CheckSection(CFG, 'NMA')
 
         LOG_DIR = check_setting_str(CFG, 'General', 'log_dir', 'Logs')
         if not helpers.makeDir(LOG_DIR):
@@ -507,32 +428,25 @@ def initialize(consoleLogging=True):
             proxy_url = proxies['ftp']
 
         # Set our common tvdb_api options here
-        TVDB_API_PARMS = {'cache': True,
-                          'apikey': TVDB_API_KEY,
+        TVDB_API_PARMS = {'apikey': TVDB_API_KEY,
                           'language': 'en',
-                          'cache_dir': False,
-                          'http_proxy': proxy_url}
-        
+                          'useZip': True}
+
         if CACHE_DIR:
-            TVDB_API_PARMS['cache_dir'] = os.path.join(CACHE_DIR, 'tvdb')
+            TVDB_API_PARMS['cache'] = os.path.join(CACHE_DIR, 'tvdb')
 
         QUALITY_DEFAULT = check_setting_int(CFG, 'General', 'quality_default', SD)
         STATUS_DEFAULT = check_setting_int(CFG, 'General', 'status_default', SKIPPED)
         VERSION_NOTIFY = check_setting_int(CFG, 'General', 'version_notify', 1)
-        
-        SEASON_FOLDERS_FORMAT = check_setting_str(CFG, 'General', 'season_folders_format', 'Season %02d')
-        SEASON_FOLDERS_DEFAULT = bool(check_setting_int(CFG, 'General', 'season_folders_default', 0))
+        FLATTEN_FOLDERS_DEFAULT = bool(check_setting_int(CFG, 'General', 'flatten_folders_default', 0))
 
         PROVIDER_ORDER = check_setting_str(CFG, 'General', 'provider_order', '').split()
 
-        NAMING_SHOW_NAME = bool(check_setting_int(CFG, 'General', 'naming_show_name', 1))
-        NAMING_EP_NAME = bool(check_setting_int(CFG, 'General', 'naming_ep_name', 1))
-        NAMING_EP_TYPE = check_setting_int(CFG, 'General', 'naming_ep_type', 0)
-        NAMING_MULTI_EP_TYPE = check_setting_int(CFG, 'General', 'naming_multi_ep_type', 0)
-        NAMING_SEP_TYPE = check_setting_int(CFG, 'General', 'naming_sep_type', 0)
-        NAMING_USE_PERIODS = bool(check_setting_int(CFG, 'General', 'naming_use_periods', 0))
-        NAMING_QUALITY = bool(check_setting_int(CFG, 'General', 'naming_quality', 0))
-        NAMING_DATES = bool(check_setting_int(CFG, 'General', 'naming_dates', 1))
+        NAMING_PATTERN = check_setting_str(CFG, 'General', 'naming_pattern', '')
+        NAMING_ABD_PATTERN = check_setting_str(CFG, 'General', 'naming_abd_pattern', '')
+        NAMING_CUSTOM_ABD = check_setting_int(CFG, 'General', 'naming_custom_abd', 0)
+        NAMING_MULTI_EP = check_setting_int(CFG, 'General', 'naming_multi_ep', 1)
+        NAMING_FORCE_FOLDERS = naming.check_force_season_folders()
 
         TVDB_BASE_URL = 'http://www.thetvdb.com/api/' + TVDB_API_KEY
 
@@ -763,9 +677,9 @@ def initialize(consoleLogging=True):
 
         newznabData = check_setting_str(CFG, 'Newznab', 'newznab_data', '')
         newznabProviderList = providers.getNewznabProviderList(newznabData)
-
         providerList = providers.makeProviderList()
-        
+
+        # start up all the threads
         logger.sb_log_instance.initLogging(consoleLogging=consoleLogging)
 
         # initialize the main SB database
@@ -776,6 +690,10 @@ def initialize(consoleLogging=True):
         
         # fix up any db problems
         db.sanityCheckDatabase(db.DBConnection(), mainDB.MainSanityCheck)
+
+        # migrate the config if it needs it
+        migrator = ConfigMigrator(CFG)
+        migrator.migrate_config()
 
         currentSearchScheduler = scheduler.Scheduler(searchCurrent.CurrentSearcher(),
                                                      cycleTime=datetime.timedelta(minutes=SEARCH_FREQUENCY),
@@ -1053,18 +971,13 @@ def save_config():
     new_config['General']['download_propers'] = int(DOWNLOAD_PROPERS)
     new_config['General']['quality_default'] = int(QUALITY_DEFAULT)
     new_config['General']['status_default'] = int(STATUS_DEFAULT)
-    new_config['General']['season_folders_format'] = SEASON_FOLDERS_FORMAT
-    new_config['General']['season_folders_default'] = int(SEASON_FOLDERS_DEFAULT)
+    new_config['General']['flatten_folders_default'] = int(FLATTEN_FOLDERS_DEFAULT)
     new_config['General']['provider_order'] = ' '.join([x.getID() for x in providers.sortedProviderList()])
     new_config['General']['version_notify'] = int(VERSION_NOTIFY)
-    new_config['General']['naming_ep_name'] = int(NAMING_EP_NAME)
-    new_config['General']['naming_show_name'] = int(NAMING_SHOW_NAME)
-    new_config['General']['naming_ep_type'] = int(NAMING_EP_TYPE)
-    new_config['General']['naming_multi_ep_type'] = int(NAMING_MULTI_EP_TYPE)
-    new_config['General']['naming_sep_type'] = int(NAMING_SEP_TYPE)
-    new_config['General']['naming_use_periods'] = int(NAMING_USE_PERIODS)
-    new_config['General']['naming_quality'] = int(NAMING_QUALITY)
-    new_config['General']['naming_dates'] = int(NAMING_DATES)
+    new_config['General']['naming_pattern'] = NAMING_PATTERN
+    new_config['General']['naming_custom_abd'] = int(NAMING_CUSTOM_ABD)
+    new_config['General']['naming_abd_pattern'] = NAMING_ABD_PATTERN
+    new_config['General']['naming_multi_ep'] = int(NAMING_MULTI_EP)
     new_config['General']['launch_browser'] = int(LAUNCH_BROWSER)
 
     new_config['General']['use_banner'] = int(USE_BANNER)
@@ -1262,6 +1175,8 @@ def save_config():
     new_config['GUI']['coming_eps_layout'] = COMING_EPS_LAYOUT
     new_config['GUI']['coming_eps_display_paused'] = int(COMING_EPS_DISPLAY_PAUSED)
     new_config['GUI']['coming_eps_sort'] = COMING_EPS_SORT
+
+    new_config['General']['config_version'] = CONFIG_VERSION
 
     new_config.write()
 
