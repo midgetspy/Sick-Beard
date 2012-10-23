@@ -68,7 +68,7 @@ class TVShow(object):
         self.paused = 0
         self.air_by_date = 0
         self.lang = lang
-        self.updatetime = 0
+        self.tvdb_updatetime = 0
 
         self.lock = threading.Lock()
         self._isDirGood = False
@@ -575,9 +575,9 @@ class TVShow(object):
             self.airs = sqlResults[0]["airs"]
             if self.airs == None:
                 self.airs = ""
-            self.updatetime = sqlResults[0]["updatetime"]
-            if self.updatetime is None:
-                self.updatetime = time.time()
+            self.tvdb_updatetime = sqlResults[0]["tvdb_updatetime"]
+            if self.tvdb_updatetime is None:
+                self.tvdb_updatetime = 0
             self.startyear = sqlResults[0]["startyear"]
             if self.startyear == None:
                 self.startyear = 0
@@ -640,6 +640,8 @@ class TVShow(object):
 
         if self.status == None:
             self.status = ""
+
+        self.tvdb_updatetime = time.time()
 
         self.saveToDB()
 
@@ -802,7 +804,7 @@ class TVShow(object):
                         "runtime": self.runtime,
                         "quality": self.quality,
                         "airs": self.airs,
-                        "updatetime": self.updatetime,
+                        "tvdb_updatetime": self.tvdb_updatetime,
                         "status": self.status,
                         "flatten_folders": self.flatten_folders,
                         "paused": self.paused,
