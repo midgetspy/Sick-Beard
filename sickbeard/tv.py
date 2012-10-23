@@ -68,7 +68,7 @@ class TVShow(object):
         self.paused = 0
         self.air_by_date = 0
         self.lang = lang
-        self.updatetime = None
+        self.updatetime = 0
 
         self.lock = threading.Lock()
         self._isDirGood = False
