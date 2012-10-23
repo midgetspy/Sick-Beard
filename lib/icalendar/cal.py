@@ -9,17 +9,17 @@ These are the defined components.
 import pytz
 from datetime import datetime
 from types import ListType, TupleType
-from icalendar.caselessdict import CaselessDict
-from icalendar.parser import (
+from caselessdict import CaselessDict
+from parser import (
     Contentlines,
     Contentline,
     Parameters,
 )
-from icalendar.parser import (
+from parser import (
     q_split,
     q_join,
 )
-from icalendar.prop import (
+from prop import (
     TypesFactory,
     vText,
 )

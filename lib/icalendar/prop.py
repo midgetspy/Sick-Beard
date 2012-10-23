@@ -49,8 +49,8 @@ from datetime import (
     tzinfo,
 )
 from types import TupleType, ListType
-from icalendar.caselessdict import CaselessDict
-from icalendar.parser import Parameters
+from caselessdict import CaselessDict
+from parser import Parameters
 
 
 SequenceTypes = [TupleType, ListType]

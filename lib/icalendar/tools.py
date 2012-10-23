@@ -40,7 +40,7 @@ class UIDGenerator:
         datetime-uniquevalue@host. Like:
         20050105T225746Z-HKtJMqUgdO0jDUwm@example.com
         """
-        from icalendar.prop import vText, vDatetime
+        from prop import vText, vDatetime
         unique = unique or self.rnd_string()
         return vText('%s-%s@%s' % (vDatetime(datetime.today()).to_ical(), unique, host_name))
 

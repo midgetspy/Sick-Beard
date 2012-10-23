@@ -10,9 +10,9 @@ Copyright, 2005: Max M <maxm@mxm.dk>
 """
 
 import re
-import icalendar.tools
+import tools
 from types import TupleType, ListType
-from icalendar.caselessdict import CaselessDict
+from caselessdict import CaselessDict
 SequenceTypes = [TupleType, ListType]
 
 
