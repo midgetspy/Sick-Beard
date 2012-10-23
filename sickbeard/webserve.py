@@ -2835,7 +2835,7 @@ class WebInterface:
         """ Provides a subscribeable URL for iCal subscriptions
         """
 
-        logger.log(u"Receiving iCal request from %s" % cherrypy.request.remote_ip)
+        logger.log(u"Receiving iCal request from %s" % cherrypy.request.remote.ip)
 
         try:
             from PIL import Image
