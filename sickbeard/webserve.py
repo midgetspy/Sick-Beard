@@ -26,6 +26,7 @@ import re
 import threading
 import datetime
 import random
+import pytz
 
 from Cheetah.Template import Template
 import cherrypy.lib
@@ -47,6 +48,7 @@ from sickbeard.common import SNATCHED, SKIPPED, UNAIRED, IGNORED, ARCHIVED, WANT
 from sickbeard.exceptions import ex
 from sickbeard.webapi import Api
 
+from lib.icalendar import Calendar, Event, FixedOffset
 from lib.tvdb_api import tvdb_api
 
 try:
@@ -2827,6 +2829,98 @@ class WebInterface:
                 
 
         return _munge(t)
+
+    @cherrypy.expose
+    def ical(self):
+        """ Provides a subscribeable URL for iCal subscriptions
+        """
+
+        logger.log(u"Receiving iCal request from %s" % cherrypy.request.remote.ip)
+
+        try:
+            from PIL import Image
+            pil_import = True
+        except ImportError:
+            pil_import = False
+
+        poster_url = cherrypy.url().replace('ical', '')
+
+        time_re = re.compile('([0-9]{1,2})\:([0-9]{2})(\ |)([AM|am|PM|pm]{2})')
+
+        cal = Calendar()
+
+        # As far as I know Sick-Beard is pinned to EST
+        EST = FixedOffset(-240, "EST")
+        cal.add('version', '2.0')
+        cal.add('prodid', '//Sick-Beard Upcoming Episodes//')
+
+        myDB = db.DBConnection()
+
+        today = datetime.date.today().toordinal()
+        next_month = (datetime.date.today() + datetime.timedelta(days=30)).toordinal()
+
+        # Get all the shows that are not paused and are currently on air
+        calendar_shows = myDB.select("SELECT show_name, tvdb_id, network, airs, runtime FROM tv_shows WHERE status = 'Continuing' AND paused != '1'")
+        for show in calendar_shows:
+            # Get all episodes of this show airing between today and next month
+            episode_list = myDB.select("SELECT tvdbid, name, season, episode, description, airdate FROM tv_episodes WHERE airdate >= ? AND airdate < ? AND showid = ?", (today, next_month, int(show["tvdb_id"])))
+
+            for episode in episode_list:
+                event = Event()
+                event.add('summary', "%s: %s" % (show['show_name'], episode['name']))
+                air_date = datetime.datetime.fromordinal(int(episode['airdate']))
+                air_time = time_re.search(show['airs'])
+
+                # Parse out the air time
+                if(air_time.group(4).lower() == 'pm'):
+                    t = datetime.time((int(air_time.group(1)) + 12), int(air_time.group(2)), 0, tzinfo=EST)
+                else:
+                    t = datetime.time(int(air_time.group(1)), int(air_time.group(2)), 0, tzinfo=EST)
+
+                at = datetime.datetime.combine(air_date, t)
+
+                # Google Calendar expects this in UTC
+                event.add('dtstart', at.astimezone(pytz.timezone("UTC")))
+
+                # The runtimes are generally never available, so if it is great, if not set to
+                # start time just to have the event added
+                if int(show['runtime']) > 0:
+                    et = at + datetime.timedelta(minutes=int(show['runtime']))
+                    event.add('dtend', et.astimezone(pytz.timezone("UTC")))
+                else:
+                    event.add('dtend', at.astimezone(pytz.timezone("UTC")))
+
+                event.add('X-GOOGLE-CALENDAR-CONTENT-TITLE',
+                    "%s: %s" % (show['show_name'], episode['name']))
+                event.add('X-GOOGLE-CALENDAR-CONTENT-TYPE', 'image/*')
+                event.add('X-GOOGLE-CALENDAR-CONTENT-URL', str(poster_url) + 'showPoster/?show=' + str(show['tvdb_id']) + '&which=banner')
+
+                if pil_import:
+                    # We can get an accurate height/width
+                    try:
+                        image_path = ek.ek(os.path.join, sickbeard.PROG_DIR, 'cache', 'images', 
+                            "%s.banner.jpg" % show['tvdb_id'])
+                        b = Image.open(image_path)
+                        w,h = b.size
+                        event.add('X-GOOGLE-CALENDAR-CONTENT-WIDTH', "%s" % w)
+                        event.add('X-GOOGLE-CALENDAR-CONTENT-HEIGHT', "%s" % h)
+                    except IOError:
+                        logger.log(u"Couldn't get image info for %s/%s" %
+                            (show['show_name'], image_path))
+                else:
+                    # Just guessing
+                    event.add('X-GOOGLE-CALENDAR-CONTENT-WIDTH', '758')
+                    event.add('X-GOOGLE-CALENDAR-CONTENT-HEIGHT', '140')
+
+                event.add('X-GOOGLE-CALENDAR-CONTENT-ICON', "%simages/favicon.ico" % poster_url)
+
+                event['uid'] = "%s-%s@Sick-Beard" % (datetime.date.today().isoformat(),
+                    random.randint(10000,99999))
+
+                cal.add_component(event)
+
+        return cal.to_ical()
+        
 
     manage = Manage()
 
