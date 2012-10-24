@@ -147,22 +147,22 @@ class TORRENTZProvider(generic.TorrentProvider):
         torrentHash = torrentz_url.replace('http://torrentz.eu/','').upper()
         try:
             url = "http://torrage.com/torrent/" + torrentHash + '.' + self.providerType
-            
-            urllib2.urlopen(url)            
-        except urllib2.HTTPError, eA:
-            logger.log('Cannot find torrage for ' + torrentz_url + ':' + str(eA).decode('utf-8'), logger.DEBUG)
+            urllib2.urlopen(url)
+        except (urllib2.HTTPError,urllib2.URLError) as  eA:
+            logger.log(torrentz_url + ' is not available on torrage : ' + str(eA).decode('utf-8'), logger.DEBUG)
             try:
                 url = "http://zoink.it/torrent/" + torrentHash + '.' + self.providerType
-                urllib2.urlopen(url)                
-            except urllib2.HTTPError, eB:
-                logger.log('Cannot find zoink for ' + torrentz_url + ':' + str(eB).decode('utf-8'), logger.DEBUG)
+                urllib2.urlopen(url)
+            except (urllib2.HTTPError,urllib2.URLError) as eB:
+                logger.log(torrentz_url + ' is not available on zoink : ' + str(eB).decode('utf-8'), logger.DEBUG)
                 try:
                     url = "http://torcache.net/torrent/" + torrentHash + '.' + self.providerType
-                    urllib2.urlopen(url)  
-                except urllib2.HTTPError, eC:
-                    logger.log('Cannot find torcache for ' + torrentz_url + ':' + str(eC).decode('utf-8'), logger.DEBUG)
+                    urllib2.urlopen(url)
+                except (urllib2.HTTPError,urllib2.URLError) as  eC:
+                    logger.log(torrentz_url + ' is not available on torcache : ' + str(eC).decode('utf-8'), logger.DEBUG)
                     logger.log(u"No suitable URL for "+torrentz_url, logger.DEBUG)
                     url = ''
+
         return url
         
     def _get_title_and_url(self, item):
