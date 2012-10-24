@@ -2448,7 +2448,7 @@ class Home:
     def updateXBMC(self, showName=None):
 
         for curHost in [x.strip() for x in sickbeard.XBMC_HOST.split(",")]:
-            if notifiers.xbmc_notifier._update_library(curHost, showName=showName):
+            if notifiers.xbmc_notifier.update_library(curHost, showName=showName):
                 ui.notifications.message("Command sent to XBMC host " + curHost + " to update library")
             else:
                 ui.notifications.error("Unable to contact XBMC host " + curHost)
