@@ -23,6 +23,7 @@ import datetime
 import threading
 import re
 import glob
+import time
 
 import sickbeard
 
@@ -67,6 +68,7 @@ class TVShow(object):
         self.paused = 0
         self.air_by_date = 0
         self.lang = lang
+        self.tvdb_updatetime = 0
 
         self.lock = threading.Lock()
         self._isDirGood = False
@@ -594,6 +596,9 @@ class TVShow(object):
             self.airs = sqlResults[0]["airs"]
             if self.airs == None:
                 self.airs = ""
+            self.tvdb_updatetime = sqlResults[0]["tvdb_updatetime"]
+            if self.tvdb_updatetime is None:
+                self.tvdb_updatetime = 0
             self.startyear = sqlResults[0]["startyear"]
             if self.startyear == None:
                 self.startyear = 0
@@ -656,6 +661,8 @@ class TVShow(object):
 
         if self.status == None:
             self.status = ""
+
+        self.tvdb_updatetime = time.time()
 
         self.saveToDB()
 
@@ -818,6 +825,7 @@ class TVShow(object):
                         "runtime": self.runtime,
                         "quality": self.quality,
                         "airs": self.airs,
+                        "tvdb_updatetime": self.tvdb_updatetime,
                         "status": self.status,
                         "flatten_folders": self.flatten_folders,
                         "paused": self.paused,
@@ -1516,8 +1524,6 @@ class TVEpisode(object):
         Manipulates an episode naming pattern and then fills the template in
         """
         
-        logger.log(u"pattern: "+pattern, logger.DEBUG)
-        
         if pattern == None:
             pattern = sickbeard.NAMING_PATTERN
         
@@ -1621,10 +1627,13 @@ class TVEpisode(object):
             # fill out the template for this piece and then insert this piece into the actual pattern
             cur_name_group_result = re.sub('(?i)(?x)'+regex_used, regex_replacement, cur_name_group)
             #cur_name_group_result = cur_name_group.replace(ep_format, ep_string)
-            logger.log(u"found "+ep_format+" as the ep pattern using "+regex_used+" and replaced it with "+regex_replacement+" to result in "+cur_name_group_result+" from "+cur_name_group, logger.DEBUG)
+            #logger.log(u"found "+ep_format+" as the ep pattern using "+regex_used+" and replaced it with "+regex_replacement+" to result in "+cur_name_group_result+" from "+cur_name_group, logger.DEBUG)
             result_name = result_name.replace(cur_name_group, cur_name_group_result)
 
         result_name = self._format_string(result_name, replace_map)
+
+        logger.log(u"formatting pattern: "+pattern+" -> "+result_name, logger.DEBUG)
+        
         
         return result_name
 
