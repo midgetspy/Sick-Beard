@@ -2262,7 +2262,7 @@ class Home:
     @cherrypy.expose
     def editShow(self, show=None, location=None, anyQualities=[], bestQualities=[], flatten_folders=None, paused=None, directCall=False, air_by_date=None, tvdbLang=None):
 
-        if show == None:
+        if show is None:
             errString = "Invalid show ID: "+str(show)
             if directCall:
                 return [errString]
@@ -2271,15 +2271,16 @@ class Home:
 
         showObj = sickbeard.helpers.findCertainShow(sickbeard.showList, int(show))
 
-        if showObj == None:
+        if showObj is None:
             errString = "Unable to find the specified show: "+str(show)
             if directCall:
                 return [errString]
             else:
                 return _genericMessage("Error", errString)
 
-        if not location and not anyQualities and not bestQualities and not flatten_folders:
-
+        # display edit page if nothing is set
+        fields_to_edit = [location, anyQualities, bestQualities, flatten_folders, paused, air_by_date]
+        if all(not field for field in fields_to_edit):
             t = PageTemplate(file="editShow.tmpl")
             t.submenu = HomeMenu()
             with showObj.lock:
@@ -2287,22 +2288,22 @@ class Home:
 
             return _munge(t)
 
-        if flatten_folders == "on":
-            flatten_folders = 1
+        if flatten_folders or not directCall:
+            flatten_folders = 1 if flatten_folders == "on" else 0
         else:
-            flatten_folders = 0
+            flatten_folders = showObj.flatten_folders
 
         logger.log(u"flatten folders: "+str(flatten_folders))
 
-        if paused == "on":
-            paused = 1
+        if paused or not directCall:
+            paused = 1 if paused == "on" else 0
         else:
-            paused = 0
+            paused = showObj.paused
 
-        if air_by_date == "on":
-            air_by_date = 1
+        if air_by_date or not directCall:
+            air_by_date = 1 if air_by_date == "on" else 0
         else:
-            air_by_date = 0
+            air_by_date = showObj.air_by_date
 
         if tvdbLang and tvdbLang in tvdb_api.Tvdb().config['valid_languages']:
             tvdb_lang = tvdbLang
@@ -2323,8 +2324,9 @@ class Home:
 
         errors = []
         with showObj.lock:
-            newQuality = Quality.combineQualities(map(int, anyQualities), map(int, bestQualities))
-            showObj.quality = newQuality
+            if anyQualities or bestQualities or not directCall:
+                newQuality = Quality.combineQualities(map(int, anyQualities), map(int, bestQualities))
+                showObj.quality = newQuality
 
             # reversed for now
             if bool(showObj.flatten_folders) != bool(flatten_folders):
@@ -2339,7 +2341,7 @@ class Home:
             showObj.lang = tvdb_lang
 
             # if we change location clear the db of episodes, change it, write to db, and rescan
-            if os.path.normpath(showObj._location) != os.path.normpath(location):
+            if location and os.path.normpath(showObj._location) != os.path.normpath(location):
                 logger.log(os.path.normpath(showObj._location)+" != "+os.path.normpath(location), logger.DEBUG)
                 if not ek.ek(os.path.isdir, location):
                     errors.append("New location <tt>%s</tt> does not exist" % location)
