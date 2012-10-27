@@ -8,17 +8,16 @@
 
 #set global $topmenu="config"#
 #import os.path
-#include $os.path.join($sickbeard.PROG_DIR,  "gui/classic/interfaces/default/inc_top.tmpl")
+#include $os.path.join($sickbeard.PROG_DIR, "data/interfaces/default/inc_top.tmpl")
 
-<script type="text/javascript" src="$sbRoot/js/configProviders.js"></script>
-<script type="text/javascript" src="$sbRoot/js/config.js"></script>
+<script type="text/javascript" src="$sbRoot/js/configProviders.js?$sbPID"></script>
+<script type="text/javascript" src="$sbRoot/js/config.js?$sbPID"></script>
 <script type="text/javascript" charset="utf-8">
 <!--
 \$(document).ready(function(){
-
-var show_nzb_providers = #if $sickbeard.USE_NZBS then "true" else "false"#;
+    var show_nzb_providers = #if $sickbeard.USE_NZBS then "true" else "false"#;
 #for $curNewznabProvider in $sickbeard.newznabProviderList:
-\$(this).addProvider('$curNewznabProvider.getID()', '$curNewznabProvider.name', '$curNewznabProvider.url', '$curNewznabProvider.key', $int($curNewznabProvider.default), show_nzb_providers);
+    \$(this).addProvider('$curNewznabProvider.getID()', '$curNewznabProvider.name', '$curNewznabProvider.url', '$curNewznabProvider.key', $int($curNewznabProvider.default), show_nzb_providers);
 #end for
 });
 //-->
@@ -30,20 +29,35 @@ var show_nzb_providers = #if $sickbeard.USE_NZBS then "true" else "false"#;
 <form id="configForm" action="saveProviders" method="post">
 
             <div id="config-components">
+                <ul>
+                	<li><a href="#core-component-group1">Provider Priorities</a></li>
+                	<li><a href="#core-component-group2">Configure Built-In Providers</a></li>
+                  #if $sickbeard.USE_NZBS
+                	<li><a href="#core-component-group3">Configure Custom Newznab Providers</a></li>
+                  #end if
+                </ul>
                 
                 <div id="core-component-group1" class="component-group clearfix">
 
                     <div class="component-group-desc">
                         <h3>Provider Priorities</h3>
                         <p>Check off and drag the providers into the order you want them to be used.</p>
-                        <p class="note">At least one provider is required but two are recommended.</p>
-                        <p>NZB/Torrent providers can be toggled in <a href="$sbRoot/config/search">Search Settings</a></p>
-                        <p class="note"><span style="color: #654B24; font-size: 16px;">*</span> Provider does not support backlog searches at this time.</p>
-                        <p class="note"><span style="color: #654B24; font-size: 16px;">**</span> Provider supports <b>limited</b> backlog searches, all episodes/qualities may not be available.</p>
+                        <p>At least one provider is required but two are recommended.</p>
+
+                        #if not $sickbeard.USE_NZBS or not $sickbeard.USE_TORRENTS:
+                        <blockquote style="margin: 20px 0;">NZB/Torrent providers can be toggled in <b><a href="$sbRoot/config/search">Search Settings</a></b></blockquote>
+                        #else:
+                        <br/>
+                        #end if
+
+                        <div>
+                            <h4 class="note">*</h4><p class="note">Provider does not support backlog searches at this time.</p>
+                            <h4 class="note">**</h4><p class="note">Provider supports <b>limited</b> backlog searches, all episodes/qualities may not be available.</p>
+                        </div>
                     </div>
 
                     <fieldset class="component-group-list">
-                        <ul id="provider_order_list">
+                        <ul id="providerOrderList">
                         #for $curProvider in $sickbeard.providers.sortedProviderList():
                             #if $curProvider.providerType == $GenericProvider.NZB and not $sickbeard.USE_NZBS:
                                 #continue
@@ -52,23 +66,24 @@ var show_nzb_providers = #if $sickbeard.USE_NZBS then "true" else "false"#;
                             #end if
                             #set $curName = $curProvider.getID()
                           <li class="ui-state-default" id="$curName">
-                            <input type="checkbox" id="enable_$curName" class="provider_enabler" #if $curProvider.isEnabled() then "checked=\"checked\"" else ""#/>
-                            <a href="$curProvider.url" class="imgLink" target="_new"><img src="$sbRoot/images/providers/$curProvider.imageName()" alt="$curProvider.name" title="$curProvider.name" width="16" height="16" /></a>
+                            <input type="checkbox" id="enable_$curName" class="checkbox provider_enabler" #if $curProvider.isEnabled() then "checked=\"checked\"" else ""#/>
+                            <a href="$curProvider.url" class="imgLink" target="_new"><img src="$sbRoot/images/providers/$curProvider.imageName()" alt="" title="$curProvider.name" width="16" height="16" /></a>
                             $curProvider.name
                             #if not $curProvider.supportsBacklog then "*" else ""#
                             #if $curProvider.name == "EZRSS" or $curProvider.name == "ThePirateBay" or $curProvider.name == "DailyTvTorrents" then "**" else ""#
+                            <span class="ui-icon ui-icon-arrowthick-2-n-s pull-right"></span>
                           </li>
                         #end for
                         </ul>
                         <input type="hidden" name="provider_order" id="provider_order" value="<%=" ".join([x.getID()+':'+str(int(x.isEnabled())) for x in sickbeard.providers.sortedProviderList()])%>"/>
-                        <br/><input type="submit" class="config_submitter" value="Save Changes" /><br/>
+                        <br/><input type="submit" class="btn config_submitter" value="Save Changes" /><br/>
                     </fieldset>
                 </div><!-- /component-group1 //-->
 
                 <div id="core-component-group2" class="component-group clearfix">
 
                     <div class="component-group-desc">
-                        <h3>Configure Built-In<br />Providers</h3>
+                        <h3>Configure Built-In Providers</h3>
                         <p>Check with provider's website on how to obtain an API key if needed.</p>
                     </div>
                     
@@ -89,7 +104,7 @@ var show_nzb_providers = #if $sickbeard.USE_NZBS then "true" else "false"#;
                                     #end for
 
                                     #if $provider_config_list:                                        
-                                    <select id="editAProvider">
+                                    <select id="editAProvider" class="input-medium" >
                                         #for $cur_provider in $provider_config_list + [$curProvider for $curProvider in $sickbeard.newznabProviderList if $curProvider.default and $curProvider.needs_auth and $sickbeard.USE_NZBS]:
                                             <option value="$cur_provider.getID()">$cur_provider.name</option>
                                         #end for
@@ -104,7 +119,7 @@ var show_nzb_providers = #if $sickbeard.USE_NZBS then "true" else "false"#;
 
 <!-- start div for editing providers //-->
 #for $curNewznabProvider in [$curProvider for $curProvider in $sickbeard.newznabProviderList if $curProvider.default and $curProvider.needs_auth]:
-<div class="providerDiv" id="${curNewznabProvider.getID()}Div">
+                    <div class="providerDiv" id="${curNewznabProvider.getID()}Div">
                         <div class="field-pair">
                             <label class="clearfix">
                                 <span class="component-title">$curNewznabProvider.name URL</span>
@@ -117,11 +132,10 @@ var show_nzb_providers = #if $sickbeard.USE_NZBS then "true" else "false"#;
                                 <input class="component-desc newznab_key" type="text" id="${curNewznabProvider.getID()}_hash" value="$curNewznabProvider.key" size="40" />
                             </label>
                         </div>
-</div>
+                    </div><!-- /${curNewznabProvider.getID()}Div //-->
 #end for
-
 <!--
-<div class="providerDiv" id="nzbs_orgDiv">
+                    <div class="providerDiv" id="nzbs_orgDiv">
                         <div class="field-pair">
                             <label class="clearfix">
                                 <span class="component-title">NZBs.org UID</span>
@@ -134,9 +148,9 @@ var show_nzb_providers = #if $sickbeard.USE_NZBS then "true" else "false"#;
                                 <input class="component-desc" type="text" name="nzbs_org_hash" value="$sickbeard.NZBS_HASH" size="40" />
                             </label>
                         </div>
-</div>
+                    </div>
 -->
-<div class="providerDiv" id="nzbmatrixDiv">
+                    <div class="providerDiv" id="nzbmatrixDiv">
                         <div class="field-pair">
                             <label class="clearfix">
                                 <span class="component-title">NZBMatrix Username</span>
@@ -149,9 +163,9 @@ var show_nzb_providers = #if $sickbeard.USE_NZBS then "true" else "false"#;
                                 <input class="component-desc" type="text" name="nzbmatrix_apikey" value="$sickbeard.NZBMATRIX_APIKEY" size="40" />
                             </label>
                         </div>
-</div>
+                    </div><!-- /nzbmatrixDiv //-->
 
-<div class="providerDiv" id="newzbinDiv">
+                    <div class="providerDiv" id="newzbinDiv">
                         <div class="field-pair">
                             <label class="clearfix">
                                 <span class="component-title">Newzbin Username</span>
@@ -164,9 +178,9 @@ var show_nzb_providers = #if $sickbeard.USE_NZBS then "true" else "false"#;
                                 <input class="component-desc" type="password" name="newzbin_password" value="$sickbeard.NEWZBIN_PASSWORD" size="40" />
                             </label>
                         </div>
-</div>
+                    </div><!-- /newzbinDiv //-->
 
-<div class="providerDiv" id="nzbs_r_usDiv">
+                    <div class="providerDiv" id="nzbs_r_usDiv">
                         <div class="field-pair">
                             <label class="clearfix">
                                 <span class="component-title">NZBs'R'US UID</span>
@@ -179,9 +193,9 @@ var show_nzb_providers = #if $sickbeard.USE_NZBS then "true" else "false"#;
                                 <input class="component-desc" type="text" name="nzbs_r_us_hash" value="$sickbeard.NZBSRUS_HASH" size="40" />
                             </label>
                         </div>
-</div>
+                    </div><!-- /nzbs_r_usDiv //-->
 
-<div class="providerDiv" id="tvtorrentsDiv">
+                    <div class="providerDiv" id="tvtorrentsDiv">
                         <div class="field-pair">
                             <label class="clearfix">
                                 <span class="component-title">TvTorrents Digest:</span>
@@ -194,9 +208,17 @@ var show_nzb_providers = #if $sickbeard.USE_NZBS then "true" else "false"#;
                                 <input class="component-desc" type="text" name="tvtorrents_hash" value="$sickbeard.TVTORRENTS_HASH" size="40" />
                             </label>
                         </div>
-</div>
+                    </div><!-- /tvtorrentsDiv //-->
 
-
+                    <div class="providerDiv" id="btnDiv">
+                        <div class="field-pair">
+                            <label class="clearfix">
+                                <span class="component-title">BTN API KEY:</span>
+                                <input class="component-desc" type="text" name="btn_api_key" value="$sickbeard.BTN_API_KEY" size="40" />
+                            </label>
+                        </div>
+                    </div><!-- /btnDiv //-->
+                    
 <div class="providerDiv" id="thepiratebayDiv">
                         <div class="field-pair">
                             <input type="checkbox" class="enabler" name="thepiratebay_proxy" id="thepiratebay_proxy" #if $sickbeard.THEPIRATEBAY_PROXY then "checked=\"checked\"" else ""#/>
@@ -245,18 +267,9 @@ var show_nzb_providers = #if $sickbeard.USE_NZBS then "true" else "false"#;
                         </div>
 </div>
 
-<div class="providerDiv" id="btnDiv">
-                        <div class="field-pair">
-                            <label class="clearfix">
-                                <span class="component-title">BTN API KEY:</span>
-                                <input class="component-desc" type="text" name="btn_api_key" value="$sickbeard.BTN_API_KEY" size="40" />
-                            </label>
-                        </div>
-</div>
-
 <!-- end div for editing providers -->
 
-                    <input type="submit" class="config_submitter" value="Save Changes" /><br/>
+                    <input type="submit" class="btn config_submitter" value="Save Changes" /><br/>
             
                     </fieldset>
                 </div><!-- /component-group2 //-->
@@ -265,7 +278,7 @@ var show_nzb_providers = #if $sickbeard.USE_NZBS then "true" else "false"#;
                 <div id="core-component-group3" class="component-group clearfix">
 
                     <div class="component-group-desc">
-                        <h3>Configure Custom<br />Newznab Providers</h3>
+                        <h3>Configure Custom Newznab Providers</h3>
                         <p>Add and setup custom Newznab providers.</p>
                         <p>Some built-in Newznab providers are already available above.</p>
                     </div>
@@ -307,24 +320,24 @@ var show_nzb_providers = #if $sickbeard.USE_NZBS then "true" else "false"#;
                             </label>
                         </div>
             <div id="newznab_add_div">
-                <input type="button" class="newznab_save" id="newznab_add" value="Add" />
+                <input type="button" class="btn newznab_save" id="newznab_add" value="Add" />
             </div>
             <div id="newznab_update_div" style="display: none;">
-                <input type="button" class="newznab_delete" id="newznab_delete" value="Delete" />
+                <input type="button" class="btn btn-danger newznab_delete" id="newznab_delete" value="Delete" />
             </div> 
 </div>
 
                     </fieldset>
                 </div><!-- /component-group3 //-->
+#end if                
 
-#end if
-                    
-            <br/><input type="submit" class="config_submitter" value="Save Changes" /><br/>
-                
+                <div class="component-group-save">
+                    <input type="submit" class="btn config_submitter" value="Save Changes" />
+                </div><br />
+
             </div><!-- /config-components //-->
 
 </form>
 </div></div>
-<div class="clearfix"></div>
 
-#include $os.path.join($sickbeard.PROG_DIR, "gui/classic/interfaces/default/inc_bottom.tmpl")
+#include $os.path.join($sickbeard.PROG_DIR, "data/interfaces/default/inc_bottom.tmpl")

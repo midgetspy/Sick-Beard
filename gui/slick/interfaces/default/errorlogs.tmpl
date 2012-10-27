@@ -14,10 +14,11 @@
 #else 
 	<h1 class="title">$title</h1>
 #end if
-<div class="align-left">
+<div class="align-left"><pre>
 #for $curError in $classes.ErrorViewer.errors[:30]:
-    $curError.time $curError.message<br />
+$curError.time $curError.message
 #end for
+</pre>
 </div>
 
 <script type="text/javascript" charset="utf-8">

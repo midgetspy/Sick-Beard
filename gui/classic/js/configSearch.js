@@ -37,7 +37,7 @@ $(document).ready(function(){
     $.fn.torrent_method_handler = function() {
         
         var selectedProvider = $('#torrent_method :selected').val();
-		
+
         if (selectedProvider == "blackhole") {
             $('#t_blackhole_settings').show();
             $('#torrent_settings').hide();
@@ -89,10 +89,14 @@ $(document).ready(function(){
         $.get(sbRoot+"/home/testSABnzbd", {'host': sab_host, 'username': sab_username, 'password': sab_password, 'apikey': sab_apiKey}, 
         function (data){ $('#testSABnzbd-result').html(data); });
     });
-
-    $('#torrent_method').change($(this).torrent_method_handler);
     
-    $(this).torrent_method_handler();    
+    $('#torrent_method').change($(this).torrent_method_handler);
+
+    $(this).torrent_method_handler();
+    
+    $('#use_torrents').click(function(){
+    	toggle_torrent_title();
+    });
 
     $('#testTorrent').click(function(){
         $('#testTorrent-result').html(loading);

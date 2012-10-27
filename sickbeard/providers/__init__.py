@@ -23,9 +23,9 @@ __all__ = ['ezrss',
            'nzbsrus',
            'womble',
            'newzbin',
-           'thepiratebay',
            'btn',
-           'dtt',
+           'thepiratebay',
+           'dtt',           
            ]
 
 import sickbeard
@@ -99,8 +99,7 @@ def makeNewznabProvider(configString):
     return newProvider
 
 def getDefaultNewznabProviders():
-    return 'Sick Beard Index|http://momo.sickbeard.com/|0|0!!!NZBs.org|http://beta.nzbs.org/||0'
-
+    return 'Sick Beard Index|http://lolo.sickbeard.com/|0|0!!!NZBs.org|http://beta.nzbs.org/||0'
 
 def getProviderModule(name):
     name = name.lower()

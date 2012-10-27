@@ -30,12 +30,15 @@ from threading import Lock
 
 # apparently py2exe won't build these unless they're imported somewhere
 from sickbeard import providers, metadata
-from providers import ezrss, tvtorrents, thepiratebay, btn, dtt, nzbs_org_old, nzbmatrix, nzbsrus, newznab, womble, newzbin
+from providers import ezrss, tvtorrents, btn, nzbmatrix, nzbsrus, newznab, womble, newzbin, nzbs_org_old, thepiratebay, dtt
+from sickbeard.config import CheckSection, check_setting_int, check_setting_str, ConfigMigrator
+
 from sickbeard import searchCurrent, searchBacklog, showUpdater, versionChecker, properFinder, autoPostProcesser
 from sickbeard import helpers, db, exceptions, show_queue, search_queue, scheduler
 from sickbeard import logger
+from sickbeard import naming
 
-from sickbeard.common import *
+from common import SD, SKIPPED, NAMING_REPEAT
 
 from sickbeard.databases import mainDB, cache_db
 
@@ -49,6 +52,9 @@ PID = None
 
 CFG = None
 CONFIG_FILE = None
+
+# this is the version of the config we EXPECT to find
+CONFIG_VERSION = 1
 
 PROG_DIR = '.'
 MY_FULLNAME = None
@@ -102,11 +108,11 @@ ENABLE_HTTPS = False
 HTTPS_CERT = None
 HTTPS_KEY = None
 
-UPDATETV_ON_START = None
 LAUNCH_BROWSER = None
 CACHE_DIR = None
 ACTUAL_CACHE_DIR = None
 ROOT_DIRS = None
+UPDATE_SHOWS_ON_START = None
 
 USE_BANNER = None
 USE_LISTVIEW = None
@@ -119,20 +125,15 @@ METADATA_SYNOLOGY = None
 
 QUALITY_DEFAULT = None
 STATUS_DEFAULT = None
-SEASON_FOLDERS_FORMAT = None
-SEASON_FOLDERS_DEFAULT = None
+FLATTEN_FOLDERS_DEFAULT = None
 PROVIDER_ORDER = []
 
-NAMING_SHOW_NAME = None
+NAMING_MULTI_EP = None
+NAMING_PATTERN = None
+NAMING_ABD_PATTERN = None
+NAMING_CUSTOM_ABD = None
+NAMING_FORCE_FOLDERS = False
 NAMING_STRIP_YEAR = None
-NAMING_EP_NAME = None
-NAMING_EP_TYPE = None
-NAMING_MULTI_EP_TYPE = None
-NAMING_SEP_TYPE = None
-NAMING_USE_PERIODS = None
-NAMING_QUALITY = None
-NAMING_RELEASE_GROUP = None
-NAMING_DATES = None
 
 TVDB_API_KEY = '9DAF49C96CBF8DAC'
 TVDB_BASE_URL = None
@@ -142,10 +143,10 @@ USE_NZBS = None
 USE_TORRENTS = None
 
 NZB_METHOD = None
-TORRENT_METHOD = None
 NZB_DIR = None
-
 USENET_RETENTION = None
+TORRENT_METHOD = None
+TORRENT_DIR = None
 DOWNLOAD_PROPERS = None
 
 SEARCH_FREQUENCY = None
@@ -157,23 +158,22 @@ DEFAULT_SEARCH_FREQUENCY = 60
 
 EZRSS = False
 
-DTT = False
-DTT_NORAR = False
-DTT_SINGLE = False
-
 TVTORRENTS = False
 TVTORRENTS_DIGEST = None
 TVTORRENTS_HASH = None
+
+BTN = False
+BTN_API_KEY = None
+
+DTT = False
+DTT_NORAR = False
+DTT_SINGLE = False
 
 THEPIRATEBAY = False
 THEPIRATEBAY_TRUSTED = False
 THEPIRATEBAY_PROXY = False
 THEPIRATEBAY_PROXY_URL = None
-
-BTN = False
-BTN_API_KEY = None
-
-TORRENT_DIR = None
+THEPIRATEBAY_BLACKLIST = None
 
 ADD_SHOWS_WO_DIR = None
 CREATE_MISSING_SHOW_DIRS = None
@@ -313,130 +313,51 @@ EXTRA_SCRIPTS = []
 
 GIT_PATH = None
 
-IGNORE_WORDS = "german,french,core2hd,dutch,swedish"
+IGNORE_WORDS = "german,french,core2hd,dutch,swedish,reenc"
 
 __INITIALIZED__ = False
-
-def CheckSection(sec):
-    """ Check if INI section exists, if not create it """
-    try:
-        CFG[sec]
-        return True
-    except:
-        CFG[sec] = {}
-        return False
-
-################################################################################
-# Check_setting_int                                                            #
-################################################################################
-def minimax(val, low, high):
-    """ Return value forced within range """
-    try:
-        val = int(val)
-    except:
-        val = 0
-    if val < low:
-        return low
-    if val > high:
-        return high
-    return val
-
-################################################################################
-# Check_setting_int                                                            #
-################################################################################
-def check_setting_int(config, cfg_name, item_name, def_val):
-    try:
-        my_val = int(config[cfg_name][item_name])
-    except:
-        my_val = def_val
-        try:
-            config[cfg_name][item_name] = my_val
-        except:
-            config[cfg_name] = {}
-            config[cfg_name][item_name] = my_val
-    logger.log(item_name + " -> " + str(my_val), logger.DEBUG)
-    return my_val
-
-################################################################################
-# Check_setting_float                                                          #
-################################################################################
-def check_setting_float(config, cfg_name, item_name, def_val):
-    try:
-        my_val = float(config[cfg_name][item_name])
-    except:
-        my_val = def_val
-        try:
-            config[cfg_name][item_name] = my_val
-        except:
-            config[cfg_name] = {}
-            config[cfg_name][item_name] = my_val
-
-    logger.log(item_name + " -> " + str(my_val), logger.DEBUG)
-    return my_val
-
-################################################################################
-# Check_setting_str                                                            #
-################################################################################
-def check_setting_str(config, cfg_name, item_name, def_val, log=True):
-    try:
-        my_val = config[cfg_name][item_name]
-    except:
-        my_val = def_val
-        try:
-            config[cfg_name][item_name] = my_val
-        except:
-            config[cfg_name] = {}
-            config[cfg_name][item_name] = my_val
-
-    if log:
-        logger.log(item_name + " -> " + my_val, logger.DEBUG)
-    else:
-        logger.log(item_name + " -> ******", logger.DEBUG)
-    return my_val
-
 
 def get_backlog_cycle_time():
     cycletime = SEARCH_FREQUENCY*2+7
     return max([cycletime, 720])
-
 
 def initialize(consoleLogging=True):
 
     with INIT_LOCK:
 
         global LOG_DIR, WEB_PORT, WEB_LOG, WEB_ROOT, WEB_USERNAME, WEB_PASSWORD, WEB_HOST, WEB_IPV6, USE_API, API_KEY, ENABLE_HTTPS, HTTPS_CERT, HTTPS_KEY, \
-                USE_NZBS, USE_TORRENTS, NZB_METHOD, NZB_DIR, TORRENT_METHOD, DOWNLOAD_PROPERS, \
+                USE_NZBS, USE_TORRENTS, NZB_METHOD, NZB_DIR, DOWNLOAD_PROPERS, TORRENT_METHOD, \
                 SAB_USERNAME, SAB_PASSWORD, SAB_APIKEY, SAB_CATEGORY, SAB_HOST, \
-                TORRENT_USERNAME, TORRENT_PASSWORD, TORRENT_HOST, TORRENT_PATH, TORRENT_RATIO, TORRENT_PAUSED, \
                 NZBGET_PASSWORD, NZBGET_CATEGORY, NZBGET_HOST, currentSearchScheduler, backlogSearchScheduler, \
+                TORRENT_USERNAME, TORRENT_PASSWORD, TORRENT_HOST, TORRENT_PATH, TORRENT_RATIO, TORRENT_PAUSED, \
                 USE_XBMC, XBMC_NOTIFY_ONSNATCH, XBMC_NOTIFY_ONDOWNLOAD, XBMC_UPDATE_FULL, \
                 XBMC_UPDATE_LIBRARY, XBMC_HOST, XBMC_USERNAME, XBMC_PASSWORD, \
                 USE_TRAKT, TRAKT_USERNAME, TRAKT_PASSWORD, TRAKT_API, \
                 USE_PLEX, PLEX_NOTIFY_ONSNATCH, PLEX_NOTIFY_ONDOWNLOAD, PLEX_UPDATE_LIBRARY, \
                 PLEX_SERVER_HOST, PLEX_HOST, PLEX_USERNAME, PLEX_PASSWORD, \
-                showUpdateScheduler, __INITIALIZED__, UPDATETV_ON_START, LAUNCH_BROWSER, showList, loadingShowList, \
-                NZBS, NZBS_UID, NZBS_HASH, EZRSS, DTT, DTT_NORAR, DTT_SINGLE, TVTORRENTS, TVTORRENTS_DIGEST, TVTORRENTS_HASH,  THEPIRATEBAY, THEPIRATEBAY_TRUSTED, THEPIRATEBAY_PROXY, THEPIRATEBAY_PROXY_URL, BTN, BTN_API_KEY, TORRENT_DIR, USENET_RETENTION, SOCKET_TIMEOUT, \
+                showUpdateScheduler, __INITIALIZED__, LAUNCH_BROWSER, UPDATE_SHOWS_ON_START, showList, loadingShowList, \
+                NZBS, NZBS_UID, NZBS_HASH, EZRSS, TVTORRENTS, TVTORRENTS_DIGEST, TVTORRENTS_HASH, BTN, BTN_API_KEY, \
+                DTT, DTT_NORAR, DTT_SINGLE, THEPIRATEBAY, THEPIRATEBAY_TRUSTED, THEPIRATEBAY_PROXY, THEPIRATEBAY_PROXY_URL, THEPIRATEBAY_BLACKLIST, TORRENT_DIR, USENET_RETENTION, SOCKET_TIMEOUT, \
                 SEARCH_FREQUENCY, DEFAULT_SEARCH_FREQUENCY, BACKLOG_SEARCH_FREQUENCY, \
-                QUALITY_DEFAULT, SEASON_FOLDERS_FORMAT, SEASON_FOLDERS_DEFAULT, STATUS_DEFAULT, \
+                QUALITY_DEFAULT, FLATTEN_FOLDERS_DEFAULT, STATUS_DEFAULT, \
                 GROWL_NOTIFY_ONSNATCH, GROWL_NOTIFY_ONDOWNLOAD, TWITTER_NOTIFY_ONSNATCH, TWITTER_NOTIFY_ONDOWNLOAD, \
                 USE_GROWL, GROWL_HOST, GROWL_PASSWORD, USE_PROWL, PROWL_NOTIFY_ONSNATCH, PROWL_NOTIFY_ONDOWNLOAD, PROWL_API, PROWL_PRIORITY, PROG_DIR, NZBMATRIX, NZBMATRIX_USERNAME, \
                 USE_PYTIVO, PYTIVO_NOTIFY_ONSNATCH, PYTIVO_NOTIFY_ONDOWNLOAD, PYTIVO_UPDATE_LIBRARY, PYTIVO_HOST, PYTIVO_SHARE_NAME, PYTIVO_TIVO_NAME, \
                 USE_NMA, NMA_NOTIFY_ONSNATCH, NMA_NOTIFY_ONDOWNLOAD, NMA_API, NMA_PRIORITY, \
                 NZBMATRIX_APIKEY, versionCheckScheduler, VERSION_NOTIFY, PROCESS_AUTOMATICALLY, \
                 KEEP_PROCESSED_DIR, TV_DOWNLOAD_DIR, TVDB_BASE_URL, MIN_SEARCH_FREQUENCY, \
-                showQueueScheduler, searchQueueScheduler, ROOT_DIRS, \
-                NAMING_SHOW_NAME, NAMING_STRIP_YEAR, NAMING_EP_TYPE, NAMING_MULTI_EP_TYPE, CACHE_DIR, ACTUAL_CACHE_DIR, TVDB_API_PARMS, \
+                showQueueScheduler, searchQueueScheduler, ROOT_DIRS, CACHE_DIR, ACTUAL_CACHE_DIR, TVDB_API_PARMS, \
+                NAMING_PATTERN, NAMING_MULTI_EP, NAMING_FORCE_FOLDERS, NAMING_ABD_PATTERN, NAMING_CUSTOM_ABD, NAMING_STRIP_YEAR, \
                 RENAME_EPISODES, properFinderScheduler, PROVIDER_ORDER, autoPostProcesserScheduler, \
-                NAMING_EP_NAME, NAMING_SEP_TYPE, NAMING_USE_PERIODS, WOMBLE, \
-                NZBSRUS, NZBSRUS_UID, NZBSRUS_HASH, NAMING_QUALITY, NAMING_RELEASE_GROUP, providerList, newznabProviderList, \
-                NAMING_DATES, EXTRA_SCRIPTS, USE_TWITTER, TWITTER_USERNAME, TWITTER_PASSWORD, TWITTER_PREFIX, \
+                NZBSRUS, NZBSRUS_UID, NZBSRUS_HASH, WOMBLE, providerList, newznabProviderList, \
+                EXTRA_SCRIPTS, USE_TWITTER, TWITTER_USERNAME, TWITTER_PASSWORD, TWITTER_PREFIX, \
                 USE_NOTIFO, NOTIFO_USERNAME, NOTIFO_APISECRET, NOTIFO_NOTIFY_ONDOWNLOAD, NOTIFO_NOTIFY_ONSNATCH, \
                 USE_BOXCAR, BOXCAR_USERNAME, BOXCAR_PASSWORD, BOXCAR_NOTIFY_ONDOWNLOAD, BOXCAR_NOTIFY_ONSNATCH, \
                 USE_PUSHOVER, PUSHOVER_USERKEY, PUSHOVER_NOTIFY_ONDOWNLOAD, PUSHOVER_NOTIFY_ONSNATCH, \
                 USE_LIBNOTIFY, LIBNOTIFY_NOTIFY_ONSNATCH, LIBNOTIFY_NOTIFY_ONDOWNLOAD, USE_NMJ, NMJ_HOST, NMJ_DATABASE, NMJ_MOUNT, USE_SYNOINDEX, \
                 USE_BANNER, USE_LISTVIEW, METADATA_XBMC, METADATA_MEDIABROWSER, METADATA_PS3, METADATA_SYNOLOGY, metadata_provider_dict, \
                 NEWZBIN, NEWZBIN_USERNAME, NEWZBIN_PASSWORD, GIT_PATH, MOVE_ASSOCIATED_FILES, \
-                GUI_NAME,COMING_EPS_LAYOUT, COMING_EPS_SORT, COMING_EPS_DISPLAY_PAUSED, METADATA_WDTV, METADATA_TIVO, IGNORE_WORDS, CREATE_MISSING_SHOW_DIRS, \
+                GUI_NAME, COMING_EPS_LAYOUT, COMING_EPS_SORT, COMING_EPS_DISPLAY_PAUSED, METADATA_WDTV, METADATA_TIVO, IGNORE_WORDS, CREATE_MISSING_SHOW_DIRS, \
                 ADD_SHOWS_WO_DIR
 
         if __INITIALIZED__:
@@ -444,20 +365,20 @@ def initialize(consoleLogging=True):
 
         socket.setdefaulttimeout(SOCKET_TIMEOUT)
 
-        CheckSection('General')
-        CheckSection('Blackhole')
-        CheckSection('Newzbin')
-        CheckSection('SABnzbd')
-        CheckSection('NZBget')
-        CheckSection('XBMC')
-        CheckSection('PLEX')
-        CheckSection('Growl')
-        CheckSection('Prowl')
-        CheckSection('Twitter')
-        CheckSection('NMJ')
-        CheckSection('Synology')
-        CheckSection('pyTivo')
-        CheckSection('NMA')
+        CheckSection(CFG, 'General')
+        CheckSection(CFG, 'Blackhole')
+        CheckSection(CFG, 'Newzbin')
+        CheckSection(CFG, 'SABnzbd')
+        CheckSection(CFG, 'NZBget')
+        CheckSection(CFG, 'XBMC')
+        CheckSection(CFG, 'PLEX')
+        CheckSection(CFG, 'Growl')
+        CheckSection(CFG, 'Prowl')
+        CheckSection(CFG, 'Twitter')
+        CheckSection(CFG, 'NMJ')
+        CheckSection(CFG, 'Synology')
+        CheckSection(CFG, 'pyTivo')
+        CheckSection(CFG, 'NMA')
 
         LOG_DIR = check_setting_str(CFG, 'General', 'log_dir', 'Logs')
         if not helpers.makeDir(LOG_DIR):
@@ -478,8 +399,8 @@ def initialize(consoleLogging=True):
         WEB_USERNAME = check_setting_str(CFG, 'General', 'web_username', '')
         WEB_PASSWORD = check_setting_str(CFG, 'General', 'web_password', '')
         LAUNCH_BROWSER = bool(check_setting_int(CFG, 'General', 'launch_browser', 1))
-        
-        UPDATETV_ON_START = bool(check_setting_int(CFG, 'General', 'updatetv_on_start', 0))
+
+        UPDATE_SHOWS_ON_START = bool(check_setting_int(CFG, 'General', 'update_shows_on_start', 0))
 
         USE_API = bool(check_setting_int(CFG, 'General', 'use_api', 0)) 
         API_KEY = check_setting_str(CFG, 'General', 'api_key', '')
@@ -516,39 +437,31 @@ def initialize(consoleLogging=True):
             proxy_url = proxies['ftp']
 
         # Set our common tvdb_api options here
-        TVDB_API_PARMS = {'cache': True,
-                          'apikey': TVDB_API_KEY,
+        TVDB_API_PARMS = {'apikey': TVDB_API_KEY,
                           'language': 'en',
-                          'cache_dir': False,
-                          'http_proxy': proxy_url}
-        
+                          'useZip': True}
+
         if CACHE_DIR:
-            TVDB_API_PARMS['cache_dir'] = os.path.join(CACHE_DIR, 'tvdb')
+            TVDB_API_PARMS['cache'] = os.path.join(CACHE_DIR, 'tvdb')
 
         QUALITY_DEFAULT = check_setting_int(CFG, 'General', 'quality_default', SD)
         STATUS_DEFAULT = check_setting_int(CFG, 'General', 'status_default', SKIPPED)
         VERSION_NOTIFY = check_setting_int(CFG, 'General', 'version_notify', 1)
-        
-        SEASON_FOLDERS_FORMAT = check_setting_str(CFG, 'General', 'season_folders_format', 'Season %02d')
-        SEASON_FOLDERS_DEFAULT = bool(check_setting_int(CFG, 'General', 'season_folders_default', 0))
+        FLATTEN_FOLDERS_DEFAULT = bool(check_setting_int(CFG, 'General', 'flatten_folders_default', 0))
 
         PROVIDER_ORDER = check_setting_str(CFG, 'General', 'provider_order', '').split()
 
-        NAMING_SHOW_NAME = bool(check_setting_int(CFG, 'General', 'naming_show_name', 1))
+        NAMING_PATTERN = check_setting_str(CFG, 'General', 'naming_pattern', '')
+        NAMING_ABD_PATTERN = check_setting_str(CFG, 'General', 'naming_abd_pattern', '')
+        NAMING_CUSTOM_ABD = check_setting_int(CFG, 'General', 'naming_custom_abd', 0)
+        NAMING_MULTI_EP = check_setting_int(CFG, 'General', 'naming_multi_ep', 1)
+        NAMING_FORCE_FOLDERS = naming.check_force_season_folders()
         NAMING_STRIP_YEAR = bool(check_setting_int(CFG, 'General', 'naming_strip_year', 0))
-        NAMING_EP_NAME = bool(check_setting_int(CFG, 'General', 'naming_ep_name', 1))
-        NAMING_EP_TYPE = check_setting_int(CFG, 'General', 'naming_ep_type', 0)
-        NAMING_MULTI_EP_TYPE = check_setting_int(CFG, 'General', 'naming_multi_ep_type', 0)
-        NAMING_SEP_TYPE = check_setting_int(CFG, 'General', 'naming_sep_type', 0)
-        NAMING_USE_PERIODS = bool(check_setting_int(CFG, 'General', 'naming_use_periods', 0))
-        NAMING_QUALITY = bool(check_setting_int(CFG, 'General', 'naming_quality', 0))
-        NAMING_RELEASE_GROUP = bool(check_setting_int(CFG, 'General', 'naming_release_group', 0))
-        NAMING_DATES = bool(check_setting_int(CFG, 'General', 'naming_dates', 1))
 
         TVDB_BASE_URL = 'http://www.thetvdb.com/api/' + TVDB_API_KEY
 
-        USE_NZBS = bool(check_setting_int(CFG, 'General', 'use_nzbs', 0))
-        USE_TORRENTS = bool(check_setting_int(CFG, 'General', 'use_torrents', 1))
+        USE_NZBS = bool(check_setting_int(CFG, 'General', 'use_nzbs', 1))
+        USE_TORRENTS = bool(check_setting_int(CFG, 'General', 'use_torrents', 0))
 
         NZB_METHOD = check_setting_str(CFG, 'General', 'nzb_method', 'blackhole')
         if NZB_METHOD not in ('blackhole', 'sabnzbd', 'nzbget'):
@@ -580,22 +493,23 @@ def initialize(consoleLogging=True):
         EZRSS = bool(check_setting_int(CFG, 'General', 'use_torrent', 0))
         if not EZRSS:
             EZRSS = bool(check_setting_int(CFG, 'EZRSS', 'ezrss', 0))
-        
-        DTT = bool(check_setting_int(CFG, 'DTT', 'dtt', 0))
-        DTT_NORAR = bool(check_setting_int(CFG, 'DTT', 'dtt_norar', 0))
-        DTT_SINGLE = bool(check_setting_int(CFG, 'DTT', 'dtt_single', 0))
             
         TVTORRENTS = bool(check_setting_int(CFG, 'TVTORRENTS', 'tvtorrents', 0))    
         TVTORRENTS_DIGEST = check_setting_str(CFG, 'TVTORRENTS', 'tvtorrents_digest', '')
         TVTORRENTS_HASH = check_setting_str(CFG, 'TVTORRENTS', 'tvtorrents_hash', '')
 
+        BTN = bool(check_setting_int(CFG, 'BTN', 'btn', 0))    
+        BTN_API_KEY = check_setting_str(CFG, 'BTN', 'btn_api_key', '')
+
+        DTT = bool(check_setting_int(CFG, 'DTT', 'dtt', 0))
+        DTT_NORAR = bool(check_setting_int(CFG, 'DTT', 'dtt_norar', 0))
+        DTT_SINGLE = bool(check_setting_int(CFG, 'DTT', 'dtt_single', 0))
+        
         THEPIRATEBAY = bool(check_setting_int(CFG, 'THEPIRATEBAY', 'thepiratebay', 0)) 
         THEPIRATEBAY_TRUSTED = bool(check_setting_int(CFG, 'THEPIRATEBAY', 'thepiratebay_trusted', 0))         
         THEPIRATEBAY_PROXY = bool(check_setting_int(CFG, 'THEPIRATEBAY', 'thepiratebay_proxy', 0))
-        THEPIRATEBAY_PROXY_URL = check_setting_str(CFG, 'THEPIRATEBAY', 'thepiratebay_proxy_url', '')
-        
-        BTN = bool(check_setting_int(CFG, 'BTN', 'btn', 0))    
-        BTN_API_KEY = check_setting_str(CFG, 'BTN', 'btn_api_key', '')
+        THEPIRATEBAY_PROXY_URL = check_setting_str(CFG, 'THEPIRATEBAY', 'thepiratebay_proxy_url', '')        
+        THEPIRATEBAY_BLACKLIST = check_setting_str(CFG, 'THEPIRATEBAY', 'thepiratebay_blacklist', '')        
 
         NZBS = bool(check_setting_int(CFG, 'NZBs', 'nzbs', 0))
         NZBS_UID = check_setting_str(CFG, 'NZBs', 'nzbs_uid', '')
@@ -631,7 +545,7 @@ def initialize(consoleLogging=True):
         TORRENT_PATH = check_setting_str(CFG, 'TORRENT', 'torrent_path', '')
         TORRENT_RATIO = check_setting_str(CFG, 'TORRENT', 'torrent_ratio', '')
         TORRENT_PAUSED = bool(check_setting_int(CFG, 'TORRENT', 'torrent_paused', 0)) 
-
+        
         USE_XBMC = bool(check_setting_int(CFG, 'XBMC', 'use_xbmc', 0)) 
         XBMC_NOTIFY_ONSNATCH = bool(check_setting_int(CFG, 'XBMC', 'xbmc_notify_onsnatch', 0))
         XBMC_NOTIFY_ONDOWNLOAD = bool(check_setting_int(CFG, 'XBMC', 'xbmc_notify_ondownload', 0))
@@ -780,16 +694,17 @@ def initialize(consoleLogging=True):
                 tmp_provider.set_config(cur_metadata_config)
                 metadata_provider_dict[tmp_provider.name] = tmp_provider
 
-        GUI_NAME = check_setting_str(CFG, 'GUI', 'gui_name', 'slick')        
+        GUI_NAME = check_setting_str(CFG, 'GUI', 'gui_name', 'slick') 
+
         COMING_EPS_LAYOUT = check_setting_str(CFG, 'GUI', 'coming_eps_layout', 'banner')
         COMING_EPS_DISPLAY_PAUSED = bool(check_setting_int(CFG, 'GUI', 'coming_eps_display_paused', 0))
         COMING_EPS_SORT = check_setting_str(CFG, 'GUI', 'coming_eps_sort', 'date')
 
         newznabData = check_setting_str(CFG, 'Newznab', 'newznab_data', '')
         newznabProviderList = providers.getNewznabProviderList(newznabData)
-
         providerList = providers.makeProviderList()
-        
+
+        # start up all the threads
         logger.sb_log_instance.initLogging(consoleLogging=consoleLogging)
 
         # initialize the main SB database
@@ -800,6 +715,10 @@ def initialize(consoleLogging=True):
         
         # fix up any db problems
         db.sanityCheckDatabase(db.DBConnection(), mainDB.MainSanityCheck)
+
+        # migrate the config if it needs it
+        migrator = ConfigMigrator(CFG)
+        migrator.migrate_config()
 
         currentSearchScheduler = scheduler.Scheduler(searchCurrent.CurrentSearcher(),
                                                      cycleTime=datetime.timedelta(minutes=SEARCH_FREQUENCY),
@@ -1072,28 +991,22 @@ def save_config():
     new_config['General']['use_nzbs'] = int(USE_NZBS)
     new_config['General']['use_torrents'] = int(USE_TORRENTS)
     new_config['General']['nzb_method'] = NZB_METHOD
-    new_config['General']['torrent_method'] = TORRENT_METHOD
+    new_config['General']['torrent_method'] = TORRENT_METHOD    
     new_config['General']['usenet_retention'] = int(USENET_RETENTION)
     new_config['General']['search_frequency'] = int(SEARCH_FREQUENCY)
     new_config['General']['download_propers'] = int(DOWNLOAD_PROPERS)
     new_config['General']['quality_default'] = int(QUALITY_DEFAULT)
     new_config['General']['status_default'] = int(STATUS_DEFAULT)
-    new_config['General']['season_folders_format'] = SEASON_FOLDERS_FORMAT
-    new_config['General']['season_folders_default'] = int(SEASON_FOLDERS_DEFAULT)
+    new_config['General']['flatten_folders_default'] = int(FLATTEN_FOLDERS_DEFAULT)
     new_config['General']['provider_order'] = ' '.join([x.getID() for x in providers.sortedProviderList()])
     new_config['General']['version_notify'] = int(VERSION_NOTIFY)
-    new_config['General']['naming_ep_name'] = int(NAMING_EP_NAME)
-    new_config['General']['naming_strip_year'] = int(NAMING_STRIP_YEAR)
-    new_config['General']['naming_show_name'] = int(NAMING_SHOW_NAME)
-    new_config['General']['naming_ep_type'] = int(NAMING_EP_TYPE)
-    new_config['General']['naming_multi_ep_type'] = int(NAMING_MULTI_EP_TYPE)
-    new_config['General']['naming_sep_type'] = int(NAMING_SEP_TYPE)
-    new_config['General']['naming_use_periods'] = int(NAMING_USE_PERIODS)
-    new_config['General']['naming_quality'] = int(NAMING_QUALITY)
-    new_config['General']['naming_release_group'] = int(NAMING_RELEASE_GROUP)
-    new_config['General']['naming_dates'] = int(NAMING_DATES)
+    new_config['General']['naming_strip_year'] = NAMING_STRIP_YEAR
+    new_config['General']['naming_pattern'] = NAMING_PATTERN
+    new_config['General']['naming_custom_abd'] = int(NAMING_CUSTOM_ABD)
+    new_config['General']['naming_abd_pattern'] = NAMING_ABD_PATTERN
+    new_config['General']['naming_multi_ep'] = int(NAMING_MULTI_EP)
     new_config['General']['launch_browser'] = int(LAUNCH_BROWSER)
-    new_config['General']['updatetv_on_start'] = int(UPDATETV_ON_START)
+    new_config['General']['update_shows_on_start'] = int(UPDATE_SHOWS_ON_START)
 
     new_config['General']['use_banner'] = int(USE_BANNER)
     new_config['General']['use_listview'] = int(USE_LISTVIEW)
@@ -1125,25 +1038,26 @@ def save_config():
     new_config['EZRSS'] = {}
     new_config['EZRSS']['ezrss'] = int(EZRSS)
     
-    new_config['DTT'] = {}
-    new_config['DTT']['dtt'] = int(DTT)
-    new_config['DTT']['dtt_norar'] = int(DTT_NORAR)
-    new_config['DTT']['dtt_single'] = int(DTT_SINGLE)
-    
     new_config['TVTORRENTS'] = {}
     new_config['TVTORRENTS']['tvtorrents'] = int(TVTORRENTS)
     new_config['TVTORRENTS']['tvtorrents_digest'] = TVTORRENTS_DIGEST
     new_config['TVTORRENTS']['tvtorrents_hash'] = TVTORRENTS_HASH
-    
+
+    new_config['BTN'] = {}
+    new_config['BTN']['btn'] = int(BTN)
+    new_config['BTN']['btn_api_key'] = BTN_API_KEY
+
+    new_config['DTT'] = {}
+    new_config['DTT']['dtt'] = int(DTT)
+    new_config['DTT']['dtt_norar'] = int(DTT_NORAR)
+    new_config['DTT']['dtt_single'] = int(DTT_SINGLE)
+
     new_config['THEPIRATEBAY'] = {}
     new_config['THEPIRATEBAY']['thepiratebay'] = int(THEPIRATEBAY)
     new_config['THEPIRATEBAY']['thepiratebay_trusted'] = int(THEPIRATEBAY_TRUSTED)    
     new_config['THEPIRATEBAY']['thepiratebay_proxy'] = int(THEPIRATEBAY_PROXY)
     new_config['THEPIRATEBAY']['thepiratebay_proxy_url'] = THEPIRATEBAY_PROXY_URL
-
-    new_config['BTN'] = {}
-    new_config['BTN']['btn'] = int(BTN)
-    new_config['BTN']['btn_api_key'] = BTN_API_KEY
+    new_config['THEPIRATEBAY']['thepiratebay_blacklist'] = THEPIRATEBAY_BLACKLIST
 
     new_config['NZBs'] = {}
     new_config['NZBs']['nzbs'] = int(NZBS)
@@ -1293,6 +1207,8 @@ def save_config():
     new_config['GUI']['coming_eps_layout'] = COMING_EPS_LAYOUT
     new_config['GUI']['coming_eps_display_paused'] = int(COMING_EPS_DISPLAY_PAUSED)
     new_config['GUI']['coming_eps_sort'] = COMING_EPS_SORT
+
+    new_config['General']['config_version'] = CONFIG_VERSION
 
     new_config.write()
 

@@ -19,7 +19,7 @@
 \$(document).ready(function() 
 { 
     \$("#historyTable:has(tbody tr)").tablesorter({
-        widgets: ['zebra', 'stickyHeaders', 'filter'],
+        widgets: ['zebra', 'filter'],
         sortList: [[0,1]],
         textExtraction: {
             4: function(node) { return \$(node).find("span").text().toLowerCase(); }

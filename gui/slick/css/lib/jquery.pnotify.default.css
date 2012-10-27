@@ -1,0 +1,101 @@
+/* 
+	Document   : jquery.pnotify.default.css
+	Created on : Nov 23, 2009, 3:14:10 PM
+	Author     : Hunter Perrin
+	Version    : 1.0.0
+	Description:
+		Default styling for Pines Notify jQuery plugin.
+*/
+
+/* Notice
+----------------------------------*/
+.ui-pnotify {
+  position: fixed;
+  right: 10px;
+  bottom: 10px;
+	/* Ensure that the notices are on top of everything else. */
+	z-index: 9999;
+}
+/* This hides position: fixed from IE6, which doesn't understand it. */
+html > body .ui-pnotify {
+	position: fixed;
+}
+.ui-pnotify .ui-widget {
+	background: none;
+}
+.ui-pnotify-container {
+	background-position: 0 0;
+	border: 1px solid #cccccc;
+	  background-image: -moz-linear-gradient(#fdf0d5, #fff9ee) !important;
+	  background-image: linear-gradient(#fdf0d5, #fff9ee) !important;
+	  background-image: -webkit-linear-gradient(#fdf0d5, #fff9ee) !important;
+	  background-image: -o-linear-gradient(#fdf0d5, #fff9ee) !important;
+	  filter: progid:dximagetransform.microsoft.gradient(startColorstr=#555555, endColorstr=#333333) !important;
+	  -ms-filter: progid:dximagetransform.microsoft.gradient(startColorstr=#555555, endColorstr=#333333) !important;
+	  -moz-border-radius: 7px;
+	  -webkit-border-radius: 7px;
+	  border-radius: 7px;
+	  font-size: 14px;
+	  -moz-box-shadow: 0px 0px 2px #aaaaaa;
+	  -webkit-box-shadow: 0px 0px 2px #aaaaaa;
+	  -o-box-shadow: 0px 0px 2px #aaaaaa;
+	  box-shadow: 0px 0px 2px #aaaaaa;
+	  padding: 7px 10px;
+	  text-align: center;
+	  min-height: 22px;
+	  width: 250px;
+	  z-index: 9999;
+	  font-family: "Trebuchet MS", Helvetica, Arial, sans-serif;
+	  line-height: normal;
+	  filter: alpha(opacity=85);
+	  -moz-opacity: 0.8 !important;
+	  -khtml-opacity: 0.8 !important;
+	  -o-opacity: 0.8 !important;
+	  opacity: 0.8 !important;
+}
+.ui-pnotify-closer {
+	float: right;
+	margin-left: .2em;
+}
+.ui-pnotify-title {
+	display: block;
+	background: none;
+	font-size: 14px;
+	font-weight: bold;
+	font-family: "Trebuchet MS", Helvetica, Arial, sans-serif;
+	line-height: normal;
+}
+.ui-pnotify-text {
+	display: block;
+	 font-size: 14px;
+	 font-family: "Trebuchet MS", Helvetica, Arial, sans-serif;
+	 line-height: normal;
+}
+.ui-pnotify-icon, .ui-pnotify-icon span {
+	display: block;
+	float: left;
+	margin-right: .2em;
+}
+/* History Pulldown
+----------------------------------*/
+.ui-pnotify-history-container {
+	position: absolute;
+	top: 0;
+	right: 18px;
+	width: 70px;
+	border-top: none;
+	/* Ensure that the history container is on top of the notices. */
+	z-index: 10000;
+}
+.ui-pnotify-history-container .ui-pnotify-history-header {
+	/*padding: 2px;*/
+}
+.ui-pnotify-history-container button {
+	cursor: pointer;
+	display: block;
+	width: 100%;
+}
+.ui-pnotify-history-container .ui-pnotify-history-pulldown {
+	display: block;
+	margin: 0 auto;
+}

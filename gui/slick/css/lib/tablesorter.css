@@ -36,13 +36,13 @@ table.tablesorter .tablesorter-header {
   cursor: pointer;
 }
 table.tablesorter .tablesorter-header-inner {
-  padding: 0px 18px 0px 4px; 
+  padding: 0px 15px 0px 4px; 
 }
 table.tablesorter th.tablesorter-headerSortUp .tablesorter-header-inner {
-  background: url(../images/tablesorter/asc.gif) no-repeat right center;
+  background: url(../lib/images/tablesorter/asc.gif) no-repeat right center;
 }
 table.tablesorter th.tablesorter-headerSortDown .tablesorter-header-inner {
-  background: url(../images/tablesorter/desc.gif) no-repeat right center;
+  background: url(../lib/images/tablesorter/desc.gif) no-repeat right center;
 }
 table.tablesorter th.tablesorter-headerSortUp {
   background-image: -moz-linear-gradient(#777777, #555555) !important;

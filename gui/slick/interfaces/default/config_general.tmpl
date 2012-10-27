@@ -16,7 +16,7 @@
 #else 
 	<h1 class="title">$title</h1>
 #end if
-<script type="text/javascript" src="$sbRoot/js/config.js"></script>
+<script type="text/javascript" src="$sbRoot/js/config.js?$sbPID"></script>
 
 <div id="config">
 <div id="config-content">
@@ -48,8 +48,8 @@
                         </div>
 
                         <div class="field-pair">
-                            <input type="checkbox" name="updatetv_on_start" id="updatetv_on_start" #if $sickbeard.UPDATETV_ON_START then "checked=\"checked\"" else ""#/>
-                            <label class="clearfix" for="updatetv_on_start">
+                            <input type="checkbox" name="update_shows_on_start" id="update_shows_on_start" #if $sickbeard.UPDATE_SHOWS_ON_START then "checked=\"checked\"" else ""#/>
+                            <label class="clearfix" for="update_shows_on_start">
                                 <span class="component-title">Update Shows on Start</span>
                                 <span class="component-desc">Should Sick Beard update shows info when started?</span>
                             </label>

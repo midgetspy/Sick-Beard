@@ -5,15 +5,3 @@ username=
 password=
 web_root=
 ssl=0
-
-[Transmission]
-host=localhost
-port=9091
-username=
-password=
-download_dir=
-
-[uTorrent]
-# Set the download_dir to the dir where your torrents end up; if you have UT
-# move torrents then specify that final destination dir here
-download_dir=

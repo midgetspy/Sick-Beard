@@ -27,14 +27,14 @@ font: bold 24px Arial;
 float:left;
 }
 div.stepsguide .step p {
-border-bottom: 4px solid #222222;
+border-bottom: 4px solid #57442B;
 }
 
 div.stepsguide .disabledstep{
 color:#C4C4C4;
 }
 div.stepsguide .disabledstep p {
-border-bottom: 4px solid #C4C4C4;
+border-bottom: 4px solid #8A775E;
 }
 
 div.stepsguide .step .smalltext{
@@ -55,7 +55,7 @@ border-radius:6px;
 -webkit-border-radius:6px;
 -moz-border-radius:6px;
 padding:3px 6px;
-background:#343434;
+background:#57442B;
 color:white;
 cursor:hand;
 cursor:pointer;

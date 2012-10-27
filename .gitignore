@@ -2,7 +2,7 @@
 ######################
 cache/*
 cache.db*
-config.ini
+config.ini*
 Logs/*
 sickbeard.db*
 autoProcessTV/autoProcessTV.cfg
@@ -22,17 +22,10 @@ tests/cache.db
 #  IDE specific      #
 ######################
 *.bak
-dist/*
-build/*
-autoProcessTV/dist/*
-autoProcessTV/build/*
-SickBeard-win32-*.zip
-*.exe
-gc.ini
-CHANGELOG.txt
 *.tmp
 *.wpr
 *.project
+*.pydevproject
 *.cproject
 *.tmproj
 *.tmproject

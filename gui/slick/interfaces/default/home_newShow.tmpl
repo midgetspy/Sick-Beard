@@ -12,11 +12,11 @@
 
 #include $os.path.join($sickbeard.PROG_DIR, "gui/slick/interfaces/default/inc_top.tmpl")
 
-<link rel="stylesheet" type="text/css" href="$sbRoot/css/formwizard.css" />
-<script type="text/javascript" src="$sbRoot/js/formwizard.js"></script>
-<script type="text/javascript" src="$sbRoot/js/qualityChooser.js"></script>
-<script type="text/javascript" src="$sbRoot/js/newShow.js"></script>
-<script type="text/javascript" src="$sbRoot/js/addShowOptions.js"></script> 
+<link rel="stylesheet" type="text/css" href="$sbRoot/css/formwizard.css?$sbPID" />
+<script type="text/javascript" src="$sbRoot/js/formwizard.js?$sbPID"></script>
+<script type="text/javascript" src="$sbRoot/js/qualityChooser.js?$sbPID"></script>
+<script type="text/javascript" src="$sbRoot/js/newShow.js?$sbPID"></script>
+<script type="text/javascript" src="$sbRoot/js/addShowOptions.js?$sbPID"></script> 
    #if $varExists('header') 
    	<h1 class="header">$header</h1>
    #else 
@@ -37,11 +37,11 @@
             <input type="hidden" name="whichSeries" value="$provided_tvdb_id" />
             <input type="hidden" id="providedName" value="$provided_tvdb_name" />
         #else:
-            <input type="text" id="nameToSearch" value="$default_show_name" />
-            <select name="tvdbLang" id="tvdbLangSelect">
+            <input type="text" id="nameToSearch" value="$default_show_name" style="margin-top: 1px;" />
+            <select name="tvdbLang" id="tvdbLangSelect" style="height: 26px;margin-top: 1px;">
                 <option value="en" selected="selected">en</option>
             </select><b>*</b>
-            <input class="btn" type="button" id="searchName" value="Search" /><br /><br />
+            <input class="btn" type="button" id="searchName" value="Search" style="margin-top: -3px;" /><br /><br />
     
             <b>*</b> This will only affect the language of the retrieved metadata file contents and episode filenames.<br />
             This <b>DOES NOT</b> allow Sick Beard to download non-english TV episodes!<br />
@@ -87,6 +87,6 @@
 #end if
 </div>
 
-<script type="text/javascript" src="$sbRoot/js/rootDirs.js"></script>
+<script type="text/javascript" src="$sbRoot/js/rootDirs.js?$sbPID"></script>
 
 #include $os.path.join($sickbeard.PROG_DIR,"gui/slick/interfaces/default/inc_bottom.tmpl")

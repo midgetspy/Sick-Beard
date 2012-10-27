@@ -108,10 +108,10 @@ class GenericProvider:
 
         result = None
 
-        try:
-            result = helpers.getURL(url, headers)
-        except (urllib2.HTTPError, IOError), e:
-            logger.log(u"Error loading "+self.name+" URL: " + str(sys.exc_info()) + " - " + ex(e), logger.ERROR)
+        result = helpers.getURL(url, headers)
+
+        if result is None:
+            logger.log(u"Error loading "+self.name+" URL: " + url, logger.ERROR)
             return None
 
         return result
@@ -222,7 +222,7 @@ class GenericProvider:
 
         self._checkAuth()
 
-        logger.log(u"Searching "+self.name+" for " + episode.prettyName(True))
+        logger.log(u"Searching "+self.name+" for " + episode.prettyName())
 
         self.cache.updateCache()
         results = self.cache.searchCache(episode, manualSearch)
@@ -284,7 +284,7 @@ class GenericProvider:
         results = {}
 
         for curString in self._get_season_search_strings(show, season):
-            itemList += self._doSearch(curString, show=show)
+            itemList += self._doSearch(curString)
 
         for item in itemList:
 

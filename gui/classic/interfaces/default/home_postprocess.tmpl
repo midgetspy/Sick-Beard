@@ -5,10 +5,10 @@
 
 #set global $topmenu="home"#
 #import os.path
-#include $os.path.join($sickbeard.PROG_DIR,  "gui/classic/interfaces/default/inc_top.tmpl")
+#include $os.path.join($sickbeard.PROG_DIR, "data/interfaces/default/inc_top.tmpl")
 
 <form name="processForm" method="post" action="processEpisode">
-Enter the folder containing the episode: <input type="text" name="dir" id="episodeDir" size="50" /> <input type="submit" value="Process" />
+Enter the folder containing the episode: <input type="text" name="dir" id="episodeDir" size="50" /> <input type="submit" class="btn" value="Process" />
 </form>
 <br />
 
@@ -18,4 +18,4 @@ Enter the folder containing the episode: <input type="text" name="dir" id="episo
 //-->
 </script>
 
-#include $os.path.join($sickbeard.PROG_DIR, "gui/classic/interfaces/default/inc_bottom.tmpl")
+#include $os.path.join($sickbeard.PROG_DIR, "data/interfaces/default/inc_bottom.tmpl")

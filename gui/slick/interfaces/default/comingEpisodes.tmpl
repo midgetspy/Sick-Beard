@@ -10,7 +10,7 @@
 #import os.path
 #include $os.path.join($sickbeard.PROG_DIR, "gui/slick/interfaces/default/inc_top.tmpl")
 #set $sort = $sickbeard.COMING_EPS_SORT
-<script type="text/javascript" src="$sbRoot/js/ajaxEpSearch.js"></script>
+<script type="text/javascript" src="$sbRoot/js/ajaxEpSearch.js?$sbPID"></script>
 #if $varExists('header') 
 	<h1 class="header">$header</h1>
 #else 
@@ -18,7 +18,7 @@
 #end if
 <div class="h2footer align-right">
     <b>Key:</b> 
-    <span class="listing_overdue">Past</span>
+    <span class="listing_overdue">Missed</span>
     <span class="listing_current">Current</span>
     <span class="listing_default">Future</span>
     <span class="listing_toofar">Distant</span>
@@ -27,7 +27,7 @@
 
 #if $layout == 'list':
 <!-- start list view //-->
-<script type="text/javascript" src="$sbRoot/js/plotTooltip.js"></script>
+<script type="text/javascript" src="$sbRoot/js/plotTooltip.js?$sbPID"></script>
 <script type="text/javascript" charset="utf-8">
 <!--
 \$.tablesorter.addParser({
@@ -124,7 +124,7 @@
         <td class="nowrap" align="center"><%="%02ix%02i" % (int(cur_result["season"]), int(cur_result["episode"])) %></td>
         <td>
         #if $cur_result["description"] != "" and $cur_result["description"] != None:
-            <img alt="" src="$sbRoot/images/info32.png" height="16" width="16" class="plotInfo" id="plot_info_<%=str(cur_result["showid"])+"_"+str(cur_result["season"])+"_"+str(cur_result["episode"])%>" />
+            <img alt="" src="$sbRoot/images/info32.png" height="16" width="16" class="plotInfo" id="plot_info_<%=str(cur_result["showid"])+"_"+str(cur_result["season"])+"_"+str(cur_result["episode"])%>" style="padding-top: 6px;"/>
         #end if
             $cur_result["name"]
         </td>
@@ -151,7 +151,7 @@
 <script type="text/javascript" charset="utf-8">
 <!--
 \$(document).ready(function(){ 
-  \$('#sbRoot').ajaxEpSearch({'size': 16, 'loadingImage': 'loading16_333333.gif'});
+  \$('#sbRoot').ajaxEpSearch({'size': 16, 'loadingImage': 'loading16.gif'});
   \$(".ep_summary").hide();
   \$(".ep_summaryTrigger").click(function() {
     \$(this).next(".ep_summary").slideToggle('normal', function() {
@@ -170,7 +170,7 @@
     #set $show_div = "ep_listing listing_default"
 
     #if $sort == "show": 
-        <br/><br/>
+       <br/><br/>
     #end if
     
     #for $cur_result in $sql_results:
@@ -210,10 +210,10 @@
                     #set $too_late_header = True
                 #elif $cur_ep_airdate >= $today and $cur_ep_airdate < $next_week:
                     #if $cur_ep_airdate == $today:
-                    <h1 class="day">$datetime.date.fromordinal($cur_ep_airdate).strftime("%A").decode($sickbeard.SYS_ENCODING) <span style="font-size: 12px;">[today]</span></h1>
+                    <h1 class="day">$datetime.date.fromordinal($cur_ep_airdate).strftime("%A").decode($sickbeard.SYS_ENCODING).capitalize() <span style="font-size: 12px;">[today]</span></h1>
                         #set $show_div = "ep_listing listing_current"
                     #else:
-                    <h1 class="day">$datetime.date.fromordinal($cur_ep_airdate).strftime("%A").decode($sickbeard.SYS_ENCODING)</h1>
+                    <h1 class="day">$datetime.date.fromordinal($cur_ep_airdate).strftime("%A").decode($sickbeard.SYS_ENCODING).capitalize()</h1>
                         #set $show_div = "ep_listing listing_default"
                     #end if
                 #end if
@@ -256,12 +256,19 @@
     			 <span class="quality Custom">Custom</span>
 	            #end if
 	        </div>
+          </td>
+        </tr>
+        <tr>
+          <td style="vertical-align: top;">
+          <div>        	        
             #if $cur_result["description"] == '':
-                <div class="ep_summary" style="margin-left:0;display:block !important;">[There is no summary added for this episode]</div>
+            	<span class="title">Plot:</span>
+                <img class="ep_summaryTrigger" src="$sbRoot/images/plus.png" height="16" width="16" alt="" title="Toggle Summary" /><div class="ep_summary">[There is no summary added for this episode]</div>
             #else:
             	<span class="title">Plot:</span>
                 <img class="ep_summaryTrigger" src="$sbRoot/images/plus.png" height="16" width="16" alt="" title="Toggle Summary" /><div class="ep_summary">$cur_result["description"]</div>
             #end if
+          </div>
           </td>
         </tr>
       </table>
@@ -282,5 +289,5 @@ window.setInterval( "location.reload(true)", 600000); // Refresh every 10 minute
 //-->
 </script>
 
-<script type="text/javascript" src="$sbRoot/js/tableClick.js"></script>
+<script type="text/javascript" src="$sbRoot/js/tableClick.js?$sbPID"></script>
 #include $os.path.join($sickbeard.PROG_DIR, "gui/slick/interfaces/default/inc_bottom.tmpl")

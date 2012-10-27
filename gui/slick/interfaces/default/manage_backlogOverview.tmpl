@@ -9,6 +9,21 @@
 #set global $topmenu="manage"#
 #import os.path
 #include $os.path.join($sickbeard.PROG_DIR, "gui/slick/interfaces/default/inc_top.tmpl")
+
+<script type="text/javascript">
+<!--
+\$(document).ready(function() 
+{ 
+	\$('#pickShow').change(function(){
+		var id = \$(this).val();
+		if (id)  {
+			\$('html,body').animate({scrollTop: \$("#show-"+id).offset().top -25},'slow');
+        }
+    });
+});
+//-->
+</script>
+
 #if $varExists('header') 
 	<h1 class="header">$header</h1>
 #else 
@@ -27,6 +42,17 @@
     <span class="qual nowrap">Low Quality: <b>$totalQual</b></span>
 </div><br/>
 
+<div class="float-left">
+Jump to Show  
+	<select id="pickShow">
+	#for $curShow in sorted($sickbeard.showList, key=operator.attrgetter('name')):
+	#if $showCounts[$curShow.tvdbid][$Overview.QUAL]+$showCounts[$curShow.tvdbid][$Overview.WANTED] != 0:
+	<option value="$curShow.tvdbid">$curShow.name</option>
+	#end if
+	#end for
+</select>
+</div>
+
 <table class="sickbeardTable" cellspacing="1" border="0" cellpadding="0">
 
 #for $curShow in sorted($sickbeard.showList, key=operator.attrgetter('name')):
@@ -35,13 +61,13 @@
 #continue
 #end if
 
-  <tr class="seasonheader">
+  <tr class="seasonheader" id="show-$curShow.tvdbid">
     <td colspan="3" class="align-left">
         <br/><h2><a href="$sbRoot/home/displayShow?show=$curShow.tvdbid">$curShow.name</a></h2>
         <div class="float-right">
             <span class="wanted nowrap">Wanted: <b>$showCounts[$curShow.tvdbid][$Overview.WANTED]</b></span>
             <span class="qual nowrap">Low Quality: <b>$showCounts[$curShow.tvdbid][$Overview.QUAL]</b></span>
-            <a href="$sbRoot/manage/backlogShow?tvdb_id=$curShow.tvdbid"><img alt="[force backlog]" height="20" src="$sbRoot/images/forceBacklog20.png" title="Force Backlog" /></a>
+            <a class="btn btn-mini btn-inverse forceBacklog" href="$sbRoot/manage/backlogShow?tvdb_id=$curShow.tvdbid"><i class="icon-play-circle icon-white"></i> Force Backlog</a>
         </div>
     </td>
   </tr>

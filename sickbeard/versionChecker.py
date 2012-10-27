@@ -108,6 +108,7 @@ class WindowsUpdateManager(UpdateManager):
 
     def __init__(self):
         self._cur_version = None
+        self._cur_commit_hash = None
         self._newest_version = None
 
         self.gc_url = 'http://code.google.com/p/sickbeard/downloads/list'
@@ -152,7 +153,7 @@ class WindowsUpdateManager(UpdateManager):
 
     def set_newest_text(self):
         new_str = 'There is a <a href="'+self.gc_url+'" onclick="window.open(this.href); return false;">newer version available</a> (build '+str(self._newest_version)+')'
-        new_str += "&mdash; <a href=\""+self.get_update_url()+"\">Update Now</a>"
+        new_str += "&mdash; <a class=""update"" href=\""+self.get_update_url()+"\">Update Now</a>"
         sickbeard.NEWEST_VERSION_STRING = new_str
 
     def update(self):
@@ -213,6 +214,8 @@ class GitUpdateManager(UpdateManager):
 
         self.git_url = 'http://code.google.com/p/sickbeard/downloads/list'
 
+        self.branch = self._find_git_branch()
+
     def _git_error(self):
         error_message = 'Unable to find your git executable - either delete your .git folder and run from source OR <a href="http://code.google.com/p/sickbeard/wiki/AdvancedSettings" onclick="window.open(this.href); return false;">set git_path in your config.ini</a> to enable updates.'
         sickbeard.NEWEST_VERSION_STRING = error_message
@@ -245,7 +248,7 @@ class GitUpdateManager(UpdateManager):
                 logger.log(u"Command "+cmd+" didn't work, couldn't find git.")
                 continue
             
-            if 'not found' in output or "not recognized as an internal or external command" in output:
+            if p.returncode != 0 or 'not found' in output or "not recognized as an internal or external command" in output:
                 logger.log(u"Unable to find git with command "+cmd, logger.DEBUG)
                 output = None
             elif 'fatal:' in output or err:
@@ -282,6 +285,17 @@ class GitUpdateManager(UpdateManager):
             
         return True
 
+    def _find_git_branch(self):
+
+        branch_info = self._run_git('symbolic-ref -q HEAD')
+
+        if not branch_info or not branch_info[0]:
+            return 'master'
+
+        branch = branch_info[0].strip().replace('refs/heads/', '', 1)
+
+        return branch or 'master'
+
 
     def _check_github_for_update(self):
         """
@@ -297,7 +311,9 @@ class GitUpdateManager(UpdateManager):
         gh = github.GitHub()
 
         # find newest commit
-        for curCommit in gh.commits('mr-orange', 'Sick-Beard', version.SICKBEARD_VERSION):
+        for curCommit in gh.commits('mr-orange', 'Sick-Beard', self.branch):
+#        for curCommit in gh.commits('mr-orange', 'Sick-Beard', version.SICKBEARD_VERSION):
+
             if not self._newest_commit_hash:
                 self._newest_commit_hash = curCommit['sha']
                 if not self._cur_commit_hash:
@@ -330,7 +346,7 @@ class GitUpdateManager(UpdateManager):
             url = 'http://github.com/mr-orange/Sick-Beard/commits/'
 
         new_str = 'There is a <a href="'+url+'" onclick="window.open(this.href); return false;">newer version available</a> ('+message+')'
-        new_str += "&mdash; <a href=\""+self.get_update_url()+"\">Update Now</a>"
+        new_str += "&mdash; <a class=""update"" href=\""+self.get_update_url()+"\">Update Now</a>"
 
         sickbeard.NEWEST_VERSION_STRING = new_str
 
@@ -338,8 +354,8 @@ class GitUpdateManager(UpdateManager):
         self._find_installed_version()
         try:
             self._check_github_for_update()
-        except Exception:
-            logger.log(u"Unable to contact github, can't check for update", logger.ERROR)
+        except Exception, e:
+            logger.log(u"Unable to contact github, can't check for update: "+repr(e), logger.ERROR)
             return False
 
         logger.log(u"After checking, cur_commit = "+str(self._cur_commit_hash)+", newest_commit = "+str(self._newest_commit_hash)+", num_commits_behind = "+str(self._num_commits_behind), logger.DEBUG)
@@ -355,7 +371,7 @@ class GitUpdateManager(UpdateManager):
         on the call's success.
         """
 
-        output, err = self._run_git('pull origin '+sickbeard.version.SICKBEARD_VERSION) #@UnusedVariable
+        output, err = self._run_git('pull origin '+self.branch) #@UnusedVariable
 
         if not output:
             return self._git_error()
@@ -421,7 +437,7 @@ class SourceUpdateManager(GitUpdateManager):
             logger.log(u"Unknown current version, don't know if we should update or not", logger.DEBUG)
 
             new_str = "Unknown version: If you've never used the Sick Beard upgrade system then I don't know what version you have."
-            new_str += "&mdash; <a href=\""+self.get_update_url()+"\">Update Now</a>"
+            new_str += "&mdash; <a class=""update"" href=\""+self.get_update_url()+"\">Update Now</a>"
 
             sickbeard.NEWEST_VERSION_STRING = new_str
 
@@ -492,3 +508,4 @@ class SourceUpdateManager(GitUpdateManager):
             return False
 
         return True
+

@@ -108,14 +108,13 @@ def initWebServer(options = {}):
         logger.log(u"Starting Sick Beard on "+protocol+"://" + str(options['host']) + ":" + str(options['port']) + "/")
         cherrypy.config.update(options_dict)
 
+        logger.log(u"Sick Beard data root:" + str(options['data_root']))
+
         # setup cherrypy logging
         if options['log_dir'] and os.path.isdir(options['log_dir']):
                 cherrypy.config.update({ 'log.access_file': os.path.join(options['log_dir'], "cherrypy.log") })
                 logger.log('Using %s for cherrypy log' % cherrypy.config['log.access_file'])
 
-        logger.log(u'Gui Data Root: '+options['data_root'], logger.MESSAGE )
-        logger.log(u'Gui Name: '+sickbeard.GUI_NAME, logger.MESSAGE )
-        
         conf = {
                         '/': {
                                 'tools.staticdir.root': options['data_root'],

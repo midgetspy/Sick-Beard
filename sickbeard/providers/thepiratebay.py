@@ -25,24 +25,26 @@ import os
 import sickbeard
 import generic
 from sickbeard.common import Quality
+from sickbeard.name_parser.parser import NameParser, InvalidNameException
 from sickbeard import logger
 from sickbeard import tvcache
 from sickbeard import helpers
 from sickbeard import show_name_helpers
 from sickbeard import db
-from sickbeard.common import Overview
+from sickbeard.common import Overview 
 from sickbeard.exceptions import ex
 from sickbeard import encodingKludge as ek
 
-proxy_dict = {'proxyfofree.com (US)' : 'http://proxyfofree.com/',
-              'meganprx.info (FR)': 'http://www.meganprx.info/',
-              'alexandraprx.info (FR)' : 'http://www.alexandraprx.info/',
-              'imspecial.me (DE)' : 'http://imspecial.me/',
-              'proxite.eu (DE)' :'http://proxite.eu/',
-              'shieldmagic.com (GB)' : 'http://www.shieldmagic.com/',
-              'wowspeed.co.uk (GB)' : 'http://wowspeed.co.uk/' ,             
-              'webproxy.cz (CZ)' : 'http://webproxy.cz/',
-              'freeproxy.cz (CZ)' : 'http://www.freeproxy.cz/',
+proxy_dict = {
+              'Getprivate.eu (NL)' : 'http://getprivate.eu/',
+              '15bb51.info (US)' : 'http://15bb51.info/',
+              'Hideme.nl (NL)' : 'http://hideme.nl/',
+              'Rapidproxy.us (GB)' : 'http://rapidproxy.us/',
+              'Proxite.eu (DE)' :'http://proxite.eu/',
+              'Shieldmagic.com (GB)' : 'http://www.shieldmagic.com/',
+              'Wowspeed.co.uk (GB)' : 'http://wowspeed.co.uk/' ,             
+              'Webproxy.cz (CZ)' : 'http://webproxy.cz/',
+              'Freeproxy.cz (CZ)' : 'http://www.freeproxy.cz/',
              }
 
 class ThePirateBayProvider(generic.TorrentProvider):
@@ -59,10 +61,12 @@ class ThePirateBayProvider(generic.TorrentProvider):
         
         self.url = 'http://thepiratebay.se/'
 
-        self.searchurl =  'http://thepiratebay.se/search/%s/0/7/200'  # order by seed       
+        self.searchurl = self.url+'search/%s/0/7/200'  # order by seed       
 
-        self.re_title_url = '<td>.*?".*?/torrent/\d+/(?P<title>.*?)%s".*?<a href=".*?(?P<url>magnet.*?)%s".*?</td>'
- 
+        self.re_title_url =  '/torrent/(?P<id>\d+)/(?P<title>.*?)//1".+?[^<]+?(?P<url>magnet.*?)//1".+?/user/(?P<user>.*?)[//1"|///1"].+?[^<td](?P<seeders>\d+)</td>.+?[^<td](?P<leechers>\d+)</td>'
+
+#       '/torrent/(?P<id>\d+)/(?P<title>.*?)%s".+?[^<]+?(?P<url>magnet.*?)%s".+?/user/(?P<user>.*?)[%s"|/%s"].+?[^<td](?P<seeders>\d+)</td>.+?[^<td](?P<leechers>\d+)</td>'
+
     def isEnabled(self):
         return sickbeard.THEPIRATEBAY
         
@@ -74,109 +78,192 @@ class ThePirateBayProvider(generic.TorrentProvider):
         quality = Quality.nameQuality(item[0])
         return quality    
 
-    def _get_airbydate_season_range(self, season):
-        
-            if season == None:
-                return ()
-        
-            year, month = map(int, season.split('-'))
-            min_date = datetime.date(year, month, 1)
-            if month == 12:
-                max_date = datetime.date(year, month, 31)
-            else:    
-                max_date = datetime.date(year, month+1, 1) -  datetime.timedelta(days=1)
+    def _reverseQuality(self,quality):
 
-            return (min_date, max_date)    
+        quality_string = ''
+
+        if quality == Quality.SDTV:
+            quality_string = 'HDTV x264'
+        elif quality == Quality.HDTV:    
+            quality_string = '720p HDTV x264'
+        elif quality == Quality.HDWEBDL:
+            quality_string = '720p WEB-DL'
+        elif quality == Quality.HDBLURAY:
+            quality_string = '720p Bluray x264'
+        elif quality == Quality.FULLHDBLURAY:
+            quality_string = '1080p Bluray x264'  
+        
+        return quality_string
+
+    def _find_season_quality(self,title,torrent_id):
+        """ Rewrite the title of a Season Torrent with the quality found inspecting torrent file list """
+
+        mediaExtensions = ['avi', 'mkv', 'wmv', 'divx',
+                           'vob', 'dvr-ms', 'wtv', 'ts'
+                           'ogv', 'rar', 'zip'] 
+        
+        quality = Quality.UNKNOWN        
+        
+        fileName = None
+        
+        fileURL = self.proxy._buildURL(self.url+'ajax_details_filelist.php?id='+str(torrent_id))
       
+        data = self.getURL(fileURL)
+        
+        if not data:
+            return None
+        
+        filesList = re.findall('<td.+>(.*?)</td>',data) 
+        
+        if not filesList: 
+            logger.log(u"Unable to get the torrent file list for "+title, logger.ERROR)
+            
+#        for fileName in filter(lambda x: x.rpartition(".")[2].lower() in mediaExtensions, filesList):
+#            quality = Quality.nameQuality(os.path.basename(fileName))
+#            if quality != Quality.UNKNOWN: break
+
+        for fileName in filesList:
+            sepFile = fileName.rpartition(".")  
+            if fileName.rpartition(".")[2].lower() in mediaExtensions:
+                quality = Quality.nameQuality(fileName)
+                if quality != Quality.UNKNOWN: break
+
+        if fileName!=None and quality == Quality.UNKNOWN:
+            quality = Quality.assumeQuality(os.path.basename(fileName))            
+
+        if quality == Quality.UNKNOWN:
+            logger.log(u"No Season quality for "+title, logger.DEBUG)
+            return None
+
+        try:
+            myParser = NameParser()
+            parse_result = myParser.parse(fileName)
+        except InvalidNameException:
+            return None
+        
+        logger.log(u"Season quality for "+title+" is "+Quality.qualityStrings[quality], logger.DEBUG)
+        
+        if parse_result.series_name and parse_result.season_number: 
+            title = parse_result.series_name+' S%02d' % int(parse_result.season_number)+' '+self._reverseQuality(quality)
+        
+        return title
+
     def _get_season_search_strings(self, show, season=None):
-    
-        search_string = []
+
+        search_string = {'Episode': []}
     
         if not show:
             return []
 
-        #Building the search string with the season we need
-        #1) ShowName SXX 
-        #2) ShowName Season X
-        for show_name in set(show_name_helpers.allPossibleShowNames(show)):
-            ep_string = show_name + ' ' + 'S%02d' % int(season)   
-            search_string.append(ep_string)
-          
-            ep_string = show_name + ' ' + 'Season' + ' ' + str(season)   
-            search_string.append(ep_string)
+        seasonEp = show.getAllEpisodes(season)
+
+        wantedEp = [x for x in seasonEp if show.getOverview(x.status) in (Overview.WANTED, Overview.QUAL)]          
+
+        #If Every episode in Season is a wanted Episode then search for Season first
+        if wantedEp == seasonEp:
+            search_string = {'Season': [], 'Episode': []}
+            for show_name in set(show_name_helpers.allPossibleShowNames(show)):
+                ep_string = show_name +' S%02d' % int(season) #1) ShowName SXX   
+                search_string['Season'].append(ep_string)
+                      
+                ep_string = show_name+' Season '+str(season)+' -Ep*' #2) ShowName Season X  
+                search_string['Season'].append(ep_string)
 
         #Building the search string with the episodes we need         
-        myDB = db.DBConnection()
+        for ep_obj in wantedEp:
+            search_string['Episode'] += self._get_episode_search_strings(ep_obj)[0]['Episode']
         
-        if show.air_by_date:
-            (min_date, max_date) = self._get_airbydate_season_range(season)
-            sqlResults = myDB.select("SELECT * FROM tv_episodes WHERE showid = ? AND airdate >= ? AND airdate <= ?", [show.tvdbid,  min_date.toordinal(), max_date.toordinal()])
-        else:
-            sqlResults = myDB.select("SELECT * FROM tv_episodes WHERE showid = ? AND season = ?", [show.tvdbid, season])
-            
-        for sqlEp in sqlResults:
-            if show.getOverview(int(sqlEp["status"])) in (Overview.WANTED, Overview.QUAL):
-                
-                if show.air_by_date:
-                    for show_name in set(show_name_helpers.allPossibleShowNames(show)):
-                        ep_string = show_name_helpers.sanitizeSceneName(show_name) +' '+ str(datetime.date.fromordinal(sqlEp["airdate"])).replace('-', '.')
-                        search_string.append(ep_string)
-                else:
-                    for show_name in set(show_name_helpers.allPossibleShowNames(show)):
-                        ep_string = show_name_helpers.sanitizeSceneName(show_name) +' '+ sickbeard.config.naming_ep_type[2] % {'seasonnumber': season, 'episodenumber': int(sqlEp["episode"])}
-                        search_string.append(ep_string)                       
+        #If no Episode is needed then return an empty list
+        if not search_string['Episode']:
+            return []
         
-        return search_string
+        return [search_string]
 
     def _get_episode_search_strings(self, ep_obj):
        
-        search_string = []
+        search_string = {'Episode': []}
        
         if not ep_obj:
             return []
                 
         if ep_obj.show.air_by_date:
             for show_name in set(show_name_helpers.allPossibleShowNames(ep_obj.show)):
-                ep_string = show_name_helpers.sanitizeSceneName(show_name) +' '+ str(ep_obj.airdate).replace('-', '.')
-                search_string.append(ep_string)
+                ep_string = show_name_helpers.sanitizeSceneName(show_name) +' '+ str(ep_obj.airdate)
+                search_string['Episode'].append(ep_string)
         else:
             for show_name in set(show_name_helpers.allPossibleShowNames(ep_obj.show)):
                 ep_string = show_name_helpers.sanitizeSceneName(show_name) +' '+ sickbeard.config.naming_ep_type[2] % {'seasonnumber': ep_obj.season, 'episodenumber': ep_obj.episode}
-                search_string.append(ep_string)
+                search_string['Episode'].append(ep_string)
     
-        return search_string
+        return [search_string]
 
     def _doSearch(self, search_params, show=None):
     
         results = []
+        items = {'Season': [], 'Episode': []}
 
-        searchURL = self.proxy._buildURL(self.searchurl %(urllib.quote(search_params)))    
+        for mode in search_params.keys():
+            for search_string in search_params[mode]:
 
-        logger.log(u"Search string: " + searchURL, logger.DEBUG)
+                searchURL = self.proxy._buildURL(self.searchurl %(urllib.quote(search_string)))    
+        
+                logger.log(u"Search string: " + searchURL, logger.DEBUG)
+        
+                data = self.getURL(searchURL)
+                if not data:
+                    return []
+        
+                re_title_url = self.proxy._buildRE(self.re_title_url)
+                
+                #Extracting torrent information from data returned by searchURL                   
+                match = re.compile(re_title_url, re.DOTALL ).finditer(urllib.unquote(data))
+                for torrent in match:
+
+                    title = torrent.group('title').replace('_','.')#Do not know why but SickBeard skip release with '_' in name
+                    url = torrent.group('url')
+                    id = int(torrent.group('id'))
+                    seeders = int(torrent.group('seeders'))
+                    leechers = int(torrent.group('leechers'))
+                    uploader = torrent.group('user')
+
+                    #Filter unseeded torrent
+                    if seeders == 0:
+                        continue 
+
+                    if uploader in sickbeard.THEPIRATEBAY_BLACKLIST.split(','):
+                        logger.log(u"ThePirateBay Provider found result "+torrent.group('title')+" but the uploader "+ uploader+" it's blacklisted so I'm ignoring this result",logger.DEBUG)
+                        continue
+                        
+                    if not show_name_helpers.filterBadReleases(title):
+                        continue
+                   
+                    #Accept Torrent only from Good People for every Episode Search
+                    if sickbeard.THEPIRATEBAY_TRUSTED and re.search('(VIP|Trusted|Helpers)',torrent.group(0))== None:
+                        logger.log(u"ThePirateBay Provider found result "+torrent.group('title')+" but the uploader " + uploader + "it's not trusted I'm ignoring this result",logger.DEBUG)
+                        continue
+
+                    #Try to find the real Quality for full season torrent analyzing files in torrent 
+                    if mode == 'Season' and Quality.nameQuality(title) == Quality.UNKNOWN:     
+                        title = self._find_season_quality(title,id)
                     
-        data = self.getURL(searchURL)
-        if not data:
-            return []
+                    if not title:
+                        continue
+                        
+                    item = title, url, id, seeders, leechers, uploader
+                    
+                    items[mode].append(item)    
 
-        re_title_url = self.proxy._buildRE(self.re_title_url)
-        
-        #Extracting torrent information from searchURL                   
-        match = re.compile(re_title_url, re.DOTALL ).finditer(urllib.unquote(data))
-        for torrent in match:
-           
-            #Accept Torrent only from Good People
-            if sickbeard.THEPIRATEBAY_TRUSTED and re.search('(VIP|Trusted|Helpers)',torrent.group(0))== None:
-                logger.log(u"ThePirateBay Provider found result "+torrent.group('title')+" but that doesn't seem like a trusted result so I'm ignoring it",logger.DEBUG)
-                continue
-            
-            #Do not know why but Sick Beard skip release with a '_' in name
-            item = (torrent.group('title').replace('_','.'),torrent.group('url'))
-            results.append(item)
-        
+            #For each search mode sort all the items by seeders
+            items[mode].sort(key=lambda tup: tup[3], reverse=True)        
+
+            results += items[mode]  
+                
         return results
 
     def _get_title_and_url(self, item):
-        (title, url) = item
+        
+        title, url, id, seeders, leechers, uploader = item
+        
         if url:
             url = url.replace('&amp;','&')
 
@@ -230,7 +317,7 @@ class ThePirateBayCache(tvcache.TVCache):
         tvcache.TVCache.__init__(self, provider)
 
         # only poll ThePirateBay every 10 minutes max
-        self.minTime = 10
+        self.minTime = 20
 
     def updateCache(self):
 
@@ -257,18 +344,28 @@ class ThePirateBayCache(tvcache.TVCache):
             return []
                 
         for torrent in match:
+
+            title = torrent.group('title').replace('_','.')#Do not know why but SickBeard skip release with '_' in name
+            url = torrent.group('url')
+            uploader = torrent.group('user')
            
             #accept torrent only from Trusted people
             if sickbeard.THEPIRATEBAY_TRUSTED and re.search('(VIP|Trusted|Helpers)',torrent.group(0))== None:
                 logger.log(u"ThePirateBay Provider found result "+torrent.group('title')+" but that doesn't seem like a trusted result so I'm ignoring it",logger.DEBUG)
                 continue
+
+            if uploader in sickbeard.THEPIRATEBAY_BLACKLIST.split(','):
+                logger.log(u"ThePirateBay Provider found result "+torrent.group('title')+" but the uploader "+ uploader+" it's blacklisted so I'm ignoring this result",logger.DEBUG)
+                continue
             
-            item = (torrent.group('title').replace('_','.'),torrent.group('url'))
+            item = (title,url)
+
             self._parseItem(item)
 
     def _getData(self):
        
-        url = self.provider.proxy._buildURL('http://thepiratebay.org/tv/latest/') #url for the last 50 tv-show
+        #url for the last 50 tv-show
+        url = self.provider.proxy._buildURL(self.provider.url+'tv/latest/')
 
         logger.log(u"ThePirateBay cache update URL: "+ url, logger.DEBUG)
 
@@ -309,13 +406,13 @@ class ThePirateBayWebproxy:
         
         return url      
 
-    def _buildRE(self,re):
+    def _buildRE(self,regx):
         """ Return the Proxyfied RE string """
         if self.isEnabled():
-            re = re %('&amp;b=32','&amp;b=32')
+            regx = re.sub('//1',self.option,regx).replace('&','&amp;')
         else:
-            re = re %('','')   
+            regx = re.sub('//1','',regx)  
 
-        return re    
+        return regx    
     
 provider = ThePirateBayProvider()

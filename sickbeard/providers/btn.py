@@ -1,5 +1,5 @@
 # coding=utf-8
-# Author: DaniÃ«l Heimans
+# Author: Daniël Heimans
 # URL: http://code.google.com/p/sickbeard
 #
 # This file is part of Sick Beard.

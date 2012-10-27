@@ -1,6 +1,6 @@
 #config{text-align:center;padding:0 0px 20px 0;font-size: 12px;}
 #config /**{font-family:Verdana, sans-serif;}*/
-#config *{font-family: "Helvetica Neue", Helvetica, Arial, Geneva, sans-serif;}
+#config *{font-family: "Helvetica Neue",Helvetica,Arial,sans-serif;}
 #config a:hover {color: #005580 !important;/*text-decoration: underline;*/}
 #config h3 a {text-decoration: none;font-size: 18px;}
 #config h3 img {vertical-align: text-bottom; padding-right: 5px;}
@@ -10,7 +10,7 @@
 #config h5{font-size:1em;color:#000;margin:0 0 .2em;}
 #config p{font-size:1.2em;line-height:1.3;}
 #config .path{font-size:1em;color:#333;font-family:Verdana;}
-#config .jumbo{font-size:16px !important;}
+#config .jumbo{font-size:15px !important;}
 #config-content{display:block;width:100%;text-align:left;clear:both;background:#fff;margin:0 auto;padding:0 0 40px;}
 #config-components{width:auto;}
 #config-components-border{float:left;width:auto;border-top:1px solid #999;padding:5px 0;}
@@ -20,7 +20,7 @@
 #config .component-group-desc h3{font-size:1.5em;}
 #config .component-group-desc p{width:85%;font-size:1.0em;color:#666;margin:.8em 0;}
 #config .component-group-desc p.note{width:90%;/*font-size:1.2em*/;color:#333;margin:.8em 0;}
-#config .component-group-list{float:left;width:600px;margin-top:16px;}
+#config .component-group-list{float:left;width:605px;margin-top:16px;}
 
 #config fieldset{border:0;outline:0;}
 #config div.field-pair{margin:.9em 0 1.4em;}
@@ -62,7 +62,7 @@
 /* Hides from IE-mac \*/
 * html .clearfix{height:1%;}
 /* End hide from IE-mac */
-#provider_order_list{list-style-type:none;width:250px;margin:0;padding:0;}
+#provider_order_list{list-style-type:none;width:270px;margin:0;padding:0;}
 #provider_order_list li{font-size:15px;font-weight:bold;height:1.3em;font-family:Verdana;margin:0 5px 5px;padding:6px;}
 #provider_order_list input{margin:0px 2px;}
 .providerDiv{display:none;padding-left:20px;}
@@ -123,4 +123,41 @@
     padding-left: 6px;
     padding-right: 6px;
     padding-top: 3px;
+}
+
+/* =======================================================================
+config_postProcessing.tmpl
+========================================================================== */
+#config div.example {
+  padding: 4px 10px 4px 10px; 
+  margin-top: 2px;
+  background-color: #dfdede;
+}
+.Key {
+  width: 100%;
+  padding: 6px;
+  font-family: sans-serif;
+  font-size: 13px;
+  background-color: #f4f4f4;
+  border: 1px solid #ccc;
+  border-collapse: collapse;
+  border-spacing: 0;
+  line-height: 18px !important;
+  margin-left: 15px !important;
+}
+.Key th, .tableHeader {
+  padding: 3px 9px;
+  margin: 0;
+  color: #fff;
+  text-align: center;
+  background: none repeat scroll 0 0 #666;
+}
+.Key td {
+  padding: 1px 5px !important;
+}
+.Key tr {
+  border-bottom: 1px solid #ccc;
+}
+.Key tr.even {
+  background-color: #dfdede;
 }

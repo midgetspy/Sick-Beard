@@ -9,7 +9,7 @@
 
 #set global $topmenu="home"#
 #import os.path
-#include $os.path.join($sickbeard.PROG_DIR,  "gui/classic/interfaces/default/inc_top.tmpl")  
+#include $os.path.join($sickbeard.PROG_DIR, "data/interfaces/default/inc_top.tmpl")
 
 <script type="text/javascript" charset="utf-8">
 <!--
@@ -44,7 +44,7 @@
 
         \$('#tvdbLangSelect').change(function() { searchTvdb() });
   });
-	
+
 });
 //-->
 </script>
@@ -58,25 +58,35 @@ Quality:
 #set $qualities = $common.Quality.splitQuality(int($show.quality))
 #set global $anyQualities = $qualities[0]
 #set global $bestQualities = $qualities[1]
-
-#include $os.path.join($sickbeard.PROG_DIR, "gui/classic/interfaces/default/inc_qualityChooser.tmpl")
-Scene Exception: <br />
-<input type="text" id="SceneName"> 
-<input type="button" value="Add" id="addSceneName"><br />
-<div id="SceneException" style="margin-left: 15px;">
+#include $os.path.join($sickbeard.PROG_DIR, "data/interfaces/default/inc_qualityChooser.tmpl")
 <br />
-	<select id="exceptions_list" name="exceptions_list" multiple="multiple" >
-			#for $cur_exception in $show.exceptions:
-				<option value="$cur_exception">$cur_exception</option>
-			#end for
-	</select>
-	<input id="removeSceneName" value="Remove" type="button"/>
-	<br />
-</div>		
-Note: This will <b>affect the episode show search</b> on nzb and torrent provider.<br />
-This list overrides the original name, it doesn't append to it.<br />
-So if the original name is valid in addition to the exception you will have to<br /> 
-put both of them in the exception list.<br />
+
+Scene Exception:
+<input type="text" id="SceneName"> 
+<input class="btn" type="button" value="Add" id="addSceneName"><br />
+
+<div id="SceneException" >
+
+  <div class="component-group-desc">
+    <p>This will <b>affect the episode show search</b> on nzb and torrent provider.<br />
+       This list overrides the original name, it doesn't append to it.<br />
+    </p>
+  </div>
+
+  <div class="float-left" style="padding-bottom: 40px; text-align:center;">
+    <h4>Exceptions List</h4>
+    <select id="exceptions_list" name="exceptions_list" multiple="multiple" style="min-width:10em;" >
+        #for $cur_exception in $show.exceptions:
+          <option value="$cur_exception">$cur_exception</option>
+        #end for
+    </select>
+  <div>	
+  <input id="removeSceneName" value="Remove" class="btn float-left" type="button" style="margin-top: 10px;"/>
+</div>	
+<br />
+
+</div>	
+</div>
 <br />
 <br />
 
@@ -85,15 +95,14 @@ Note: This will only affect the language of the retrieved metadata file contents
 This <b>DOES NOT</b> allow Sick Beard to download non-english TV episodes!<br />
 <br />
 <br />
-Use Season Folders: <input type="checkbox" name="seasonfolders" #if $show.seasonfolders == 1 then "checked=\"checked\"" else ""# /><br /><br />
+Flatten files (no folders): <input type="checkbox" name="flatten_folders" #if $show.flatten_folders == 1 and not $sickbeard.NAMING_FORCE_FOLDERS then "checked=\"checked\"" else ""# #if $sickbeard.NAMING_FORCE_FOLDERS then "disabled=\"disabled\"" else ""#/><br /><br />
 Paused: <input type="checkbox" name="paused" #if $show.paused == 1 then "checked=\"checked\"" else ""# /><br /><br />
 
 Air by date: 
 <input type="checkbox" name="air_by_date" #if $show.air_by_date == 1 then "checked=\"checked\"" else ""# /><br />
 (check this if the show is released as Show.03.02.2010 rather than Show.S02E03) 
 <br /><br />
-<input type="submit" id="submit" value="Submit"/>
-
+<input class="btn" type="submit" value="Submit" />
 </form>
 
 <script type="text/javascript" charset="utf-8">
@@ -117,8 +126,6 @@ Air by date:
         var scene_ex = \$('#SceneName').val()
         var option = \$("<option>")
 		all_exceptions = []
-		
-		\$("#SceneException").show()
 			
 	    \$("#exceptions_list option").each  ( function() {
 	       all_exceptions.push( \$(this).val() )
@@ -128,6 +135,8 @@ Air by date:
         
         if (jQuery.inArray(scene_ex, all_exceptions) > -1 || (scene_ex == ''))
         	return
+
+		\$("#SceneException").show()
 
         option.attr("value",scene_ex)
         option.html(scene_ex)
@@ -158,4 +167,4 @@ Air by date:
 //-->
 </script>
 
-#include $os.path.join($sickbeard.PROG_DIR, "gui/classic/interfaces/default/inc_bottom.tmpl")
+#include $os.path.join($sickbeard.PROG_DIR, "data/interfaces/default/inc_bottom.tmpl")
