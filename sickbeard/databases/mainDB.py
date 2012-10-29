@@ -417,6 +417,7 @@ class FixAirByDateSetting(SetNzbTorrentSettings):
                 self.connection.action("UPDATE tv_shows SET air_by_date = ? WHERE tvdb_id = ?", [1, cur_show["tvdb_id"]])
         
         self.incDBVersion()
+
 class AddSubtitlesSupport(FixAirByDateSetting):    
     def test(self):
         return self.checkDBVersion() >= 10
@@ -428,14 +429,14 @@ class AddSubtitlesSupport(FixAirByDateSetting):
         self.addColumn("tv_episodes", "subtitles_lastsearch", "TIMESTAMP", str(datetime.datetime.min))
         self.incDBVersion()
 
-class AddSizeAndSceneNameFields(FixAirByDateSetting):
+class AddSizeAndSceneNameFields(AddSubtitlesSupport):
 
     def test(self):
-        return self.checkDBVersion() >= 10
+        return self.checkDBVersion() >= 11
     
     def execute(self):
 
-        backupDatabase(10)
+        backupDatabase(11)
 
         if not self.hasColumn("tv_episodes", "file_size"):
             self.addColumn("tv_episodes", "file_size")
@@ -533,14 +534,14 @@ class AddSizeAndSceneNameFields(FixAirByDateSetting):
 class RenameSeasonFolders(AddSizeAndSceneNameFields):
 
     def test(self):
-        return self.checkDBVersion() >= 11
+        return self.checkDBVersion() >= 12
     
     def execute(self):
         
         # rename the column
         self.connection.action("ALTER TABLE tv_shows RENAME TO tmp_tv_shows")
-        self.connection.action("CREATE TABLE tv_shows (show_id INTEGER PRIMARY KEY, location TEXT, show_name TEXT, tvdb_id NUMERIC, network TEXT, genre TEXT, runtime NUMERIC, quality NUMERIC, airs TEXT, status TEXT, flatten_folders NUMERIC, paused NUMERIC, startyear NUMERIC, tvr_id NUMERIC, tvr_name TEXT, air_by_date NUMERIC, lang TEXT)")
-        sql = "INSERT INTO tv_shows(show_id, location, show_name, tvdb_id, network, genre, runtime, quality, airs, status, flatten_folders, paused, startyear, tvr_id, tvr_name, air_by_date, lang) SELECT show_id, location, show_name, tvdb_id, network, genre, runtime, quality, airs, status, seasonfolders, paused, startyear, tvr_id, tvr_name, air_by_date, lang FROM tmp_tv_shows"
+        self.connection.action("CREATE TABLE tv_shows (show_id INTEGER PRIMARY KEY, location TEXT, show_name TEXT, tvdb_id NUMERIC, network TEXT, genre TEXT, runtime NUMERIC, quality NUMERIC, airs TEXT, status TEXT, flatten_folders NUMERIC, paused NUMERIC, startyear NUMERIC, tvr_id NUMERIC, tvr_name TEXT, air_by_date NUMERIC, lang TEXT, subtitles NUMERIC)")
+        sql = "INSERT INTO tv_shows(show_id, location, show_name, tvdb_id, network, genre, runtime, quality, airs, status, flatten_folders, paused, startyear, tvr_id, tvr_name, air_by_date, lang, subtitles) SELECT show_id, location, show_name, tvdb_id, network, genre, runtime, quality, airs, status, seasonfolders, paused, startyear, tvr_id, tvr_name, air_by_date, lang, subtitles FROM tmp_tv_shows"
         self.connection.action(sql)
         
         # flip the values to be opposite of what they were before
