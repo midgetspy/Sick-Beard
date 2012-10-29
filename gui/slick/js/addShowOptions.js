@@ -9,7 +9,7 @@ $(document).ready(function(){
         $.get(sbRoot+'/config/general/saveAddShowDefaults', {defaultStatus: $('#statusSelect').val(),
                                                              anyQualities: anyQualArray.join(','),
                                                              bestQualities: bestQualArray.join(','),
-                                                             defaultSeasonFolders: $('#seasonFolders').prop('checked'),
+                                                             defaultFlattenFolders: $('#flatten_folders').prop('checked'),
                                                              subtitles: $('#subtitles').prop('checked')} );
         $(this).attr('disabled', true);
         $.pnotify({
@@ -18,7 +18,7 @@ $(document).ready(function(){
         });
     });
 
-    $('#statusSelect, #qualityPreset, #seasonFolders, #anyQualities, #bestQualities, #subtitles').change(function(){
+    $('#statusSelect, #qualityPreset, #flatten_folders, #anyQualities, #bestQualities, #subtitles').change(function(){
         $('#saveDefaultsButton').attr('disabled', false);
     });
 
