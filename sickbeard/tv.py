@@ -852,7 +852,8 @@ class TVShow(object):
             return
 
 
-    def saveToDB(self):        logger.log(str(self.tvdbid) + ": Saving show info to database", logger.DEBUG)
+    def saveToDB(self):
+        logger.log(str(self.tvdbid) + ": Saving show info to database", logger.DEBUG)
 
         myDB = db.DBConnection()
 
