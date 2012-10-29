@@ -2,6 +2,7 @@
 #from sickbeard import subtitles
 #import sickbeard.helpers
 #from sickbeard.common import *
+#import subliminal
 #import os.path, os
 #import datetime
 #set global $title=$show.name
@@ -194,11 +195,11 @@ $epLoc
     </td>
 #if $sickbeard.USE_SUBTITLES and $show.subtitles:
     <td class="subtitles_column" align="center">&nbsp;
-    #for $sub_lang in $epResult["subtitles"].split(','):
-        #if $sub_lang:
-            <img src="$sbRoot/images/flags/${sub_lang}.png" width="16" height="11" alt="${sub_lang}" />&nbsp;
-        #end if
-    #end for
+    #if $epResult["subtitles"]:
+        #for $sub_lang in subliminal.language.language_list($epResult["subtitles"].split(',')):
+            <img src="$sbRoot/images/flags/${sub_lang.alpha2}.png" width="16" height="11" alt="${sub_lang}" />&nbsp;
+        #end for
+    #end if
     </td>
 #end if
 #set $curStatus, $curQuality = $Quality.splitCompositeStatus(int($epResult["status"]))
