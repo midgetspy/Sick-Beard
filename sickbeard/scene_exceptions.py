@@ -68,7 +68,7 @@ def retrieve_exceptions():
     exception_dict = {}
 
     # exceptions are stored on github pages
-    url = 'http://midgetspy.github.com/sb_tvdb_scene_exceptions/exceptions.txt'
+    url = 'http://github.com/midgetspy/sb_tvdb_scene_exceptions/blob/gh-pages/exceptions.txt'
 
     logger.log(u"Check scene exceptions update")
     url_data = helpers.getURL(url)
