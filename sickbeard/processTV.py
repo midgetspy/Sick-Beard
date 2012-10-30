@@ -24,6 +24,7 @@ import shutil
 import sickbeard 
 from sickbeard import postProcessor
 from sickbeard import db, helpers, exceptions
+from sickbeard import strm
 
 from sickbeard import encodingKludge as ek
 from sickbeard.exceptions import ex
@@ -82,6 +83,15 @@ def processDir (dirName, nzbName=None, recurse=False):
             return returnStr
 
     fileList = ek.ek(os.listdir, dirName)
+    
+    # create strm and move .nzb files
+    if sickbeard.NZB_METHOD == "strm":
+        for file in fileList:
+            if os.path.splitext(file)[1] == ".nzb":
+                strm_files = strm.NZBtoSTRM(file)
+                if strm_files:
+                    helpers.moveFile(ek.ek(os.path.join, dirName, file), ek.ek(os.path.join, sickbeard.NZB_DIR, file))
+                    fileList.extend(strm_files)
 
     # split the list into video files and folders
     folders = filter(lambda x: ek.ek(os.path.isdir, ek.ek(os.path.join, dirName, x)), fileList)

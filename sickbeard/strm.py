@@ -206,3 +206,11 @@ def saveSTRM(nzb):
             ui.notifications.message('Episode snatched','<b>%s</b> snatched from <b>%s</b>' % (nzb.name, nzbProvider.name))
 
     return newResult
+    
+def NZBtoSTRM(file):
+
+    nzbName = os.path.splitext(file)[0]
+    fileContents = "plugin://plugin.program.pneumatic/?mode=strm&type=add_file&nzb=" + sickbeard.PNEU_NZB_DIR + nzbName + ".nzb" + "&nzbname=" + nzbName
+    strmFile = _commitSTRM(nzbName, fileContents)
+    if strmFile:
+        return nzbName
