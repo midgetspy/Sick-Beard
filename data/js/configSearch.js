@@ -18,24 +18,28 @@ $(document).ready(function(){
             $('#testSABnzbd').hide();
             $('#testSABnzbd-result').hide();
             $('#nzbget_settings').hide();
+            $('#strm_settings').hide();
         } else if (selectedProvider == "nzbget") {
             $('#blackhole_settings').hide();
             $('#sabnzbd_settings').hide();
             $('#testSABnzbd').hide();
             $('#testSABnzbd-result').hide();
             $('#nzbget_settings').show();
+            $('#strm_settings').hide();
         } else if (selectedProvider == "strm") {
             $('#blackhole_settings').show();
             $('#sabnzbd_settings').hide();
             $('#testSABnzbd').hide();
             $('#testSABnzbd-result').hide();
             $('#nzbget_settings').hide();
+            $('#strm_settings').show();
         } else {
             $('#blackhole_settings').hide();
             $('#sabnzbd_settings').show();
             $('#testSABnzbd').show();
             $('#testSABnzbd-result').show();
             $('#nzbget_settings').hide();
+            $('#strm_settings').hide();
         }
 
     }
