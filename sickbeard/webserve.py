@@ -51,6 +51,8 @@ from sickbeard.webapi import Api
 
 from lib.tvdb_api import tvdb_api
 
+import subliminal
+
 try:
     import json
 except ImportError:
@@ -151,6 +153,8 @@ ManageMenu = [
     { 'title': 'Manage Searches',           'path': 'manage/manageSearches'  },
     { 'title': 'Episode Status Management', 'path': 'manage/episodeStatuses' },
 ]
+if sickbeard.USE_SUBTITLES:
+    ManageMenu.append({ 'title': 'Missed Subtitle Management', 'path': 'manage/subtitleMissed' })
 
 class ManageSearches:
 
@@ -306,6 +310,110 @@ class Manage:
             Home().setStatus(cur_tvdb_id, '|'.join(to_change[cur_tvdb_id]), newStatus, direct=True)
             
         redirect('/manage/episodeStatuses')
+
+    @cherrypy.expose
+    def showSubtitleMissed(self, tvdb_id, whichSubs):
+        myDB = db.DBConnection()
+
+        cur_show_results = myDB.select("SELECT season, episode, name, subtitles FROM tv_episodes WHERE showid = ? AND season != 0 AND status LIKE '%4'", [int(tvdb_id)])
+        
+        result = {}
+        for cur_result in cur_show_results:
+            if whichSubs == 'all':
+                if len(set(cur_result["subtitles"].split(',')).intersection(set(subtitles.wantedLanguages()))) >= len(subtitles.wantedLanguages()):
+                    continue
+            elif whichSubs in cur_result["subtitles"].split(','):
+                continue
+
+            cur_season = int(cur_result["season"])
+            cur_episode = int(cur_result["episode"])
+            
+            if cur_season not in result:
+                result[cur_season] = {}
+            
+            if cur_episode not in result[cur_season]:
+                result[cur_season][cur_episode] = {}
+            
+            result[cur_season][cur_episode]["name"] = cur_result["name"]
+            
+            result[cur_season][cur_episode]["subtitles"] = ",".join(subliminal.language.Language(subtitle).alpha2 for subtitle in cur_result["subtitles"].split(',')) if not cur_result["subtitles"] == '' else ''
+        
+        return json.dumps(result)
+        
+    @cherrypy.expose
+    def subtitleMissed(self, whichSubs=None):
+
+        t = PageTemplate(file="manage_subtitleMissed.tmpl")
+        t.submenu = ManageMenu
+        t.whichSubs = whichSubs
+        
+        if not whichSubs:
+            return _munge(t)
+
+        myDB = db.DBConnection()
+        status_results = myDB.select("SELECT show_name, tv_shows.tvdb_id as tvdb_id, tv_episodes.subtitles subtitles FROM tv_episodes, tv_shows WHERE tv_shows.subtitles = 1 AND tv_episodes.status LIKE '%4' AND tv_episodes.showid = tv_shows.tvdb_id ORDER BY show_name")
+
+        ep_counts = {}
+        show_names = {}
+        sorted_show_ids = []
+        for cur_status_result in status_results:
+            if whichSubs == 'all':
+                if len(set(cur_status_result["subtitles"].split(',')).intersection(set(subtitles.wantedLanguages()))) >= len(subtitles.wantedLanguages()):
+                    continue
+            elif whichSubs in cur_status_result["subtitles"].split(','):
+                continue
+            
+            cur_tvdb_id = int(cur_status_result["tvdb_id"])
+            if cur_tvdb_id not in ep_counts:
+                ep_counts[cur_tvdb_id] = 1
+            else:
+                ep_counts[cur_tvdb_id] += 1
+        
+            show_names[cur_tvdb_id] = cur_status_result["show_name"]
+            if cur_tvdb_id not in sorted_show_ids:
+                sorted_show_ids.append(cur_tvdb_id)
+        
+        t.show_names = show_names
+        t.ep_counts = ep_counts
+        t.sorted_show_ids = sorted_show_ids
+        return _munge(t)
+    
+    @cherrypy.expose
+    def downloadSubtitleMissed(self, *args, **kwargs):
+        
+        to_download = {}
+        
+        # make a list of all shows and their associated args
+        for arg in kwargs:
+            tvdb_id, what = arg.split('-')
+            
+            # we don't care about unchecked checkboxes
+            if kwargs[arg] != 'on' or what == 'all':
+                continue
+            
+            if tvdb_id not in to_download:
+                to_download[tvdb_id] = []
+            
+            to_download[tvdb_id].append(what)
+        
+        for cur_tvdb_id in to_download:
+            for epResult in to_download[cur_tvdb_id]:
+                season, episode = epResult.split('x');
+            
+                show = sickbeard.helpers.findCertainShow(sickbeard.showList, int(cur_tvdb_id))
+                subtitles = show.getEpisode(int(season), int(episode)).downloadSubtitles()
+                
+                if sickbeard.SUBTITLES_SUBDIR:
+                    for video in subtitles:
+                        subs_new_path = ek.ek(os.path.join, os.path.dirname(video.path), sickbeard.SUBTITLES_SUBDIR)
+                        if not ek.ek(os.path.isdir, subs_new_path):
+                            ek.ek(os.mkdir, subs_new_path)
+                        
+                        for subtitle in subtitles.get(video):
+                            new_file_path = ek.ek(os.path.join, subs_new_path, os.path.basename(subtitle.path))
+                            helpers.moveFile(subtitle.path, new_file_path)
+                        
+        redirect('/manage/subtitleMissed')
 
     @cherrypy.expose
     def backlogShow(self, tvdb_id):
