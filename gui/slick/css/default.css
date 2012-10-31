@@ -408,6 +408,7 @@ input:not(.btn){margin-right:6px;margin-top:5px;padding-top:4px;padding-bottom:4
   float: right;
   font-weight: 700;
   position: relative;
+  padding-left: 2px;
 }
 
 .sickbeardTable td.plotInfo {
