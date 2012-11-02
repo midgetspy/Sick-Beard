@@ -1017,7 +1017,7 @@ class ConfigSearch:
         sickbeard.TORRENT_HOST = torrent_host
         
         sickbeard.USE_SUBTITLES = use_subtitles
-        sickbeard.SUBTITLES_LANGUAGES = [lang.alpha3 for lang in subtitles.isValidLanguage(subtitles_languages.replace(' ', '').split(','))] if subtitles_languages != ''  else ''
+        sickbeard.SUBTITLES_LANGUAGES = [lang.alpha2 for lang in subtitles.isValidLanguage(subtitles_languages.replace(' ', '').split(','))] if subtitles_languages != ''  else ''
         sickbeard.SUBTITLES_MULTI = subtitles_multi
         sickbeard.SUBTITLES_SUBDIR = subtitles_subdir
 

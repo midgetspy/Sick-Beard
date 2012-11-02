@@ -1,6 +1,5 @@
 #import sickbeard
 #from sickbeard import subtitles
-#from lib import subliminal
 #set global $title="Config - Episode Search"
 #set global $header="Search Options"
 
@@ -21,7 +20,7 @@
   	\$(document).ready(function() {
 		\$("#subtitles_languages").tokenInput(
 				[
-	                <%=",\r\n".join("{id: \"" + lang[0] + "\", name: \"" + lang[3] + "\"}" for lang in subliminal.language.LANGUAGES)%>
+	                <%=",\r\n".join("{id: \"" + lang[2] + "\", name: \"" + lang[3] + "\"}" for lang in subtitles.subtitleLanguageFilter())%>
 	            ],
 	            {
 					theme: "facebook",

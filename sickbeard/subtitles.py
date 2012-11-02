@@ -77,11 +77,14 @@ def subtitlesLanguages(video_path):
     languages = set()
     for subtitle in subtitles:
         if subtitle.language:
-            languages.add(subtitle.language.alpha3)
+            languages.add(subtitle.language.alpha2)
         else:
             languages.add(SINGLE)
     return list(languages)
 
+# Return a list with languages that have alpha2 code
+def subtitleLanguageFilter():
+    return [language for language in subliminal.language.LANGUAGES if language[2] != ""]
 
 class SubtitlesFinder():
     """
@@ -156,7 +159,7 @@ class SubtitlesFinder():
             logger.log('Downloaded %d subtitles' % len(subtitles), logger.MESSAGE)
             
             for video in subtitles:
-                notifiers.notify_subtitle_download(os.path.basename(video.path).rpartition(".")[0], ",".join([subtitle.language.alpha3 for subtitle in subtitles.get(video)]))
+                notifiers.notify_subtitle_download(os.path.basename(video.path).rpartition(".")[0], ",".join([subtitle.language.alpha2 for subtitle in subtitles.get(video)]))
         else:
             logger.log('No subtitles found', logger.MESSAGE)
 
@@ -180,4 +183,3 @@ class SubtitlesFinder():
             episode.subtitles_lastsearch = now.strftime("%Y-%m-%d %H:%M:%S")
             episode.refreshSubtitles()
             episode.saveToDB()
-
