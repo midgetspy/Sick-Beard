@@ -16,33 +16,24 @@
 # You should have received a copy of the GNU General Public License
 # along with Sick Beard.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
 import os
-
 import sickbeard
-
 import urllib2
-
 import re
-
 import xml.etree.cElementTree as etree
-
 from name_parser.parser import NameParser, InvalidNameException
-
 from sickbeard import logger, helpers, ui, nzbSplitter, classes
-
 from sickbeard.exceptions import ex
-
 from sickbeard import encodingKludge as ek
+
 
 def _getSeasonNZBs(name, urlData, season, showName):
 
     try:
         showXML = etree.ElementTree(etree.XML(urlData))
     except SyntaxError:
-        logger.log(u"Unable to parse the XML of "+name+", not splitting it", logger.ERROR)
-        return ({},'')
+        logger.log(u"Unable to parse the XML of " + name + ", not splitting it", logger.ERROR)
+        return ({}, '')
 
     filename = name.replace(".nzb", "")
 
@@ -54,7 +45,7 @@ def _getSeasonNZBs(name, urlData, season, showName):
     #if sceneNameMatch:
     #    showName, qualitySection, groupName = sceneNameMatch.groups() #@UnusedVariable
     #else:
-    #    logger.log(u"Unable to parse "+name+" into a scene name. If it's a valid one log a bug.", logger.ERROR)
+    #    logger.log(u"Unable to parse " + name + " into a scene name. If it's a valid one log a bug.", logger.ERROR)
     #    return ({},'')
 
     epFiles = {}
@@ -91,12 +82,13 @@ def _getSeasonNZBs(name, urlData, season, showName):
 
     return (epFiles, xmlns)
 
+
 def _splitResult(result):
 
     try:
         urlData = helpers.getURL(result.url)
     except urllib2.URLError:
-        logger.log(u"Unable to load url "+result.url+", can't download season NZB", logger.ERROR)
+        logger.log(u"Unable to load url " + result.url + ", can't download season NZB", logger.ERROR)
         return False
 
     # parse the season ep name
@@ -104,11 +96,11 @@ def _splitResult(result):
         np = NameParser(False)
         parse_result = np.parse(result.name)
     except InvalidNameException:
-        logger.log(u"Unable to parse the filename "+result.name+" into a valid episode", logger.WARNING)
+        logger.log(u"Unable to parse the filename " + result.name + " into a valid episode", logger.WARNING)
         return False
 
     # bust it up
-    season = parse_result.season_number if parse_result.season_number != None else 1
+    season = parse_result.season_number if parse_result.season_number is not None else 1
 
     separateNZBs, xmlns = _getSeasonNZBs(result.name, urlData, season, parse_result.series_name)
 
@@ -117,28 +109,28 @@ def _splitResult(result):
     if len(separateNZBs) > 1:
         for newNZB in separateNZBs:
 
-            logger.log(u"Split out "+newNZB+" from "+result.name, logger.DEBUG)
+            logger.log(u"Split out " + newNZB + " from " + result.name, logger.DEBUG)
 
             # parse the name
             try:
                 np = NameParser(False)
                 parse_result = np.parse(newNZB)
             except InvalidNameException:
-                logger.log(u"Unable to parse the filename "+newNZB+" into a valid episode", logger.WARNING)
+                logger.log(u"Unable to parse the filename " + newNZB + " into a valid episode", logger.WARNING)
                 return False
 
             # make sure the result is sane
-            if (parse_result.season_number != None and parse_result.season_number != season) or (parse_result.season_number == None and season != 1):
-                logger.log(u"Found "+newNZB+" inside "+result.name+" but it doesn't seem to belong to the same season, ignoring it", logger.WARNING)
+            if (parse_result.season_number is not None and parse_result.season_number is not season) or (parse_result.season_number is None and season is not 1):
+                logger.log(u"Found " + newNZB + " inside " + result.name + " but it doesn't seem to belong to the same season, ignoring it", logger.WARNING)
                 continue
             elif len(parse_result.episode_numbers) == 0:
-                logger.log(u"Found "+newNZB+" inside "+result.name+" but it doesn't seem to be a valid episode NZB, ignoring it", logger.WARNING)
+                logger.log(u"Found " + newNZB + " inside " + result.name + " but it doesn't seem to be a valid episode NZB, ignoring it", logger.WARNING)
                 continue
 
             wantEp = True
             for epNo in parse_result.episode_numbers:
                 if not result.extraInfo[0].wantEpisode(season, epNo, result.quality):
-                    logger.log(u"Ignoring result "+newNZB+" because we don't want an episode that is "+Quality.qualityStrings[result.quality], logger.DEBUG)
+                    logger.log(u"Ignoring result " + newNZB + " because we don't want an episode that is " + Quality.qualityStrings[result.quality], logger.DEBUG)
                     wantEp = False
                     break
             if not wantEp:
@@ -160,6 +152,7 @@ def _splitResult(result):
 
     return resultList
 
+
 def _commitSTRM(strmName, strmContents):
     # get the final file path to the strm file
     destinationPath = ek.ek(os.path.join, sickbeard.TV_DOWNLOAD_DIR, strmName)
@@ -176,8 +169,9 @@ def _commitSTRM(strmName, strmContents):
         helpers.chmodAsParent(fileName)
         return True
     except IOError, e:
-        logger.log(u"Error trying to save STRM to TV downloader directory: "+ex(e), logger.ERROR)
+        logger.log(u"Error trying to save STRM to TV downloader directory: " + ex(e), logger.ERROR)
         return False
+
 
 def saveSTRM(nzb):
 
@@ -195,7 +189,7 @@ def saveSTRM(nzb):
             newResult = _commitSTRM(episode.name, fileContents)
             nzbProvider = nzb.provider
             if newResult:
-                ui.notifications.message('Episode snatched','<b>%s</b> snatched from <b>%s</b>' % (nzb.name, nzbProvider.name))
+                ui.notifications.message('Episode snatched', '<b>%s</b> snatched from <b>%s</b>' % (nzb.name, nzbProvider.name))
                 newResult = False
     else:
         fileContents = "plugin://plugin.program.pneumatic/?mode=strm&type=add_file&nzb=" + sickbeard.PNEU_NZB_DIR + nzb.name + ".nzb" + "&nzbname=" + nzb.name
@@ -203,10 +197,11 @@ def saveSTRM(nzb):
         newResult = _commitSTRM(nzb.name, fileContents)
         nzbProvider = nzb.provider
         if newResult:
-            ui.notifications.message('Episode snatched','<b>%s</b> snatched from <b>%s</b>' % (nzb.name, nzbProvider.name))
+            ui.notifications.message('Episode snatched', '<b>%s</b> snatched from <b>%s</b>' % (nzb.name, nzbProvider.name))
 
     return newResult
-    
+
+
 def NZBtoSTRM(file):
 
     nzbName = os.path.splitext(file)[0]
