@@ -19,7 +19,6 @@
 import re
 import urllib, urllib2
 import sys
-import datetime
 import os
 
 import sickbeard
@@ -30,7 +29,6 @@ from sickbeard import logger
 from sickbeard import tvcache
 from sickbeard import helpers
 from sickbeard import show_name_helpers
-from sickbeard import db
 from sickbeard.common import Overview 
 from sickbeard.exceptions import ex
 from sickbeard import encodingKludge as ek
@@ -63,9 +61,7 @@ class ThePirateBayProvider(generic.TorrentProvider):
 
         self.searchurl = self.url+'search/%s/0/7/200'  # order by seed       
 
-        self.re_title_url =  '/torrent/(?P<id>\d+)/(?P<title>.*?)//1".+?[^<]+?(?P<url>magnet.*?)//1".+?/user/(?P<user>.*?)[//1"|///1"].+?[^<td](?P<seeders>\d+)</td>.+?[^<td](?P<leechers>\d+)</td>'
-
-#       '/torrent/(?P<id>\d+)/(?P<title>.*?)%s".+?[^<]+?(?P<url>magnet.*?)%s".+?/user/(?P<user>.*?)[%s"|/%s"].+?[^<td](?P<seeders>\d+)</td>.+?[^<td](?P<leechers>\d+)</td>'
+        self.re_title_url =  '/torrent/(?P<id>\d+)/(?P<title>.*?)//1".+?[^<]+?(?P<url>magnet.*?)//1".+?[^<td](?P<seeders>\d+)</td>.+?[^<td](?P<leechers>\d+)</td>'
 
     def isEnabled(self):
         return sickbeard.THEPIRATEBAY
@@ -118,15 +114,15 @@ class ThePirateBayProvider(generic.TorrentProvider):
         if not filesList: 
             logger.log(u"Unable to get the torrent file list for "+title, logger.ERROR)
             
-#        for fileName in filter(lambda x: x.rpartition(".")[2].lower() in mediaExtensions, filesList):
-#            quality = Quality.nameQuality(os.path.basename(fileName))
-#            if quality != Quality.UNKNOWN: break
+        for fileName in filter(lambda x: x.rpartition(".")[2].lower() in mediaExtensions, filesList):
+            quality = Quality.nameQuality(os.path.basename(fileName))
+            if quality != Quality.UNKNOWN: break
 
-        for fileName in filesList:
-            sepFile = fileName.rpartition(".")  
-            if fileName.rpartition(".")[2].lower() in mediaExtensions:
-                quality = Quality.nameQuality(fileName)
-                if quality != Quality.UNKNOWN: break
+#        for fileName in filesList:
+#            sepFile = fileName.rpartition(".")  
+#            if fileName.rpartition(".")[2].lower() in mediaExtensions:
+#                quality = Quality.nameQuality(fileName)
+#                if quality != Quality.UNKNOWN: break
 
         if fileName!=None and quality == Quality.UNKNOWN:
             quality = Quality.assumeQuality(os.path.basename(fileName))            
@@ -224,22 +220,17 @@ class ThePirateBayProvider(generic.TorrentProvider):
                     id = int(torrent.group('id'))
                     seeders = int(torrent.group('seeders'))
                     leechers = int(torrent.group('leechers'))
-                    uploader = torrent.group('user')
 
                     #Filter unseeded torrent
                     if seeders == 0:
                         continue 
-
-                    if uploader in sickbeard.THEPIRATEBAY_BLACKLIST.split(','):
-                        logger.log(u"ThePirateBay Provider found result "+torrent.group('title')+" but the uploader "+ uploader+" it's blacklisted so I'm ignoring this result",logger.DEBUG)
-                        continue
-                        
+                       
                     if not show_name_helpers.filterBadReleases(title):
                         continue
                    
                     #Accept Torrent only from Good People for every Episode Search
-                    if sickbeard.THEPIRATEBAY_TRUSTED and re.search('(VIP|Trusted|Helpers)',torrent.group(0))== None:
-                        logger.log(u"ThePirateBay Provider found result "+torrent.group('title')+" but the uploader " + uploader + "it's not trusted I'm ignoring this result",logger.DEBUG)
+                    if sickbeard.THEPIRATEBAY_TRUSTED and re.search('(VIP|Trusted|Helper)',torrent.group(0))== None:
+                        logger.log(u"ThePirateBay Provider found result "+torrent.group('title')+" but that doesn't seem like a trusted result so I'm ignoring it",logger.DEBUG)
                         continue
 
                     #Try to find the real Quality for full season torrent analyzing files in torrent 
@@ -249,7 +240,7 @@ class ThePirateBayProvider(generic.TorrentProvider):
                     if not title:
                         continue
                         
-                    item = title, url, id, seeders, leechers, uploader
+                    item = title, url, id, seeders, leechers
                     
                     items[mode].append(item)    
 
@@ -262,7 +253,7 @@ class ThePirateBayProvider(generic.TorrentProvider):
 
     def _get_title_and_url(self, item):
         
-        title, url, id, seeders, leechers, uploader = item
+        title, url, id, seeders, leechers = item
         
         if url:
             url = url.replace('&amp;','&')
@@ -347,17 +338,12 @@ class ThePirateBayCache(tvcache.TVCache):
 
             title = torrent.group('title').replace('_','.')#Do not know why but SickBeard skip release with '_' in name
             url = torrent.group('url')
-            uploader = torrent.group('user')
            
             #accept torrent only from Trusted people
-            if sickbeard.THEPIRATEBAY_TRUSTED and re.search('(VIP|Trusted|Helpers)',torrent.group(0))== None:
+            if sickbeard.THEPIRATEBAY_TRUSTED and re.search('(VIP|Trusted|Helper)',torrent.group(0))== None:
                 logger.log(u"ThePirateBay Provider found result "+torrent.group('title')+" but that doesn't seem like a trusted result so I'm ignoring it",logger.DEBUG)
                 continue
-
-            if uploader in sickbeard.THEPIRATEBAY_BLACKLIST.split(','):
-                logger.log(u"ThePirateBay Provider found result "+torrent.group('title')+" but the uploader "+ uploader+" it's blacklisted so I'm ignoring this result",logger.DEBUG)
-                continue
-            
+           
             item = (title,url)
 
             self._parseItem(item)
