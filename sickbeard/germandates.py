@@ -53,6 +53,8 @@ def updateSlugs():
 	for entry in r.json["result"]:
 	 	if not slugs.select(slugs.c.id == entry["id"]).execute().fetchone():
 	 		slugs.insert().execute(entry)
+	 	if error.select(error.c.tvdbid == entry["id"]).execute().fetchone():
+	 		conn.execute(error.delete().where(error.c.tvdbid == entry["id"]))
 
 
 def updateEpisode(serieselement):
@@ -83,7 +85,7 @@ def noSlug(tvdbid):
 	if not inerror:
 		logger.log(u"Sorry i cant find any slugs for {0}, go to cytec.us/tvdb to add more shows".format(tvdbid), logger.ERROR)
 		updateSlugs()
-		add_to_error = error.insert(tvdbid=tvdbid).execute()
+		add_to_error = error.insert().values(tvdbid=tvdbid).execute()
 
 def fsGetDates(tvdbid):
 	myrequest = slugs.select(slugs.c.id == tvdbid).execute().fetchone()
@@ -91,7 +93,7 @@ def fsGetDates(tvdbid):
 		#check if it is in error db:
 		noSlug(tvdbid)
 	
-	if myrequest:
+	if myrequest.fernsehserien:
 		#fernseserien.de first...
 		url = "http://www.fernsehserien.de/{0}/episodenguide".format(myrequest.fernsehserien)
 		r = requests.get(url)
@@ -122,7 +124,7 @@ def sjGetDates(tvdbid):
 	if not myrequest:
 		noSlug(tvdbid)
 	
-	if myrequest:
+	if myrequest.serienjunkies:
 		#serienjunkies.de first...
 		url = "http://www.serienjunkies.de/{0}/alle-serien-staffeln.html".format(myrequest.serienjunkies)
 		r = requests.get(url)
@@ -130,17 +132,20 @@ def sjGetDates(tvdbid):
 			#print r.text
 			soup = BeautifulSoup(r.text)
 			eplist = soup.find("table", {"class": "eplist"})
-			for row in eplist:
-				info = row.find_all("td", {"class": re.compile("^e")})
-				if info:
-					season, episode = info[0].text.split("x")
-					name = info[3].text
-					date = info[4].text
-					serieselement = { "tvdbid": tvdbid, "name": name, "firstaired": date, "episode": episode, "season": season }
-					updateEpisode(serieselement)
-				else:
-					#print "Something went wrong... unable to parse: {0}".format(row)
-					logger.log(u"Something went wrong... unable to parse: {0}".format(row), logger.WARNING)
+			try:
+				for row in eplist:
+					info = row.find_all("td", {"class": re.compile("^e")})
+					if info:
+						season, episode = info[0].text.split("x")
+						name = info[3].text
+						date = info[4].text
+						serieselement = { "tvdbid": tvdbid, "name": name, "firstaired": date, "episode": episode, "season": season }
+						updateEpisode(serieselement)
+					else:
+						#print "Something went wrong... unable to parse: {0}".format(row)
+						logger.log(u"Something went wrong... unable to parse: {0}".format(row), logger.WARNING)
+			except:
+				logger.log(u"Unable to parse Serienjunkies informations for {0}".format(tvdbid), logger.ERROR)
 		else:
 			#print "Seems there was an error with the url {0}".format(url)
 			logger.log(u"Seems there was an error with the url {0}".format(url), logger.WARNING)
