@@ -70,7 +70,7 @@ class NZBMatrixProvider(generic.NZBProvider):
                   "username": sickbeard.NZBMATRIX_USERNAME,
                   "apikey": sickbeard.NZBMATRIX_APIKEY,
                   "subcat": "6,41",
-                  "english": 1,
+                  "english": 0,
                   "ssl": 1,
                   "scenename": 1}
 
