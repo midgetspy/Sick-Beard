@@ -60,6 +60,11 @@ from lib.configobj import ConfigObj
 signal.signal(signal.SIGINT, sickbeard.sig_handler)
 signal.signal(signal.SIGTERM, sickbeard.sig_handler)
 
+# Root path
+base_path = dirname(os.path.abspath(__file__))
+
+# Insert local directories into path
+sys.path.insert(0, os.path.join(base_path, 'lib'))
 
 def loadShowsFromDB():
     """
