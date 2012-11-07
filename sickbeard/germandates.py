@@ -18,6 +18,10 @@ airdates = Table('airdates', metadata,
 	Column('episode', Integer),
 	)
 
+error = Table('error', metadata,
+	Column('tvdbid', Integer, ForeignKey('airdates.tvdbid'))
+	)
+
 slugs = Table('slugs', metadata,
 	Column('id', Integer, primary_key=True, unique=True),
 	Column('name', String),
@@ -74,15 +78,18 @@ def updateEpisode(serieselement):
 
 #next try to get infos from an given tvdbid
 #tvdbid=72023
-
+def noSlug(tvdbid):
+	inerror = error.select(error.c.tvdbid == tvdbid).execute().fetchone()
+	if not inerror:
+		logger.log(u"Sorry i cant find any slugs for {0}, go to cytec.us/tvdb to add more shows".format(tvdbid), logger.ERROR)
+		updateSlugs()
+		add_to_error = error.insert(tvdbid=tvdbid).execute()
 
 def fsGetDates(tvdbid):
 	myrequest = slugs.select(slugs.c.id == tvdbid).execute().fetchone()
 	if not myrequest:
-		# print "Sorry nothing found for this slug..."
-		# print "Got to cytec.us/tvdb to add some..."
-		logger.log(u"Sorry i cant find any slugs for {0}, go to cytec.us/tvdb to add more shows".format(tvdbid), logger.ERROR)
-		updateSlugs()
+		#check if it is in error db:
+		noSlug(tvdbid)
 	
 	if myrequest:
 		#fernseserien.de first...
@@ -113,8 +120,7 @@ def fsGetDates(tvdbid):
 def sjGetDates(tvdbid):
 	myrequest = slugs.select(slugs.c.id == tvdbid).execute().fetchone()
 	if not myrequest:
-		logger.log(u"Sorry i cant find any slugs for {0}, go to cytec.us/tvdb to add more shows".format(tvdbid), logger.ERROR)
-		updateSlugs()
+		noSlug(tvdbid)
 	
 	if myrequest:
 		#serienjunkies.de first...
