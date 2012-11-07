@@ -160,7 +160,7 @@ class NZBMatrixCache(tvcache.TVCache):
                    'username': sickbeard.NZBMATRIX_USERNAME,
                    'apikey': sickbeard.NZBMATRIX_APIKEY,
                    'maxage': sickbeard.USENET_RETENTION,
-                   'english': 1,
+                   'english': 0,
                    'ssl': 1,
                    'scenename': 1,
                    'subcat': '6,41'}
