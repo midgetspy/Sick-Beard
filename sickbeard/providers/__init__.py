@@ -71,7 +71,7 @@ def getNewznabProviderList(data):
         if curDefault.key == '0':
             curDefault.key = ''
             curDefault.needs_auth = False
-
+               
         if curDefault.name not in providerDict:
             curDefault.default = True
             providerList.append(curDefault)
@@ -109,7 +109,7 @@ def makeNewznabProvider(configString):
     return newProvider
 
 def getDefaultNewznabProviders():
-    return 'Sick Beard Index|http://momo.sickbeard.com/|0|5000|0!!!NZBs.org|http://beta.nzbs.org/|0|5000|0'
+    return 'Sick Beard Index|http://lolo.sickbeard.com/|0|5000|0!!!NZBs.org|http://beta.nzbs.org/|0|5000|0'
 
 
 

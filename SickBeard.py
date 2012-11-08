@@ -19,7 +19,11 @@
 
 # Check needed software dependencies to nudge users to fix their setup
 import sys, os.path
-sys.path.append(os.path.abspath('lib'))
+# Root path
+base_path = os.path.dirname(os.path.abspath(__file__))
+
+# Insert local directories into path
+sys.path.append(os.path.join(base_path, 'lib'))
 
 if sys.version_info < (2, 5):
     print "Sorry, requires Python 2.5, 2.6 or 2.7."
