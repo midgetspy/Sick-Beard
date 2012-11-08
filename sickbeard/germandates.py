@@ -1,7 +1,8 @@
 import re
 from bs4 import BeautifulSoup
-from lib import requests
-from lib.sqlalchemy import *
+
+import requests
+from sqlalchemy import *
 from sickbeard import logger
 from datetime import date, timedelta
 
