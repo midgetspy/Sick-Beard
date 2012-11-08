@@ -56,10 +56,7 @@ def isValidLanguage(language):
     return subliminal.language.language_list(language)
 
 def getLanguageName(selectLang):
-    for lang in subliminal.language.LANGUAGES:
-        if selectLang == lang[0]:
-            return lang[3]
-    return 'Error'
+    return subliminal.language.Language(selectLang).name
 
 def wantedLanguages(sqlLike = False):
     if sickbeard.SUBTITLES_MULTI:
