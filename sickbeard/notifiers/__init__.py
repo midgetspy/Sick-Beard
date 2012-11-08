@@ -20,61 +20,64 @@ import sickbeard
 
 import xbmc
 import plex
-import growl
-import prowl
-import tweet
-from . import libnotify
-import notifo
-import boxcar
-import pushover
 import nmj
 import synoindex
-import trakt
 import pytivo
+
+import growl
+import prowl
+import notifo
+from . import libnotify
+import pushover
+import boxcar
 import nma
+
+import tweet
+import trakt
 
 from sickbeard.common import *
 
+# home theater
 xbmc_notifier = xbmc.XBMCNotifier()
 plex_notifier = plex.PLEXNotifier()
-growl_notifier = growl.GrowlNotifier()
-prowl_notifier = prowl.ProwlNotifier()
-twitter_notifier = tweet.TwitterNotifier()
-notifo_notifier = notifo.NotifoNotifier()
-boxcar_notifier = boxcar.BoxcarNotifier()
-pushover_notifier = pushover.PushoverNotifier()
-libnotify_notifier = libnotify.LibnotifyNotifier()
 nmj_notifier = nmj.NMJNotifier()
 synoindex_notifier = synoindex.synoIndexNotifier()
-trakt_notifier = trakt.TraktNotifier()
 pytivo_notifier = pytivo.pyTivoNotifier()
+# devices
+growl_notifier = growl.GrowlNotifier()
+prowl_notifier = prowl.ProwlNotifier()
+notifo_notifier = notifo.NotifoNotifier()
+libnotify_notifier = libnotify.LibnotifyNotifier()
+pushover_notifier = pushover.PushoverNotifier()
+boxcar_notifier = boxcar.BoxcarNotifier()
 nma_notifier = nma.NMA_Notifier()
+# online
+twitter_notifier = tweet.TwitterNotifier()
+trakt_notifier = trakt.TraktNotifier()
 
 notifiers = [
-    # Libnotify notifier goes first because it doesn't involve blocking on
-    # network activity.
-    libnotify_notifier,
+    libnotify_notifier, # Libnotify notifier goes first because it doesn't involve blocking on network activity.
     xbmc_notifier,
     plex_notifier,
-    growl_notifier,
-    prowl_notifier,
-    twitter_notifier,
     nmj_notifier,
     synoindex_notifier,
-    boxcar_notifier,
-    pushover_notifier,
-    trakt_notifier,
     pytivo_notifier,
+    growl_notifier,
+    prowl_notifier,
+    notifo_notifier,
+    pushover_notifier,
+    boxcar_notifier,
     nma_notifier,
+    twitter_notifier,
+    trakt_notifier,
 ]
+
 
 def notify_download(ep_name):
     for n in notifiers:
         n.notify_download(ep_name)
-    notifo_notifier.notify_download(ep_name)
+
 
 def notify_snatch(ep_name):
     for n in notifiers:
         n.notify_snatch(ep_name)
-    notifo_notifier.notify_snatch(ep_name)
-
