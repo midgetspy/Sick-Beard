@@ -18,7 +18,9 @@
 # along with Sick Beard.  If not, see <http://www.gnu.org/licenses/>.
 
 # Check needed software dependencies to nudge users to fix their setup
-import sys
+import sys, os.path
+sys.path.append(os.path.abspath('lib'))
+
 if sys.version_info < (2, 5):
     print "Sorry, requires Python 2.5, 2.6 or 2.7."
     sys.exit(1)
@@ -60,11 +62,6 @@ from lib.configobj import ConfigObj
 signal.signal(signal.SIGINT, sickbeard.sig_handler)
 signal.signal(signal.SIGTERM, sickbeard.sig_handler)
 
-# Root path
-base_path = os.path.dirname(os.path.abspath(__file__))
-
-# Insert local directories into path
-sys.path.insert(0, os.path.join(base_path, 'lib'))
 
 def loadShowsFromDB():
     """
