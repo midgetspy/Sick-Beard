@@ -327,7 +327,7 @@ class XBMCNotifier:
             try:
                 response = urllib2.urlopen(req)
             except urllib2.URLError, e:
-                logger.log(u"Error while trying to retrieve API version: " + ex(e), logger.WARNING)
+                logger.log(u"Error while trying to retrieve XBMC API version for " + host + ": " + ex(e), logger.WARNING)
                 return False
 
             # parse the json result
