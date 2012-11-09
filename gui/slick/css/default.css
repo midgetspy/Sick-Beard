@@ -391,14 +391,16 @@ input:not(.btn){margin-right:6px;margin-top:5px;padding-top:4px;padding-bottom:4
   line-height: normal;
 }
 .sickbeardTable td.status_column {
+  font-weight: bold;
   line-height: 20px;
   text-align: center;
   width: 12%;
+	color: #555555;
 }
 
 .sickbeardTable td.subtitles_column {
   float:  right;
-  padding-top: 9px;
+  padding-top: 13px;
   width: 100%
 }
 

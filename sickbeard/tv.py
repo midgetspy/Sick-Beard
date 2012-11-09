@@ -1793,28 +1793,11 @@ class TVEpisode(object):
         in the naming settings.
         """
 
-        REMOTE_DBG = False
-        
-        if REMOTE_DBG:
-                # Make pydev debugger works for auto reload.
-                # Note pydevd module need to be copied in XBMC\system\python\Lib\pysrc
-            try:
-                import pysrc.pydevd as pydevd
-                # stdoutToServer and stderrToServer redirect stdout and stderr to eclipse console
-                pydevd.settrace('localhost', port=5678, stdoutToServer=True, stderrToServer=True)
-            except ImportError:
-                sys.stderr.write("Error: " +
-                        "You must add org.python.pydev.debug.pysrc to your PYTHONPATH.")
-                sys.exit(1) 
-
-        if not ek.ek(os.path.isfile, self.location):
-            logger.log(u"Can't perform rename on " + self.location + " when it doesn't exist, skipping", logger.WARNING)
-            return
-
         proper_path = self.proper_path()
         absolute_proper_path = ek.ek(os.path.join, self.show.location, proper_path)
         absolute_current_path_no_ext, file_ext = os.path.splitext(self.location)
-
+        related_subs = []
+        
         current_path = absolute_current_path_no_ext
 
         if absolute_current_path_no_ext.startswith(self.show.location):
