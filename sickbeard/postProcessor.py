@@ -224,12 +224,9 @@ class PostProcessor(object):
 
         file_list = [file_path]
         if associated_files:
-            file_list = self._list_associated_files(file_path)
-        elif subtitles:
-            file_list = self._list_associated_files(file_path, True)
-            file_list.append(file_path)
-        else:
             file_list = file_list + self._list_associated_files(file_path)
+        elif subtitles:
+            file_list = file_list + self._list_associated_files(file_path, True)
 
         if not file_list:
             self._log(u"There were no files associated with " + file_path + ", not moving anything", logger.DEBUG)
