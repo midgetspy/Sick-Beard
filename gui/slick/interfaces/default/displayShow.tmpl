@@ -11,7 +11,7 @@
 #set $exceptions_string = " | ".join($show.exceptions)
 #include $os.path.join($sickbeard.PROG_DIR, "gui/slick/interfaces/default/inc_top.tmpl")
 
-<script type="text/javascript" src="$sbRoot/js/jquery.bookmarkscroll.js?$sbPID"></script>
+<script type="text/javascript" src="$sbRoot/js/lib/jquery.bookmarkscroll.js?$sbPID"></script>
 
 
 #if $show_message:
@@ -180,7 +180,7 @@ $Quality.DOWNLOADED.sort()
     <td align="center">$epResult["episode"]</td>
     <td class="title">
     #if $epResult["description"] != "" and $epResult["description"] != None:
-    <img style="padding-top: 2px;" src="$sbRoot/images/info32.png" height="16" class="plotInfo" alt="" id="plot_info_$show.tvdbid<%="_"+str(epResult["season"])+"_"+str(epResult["episode"])%>" />
+    <img style="padding-top: 3px;" src="$sbRoot/images/info32.png" height="16" class="plotInfo" alt="" id="plot_info_$show.tvdbid<%="_"+str(epResult["season"])+"_"+str(epResult["episode"])%>" />
 	#end if    
     $epResult["name"]
 </td>
@@ -194,7 +194,7 @@ $epLoc
 	</small>
     </td>
 #if $sickbeard.USE_SUBTITLES and $show.subtitles:
-    <td class="subtitles_column" align="center">&nbsp;
+    <td class="subtitles_column" align="left">&nbsp;
     #if $epResult["subtitles"]:
         #for $sub_lang in subliminal.language.language_list($epResult["subtitles"].split(',')):
             <img src="$sbRoot/images/flags/${sub_lang.alpha2}.png" width="16" height="11" alt="${sub_lang}" />&nbsp;

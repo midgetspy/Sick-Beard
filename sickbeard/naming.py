@@ -114,6 +114,10 @@ def validate_name(pattern, multi=None, file_only=False, abd=False):
     if not file_only:
         new_name = ek.ek(os.path.join, new_path, new_name)
 
+    if not new_name:
+        logger.log(u"Unable to create a name out of "+pattern, logger.DEBUG)    
+        return False
+
     logger.log(u"Trying to parse "+new_name, logger.DEBUG)
 
     try:

@@ -70,7 +70,7 @@
 \$(document).ready(function(){ 
 
     \$("#showListTable:has(tbody tr)").tablesorter({
-        sortList: [[6,2],[2,0]],
+        sortList: [[6,0],[2,0]],
         textExtraction: {
             4: function(node) { return \$(node).find("span").text(); },
             6: function(node) { return \$(node).find("img").attr("alt"); }

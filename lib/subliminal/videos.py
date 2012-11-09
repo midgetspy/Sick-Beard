@@ -141,8 +141,8 @@ class Video(object):
         if folder == '':
             folder = '.'
         existing = [f for f in os.listdir(folder) if f.startswith(basename)]
-        if sickbeard.SUBTITLES_SUBDIR:
-            subsDir = ek.ek(os.path.join, folder, sickbeard.SUBTITLES_SUBDIR)
+        if sickbeard.SUBTITLES_DIR:
+            subsDir = ek.ek(os.path.join, folder, sickbeard.SUBTITLES_DIR)
             if ek.ek(os.path.isdir, subsDir):
                 existing.extend([f for f in os.listdir(subsDir) if f.startswith(basename)])
         for path in existing:

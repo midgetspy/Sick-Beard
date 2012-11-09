@@ -152,7 +152,7 @@ class WindowsUpdateManager(UpdateManager):
             return True
 
     def set_newest_text(self):
-        new_str = 'There is a <a href="'+self.gc_url+'" onclick="window.open(this.href); return false;">newer version available</a> (build '+str(self._newest_version)+')'
+        new_str = 'There is a <a class="update" href="'+self.gc_url+'" onclick="window.open(this.href); return false;">newer version available</a> (build '+str(self._newest_version)+')'
         new_str += "&mdash; <a class=""update"" href=\""+self.get_update_url()+"\">Update Now</a>"
         sickbeard.NEWEST_VERSION_STRING = new_str
 
@@ -217,7 +217,7 @@ class GitUpdateManager(UpdateManager):
         self.branch = self._find_git_branch()
 
     def _git_error(self):
-        error_message = 'Unable to find your git executable - either delete your .git folder and run from source OR <a href="http://code.google.com/p/sickbeard/wiki/AdvancedSettings" onclick="window.open(this.href); return false;">set git_path in your config.ini</a> to enable updates.'
+        error_message = 'Unable to find your git executable - either delete your .git folder and run from source OR <a class="update" href="http://code.google.com/p/sickbeard/wiki/AdvancedSettings" onclick="window.open(this.href); return false;">set git_path in your config.ini</a> to enable updates.'
         sickbeard.NEWEST_VERSION_STRING = error_message
         
         return None
@@ -311,7 +311,7 @@ class GitUpdateManager(UpdateManager):
         gh = github.GitHub()
 
         # find newest commit
-        for curCommit in gh.commits('Pistachitos', 'Sick-Beard', version.SICKBEARD_VERSION):
+        for curCommit in gh.commits('mr-orange', 'Sick-Beard', version.SICKBEARD_VERSION):
 
             if not self._newest_commit_hash:
                 self._newest_commit_hash = curCommit['sha']
@@ -340,11 +340,11 @@ class GitUpdateManager(UpdateManager):
             return
 
         if self._newest_commit_hash:
-            url = 'http://github.com/Pistachitos/Sick-Beard/compare/'+self._cur_commit_hash+'...'+self._newest_commit_hash
+            url = 'http://github.com/mr-orange/Sick-Beard/compare/'+self._cur_commit_hash+'...'+self._newest_commit_hash
         else:
-            url = 'http://github.com/Pistachitos/Sick-Beard/commits/'
+            url = 'http://github.com/mr-orange/Sick-Beard/commits/'
 
-        new_str = 'There is a <a href="'+url+'" onclick="window.open(this.href); return false;">newer version available</a> ('+message+')'
+        new_str = 'There is a <a class="update" href="'+url+'" onclick="window.open(this.href); return false;">newer version available</a> ('+message+')'
         new_str += "&mdash; <a class=""update"" href=\""+self.get_update_url()+"\">Update Now</a>"
 
         sickbeard.NEWEST_VERSION_STRING = new_str
@@ -448,7 +448,7 @@ class SourceUpdateManager(GitUpdateManager):
         Downloads the latest source tarball from github and installs it over the existing version.
         """
 
-        tar_download_url = 'https://github.com/Pistachitos/Sick-Beard/tarball/'+version.SICKBEARD_VERSION
+        tar_download_url = 'https://github.com/mr-orange/Sick-Beard/tarball/'+version.SICKBEARD_VERSION
         sb_update_dir = os.path.join(sickbeard.PROG_DIR, 'sb-update')
         version_path = os.path.join(sickbeard.PROG_DIR, 'version.txt')
 

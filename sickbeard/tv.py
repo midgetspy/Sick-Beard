@@ -837,9 +837,9 @@ class TVShow(object):
                 episode = self.makeEpFromFile(episodeLoc['location']);
                 subtitles = episode.downloadSubtitles()
         
-                if sickbeard.SUBTITLES_SUBDIR:
+                if sickbeard.SUBTITLES_DIR:
                     for video in subtitles:
-                        subs_new_path = ek.ek(os.path.join, os.path.dirname(video.path), sickbeard.SUBTITLES_SUBDIR)
+                        subs_new_path = ek.ek(os.path.join, os.path.dirname(video.path), sickbeard.SUBTITLES_DIR)
                         if not ek.ek(os.path.isdir, subs_new_path):
                             ek.ek(os.mkdir, subs_new_path)
                         
@@ -1057,7 +1057,7 @@ class TVEpisode(object):
         logger.log(str(self.show.tvdbid) + ": Downloading subtitles for episode " + str(self.season) + "x" + str(self.episode), logger.DEBUG)
         
         try:
-            subtitles = subliminal.download_subtitles([self.location], languages=sickbeard.SUBTITLES_LANGUAGES, services=sickbeard.subtitles.getEnabledServiceList(), force=False, multi=sickbeard.SUBTITLES_MULTI, cache_dir=sickbeard.CACHE_DIR)
+            subtitles = subliminal.download_subtitles([self.location], languages=sickbeard.SUBTITLES_LANGUAGES, services=sickbeard.subtitles.getEnabledServiceList(), force=False, multi=True, cache_dir=sickbeard.CACHE_DIR)
             
         except Exception as e:
             logger.log("Error occurred when downloading subtitles: " + str(e), logger.DEBUG)
@@ -1793,6 +1793,20 @@ class TVEpisode(object):
         in the naming settings.
         """
 
+        REMOTE_DBG = False
+        
+        if REMOTE_DBG:
+                # Make pydev debugger works for auto reload.
+                # Note pydevd module need to be copied in XBMC\system\python\Lib\pysrc
+            try:
+                import pysrc.pydevd as pydevd
+                # stdoutToServer and stderrToServer redirect stdout and stderr to eclipse console
+                pydevd.settrace('localhost', port=5678, stdoutToServer=True, stderrToServer=True)
+            except ImportError:
+                sys.stderr.write("Error: " +
+                        "You must add org.python.pydev.debug.pysrc to your PYTHONPATH.")
+                sys.exit(1) 
+
         if not ek.ek(os.path.isfile, self.location):
             logger.log(u"Can't perform rename on " + self.location + " when it doesn't exist, skipping", logger.WARNING)
             return
@@ -1814,6 +1828,11 @@ class TVEpisode(object):
             return
 
         related_files = postProcessor.PostProcessor(self.location)._list_associated_files(self.location)
+
+        if self.show.subtitles and sickbeard.SUBTITLES_DIR != '':
+            related_subs = postProcessor.PostProcessor(self.location)._list_associated_files(sickbeard.SUBTITLES_DIR, subtitles_only=True)
+            absolute_proper_subs_path = ek.ek(os.path.join, sickbeard.SUBTITLES_DIR, self.formatted_filename())
+            
         logger.log(u"Files associated to " + self.location + ": " + str(related_files), logger.DEBUG)
 
         # move the ep file
@@ -1824,6 +1843,11 @@ class TVEpisode(object):
             cur_result = helpers.rename_ep_file(cur_related_file, absolute_proper_path)
             if cur_result == False:
                 logger.log(str(self.tvdbid) + ": Unable to rename file " + cur_related_file, logger.ERROR)
+
+        for cur_related_sub in related_subs:
+            cur_result = helpers.rename_ep_file(cur_related_sub, absolute_proper_subs_path)
+            if cur_result == False:
+                logger.log(str(self.tvdbid) + ": Unable to rename file " + cur_related_sub, logger.ERROR)
 
         # save the ep
         with self.lock:

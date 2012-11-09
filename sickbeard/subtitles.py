@@ -37,7 +37,7 @@ def sortedServiceList():
     curIndex = 0
     for curService in sickbeard.SUBTITLES_SERVICES_LIST:
         if curService in servicesMapping:
-            curServiceDict = {'id': curService, 'image': curService+'.png', 'name': servicesMapping[curService], 'enabled': sickbeard.SUBTITLES_SERVICES_ENABLED[curIndex] == 1, 'api_based': servicesMapping[curService] in subliminal.SERVICES, 'url': __import__('lib.subliminal.services.' + curService, globals=globals(), locals=locals(), fromlist=['Service'], level=-1).Service.site_url}
+            curServiceDict = {'id': curService, 'image': curService+'.png', 'name': servicesMapping[curService], 'enabled': sickbeard.SUBTITLES_SERVICES_ENABLED[curIndex] == 1, 'api_based': __import__('lib.subliminal.services.' + curService, globals=globals(), locals=locals(), fromlist=['Service'], level=-1).Service.api_based, 'url': __import__('lib.subliminal.services.' + curService, globals=globals(), locals=locals(), fromlist=['Service'], level=-1).Service.site_url}
             newList.append(curServiceDict)
         curIndex += 1
 
@@ -59,10 +59,7 @@ def getLanguageName(selectLang):
     return subliminal.language.Language(selectLang).name
 
 def wantedLanguages(sqlLike = False):
-    if sickbeard.SUBTITLES_MULTI:
-        wantedLanguages = sorted(sickbeard.SUBTITLES_LANGUAGES)
-    else:
-        wantedLanguages = [SINGLE]
+    wantedLanguages = sorted(sickbeard.SUBTITLES_LANGUAGES)
     if sqlLike:
         return '%' + ','.join(wantedLanguages) + '%'
     return wantedLanguages
@@ -140,11 +137,11 @@ class SubtitlesFinder():
             return
 
         # download subtitles
-        subtitles = subliminal.download_subtitles(locations, cache_dir=sickbeard.CACHE_DIR, multi=sickbeard.SUBTITLES_MULTI, languages=sickbeard.SUBTITLES_LANGUAGES, services=sickbeard.subtitles.getEnabledServiceList())
+        subtitles = subliminal.download_subtitles(locations, cache_dir=sickbeard.CACHE_DIR, multi=True, languages=sickbeard.SUBTITLES_LANGUAGES, services=sickbeard.subtitles.getEnabledServiceList())
 
-        if sickbeard.SUBTITLES_SUBDIR:
+        if sickbeard.SUBTITLES_DIR:
             for video in subtitles:
-                subsDir = ek.ek(os.path.join, os.path.dirname(video.path), sickbeard.SUBTITLES_SUBDIR)
+                subsDir = ek.ek(os.path.join, os.path.dirname(video.path), sickbeard.SUBTITLES_DIR)
                 if not ek.ek(os.path.isdir, subsDir):
                     ek.ek(os.mkdir, subsDir)
                 

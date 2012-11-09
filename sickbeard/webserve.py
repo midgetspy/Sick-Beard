@@ -757,6 +757,7 @@ ConfigMenu = [
     { 'title': 'General',           'path': 'config/general/'          },
     { 'title': 'Search Settings',   'path': 'config/search/'           },
     { 'title': 'Search Providers',  'path': 'config/providers/'        },
+    { 'title': 'Subtitles Settings','path': 'config/subtitles/'        },
     { 'title': 'Post Processing',   'path': 'config/postProcessing/'   },
     { 'title': 'Notifications',     'path': 'config/notifications/'    },
 ]
@@ -847,9 +848,9 @@ class ConfigGeneral:
             web_log = 0
 
         if update_shows_on_start == "on":
-           update_shows_on_start = 1
+            update_shows_on_start = 1
         else:
-           update_shows_on_start = 0
+            update_shows_on_start = 0
 
         if launch_browser == "on":
             launch_browser = 1
@@ -922,8 +923,8 @@ class ConfigSearch:
     def saveSearch(self, use_nzbs=None, use_torrents=None, nzb_dir=None, sab_username=None, sab_password=None,
                        sab_apikey=None, sab_category=None, sab_host=None, nzbget_password=None, nzbget_category=None, nzbget_host=None,
                        nzb_method=None, torrent_method=None, usenet_retention=None, search_frequency=None, download_propers=None,
-                       torrent_dir=None, torrent_username=None, torrent_password=None, torrent_host=None, torrent_path=None, torrent_ratio=None, torrent_paused=None,
-                       use_subtitles=None, subtitles_languages=None, subtitles_multi=None, subtitles_subdir=None):
+                       torrent_dir=None, torrent_username=None, torrent_password=None, torrent_host=None, torrent_path=None, torrent_ratio=None, torrent_paused=None):
+#                       use_subtitles=None, subtitles_languages=None, subtitles_multi=None, subtitles_dir=None):
 
 
         results = []
@@ -950,24 +951,6 @@ class ConfigSearch:
             use_torrents = 1
         else:
             use_torrents = 0
-            
-        if use_subtitles == "on":
-            use_subtitles = 1
-            if sickbeard.subtitlesFinderScheduler.thread == None or not sickbeard.subtitlesFinderScheduler.thread.isAlive():
-                sickbeard.subtitlesFinderScheduler.thread.start()
-        else:
-            use_subtitles = 0
-            sickbeard.subtitlesFinderScheduler.abort = True
-            logger.log(u"Waiting for the SUBTITLESFINDER thread to exit")
-            try:
-                sickbeard.subtitlesFinderScheduler.thread.join(5)
-            except:
-                pass
-            
-        if subtitles_multi == "on":
-            subtitles_multi = 1
-        else:
-            subtitles_multi = 0
 
         if usenet_retention == None:
             usenet_retention = 200
@@ -1015,11 +998,6 @@ class ConfigSearch:
             torrent_host = torrent_host + '/'
 
         sickbeard.TORRENT_HOST = torrent_host
-        
-        sickbeard.USE_SUBTITLES = use_subtitles
-        sickbeard.SUBTITLES_LANGUAGES = [lang.alpha2 for lang in subtitles.isValidLanguage(subtitles_languages.replace(' ', '').split(','))] if subtitles_languages != ''  else ''
-        sickbeard.SUBTITLES_MULTI = subtitles_multi
-        sickbeard.SUBTITLES_SUBDIR = subtitles_subdir
 
         sickbeard.save_config()
 
@@ -1240,7 +1218,7 @@ class ConfigProviders:
                       dtt_norar = None, dtt_single = None,
                       thepiratebay_trusted=None, thepiratebay_proxy=None, thepiratebay_proxy_url=None,
                       newzbin_username=None, newzbin_password=None,
-                      provider_order=None, service_order=None):
+                      provider_order=None):
 
         results = []
 
@@ -1358,18 +1336,6 @@ class ConfigProviders:
         sickbeard.NEWZBIN_PASSWORD = newzbin_password
 
         sickbeard.PROVIDER_ORDER = provider_list
-        
-        # Subtitles services
-        services_str_list = service_order.split()
-        subtitles_services_list = []
-        subtitles_services_enabled = []
-        for curServiceStr in services_str_list:
-            curService, curEnabled = curServiceStr.split(':')
-            subtitles_services_list.append(curService)
-            subtitles_services_enabled.append(int(curEnabled))
-            
-        sickbeard.SUBTITLES_SERVICES_LIST = subtitles_services_list
-        sickbeard.SUBTITLES_SERVICES_ENABLED = subtitles_services_enabled
 
         sickbeard.save_config()
 
@@ -1775,6 +1741,58 @@ class ConfigNotifications:
 
         redirect("/config/notifications/")
 
+class ConfigSubtitles:
+
+    @cherrypy.expose
+    def index(self):
+        t = PageTemplate(file="config_subtitles.tmpl")
+        t.submenu = ConfigMenu
+        return _munge(t)
+
+    @cherrypy.expose
+    def saveSubtitles(self, use_subtitles=None, subtitles_plugins=None, subtitles_languages=None, subtitles_dir=None, service_order=None):
+        results = []
+
+        if use_subtitles == "on":
+            use_subtitles = 1
+            if sickbeard.subtitlesFinderScheduler.thread == None or not sickbeard.subtitlesFinderScheduler.thread.isAlive():
+                sickbeard.subtitlesFinderScheduler.thread.start()
+        else:
+            use_subtitles = 0
+            sickbeard.subtitlesFinderScheduler.abort = True
+            logger.log(u"Waiting for the SUBTITLESFINDER thread to exit")
+            try:
+                sickbeard.subtitlesFinderScheduler.thread.join(5)
+            except:
+                pass
+
+        sickbeard.USE_SUBTITLES = use_subtitles
+        sickbeard.SUBTITLES_LANGUAGES = [lang.alpha2 for lang in subtitles.isValidLanguage(subtitles_languages.replace(' ', '').split(','))] if subtitles_languages != ''  else ''
+        sickbeard.SUBTITLES_SUBDIR = subtitles_dir
+
+        # Subtitles services
+        services_str_list = service_order.split()
+        subtitles_services_list = []
+        subtitles_services_enabled = []
+        for curServiceStr in services_str_list:
+            curService, curEnabled = curServiceStr.split(':')
+            subtitles_services_list.append(curService)
+            subtitles_services_enabled.append(int(curEnabled))
+            
+        sickbeard.SUBTITLES_SERVICES_LIST = subtitles_services_list
+        sickbeard.SUBTITLES_SERVICES_ENABLED = subtitles_services_enabled
+
+        sickbeard.save_config()
+
+        if len(results) > 0:
+            for x in results:
+                logger.log(x, logger.ERROR)
+            ui.notifications.error('Error(s) Saving Configuration',
+                        '<br />\n'.join(results))
+        else:
+            ui.notifications.message('Configuration Saved', ek.ek(os.path.join, sickbeard.CONFIG_FILE) )
+
+        redirect("/config/subtitles/")
 
 class Config:
 
@@ -1815,6 +1833,8 @@ class Config:
     providers = ConfigProviders()
 
     notifications = ConfigNotifications()
+
+    subtitles = ConfigSubtitles()
 
 def haveXBMC():
     return sickbeard.XBMC_HOST
@@ -3018,21 +3038,17 @@ class Home:
         for cur_ep_obj in ep_obj_list:
             # Only want to rename if we have a location
             if cur_ep_obj.location:
+                ep_obj_rename_list.append(cur_ep_obj)
                 if cur_ep_obj.relatedEps:
-                    # do we have one of multi-episodes in the rename list already
-                    have_already = False
-                    for cur_related_ep in cur_ep_obj.relatedEps + [cur_ep_obj]:
-                        if cur_related_ep in ep_obj_rename_list:
-                            have_already = True
-                            break
-                        if not have_already:
+                    for cur_related_ep in cur_ep_obj.relatedEps:
+                        if cur_related_ep not in ep_obj_rename_list:
                             ep_obj_rename_list.append(cur_ep_obj)
-                else:
-                    ep_obj_rename_list.append(cur_ep_obj)
+#                else:
+#                    ep_obj_rename_list.append(cur_ep_obj)
 
-        if ep_obj_rename_list:
-            # present season DESC episode DESC on screen
-            ep_obj_rename_list.reverse()
+            if ep_obj_rename_list:
+                # present season DESC episode DESC on screen
+                ep_obj_rename_list.reverse()
 
         t = PageTemplate(file="testRename.tmpl")
         t.submenu = [{'title': 'Edit', 'path': 'home/editShow?show=%d' % showObj.tvdbid}]

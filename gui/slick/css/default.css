@@ -390,10 +390,18 @@ input:not(.btn){margin-right:6px;margin-top:5px;padding-top:4px;padding-bottom:4
   font-size: 14px;
   line-height: normal;
 }
-/*.sickbeardTable td.status_column {
-  line-height: normal;
+.sickbeardTable td.status_column {
+  line-height: 20px;
   text-align: center;
-}*/
+  width: 12%;
+}
+
+.sickbeardTable td.subtitles_column {
+  float:  right;
+  padding-top: 9px;
+  width: 100%
+}
+
 .sickbeardTable td small {
   font-size: 11px;
   font-style: italic;
@@ -408,6 +416,7 @@ input:not(.btn){margin-right:6px;margin-top:5px;padding-top:4px;padding-bottom:4
   float: right;
   font-weight: 700;
   position: relative;
+  padding-left: 2px;
 }
 
 .sickbeardTable td.plotInfo {

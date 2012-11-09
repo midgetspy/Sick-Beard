@@ -15,7 +15,6 @@
 	<h1 class="title">$title</h1>
 #end if
 <script type="text/javascript" src="$sbRoot/js/configProviders.js?$sbPID"></script>
-<script type="text/javascript" src="$sbRoot/js/configServices.js?$sbPID"></script>
 <script type="text/javascript" src="$sbRoot/js/config.js?$sbPID"></script>
 <script type="text/javascript" charset="utf-8">
 <!--
@@ -40,9 +39,6 @@ var show_nzb_providers = #if $sickbeard.USE_NZBS then "true" else "false"#;
                 	<li><a href="#core-component-group2">Configure Built-In Providers</a></li>
                   #if $sickbeard.USE_NZBS
                 	<li><a href="#core-component-group3">Configure Custom Newznab Providers</a></li>
-                  #end if
-                  #if $sickbeard.USE_SUBTITLES
-                    <li><a href="#core-component-group4">Configure Subtitles Providers</a></li>
                   #end if
                 </ul>
                 
@@ -340,41 +336,7 @@ var show_nzb_providers = #if $sickbeard.USE_NZBS then "true" else "false"#;
                     </fieldset>
                 </div><!-- /component-group3 //-->
 #end if
-#if $sickbeard.USE_SUBTITLES:
-            <div id="core-component-group4" class="component-group clearfix">
-
-                    <div class="component-group-desc">
-                        <h3>Subtitles Provider Priorities</h3>
-                        <p>Check off and drag the subtitles providers into the order you want them to be used.</p>
-                        <p>At least one provider is required but two are recommended.</p>
-
-                        <div>
-                            <h4 class="note">*</h4><p class="note">Provider does not use api to download subtitles.</p>
-                        </div>
-                    </div>
-
-                    <fieldset class="component-group-list" style="margin-left: 50px; margin-top:36px">
-                        <ul id="service_order_list">
-                        #for $curService in $sickbeard.subtitles.sortedServiceList():
-                            #set $curName = $curService.id
-                          <li class="ui-state-default" id="$curName">
-                            <input type="checkbox" id="enable_$curName" class="service_enabler" #if $curService.enabled then "checked=\"checked\"" else ""#/>
-                            <a href="$curService.url" class="imgLink" target="_new">
-                                <img src="$sbRoot/images/subtitles/$curService.image" alt="$curService.name" title="$curService.name" width="16" height="16" />
-                            </a>
-                            $curService.name
-                            #if not $curService.api_based then "*" else ""#
-                            
-                            <span class="ui-icon ui-icon-arrowthick-2-n-s pull-right"></span>
-                          </li>
-                        #end for
-                        </ul>
-                        <input type="hidden" name="service_order" id="service_order" value="<%=" ".join([x.get('id')+':'+str(int(x.get('enabled'))) for x in sickbeard.subtitles.sortedServiceList()])%>"/>
-                        
-                        <br/><input type="submit" class="btn config_submitter" value="Save Changes" /><br/>
-                    </fieldset>
-                </div><!-- /component-group4 //-->
-#end if
+                    
             <br/><input type="submit" class="btn config_submitter" value="Save Changes" /><br/>
                 
             </div><!-- /config-components //-->

@@ -329,8 +329,7 @@ COMING_EPS_SORT = None
 
 USE_SUBTITLES = False
 SUBTITLES_LANGUAGES = []
-SUBTITLES_MULTI = False
-SUBTITLES_SUBDIR = ''
+SUBTITLES_DIR = ''
 SUBTITLES_SERVICES_LIST = []
 SUBTITLES_SERVICES_ENABLED = []
 
@@ -384,7 +383,7 @@ def initialize(consoleLogging=True):
                 USE_BANNER, USE_LISTVIEW, METADATA_XBMC, METADATA_MEDIABROWSER, METADATA_PS3, METADATA_SYNOLOGY, metadata_provider_dict, \
                 NEWZBIN, NEWZBIN_USERNAME, NEWZBIN_PASSWORD, GIT_PATH, MOVE_ASSOCIATED_FILES, \
                 GUI_NAME, COMING_EPS_LAYOUT, COMING_EPS_SORT, COMING_EPS_DISPLAY_PAUSED, METADATA_WDTV, METADATA_TIVO, IGNORE_WORDS, CREATE_MISSING_SHOW_DIRS, \
-                ADD_SHOWS_WO_DIR, USE_SUBTITLES, SUBTITLES_LANGUAGES, SUBTITLES_MULTI, SUBTITLES_SUBDIR, SUBTITLES_SERVICES_LIST, SUBTITLES_SERVICES_ENABLED, subtitlesFinderScheduler
+                ADD_SHOWS_WO_DIR, USE_SUBTITLES, SUBTITLES_LANGUAGES, SUBTITLES_DIR, SUBTITLES_SERVICES_LIST, SUBTITLES_SERVICES_ENABLED, subtitlesFinderScheduler
 
         if __INITIALIZED__:
             return False
@@ -677,8 +676,7 @@ def initialize(consoleLogging=True):
         SUBTITLES_LANGUAGES = check_setting_str(CFG, 'Subtitles', 'subtitles_languages', '').split(',')
         if SUBTITLES_LANGUAGES[0] == '':
             SUBTITLES_LANGUAGES = []
-        SUBTITLES_MULTI = bool(check_setting_int(CFG, 'Subtitles', 'subtitles_multi', 0))
-        SUBTITLES_SUBDIR = check_setting_str(CFG, 'Subtitles', 'subtitles_subdir', '')
+        SUBTITLES_DIR = check_setting_str(CFG, 'Subtitles', 'subtitles_dir', '')
         SUBTITLES_SERVICES_LIST = check_setting_str(CFG, 'Subtitles', 'SUBTITLES_SERVICES_LIST', '').split(',')
         SUBTITLES_SERVICES_ENABLED = [int(x) for x in check_setting_str(CFG, 'Subtitles', 'SUBTITLES_SERVICES_ENABLED', '').split('|') if x]
         SUBTITLES_DEFAULT = bool(check_setting_int(CFG, 'Subtitles', 'subtitles_default', 0))
@@ -1300,8 +1298,7 @@ def save_config():
     new_config['Subtitles']['subtitles_languages'] = ','.join(SUBTITLES_LANGUAGES)
     new_config['Subtitles']['SUBTITLES_SERVICES_LIST'] = ','.join(SUBTITLES_SERVICES_LIST)
     new_config['Subtitles']['SUBTITLES_SERVICES_ENABLED'] = '|'.join([str(x) for x in SUBTITLES_SERVICES_ENABLED])
-    new_config['Subtitles']['subtitles_multi'] = int(SUBTITLES_MULTI)
-    new_config['Subtitles']['subtitles_subdir'] = SUBTITLES_SUBDIR
+    new_config['Subtitles']['subtitles_dir'] = SUBTITLES_DIR
     new_config['Subtitles']['subtitles_default'] = int(SUBTITLES_DEFAULT)
     new_config['General']['config_version'] = CONFIG_VERSION
 

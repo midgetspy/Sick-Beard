@@ -153,6 +153,11 @@ class PostProcessor(object):
         if not file_path:
             return []
 
+        if file_path != self.file_path:
+             associated_dir = os.path.dirname(file_path)
+             associated_fname = os.path.basename(self.file_path) 
+             file_path = os.path.join(associated_dir, associated_fname)
+
         file_path_list = []
     
         base_name = file_path.rpartition('.')[0]+'.'
@@ -224,9 +229,12 @@ class PostProcessor(object):
 
         file_list = [file_path]
         if associated_files:
-            file_list = file_list + self._list_associated_files(file_path)
+            file_list = self._list_associated_files(file_path)
         elif subtitles:
-            file_list = file_list + self._list_associated_files(file_path, True)
+            file_list = self._list_associated_files(file_path, True)
+            file_list.append(file_path)
+        else:
+            file_list = file_list + self._list_associated_files(file_path)
 
         if not file_list:
             self._log(u"There were no files associated with " + file_path + ", not moving anything", logger.DEBUG)
@@ -257,8 +265,8 @@ class PostProcessor(object):
             else:
                 new_file_name = helpers.replaceExtension(cur_file_name, cur_extension)
             
-            if sickbeard.SUBTITLES_SUBDIR and cur_extension.endswith('srt'):
-                subs_new_path = ek.ek(os.path.join, new_path, sickbeard.SUBTITLES_SUBDIR)
+            if sickbeard.SUBTITLES_DIR and cur_extension.endswith('srt'):
+                subs_new_path = ek.ek(os.path.join, new_path, sickbeard.SUBTITLES_DIR)
                 if not ek.ek(os.path.isdir, subs_new_path):
                     ek.ek(os.mkdir, subs_new_path)
                 new_file_path = ek.ek(os.path.join, subs_new_path, new_file_name)
