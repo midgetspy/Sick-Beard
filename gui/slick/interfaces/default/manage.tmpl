@@ -44,15 +44,21 @@
         widgets: ['zebra'],
         headers: {
             0: { sorter: false},
-            2: { sorter: 'showNames'},
-            3: { sorter: 'quality'},
+            1: { sorter: 'showNames'},
+            2: { sorter: 'quality'},
+            3: { sorter: 'flatfold'},
+            4: { sorter: 'paused'},
+            5: { sorter: 'status'},              
             6: { sorter: false},
             7: { sorter: false},
             8: { sorter: false},
+#if $sickbeard.USE_SUBTITLES            
+            9: { sorter: false},
+           10: { sorter: false}
+#else
             9: { sorter: false}
-#if $sickbeard.USE_SUBTITLES:
-            11: { sorter: false},
-#end if
+#end if           	            
+            
         }
     }); 
 });
@@ -82,7 +88,7 @@
       <th width="1%">Rescan<br/><input type="checkbox" class="bulkCheck" id="refreshCheck" /></th>
       <th width="1%">Rename<br/><input type="checkbox" class="bulkCheck" id="renameCheck" /></th>
 #if $sickbeard.USE_SUBTITLES:
-      <th width="1%">Subtitle&nbsp;<input type="checkbox" class="bulkCheck" id="subtitleCheck" /></th>
+      <th width="1%">Subtitle<br/><input type="checkbox" class="bulkCheck" id="subtitleCheck" /></th>
 #end if
 <!--      <th>Force Metadata Regen <input type="checkbox" class="bulkCheck" id="metadataCheck" /></th>//-->
       <th width="1%">Delete<br/><input type="checkbox" class="bulkCheck" id="deleteCheck" /></th>
@@ -91,7 +97,7 @@
 <tfoot>
   <tr>
     <td rowspan="1" colspan="1" class="align-center alt"><input class="btn" type="button" value="Edit Selected" id="submitMassEdit" /></td>
-    <td rowspan="1" colspan="#if $sickbeard.USE_SUBTITLES then 11 else 10#" align="right"><input type="button" value="Submit" id="submitMassUpdate" /></td>
+    <td rowspan="1" colspan="#if $sickbeard.USE_SUBTITLES then 11 else 10#" class="align-right alt"><input class="btn btn-primary" type="button" value="Submit" id="submitMassUpdate" /></td>
   </tr>
 </tfoot>
   <tbody>
