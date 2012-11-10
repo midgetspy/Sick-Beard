@@ -52,13 +52,10 @@
             6: { sorter: false},
             7: { sorter: false},
             8: { sorter: false},
-#if $sickbeard.USE_SUBTITLES            
-            9: { sorter: false},
-           10: { sorter: false}
-#else
             9: { sorter: false}
-#end if           	            
-            
+#if $sickbeard.USE_SUBTITLES            
+           ,10: { sorter: false}
+#end if         	            
         }
     }); 
 });
