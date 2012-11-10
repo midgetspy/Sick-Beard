@@ -9,9 +9,9 @@ $(document).ready(function() {
         var row = '';
         row += ' <tr class="good">';
         row += '  <td><input type="checkbox" class="'+tvdb_id+'-epcheck" name="'+tvdb_id+'-'+season+'x'+episode+'"'+checked+'></td>';
-        row += '  <td>'+season+'x'+episode+'</td>';
-        row += '  <td style="width: 100%">'+name+'</td>';
-        row += '  <td>'; 
+        row += '  <td style="width: 1%;">'+season+'x'+episode+'</td>';
+        row += '  <td>'+name+'</td>';
+        row += '  <td style="float: right;">'; 
         	subtitles = subtitles.split(',')
         	for (i in subtitles)
         	{
