@@ -1756,7 +1756,7 @@ class ConfigSubtitles:
         if use_subtitles == "on":
             use_subtitles = 1
             if sickbeard.subtitlesFinderScheduler.thread == None or not sickbeard.subtitlesFinderScheduler.thread.isAlive():
-                sickbeard.subtitlesFinderScheduler.thread.start()
+                sickbeard.subtitlesFinderScheduler.initThread()
         else:
             use_subtitles = 0
             sickbeard.subtitlesFinderScheduler.abort = True
