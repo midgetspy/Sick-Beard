@@ -1024,7 +1024,7 @@ class ConfigPostProcessing:
     def savePostProcessing(self, naming_pattern=None, naming_multi_ep=None,
                     xbmc_data=None, mediabrowser_data=None, synology_data=None, sony_ps3_data=None, wdtv_data=None, tivo_data=None,
                     use_banner=None, keep_processed_dir=None, process_automatically=None, rename_episodes=None,
-                    move_associated_files=None, tv_download_dir=None, naming_custom_abd=None, naming_abd_pattern=None, namimg_strip_year=None):
+                    move_associated_files=None, tv_download_dir=None, naming_custom_abd=None, naming_abd_pattern=None, naming_strip_year=None):
 
         results = []
 
@@ -1061,7 +1061,7 @@ class ConfigPostProcessing:
         else:
             naming_custom_abd = 0
             
-        if namimg_strip_year == "on":
+        if naming_strip_year == "on":
             naming_strip_year = 1
         else:
             naming_strip_year = 0

@@ -1572,11 +1572,16 @@ class TVEpisode(object):
             return parse_result.release_group
 
         epStatus, epQual = Quality.splitCompositeStatus(self.status) #@UnusedVariable
+
+        if sickbeard.NAMING_STRIP_YEAR:
+            show_name = re.sub("\(\w+\)$", "", self.show.name).rstrip()
+        else:
+            show_name = self.show.name 
         
         return {
-                   '%SN': self.show.name,
-                   '%S.N': dot(self.show.name),
-                   '%S_N': us(self.show.name),
+                   '%SN': show_name,
+                   '%S.N': dot(show_name),
+                   '%S_N': us(show_name),
                    '%EN': ep_name,
                    '%E.N': dot(ep_name),
                    '%E_N': us(ep_name),
@@ -1640,7 +1645,7 @@ class TVEpisode(object):
                 result_name = result_name.replace('%RN', '%S.N.S%0SE%0E.%E.N-SiCKBEARD')
                 result_name = result_name.replace('%rn', '%s.n.s%0se%0e.%e.n-sickbeard')
 
-            result_name = result_name.replace('%RG', 'SiCKBEARD')
+            result_name = result_name.replace('%RG', 'SICKBEARD')
             result_name = result_name.replace('%rg', 'sickbeard')
             logger.log(u"Episode has no release name, replacing it with a generic one: "+result_name, logger.DEBUG)
         
