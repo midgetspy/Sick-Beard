@@ -401,7 +401,7 @@ input:not(.btn){margin-right:6px;margin-top:5px;padding-top:4px;padding-bottom:4
 .sickbeardTable td.subtitles_column {
   float:  right;
   padding-top: 13px;
-  width: 100%
+/*  width: 100% */
 }
 
 .sickbeardTable td small {
