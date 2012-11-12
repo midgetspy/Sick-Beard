@@ -187,10 +187,11 @@ $Quality.DOWNLOADED.sort()
     <td align="center" class="nowrap">#if int($epResult["airdate"]) == 1 then "never" else $datetime.date.fromordinal(int($epResult["airdate"]))#</td>
     <td><small>
 #if $epLoc and $show._location and $epLoc.lower().startswith($show._location.lower()):
-$epLoc[len($show._location)+1:]
+#set $epLoc = os.path.basename($epLoc[len($show._location)+1:])
 #elif $epLoc and (not $epLoc.lower().startswith($show._location.lower()) or not $show._location):
-$epLoc
+#set $epLoc = os.path.basename($epLoc)
 #end if
+$epLoc
 	</small>
     </td>
 #if $sickbeard.USE_SUBTITLES and $show.subtitles:
