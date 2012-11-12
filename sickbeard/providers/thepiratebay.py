@@ -61,7 +61,7 @@ class ThePirateBayProvider(generic.TorrentProvider):
 
         self.searchurl = self.url+'search/%s/0/7/200'  # order by seed       
 
-        self.re_title_url =  '/torrent/(?P<id>\d+)/(?P<title>.*?)//1".+?[^<]+?(?P<url>magnet.*?)//1".+?[^<td](?P<seeders>\d+)</td>.+?[^<td](?P<leechers>\d+)</td>'
+        self.re_title_url =  '/torrent/(?P<id>\d+)/(?P<title>.*?)//1".+?(?P<url>magnet.*?)//1".+?(?P<seeders>\d+)</td>.+?(?P<leechers>\d+)</td>'
 
     def isEnabled(self):
         return sickbeard.THEPIRATEBAY
