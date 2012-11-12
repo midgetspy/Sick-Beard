@@ -1,13 +1,5 @@
 $(document).ready(function(){
 
-	$.fn.showHideSubtitles = function() {
-        if ($('#use_subtitles').attr('checked')) {
-            $('#content_use_subtitles').show()
-        } else {
-            $('#content_use_subtitles').hide()
-        }
-    }
-    
     $.fn.showHideServices = function() {
         $('.serviceDiv').each(function(){
             var serviceName = $(this).attr('id');
@@ -74,10 +66,4 @@ $(document).ready(function(){
 
     $("#service_order_list").disableSelection();
     
-    $('#use_subtitles').change(function(){
-        $(this).showHideSubtitles();
-    });
-    
-    $(this).showHideSubtitles();
-
 });
