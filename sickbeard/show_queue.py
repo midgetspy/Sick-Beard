@@ -219,10 +219,16 @@ class QueueItemAdd(ShowQueueItem):
                 t = tvdb_api.Tvdb(**ltvdb_api_parms)
                 s = t[self.tvdb_id]
 
-                # this usually only happens if they have an NFO in their show dir which gave us a TVDB ID that has no
-                # proper english version of the show
-                if not s or not s['seriesname']:
-                    ui.notifications.error("Unable to add show", "Show in "+self.showDir+" has no name on TVDB, probably the wrong language. Delete .nfo and add manually in the correct language.")
+                # this usually only happens if they have an NFO in their show dir which gave us a TVDB ID that has no proper english version of the show
+                if not s['seriesname']:
+                    logger.log(u"Show in " + self.showDir + " has no name on TVDB, probably the wrong language used to search with.", logger.ERROR)
+                    ui.notifications.error("Unable to add show", "Show in " + self.showDir + " has no name on TVDB, probably the wrong language. Delete .nfo and add manually in the correct language.")
+                    self._finishEarly()
+                    return
+                # if the show has no episodes/seasons
+                if not s:
+                    logger.log(u"Show " + str(s['seriesname']) + " is on TVDB but contains no season/episode data.", logger.ERROR)
+                    ui.notifications.error("Unable to add show", "Show " + str(s['seriesname']) + " is on TVDB but contains no season/episode data.")
                     self._finishEarly()
                     return
             except tvdb_exceptions.tvdb_exception, e:
