@@ -386,6 +386,7 @@ input:not(.btn){margin-right:6px;margin-top:5px;padding-top:4px;padding-bottom:4
 .sickbeardTable td {
   font-size: 14px;
 }
+
 .sickbeardTable td.title {
   font-size: 14px;
   line-height: normal;
@@ -399,8 +400,8 @@ input:not(.btn){margin-right:6px;margin-top:5px;padding-top:4px;padding-bottom:4
 }
 
 .sickbeardTable td.subtitles_column {
-  float:  right;
   padding-top: 13px;
+  padding-left: 14px;
 /*  width: 100% */
 }
 
