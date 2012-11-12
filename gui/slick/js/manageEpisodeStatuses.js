@@ -44,4 +44,24 @@ $(document).ready(function() {
         $(this).hide();
     });
 
+    // selects all visible episode checkboxes.
+    $('.selectAllShows').click(function(){
+        $('.allCheck').each(function(){
+                this.checked = true;
+        });
+        $('input[class*="-epcheck"]').each(function(){
+                this.checked = true;
+        });
+    });
+
+    // clears all visible episode checkboxes and the season selectors
+    $('.unselectAllShows').click(function(){
+        $('.allCheck').each(function(){
+                this.checked = false;
+        });
+        $('input[class*="-epcheck"]').each(function(){
+                this.checked = false;
+        });
+    });
+
 });
