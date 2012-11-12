@@ -351,7 +351,7 @@ class Manage:
             return _munge(t)
 
         myDB = db.DBConnection()
-        status_results = myDB.select("SELECT show_name, tv_shows.tvdb_id as tvdb_id, tv_episodes.subtitles subtitles FROM tv_episodes, tv_shows WHERE tv_shows.subtitles = 1 AND tv_episodes.status LIKE '%4' AND tv_episodes.showid = tv_shows.tvdb_id ORDER BY show_name")
+        status_results = myDB.select("SELECT show_name, tv_shows.tvdb_id as tvdb_id, tv_episodes.subtitles subtitles FROM tv_episodes, tv_shows WHERE tv_shows.subtitles = 1 AND tv_episodes.status LIKE '%4' AND tv_episodes.season != 0 AND tv_episodes.showid = tv_shows.tvdb_id ORDER BY show_name")
 
         ep_counts = {}
         show_names = {}
@@ -388,7 +388,7 @@ class Manage:
             tvdb_id, what = arg.split('-')
             
             # we don't care about unchecked checkboxes
-            if kwargs[arg] != 'on' or what == 'all':
+            if kwargs[arg] != 'on':
                 continue
             
             if tvdb_id not in to_download:
@@ -397,15 +397,21 @@ class Manage:
             to_download[tvdb_id].append(what)
         
         for cur_tvdb_id in to_download:
+            # get a list of all the eps we want to download subtitles if they just said "all"
+            if 'all' in to_download[cur_tvdb_id]:
+                myDB = db.DBConnection()
+                all_eps_results = myDB.select("SELECT season, episode FROM tv_episodes WHERE status LIKE '%4' AND season != 0 AND showid = ?", [cur_tvdb_id])
+                to_download[cur_tvdb_id] = [str(x["season"])+'x'+str(x["episode"]) for x in all_eps_results]
+            
             for epResult in to_download[cur_tvdb_id]:
                 season, episode = epResult.split('x');
             
                 show = sickbeard.helpers.findCertainShow(sickbeard.showList, int(cur_tvdb_id))
                 subtitles = show.getEpisode(int(season), int(episode)).downloadSubtitles()
                 
-                if sickbeard.SUBTITLES_SUBDIR:
+                if sickbeard.SUBTITLES_DIR:
                     for video in subtitles:
-                        subs_new_path = ek.ek(os.path.join, os.path.dirname(video.path), sickbeard.SUBTITLES_SUBDIR)
+                        subs_new_path = ek.ek(os.path.join, os.path.dirname(video.path), sickbeard.SUBTITLES_DIR)
                         if not ek.ek(os.path.isdir, subs_new_path):
                             ek.ek(os.mkdir, subs_new_path)
                         
