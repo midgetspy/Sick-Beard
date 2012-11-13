@@ -78,7 +78,7 @@
 #end if
     <tr><td class="showLegend">Status: </td><td>$show.status</td></tr>
 #if $showLoc[1]:
-    <tr><td class="showLegend">Location: </td><td><small>$showLoc[0]</small></td></tr>
+    <tr><td class="showLegend">Location: </td><td>$showLoc[0]</td></tr>
 #else:
     <tr><td class="showLegend"><span style="color: red;">Location: </span></td><td><span style="color: red;">$showLoc[0]</span> (dir is missing)</td></tr>
 #end if
@@ -94,6 +94,11 @@ initially download: <b><%=", ".join([Quality.qualityStrings[x] for x in anyQuali
 replace with: <b><%=", ".join([Quality.qualityStrings[x] for x in bestQualities])%></b>
 #end if 
 #end if
+#if $show.exceptions:
+	<tr><td class="showLegend">Scene Name: </td><td>$exceptions_string</td></tr>
+#else:
+    <tr><td>&nbsp</td></tr>
+#end if    
     </td></tr>
     </table>
     <td>
@@ -108,11 +113,6 @@ replace with: <b><%=", ".join([Quality.qualityStrings[x] for x in bestQualities]
 </table>
 </td>
 </tr>
-#if $show.exceptions:
-<table>
-    <tr><td class="showLegend">Scene Exceptions: </td><td>$exceptions_string</td></tr>
-</table>
-#end if
 </table>
 </div>
 </div>
