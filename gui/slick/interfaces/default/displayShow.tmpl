@@ -198,7 +198,9 @@ $epLoc
     <td class="subtitles_column" align="left">&nbsp;
     #if $epResult["subtitles"]:
         #for $sub_lang in subliminal.language.language_list($epResult["subtitles"].split(',')):
-            <img src="$sbRoot/images/flags/${sub_lang.alpha2}.png" width="16" height="11" alt="${sub_lang}" />&nbsp;
+            #if sub_lang.alpha2 != ""
+            	<img src="$sbRoot/images/flags/${sub_lang.alpha2}.png" width="16" height="11" alt="${sub_lang}" />&nbsp;
+			#end if
         #end for
     #end if
     </td>
