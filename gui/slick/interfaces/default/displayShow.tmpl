@@ -185,7 +185,7 @@ $Quality.DOWNLOADED.sort()
     $epResult["name"]
 </td>
     <td align="center" class="nowrap">#if int($epResult["airdate"]) == 1 then "never" else $datetime.date.fromordinal(int($epResult["airdate"]))#</td>
-    <td><small>
+    <td class="filename"><small>
 #if $epLoc and $show._location and $epLoc.lower().startswith($show._location.lower()):
 #set $epLoc = os.path.basename($epLoc[len($show._location)+1:])
 #elif $epLoc and (not $epLoc.lower().startswith($show._location.lower()) or not $show._location):
@@ -195,7 +195,7 @@ $epLoc
 	</small>
     </td>
 #if $sickbeard.USE_SUBTITLES and $show.subtitles:
-    <td class="subtitles_column" align="left">&nbsp;
+    <td class="subtitles_column" align="right">
     #if $epResult["subtitles"]:
         #for $sub_lang in subliminal.language.language_list($epResult["subtitles"].split(',')):
             #if sub_lang.alpha2 != ""
