@@ -94,32 +94,32 @@ def change_NZB_DIR(nzb_dir):
 
     if nzb_dir == '':
         sickbeard.NZB_DIR = ''
-        return True
+        return True, u"Removed NZB directory"
 
     if os.path.normpath(sickbeard.NZB_DIR) != os.path.normpath(nzb_dir):
         if helpers.makeDir(nzb_dir):
             sickbeard.NZB_DIR = os.path.normpath(nzb_dir)
             logger.log(u"Changed NZB folder to " + nzb_dir)
         else:
-            return False
+            return False, u"Unable to create NZB directory '" + nzb_dir + "', directory unchanged"
 
-    return True
+    return True, u"Changed NZB directory to " + nzb_dir
 
 
 def change_TORRENT_DIR(torrent_dir):
 
     if torrent_dir == '':
         sickbeard.TORRENT_DIR = ''
-        return True
+        return True, u"Removed TORRENT directory"
 
     if os.path.normpath(sickbeard.TORRENT_DIR) != os.path.normpath(torrent_dir):
         if helpers.makeDir(torrent_dir):
             sickbeard.TORRENT_DIR = os.path.normpath(torrent_dir)
-            logger.log(u"Changed torrent folder to " + torrent_dir)
+            logger.log(u"Changed torrent directory to " + torrent_dir)
         else:
-            return False
+            return False, u"Unable to create TORRENT directory '" + torrent_dir + "', directory unchanged"
 
-    return True
+    return True, u"Changed TORRENT directory to " + torrent_dir
 
 
 def change_TV_DOWNLOAD_DIR(tv_download_dir):
@@ -152,6 +152,7 @@ def change_SEARCH_FREQUENCY(freq):
 
     sickbeard.currentSearchScheduler.cycleTime = datetime.timedelta(minutes=sickbeard.SEARCH_FREQUENCY)
     sickbeard.backlogSearchScheduler.cycleTime = datetime.timedelta(minutes=sickbeard.get_backlog_cycle_time())
+    return True, u"SEARCH_FREQUENCY changed to " + str(freq)
 
 def change_VERSION_NOTIFY(version_notify):
    
