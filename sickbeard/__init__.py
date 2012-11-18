@@ -933,7 +933,7 @@ def restart(soft=True):
 
 def save_config():
 
-    new_config = ConfigObj(encoding="UTF-8")
+    new_config = ConfigObj()
     new_config.filename = CONFIG_FILE
 
     new_config['General'] = {}
