@@ -62,9 +62,25 @@ class NZBIndexProvider(generic.NZBProvider):
         # return [searchStr]
         return [x for x in show_name_helpers.makeSceneSearchString(ep_obj)]
 
+     def _get_title_and_url(self, item):
+        (title, url) = super(NZBIndexProvider, self)._get_title_and_url(item)
+        logger.log( '_get_title_and_url(%s), returns (%s, %s)' %(item, title, url), logger.DEBUG)
+        logger.log( 'self.searchString=%s' %(self.searchString), logger.DEBUG)
+
+        # try to filter relevant parts from title
+        stitle = filter( lambda x: x.lower().startswith( self.searchString.lower().strip().split()[0] ), re.sub( '\s+', ' ', re.sub('[\[\]\(\)\<\>]+', ' ', title) ).strip().split() )
+        if len(stitle) > 1:
+            logger.log( 'more than one result for the fixed title (%s), using first.' % stitle, logger.ERROR )
+        if stitle:
+            title = stitle[0]
+
+        logger.log( 'fixed title: "%s"' % title, logger.DEBUG)
+        return (title, url)
+
     def _doSearch(self, curString, quotes=False, show=None):
 
         term =  re.sub('[\.\-\:]', ' ', curString).encode('utf-8')
+        self.searchString = term
         if quotes:
             term = "\""+term+"\""
 

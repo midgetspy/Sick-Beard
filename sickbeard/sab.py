@@ -82,6 +82,12 @@ def sendNZB(nzb):
     logger.log(u"URL: " + url, logger.DEBUG)
 
     try:
+        #Sometimes (only from nzbindex results?) we have stupid names in sab queue - postprocessing does not work then.
+        #Should use &nzbname=NiceName here to send the "real" name to sab.
+        if nzb.resultType == "nzb" and nzb.provider.getID() == 'nzbindex':
+            logger.log(u"Pretty name for SAB queue: " + nzb.name)
+            params['nzbname'] = nzb.name
+
         # if we have the URL to an NZB then we've built up the SAB API URL already so just call it 
         if nzb.resultType == "nzb":
             f = urllib.urlopen(url)
