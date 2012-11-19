@@ -67,6 +67,13 @@
                                 </label>
                             </div>
                             <div class="field-pair">
+                                <input type="checkbox" name="xbmc_update_once" id="xbmc_update_once" #if $sickbeard.XBMC_UPDATE_ONCE then "checked=\"checked\"" else ""# />
+                                <label class="clearfix" for="xbmc_update_once">
+                                    <span class="component-title">Update Only One Host</span>
+                                    <span class="component-desc">Update only one host in the list? (Useful for shared databases)</span>
+                                </label>
+                            </div>
+                            <div class="field-pair">
                                 <label class="nocheck clearfix">
                                     <span class="component-title">XBMC IP:Port</span>
                                     <input type="text" name="xbmc_host" id="xbmc_host" value="$sickbeard.XBMC_HOST" size="35" />
