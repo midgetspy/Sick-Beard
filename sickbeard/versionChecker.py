@@ -235,13 +235,16 @@ class GitUpdateManager(UpdateManager):
 
         output = err = None
 
+        git_env = os.environ
+        git_env['LANG'] = 'en'
+
         for cur_git in git_locations:
 
             cmd = cur_git+' '+args
         
             try:
                 logger.log(u"Executing "+cmd+" with your shell in "+sickbeard.PROG_DIR, logger.DEBUG)
-                p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=True, cwd=sickbeard.PROG_DIR)
+                p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=True, cwd=sickbeard.PROG_DIR, env=git_env)
                 output, err = p.communicate()
                 logger.log(u"git output: "+output, logger.DEBUG)
             except OSError:
