@@ -23,7 +23,7 @@
 <script type="text/javascript" src="$sbRoot/js/displayShow.js?$sbPID"></script>
 <script type="text/javascript" src="$sbRoot/js/plotTooltip.js?$sbPID"></script>
 <script type="text/javascript" src="$sbRoot/js/ajaxEpSearch.js?$sbPID"></script>
-<script type="text/javascript" src="$sbRoot/js/ajaxEpSubtitles.js"></script>
+<script type="text/javascript" src="$sbRoot/js/ajaxEpSubtitles.js?$sbPID"></script>
 
 <div class="navShows">
 </br>
@@ -187,19 +187,19 @@ $Quality.DOWNLOADED.sort()
     <td align="center" class="nowrap">#if int($epResult["airdate"]) == 1 then "never" else $datetime.date.fromordinal(int($epResult["airdate"]))#</td>
     <td class="filename"><small>
 #if $epLoc and $show._location and $epLoc.lower().startswith($show._location.lower()):
-#set $epLoc = os.path.basename($epLoc[len($show._location)+1:])
+	#set $epLoc = os.path.basename($epLoc[len($show._location)+1:])
 #elif $epLoc and (not $epLoc.lower().startswith($show._location.lower()) or not $show._location):
-#set $epLoc = os.path.basename($epLoc)
+	#set $epLoc = os.path.basename($epLoc)
 #end if
 $epLoc
 	</small>
     </td>
 #if $sickbeard.USE_SUBTITLES and $show.subtitles:
-    <td class="subtitles_column" align="right">
+    <td id="subtitles_column" class="subtitles_column" align="right">
     #if $epResult["subtitles"]:
         #for $sub_lang in subliminal.language.language_list($epResult["subtitles"].split(',')):
             #if sub_lang.alpha2 != ""
-            	<img src="$sbRoot/images/flags/${sub_lang.alpha2}.png" width="16" height="11" alt="${sub_lang}" />&nbsp;
+            	<img src="$sbRoot/images/flags/${sub_lang.alpha2}.png" width="16" height="11" alt="${sub_lang}" />
 			#end if
         #end for
     #end if
