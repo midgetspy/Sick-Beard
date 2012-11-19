@@ -1067,7 +1067,7 @@ class TVEpisode(object):
             subtitleList = []
             for video in subtitles:
                 for subtitle in subtitles.get(video):
-                    subtitleList.append(str(subtitle.language))
+                    subtitleList.append(subtitle.language.name)
             
             logger.log(str(self.show.tvdbid) + ": Downloaded " + ", ".join(subtitleList) + " subtitles for episode " + str(self.season) + "x" + str(self.episode), logger.DEBUG)
             
