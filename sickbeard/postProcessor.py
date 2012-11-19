@@ -162,15 +162,23 @@ class PostProcessor(object):
         
         # don't confuse glob with chars we didn't mean to use
         base_name = re.sub(r'[\[\]\*\?]', r'[\g<0>]', base_name)
-    
-        for associated_file_path in ek.ek(glob.glob, base_name+'*'):
-            # only add associated to list
-            if associated_file_path == file_path:
-                continue
-            # only list it if the only non-shared part is the extension
-            if '.' in associated_file_path[len(base_name):]:
-                continue
 
+        # list of ISO693-1 country codes
+        ISO693 = ["ab", "aa", "af", "ak", "sq", "am", "ar", "an", "hy", "as", "av", "ae", "ay", "az", "bm", "ba", "eu",
+        "be", "bn", "bh", "bi", "bs", "br", "bg", "my", "ca", "ch", "ce", "ny", "zh", "cv", "kw", "co", "cr", "hr",
+        "cs", "da", "dv", "nl", "dz", "en", "eo", "et", "ee", "fo", "fj", "fi", "fr", "ff", "gl", "ka", "de", "el",
+        "gn", "gu", "ht", "ha", "he", "hz", "hi", "ho", "hu", "ia", "id", "ie", "ga", "ig", "ik", "io", "is", "it",
+        "iu", "ja", "jv", "kl", "kn", "kr", "ks", "kk", "km", "ki", "rw", "ky", "kv", "kg", "ko", "ku", "kj", "la",
+        "lb", "lg", "li", "ln", "lo", "lt", "lu", "lv", "gv", "mk", "mg", "ms", "ml", "mt", "mi", "mr", "mh", "mn",
+        "na", "nv", "nb", "nd", "ne", "ng", "nn", "no", "ii", "nr", "oc", "oj", "cu", "om", "or", "os", "pa", "pi",
+        "fa", "pl", "ps", "pt", "qu", "rm", "rn", "ro", "ru", "sa", "sc", "sd", "se", "sm", "sg", "sr", "gd", "sn",
+        "si", "sk", "sl", "so", "st", "es", "su", "sw", "ss", "sv", "ta", "te", "tg", "th", "ti", "bo", "tk", "tl",
+        "tn", "to", "tr", "ts", "tt", "tw", "ty", "ug", "uk", "ur", "uz", "ve", "vi", "vo", "wa", "cy", "wo", "fy",
+        "xh", "yi", "yo", "za", "zu"]
+        for associated_file_path in ek.ek(glob.glob, base_name+'*'):
+            # only add associated to list; check for files ending with an ISO693 code, with file extension srt (subs)
+            if (associated_file_path == file_path) or (associated_file_path.rpartition('.')[0] == file_path and associated_file_path.rpartition('.')[2] in ISO693 and associated_file_path.rpartition('.')[-1] == "srt"):
+                continue
             file_path_list.append(associated_file_path)
         
         return file_path_list
@@ -238,6 +246,22 @@ class PostProcessor(object):
             # replace .nfo with .nfo-orig to avoid conflicts
             if cur_extension == 'nfo':
                 cur_extension = 'nfo-orig'
+
+            # list of ISO693-1 country codes
+            ISO693 = ["ab", "aa", "af", "ak", "sq", "am", "ar", "an", "hy", "as", "av", "ae", "ay", "az", "bm", "ba", "eu",
+            "be", "bn", "bh", "bi", "bs", "br", "bg", "my", "ca", "ch", "ce", "ny", "zh", "cv", "kw", "co", "cr", "hr",
+            "cs", "da", "dv", "nl", "dz", "en", "eo", "et", "ee", "fo", "fj", "fi", "fr", "ff", "gl", "ka", "de", "el",
+            "gn", "gu", "ht", "ha", "he", "hz", "hi", "ho", "hu", "ia", "id", "ie", "ga", "ig", "ik", "io", "is", "it",
+            "iu", "ja", "jv", "kl", "kn", "kr", "ks", "kk", "km", "ki", "rw", "ky", "kv", "kg", "ko", "ku", "kj", "la",
+            "lb", "lg", "li", "ln", "lo", "lt", "lu", "lv", "gv", "mk", "mg", "ms", "ml", "mt", "mi", "mr", "mh", "mn",
+            "na", "nv", "nb", "nd", "ne", "ng", "nn", "no", "ii", "nr", "oc", "oj", "cu", "om", "or", "os", "pa", "pi",
+            "fa", "pl", "ps", "pt", "qu", "rm", "rn", "ro", "ru", "sa", "sc", "sd", "se", "sm", "sg", "sr", "gd", "sn",
+            "si", "sk", "sl", "so", "st", "es", "su", "sw", "ss", "sv", "ta", "te", "tg", "th", "ti", "bo", "tk", "tl",
+            "tn", "to", "tr", "ts", "tt", "tw", "ty", "ug", "uk", "ur", "uz", "ve", "vi", "vo", "wa", "cy", "wo", "fy",
+            "xh", "yi", "yo", "za", "zu"]
+            # If file ends with srt, check if there is an vallid ISO963 value in front of it.
+            if (cur_extension == "srt" and (cur_file_path.rpartition('.')[0].rpartition('.')[-1]) in ISO693):
+                cur_extension = (cur_file_path.rpartition('.')[0].rpartition('.')[-1]) +'.' + 'srt'
 
             # If new base name then convert name
             if new_base_name:
