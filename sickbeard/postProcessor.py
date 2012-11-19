@@ -813,6 +813,7 @@ class PostProcessor(object):
             proper_absolute_path = ek.ek(os.path.join, ep_obj.show.location, proper_path)
 
             dest_path = ek.ek(os.path.dirname, proper_absolute_path)
+            notifiers.synoindex_notifier.addFolder(dest_path)
         except exceptions.ShowDirNotFoundException:
             raise exceptions.PostProcessingFailed(u"Unable to post-process an episode if the show dir doesn't exist, quitting")
 
