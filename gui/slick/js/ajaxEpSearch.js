@@ -33,9 +33,11 @@
 	                // color the row
 	                if (options.colorRow)
 	                	parent.parent().removeClass('skipped wanted qual good unaired').addClass('good');
-	                
+	                // applying the quality class
+                    var rSearchTerm = /(\w+)\s\((.+?)\)/;
+	                  HtmlContent = data.result.replace(rSearchTerm,'$1 <span class="quality $2">$2</span>');
 	                // update the status column if it exists
-	                parent.siblings('.status_column').html(data.result);
+                    parent.siblings('.status_column').html(HtmlContent)    	                  
 	            }
 
 	            // put the corresponding image as the result for the the row
