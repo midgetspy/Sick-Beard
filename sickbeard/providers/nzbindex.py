@@ -62,7 +62,7 @@ class NZBIndexProvider(generic.NZBProvider):
         # return [searchStr]
         return [x for x in show_name_helpers.makeSceneSearchString(ep_obj)]
 
-     def _get_title_and_url(self, item):
+    def _get_title_and_url(self, item):
         (title, url) = super(NZBIndexProvider, self)._get_title_and_url(item)
         logger.log( '_get_title_and_url(%s), returns (%s, %s)' %(item, title, url), logger.DEBUG)
         logger.log( 'self.searchString=%s' %(self.searchString), logger.DEBUG)
