@@ -401,12 +401,12 @@ input:not(.btn){margin-right:6px;margin-top:5px;padding-top:4px;padding-bottom:4
 
 .sickbeardTable td.subtitles_column {
   vertical-align: middle;
-  width: 11%;
-/*  padding-top: 13px;
-  padding-left: 14px;
-  width: 100% */
+  width: 10%;
 }
 
+.sickbeardTable td.subtitles_column img {
+  padding-right: 2px;
+}
 .sickbeardTable td small {
   font-size: 11px;
   font-style: italic;
