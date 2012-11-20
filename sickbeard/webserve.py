@@ -3146,9 +3146,9 @@ class Home:
         try:
             subtitles = ep_obj.downloadSubtitles()
             
-            if sickbeard.SUBTITLES_SUBDIR:
+            if sickbeard.SUBTITLES_DIR:
                 for video in subtitles:
-                    subs_new_path = ek.ek(os.path.join, os.path.dirname(video.path), sickbeard.SUBTITLES_SUBDIR)
+                    subs_new_path = ek.ek(os.path.join, os.path.dirname(video.path), sickbeard.SUBTITLES_DIR)
                     if not ek.ek(os.path.isdir, subs_new_path):
                         ek.ek(os.mkdir, subs_new_path)
                     
