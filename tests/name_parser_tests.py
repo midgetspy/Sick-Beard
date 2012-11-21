@@ -139,6 +139,10 @@ combination_test_cases = [
                           ('Season 2\\Show Name - 03-04 - Ep Name.ext',
                            parser.ParseResult(None, 'Show Name', 2, [3,4], extra_info = 'Ep Name'),
                            ['no_season', 'season_only']),
+                           
+                          ('Season 02\\03-04-05 - Ep Name.ext',
+                           parser.ParseResult(None, None, 2, [3,4,5], extra_info = 'Ep Name'),
+                           ['no_season', 'season_only']),
                           ]
 
 unicode_test_cases = [
@@ -337,11 +341,11 @@ if __name__ == '__main__':
         suite = unittest.TestLoader().loadTestsFromTestCase(BasicTests)
     unittest.TextTestRunner(verbosity=2).run(suite)
 
-    #suite = unittest.TestLoader().loadTestsFromTestCase(ComboTests)
-    #unittest.TextTestRunner(verbosity=2).run(suite)
+    suite = unittest.TestLoader().loadTestsFromTestCase(ComboTests)
+    unittest.TextTestRunner(verbosity=2).run(suite)
 
-    #suite = unittest.TestLoader().loadTestsFromTestCase(UnicodeTests)
-    #unittest.TextTestRunner(verbosity=2).run(suite)
+    suite = unittest.TestLoader().loadTestsFromTestCase(UnicodeTests)
+    unittest.TextTestRunner(verbosity=2).run(suite)
 
-    #suite = unittest.TestLoader().loadTestsFromTestCase(FailureCaseTests)
-    #unittest.TextTestRunner(verbosity=2).run(suite)
+    suite = unittest.TestLoader().loadTestsFromTestCase(FailureCaseTests)
+    unittest.TextTestRunner(verbosity=2).run(suite)
