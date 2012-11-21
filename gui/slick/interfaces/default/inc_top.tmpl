@@ -6,10 +6,20 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml"> 
 <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="robots" content="noindex">
     <title>Sick Beard - alpha $sickbeard.version.SICKBEARD_VERSION - $title</title>
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <link rel="shortcut icon" href="$sbRoot/images/favicon.ico" />
-    <link rel="apple-touch-icon" href="$sbRoot/images/sickbeard_touch_icon.png" />
+    <!--[if lt IE 9]>
+         <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+        
+    <link rel="shortcut icon" href="$sbRoot/images/ico/favicon.ico">
+    <link rel="apple-touch-icon-precomposed" sizes="144x144" href="$sbRoot/images/ico/apple-touch-icon-144x144-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" sizes="114x114" href="$sbRoot/images/ico/apple-touch-icon-114x114-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" sizes="72x72" href="$sbRoot/images/ico/apple-touch-icon-72x72-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" href="$sbRoot/images/ico/apple-touch-icon-57x57-precomposed.png">
+
     <link rel="stylesheet" type="text/css" href="$sbRoot/css/default.css?$sbPID" />
     <link rel="stylesheet" type="text/css" href="$sbRoot/css/browser.css?$sbPID" />
     <link rel="stylesheet" type="text/css" href="$sbRoot/css/comingEpisodes.css?$sbPID" />
@@ -50,7 +60,7 @@
 
     <script type="text/javascript" charset="utf-8">
     <!--
-        sbRoot = "$sbRoot";
+        sbRoot = "$sbRoot"; // needed for browser.js & ajaxNotifications.js
         //HTML for scrolltopcontrol, which is auto wrapped in DIV w/ ID="topcontrol"
         top_image_html = '<img src="$sbRoot/images/top.gif" style="width:31px; height:11px" alt="Jump to top" />'; 
     //-->
