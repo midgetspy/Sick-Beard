@@ -362,6 +362,23 @@ input:not(.btn){margin-right:6px;margin-top:5px;padding-top:4px;padding-bottom:4
   border-top: #fff 1px solid;
   vertical-align: middle;
 }
+
+#massUpdateTable.sickbeardTable th {
+  padding: 4px 0 !important;
+  border-top: #fff 1px solid;
+  vertical-align: middle;
+}
+
+#massUpdateTable.sickbeardTable th {
+  padding: 4px 0 !important;
+  border-top: #fff 1px solid;
+  vertical-align: middle;
+}
+
+#massUpdateTable.tablesorter td {
+  padding: 8px 5px;
+}
+
 .sickbeardTable th:first-child,
 .sickbeardTable td:first-child {
   border-left: none;
