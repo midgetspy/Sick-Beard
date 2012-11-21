@@ -114,7 +114,7 @@ class TVRage:
                     ep = t[self.show.tvdbid][curSeason][1]
 
                     # make sure we have a date to compare with
-                    if ep["firstaired"] == "" or ep["firstaired"] == None:
+                    if ep["firstaired"] == "" or ep["firstaired"] == None or ep["firstaired"] == "0000-00-00":
                         continue
 
                     # get a datetime object

@@ -1233,7 +1233,7 @@ class TVEpisode(object):
             return
 
 
-        if not myEp["firstaired"]:
+        if not myEp["firstaired"] or myEp["firstaired"] == "0000-00-00":
             myEp["firstaired"] = str(datetime.date.fromordinal(1))
 
         if myEp["episodename"] == None or myEp["episodename"] == "":
