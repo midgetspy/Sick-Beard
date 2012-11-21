@@ -926,85 +926,81 @@ class ConfigSearch:
         return _munge(t)
 
     @cherrypy.expose
-#    def saveSearch(self, use_nzbs=None, use_torrents=None, nzb_dir=None, sab_username=None, sab_password=None,
-#                       sab_apikey=None, sab_category=None, sab_host=None, nzbget_password=None, nzbget_category=None, nzbget_host=None,
-#                       nzb_method=None, torrent_method=None, usenet_retention=None, search_frequency=None, download_propers=None,
-#                       torrent_dir=None, torrent_username=None, torrent_password=None, torrent_host=None, torrent_path=None, torrent_ratio=None, torrent_paused=None):
-    def saveSearch(self, **postData):
-        
+    def saveSearch(self, use_nzbs=None, use_torrents=None, nzb_dir=None, sab_username=None, sab_password=None,
+                       sab_apikey=None, sab_category=None, sab_host=None, nzbget_password=None, nzbget_category=None, nzbget_host=None,
+                       nzb_method=None, torrent_method=None, usenet_retention=None, search_frequency=None, download_propers=None,
+                       torrent_dir=None, torrent_username=None, torrent_password=None, torrent_host=None, torrent_path=None, torrent_ratio=None, torrent_paused=None):
+
         results = []
 
-#        if not config.change_NZB_DIR(nzb_dir):
-#            results += ["Unable to create directory " + os.path.normpath(nzb_dir) + ", dir not changed."]
-#
-#        if not config.change_TORRENT_DIR(torrent_dir):
-#            results += ["Unable to create directory " + os.path.normpath(torrent_dir) + ", dir not changed."]
-#
-#        config.change_SEARCH_FREQUENCY(search_frequency)
-#
-#        if download_propers == "on":
-#            download_propers = 1
-#        else:
-#            download_propers = 0
-#
-#        if use_nzbs == "on":
-#            use_nzbs = 1
-#        else:
-#            use_nzbs = 0
-#
-#        if use_torrents == "on":
-#            use_torrents = 1
-#        else:
-#            use_torrents = 0
-#
-#        if usenet_retention == None:
-#            usenet_retention = 200
-#
-#        sickbeard.USE_NZBS = use_nzbs
-#        sickbeard.USE_TORRENTS = use_torrents
-#
-#        sickbeard.NZB_METHOD = nzb_method
-#        sickbeard.TORRENT_METHOD = torrent_method
-#        sickbeard.USENET_RETENTION = int(usenet_retention)
-#        
-#        sickbeard.DOWNLOAD_PROPERS = download_propers
-#
-#        sickbeard.SAB_USERNAME = sab_username
-#        sickbeard.SAB_PASSWORD = sab_password
-#        sickbeard.SAB_APIKEY = sab_apikey.strip()
-#        sickbeard.SAB_CATEGORY = sab_category
-#
-#        if sab_host and not re.match('https?://.*', sab_host):
-#            sab_host = 'http://' + sab_host
-#
-#        if not sab_host.endswith('/'):
-#            sab_host = sab_host + '/'
-        for key, value in postData.items():
-            value = value.strip()
-            val = 1 if value == "on" else value
-            if hasattr(config, 'change_' + key.upper()):
-                ret, msg = getattr(config, 'change_' + key.upper())(val)
-                if ret == False:
-                    results.append(msg)
-            elif hasattr(sickbeard, key.upper()):
-                setattr(sickbeard, key.upper(), val)
-            elif hasattr(sickbeard, key.lower()):
-                setattr(sickbeard, key.lower(), val)
-            else:
-                logger.log("Unknown search setting: " + key, logger.ERROR)
+        if not config.change_NZB_DIR(nzb_dir):
+            results += ["Unable to create directory " + os.path.normpath(nzb_dir) + ", dir not changed."]
 
-        # handle some special cases
-        sickbeard.USENET_RETENTION = int(postData.get('usenet_retention', 200))
+        if not config.change_TORRENT_DIR(torrent_dir):
+            results += ["Unable to create directory " + os.path.normpath(torrent_dir) + ", dir not changed."]
 
-        # this regex will match http or https urls or just a domain/address
-        regex = re.compile(r'^(http)?(?P<s>s|)?(://)?(?P<addr>[^/]*)/?')
-        # this substitution combined with above regex will return a '/' terminated url from given url or host
-        regex_sub = r'http\g<s>://\g<addr>/'
+        config.change_SEARCH_FREQUENCY(search_frequency)
 
-        sab_host = re.sub(regex, regex_sub, postData.get('sab_host', ''))
+        if download_propers == "on":
+            download_propers = 1
+        else:
+            download_propers = 0
+
+        if use_nzbs == "on":
+            use_nzbs = 1
+        else:
+            use_nzbs = 0
+
+        if use_torrents == "on":
+            use_torrents = 1
+        else:
+            use_torrents = 0
+
+        if usenet_retention == None:
+            usenet_retention = 200
+
+        sickbeard.USE_NZBS = use_nzbs
+        sickbeard.USE_TORRENTS = use_torrents
+
+        sickbeard.NZB_METHOD = nzb_method
+        sickbeard.TORRENT_METHOD = torrent_method
+        sickbeard.USENET_RETENTION = int(usenet_retention)
+        
+        sickbeard.DOWNLOAD_PROPERS = download_propers
+
+        sickbeard.SAB_USERNAME = sab_username
+        sickbeard.SAB_PASSWORD = sab_password
+        sickbeard.SAB_APIKEY = sab_apikey.strip()
+        sickbeard.SAB_CATEGORY = sab_category
+
+        if sab_host and not re.match('https?://.*', sab_host):
+            sab_host = 'http://' + sab_host
+
+        if not sab_host.endswith('/'):
+            sab_host = sab_host + '/'
+
         sickbeard.SAB_HOST = sab_host
 
-        torrent_host = re.sub(regex, regex_sub, postData.get('torrent_host', ''))
+        sickbeard.NZBGET_PASSWORD = nzbget_password
+        sickbeard.NZBGET_CATEGORY = nzbget_category
+        sickbeard.NZBGET_HOST = nzbget_host
+
+        sickbeard.TORRENT_USERNAME = torrent_username
+        sickbeard.TORRENT_PASSWORD = torrent_password
+        sickbeard.TORRENT_PATH = torrent_path
+        sickbeard.TORRENT_RATIO = torrent_ratio
+        if torrent_paused == "on":
+            torrent_paused = 1
+        else:
+            torrent_paused = 0
+        sickbeard.TORRENT_PAUSED = torrent_paused
+
+        if torrent_host and not re.match('https?://.*', torrent_host):
+            torrent_host = 'http://' + torrent_host
+
+        if not torrent_host.endswith('/'):
+            torrent_host = torrent_host + '/'
+
         sickbeard.TORRENT_HOST = torrent_host
 
         sickbeard.save_config()
