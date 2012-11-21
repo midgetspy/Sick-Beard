@@ -132,7 +132,7 @@ class BacklogSearcher:
 
         # don't consider this an actual backlog search if we only did recent eps
         # or if we only did certain shows
-        if fromDate == datetime.date.fromordinal(1) or not which_shows:
+        if fromDate == datetime.date.fromordinal(1) and not which_shows:
             self._set_lastBacklog(curDate)
 
         self.amActive = False
