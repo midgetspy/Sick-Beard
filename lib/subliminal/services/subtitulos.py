@@ -46,6 +46,7 @@ class Subtitulos(ServiceBase):
     # and the 'ó' char directly. This is because now BS4 converts the html
     # code chars into their equivalent unicode char
     release_pattern = re.compile('Versi.+n (.+) ([0-9]+).([0-9])+ megabytes')
+    extra_keywords_pattern = re.compile("(?:con|para)\s(?:720p)?(?:\-|\s)?([A-Za-z]+)(?:\-|\s)?(?:720p)?(?:\s|\.)(?:y\s)?(?:720p)?(?:\-\s)?([A-Za-z]+)?(?:\-\s)?(?:720p)?(?:\.)?");
 
     def list_checked(self, video, languages):
         return self.query(video.path or video.release, languages, get_keywords(video.guess), video.series, video.season, video.episode)
@@ -65,7 +66,17 @@ class Subtitulos(ServiceBase):
         soup = BeautifulSoup(r.content, self.required_features)
         subtitles = []
         for sub in soup('div', {'id': 'version'}):
+            # extract extra compatible keywords
+            extra = sub.find('span', {'class': 'comentario'}).contents[2]
+            if extra != None:
+                extra_key1 = self.extra_keywords_pattern.search(extra).group(1)
+                extra_key2 = self.extra_keywords_pattern.search(extra).group(2)
             sub_keywords = split_keyword(self.release_pattern.search(sub.find('p', {'class': 'title-sub'}).contents[1]).group(1).lower())
+            # add the extra keywords to sub_keywords before checking
+            if extra_key1 != None:
+                sub_keywords.add(extra_key1.lower())
+            if extra_key2 != None:
+                sub_keywords.add(extra_key2.lower())
             if keywords and not keywords & sub_keywords:
                 logger.debug(u'None of subtitle keywords %r in %r' % (sub_keywords, keywords))
                 continue
