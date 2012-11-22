@@ -26,7 +26,7 @@ import logging
 import urllib
 
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger("subliminal")
 
 
 class SubsWiki(ServiceBase):

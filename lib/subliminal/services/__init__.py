@@ -27,7 +27,7 @@ import zipfile
 
 
 __all__ = ['ServiceBase', 'ServiceConfig']
-logger = logging.getLogger(__name__)
+logger = logging.getLogger("subliminal")
 
 
 class ServiceBase(object):

@@ -26,7 +26,7 @@ import logging
 import re
 
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger("subliminal")
 
 
 def match(pattern, string):

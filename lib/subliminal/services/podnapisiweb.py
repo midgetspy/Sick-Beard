@@ -28,7 +28,7 @@ import re
 from subliminal.subtitles import get_subtitle_path
 
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger("subliminal")
 
 
 class PodnapisiWeb(ServiceBase):

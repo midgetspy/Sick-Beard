@@ -29,7 +29,7 @@ import os
 import re
 
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger("subliminal")
 
 
 class Addic7ed(ServiceBase):

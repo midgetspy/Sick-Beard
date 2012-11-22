@@ -20,7 +20,7 @@ import re
 import logging
 
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger("subliminal")
 
 
 COUNTRIES = [('AF', 'AFG', '004', u'Afghanistan'),

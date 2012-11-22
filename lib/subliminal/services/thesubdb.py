@@ -22,7 +22,7 @@ from ..videos import Episode, Movie, UnknownVideo
 import logging
 
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger("subliminal")
 
 
 class TheSubDB(ServiceBase):

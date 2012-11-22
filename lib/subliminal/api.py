@@ -22,7 +22,7 @@ import logging
 
 
 __all__ = ['consume_task_list', 'list_subtitles', 'download_subtitles']
-logger = logging.getLogger(__name__)
+logger = logging.getLogger("subliminal")
 
 
 def consume_task_list(tasks):
