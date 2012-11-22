@@ -15,13 +15,11 @@ Example usage:
 u'Cabin Fever'
 """
 __author__ = "dbr/Ben"
-__version__ = "1.8.2"
+__version__ = "1.7.2"
 
-import os
-import time
+import os, time
 import urllib
 import urllib2
-import getpass
 import StringIO
 import tempfile
 import warnings
@@ -271,12 +269,10 @@ class Episode(dict):
         #end for cur_key, cur_value
 
 
-
 class Actors(list):
     """Holds all Actor instances for a show
     """
     pass
-
 
 
 class Actor(dict):
@@ -498,16 +494,9 @@ class Tvdb:
     #end __init__
 
     def _getTempDir(self):
-        """Returns the [system temp dir]/tvdb_api-u501 (or
-        tvdb_api-myuser)
+        """Returns the [system temp dir]/tvdb_api
         """
-        if hasattr(os, 'getuid'):
-            uid = "u%d" % (os.getuid())
-        else:
-            # For Windows
-            uid = getpass.getuser()
-
-        return os.path.join(tempfile.gettempdir(), "tvdb_api-%s" % (uid))
+        return os.path.join(tempfile.gettempdir(), "tvdb_api")
 
     def _loadUrl(self, url, recache = False, language=None):
         global lastTimeout
