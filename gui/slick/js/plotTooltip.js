@@ -24,8 +24,8 @@ $(function () {
                 viewport: $(window),
                 my: 'left center',
                 adjust: {
-                    y: -6,
-                    x: 3
+                    y: -10,
+                    x: 2
                 }
             },
             style: {
