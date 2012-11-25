@@ -408,6 +408,22 @@ input:not(.btn){margin-right:6px;margin-top:5px;padding-top:4px;padding-bottom:4
   font-size: 14px;
   line-height: normal;
 }
+
+.sickbeardTable td.filename {
+width: 30%;
+
+}
+
+.sickbeardTable td.subtitles_column {
+  vertical-align: middle;
+/*  width: 10%; */
+}
+
+.sickbeardTable td.subtitles_column img {
+  padding-right: 2px;
+}
+
+
 .sickbeardTable td.status_column {
   font-weight: bold;
   line-height: 20px;
@@ -416,14 +432,10 @@ input:not(.btn){margin-right:6px;margin-top:5px;padding-top:4px;padding-bottom:4
 	color: #555555;
 }
 
-.sickbeardTable td.subtitles_column {
-  vertical-align: middle;
-  width: 10%;
-}
-
-.sickbeardTable td.subtitles_column img {
+.sickbeardTable td.search img {
   padding-right: 2px;
 }
+
 .sickbeardTable td small {
   font-size: 11px;
   font-style: italic;

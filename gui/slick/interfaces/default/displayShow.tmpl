@@ -195,7 +195,7 @@ $epLoc
 	</small>
     </td>
 #if $sickbeard.USE_SUBTITLES and $show.subtitles:
-    <td id="subtitles_column" class="subtitles_column" align="right">
+    <td id="subtitles_column" class="subtitles_column" align="left">
     #if $epResult["subtitles"]:
         #for $sub_lang in subliminal.language.language_list($epResult["subtitles"].split(',')):
             #if sub_lang.alpha2 != ""
@@ -207,11 +207,11 @@ $epLoc
 #end if
 #set $curStatus, $curQuality = $Quality.splitCompositeStatus(int($epResult["status"]))
 #if $curQuality != Quality.NONE:   
-    <td class="status_column" style="text-align: center;">$statusStrings[$curStatus] <span class="quality $Quality.qualityStrings[$curQuality]">$Quality.qualityStrings[$curQuality]</span></td>
+    <td class="status_column">$statusStrings[$curStatus] <span class="quality $Quality.qualityStrings[$curQuality]">$Quality.qualityStrings[$curQuality]</span></td>
 #else:    
-    <td class="status_column" style="text-align: center;">$statusStrings[$curStatus]</td>
+    <td class="status_column">$statusStrings[$curStatus]</td>
 #end if
-    <td class="search" align="left">
+    <td class="search">
     #if int($epResult["season"]) != 0:
       <a class="epSearch" href="searchEpisode?show=$show.tvdbid&amp;season=$epResult["season"]&amp;episode=$epResult["episode"]"><img src="$sbRoot/images/search32.png" height="16" alt="search" title="Manual Search" /></a>
     #end if
