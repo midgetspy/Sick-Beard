@@ -532,11 +532,14 @@ class GenericMetadata():
             logger.log(u"Unable to look up show on TVDB, not downloading images: "+ex(e), logger.ERROR)
             return None
     
-        if image_type not in ('fanart', 'poster', 'banner'):
+        if image_type not in ('fanart', 'poster', 'banner', 'thumbnail'):
             logger.log(u"Invalid image type "+str(image_type)+", couldn't find it in the TVDB object", logger.ERROR)
             return None
     
-        image_url = tvdb_show_obj[image_type]
+        if image_type == 'thumbnail':
+            image_url = re.sub('posters', '_cache/posters', tvdb_show_obj['poster'])
+        else:
+            image_url = tvdb_show_obj[image_type]
     
         image_data = metadata_helpers.getShowImage(image_url, which)
 
