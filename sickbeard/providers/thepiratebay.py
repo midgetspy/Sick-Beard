@@ -61,7 +61,7 @@ class ThePirateBayProvider(generic.TorrentProvider):
 
         self.searchurl = self.url+'search/%s/0/7/200'  # order by seed       
 
-        self.re_title_url =  '/torrent/(?P<id>\d+)/(?P<title>.*?)//1".+?[^<]+?(?P<url>magnet.*?)//1".+?[^<td](?P<seeders>\d+)</td>.+?[^<td](?P<leechers>\d+)</td>'
+        self.re_title_url =  '/torrent/(?P<id>\d+)/(?P<title>.*?)//1".+?(?P<url>magnet.*?)//1".+?(?P<seeders>\d+)</td>.+?(?P<leechers>\d+)</td>'
 
     def isEnabled(self):
         return sickbeard.THEPIRATEBAY
@@ -117,12 +117,6 @@ class ThePirateBayProvider(generic.TorrentProvider):
         for fileName in filter(lambda x: x.rpartition(".")[2].lower() in mediaExtensions, filesList):
             quality = Quality.nameQuality(os.path.basename(fileName))
             if quality != Quality.UNKNOWN: break
-
-#        for fileName in filesList:
-#            sepFile = fileName.rpartition(".")  
-#            if fileName.rpartition(".")[2].lower() in mediaExtensions:
-#                quality = Quality.nameQuality(fileName)
-#                if quality != Quality.UNKNOWN: break
 
         if fileName!=None and quality == Quality.UNKNOWN:
             quality = Quality.assumeQuality(os.path.basename(fileName))            
@@ -188,7 +182,11 @@ class ThePirateBayProvider(generic.TorrentProvider):
                 search_string['Episode'].append(ep_string)
         else:
             for show_name in set(show_name_helpers.allPossibleShowNames(ep_obj.show)):
-                ep_string = show_name_helpers.sanitizeSceneName(show_name) +' '+ sickbeard.config.naming_ep_type[2] % {'seasonnumber': ep_obj.season, 'episodenumber': ep_obj.episode}
+                ep_string = show_name_helpers.sanitizeSceneName(show_name) +' '+ \
+                sickbeard.config.naming_ep_type[2] % {'seasonnumber': ep_obj.season, 'episodenumber': ep_obj.episode} +'|'+\
+                sickbeard.config.naming_ep_type[0] % {'seasonnumber': ep_obj.season, 'episodenumber': ep_obj.episode} +'|'+\
+                sickbeard.config.naming_ep_type[3] % {'seasonnumber': ep_obj.season, 'episodenumber': ep_obj.episode} +'|'\
+
                 search_string['Episode'].append(ep_string)
     
         return [search_string]
