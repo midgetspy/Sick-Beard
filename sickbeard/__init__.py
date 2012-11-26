@@ -66,6 +66,7 @@ CREATEPID = False
 PIDFILE = ''
 
 DAEMON = None
+NO_RESIZE = False
 
 backlogSearchScheduler = None
 currentSearchScheduler = None
