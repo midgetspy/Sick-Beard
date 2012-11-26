@@ -49,7 +49,7 @@ class ImageCache:
         """
         poster_file_name = str(tvdb_id) + '.poster.jpg'
         return ek.ek(os.path.join, self._cache_dir(), poster_file_name)
-    
+
     def banner_path(self, tvdb_id):
         """
         Builds up the path to a banner cache for a given tvdb id
@@ -60,6 +60,17 @@ class ImageCache:
         """
         banner_file_name = str(tvdb_id) + '.banner.jpg'
         return ek.ek(os.path.join, self._cache_dir(), banner_file_name)
+
+    def thumbnail_path(self, tvdb_id):
+        """
+        Builds up the path to a poster cache for a given tvdb id
+
+        returns: a full path to the cached poster file for the given tvdb id 
+        
+        tvdb_id: ID of the show to use in the file name
+        """
+        thumbnail_file_name = str(tvdb_id) + '.thumbnail.jpg'
+        return ek.ek(os.path.join, self._cache_dir(), thumbnail_file_name)
 
     def has_poster(self, tvdb_id):
         """
@@ -77,8 +88,17 @@ class ImageCache:
         logger.log(u"Checking if file "+str(banner_path)+" exists", logger.DEBUG)
         return ek.ek(os.path.isfile, banner_path)
 
+    def has_thumbnail(self, tvdb_id):
+        """
+        Returns true if a cached poster exists for the given tvdb id
+        """
+        thumbnail_path = self.thumbnail_path(tvdb_id)
+        logger.log(u"Checking if file "+str(thumbnail_path)+" exists", logger.DEBUG)
+        return ek.ek(os.path.isfile, thumbnail_path)
+
     BANNER = 1
     POSTER = 2
+    THUMBNAIL = 3
     
     def which_type(self, path):
         """
@@ -132,6 +152,8 @@ class ImageCache:
             dest_path = self.poster_path(tvdb_id)
         elif img_type == self.BANNER:
             dest_path = self.banner_path(tvdb_id)
+        elif img_type == self.THUMBNAIL:
+            dest_path = self.thumbnail_path(tvdb_id)
         else:
             logger.log(u"Invalid cache image type: "+str(img_type), logger.ERROR)
             return False
@@ -163,6 +185,9 @@ class ImageCache:
         elif img_type == self.BANNER:
             img_type_name = 'banner'
             dest_path = self.banner_path(show_obj.tvdbid)
+        elif img_type == self.THUMBNAIL:
+            img_type_name = 'thumbnail'
+            dest_path = self.thumbnail_path(show_obj.tvdbid)
         else:
             logger.log(u"Invalid cache image type: "+str(img_type), logger.ERROR)
             return False
@@ -188,35 +213,37 @@ class ImageCache:
         # check if the images are already cached or not
         need_images = {self.POSTER: not self.has_poster(show_obj.tvdbid),
                        self.BANNER: not self.has_banner(show_obj.tvdbid),
+                       self.THUMBNAIL: not self.has_thumbnail(show_obj.tvdbid),
                        }
         
-        if not need_images[self.POSTER] and not need_images[self.BANNER]:
+        if not need_images[self.POSTER] and not need_images[self.BANNER] and not need_images[self.THUMBNAIL]:
             logger.log(u"No new cache images needed, not retrieving new ones")
             return
         
-        # check the show dir for images and use them
-        try:
-            for cur_provider in sickbeard.metadata_provider_dict.values():
-                logger.log(u"Checking if we can use the show image from the "+cur_provider.name+" metadata", logger.DEBUG)
-                if ek.ek(os.path.isfile, cur_provider.get_poster_path(show_obj)):
-                    cur_file_name = os.path.abspath(cur_provider.get_poster_path(show_obj))
-                    cur_file_type = self.which_type(cur_file_name)
-                    
-                    if cur_file_type == None:
-                        logger.log(u"Unable to retrieve image type, not using the image from "+str(cur_file_name), logger.WARNING)
-                        continue
-
-                    logger.log(u"Checking if image "+cur_file_name+" (type "+str(cur_file_type)+" needs metadata: "+str(need_images[cur_file_type]), logger.DEBUG)
-                    
-                    if cur_file_type in need_images and need_images[cur_file_type]:
-                        logger.log(u"Found an image in the show dir that doesn't exist in the cache, caching it: "+cur_file_name+", type "+str(cur_file_type), logger.DEBUG)
-                        self._cache_image_from_file(cur_file_name, cur_file_type, show_obj.tvdbid)
-                        need_images[cur_file_type] = False
-        except exceptions.ShowDirNotFoundException:
-            logger.log(u"Unable to search for images in show dir because it doesn't exist", logger.WARNING)
+        # check the show dir for poster or banner images and use them
+        if need_images[self.POSTER] or need_images[self.BANNER]: 
+            try:
+                for cur_provider in sickbeard.metadata_provider_dict.values():
+                    logger.log(u"Checking if we can use the show image from the "+cur_provider.name+" metadata", logger.DEBUG)
+                    if ek.ek(os.path.isfile, cur_provider.get_poster_path(show_obj)):
+                        cur_file_name = os.path.abspath(cur_provider.get_poster_path(show_obj))
+                        cur_file_type = self.which_type(cur_file_name)
+                        
+                        if cur_file_type == None:
+                            logger.log(u"Unable to retrieve image type, not using the image from "+str(cur_file_name), logger.WARNING)
+                            continue
+    
+                        logger.log(u"Checking if image "+cur_file_name+" (type "+str(cur_file_type)+" needs metadata: "+str(need_images[cur_file_type]), logger.DEBUG)
+                        
+                        if cur_file_type in need_images and need_images[cur_file_type]:
+                            logger.log(u"Found an image in the show dir that doesn't exist in the cache, caching it: "+cur_file_name+", type "+str(cur_file_type), logger.DEBUG)
+                            self._cache_image_from_file(cur_file_name, cur_file_type, show_obj.tvdbid)
+                            need_images[cur_file_type] = False
+            except exceptions.ShowDirNotFoundException:
+                logger.log(u"Unable to search for images in show dir because it doesn't exist", logger.WARNING)
                     
         # download from TVDB for missing ones
-        for cur_image_type in [self.POSTER, self.BANNER]:
+        for cur_image_type in [self.POSTER, self.BANNER, self.THUMBNAIL]:
             logger.log(u"Seeing if we still need an image of type "+str(cur_image_type)+": "+str(need_images[cur_image_type]), logger.DEBUG)
             if cur_image_type in need_images and need_images[cur_image_type]:
                 self._cache_image_from_tvdb(show_obj, cur_image_type)

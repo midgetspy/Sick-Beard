@@ -2822,12 +2822,28 @@ class WebInterface:
     @cherrypy.expose
     def showPoster(self, show=None, which=None):
 
+        REMOTE_DBG = False
+        
+        if REMOTE_DBG:
+                # Make pydev debugger works for auto reload.
+                # Note pydevd module need to be copied in XBMC\system\python\Lib\pysrc
+            try:
+                import pysrc.pydevd as pydevd
+                # stdoutToServer and stderrToServer redirect stdout and stderr to eclipse console
+                pydevd.settrace('localhost', port=5678, stdoutToServer=True, stderrToServer=True)
+            except ImportError:
+                sys.stderr.write("Error: " +
+                        "You must add org.python.pydev.debug.pysrc to your PYTHONPATH.")
+                sys.exit(1) 
+
         if which == 'poster':
+            default_image_name = 'poster.png'
+        elif which == 'thumbnail':
             default_image_name = 'poster.png'
         else:
             default_image_name = 'banner.png'
 
-        default_image_path = ek.ek(os.path.join, sickbeard.PROG_DIR, 'data', 'images', default_image_name)
+        default_image_path = ek.ek(os.path.join, sickbeard.PROG_DIR, 'gui', 'slick', 'images', default_image_name)
         if show is None:
             return cherrypy.lib.static.serve_file(default_image_path, content_type="image/png")
         else:
@@ -2840,6 +2856,8 @@ class WebInterface:
         
         if which == 'poster':
             image_file_name = cache_obj.poster_path(showObj.tvdbid)
+        elif which == 'thumbnail':
+            image_file_name = cache_obj.thumbnail_path(showObj.tvdbid)
         # this is for 'banner' but also the default case
         else:
             image_file_name = cache_obj.banner_path(showObj.tvdbid)
@@ -2857,6 +2875,8 @@ class WebInterface:
                 if which == 'banner':
                     size = 606, 112
                 elif which == 'poster':
+                    size = 136, 200
+                elif which == 'thumbnail':
                     size = 136, 200
                 else:
                     return cherrypy.lib.static.serve_file(image_file_name, content_type="image/jpeg")

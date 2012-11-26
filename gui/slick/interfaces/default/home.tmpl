@@ -10,7 +10,7 @@
 
 #set global $topmenu="home"#
 #import os.path
-#set $sickbeard.GUI = "gui/slick/"  
+
 #include $os.path.join($sickbeard.PROG_DIR, "gui/slick/interfaces/default/inc_top.tmpl")
 
 #set $myDB = $db.DBConnection()
@@ -154,7 +154,7 @@ $myShowList.sort(lambda x, y: cmp(x.name, y.name))
 
   <tr>
     <td align="center" class="nowrap">#if len($curEp) != 0 then $curEp[0].airdate else ""#</td>
-    <td><div class="imgWrapper"><a href="$sbRoot/showPoster/?show=$curShow.tvdbid&amp;which=poster" rel="dialog" title="$curShow.name"><img src="$sbRoot/showPoster/?show=$curShow.tvdbid&amp;which=poster" class="posterThumb" alt="$curShow.tvdbid"/></a></div></td>
+    <td><div class="imgWrapper"><a href="$sbRoot/showPoster/?show=$curShow.tvdbid&amp;which=poster" rel="dialog" title="$curShow.name"><img src="$sbRoot/showPoster/?show=$curShow.tvdbid&amp;which=thumbnail" class="posterThumb" alt="$curShow.tvdbid"/></a></div></td>
     <td class="tvShow"><a href="$sbRoot/home/displayShow?show=$curShow.tvdbid">$curShow.name</a></td>
     <td align="center">$curShow.network</td>
 #if $curShow.quality in $qualityPresets:
