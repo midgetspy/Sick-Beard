@@ -1516,8 +1516,6 @@ class TVEpisode(object):
         Manipulates an episode naming pattern and then fills the template in
         """
         
-        logger.log(u"pattern: "+pattern, logger.DEBUG)
-        
         if pattern == None:
             pattern = sickbeard.NAMING_PATTERN
         
@@ -1537,9 +1535,9 @@ class TVEpisode(object):
                 result_name = result_name.replace('%RN', '%S.N.S%0SE%0E.%E.N-SiCKBEARD')
                 result_name = result_name.replace('%rn', '%s.n.s%0se%0e.%e.n-sickbeard')
 
-            result_name = result_name.replace('%RG', 'SiCKBEARD')
+            result_name = result_name.replace('%RG', 'SICKBEARD')
             result_name = result_name.replace('%rg', 'sickbeard')
-            logger.log(u"Episode has no release name, replacing it with a generic one: "+result_name, logger.DEBUG)
+            #logger.log(u"Episode has no release name, replacing it with a generic one: "+result_name, logger.DEBUG)
         
         # split off ep name part only
         name_groups = re.split(r'[\\/]', result_name)
@@ -1625,6 +1623,8 @@ class TVEpisode(object):
             result_name = result_name.replace(cur_name_group, cur_name_group_result)
 
         result_name = self._format_string(result_name, replace_map)
+        
+        logger.log(u"formatting pattern: "+pattern+" -> "+result_name, logger.DEBUG)
         
         return result_name
 
