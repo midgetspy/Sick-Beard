@@ -775,8 +775,8 @@ class ConfigSearch:
     def saveSearch(self, use_nzbs=None, use_torrents=None, nzb_dir=None, sab_username=None, sab_password=None,
                        sab_apikey=None, sab_category=None, sab_host=None, nzbget_password=None, nzbget_category=None, nzbget_host=None,
                        nzb_method=None, torrent_method=None, usenet_retention=None, search_frequency=None, download_propers=None,
-                       torrent_dir=None, torrent_username=None, torrent_password=None, torrent_host=None, torrent_path=None, torrent_ratio=None, torrent_paused=None):
-
+                       torrent_dir=None, torrent_username=None, torrent_password=None, torrent_host=None, torrent_path=None, 
+                       torrent_ratio=None, torrent_paused=None):
 
         results = []
 
@@ -805,6 +805,9 @@ class ConfigSearch:
 
         if usenet_retention == None:
             usenet_retention = 200
+
+        if ignore_words == None:
+            ignore_words = ""
 
         sickbeard.USE_NZBS = use_nzbs
         sickbeard.USE_TORRENTS = use_torrents
@@ -2821,20 +2824,6 @@ class WebInterface:
 
     @cherrypy.expose
     def showPoster(self, show=None, which=None):
-
-        REMOTE_DBG = False
-        
-        if REMOTE_DBG:
-                # Make pydev debugger works for auto reload.
-                # Note pydevd module need to be copied in XBMC\system\python\Lib\pysrc
-            try:
-                import pysrc.pydevd as pydevd
-                # stdoutToServer and stderrToServer redirect stdout and stderr to eclipse console
-                pydevd.settrace('localhost', port=5678, stdoutToServer=True, stderrToServer=True)
-            except ImportError:
-                sys.stderr.write("Error: " +
-                        "You must add org.python.pydev.debug.pysrc to your PYTHONPATH.")
-                sys.exit(1) 
 
         if which == 'poster':
             default_image_name = 'poster.png'
