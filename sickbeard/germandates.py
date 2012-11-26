@@ -8,6 +8,7 @@ from datetime import date, timedelta
 
 ##define a database and add stuff to it
 #TODO: Rewrite with mappers!
+#USE SCOPED SESSIONS ...
 
 engine = create_engine('sqlite:///germandates.db', echo=False)
 metadata = MetaData(engine)
