@@ -1470,8 +1470,13 @@ class TVEpisode(object):
 
         epStatus, epQual = Quality.splitCompositeStatus(self.status) #@UnusedVariable
         
+        if sickbeard.NAMING_STRIP_YEAR:
+            show_name = re.sub("\(^\d{4}$\)", "", self.show.name).rstrip()
+        else:
+            show_name = self.show.name     
+        
         return {
-                   '%SN': self.show.name,
+                   '%SN': show_name,
                    '%S.N': dot(self.show.name),
                    '%S_N': us(self.show.name),
                    '%EN': ep_name,
