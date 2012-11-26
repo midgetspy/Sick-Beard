@@ -127,6 +127,12 @@ Change selected episodes to
     
 #for $epResult in $sqlResults:
 
+#if int($epResult["airdate"]) == 1
+    #set $status = $UNAIRED
+#else
+    #set $status = $epResult["status"]
+#end if
+
     #if int($epResult["season"]) != $curSeason:
   <tr><td colspan="9"><a name="season-$epResult["season"]"></a></td></tr>
   <tr class="seasonheader" id="season-$epResult["season"]">
@@ -140,9 +146,13 @@ Change selected episodes to
 
   #set $epStr = str($epResult["season"]) + "x" + str($epResult["episode"])
   #set $epLoc = $epResult["location"]
+#if int($status) == $UNAIRED
+  <tr class="$Overview.overviewStrings[UNAIRED]">
+#else
   <tr class="$Overview.overviewStrings[$epCats[$epStr]] season-$curSeason">
+#end if
     <td width="1%">
-#if int($epResult["status"]) != $UNAIRED
+#if int($status) != $UNAIRED
       <input type="checkbox" class="epCheck" id="<%=str(epResult["season"])+'x'+str(epResult["episode"])%>" name="<%=str(epResult["season"]) +"x"+str(epResult["episode"]) %>" />
 #end if
     </td>
@@ -164,7 +174,7 @@ $epLoc
 #end if
 
     </td>
-    <td class="status_column">$statusStrings[int($epResult["status"])]</td>
+    <td class="status_column">$statusStrings[int($status)]</td>
     <td align="center">
     #if int($epResult["season"]) != 0:
       <a class="epSearch" href="searchEpisode?show=$show.tvdbid&amp;season=$epResult["season"]&amp;episode=$epResult["episode"]"><img src="$sbRoot/images/search16.png" height="16" alt="search" title="Manual Search" /></a>
