@@ -406,11 +406,15 @@ input:not(.btn){margin-right:6px;margin-top:5px;padding-top:4px;padding-bottom:4
 .sickbeardTable td.title {
   font-size: 14px;
   line-height: normal;
+  width: 25%;
 }
-/*.sickbeardTable td.status_column {
-  line-height: normal;
+.sickbeardTable td.status_column {
+  font-weight: bold;
+  line-height: 20px;
   text-align: center;
-}*/
+  width: 12%;
+	color: #555555;
+}
 .sickbeardTable td small {
   font-size: 11px;
   font-style: italic;
