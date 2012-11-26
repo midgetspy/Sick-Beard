@@ -185,7 +185,7 @@ $Quality.DOWNLOADED.sort()
 #elif $epLoc and (not $epLoc.lower().startswith($show._location.lower()) or not $show._location):
 #set $epLoc = os.path.basename($epLoc)
 #end if
-+$epLoc
+$epLoc
 	</small>
     </td>
 #set $curStatus, $curQuality = $Quality.splitCompositeStatus(int($epResult["status"]))
