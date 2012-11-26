@@ -118,7 +118,7 @@ class Quality:
             if curQual<<16 & quality:
                 bestQualities.append(curQual)
 
-        return (anyQualities, bestQualities)
+        return (sorted(anyQualities), sorted(bestQualities))
 
     @staticmethod
     def nameQuality(name):
