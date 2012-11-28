@@ -118,7 +118,7 @@ class XBMCMetadata(generic.GenericMetadata):
         episodeguideurl = etree.SubElement( episodeguide, "url")
         episodeguideurl2 = etree.SubElement(tv_node, "episodeguideurl")
         if myShow["id"] != None:
-            showurl = sickbeard.TVDB_BASE_URL + '/series/' + myShow["id"] + '/all/en.zip'
+            showurl = sickbeard.TVDB_BASE_URL + '/series/' + myShow["id"] + '/all/' + tvdb_lang + '.zip'
             episodeguideurl.text = showurl
             episodeguideurl2.text = showurl
     
