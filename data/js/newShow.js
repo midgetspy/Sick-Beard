@@ -119,9 +119,6 @@ $(document).ready(function () {
             if ($('input:hidden[name=whichSeries]').length && $('#fullShowPath').length) {
                 goToStep(3);
             }
-            if ($('#nameToSearch').length) {
-                $('#nameToSearch').focus();
-            }
         }
     });
 
