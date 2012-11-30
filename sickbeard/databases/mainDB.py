@@ -130,7 +130,7 @@ class NumericProviders (AddAirdateIndex):
         return self.connection.tableInfo("history")['provider']['type'] == 'TEXT'
 
     histMap = {-1: 'unknown',
-                1: 'newzbin',
+                1: 'newzbin', # We should keep this here, even although Newzbin is gone
                 2: 'tvbinz',
                 3: 'nzbs',
                 4: 'eztv',

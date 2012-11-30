@@ -1001,7 +1001,6 @@ class ConfigProviders:
                       nzbs_r_us_uid=None, nzbs_r_us_hash=None, newznab_string=None,
                       tvtorrents_digest=None, tvtorrents_hash=None,
  					  btn_api_key=None,
-                      newzbin_username=None, newzbin_password=None,
                       provider_order=None):
 
         results = []
@@ -1053,8 +1052,6 @@ class ConfigProviders:
                 sickbeard.NZBS = curEnabled
             elif curProvider == 'nzbmatrix':
                 sickbeard.NZBMATRIX = curEnabled
-            elif curProvider == 'newzbin':
-                sickbeard.NEWZBIN = curEnabled
             elif curProvider == 'bin_req':
                 sickbeard.BINREQ = curEnabled
             elif curProvider == 'womble_s_index':
@@ -1080,9 +1077,6 @@ class ConfigProviders:
 
         sickbeard.NZBMATRIX_USERNAME = nzbmatrix_username
         sickbeard.NZBMATRIX_APIKEY = nzbmatrix_apikey.strip()
-
-        sickbeard.NEWZBIN_USERNAME = newzbin_username
-        sickbeard.NEWZBIN_PASSWORD = newzbin_password
 
         sickbeard.PROVIDER_ORDER = provider_list
 
