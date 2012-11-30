@@ -75,9 +75,6 @@ class ShowNotFoundException(SickBeardException):
 class EpisodeNotFoundException(SickBeardException):
 	"The episode wasn't found on theTVDB"
 
-class NewzbinAPIThrottled(SickBeardException):
-	"Newzbin has throttled us, deal with it"
-
 class TVRageException(SickBeardException):
 	"TVRage API did something bad"
 
