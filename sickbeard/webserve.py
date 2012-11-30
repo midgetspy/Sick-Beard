@@ -806,9 +806,6 @@ class ConfigSearch:
         if usenet_retention == None:
             usenet_retention = 200
 
-        if ignore_words == None:
-            ignore_words = ""
-
         sickbeard.USE_NZBS = use_nzbs
         sickbeard.USE_TORRENTS = use_torrents
 
