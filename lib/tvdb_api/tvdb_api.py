@@ -271,12 +271,10 @@ class Episode(dict):
         #end for cur_key, cur_value
 
 
-
 class Actors(list):
     """Holds all Actor instances for a show
     """
     pass
-
 
 
 class Actor(dict):
@@ -505,7 +503,10 @@ class Tvdb:
             uid = "u%d" % (os.getuid())
         else:
             # For Windows
-            uid = getpass.getuser()
+            try:
+                uid = getpass.getuser()
+            except ImportError:
+                return os.path.join(tempfile.gettempdir(), "tvdb_api")
 
         return os.path.join(tempfile.gettempdir(), "tvdb_api-%s" % (uid))
 
