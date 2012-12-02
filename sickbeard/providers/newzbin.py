@@ -18,9 +18,10 @@
 
 import os
 import re
-import sys
 import time
 import urllib
+import urllib2
+import base64
 
 from xml.dom.minidom import parseString
 from datetime import datetime, timedelta
@@ -29,53 +30,47 @@ import sickbeard
 import generic
 
 import sickbeard.encodingKludge as ek
-from sickbeard import classes, logger, helpers, exceptions, show_name_helpers
+from sickbeard import logger, helpers, exceptions, show_name_helpers
 from sickbeard import tvcache
 from sickbeard.common import Quality
 from sickbeard.exceptions import ex
 from lib.dateutil.parser import parse as parseDate
 
-class NewzbinDownloader(urllib.FancyURLopener):
 
-    def __init__(self):
-        urllib.FancyURLopener.__init__(self)
+class NewzbinErrorHandler(urllib2.HTTPDefaultErrorHandler):
+    """Returns the http error but will inspect the header X-DNZB-RCode to catch throttling and report back the proper reason code"""
 
-    def http_error_default(self, url, fp, errcode, errmsg, headers):
+    def http_error_default(self, req, fp, code, msg, hdrs):
+        # if the http error is 400 (bad request), we need to look into the header and see the return code from newzbin on why
+        if code == 400 and hdrs.getheader('X-DNZB-RCode'):
+            newzbinErrCode = int(hdrs.getheader('X-DNZB-RCode'))
 
-        # if newzbin is throttling us, wait seconds and try again
-        if errcode == 400:
-
-            newzbinErrCode = int(headers.getheader('X-DNZB-RCode'))
-
+            # if newzbin is throttling us (5 NZB requests within 60sec) we must wait (1-60) seconds and try again
             if newzbinErrCode == 450:
-                rtext = str(headers.getheader('X-DNZB-RText'))
+                rtext = str(hdrs.getheader('X-DNZB-RText'))
                 result = re.search("wait (\d+) seconds", rtext)
+                waitTime = 1 + int(result.group(1))
+                logger.log(u"Newzbin throttled our NZB downloading, pausing for " + str(waitTime) + " seconds", logger.MESSAGE)
+                time.sleep(waitTime)
+                raise exceptions.NewzbinAPIThrottled()
+            else:
+                logger.log(u"Newzbin rejected request with: " + str(hdrs.getheader('X-DNZB-RCode')) + " - " + str(hdrs.getheader('X-DNZB-RText')), logger.DEBUG)
+                # bubble the exception with the newzbin return code as the http code
+                return urllib2.HTTPDefaultErrorHandler.http_error_default(self, req, fp, newzbinErrCode, msg, hdrs)
+        else:
+            # just let the original exception bubble back up
+            return urllib2.HTTPDefaultErrorHandler.http_error_default(self, req, fp, code, msg, hdrs)
 
-            elif newzbinErrCode == 401:
-                raise exceptions.AuthException("Newzbin username or password incorrect")
-
-            elif newzbinErrCode == 402:
-                raise exceptions.AuthException("Newzbin account not premium status, can't download NZBs")
-
-            logger.log("Newzbin throttled our NZB downloading, pausing for " + result.group(1) + "seconds")
-
-            time.sleep(int(result.group(1)))
-
-            raise exceptions.NewzbinAPIThrottled()
 
 class NewzbinProvider(generic.NZBProvider):
 
     def __init__(self):
-
         generic.NZBProvider.__init__(self, "Newzbin")
-
         self.supportsBacklog = True
-
         self.cache = NewzbinCache(self)
-
         self.url = 'https://www.newzbin2.es/'
-
         self.NEWZBIN_DATE_FORMAT = '%a, %d %b %Y %H:%M:%S %Z'
+        self.attempt = 0
 
     def isEnabled(self):
         return sickbeard.NEWZBIN
@@ -85,14 +80,16 @@ class NewzbinProvider(generic.NZBProvider):
         attr_dict = {}
 
         for attribute in attributes.getElementsByTagName('report:attribute'):
+
             cur_attr = attribute.getAttribute('type')
             cur_attr_value = helpers.get_xml_text(attribute)
+
             if cur_attr not in attr_dict:
                 attr_dict[cur_attr] = [cur_attr_value]
             else:
                 attr_dict[cur_attr].append(cur_attr_value)
 
-        logger.log("Finding quality of item based on attributes "+str(attr_dict), logger.DEBUG)
+        logger.log(u"Finding quality of item based on Newzbin attributes " + str(attr_dict), logger.DEBUG)
 
         if self._is_SDTV(attr_dict):
             quality = Quality.SDTV
@@ -109,12 +106,11 @@ class NewzbinProvider(generic.NZBProvider):
         else:
             quality = Quality.UNKNOWN
 
-        logger.log("Resulting quality: "+str(quality), logger.DEBUG)
+        logger.log(u"Resulting quality: " + Quality.qualityStrings[quality] + " [" + str(quality) + "]", logger.DEBUG)
 
         return quality
 
     def _is_SDTV(self, attrs):
-
         # Video Fmt: (XviD, DivX, H.264/x264), NOT 720p, NOT 1080p, NOT 1080i
         video_fmt = 'Video Fmt' in attrs and ('XviD' in attrs['Video Fmt'] or 'DivX' in attrs['Video Fmt'] or 'H.264/x264' in attrs['Video Fmt']) \
                             and ('720p' not in attrs['Video Fmt']) \
@@ -130,13 +126,12 @@ class NewzbinProvider(generic.NZBProvider):
         return video_fmt and source and subs
 
     def _is_SDDVD(self, attrs):
-
         # Video Fmt: (XviD, DivX, H.264/x264), NOT 720p, NOT 1080p, NOT 1080i
         video_fmt = 'Video Fmt' in attrs and ('XviD' in attrs['Video Fmt'] or 'DivX' in attrs['Video Fmt'] or 'H.264/x264' in attrs['Video Fmt']) \
                             and ('720p' not in attrs['Video Fmt']) \
                             and ('1080p' not in attrs['Video Fmt']) \
                             and ('1080i' not in attrs['Video Fmt'])
-    						
+
         # Source: DVD
         source = 'Source' in attrs and 'DVD' in attrs['Source']
 
@@ -159,7 +154,6 @@ class NewzbinProvider(generic.NZBProvider):
         return video_fmt and source and subs
 
     def _is_WEBDL(self, attrs):
-
         # Video Fmt: H.264/x264, 720p
         video_fmt = 'Video Fmt' in attrs and ('H.264/x264' in attrs['Video Fmt']) \
                             and ('720p' in attrs['Video Fmt'])
@@ -173,7 +167,6 @@ class NewzbinProvider(generic.NZBProvider):
         return video_fmt and source and subs
 
     def _is_720pBluRay(self, attrs):
-
         # Video Fmt: H.264/x264, 720p
         video_fmt = 'Video Fmt' in attrs and ('H.264/x264' in attrs['Video Fmt']) \
                             and ('720p' in attrs['Video Fmt'])
@@ -184,7 +177,6 @@ class NewzbinProvider(generic.NZBProvider):
         return video_fmt and source
 
     def _is_1080pBluRay(self, attrs):
-
         # Video Fmt: H.264/x264, 1080p
         video_fmt = 'Video Fmt' in attrs and ('H.264/x264' in attrs['Video Fmt']) \
                             and ('1080p' in attrs['Video Fmt'])
@@ -194,99 +186,138 @@ class NewzbinProvider(generic.NZBProvider):
 
         return video_fmt and source
 
-
     def getIDFromURL(self, url):
-        id_regex = re.escape(self.url) + 'browse/post/(\d+)/'
-        id_match = re.match(id_regex, url)
+        """Return the Newzbin reportid number extracted from the url obtained in a Newzbin RSS feed"""
+        id_match = re.search('/browse/post/(\d+)/', url)
         if not id_match:
             return None
         else:
             return id_match.group(1)
 
     def downloadResult(self, nzb):
-
-        id = self.getIDFromURL(nzb.url)
-        if not id:
-            logger.log("Unable to get an ID from "+str(nzb.url)+", can't download from Newzbin's API", logger.ERROR)
+        """Attempts to obtain a NZB from Newzbin using their DNZB API"""
+        nzbid = self.getIDFromURL(nzb.url)
+        if not nzbid:
+            logger.log(u"Unable to get an ID from " + str(nzb.url) + ", aborting download", logger.ERROR)
             return False
 
-        logger.log("Downloading an NZB from newzbin with id "+id)
+        logger.log(u"Downloading NZB from Newzbin with id " + nzbid + " with quality " + Quality.qualityStrings[nzb.quality], logger.MESSAGE)
 
-        fileName = ek.ek(os.path.join, sickbeard.NZB_DIR, helpers.sanitizeFileName(nzb.name)+'.nzb')
-        logger.log("Saving to " + fileName)
+        opener = urllib2.build_opener(NewzbinErrorHandler)
+        # sadly newzbin does not allow header auth (hauth) for dnzb :(
+        params = urllib.urlencode({"username": sickbeard.NEWZBIN_USERNAME, "password": sickbeard.NEWZBIN_PASSWORD, "reportid": nzbid})
+        req = urllib2.Request(self.url + "api/dnzb/", params)
 
-        urllib._urlopener = NewzbinDownloader()
-
-        params = urllib.urlencode({"username": sickbeard.NEWZBIN_USERNAME, "password": sickbeard.NEWZBIN_PASSWORD, "reportid": id})
         try:
-            urllib.urlretrieve(self.url+"api/dnzb/", fileName, data=params)
+            response = opener.open(req)
+            if response:
+                fileName = ek.ek(os.path.join, sickbeard.NZB_DIR, helpers.sanitizeFileName(nzb.name) + '.nzb')
+                logger.log(u"Saving Newzbin NZB as " + fileName, logger.MESSAGE)
+                downloadedFile = open(fileName, "w")
+                downloadedFile.write(response.read())
+                downloadedFile.close()
+                response.close()
+            else:
+                logger.log(u"Unable to save Newzbin NZB at this time, no response given.", logger.MESSAGE)
+                return False
         except exceptions.NewzbinAPIThrottled:
-            logger.log("Done waiting for Newzbin API throttle limit, starting downloads again")
-            self.downloadResult(nzb)
+            self.attempt += 1
+            if self.attempt >= 5:
+                logger.log(u"Exceeded maximum retry attempts, unable to download from Newzbin due to rate limiting.", logger.ERROR)
+                return False
+            else:
+                logger.log(u"Done waiting for Newzbin API throttle limit, retrying download request again. Attempt #" + str(self.attempt), logger.WARNING)
+                self.downloadResult(nzb)
         except (urllib.ContentTooShortError, IOError), e:
-            logger.log("Error downloading NZB: " + str(sys.exc_info()) + " - " + ex(e), logger.ERROR)
+            if hasattr(e, 'reason'):
+                logger.log(u"Unable to contact Newzbin server at this time, reason: " + ex(e.reason), logger.ERROR)
+            elif hasattr(e, 'code'):
+                if e.code == 401:
+                    logger.log(u"Newzbin username or password incorrect.", logger.ERROR)
+                elif e.code == 402:
+                    logger.log(u"Newzbin account not premium status, can't download NZBs until credits are added.", logger.ERROR)
+                elif e.code == 500 or 503:
+                    logger.log(u"Newzbin server appears to be having a problem, try again later.", logger.ERROR)
+                else:
+                    logger.log(u"Newzbin server appears to be having a problem, code: " + ek(e.code), logger.ERROR)
             return False
 
         return True
 
     def getURL(self, url):
+        req = urllib2.Request(url)
+        base64string = base64.encodestring('%s:%s' % (sickbeard.NEWZBIN_USERNAME, sickbeard.NEWZBIN_PASSWORD))[:-1]
+        authheader = "Basic %s" % base64string
+        req.add_header("Authorization", authheader)
 
-        myOpener = classes.AuthURLOpener(sickbeard.NEWZBIN_USERNAME, sickbeard.NEWZBIN_PASSWORD)
         try:
-            f = myOpener.openit(url)
+            response = urllib2.urlopen(req)
         except (urllib.ContentTooShortError, IOError), e:
-            logger.log("Error loading search results: " + str(sys.exc_info()) + " - " + ex(e), logger.ERROR)
-            return None
+            if hasattr(e, 'reason'):
+                logger.log(u"Unable to contact Newzbin server at this time, reason: " + ex(e.reason), logger.ERROR)
+            elif hasattr(e, 'code'):
+                if e.code == 401:
+                    logger.log(u"Newzbin username or password incorrect.", logger.ERROR)
+                elif e.code == 402:
+                    logger.log(u"Newzbin account not premium status, can't download NZBs until credits are added.", logger.ERROR)
+                elif e.code == 500 or 503:
+                    logger.log(u"Newzbin server appears to be having a problem, try again later.", logger.ERROR)
+                else:
+                    logger.log(u"Newzbin server appears to be having a problem, code: " + ek(e.code), logger.ERROR)
+            return []
+        else:
+            result = response.read().decode(sickbeard.SYS_ENCODING)
+            response.close()
 
-        data = f.read()
-        f.close()
-
-        return data
+        return result
 
     def _get_season_search_strings(self, show, season):
-
         nameList = set(show_name_helpers.allPossibleShowNames(show))
 
         if show.air_by_date:
             suffix = ''
         else:
             suffix = 'x'
-        searchTerms = ['^"'+x+' - '+str(season)+suffix+'"' for x in nameList]
-        #searchTerms += ['^"'+x+' - Season '+str(season)+'"' for x in nameList]
-        searchStr = " OR ".join(searchTerms)
 
+        searchTerms = ['^"' + x + ' - ' + str(season) + suffix + '"' for x in nameList]
+
+        searchStr = " OR ".join(searchTerms)
         searchStr += " -subpack -extras"
 
-        logger.log("Searching newzbin for string "+searchStr, logger.DEBUG)
-        
+        logger.log(u"Searching newzbin for string " + searchStr, logger.DEBUG)
+
         return [searchStr]
 
     def _get_episode_search_strings(self, ep_obj):
-
         nameList = set(show_name_helpers.allPossibleShowNames(ep_obj.show))
+
         if not ep_obj.show.air_by_date:
-            searchStr = " OR ".join(['^"'+x+' - %dx%02d"'%(ep_obj.season, ep_obj.episode) for x in nameList])
+            searchStr = " OR ".join(['^"' + x + ' - %dx%02d"' % (ep_obj.season, ep_obj.episode) for x in nameList])
         else:
-            searchStr = " OR ".join(['^"'+x+' - '+str(ep_obj.airdate)+'"' for x in nameList])
+            searchStr = " OR ".join(['^"' + x + ' - ' + str(ep_obj.airdate) + '"' for x in nameList])
+
         return [searchStr]
 
     def _doSearch(self, searchStr, show=None):
-
         data = self._getRSSData(searchStr.encode('utf-8'))
-        
-        item_list = []
 
+        if not data:
+            return []
+
+        item_list = []
         try:
             parsedXML = parseString(data)
             items = parsedXML.getElementsByTagName('item')
         except Exception, e:
-            logger.log("Error trying to load Newzbin RSS feed: "+ex(e), logger.ERROR)
+            logger.log(u"Error trying to load Newzbin RSS feed: " + ex(e), logger.ERROR)
             return []
 
         for cur_item in items:
+
             title = helpers.get_xml_text(cur_item.getElementsByTagName('title')[0])
-            if title == 'Feeds Error':
-                raise exceptions.AuthException("The feed wouldn't load, probably because of invalid auth info")
+            if title in ['Feed Error', 'Feeds Error']:
+                raise exceptions.AuthException(u"The feed wouldn't load, probably because of invalid auth info")
+
             if sickbeard.USENET_RETENTION is not None:
                 try:
                     dateString = helpers.get_xml_text(cur_item.getElementsByTagName('report:postdate')[0])
@@ -296,18 +327,23 @@ class NewzbinProvider(generic.NZBProvider):
                     post_date = parseDate(dateString).replace(tzinfo=None)
                     retention_date = datetime.now() - timedelta(days=sickbeard.USENET_RETENTION)
                     if post_date < retention_date:
-                        logger.log(u"Date "+str(post_date)+" is out of retention range, skipping", logger.DEBUG)
+                        logger.log(u"Date " + str(post_date) + " is out of retention range, skipping", logger.DEBUG)
                         continue
                 except Exception, e:
-                    logger.log("Error parsing date from Newzbin RSS feed: " + str(e), logger.ERROR)
+                    logger.log(u"Error parsing date from Newzbin RSS feed: " + str(e), logger.WARNING)
                     continue
 
             item_list.append(cur_item)
 
         return item_list
 
-
     def _getRSSData(self, search=None):
+        # ps_rb_video_format is the composite decimal value of the video format binary
+
+        maxage = 0
+        if sickbeard.USENET_RETENTION is not None:
+            # u_v3_retention takes in a value in seconds!, 86400 = 1 day
+            maxage = 86400 * sickbeard.USENET_RETENTION
 
         params = {
                 'searchaction': 'Search',
@@ -317,7 +353,7 @@ class NewzbinProvider(generic.NZBProvider):
                 'u_url_posts_only': 0,
                 'u_comment_posts_only': 0,
                 'u_show_passworded': 0,
-                'u_v3_retention': 0,
+                'u_v3_retention': maxage,
                 'ps_rb_video_format': 3082257,
                 'ps_rb_language': 4096,
                 'sort': 'date',
@@ -335,7 +371,7 @@ class NewzbinProvider(generic.NZBProvider):
         params['q'] += 'Attr:Lang~Eng AND NOT Attr:VideoF=DVD'
 
         url = self.url + "search/?%s" % urllib.urlencode(params)
-        logger.log("Newzbin search URL: " + url, logger.DEBUG)
+        logger.log(u"Newzbin search URL: " + url, logger.DEBUG)
 
         data = self.getURL(url)
 
@@ -343,40 +379,34 @@ class NewzbinProvider(generic.NZBProvider):
 
     def _checkAuth(self):
         if sickbeard.NEWZBIN_USERNAME in (None, "") or sickbeard.NEWZBIN_PASSWORD in (None, ""):
-            raise exceptions.AuthException("Newzbin authentication details are empty, check your config")
+            raise exceptions.AuthException(u"Newzbin authentication details are empty, check your config")
+
 
 class NewzbinCache(tvcache.TVCache):
 
     def __init__(self, provider):
-
         tvcache.TVCache.__init__(self, provider)
-
-        # only poll Newzbin every 10 mins max
-        self.minTime = 1
+        # only poll Newzbin every 15 mins max
+        self.minTime = 15
 
     def _getRSSData(self):
-
         data = self.provider._getRSSData()
-
         return data
 
     def _parseItem(self, item):
-
         (title, url) = self.provider._get_title_and_url(item)
 
-        if title == 'Feeds Error':
-            logger.log("There's an error in the feed, probably bad auth info", logger.DEBUG)
-            raise exceptions.AuthException("Invalid Newzbin username/password")
+        if title in ['Feed Error', 'Feeds Error']:
+            logger.log(u"There is an error in the feed, probably bad auth info", logger.DEBUG)
+            raise exceptions.AuthException(u"Invalid Newzbin username/password")
 
         if not title or not url:
-            logger.log("The XML returned from the "+self.provider.name+" feed is incomplete, this result is unusable", logger.ERROR)
+            logger.log(u"The XML returned from the " + self.provider.name + " feed is incomplete, this result is unusable", logger.ERROR)
             return
 
         quality = self.provider.getQuality(item)
 
-        logger.log("Found quality "+str(quality), logger.DEBUG)
-
-        logger.log("Adding item from RSS to cache: "+title, logger.DEBUG)
+        logger.log(u"Adding item from RSS to cache: " + title, logger.DEBUG)
 
         self._addCacheEntry(title, url, quality=quality)
 
