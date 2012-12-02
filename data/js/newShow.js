@@ -1,7 +1,7 @@
 $(document).ready(function () {
 
     function populateSelect() {
-        if (!$('#nameToSearch').val().length) {
+        if (!$('#nameToSearch').length) {
             return;
         }
 
