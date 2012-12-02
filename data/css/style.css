@@ -9,13 +9,13 @@ browser.css
   margin: 0;
 }
 #fileBrowserDialog ul li {
-  padding: 4px 0;
-  margin: 2px;
+  margin: 2px 0;
   list-style-type: none;
   cursor: pointer;
 }
 #fileBrowserDialog ul li a {
   display: block;
+  padding: 4px 0;
 }
 #fileBrowserDialog ul li a:hover {
   color: #00f;
@@ -356,7 +356,7 @@ home.tmpl
 /* =======================================================================
 home_postprocess.tmpl
 ========================================================================== */
-#episodeDir {
+#episodeDir, #newRootDir {
   margin-right: 6px;
 }
 
@@ -442,11 +442,6 @@ ul#rootDirStaticList li {
   margin: 2px;
   list-style: none outside none;
   cursor: pointer;
-}
-/* for tabs: manage directories */
-#rootDirs, #rootDirsControls {
-  width: 50%;
-  min-width: 400px;
 }
 /* for tabs: customize options */
 #tabs div.field-pair,

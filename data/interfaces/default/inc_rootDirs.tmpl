@@ -3,7 +3,7 @@
 
 #if $sickbeard.ROOT_DIRS:
 #set $backend_pieces = $sickbeard.ROOT_DIRS.split('|')
-#set $backend_default = 'rd-'+$backend_pieces[0]
+#set $backend_default = 'rd-' + $backend_pieces[0]
 #set $backend_dirs = $backend_pieces[1:]
 #else:
 #set $backend_default = ''
@@ -11,14 +11,14 @@
 #end if
 
 <input type="hidden" id="whichDefaultRootDir" value="$backend_default" />
-<div style="padding-bottom: 5px; padding-top: 10px;">
-    <select name="rootDir" id="rootDirs" size="6" style="min-width: 400px;">
+<div style="padding: 10px 0 5px;">
+    <select name="rootDir" id="rootDirs" size="6" style="min-width: 500px;">
     #for $cur_dir in $backend_dirs:
         <option value="$cur_dir">$cur_dir</option>
     #end for
     </select>
 </div>
-<div id="rootDirsControls" style="text-align: center;">
+<div id="rootDirsControls" style="text-align: center; width: 500px;">
     <input class="btn" type="button" id="addRootDir" value="New" />
     <input class="btn" type="button" id="editRootDir" value="Edit" />
     <input class="btn" type="button" id="deleteRootDir" value="Delete" />
