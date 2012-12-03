@@ -2,7 +2,9 @@ import re
 from bs4 import BeautifulSoup
 
 import requests
-from sqlalchemy import *
+from sqlalchemy import create_engine, MetaData, Column, Integer, String, ForeignKey
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import sessionmaker, scoped_session
 from sickbeard import logger
 from datetime import date, timedelta
 
@@ -10,38 +12,80 @@ from datetime import date, timedelta
 #TODO: Rewrite with mappers!
 #USE SCOPED SESSIONS ...
 
-engine = create_engine('sqlite:///germandates.db', echo=False)
-metadata = MetaData(engine)
+engine = create_engine('sqlite:///germandates_new.db', echo=False)
+Base = declarative_base()
 
-airdates = Table('airdates', metadata,
-	Column('id', Integer, primary_key=True),
-	Column('name', String),
-	Column('firstaired', String),
-	Column('tvdbid', Integer),
-	Column('season', Integer),
-	Column('episode', Integer),
-	)
 
-error = Table('error', metadata,
-	Column('tvdbid', Integer, ForeignKey('airdates.tvdbid'))
-	)
 
-slugs = Table('slugs', metadata,
-	Column('id', Integer, primary_key=True, unique=True),
-	Column('name', String),
-	Column('serienjunkies', String),
-	Column('fernsehserien', String),
-	)
+class Airdates(Base):
+	__tablename__ = 'airdates'
 
-version = Table('version', metadata,
-	Column('id', Integer, primary_key=True),
-	Column('nextupdate', Integer),
-	)
+	id = Column(Integer, primary_key=True)
+	name = Column(String)
+	firstaired = Column(String)
+	tvdbid = Column(Integer)
+	season = Column(Integer)
+	episode = Column(Integer)
 
-metadata.create_all(engine)
+	def __init__(self, name, firstaired, tvdbid, season, episode):
+		self.name = name
+		self.firstaired = firstaired
+		self.tvdbid = tvdbid
+		self.season = season
+		self.episode = episode
 
-conn = engine.connect()
+	def __repr__(self):
+		return u"<Airdates('id:{0}, name:{1}, s{2}e{3}, aired:{4}>".format(self.tvdbid, self.name, self.season, self.episode, self.firstaired)
 
+class Error(Base):
+	__tablename__ = 'error'
+
+	tvdbid = Column(Integer, ForeignKey("airdates.tvdbid"), primary_key=True)
+
+	def __init__(self, tvdbid):
+		self.tvdbid = tvdbid
+
+	def __repr__(self):
+		return u"<Error('tvdbid:{0}')>".format(self.tvdbid)
+
+
+class Slugs(Base):
+	__tablename__ = 'slugs'
+
+	id = Column(Integer, primary_key=True)
+	name = Column(String)
+	serienjunkies = Column(String)
+	fernsehserien = Column(String)
+
+
+	def __init__(self, id, name, serienjunkies, fernsehserien):
+		self.id = id
+		self.name = name
+		self.serienjunkies = serienjunkies
+		self.fernsehserien = fernsehserien
+
+	def __repr__(self):
+		return u"<Slugs('id:{0}, name:{1}, fs:{2}, sj:{3}>".format(self.id, self.name, self.fernsehserien, self.serienjunkies)
+
+class Version(Base):
+	__tablename__ = 'version'
+
+	id = Column(Integer, primary_key=True)
+	nextupdate = Column(Integer)
+
+
+	def __init__(self, id, nextupdate):
+		self.id = id
+		self.nextupdate = nextupdate
+
+	def __repr__(self):
+		return u"<Version('next_update:{0}>".format(self.nextupdate)
+
+
+Base.metadata.create_all(engine)
+Session = sessionmaker()
+Session.configure(bind=engine)
+session = scoped_session(Session)
 
 
 def updateSlugs():
@@ -49,42 +93,63 @@ def updateSlugs():
 	r = requests.get(url)
 	logger.log(u"Updating german airdate slugs", logger.DEBUG)
 	for entry in r.json["result"]:
-	 	if not slugs.select(slugs.c.id == entry["id"]).execute().fetchone():
-	 		slugs.insert().execute(entry)
-	 	if error.select(error.c.tvdbid == entry["id"]).execute().fetchone():
-	 		conn.execute(error.delete().where(error.c.tvdbid == entry["id"]))
+	 	ins = Slugs(
+	 		id = entry["id"],
+	 		name = entry["name"],
+	 		fernsehserien = entry["fernsehserien"],
+	 		serienjunkies = entry["serienjunkies"]
+	 		)
+	 	session.merge(ins)
+	 	is_in_error = session.query(Error).filter(Error.tvdbid == entry["id"]).first()
+	 	if is_in_error:
+	 		session.delete(is_in_error)
+	session.commit()
+	logger.log(u"german airdate slug update finished", logger.DEBUG)
+	 		
 
 
 def updateEpisode(serieselement):
-	entry = airdates.select(and_(
-		airdates.c.tvdbid == serieselement["tvdbid"], 
-		airdates.c.season == serieselement["season"], 
-		airdates.c.episode == serieselement["episode"]
-		)).execute().fetchone()
-
+	entry = (
+		session.query(Airdates)
+			.filter(Airdates.tvdbid == serieselement["tvdbid"])
+			.filter(Airdates.season == serieselement["season"])
+			.filter(Airdates.episode == serieselement["episode"])
+			.first()
+		)
+	ins = Airdates(
+		name = serieselement["name"],
+		firstaired = serieselement["firstaired"],
+		tvdbid = serieselement["tvdbid"],
+		season = serieselement["season"],
+		episode = serieselement["episode"]
+	)
 	if not entry:
 		logger.log(u"Entry for {0} not in my Database... CREATE it".format(serieselement), logger.DEBUG)
-		airdates.insert(serieselement).execute()
+		session.merge(ins)
+		session.commit()
 	elif entry and not entry.firstaired:
 		logger.log(u"Entry for {0} without a Airdate... UPDATE it".format(serieselement), logger.DEBUG)
-		airdates.update().where(and_(airdates.c.season == serieselement["season"], airdates.c.episode == serieselement["episode"],airdates.c.tvdbid == serieselement["tvdbid"])).values(serieselement).execute()
+		session.merge(ins)
+		session.commit()
 	else:
 		logger.log(u"Entry {0} is in my Database".format(entry), logger.DEBUG)
 
+
 def noSlug(tvdbid):
-	inerror = error.select(error.c.tvdbid == tvdbid).execute().fetchone()
-	if not inerror:
+	is_in_error = session.query(Error).filter(Error.tvdbid == tvdbid).first()
+	if not is_in_error:
 		logger.log(u"Sorry i cant find any slugs for {0}, go to cytec.us/tvdb to add more shows".format(tvdbid), logger.ERROR)
 		updateSlugs()
-		add_to_error = error.insert().values(tvdbid=tvdbid).execute()
+		session.merge(Error(tvdbid=tvdbid))
+		session.commit()
 
 def fsGetDates(tvdbid):
-	myrequest = slugs.select(slugs.c.id == tvdbid).execute().fetchone()
-	if not myrequest:
+	my_request = session.query(Slugs).filter(Slugs.id == tvdbid).first()
+	if not my_request:
 		noSlug(tvdbid)
 	
-	if myrequest.fernsehserien:
-		url = "http://www.fernsehserien.de/{0}/episodenguide".format(myrequest.fernsehserien)
+	if my_request.fernsehserien:
+		url = "http://www.fernsehserien.de/{0}/episodenguide".format(my_request.fernsehserien)
 		r = requests.get(url)
 		if r.status_code == 200:
 			soup = BeautifulSoup(r.text)
@@ -106,12 +171,12 @@ def fsGetDates(tvdbid):
 			logger.log(u"Seems there was an error with the url {0}".format(url), logger.WARNING)
 
 def sjGetDates(tvdbid):
-	myrequest = slugs.select(slugs.c.id == tvdbid).execute().fetchone()
-	if not myrequest:
+	my_request = session.query(Slugs).filter(Slugs.id == tvdbid).first()
+	if not my_request:
 		noSlug(tvdbid)
 	
-	if myrequest.serienjunkies:
-		url = "http://www.serienjunkies.de/{0}/alle-serien-staffeln.html".format(myrequest.serienjunkies)
+	if my_request.serienjunkies:
+		url = "http://www.serienjunkies.de/{0}/alle-serien-staffeln.html".format(my_request.serienjunkies)
 		r = requests.get(url)
 		if r.status_code == 200:
 			soup = BeautifulSoup(r.text)
@@ -136,19 +201,23 @@ def updateAirDates(tvdbid):
 	now = date.today()
 	t = timedelta(14)
 	next = now + t
-	result = version.select().execute().fetchone()
+	result = session.query(Version).first()
+	ins = Version(
+		id = 1,
+		nextupdate=next.toordinal()
+	)
 	if not result:
-		ins = {"id":1, "nextupdate":next.toordinal()}
-		version.insert(ins).execute()
+		session.merge(ins)
 		logger.log(u"Next AirDates update: {0}".format(next), logger.ERROR)
 	if result and result.nextupdate >= now.toordinal():
 		logger.log(u"Next AirDates update: {0}".format(date.fromordinal(result.nextupdate)), logger.ERROR)
 	if result and result.nextupdate <= now.toordinal():
 		logger.log(u"Running AirDates update", logger.ERROR)
-		version.update().where(version.c.id == 1).values(nextupdate=next.toordinal()).execute()
+		session.merge(ins)
 		updateSlugs()
 		fsGetDates(tvdbid)
 		sjGetDates(tvdbid)
+	session.commit()
 
 
 def getEpInfo(tvdbid, season, episode):
@@ -156,18 +225,21 @@ def getEpInfo(tvdbid, season, episode):
 	if season == 0:
 		return "1.1.1".split(".")
 
-	result = airdates.select(and_(
-		airdates.c.tvdbid == tvdbid, 
-		airdates.c.season == season, 
-		airdates.c.episode == episode
-		)).execute().fetchone()
+	result = (
+		session.query(Airdates)
+			.filter(Airdates.tvdbid == tvdbid)
+			.filter(Airdates.season == season)
+			.filter(Airdates.episode == episode)
+			.first()
+		)
+
 	if not result:
 		updateSlugs()
 		fsGetDates(tvdbid)
 		sjGetDates(tvdbid)
 
 	elif not result.firstaired:
-		return "1.1.1".split(".")
+		return None
 		updateAirDates(tvdbid)
 	else:
 		return result.firstaired.split(".")
