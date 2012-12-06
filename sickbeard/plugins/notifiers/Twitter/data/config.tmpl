@@ -1,0 +1,69 @@
+#import sickbeard
+#from lib.yapsy.PluginManager import PluginManager
+#set $plugin = $sickbeard.pluginManager.getPluginByName('Twitter','Notifier').plugin_object
+
+                <div class="component-group clearfix">
+                    <div class="component-group-desc">
+                        <img class="notifier-icon" src="$sbRoot/images/notifiers/twitter.png" alt="" title="Twitter" />
+                        <h3><a href="http://www.twitter.com/" onclick="window.open(this.href, '_blank'); return false;">Twitter</a></h3>
+                        <p>A social networking and microblogging service, enabling its users to send and read other users' messages called tweets.</p>
+                    </div>
+                    <fieldset class="component-group-list">
+                        <div class="field-pair">
+                            <input type="checkbox" class="enabler" name="use_twitter" id="use_twitter" #if $plugin.USE_TWITTER then "checked=\"checked\"" else ""# />
+                            <label class="clearfix" for="use_twitter">
+                                <span class="component-title">Enable</span>
+                                <span class="component-desc">Should Sick Beard post tweets on Twitter?</span>
+                            </label>
+                            <label class="nocheck clearfix" for="use_twitter">
+                                <span class="component-title">&nbsp;</span>
+                                <span class="component-desc">You may want to use a second account.</span>
+                            </label>
+                        </div>
+
+                        <div id="content_use_twitter">
+                            <div class="field-pair">
+                                <input type="checkbox" name="twitter_notify_onsnatch" id="twitter_notify_onsnatch" #if $plugin.TWITTER_NOTIFY_ONSNATCH then "checked=\"checked\"" else ""# /> 
+                                <label class="clearfix" for="twitter_notify_onsnatch">
+                                    <span class="component-title">Notify on Snatch</span>
+                                    <span class="component-desc">Send notification when we start a download?</span>
+                                </label>
+                            </div>
+                            <div class="field-pair">
+                                <input type="checkbox" name="twitter_notify_ondownload" id="twitter_notify_ondownload" #if $plugin.TWITTER_NOTIFY_ONDOWNLOAD then "checked=\"checked\"" else ""# />
+                                <label class="clearfix" for="twitter_notify_ondownload">
+                                    <span class="component-title">Notify on Download</span>
+                                    <span class="component-desc">Send notification when we finish a download?</span>
+                                </label>
+                            </div>
+                            <div class="field-pair">
+                                <label class="clearfix">
+                                    <span class="component-title">Step One</span>
+                                </label>
+                                <label class="nocheck clearfix">
+                                    <span class="component-desc">Click the "Request Authorization" button.<br/> This will open a new page containing an auth key.<br/> Note: if nothing happens check your popup blocker.<br/></span>
+                                    <input type="button" class="btn" value="Request Authorization" id="twitterStep1" />
+                                </label>
+                            </div>
+                            <div class="field-pair">
+                                <label class="clearfix">
+                                    <span class="component-title">Step Two</span>
+                                </label>
+                                <label class="nocheck clearfix">
+                                    <span class="component-desc">Enter the key Twitter gave you below, and click "Verify Key".<br/></span>
+                                    <input type="text" id="twitter_key" value="" size="35" />
+                                    <input type="button" class="btn" value="Verify Key" id="twitterStep2" />
+                                </label>
+                            </div>
+                            <div class="field-pair">
+                                <label class="clearfix">
+                                    <span class="component-title">Step Three</span>
+                                </label>
+                            </div>
+                            <div class="testNotification" id="testTwitter-result">Click below to test.</div>
+                            <input type="button" class="btn" value="Test Twitter" id="testTwitter" />
+                            <input type="submit" class="btn config_submitter" value="Save Changes" />
+                        </div><!-- /content_use_twitter //-->
+
+                    </fieldset>
+                </div><!-- /twitter component-group //-->

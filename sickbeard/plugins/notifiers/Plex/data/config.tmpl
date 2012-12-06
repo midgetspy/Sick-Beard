@@ -1,0 +1,92 @@
+#import sickbeard
+#from lib.yapsy.PluginManager import PluginManager
+#set $plugin = $sickbeard.pluginManager.getPluginByName('Plex','Notifier').plugin_object
+
+                <div class="component-group clearfix">
+                    <div class="component-group-desc">
+                        <img class="notifier-icon" src="$sbRoot/images/notifiers/plex.png" alt="" title="Plex Media Server" />
+                        <h3><a href="http://www.plexapp.com/" onclick="window.open(this.href, '_blank'); return false;">Plex Media Server</a></h3>
+                        <p>Experience your media on a visually stunning, easy to use interface on your Mac connected to your TV. Your media library has never looked this good!</p>
+                    </div>
+                    <fieldset class="component-group-list">
+                        <div class="field-pair">
+                            <input type="checkbox" class="enabler" name="use_plex" id="use_plex" #if $plugin.USE_PLEX then "checked=\"checked\"" else ""# />
+                            <label class="clearfix" for="use_plex">
+                                <span class="component-title">Enable</span>
+                                <span class="component-desc">Should Sick Beard send Plex commands?</span>
+                            </label>
+                        </div>
+
+                        <div id="content_use_plex">
+                            <div class="field-pair">
+                                <input type="checkbox" name="plex_notify_onsnatch" id="plex_notify_onsnatch" #if $plugin.PLEX_NOTIFY_ONSNATCH then "checked=\"checked\"" else ""# />
+                                <label class="clearfix" for="plex_notify_onsnatch">
+                                    <span class="component-title">Notify on Snatch</span>
+                                    <span class="component-desc">Send notification when we start a download?</span>
+                                </label>
+                            </div>
+                            <div class="field-pair">
+                                <input type="checkbox" name="plex_notify_ondownload" id="plex_notify_ondownload" #if $plugin.PLEX_NOTIFY_ONDOWNLOAD then "checked=\"checked\"" else ""# />
+                                <label class="clearfix" for="plex_notify_ondownload">
+                                    <span class="component-title">Notify on Download</span>
+                                    <span class="component-desc">Send notification when we finish a download?</span>
+                                </label>
+                            </div>
+                            <div class="field-pair">
+                                <input type="checkbox" name="plex_update_library" id="plex_update_library" #if $plugin.PLEX_UPDATE_LIBRARY then "checked=\"checked\"" else ""# />
+                                <label class="clearfix" for="plex_update_library">
+                                    <span class="component-title">Update Library</span>
+                                    <span class="component-desc">Update Plex Media Server library when we finish a download?</span>
+                                </label>
+                            </div>
+                            <div class="field-pair">
+                                <label class="nocheck clearfix">
+                                    <span class="component-title">Plex Media Server IP:Port</span>
+                                    <input type="text" name="plex_server_host" id="plex_server_host" value="$plugin.PLEX_SERVER_HOST" size="35" />
+                                </label>
+                                <label class="nocheck clearfix">
+                                    <span class="component-title">&nbsp;</span>
+                                    <span class="component-desc">Host running Plex Media Server (eg. 192.168.1.100:32400)</span>
+                                </label>
+                            </div>
+                            <div class="field-pair">
+                                <label class="nocheck clearfix">
+                                    <span class="component-title">Plex Client IP:Port</span>
+                                    <input type="text" name="plex_host" id="plex_host" value="$plugin.PLEX_HOST" size="35" />
+                                </label>
+                                <label class="nocheck clearfix">
+                                    <span class="component-title">&nbsp;</span>
+                                    <span class="component-desc">Host running Plex Client (eg. 192.168.1.100:3000)</span>
+                                </label>
+                                <label class="nocheck clearfix">
+                                    <span class="component-title">&nbsp;</span>
+                                    <span class="component-desc">(multiple host strings must be separated by commas)</span>
+                                </label>
+                            </div>
+                            <div class="field-pair">
+                                <label class="nocheck clearfix">
+                                    <span class="component-title">Plex Client Username</span>
+                                    <input type="text" name="plex_username" id="plex_username" value="$plugin.PLEX_USERNAME" size="35" />
+                                </label>
+                                <label class="nocheck clearfix">
+                                    <span class="component-title">&nbsp;</span>
+                                    <span class="component-desc">Username of your Plex client API (blank for none)</span>
+                                </label>
+                            </div>
+                            <div class="field-pair">
+                                <label class="nocheck clearfix">
+                                    <span class="component-title">Plex Client Password</span>
+                                    <input type="password" name="plex_password" id="plex_password" value="$plugin.PLEX_PASSWORD" size="35" />
+                                </label>
+                                <label class="nocheck clearfix">
+                                    <span class="component-title">&nbsp;</span>
+                                    <span class="component-desc">Password of your Plex client API (blank for none)</span>
+                                </label>
+                            </div>
+                            <div class="testNotification" id="testPLEX-result">Click below to test.</div>
+                            <input type="button" class="btn" value="Test Plex Media Clients" id="testPLEX" />
+                            <input type="submit" class="btn config_submitter" value="Save Changes" />
+                        </div><!-- /content_use_plex -->
+
+                    </fieldset>
+                </div><!-- /plex component-group -->

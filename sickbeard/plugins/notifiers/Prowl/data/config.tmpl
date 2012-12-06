@@ -1,0 +1,67 @@
+#import sickbeard
+#from lib.yapsy.PluginManager import PluginManager
+#set $plugin = $sickbeard.pluginManager.getPluginByName('Prowl','Notifier').plugin_object
+
+                <div class="component-group clearfix">
+                    <div class="component-group-desc">
+                        <img class="notifier-icon" src="$sbRoot/images/notifiers/prowl.png" alt="Prowl" title="Prowl" />
+                        <h3><a href="http://www.prowlapp.com/" onclick="window.open(this.href, '_blank'); return false;">Prowl</a></h3>
+                        <p>A Growl client for iOS.</p>
+                    </div>
+                    <fieldset class="component-group-list">
+                        <div class="field-pair">
+                            <input type="checkbox" class="enabler" name="use_prowl" id="use_prowl" #if $plugin.USE_PROWL then "checked=\"checked\"" else ""# /> 
+                            <label class="clearfix" for="use_prowl">
+                                <span class="component-title">Enable</span>
+                                <span class="component-desc">Should Sick Beard send Prowl notifications?</span>
+                            </label>
+                        </div>
+
+                        <div id="content_use_prowl">
+                            <div class="field-pair">
+                                <input type="checkbox" name="prowl_notify_onsnatch" id="prowl_notify_onsnatch" #if $plugin.PROWL_NOTIFY_ONSNATCH then "checked=\"checked\"" else ""# /> 
+                                <label class="clearfix" for="prowl_notify_onsnatch">
+                                    <span class="component-title">Notify on Snatch</span>
+                                    <span class="component-desc">Send notification when we start a download?</span>
+                                </label>
+                            </div>
+                            <div class="field-pair">
+                                <input type="checkbox" name="prowl_notify_ondownload" id="prowl_notify_ondownload" #if $plugin.PROWL_NOTIFY_ONDOWNLOAD then "checked=\"checked\"" else ""# />
+                                <label class="clearfix" for="prowl_notify_ondownload">
+                                    <span class="component-title">Notify on Download</span>
+                                    <span class="component-desc">Send notification when we finish a download?</span>
+                                </label>
+                            </div>
+                            <div class="field-pair">
+                                <label class="nocheck clearfix">
+                                    <span class="component-title">Prowl API key:</span>
+                                    <input type="text" name="prowl_api" id="prowl_api" value="$plugin.PROWL_API" size="35" />
+                                </label>
+                                <label class="nocheck clearfix">
+                                    <span class="component-title">&nbsp;</span>
+                                    <span class="component-desc">Get your key at: <a href="https://www.prowlapp.com/api_settings.php" onclick="window.open(this.href, '_blank'); return false;">https://prowlapp.com/api_settings.php</a></span>
+                                </label>
+                            </div>
+                            <div class="field-pair">
+                                <label class="nocheck clearfix">
+                                    <span class="component-title">Prowl Priority:</span>
+                                   <select id="prowl_priority" name="prowl_priority">
+                                        <option value="-2" #if $plugin.PROWL_PRIORITY == "-2" then 'selected="selected"' else ""#>Very Low</option>
+                                        <option value="-1" #if $plugin.PROWL_PRIORITY == "-1" then 'selected="selected"' else ""#>Moderate</option>
+                                        <option value="0" #if $plugin.PROWL_PRIORITY == "0" then 'selected="selected"' else ""#>Normal</option>
+                                        <option value="1" #if $plugin.PROWL_PRIORITY == "1" then 'selected="selected"' else ""#>High</option>
+                                        <option value="2" #if $plugin.PROWL_PRIORITY == "2" then 'selected="selected"' else ""#>Emergency</option>
+                                    </select>
+                                </label>
+                                <label class="nocheck clearfix">
+                                    <span class="component-title">&nbsp;</span>
+                                    <span class="component-desc">Priority of Prowl messages from Sick-Beard.</span>
+                                </label>
+                            </div>
+                            <div class="testNotification" id="testProwl-result">Click below to test.</div>
+                            <input type="button" class="btn" value="Test Prowl" id="testProwl" />
+                            <input type="submit" class="btn config_submitter" value="Save Changes" />
+                        </div><!-- /content_use_prowl //-->
+
+                    </fieldset>
+                </div><!-- /prowl component-group //-->

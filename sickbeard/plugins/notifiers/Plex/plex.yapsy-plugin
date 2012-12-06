@@ -1,0 +1,9 @@
+[Core]
+Name = Plex
+Module = plex
+
+[Documentation]
+Description = Plex Notifier
+Author = Nic Wolfe <nic@wolfeden.ca>
+Version = 0.1
+Website = http://code.google.com/p/sickbeard/

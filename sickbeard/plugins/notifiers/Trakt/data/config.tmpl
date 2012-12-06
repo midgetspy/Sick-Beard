@@ -1,0 +1,57 @@
+#import sickbeard
+#from lib.yapsy.PluginManager import PluginManager
+#set $plugin = $sickbeard.pluginManager.getPluginByName('Trakt','Notifier').plugin_object
+
+                <div class="component-group clearfix">
+                    <div class="component-group-desc">
+                        <img class="notifier-icon" src="$sbRoot/images/notifiers/trakt.png" alt="" title="Trakt" />
+                        <h3><a href="http://trakt.tv/" onclick="window.open(this.href, '_blank'); return false;">Trakt</a></h3>
+                        <p>trakt helps keep a record of what TV shows and movies you are watching. Based on your favorites, trakt recommends additional shows and movies you'll enjoy!</p>
+                    </div>
+                    <fieldset class="component-group-list">
+                        <div class="field-pair">
+                            <input type="checkbox" class="enabler" name="use_trakt" id="use_trakt" #if $plugin.USE_TRAKT then "checked=\"checked\"" else ""# />
+                            <label class="clearfix" for="use_trakt">
+                                <span class="component-title">Enable</span>
+                                <span class="component-desc">Should Sick Beard send Trakt.tv notifications?</span>
+                            </label>
+                        </div>
+
+                        <div id="content_use_trakt">
+                            <div class="field-pair">
+                                <label class="nocheck clearfix">
+                                    <span class="component-title">Trakt Username</span>
+                                    <input type="text" name="trakt_username" id="trakt_username" value="$plugin.TRAKT_USERNAME" size="35" />
+                                </label>
+                                <label class="nocheck clearfix">
+                                    <span class="component-title">&nbsp;</span>
+                                    <span class="component-desc">Username of your Trakt account.</span>
+                                </label>
+                            </div>
+                            <div class="field-pair">
+                                <label class="nocheck clearfix">
+                                    <span class="component-title">Trakt Password</span>
+                                    <input type="password" name="trakt_password" id="trakt_password" value="$plugin.TRAKT_PASSWORD" size="35" />
+                                </label>
+                                <label class="nocheck clearfix">
+                                    <span class="component-title">&nbsp;</span>
+                                    <span class="component-desc">Password of your Trakt account.</span>
+                                </label>
+                            </div>
+                            <div class="field-pair">
+                                <label class="nocheck clearfix">
+                                    <span class="component-title">Trakt API key:</span>
+                                    <input type="text" name="trakt_api" id="trakt_api" value="$plugin.TRAKT_API" size="35" />
+                                </label>
+                                <label class="nocheck clearfix">
+                                    <span class="component-title">&nbsp;</span>
+                                    <span class="component-desc">Get your key at: <a href="http://trakt.tv/settings/api" onclick="window.open(this.href, '_blank'); return false;">http://trakt.tv/settings/api</a></span>
+                                </label>
+                            </div>
+                            <div class="testNotification" id="testTrakt-result">Click below to test.</div>
+                            <input type="button" class="btn" value="Test Trakt" id="testTrakt" />
+                            <input type="submit" class="btn config_submitter" value="Save Changes" />
+                        </div><!-- /content_use_trakt //-->
+
+                    </fieldset>
+                </div><!-- /trakt component-group //-->

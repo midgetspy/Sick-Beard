@@ -33,7 +33,7 @@ import cherrypy.lib
 import sickbeard
 
 from sickbeard import config, sab
-from sickbeard import history, notifiers, processTV
+from sickbeard import history, processTV
 from sickbeard import ui
 from sickbeard import logger, helpers, exceptions, classes, db
 from sickbeard import encodingKludge as ek
@@ -57,6 +57,8 @@ except ImportError:
 import xml.etree.cElementTree as etree
 
 from sickbeard import browser
+
+from lib.yapsy.PluginManager import PluginManager
 
 
 class PageTemplate (Template):
@@ -1136,284 +1138,12 @@ class ConfigNotifications:
         return _munge(t)
 
     @cherrypy.expose
-    def saveNotifications(self, use_xbmc=None, xbmc_notify_onsnatch=None, xbmc_notify_ondownload=None,
-                          xbmc_update_library=None, xbmc_update_full=None, xbmc_host=None, xbmc_username=None, xbmc_password=None,
-                          use_plex=None, plex_notify_onsnatch=None, plex_notify_ondownload=None, plex_update_library=None,
-                          plex_server_host=None, plex_host=None, plex_username=None, plex_password=None,
-                          use_growl=None, growl_notify_onsnatch=None, growl_notify_ondownload=None, growl_host=None, growl_password=None, 
-                          use_prowl=None, prowl_notify_onsnatch=None, prowl_notify_ondownload=None, prowl_api=None, prowl_priority=0, 
-                          use_twitter=None, twitter_notify_onsnatch=None, twitter_notify_ondownload=None, 
-                          use_notifo=None, notifo_notify_onsnatch=None, notifo_notify_ondownload=None, notifo_username=None, notifo_apisecret=None,
-                          use_boxcar=None, boxcar_notify_onsnatch=None, boxcar_notify_ondownload=None, boxcar_username=None,
-                          use_pushover=None, pushover_notify_onsnatch=None, pushover_notify_ondownload=None, pushover_userkey=None,
-                          use_libnotify=None, libnotify_notify_onsnatch=None, libnotify_notify_ondownload=None,
-                          use_nmj=None, nmj_host=None, nmj_database=None, nmj_mount=None, use_synoindex=None,
-                          use_trakt=None, trakt_username=None, trakt_password=None, trakt_api=None,
-                          use_pytivo=None, pytivo_notify_onsnatch=None, pytivo_notify_ondownload=None, pytivo_update_library=None, 
-                          pytivo_host=None, pytivo_share_name=None, pytivo_tivo_name=None,
-                          use_nma=None, nma_notify_onsnatch=None, nma_notify_ondownload=None, nma_api=None, nma_priority=0 ):
+    def saveNotifications(self, **kwargs):
 
         results = []
-
-        if xbmc_notify_onsnatch == "on":
-            xbmc_notify_onsnatch = 1
-        else:
-            xbmc_notify_onsnatch = 0
-
-        if xbmc_notify_ondownload == "on":
-            xbmc_notify_ondownload = 1
-        else:
-            xbmc_notify_ondownload = 0
-
-        if xbmc_update_library == "on":
-            xbmc_update_library = 1
-        else:
-            xbmc_update_library = 0
-
-        if xbmc_update_full == "on":
-            xbmc_update_full = 1
-        else:
-            xbmc_update_full = 0
-
-        if use_xbmc == "on":
-            use_xbmc = 1
-        else:
-            use_xbmc = 0
-
-        if plex_update_library == "on":
-            plex_update_library = 1
-        else:
-            plex_update_library = 0
-
-        if plex_notify_onsnatch == "on":
-            plex_notify_onsnatch = 1
-        else:
-            plex_notify_onsnatch = 0
-
-        if plex_notify_ondownload == "on":
-            plex_notify_ondownload = 1
-        else:
-            plex_notify_ondownload = 0
-
-        if use_plex == "on":
-            use_plex = 1
-        else:
-            use_plex = 0
-
-        if growl_notify_onsnatch == "on":
-            growl_notify_onsnatch = 1
-        else:
-            growl_notify_onsnatch = 0
-
-        if growl_notify_ondownload == "on":
-            growl_notify_ondownload = 1
-        else:
-            growl_notify_ondownload = 0
-
-        if use_growl == "on":
-            use_growl = 1
-        else:
-            use_growl = 0
-            
-        if prowl_notify_onsnatch == "on":
-            prowl_notify_onsnatch = 1
-        else:
-            prowl_notify_onsnatch = 0
-
-        if prowl_notify_ondownload == "on":
-            prowl_notify_ondownload = 1
-        else:
-            prowl_notify_ondownload = 0
-        if use_prowl == "on":
-            use_prowl = 1
-        else:
-            use_prowl = 0
-
-        if twitter_notify_onsnatch == "on":
-            twitter_notify_onsnatch = 1
-        else:
-            twitter_notify_onsnatch = 0
-
-        if twitter_notify_ondownload == "on":
-            twitter_notify_ondownload = 1
-        else:
-            twitter_notify_ondownload = 0
-        if use_twitter == "on":
-            use_twitter = 1
-        else:
-            use_twitter = 0
-
-        if notifo_notify_onsnatch == "on":
-            notifo_notify_onsnatch = 1
-        else:
-            notifo_notify_onsnatch = 0
-
-        if notifo_notify_ondownload == "on":
-            notifo_notify_ondownload = 1
-        else:
-            notifo_notify_ondownload = 0
-        if use_notifo == "on":
-            use_notifo = 1
-        else:
-            use_notifo = 0
-
-        if boxcar_notify_onsnatch == "on":
-            boxcar_notify_onsnatch = 1
-        else:
-            boxcar_notify_onsnatch = 0
-
-        if boxcar_notify_ondownload == "on":
-            boxcar_notify_ondownload = 1
-        else:
-            boxcar_notify_ondownload = 0
-        if use_boxcar == "on":
-            use_boxcar = 1
-        else:
-            use_boxcar = 0
-
-        if pushover_notify_onsnatch == "on":
-            pushover_notify_onsnatch = 1
-        else:
-            pushover_notify_onsnatch = 0
-
-        if pushover_notify_ondownload == "on":
-            pushover_notify_ondownload = 1
-        else:
-            pushover_notify_ondownload = 0
-        if use_pushover == "on":
-            use_pushover = 1
-        else:
-            use_pushover = 0
-
-        if use_nmj == "on":
-            use_nmj = 1
-        else:
-            use_nmj = 0
-
-        if use_synoindex == "on":
-            use_synoindex = 1
-        else:
-            use_synoindex = 0
-
-        if use_trakt == "on":
-            use_trakt = 1
-        else:
-            use_trakt = 0
-
-        if use_pytivo == "on":
-            use_pytivo = 1
-        else:
-            use_pytivo = 0
-            
-        if pytivo_notify_onsnatch == "on":
-            pytivo_notify_onsnatch = 1
-        else:
-            pytivo_notify_onsnatch = 0
-
-        if pytivo_notify_ondownload == "on":
-            pytivo_notify_ondownload = 1
-        else:
-            pytivo_notify_ondownload = 0
-
-        if pytivo_update_library == "on":
-            pytivo_update_library = 1
-        else:
-            pytivo_update_library = 0
-
-        if use_nma == "on":
-            use_nma = 1
-        else:
-            use_nma = 0
-
-        if nma_notify_onsnatch == "on":
-            nma_notify_onsnatch = 1
-        else:
-            nma_notify_onsnatch = 0
-
-        if nma_notify_ondownload == "on":
-            nma_notify_ondownload = 1
-        else:
-            nma_notify_ondownload = 0
-
-        sickbeard.USE_XBMC = use_xbmc
-        sickbeard.XBMC_NOTIFY_ONSNATCH = xbmc_notify_onsnatch
-        sickbeard.XBMC_NOTIFY_ONDOWNLOAD = xbmc_notify_ondownload
-        sickbeard.XBMC_UPDATE_LIBRARY = xbmc_update_library
-        sickbeard.XBMC_UPDATE_FULL = xbmc_update_full
-        sickbeard.XBMC_HOST = xbmc_host
-        sickbeard.XBMC_USERNAME = xbmc_username
-        sickbeard.XBMC_PASSWORD = xbmc_password
-
-        sickbeard.USE_PLEX = use_plex
-        sickbeard.PLEX_NOTIFY_ONSNATCH = plex_notify_onsnatch
-        sickbeard.PLEX_NOTIFY_ONDOWNLOAD = plex_notify_ondownload
-        sickbeard.PLEX_UPDATE_LIBRARY = plex_update_library
-        sickbeard.PLEX_HOST = plex_host
-        sickbeard.PLEX_SERVER_HOST = plex_server_host
-        sickbeard.PLEX_USERNAME = plex_username
-        sickbeard.PLEX_PASSWORD = plex_password
-
-        sickbeard.USE_GROWL = use_growl
-        sickbeard.GROWL_NOTIFY_ONSNATCH = growl_notify_onsnatch
-        sickbeard.GROWL_NOTIFY_ONDOWNLOAD = growl_notify_ondownload
-        sickbeard.GROWL_HOST = growl_host
-        sickbeard.GROWL_PASSWORD = growl_password
-
-        sickbeard.USE_PROWL = use_prowl
-        sickbeard.PROWL_NOTIFY_ONSNATCH = prowl_notify_onsnatch
-        sickbeard.PROWL_NOTIFY_ONDOWNLOAD = prowl_notify_ondownload
-        sickbeard.PROWL_API = prowl_api
-        sickbeard.PROWL_PRIORITY = prowl_priority
-
-        sickbeard.USE_TWITTER = use_twitter
-        sickbeard.TWITTER_NOTIFY_ONSNATCH = twitter_notify_onsnatch
-        sickbeard.TWITTER_NOTIFY_ONDOWNLOAD = twitter_notify_ondownload
-
-        sickbeard.USE_NOTIFO = use_notifo
-        sickbeard.NOTIFO_NOTIFY_ONSNATCH = notifo_notify_onsnatch
-        sickbeard.NOTIFO_NOTIFY_ONDOWNLOAD = notifo_notify_ondownload
-        sickbeard.NOTIFO_USERNAME = notifo_username
-        sickbeard.NOTIFO_APISECRET = notifo_apisecret
-
-        sickbeard.USE_BOXCAR = use_boxcar
-        sickbeard.BOXCAR_NOTIFY_ONSNATCH = boxcar_notify_onsnatch
-        sickbeard.BOXCAR_NOTIFY_ONDOWNLOAD = boxcar_notify_ondownload
-        sickbeard.BOXCAR_USERNAME = boxcar_username
-
-        sickbeard.USE_PUSHOVER = use_pushover
-        sickbeard.PUSHOVER_NOTIFY_ONSNATCH = pushover_notify_onsnatch
-        sickbeard.PUSHOVER_NOTIFY_ONDOWNLOAD = pushover_notify_ondownload
-        sickbeard.PUSHOVER_USERKEY = pushover_userkey
-
-        sickbeard.USE_LIBNOTIFY = use_libnotify == "on"
-        sickbeard.LIBNOTIFY_NOTIFY_ONSNATCH = libnotify_notify_onsnatch == "on"
-        sickbeard.LIBNOTIFY_NOTIFY_ONDOWNLOAD = libnotify_notify_ondownload == "on"
-
-        sickbeard.USE_NMJ = use_nmj
-        sickbeard.NMJ_HOST = nmj_host
-        sickbeard.NMJ_DATABASE = nmj_database
-        sickbeard.NMJ_MOUNT = nmj_mount
-
-        sickbeard.USE_SYNOINDEX = use_synoindex
-
-        sickbeard.USE_TRAKT = use_trakt
-        sickbeard.TRAKT_USERNAME = trakt_username
-        sickbeard.TRAKT_PASSWORD = trakt_password
-        sickbeard.TRAKT_API = trakt_api
-
-        sickbeard.USE_PYTIVO = use_pytivo
-        sickbeard.PYTIVO_NOTIFY_ONSNATCH = pytivo_notify_onsnatch == "off"
-        sickbeard.PYTIVO_NOTIFY_ONDOWNLOAD = pytivo_notify_ondownload ==  "off"
-        sickbeard.PYTIVO_UPDATE_LIBRARY = pytivo_update_library
-        sickbeard.PYTIVO_HOST = pytivo_host
-        sickbeard.PYTIVO_SHARE_NAME = pytivo_share_name
-        sickbeard.PYTIVO_TIVO_NAME = pytivo_tivo_name
-
-        sickbeard.USE_NMA = use_nma
-        sickbeard.NMA_NOTIFY_ONSNATCH = nma_notify_onsnatch
-        sickbeard.NMA_NOTIFY_ONDOWNLOAD = nma_notify_ondownload
-        sickbeard.NMA_API = nma_api
-        sickbeard.NMA_PRIORITY = nma_priority
+        
+        for pluginInfo in sickbeard.pluginManager.getPluginsOfCategory("Notifier"):
+            pluginInfo.plugin_object.updateConfig(**kwargs)
         
         sickbeard.save_config()
 
@@ -1447,18 +1177,19 @@ class Config:
 
     notifications = ConfigNotifications()
 
-def haveXBMC():
-    return sickbeard.USE_XBMC and sickbeard.XBMC_UPDATE_LIBRARY
+# TODO: Re-add using plugin interface
+#def haveXBMC():
+#    return sickbeard.USE_XBMC and sickbeard.XBMC_UPDATE_LIBRARY
 
-def havePLEX():
-    return sickbeard.USE_PLEX and sickbeard.PLEX_UPDATE_LIBRARY
+#def havePLEX():
+#    return sickbeard.USE_PLEX and sickbeard.PLEX_UPDATE_LIBRARY
 
 def HomeMenu():
     return [
         { 'title': 'Add Shows',              'path': 'home/addShows/',                                          },
         { 'title': 'Manual Post-Processing', 'path': 'home/postprocess/'                                        },
-        { 'title': 'Update XBMC',            'path': 'home/updateXBMC/', 'requires': haveXBMC                   },
-        { 'title': 'Update Plex',            'path': 'home/updatePLEX/', 'requires': havePLEX                   },
+        #{ 'title': 'Update XBMC',            'path': 'home/updateXBMC/', 'requires': haveXBMC                   },
+        #{ 'title': 'Update Plex',            'path': 'home/updatePLEX/', 'requires': havePLEX                   },
         { 'title': 'Restart',                'path': 'home/restart/?pid='+str(sickbeard.PID), 'confirm': True   },
         { 'title': 'Shutdown',               'path': 'home/shutdown/?pid='+str(sickbeard.PID), 'confirm': True                          },
     ]
@@ -1971,167 +1702,6 @@ class Home:
             return "Unable to connect to host"
 
     @cherrypy.expose
-    def testGrowl(self, host=None, password=None):
-        cherrypy.response.headers['Cache-Control'] = "max-age=0,no-cache,no-store"
-
-        result = notifiers.growl_notifier.test_notify(host, password)
-        if password==None or password=='':
-            pw_append = ''
-        else:
-            pw_append = " with password: " + password
-
-        if result:
-            return "Registered and Tested growl successfully "+urllib.unquote_plus(host)+pw_append
-        else:
-            return "Registration and Testing of growl failed "+urllib.unquote_plus(host)+pw_append
-
-    @cherrypy.expose
-    def testProwl(self, prowl_api=None, prowl_priority=0):
-        cherrypy.response.headers['Cache-Control'] = "max-age=0,no-cache,no-store"
-
-        result = notifiers.prowl_notifier.test_notify(prowl_api, prowl_priority)
-        if result:
-            return "Test prowl notice sent successfully"
-        else:
-            return "Test prowl notice failed"
-
-    @cherrypy.expose
-    def testNotifo(self, username=None, apisecret=None):
-        cherrypy.response.headers['Cache-Control'] = "max-age=0,no-cache,no-store"
-
-        result = notifiers.notifo_notifier.test_notify(username, apisecret)
-        if result:
-            return "Notifo notification succeeded. Check your Notifo clients to make sure it worked"
-        else:
-            return "Error sending Notifo notification"
-
-    @cherrypy.expose
-    def testBoxcar(self, username=None):
-        cherrypy.response.headers['Cache-Control'] = "max-age=0,no-cache,no-store"
-
-        result = notifiers.boxcar_notifier.test_notify(username)
-        if result:
-            return "Boxcar notification succeeded. Check your Boxcar clients to make sure it worked"
-        else:
-            return "Error sending Boxcar notification"
-
-    @cherrypy.expose
-    def testPushover(self, userKey=None):
-        cherrypy.response.headers['Cache-Control'] = "max-age=0,no-cache,no-store"
-
-        result = notifiers.pushover_notifier.test_notify(userKey)
-        if result:
-            return "Pushover notification succeeded. Check your Pushover clients to make sure it worked"
-        else:
-            return "Error sending Pushover notification"
-
-    @cherrypy.expose
-    def twitterStep1(self):
-        cherrypy.response.headers['Cache-Control'] = "max-age=0,no-cache,no-store"
-
-        return notifiers.twitter_notifier._get_authorization()
-
-    @cherrypy.expose
-    def twitterStep2(self, key):
-        cherrypy.response.headers['Cache-Control'] = "max-age=0,no-cache,no-store"
-
-        result = notifiers.twitter_notifier._get_credentials(key)
-        logger.log(u"result: "+str(result))
-        if result:
-            return "Key verification successful"
-        else:
-            return "Unable to verify key"
-
-    @cherrypy.expose
-    def testTwitter(self):
-        cherrypy.response.headers['Cache-Control'] = "max-age=0,no-cache,no-store"
-
-        result = notifiers.twitter_notifier.test_notify()
-        if result:
-            return "Tweet successful, check your twitter to make sure it worked"
-        else:
-            return "Error sending tweet"
-
-    @cherrypy.expose
-    def testXBMC(self, host=None, username=None, password=None):
-        cherrypy.response.headers['Cache-Control'] = "max-age=0,no-cache,no-store"
-
-        finalResult = ''
-        for curHost in [x.strip() for x in host.split(",")]:
-            curResult = notifiers.xbmc_notifier.test_notify(urllib.unquote_plus(curHost), username, password)
-            if len(curResult.split(":")) > 2 and 'OK' in curResult.split(":")[2]:
-                finalResult += "Test XBMC notice sent successfully to " + urllib.unquote_plus(curHost)
-            else:
-                finalResult += "Test XBMC notice failed to " + urllib.unquote_plus(curHost)
-            finalResult += "<br />\n"
-
-        return finalResult
-
-    @cherrypy.expose
-    def testPLEX(self, host=None, username=None, password=None):
-        cherrypy.response.headers['Cache-Control'] = "max-age=0,no-cache,no-store"
-
-        finalResult = ''
-        for curHost in [x.strip() for x in host.split(",")]:
-            curResult = notifiers.plex_notifier.test_notify(urllib.unquote_plus(curHost), username, password)
-            if len(curResult.split(":")) > 2 and 'OK' in curResult.split(":")[2]:
-                finalResult += "Test Plex notice sent successfully to " + urllib.unquote_plus(curHost)
-            else:
-                finalResult += "Test Plex notice failed to " + urllib.unquote_plus(curHost)
-            finalResult += "<br />\n"
-
-        return finalResult
-
-    @cherrypy.expose
-    def testLibnotify(self):
-        cherrypy.response.headers['Cache-Control'] = "max-age=0,no-cache,no-store"
-
-        if notifiers.libnotify_notifier.test_notify():
-            return "Tried sending desktop notification via libnotify"
-        else:
-            return notifiers.libnotify.diagnose()
-
-    @cherrypy.expose
-    def testNMJ(self, host=None, database=None, mount=None):
-        cherrypy.response.headers['Cache-Control'] = "max-age=0,no-cache,no-store"
-
-        result = notifiers.nmj_notifier.test_notify(urllib.unquote_plus(host), database, mount)
-        if result:
-            return "Successfull started the scan update"
-        else:
-            return "Test failed to start the scan update"
-
-    @cherrypy.expose
-    def settingsNMJ(self, host=None):
-        cherrypy.response.headers['Cache-Control'] = "max-age=0,no-cache,no-store"
-
-        result = notifiers.nmj_notifier.notify_settings(urllib.unquote_plus(host))
-        if result:
-            return '{"message": "Got settings from %(host)s", "database": "%(database)s", "mount": "%(mount)s"}' % {"host": host, "database": sickbeard.NMJ_DATABASE, "mount": sickbeard.NMJ_MOUNT}
-        else:
-            return '{"message": "Failed! Make sure your Popcorn is on and NMJ is running. (see Log & Errors -> Debug for detailed info)", "database": "", "mount": ""}'
-
-    @cherrypy.expose
-    def testTrakt(self, api=None, username=None, password=None):
-        cherrypy.response.headers['Cache-Control'] = "max-age=0,no-cache,no-store"
-
-        result = notifiers.trakt_notifier.test_notify(api, username, password)
-        if result:
-            return "Test notice sent successfully to Trakt"
-        else:
-            return "Test notice failed to Trakt"
-
-    @cherrypy.expose
-    def testNMA(self, nma_api=None, nma_priority=0):
-        cherrypy.response.headers['Cache-Control'] = "max-age=0,no-cache,no-store"
-        
-        result = notifiers.nma_notifier.test_notify(nma_api, nma_priority)
-        if result:
-            return "Test NMA notice sent successfully"
-        else:
-            return "Test NMA notice failed"
-
-    @cherrypy.expose
     def shutdown(self, pid=None):
 
         if str(pid) != str(sickbeard.PID):
@@ -2227,7 +1797,7 @@ class Home:
                 t.submenu.append({ 'title': 'Delete',               'path': 'home/deleteShow?show=%d'%showObj.tvdbid, 'confirm': True })
                 t.submenu.append({ 'title': 'Re-scan files',        'path': 'home/refreshShow?show=%d'%showObj.tvdbid })
                 t.submenu.append({ 'title': 'Force Full Update',    'path': 'home/updateShow?show=%d&amp;force=1'%showObj.tvdbid })
-                t.submenu.append({ 'title': 'Update show in XBMC',  'path': 'home/updateXBMC?showName=%s'%urllib.quote_plus(showObj.name.encode('utf-8')), 'requires': haveXBMC })
+                #t.submenu.append({ 'title': 'Update show in XBMC',  'path': 'home/updateXBMC?showName=%s'%urllib.quote_plus(showObj.name.encode('utf-8')), 'requires': haveXBMC })
                 t.submenu.append({ 'title': 'Preview Rename',       'path': 'home/testRename?show=%d'%showObj.tvdbid })
 
         t.show = showObj
@@ -2452,25 +2022,6 @@ class Home:
         time.sleep(3)
 
         redirect("/home/displayShow?show="+str(showObj.tvdbid))
-
-    @cherrypy.expose
-    def updateXBMC(self, showName=None):
-        # TODO: configure that each host can have different options / username / pw
-        # only send update to first host in the list -- workaround for xbmc sql backend users
-        firstHost = sickbeard.XBMC_HOST.split(",")[0].strip()
-        if notifiers.xbmc_notifier.update_library(showName=showName):
-            ui.notifications.message("Library update command sent to XBMC host: " + firstHost)
-        else:
-            ui.notifications.error("Unable to contact XBMC host: " + firstHost)
-        redirect('/home')
-
-    @cherrypy.expose
-    def updatePLEX(self):
-        if notifiers.plex_notifier.update_library():
-            ui.notifications.message("Library update command sent to Plex Media Server host: " + sickbeard.PLEX_SERVER_HOST)
-        else:
-            ui.notifications.error("Unable to contact Plex Media Server host: " + sickbeard.PLEX_SERVER_HOST)
-        redirect('/home')
 
     @cherrypy.expose
     def setStatus(self, show=None, eps=None, status=None, direct=False):

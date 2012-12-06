@@ -1,0 +1,9 @@
+[Core]
+Name = NMJ
+Module = nmj
+
+[Documentation]
+Description = NMJ Notifier
+Author = Nic Wolfe <nic@wolfeden.ca>
+Version = 0.1
+Website = http://code.google.com/p/sickbeard/

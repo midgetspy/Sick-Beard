@@ -308,7 +308,7 @@ def main():
             logger.log(u"Launching browser and exiting", logger.ERROR)
             sickbeard.launchBrowser(startPort)
         sys.exit()
-
+    
     # Build from the DB to start with
     logger.log(u"Loading initial show list")
     loadShowsFromDB()

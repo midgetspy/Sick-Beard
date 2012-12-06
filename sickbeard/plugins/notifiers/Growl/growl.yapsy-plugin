@@ -1,0 +1,9 @@
+[Core]
+Name = Growl
+Module = growl
+
+[Documentation]
+Description = Growl Notifier
+Author = Nic Wolfe <nic@wolfeden.ca>
+Version = 0.1
+Website = http://code.google.com/p/sickbeard/

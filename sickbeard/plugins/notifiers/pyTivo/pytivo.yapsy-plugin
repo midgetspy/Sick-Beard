@@ -1,0 +1,9 @@
+[Core]
+Name = pyTivo
+Module = pytivo
+
+[Documentation]
+Description = pyTivo Notifier
+Author = Nic Wolfe <nic@wolfeden.ca>
+Version = 0.1
+Website = http://code.google.com/p/sickbeard/

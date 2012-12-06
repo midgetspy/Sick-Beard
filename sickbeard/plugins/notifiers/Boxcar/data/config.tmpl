@@ -1,0 +1,51 @@
+#import sickbeard
+#from lib.yapsy.PluginManager import PluginManager
+#set $plugin = $sickbeard.pluginManager.getPluginByName('Boxcar','Notifier').plugin_object
+
+                <div class="component-group clearfix">
+                    <div class="component-group-desc">
+                        <img class="notifier-icon" src="$sbRoot/images/notifiers/boxcar.png" alt="" title="Boxcar" />
+                        <h3><a href="http://boxcar.io/" onclick="window.open(this.href, '_blank'); return false;">Boxcar</a></h3>
+                        <p>Read your messages where and when you want them! A subscription will be send if needed.</p>
+                    </div>
+                    <fieldset class="component-group-list">
+                        <div class="field-pair">
+                            <input type="checkbox" class="enabler" name="use_boxcar" id="use_boxcar" #if $plugin.USE_BOXCAR then "checked=\"checked\"" else ""# />
+                            <label class="clearfix" for="use_boxcar">
+                                <span class="component-title">Enable</span>
+                                <span class="component-desc">Should Sick Beard send notifications through Boxcar?</span>
+                            </label>
+                        </div>
+
+                        <div id="content_use_boxcar">
+                            <div class="field-pair">
+                                <input type="checkbox" name="boxcar_notify_onsnatch" id="boxcar_notify_onsnatch" #if $plugin.BOXCAR_NOTIFY_ONSNATCH then "checked=\"checked\"" else ""# />
+                                <label class="clearfix" for="boxcar_notify_onsnatch">
+                                    <span class="component-title">Notify on Snatch</span>
+                                    <span class="component-desc">Send notification when we start a download?</span>
+                                </label>
+                            </div>
+                            <div class="field-pair">
+                                <input type="checkbox" name="boxcar_notify_ondownload" id="boxcar_notify_ondownload" #if $plugin.BOXCAR_NOTIFY_ONDOWNLOAD then "checked=\"checked\"" else ""# />
+                                <label class="clearfix" for="boxcar_notify_ondownload">
+                                    <span class="component-title">Notify on Download</span>
+                                    <span class="component-desc">Send notification when we finish a download?</span>
+                                </label>
+                            </div>
+                            <div class="field-pair">
+                                <label class="nocheck clearfix">
+                                    <span class="component-title">Boxcar Username</span>
+                                    <input type="text" name="boxcar_username" id="boxcar_username" value="$plugin.BOXCAR_USERNAME" size="35" />
+                                </label>
+                                <label class="nocheck clearfix">
+                                    <span class="component-title">&nbsp;</span>
+                                    <span class="component-desc">Username of your Boxcar account</span>
+                                </label>
+                            </div>
+                            <div class="testNotification" id="testBoxcar-result">Click below to test.</div>
+                            <input type="button" class="btn" value="Test Boxcar" id="testBoxcar" />
+                            <input type="submit" class="btn config_submitter" value="Save Changes" />
+                        </div><!-- /content_use_boxcar //-->
+
+                    </fieldset>
+                </div><!-- /boxcar component-group //-->

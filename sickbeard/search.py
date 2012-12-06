@@ -29,7 +29,6 @@ from sickbeard import logger, db, show_name_helpers, exceptions, helpers
 from sickbeard import sab
 from sickbeard import nzbget
 from sickbeard import history
-from sickbeard import notifiers
 from sickbeard import nzbSplitter
 from sickbeard import ui
 from sickbeard import encodingKludge as ek
@@ -37,6 +36,8 @@ from sickbeard import providers
 
 from sickbeard.exceptions import ex
 from sickbeard.providers.generic import GenericProvider
+
+from lib.yapsy.PluginManager import PluginManager
 
 def _downloadResult(result):
     """
@@ -133,7 +134,8 @@ def snatchEpisode(result, endStatus=SNATCHED):
             curEpObj.saveToDB()
 
         if curEpObj.status not in Quality.DOWNLOADED:
-            notifiers.notify_snatch(curEpObj.prettyName())
+            for pluginInfo in sickbeard.pluginManager.getPluginsOfCategory("Notifier"):
+                pluginInfo.plugin_object.notify_snatch(curEpObj.prettyName())
 
     return True
 

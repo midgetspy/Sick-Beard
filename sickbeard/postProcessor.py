@@ -26,6 +26,8 @@ import subprocess
 
 import sickbeard
 
+from lib.yapsy.PluginManager import PluginManager
+
 from sickbeard import db
 from sickbeard import classes
 from sickbeard import common
@@ -33,7 +35,6 @@ from sickbeard import exceptions
 from sickbeard import helpers
 from sickbeard import history
 from sickbeard import logger
-from sickbeard import notifiers
 from sickbeard import show_name_helpers
 from sickbeard import scene_exceptions
 
@@ -200,8 +201,9 @@ class PostProcessor(object):
             self._log(u"Deleting file "+cur_file, logger.DEBUG)
             if ek.ek(os.path.isfile, cur_file):
                 ek.ek(os.remove, cur_file)
-                # do the library update for synoindex
-                notifiers.synoindex_notifier.deleteFile(cur_file)
+                
+                for pluginInfo in sickbeard.pluginManager.getPluginsOfCategory("Notifier"):
+                    pluginInfo.plugin_object.update_library(cur_file, False)
 
     def _combined_file_operation (self, file_path, new_path, new_base_name, associated_files=False, action=None):
         """
@@ -846,30 +848,17 @@ class PostProcessor(object):
         history.logDownload(ep_obj, self.file_path, new_ep_quality, self.release_group)
 
         # send notifications
-        notifiers.notify_download(ep_obj.prettyName())
+        for pluginInfo in sickbeard.pluginManager.getPluginsOfCategory("Notifier"):
+            pluginInfo.plugin_object.notify_download(ep_obj.prettyName())
 
         # generate nfo/tbn
         ep_obj.createMetaFiles()
         ep_obj.saveToDB()
-
-        # do the library update for XBMC
-        notifiers.xbmc_notifier.update_library(ep_obj.show.name)
-
-        # do the library update for Plex
-        notifiers.plex_notifier.update_library()
-
-        # do the library update for NMJ
-        # nmj_notifier kicks off its library update when the notify_download is issued (inside notifiers)
-
-        # do the library update for Synology Indexer
-        notifiers.synoindex_notifier.addFile(ep_obj.location)
-
-        # do the library update for pyTivo
-        notifiers.pytivo_notifier.update_library(ep_obj)
-
-        # do the library update for Trakt
-        notifiers.trakt_notifier.update_library(ep_obj)
-
+        
+        # update library
+        for pluginInfo in sickbeard.pluginManager.getPluginsOfCategory("Notifier"):
+            pluginInfo.plugin_object.update_library(ep_obj)
+        
         self._run_extra_scripts(ep_obj)
 
         return True
