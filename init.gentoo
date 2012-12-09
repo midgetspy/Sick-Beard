@@ -1,0 +1,41 @@
+#!/sbin/runscript
+# Copyright 1999-2012 Gentoo Foundation
+# Distributed under the terms of the GNU General Public License v2
+# $Header: $
+
+depend() {
+	need net localmount
+	after bootmisc
+}
+
+start() {
+	ebegin "Starting Sick Beard"
+	SB_OPTIONS="--daemon --nolaunch"
+	if [ "${FORCEUPDATE}" = 'Y' -o "${FORCEUPDATE}" = 'y' ] ; then
+		SB_OPTIONS+=' --forceupdate'
+	fi
+	if [ -n "${PORT}" ] ; then
+		SB_OPTIONS+=" --port=${PORT}"
+	fi
+	if [ -n "${CONFIG}" ] ; then
+		SB_OPTIONS+=" --config=${CONFIG}"
+	fi
+	if [ -n "${DATADIR}" ] ; then
+		SB_OPTIONS+=" --datadir=${DATADIR}"
+	fi
+
+	start-stop-daemon --start -exec "${EXEC}" --pidfile "${PIDFILE}" \
+		--user ${USER} --progress --make-pidfile -- ${SB_OPTIONS}
+	returncode=$?
+	eend $returncode
+
+	if [ $returncode -eq 0 ] ; then
+		ps aux | grep "${EXEC}" | grep -v grep | awk '{print $2}' > "${PIDFILE}"
+	fi
+}
+
+stop() {
+	ebegin "Stopping Sick Beard"
+	start-stop-daemon --stop --pidfile "${PIDFILE}" --retry 12
+	eend $?
+}

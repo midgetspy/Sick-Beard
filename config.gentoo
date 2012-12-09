@@ -1,0 +1,22 @@
+# /etc/conf.d/sickbeard
+
+# Sick Beard Python script location
+EXEC='/opt/sickbeard/SickBeard.py'
+
+# The location of the pidfile
+PIDFILE='/var/run/sickbeard.pid'
+
+# The user used to run Sick Beard
+USER='sickbeard'
+
+# Check for new episodes of the defined series when starting
+FORCEUPDATE='N'
+
+# The port to run Sick Beard on (leave empty for the default port)
+PORT=''
+
+# Specify a path to a configfile (leave empty for the default location)
+CONFIG=''
+
+# Specify the datadirectory SB should use (leave empty to use the default location)
+DATADIR=''
