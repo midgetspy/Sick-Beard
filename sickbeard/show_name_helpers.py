@@ -38,7 +38,7 @@ langCodes = {
     'de': 'german',
     'fr': 'french',
     'es': 'spanish',
-    'jp'; 'japdub'
+    'jp': 'japdub'
 }
 
 def filterBadReleases(name, show):
