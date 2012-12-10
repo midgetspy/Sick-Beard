@@ -12,7 +12,7 @@ from datetime import date, timedelta
 #TODO: Rewrite with mappers!
 #USE SCOPED SESSIONS ...
 
-engine = create_engine('sqlite:///germandates_new.db', echo=False)
+engine = create_engine('sqlite:///germandates.db', echo=False)
 Base = declarative_base()
 
 
