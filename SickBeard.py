@@ -17,7 +17,13 @@
 # You should have received a copy of the GNU General Public License
 # along with Sick Beard.  If not, see <http://www.gnu.org/licenses/>.
 
-import sys
+import sys, os.path
+# Root path
+base_path = os.path.dirname(os.path.abspath(__file__))
+
+# Insert local directories into path
+sys.path.append(os.path.join(base_path, 'lib'))
+
 if sys.version_info < (2, 5):
     print "Sorry, requires Python 2.5 or higher."
     sys.exit(1)

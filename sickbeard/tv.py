@@ -18,6 +18,8 @@
 
 from __future__ import with_statement
 
+import requests
+
 import os.path
 import datetime
 import threading
@@ -39,6 +41,8 @@ from sickbeard import tvrage
 from sickbeard import config
 from sickbeard import image_cache
 from sickbeard import postProcessor
+
+from sickbeard import germandates
 
 from sickbeard import encodingKludge as ek
 
@@ -1135,9 +1139,35 @@ class TVEpisode(object):
             self.description = ""
         else:
             self.description = tmp_description
-        rawAirdate = [int(x) for x in myEp["firstaired"].split("-")]
+        #rawAirdate = [int(x) for x in myEp["firstaired"].split("-")]
+
+
+        ### cytec airdateserver
+        if tvdb_lang == "de":
+            airlist = germandates.getEpInfo(self.show.tvdbid, self.season, self.episode)
+        else:
+            airlist = None
+
+        if airlist:
+            try:
+                rawAirdate = [int(x) for x in airlist]
+                germandate = True
+                logger.log(u"Useing german airdate ({0}) for this episode: {1}x{2}".format(rawAirdate, season, episode), logger.DEBUG)
+            except:
+                #set it to never aired
+                rawAirdate = [1,1,1]
+                logger.log(u"No german airdate found for this episode: {1}x{2}... skipping".format(rawAirdate, season, episode), logger.DEBUG)
+                germandate = False
+        else:
+            rawAirdate = [int(x) for x in myEp["firstaired"].split("-")]
+            germandate = False
+            logger.log(u"Useing tvdb airdate for this episode", logger.DEBUG)
+        
         try:
-            self.airdate = datetime.date(rawAirdate[0], rawAirdate[1], rawAirdate[2])
+            if germandate:
+                self.airdate = datetime.date(rawAirdate[2], rawAirdate[1], rawAirdate[0])
+            else:
+                self.airdate = datetime.date(rawAirdate[0], rawAirdate[1], rawAirdate[2])
         except ValueError:
             logger.log(u"Malformed air date retrieved from TVDB ("+self.show.name+" - "+str(season)+"x"+str(episode)+")", logger.ERROR)
             # if I'm incomplete on TVDB but I once was complete then just delete myself from the DB for now

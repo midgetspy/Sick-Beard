@@ -37,7 +37,8 @@ mandatory = []
 langCodes = {
     'de': 'german',
     'fr': 'french',
-    'es': 'spanish'
+    'es': 'spanish',
+    'jp'; 'japdub'
 }
 
 def filterBadReleases(name, show):
@@ -57,15 +58,16 @@ def filterBadReleases(name, show):
         logger.log(u"Unable to parse the filename "+name+" into a valid episode", logger.WARNING)
         return False
 
-    #if language not english, search for mandatory, else add german to ignore list
+    #if language not english, search for mandatory, else add other languages to ignore list
     if show.lang != "en":
         mandatory = [(langCodes[show.lang])]
         if langCodes[show.lang] in resultFilters:
             resultFilters.remove(langCodes[show.lang])
         logger.log(u"Language for \""+show.name+"\" is "+show.lang+" so im looking for \""+langCodes[show.lang]+"\" in release names", logger.DEBUG)
     elif show.lang == "en":
-        if not "german" in resultFilters:
-            resultFilters.append("german")
+        for key in langCodes:
+            if not langCodes[key] in resultFilters:
+                resultFilters.append(langCodes[key])
         mandatory = []
         logger.log(u"Language for \""+show.name+"\" is "+show.lang, logger.DEBUG)
 
