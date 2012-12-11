@@ -67,30 +67,33 @@ def check_force_season_folders(pattern=None, multi=None):
     if pattern == None:
         pattern = sickbeard.NAMING_PATTERN
     
-    valid = not validate_name(pattern, None, file_only=True) 
+    errors = validate_name(pattern, None, file_only=True, warn=False)
     
     if multi != None:
-        valid = valid or not validate_name(pattern, multi, file_only=True)
+        errors += validate_name(pattern, multi, file_only=True, warn=False)
 
-    return valid
+    return errors
 
 def check_valid_naming(pattern=None, multi=None):
     """
     Checks if the name is can be parsed back to its original form for both single and multi episodes.
     
-    Returns true if the naming is valid, false if not.
+    Returns a list which will be empty if the name was valid or contain error strings if not.
     """
     if pattern == None:
         pattern = sickbeard.NAMING_PATTERN
         
     logger.log(u"Checking whether the pattern "+pattern+" is valid for a single episode", logger.DEBUG)
-    valid = validate_name(pattern, None)
+    errors = validate_name(pattern, None)
 
     if multi != None:
         logger.log(u"Checking whether the pattern "+pattern+" is valid for a multi episode", logger.DEBUG)
-        valid = valid and validate_name(pattern, multi)
+        errors += validate_name(pattern, multi)
 
-    return valid
+    logger.log(u"Checking whether the pattern "+pattern+" can be mistaken for a multi episode when the ep name begins with a number", logger.DEBUG)
+    errors += validate_name(pattern, None, ep_name_number=True)
+
+    return list(set(errors))
 
 def check_valid_abd_naming(pattern=None):
     """
@@ -102,13 +105,11 @@ def check_valid_abd_naming(pattern=None):
         pattern = sickbeard.NAMING_PATTERN
         
     logger.log(u"Checking whether the pattern "+pattern+" is valid for an air-by-date episode", logger.DEBUG)
-    valid = validate_name(pattern, abd=True)
-
-    return valid
+    return validate_name(pattern, abd=True)
 
 
-def validate_name(pattern, multi=None, file_only=False, abd=False):
-    ep = _generate_sample_ep(multi, abd)
+def validate_name(pattern, multi=None, file_only=False, abd=False, warn=True, ep_name_number=False):
+    ep = _generate_sample_ep(multi, abd, ep_name_number)
 
     parser = NameParser(True)
 
@@ -117,37 +118,50 @@ def validate_name(pattern, multi=None, file_only=False, abd=False):
     if not file_only:
         new_name = ek.ek(os.path.join, new_path, new_name)
 
+    if warn:
+        warn_level = logger.WARNING
+    else:
+        warn_level = logger.DEBUG
+
     if not new_name:
-        logger.log(u"Unable to create a name out of "+pattern, logger.DEBUG)
-        return False
+        logger.log(u"Pattern "+pattern+" is not a valid pattern", warn_level)
+        return ["Pattern is invalid"]
 
     logger.log(u"Trying to parse "+new_name, logger.DEBUG)
 
     try:
         result = parser.parse(new_name)
     except InvalidNameException:
-        logger.log(u"Unable to parse "+new_name+", not valid", logger.DEBUG)
-        return False
+        logger.log(u"The pattern "+pattern+" generated an unrecognizable name: "+new_name, warn_level)
+        return ["Pattern results in invalid name"]
     
     logger.log("The name "+new_name + " parsed into " + str(result), logger.DEBUG)
 
     if abd:
         if result.air_date != ep.airdate:
-            logger.log(u"Air date incorrect in parsed episode, pattern isn't valid", logger.DEBUG)
-            return False
+            logger.log(u"The pattern "+pattern+" resulted in "+new_name+" which was recognized as having date "+str(result.air_date)+" but should have had date "+str(ep.airdate), warn_level)
+            return ["The air date parses incorrectly"]
     else:
         if result.season_number != ep.season:
-            logger.log(u"Season incorrect in parsed episode, pattern isn't valid", logger.DEBUG)
-            return False
-        if result.episode_numbers != [x.episode for x in [ep] + ep.relatedEps]:
-            logger.log(u"Episode incorrect in parsed episode, pattern isn't valid", logger.DEBUG)
-            return False
+            logger.log(u"The pattern "+pattern+" resulted in "+new_name+" which was recognized as being season "+str(result.season_number)+" but should have been season "+str(ep.season), warn_level)
+            return ["The season number was not recognized correctly"]
 
-    return True
+        if set(result.episode_numbers) ^ set([x.episode for x in [ep] + ep.relatedEps]):
+            logger.log(u"The pattern "+pattern+" resulted in "+new_name+" which was recognized as being episodes "+repr([str(x) for x in result.episode_numbers])+" but should have been episodes "+repr([str(x.episode) for x in [ep] + ep.relatedEps]), warn_level)
+            if result.episode_numbers and ep_name_number:
+                return ["If the episode name began with a number it would be mistaken for a multi-episode"]
+            else:
+                return ["The episode number was not recognized correctly"]
 
-def _generate_sample_ep(multi=None, abd=False):
+    return []
+
+def _generate_sample_ep(multi=None, abd=False, ep_name_number=False):
+    ep_name = "Ep Name"
+    if ep_name_number:
+        ep_name = "10 is part of the " + ep_name
+
     # make a fake episode object
-    ep = TVEpisode(2,3,"Ep Name")
+    ep = TVEpisode(2,3,ep_name)
     ep._status = Quality.compositeStatus(DOWNLOADED, Quality.HDTV)
     ep._airdate = datetime.date(2011, 3, 9)
     if abd:
@@ -156,14 +170,14 @@ def _generate_sample_ep(multi=None, abd=False):
         ep._release_name = 'Show.Name.S02E03.HDTV.XviD-RLSGROUP'
 
     if multi != None:
-        ep._name = "Ep Name (1)"
+        ep._name = ep_name+" (1)"
         ep._release_name = 'Show.Name.S02E03E04E05.HDTV.XviD-RLSGROUP'
 
-        secondEp = TVEpisode(2,4,"Ep Name (2)")
+        secondEp = TVEpisode(2,4,ep_name+" (2)")
         secondEp._status = Quality.compositeStatus(DOWNLOADED, Quality.HDTV)
         secondEp._release_name = ep._release_name
 
-        thirdEp = TVEpisode(2,5,"Ep Name (3)")
+        thirdEp = TVEpisode(2,5,ep_name+" (3)")
         thirdEp._status = Quality.compositeStatus(DOWNLOADED, Quality.HDTV)
         thirdEp._release_name = ep._release_name
 

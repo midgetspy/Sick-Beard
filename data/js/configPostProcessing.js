@@ -33,30 +33,20 @@ $(document).ready(function () {
                 }
             });
 
-        $.get(sbRoot + '/config/postProcessing/isNamingValid', {pattern: pattern, multi: multi},
+        $.getJSON(sbRoot + '/config/postProcessing/isNamingValid', {pattern: pattern, multi: multi},
             function (data) {
-                if (data == "invalid") {
-                    $('#naming_pattern').qtip('option', {
-                        'content.text': 'This pattern is invalid.',
-                        'style.classes': 'ui-tooltip-rounded ui-tooltip-shadow ui-tooltip-red'
-                    });
-                    $('#naming_pattern').qtip('toggle', true);
-                    $('#naming_pattern').css('background-color', '#FFDDDD');
-                } else if (data == "seasonfolders") {
-                    $('#naming_pattern').qtip('option', {
-                        'content.text': 'This pattern would be invalid without the folders, using it will force "Flatten" off for all shows.',
-                        'style.classes': 'ui-tooltip-rounded ui-tooltip-shadow ui-tooltip-cream'
-                    });
-                    $('#naming_pattern').qtip('toggle', true);
-                    $('#naming_pattern').css('background-color', '#FFFFDD');
-                } else {
-                    $('#naming_pattern').qtip('option', {
-                        'content.text': 'This pattern is valid.',
-                        'style.classes': 'ui-tooltip-rounded ui-tooltip-shadow ui-tooltip-green'
-                    });
-                    $('#naming_pattern').qtip('toggle', false);
+	    		if (data.result == "valid") {
                     $('#naming_pattern').css('background-color', '#FFFFFF');
-                }
+	    			$('#custom_naming_error_div').hide();
+	    		} else if (data.result == "invalid") {
+                    $('#naming_pattern').css('background-color', '#FFDDDD');
+	    			$('#custom_naming_error_zone').html(data.errors.join('<br />'));
+	    			$('#custom_naming_error_div').show();
+                } else if (data.result == "seasonfolders") {
+    				$('#custom_naming_error_zone').html('<b>This pattern would be invalid without the folders, using it will force "Flatten" off for all shows.</b><br />');
+                    $('#naming_pattern').css('background-color', '#FFFFDD');
+	    		}
+	    		
             });
 
     }
@@ -81,7 +71,7 @@ $(document).ready(function () {
 
         $.get(sbRoot + '/config/postProcessing/isNamingValid', {pattern: pattern, abd: 'True'},
             function (data) {
-                if (data == "invalid") {
+    			if (data == "invalid") {
                     $('#naming_abd_pattern').qtip('option', {
                         'content.text': 'This pattern is invalid.',
                         'style.classes': 'ui-tooltip-rounded ui-tooltip-shadow ui-tooltip-red'

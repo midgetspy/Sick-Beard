@@ -869,7 +869,7 @@ class ConfigPostProcessing:
         if self.isNamingValid(naming_pattern, naming_multi_ep) != "invalid":
             sickbeard.NAMING_PATTERN = naming_pattern
             sickbeard.NAMING_MULTI_EP = int(naming_multi_ep)
-            sickbeard.NAMING_FORCE_FOLDERS = naming.check_force_season_folders()
+            sickbeard.NAMING_FORCE_FOLDERS = len(naming.check_force_season_folders()) > 0 
         else:
             results.append("You tried saving an invalid naming config, not saving your naming settings")
 
@@ -909,24 +909,31 @@ class ConfigPostProcessing:
         if pattern == None:
             return "invalid"
         
+        if multi != None:
+            multi = int(multi)
+        
+        result = {}
+        
         # air by date shows just need one check, we don't need to worry about season folders 
         if abd:
-            is_valid = naming.check_valid_abd_naming(pattern)
-            require_season_folders = False
+            result['errors'] = naming.check_valid_abd_naming(pattern)
 
         else:
             # check validity of single and multi ep cases for the whole path
-            is_valid = naming.check_valid_naming(pattern, multi)
+            result['errors'] = naming.check_valid_naming(pattern, multi)
     
+        if not abd:
             # check validity of single and multi ep cases for only the file name
-            require_season_folders = naming.check_force_season_folders(pattern, multi)
+            result['season_folder_errors'] = naming.check_force_season_folders(pattern, multi)
 
-        if is_valid and not require_season_folders:
-            return "valid"
-        elif is_valid and require_season_folders:
-            return "seasonfolders"
+        if result['errors']:
+            result['result'] = 'invalid'
+        elif result['season_folder_errors']:
+            result['result'] = 'seasonfolders'
         else:
-            return "invalid"
+            result['result'] = 'valid'
+
+        return json.dumps(result)
 
         
 class ConfigProviders:
