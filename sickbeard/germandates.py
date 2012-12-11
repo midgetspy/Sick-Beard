@@ -148,7 +148,7 @@ def fsGetDates(tvdbid):
 	if not my_request:
 		noSlug(tvdbid)
 	
-	if my_request.fernsehserien:
+	if my_request and my_request.fernsehserien:
 		url = "http://www.fernsehserien.de/{0}/episodenguide".format(my_request.fernsehserien)
 		r = requests.get(url)
 		if r.status_code == 200:
@@ -175,7 +175,7 @@ def sjGetDates(tvdbid):
 	if not my_request:
 		noSlug(tvdbid)
 	
-	if my_request.serienjunkies:
+	if my_request and my_request.serienjunkies:
 		url = "http://www.serienjunkies.de/{0}/alle-serien-staffeln.html".format(my_request.serienjunkies)
 		r = requests.get(url)
 		if r.status_code == 200:
