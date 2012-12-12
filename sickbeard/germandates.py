@@ -143,7 +143,7 @@ def noSlug(tvdbid):
 		session.merge(Error(tvdbid=tvdbid))
 		session.commit()
 
-def fsGetDates(tvdbid):
+def fsGetDates(tvdbid, test=False):
 	my_request = session.query(Slugs).filter(Slugs.id == tvdbid).first()
 	if not my_request:
 		noSlug(tvdbid)
@@ -164,13 +164,16 @@ def fsGetDates(tvdbid):
 					name = info[3].text
 					date = info[4].text
 					serieselement = { "tvdbid": tvdbid, "name": name, "firstaired": date, "episode": episode, "season": season }
-					updateEpisode(serieselement)
+					if test:
+						print serieselement
+					else:
+						updateEpisode(serieselement)
 				else:
 					logger.log(u"Something went wrong... unable to parse: {0}".format(row), logger.DEBUG)
 		else:
 			logger.log(u"Seems there was an error with the url {0}".format(url), logger.WARNING)
 
-def sjGetDates(tvdbid):
+def sjGetDates(tvdbid, test=False):
 	my_request = session.query(Slugs).filter(Slugs.id == tvdbid).first()
 	if not my_request:
 		noSlug(tvdbid)
@@ -181,19 +184,20 @@ def sjGetDates(tvdbid):
 		if r.status_code == 200:
 			soup = BeautifulSoup(r.text)
 			eplist = soup.find("table", {"class": "eplist"})
-			try:
-				for row in eplist:
-					info = row.find_all("td", {"class": re.compile("^e")})
-					if info:
-						season, episode = info[0].text.split("x")
-						name = info[3].text
-						date = info[4].text
-						serieselement = { "tvdbid": tvdbid, "name": name, "firstaired": date, "episode": episode, "season": season }
-						updateEpisode(serieselement)
+			for row in eplist:
+				info = row.find_all("td", {"class": re.compile("^e")})
+				if info:
+					season, episode = info[0].text.split("x")
+					name = info[3].text
+					date = info[4].text
+					serieselement = { "tvdbid": tvdbid, "name": name, "firstaired": date, "episode": episode, "season": season }
+					if test:
+						print serieselement
 					else:
-						logger.log(u"Something went wrong... unable to parse: {0}".format(row), logger.WARNING)
-			except:
-				logger.log(u"Unable to parse Serienjunkies informations for {0}".format(tvdbid), logger.ERROR)
+						updateEpisode(serieselement)
+				else:
+					logger.log(u"Something went wrong... unable to parse: {0}".format(row), logger.WARNING)
+
 		else:
 			logger.log(u"Seems there was an error with the url {0}".format(url), logger.WARNING)
 	
