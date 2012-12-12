@@ -31,10 +31,11 @@ Sick Beard makes use of the following projects:
 * [SocksiPy][socks]
 * [python-dateutil][dateutil]
 * [jsonrpclib][jsonrpclib]
+* [Subliminal][subliminal]
 
 ## Dependencies
 
-To run Sick Beard from source you will need Python 2.5+ and Cheetah 2.1.0+. The [binary releases][googledownloads] are standalone.
+To run Sick Beard from source you will need Python 2.6+ and Cheetah 2.1.0+. The [binary releases][googledownloads] are standalone.
 
 ## Bugs
 
@@ -54,3 +55,4 @@ If you find a bug please report it or it'll never get fixed. Verify that it hasn
 [googleissues]: http://code.google.com/p/sickbeard/issues/list
 [googlenewissue]: http://code.google.com/p/sickbeard/issues/entry
 [jsonrpclib]: https://github.com/joshmarshall/jsonrpclib
+[subliminal]: https://github.com/Diaoul/subliminal
