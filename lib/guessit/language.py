@@ -27,7 +27,7 @@ import logging
 
 __all__ = [ 'is_iso_language', 'is_language', 'lang_set', 'Language',
             'ALL_LANGUAGES', 'ALL_LANGUAGES_NAMES', 'UNDETERMINED',
-            'search_language' ]
+            'search_language', 'guess_language' ]
 
 
 log = logging.getLogger(__name__)
@@ -325,7 +325,7 @@ def search_language(string, lang_filter=None):
         'la', 'el', 'del', 'por', 'mar',
         # other
         'ind', 'arw', 'ts', 'ii', 'bin', 'chan', 'ss', 'san', 'oss', 'iii',
-        'vi'
+        'vi', 'ben'
         ])
     sep = r'[](){} \._-+'
 
@@ -370,3 +370,19 @@ def search_language(string, lang_filter=None):
             return language, (pos - 1, end - 1), confidence
 
     return None, None, None
+
+
+def guess_language(text):
+    """Guess the language in which a body of text is written.
+
+    This uses the external guess-language python module, and will fail and return
+    Language(Undetermined) if it is not installed.
+    """
+    try:
+        from guess_language import guessLanguage
+        return Language(guessLanguage(text))
+
+    except ImportError:
+        log.error('Cannot detect the language of the given text body, missing dependency: guess-language')
+        log.error('Please install it from PyPI, by doing eg: pip install guess-language')
+        return UNDETERMINED

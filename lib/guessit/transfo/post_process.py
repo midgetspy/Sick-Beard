@@ -20,6 +20,7 @@
 
 from __future__ import unicode_literals
 from guessit.patterns import subtitle_exts
+from guessit.textutils import reorder_title
 import logging
 
 log = logging.getLogger(__name__)
@@ -60,11 +61,4 @@ def process(mtree):
         if 'series' not in node.guess:
             continue
 
-        series = node.guess['series']
-        lseries = series.lower()
-
-        if lseries[-4:] == ',the':
-            node.guess['series'] = 'The ' + series[:-4]
-
-        if lseries[-5:] == ', the':
-            node.guess['series'] = 'The ' + series[:-5]
+        node.guess['series'] = reorder_title(node.guess['series'])
