@@ -1,6 +1,4 @@
 (function(){
-		$.ajaxSetup({ async: false });
-
 	$.fn.ajaxEpSubtitlesSearch = function(){
 		$('.epSubtitlesSearch').click(function(){
 			var subtitles_td = $(this).parent().siblings('.subtitles_column');
