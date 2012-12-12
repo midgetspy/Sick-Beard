@@ -1,7 +1,12 @@
+import sys, os.path
+# Root path
+base_path = os.path.dirname(os.path.abspath(__file__))
+
+# Insert local directories into path
+sys.path.append(os.path.join(base_path, 'lib'))
+
 from sqlalchemy import *
 import requests
-
-import webbrowser
 
 
 engine = create_engine('sqlite:///sickbeard.db', echo=False)
@@ -35,7 +40,6 @@ if missingshows:
     f.write("\nBitte hilf mit, gehe auf http://cytec.us/tvdb/ und trage deine TV-Shows ein.\n")
     f.close()
     print "\nBitte hilf mit, gehe auf http://cytec.us/tvdb/ und trage deine TV-Shows ein.\n"
-    webbrowser.open("http://cytec.us/tvdb/", new=2)
 
 
 else:
