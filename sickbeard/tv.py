@@ -61,6 +61,7 @@ class TVShow(object):
         self.name = ""
         self.tvrid = 0
         self.tvrname = ""
+        self.imdbid = "" 
         self.network = ""
         self.genre = ""
         self.runtime = 0
@@ -631,6 +632,8 @@ class TVShow(object):
             if self.lang == "":
                 self.lang = sqlResults[0]["lang"]
 
+            if self.imdbid == "":
+                self.imdbid = sqlResults[0]["imdb_id"]                    
 
     def loadFromTVDB(self, cache=True, tvapi=None, cachedSeason=None):
 
@@ -658,6 +661,8 @@ class TVShow(object):
 
         self.genre = myEp['genre']
         self.network = myEp['network']
+        self.runtime = myEp['runtime']
+        self.imdbid = myEp['imdb_id']
 
         if myEp["airs_dayofweek"] != None and myEp["airs_time"] != None:
             self.airs = myEp["airs_dayofweek"] + " " + myEp["airs_time"]
@@ -873,7 +878,8 @@ class TVShow(object):
 						"subtitles": self.subtitles,
                         "startyear": self.startyear,
                         "tvr_name": self.tvrname,
-                        "lang": self.lang
+                        "lang": self.lang,
+                        "imdb_id": self.imdbid
                         }
 
         myDB.upsert("tv_shows", newValueDict, controlValueDict)

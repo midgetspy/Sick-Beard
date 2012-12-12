@@ -120,16 +120,12 @@ class AddTvrName (AddTvrId):
     def execute(self):
         self.addColumn("tv_shows", "tvr_name", "TEXT", "")
 
-#class AddSubtitlesSupport(AddTvrId):    
-#    def test(self):
-#        return self.checkDBVersion() >= 12
-#
-#    def execute(self):
-#        self.addColumn("tv_shows", "subtitles")
-#        self.addColumn("tv_episodes", "subtitles", "TEXT", "")
-#        self.addColumn("tv_episodes", "subtitles_searchcount")
-#        self.addColumn("tv_episodes", "subtitles_lastsearch", "TIMESTAMP", str(datetime.datetime.min))
-#        self.incDBVersion()
+class AddImdbId (InitialSchema):
+    def test(self):
+        return self.hasColumn("tv_shows", "imdb_id")
+
+    def execute(self):
+        self.addColumn("tv_shows", "imdb_id", "TEXT", "")
 
 class AddAirdateIndex (AddTvrName):
     def test(self):
@@ -563,3 +559,5 @@ class AddSubtitlesSupport(RenameSeasonFolders):
         self.addColumn("tv_episodes", "subtitles_searchcount")
         self.addColumn("tv_episodes", "subtitles_lastsearch", "TIMESTAMP", str(datetime.datetime.min))
         self.incDBVersion()
+   
+     
