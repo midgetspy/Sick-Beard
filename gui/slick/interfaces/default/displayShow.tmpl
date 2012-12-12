@@ -37,11 +37,31 @@
 <div class="navShow"><img id="nextShow" src="$sbRoot/images/next.gif" alt="&gt;&gt;" title="Next Show" /></div>
 </div></div>
 
-<div class="tvshowImg"><a href="$sbRoot/showPoster/?show=$show.tvdbid&amp;which=poster" rel="dialog" title="$show.name"><img src="$sbRoot/showPoster/?show=$show.tvdbid&amp;which=thumbnail" class="posterThumb" alt=""/></a>
+<div class="tvshowImg"><a href="$sbRoot/showPoster/?show=$show.tvdbid&amp;which=poster" rel="dialog" title="$show.name"><img src="$sbRoot/showPoster/?show=$show.tvdbid&amp;which=poster_thumb" class="posterThumb" alt=""/></a>
 </div>
 
 <div class="showInfo">
 <h1 class="title">$header</h1>
+<span class="headerInfo" style="color: #b7b7b7; line-height: 16px;">($show.startyear) - $show.runtime min - $show.genre[1:-1].replace('|',' | ')
+	<span class="tvshowLink" style="vertical-align: text-top">
+		<a href="http://www.imdb.com/title/$show.imdbid" onclick="window.open(this.href, '_blank'); return false;" title="http://www.imdb.com/title/$show.imdbid"><img alt="[imdb]" height="16" width="16" src="$sbRoot/images/imdb.png" /> 
+	    <a href="http://www.thetvdb.com/?tab=series&amp;id=$show.tvdbid" onclick="window.open(this.href, '_blank'); return false;" title="http://www.thetvdb.com/?tab=series&amp;id=$show.tvdbid"><img alt="[tvdb]" height="16" width="16" src="$sbRoot/images/thetvdb16.png" /></a>
+	</span>
+</span> 
+
+##There is a special/season_0?## 
+#if int($seasonResults[-1]["season"]) == 0:	
+	#set $season_special=1
+#else: 
+	#set $season_special=0
+#end if
+	
+#if not $sickbeard.DISPLAY_SHOW_SPECIALS and $season_special:
+	$seasonResults.pop(-1)
+#end if
+
+<div class="seasonList"> 
+<span>
 #if (len($seasonResults) > 14):
     <select id="seasonJump">
         <option value="jump">Jump to Season</option>
@@ -62,12 +82,23 @@
         #end if
     #end for
 #end if
+</span>
 
-
+<span class="float-right">
+#if $season_special:
+	<b>Display Specials:</b>
+	#if sickbeard.DISPLAY_SHOW_SPECIALS:
+		<a class="inner" href="$sbRoot/toggleDisplayShowSpecials/?show=$show.tvdbid">Hide</a>
+	#else:
+		<a class="inner" href="$sbRoot/toggleDisplayShowSpecials/?show=$show.tvdbid">Show</a>
+	#end if	
+#end if
+</span>
+</div>
 <div id="summary" class="align-left">
 <table class="infoTable" cellspacing="1" border="0" cellpadding="0">
 <tr>
-<td>
+<td  width="75%">
 <table>
 #if $show.network and $show.airs:
     <tr><td class="showLegend">Airs: </td><td>$show.airs on $show.network</td></tr>
@@ -88,26 +119,23 @@
 <span class="quality $qualityPresetStrings[$show.quality]">$qualityPresetStrings[$show.quality]</span>
 #else:
 #if $anyQualities:
-initially download: <b><%=", ".join([Quality.qualityStrings[x] for x in anyQualities])%></b> #if $bestQualities then " + " else ""#
+<i>Initial:</i> <b><%=", ".join([Quality.qualityStrings[x] for x in anyQualities])%></b> #if $bestQualities then " </br> " else ""#
 #end if
 #if $bestQualities:
-replace with: <b><%=", ".join([Quality.qualityStrings[x] for x in bestQualities])%></b>
-#end if 
+<i>Replace with:</i> <b><%=", ".join([Quality.qualityStrings[x] for x in bestQualities])%></b>
 #end if
-#if $show.exceptions:
-	<tr><td class="showLegend">Scene Name: </td><td>$exceptions_string</td></tr>
-#else:
-    <tr><td>&nbsp</td></tr>
-#end if    
+#end if
+
+	<tr><td class="showLegend">Scene Name:</td><td>#if $show.exceptions then $exceptions_string else $show.name#</td></tr>
     </td></tr>
     </table>
-    <td>
+    <td style="float: right;">
     <table>
     <tr><td class="showLegend">Language:</td><td><img src="$sbRoot/images/flags/${show.lang}.png" width="16" height="11" alt="$show.lang" title="$show.lang" /></td></tr>
 #if $sickbeard.USE_SUBTITLES
     <tr><td class="showLegend">Subtitles: </td><td><img src="$sbRoot/images/#if int($show.subtitles) == 1 then "yes16.png\" alt=\"Y" else "no16.png\" alt=\"N"#" width="16" height="16" /></td></tr>
 #end if
-    <tr><td class="showLegend">Flatten Folders: </td><td><img src="$sbRoot/images/#if $show.flatten_folders == 1 or $sickbeard.NAMING_FORCE_FOLDERS then "yes16.png\" alt=\"Y" else "no16.png\" alt=\"N"#" width="16" height="16" /></td></tr>
+    <tr><td class="showLegend">Flat Folders: </td><td><img src="$sbRoot/images/#if $show.flatten_folders == 1 or $sickbeard.NAMING_FORCE_FOLDERS then "yes16.png\" alt=\"Y" else "no16.png\" alt=\"N"#" width="16" height="16" /></td></tr>
     <tr><td class="showLegend">Paused: </td><td><img src="$sbRoot/images/#if int($show.paused) == 1 then "yes16.png\" alt=\"Y" else "no16.png\" alt=\"N"#" width="16" height="16" /></td></tr>
     <tr><td class="showLegend">Air-by-Date: </td><td><img src="$sbRoot/images/#if int($show.air_by_date) == 1 then "yes16.png\" alt=\"Y" else "no16.png\" alt=\"N"#" width="16" height="16" /></td></tr>
 </table>
@@ -155,8 +183,11 @@ $Quality.DOWNLOADED.sort()
 <table class="sickbeardTable" cellspacing="1" border="0" cellpadding="0">
     
 #for $epResult in $sqlResults:
+  #if not $sickbeard.DISPLAY_SHOW_SPECIALS and int($epResult["season"]) == 0:
+  	#continue
+  #end if	
 
-    #if int($epResult["season"]) != $curSeason:
+  #if int($epResult["season"]) != $curSeason:
   <tr><td colspan="9"  style="height: 0px; padding:0; margin:0;"><a name="season-$epResult["season"]"></a></td></tr>
   <tr class="seasonheader" id="season-$epResult["season"]" >
     <td colspan="9">
@@ -165,7 +196,7 @@ $Quality.DOWNLOADED.sort()
   </tr>
   <tr id="season-$epResult["season"]-cols"><th width="1%"><input type="checkbox" class="seasonCheck" id="$epResult["season"]" /></th><th>NFO</th><th>TBN</th><th>Episode</th><th>Name</th><th class="nowrap">Airdate</th><th>Filename</th>#if $sickbeard.USE_SUBTITLES and $show.subtitles then "<th>Subtitles</th>" else ""#<th>Status</th><th>Search</th></tr>
         #set $curSeason = int($epResult["season"])
-    #end if    
+  #end if    
 
   #set $epStr = str($epResult["season"]) + "x" + str($epResult["episode"])
   #set $epLoc = $epResult["location"]

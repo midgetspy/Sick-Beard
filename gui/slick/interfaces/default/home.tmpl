@@ -90,14 +90,26 @@
 });
 //-->
 </script>
+
 #if $varExists('header') 
 	<h1 class="header">$header</h1>
 #else 
 	<h1 class="title">$title</h1>
 #end if
+
+<div id="HomeLayout" style="float: right; margin-top: -25px;">
+	<span><b>Layout:</b>
+		<a class="inner" href="$sbRoot/setHomeLayout/?layout=poster" style="font-size: 12px;">Poster</a>·
+		<a class="inner" href="$sbRoot/setHomeLayout/?layout=banner" style="font-size: 12px;">Banner</a>
+	</span>
+</div>
+
+#set $layout = $sickbeard.HOME_LAYOUT
+
 <table id="showListTable" class="sickbeardTable tablesorter" cellspacing="1" border="0" cellpadding="0">
 
-  <thead><tr><th class="nowrap">Next Ep</th><th>Poster</th></td><th>Show</th><th>Network</th><th>Quality</th><th>Downloads</th><th>Active</th><th>Status</th></tr></thead>
+<!--  <thead><tr><th class="nowrap">Next Ep</th><th>Poster</th></td>#if $layout=="poster" then "<th>Show</th>" else ""#<th>Network</th><th>Quality</th><th>Downloads</th><th>Active</th><th>Status</th></tr></thead>//-->
+  <thead><tr><th class="nowrap">Next Ep</th>#if $layout=="poster" then "<th>Poster</th>" else ""#</td><th>Show</th><th>Network</th><th>Quality</th><th>Downloads</th><th>Active</th><th>Status</th></tr></thead>
   <tfoot>
     <tr>
       <th rowspan="1" colspan="1" align="center"><a href="$sbRoot/home/addShows/">&nbsp Add Show</a></th>
@@ -153,11 +165,16 @@ $myShowList.sort(lambda x, y: cmp(x.name, y.name))
   #set $den = 1
 #end if
 
+#set $which_thumb = $layout+"_thumb" 
 
   <tr>
     <td align="center" class="nowrap">#if len($curEp) != 0 then $curEp[0].airdate else ""#</td>
-    <td><div class="imgWrapper"><a href="$sbRoot/showPoster/?show=$curShow.tvdbid&amp;which=poster" rel="dialog" title="$curShow.name"><img src="$sbRoot/showPoster/?show=$curShow.tvdbid&amp;which=thumbnail" class="posterThumb" alt="$curShow.tvdbid"/></a></div></td>
-    <td class="tvShow"><a href="$sbRoot/home/displayShow?show=$curShow.tvdbid">$curShow.name</a></td>
+    #if $layout == 'poster':
+	    <td><div class="imgHomeWrapper $layout"><a href="$sbRoot/showPoster/?show=$curShow.tvdbid&amp;which=$layout" rel="dialog" title="$curShow.name"><img src="$sbRoot/showPoster/?show=$curShow.tvdbid&amp;which=$which_thumb" class="$layout" alt="$curShow.tvdbid"/></a></div></td>
+    	<td class="tvShow"><a href="$sbRoot/home/displayShow?show=$curShow.tvdbid">$curShow.name</a></td>
+	#else:
+	    <td><div class="imgHomeWrapper $layout"><a href="$sbRoot/home/displayShow?show=$curShow.tvdbid"><img src="$sbRoot/showPoster/?show=$curShow.tvdbid&amp;which=$which_thumb" class="$layout" alt="$curShow.tvdbid" title="$curShow.name"/></div></td>
+    #end if
     <td align="center">$curShow.network</td>
 #if $curShow.quality in $qualityPresets:
     <td align="center"><span class="quality $qualityPresetStrings[$curShow.quality]">$qualityPresetStrings[$curShow.quality]</span></td>

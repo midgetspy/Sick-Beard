@@ -323,6 +323,8 @@ NMA_API = None
 NMA_PRIORITY = 0
 
 GUI_NAME = None
+HOME_LAYOUT = None
+DISPLAY_SHOW_SPECIALS = None
 COMING_EPS_LAYOUT = None
 COMING_EPS_DISPLAY_PAUSED = None
 COMING_EPS_SORT = None
@@ -382,7 +384,7 @@ def initialize(consoleLogging=True):
                 USE_SYNOLOGYNOTIFIER, SYNOLOGYNOTIFIER_NOTIFY_ONSNATCH, SYNOLOGYNOTIFIER_NOTIFY_ONDOWNLOAD, SYNOLOGYNOTIFIER_NOTIFY_ONSUBTITLEDOWNLOAD, \
                 USE_BANNER, USE_LISTVIEW, METADATA_XBMC, METADATA_MEDIABROWSER, METADATA_PS3, METADATA_SYNOLOGY, metadata_provider_dict, \
                 NEWZBIN, NEWZBIN_USERNAME, NEWZBIN_PASSWORD, GIT_PATH, MOVE_ASSOCIATED_FILES, \
-                GUI_NAME, COMING_EPS_LAYOUT, COMING_EPS_SORT, COMING_EPS_DISPLAY_PAUSED, METADATA_WDTV, METADATA_TIVO, IGNORE_WORDS, CREATE_MISSING_SHOW_DIRS, \
+                GUI_NAME, HOME_LAYOUT, DISPLAY_SHOW_SPECIALS, COMING_EPS_LAYOUT, COMING_EPS_SORT, COMING_EPS_DISPLAY_PAUSED, METADATA_WDTV, METADATA_TIVO, IGNORE_WORDS, CREATE_MISSING_SHOW_DIRS, \
                 ADD_SHOWS_WO_DIR, USE_SUBTITLES, SUBTITLES_LANGUAGES, SUBTITLES_DIR, SUBTITLES_SERVICES_LIST, SUBTITLES_SERVICES_ENABLED, subtitlesFinderScheduler
 
         if __INITIALIZED__:
@@ -748,6 +750,8 @@ def initialize(consoleLogging=True):
 
         GUI_NAME = check_setting_str(CFG, 'GUI', 'gui_name', 'slick') 
 
+        HOME_LAYOUT = check_setting_str(CFG, 'GUI', 'home_layout', 'poster')    
+        DISPLAY_SHOW_SPECIALS = bool(check_setting_int(CFG, 'GUI', 'display_show_specials', 1)) 
         COMING_EPS_LAYOUT = check_setting_str(CFG, 'GUI', 'coming_eps_layout', 'banner')
         COMING_EPS_DISPLAY_PAUSED = bool(check_setting_int(CFG, 'GUI', 'coming_eps_display_paused', 0))
         COMING_EPS_SORT = check_setting_str(CFG, 'GUI', 'coming_eps_sort', 'date')
@@ -1289,6 +1293,8 @@ def save_config():
 
     new_config['GUI'] = {}
     new_config['GUI']['gui_name'] = GUI_NAME
+    new_config['GUI']['home_layout'] = HOME_LAYOUT
+    new_config['GUI']['display_show_specials'] = int(DISPLAY_SHOW_SPECIALS)
     new_config['GUI']['coming_eps_layout'] = COMING_EPS_LAYOUT
     new_config['GUI']['coming_eps_display_paused'] = int(COMING_EPS_DISPLAY_PAUSED)
     new_config['GUI']['coming_eps_sort'] = COMING_EPS_SORT

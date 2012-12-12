@@ -53,8 +53,8 @@
 #set $curStatus, $curQuality = $Quality.splitCompositeStatus(int($hItem["action"]))
   <tr>
     <td class="nowrap">$datetime.datetime.strptime(str($hItem["date"]), $history.dateFormat)</td>
-    <td><a style="color: #000000; text-align: center;" href="$sbRoot/home/displayShow?show=$hItem["showid"]#season-$hItem["season"]">$hItem["show_name"] - <%=str(hItem["season"]) +"x"+ "%02i" % int(hItem["episode"]) %></a></td>
-    <td align="center">$statusStrings[$curStatus]</td>
+    <td width="35%"><a style="color: #000000; text-align: center;" href="$sbRoot/home/displayShow?show=$hItem["showid"]#season-$hItem["season"]">$hItem["show_name"] - <%=str(hItem["season"]) +"x"+ "%02i" % int(hItem["episode"]) %>#if "proper" in $hItem["resource"].lower or "repack" in $hItem["resource"].lower then ' <span class="quality Proper">Proper</span>' else ""#</a></td>
+    <td align="center"><span style="cursor: help;" title="$os.path.basename($hItem["resource"])">$statusStrings[$curStatus]</span></td>
     <td align="center">
     #if $curStatus == DOWNLOADED:
       #set $match = $re.search("\-(\w+)\.\w{3}\Z", $os.path.basename($hItem["resource"]))
@@ -62,10 +62,10 @@
           #if $match.group(1).upper() in ("X264", "720P"):
             #set $match = $re.search("(\w+)\-.*\-"+$match.group(1)+"\.\w{3}\Z", $os.path.basename($hItem["resource"]), re.IGNORECASE)
             #if $match
-                $match.group(1).upper()
+                <i>$match.group(1).upper()</i>
           #end if
           #else:
-          $match.group(1).upper()
+          <i>$match.group(1).upper()</i>
         #end if
       #end if
     #else

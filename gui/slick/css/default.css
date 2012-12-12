@@ -63,6 +63,28 @@ img {
     padding-right: 2px;
 }
 
+.imgHomeWrapper {
+	background: url("../images/loading.gif") no-repeat scroll center center #FFFFFF;
+    border: 3px solid #FFFFFF;
+    box-shadow: 1px 1px 2px 0 #555555;
+    float: left;
+    height: 50px;
+    overflow: hidden;
+/*    border-radius: 4px;*/
+}
+.imgHomeWrapper .poster {
+    float: left;
+    width: 50px;
+    height: auto;
+    position: relative;
+    vertical-align: middle;
+}
+.imgHomeWrapper .banner {
+    vertical-align: top;
+    height: auto;
+    width: 300px;
+}
+
 html {
   margin: 0;
   padding: 0;
@@ -473,7 +495,7 @@ width: 30%;
 .progressbarText {
   text-shadow: 0 0 0.1em #fff;
   position: absolute;
-  top: 0px;
+  top: 0;
   font-size: 12px;
   width: 100%;
   height: 100%;
@@ -605,20 +627,31 @@ tr.unaired {
   font-size: 14px;
   font-weight: normal;
   color: #343434;
+  height: 35px;
 }
 .showInfo {
   width: 745px;
   float: right;
   padding-top: 10px;
 }
+
+span .headerInfo {
+ color: #666666;
+}
+
+div .seasonList {
+ padding-top: 12px;
+ padding-right: 10px;
+}
+
 div#summary {
   background-color: #f9f9f9;
   -moz-border-radius: 10px;
   -webkit-border-radius: 10px;
   border-radius: 10px;
-  padding: 10px;
+  padding: 5px 10px;
   border: 1px solid #ddd;
-  margin: 10px 0;
+  margin: 3px 0 10px 0;
 }
 div#summary .infoTable {
   width: 85%;
@@ -957,6 +990,13 @@ span.Any {
   /* black */
 
 }
+
+span.Proper {
+  background: none repeat scroll 0 0 #CD7300;
+  /* red */
+
+}
+
 span.false {
   color: #993333;
   /* red */

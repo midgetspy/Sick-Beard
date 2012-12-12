@@ -39,6 +39,12 @@ class ImageCache:
         """
         return ek.ek(os.path.abspath, ek.ek(os.path.join, sickbeard.CACHE_DIR, 'images'))
 
+    def _thumbnails_dir(self):
+        """
+        Builds up the full path to the thumbnails image cache directory
+        """
+        return ek.ek(os.path.abspath, ek.ek(os.path.join, self._cache_dir(), 'thumbnails'))
+
     def poster_path(self, tvdb_id):
         """
         Builds up the path to a poster cache for a given tvdb id
@@ -61,7 +67,7 @@ class ImageCache:
         banner_file_name = str(tvdb_id) + '.banner.jpg'
         return ek.ek(os.path.join, self._cache_dir(), banner_file_name)
 
-    def thumbnail_path(self, tvdb_id):
+    def poster_thumb_path(self, tvdb_id):
         """
         Builds up the path to a poster cache for a given tvdb id
 
@@ -69,8 +75,19 @@ class ImageCache:
         
         tvdb_id: ID of the show to use in the file name
         """
-        thumbnail_file_name = str(tvdb_id) + '.thumbnail.jpg'
-        return ek.ek(os.path.join, self._cache_dir(), thumbnail_file_name)
+        posterthumb_file_name = str(tvdb_id) + '.poster.jpg'
+        return ek.ek(os.path.join, self._thumbnails_dir(), posterthumb_file_name)
+
+    def banner_thumb_path(self, tvdb_id):
+        """
+        Builds up the path to a poster cache for a given tvdb id
+
+        returns: a full path to the cached poster file for the given tvdb id 
+        
+        tvdb_id: ID of the show to use in the file name
+        """
+        bannerthumb_file_name = str(tvdb_id) + '.banner.jpg'
+        return ek.ek(os.path.join, self._thumbnails_dir(), bannerthumb_file_name)
 
     def has_poster(self, tvdb_id):
         """
@@ -88,17 +105,27 @@ class ImageCache:
         logger.log(u"Checking if file "+str(banner_path)+" exists", logger.DEBUG)
         return ek.ek(os.path.isfile, banner_path)
 
-    def has_thumbnail(self, tvdb_id):
+    def has_poster_thumbnail(self, tvdb_id):
         """
-        Returns true if a cached poster exists for the given tvdb id
+        Returns true if a cached poster thumbnail exists for the given tvdb id
         """
-        thumbnail_path = self.thumbnail_path(tvdb_id)
-        logger.log(u"Checking if file "+str(thumbnail_path)+" exists", logger.DEBUG)
-        return ek.ek(os.path.isfile, thumbnail_path)
+        poster_thumb_path = self.poster_thumb_path(tvdb_id)
+        logger.log(u"Checking if file "+str(poster_thumb_path)+" exists", logger.DEBUG)
+        return ek.ek(os.path.isfile, poster_thumb_path)
+
+    def has_banner_thumbnail(self, tvdb_id):
+        """
+        Returns true if a cached banner exists for the given tvdb id
+        """
+        banner_thumb_path = self.banner_thumb_path(tvdb_id)
+        logger.log(u"Checking if file "+str(banner_thumb_path)+" exists", logger.DEBUG)
+        return ek.ek(os.path.isfile, banner_thumb_path)
+
 
     BANNER = 1
     POSTER = 2
-    THUMBNAIL = 3
+    BANNER_THUMB = 3
+    POSTER_THUMB = 4
     
     def which_type(self, path):
         """
@@ -152,8 +179,6 @@ class ImageCache:
             dest_path = self.poster_path(tvdb_id)
         elif img_type == self.BANNER:
             dest_path = self.banner_path(tvdb_id)
-        elif img_type == self.THUMBNAIL:
-            dest_path = self.thumbnail_path(tvdb_id)
         else:
             logger.log(u"Invalid cache image type: "+str(img_type), logger.ERROR)
             return False
@@ -162,6 +187,10 @@ class ImageCache:
         if not ek.ek(os.path.isdir, self._cache_dir()):
             logger.log(u"Image cache dir didn't exist, creating it at "+str(self._cache_dir()))
             ek.ek(os.makedirs, self._cache_dir())
+
+        if not ek.ek(os.path.isdir, self._thumbnails_dir()):
+            logger.log(u"Thumbnails cache dir didn't exist, creating it at "+str(self._thumbnails_dir()))
+            ek.ek(os.makedirs, self._thumbnails_dir())
 
         logger.log(u"Copying from "+image_path+" to "+dest_path)
         helpers.copyFile(image_path, dest_path)
@@ -185,9 +214,12 @@ class ImageCache:
         elif img_type == self.BANNER:
             img_type_name = 'banner'
             dest_path = self.banner_path(show_obj.tvdbid)
-        elif img_type == self.THUMBNAIL:
-            img_type_name = 'thumbnail'
-            dest_path = self.thumbnail_path(show_obj.tvdbid)
+        elif img_type == self.POSTER_THUMB:
+            img_type_name = 'poster_thumb'
+            dest_path = self.poster_thumb_path(show_obj.tvdbid)
+        elif img_type == self.BANNER_THUMB:
+            img_type_name = 'banner_thumb'
+            dest_path = self.banner_thumb_path(show_obj.tvdbid)
         else:
             logger.log(u"Invalid cache image type: "+str(img_type), logger.ERROR)
             return False
@@ -213,10 +245,10 @@ class ImageCache:
         # check if the images are already cached or not
         need_images = {self.POSTER: not self.has_poster(show_obj.tvdbid),
                        self.BANNER: not self.has_banner(show_obj.tvdbid),
-                       self.THUMBNAIL: not self.has_thumbnail(show_obj.tvdbid),
-                       }
+                       self.POSTER_THUMB: not self.has_poster_thumbnail(show_obj.tvdbid),
+                       self.BANNER_THUMB: not self.has_banner_thumbnail(show_obj.tvdbid)}
         
-        if not need_images[self.POSTER] and not need_images[self.BANNER] and not need_images[self.THUMBNAIL]:
+        if not need_images[self.POSTER] and not need_images[self.BANNER] and not need_images[self.POSTER_THUMB] and not need_images[self.BANNER_THUMB]:
             logger.log(u"No new cache images needed, not retrieving new ones")
             return
         
@@ -243,7 +275,7 @@ class ImageCache:
                 logger.log(u"Unable to search for images in show dir because it doesn't exist", logger.WARNING)
                     
         # download from TVDB for missing ones
-        for cur_image_type in [self.POSTER, self.BANNER, self.THUMBNAIL]:
+        for cur_image_type in [self.POSTER, self.BANNER, self.POSTER_THUMB, self.BANNER_THUMB]:
             logger.log(u"Seeing if we still need an image of type "+str(cur_image_type)+": "+str(need_images[cur_image_type]), logger.DEBUG)
             if cur_image_type in need_images and need_images[cur_image_type]:
                 self._cache_image_from_tvdb(show_obj, cur_image_type)
