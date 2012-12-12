@@ -930,6 +930,11 @@ a.whitelink {
   position: relative;
   margin-right: 3px;
 }
+
+ui-pnotify-text img {
+	padding-top: 3px;
+}
+
 div.ui-pnotify {
   min-width: 340px;
   max-width: 550px;
