@@ -775,11 +775,15 @@ ul#rootDirStaticList li {
   cursor: pointer;
 }
 
-#rootDirs, #rootDirsControls {
+/*#rootDirs, #rootDirsControls {
   width: 50%;
   min-width: 400px;
 	height:auto !important;
-}
+}*/
+
+#episodeDir, #newRootDir {
+   margin-right: 6px;
+ }
 
 #displayText {
   background-color: #efefef;

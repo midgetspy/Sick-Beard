@@ -116,14 +116,12 @@ def retrieve_exceptions():
             name_cache.clearCache()
         else:
             logger.log(u"No scene exceptions update needed")
-        
+                    
 def update_scene_exceptions(tvdb_id, scene_exceptions):
     """
     Given a tvdb_id, and a list of all show scene exceptions, update the db.
     """
-            if not aliases:
-                continue
-
+    
     myDB = db.DBConnection("cache.db")
     
     myDB.action('DELETE FROM scene_exceptions WHERE tvdb_id=?', [tvdb_id])
@@ -132,24 +130,3 @@ def update_scene_exceptions(tvdb_id, scene_exceptions):
         myDB.action("INSERT INTO scene_exceptions (tvdb_id, show_name) VALUES (?,?)", [tvdb_id, cur_exception])
     
     name_cache.clearCache()        
-
-        changed_exceptions = False
-
-        # write all the exceptions we got off the net into the database
-        for cur_tvdb_id in exception_dict:
-
-            # get a list of the existing exceptions for this ID
-            existing_exceptions = [x["show_name"] for x in myDB.select("SELECT * FROM scene_exceptions WHERE tvdb_id = ?", [cur_tvdb_id])]
-
-            for cur_exception in exception_dict[cur_tvdb_id]:
-                # if this exception isn't already in the DB then add it
-                if cur_exception not in existing_exceptions:
-                    myDB.action("INSERT INTO scene_exceptions (tvdb_id, show_name) VALUES (?,?)", [cur_tvdb_id, cur_exception])
-                    changed_exceptions = True
-
-        # since this could invalidate the results of the cache we clear it out after updating
-        if changed_exceptions:
-            logger.log(u"Updated scene exceptions")
-            name_cache.clearCache()
-        else:
-            logger.log(u"No scene exceptions update needed")

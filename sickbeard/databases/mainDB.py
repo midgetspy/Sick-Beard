@@ -84,21 +84,8 @@ class MainSanityCheck(db.DBSanityCheck):
         else:
             logger.log(u"No orphan episode, check passed")
 
-def backupDatabase(version):
-    helpers.backupVersionedFile(db.dbFilename(), version)
-
-        sqlResults = self.connection.select("SELECT episode_id, showid, tv_shows.tvdb_id FROM tv_episodes LEFT JOIN tv_shows ON tv_episodes.showid=tv_shows.tvdb_id WHERE tv_shows.tvdb_id is NULL")
-
-        for cur_orphan in sqlResults:
-            logger.log(u"Orphan episode detected! episode_id: " + str(cur_orphan["episode_id"]) + " showid: " + str(cur_orphan["showid"]), logger.DEBUG)
-            logger.log(u"Deleting orphan episode with episode_id: "+str(cur_orphan["episode_id"]))
-            self.connection.action("DELETE FROM tv_episodes WHERE episode_id = ?", [cur_orphan["episode_id"]])
-
-        else:
-            logger.log(u"No orphan episode, check passed")
-
-def backupDatabase(version):
-    helpers.backupVersionedFile(db.dbFilename(), version)
+    def backupDatabase(version):
+        helpers.backupVersionedFile(db.dbFilename(), version)
 
 # ======================
 # = Main DB Migrations =

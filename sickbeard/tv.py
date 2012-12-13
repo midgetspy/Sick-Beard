@@ -50,7 +50,6 @@ from common import Quality, Overview
 from common import DOWNLOADED, SNATCHED, SNATCHED_PROPER, ARCHIVED, IGNORED, UNAIRED, WANTED, SKIPPED, UNKNOWN
 from common import NAMING_DUPLICATE, NAMING_EXTEND, NAMING_LIMITED_EXTEND, NAMING_SEPARATED_REPEAT, NAMING_LIMITED_EXTEND_E_PREFIXED
 
-from common import NAMING_DUPLICATE, NAMING_EXTEND, NAMING_LIMITED_EXTEND, NAMING_SEPARATED_REPEAT
 
 class TVShow(object):
 
@@ -1724,6 +1723,10 @@ class TVEpisode(object):
 
                 # add "E04"
                 ep_string += ep_sep
+                
+                if multi == NAMING_LIMITED_EXTEND_E_PREFIXED:
+                    ep_string += 'E'
+                
                 ep_string += other_ep._format_string(ep_format.upper(), other_ep._replace_map())
 
             if season_ep_match:

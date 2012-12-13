@@ -49,11 +49,7 @@ class BTNProvider(generic.TorrentProvider):
         return sickbeard.BTN
     
     def imageName(self):
-<<<<<<< HEAD
         return 'btn.png'
-=======
-        return 'btn.png'
->>>>>>> 68962d4e945e105ae0cd98b2da20dd1f797d40f3
 
     def checkAuthFromData(self, data):
         result = True
