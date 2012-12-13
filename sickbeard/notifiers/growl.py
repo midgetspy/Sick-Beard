@@ -164,9 +164,8 @@ class GrowlNotifier:
         register.add_header('Application-Icon', 'https://raw.github.com/midgetspy/Sick-Beard/master/data/images/sickbeard.png')
         
         register.add_notification('Test', True)
-
-        for i in common.notifyStrings:
-            register.add_notification(common.notifyStrings[i], True)
+        register.add_notification(common.notifyStrings[common.NOTIFY_SNATCH], True)
+        register.add_notification(common.notifyStrings[common.NOTIFY_DOWNLOAD], True)
 
         if opts['password']:
             register.set_password(opts['password'])

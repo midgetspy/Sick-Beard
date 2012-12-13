@@ -1847,10 +1847,10 @@ class Config:
     subtitles = ConfigSubtitles()
 
 def haveXBMC():
-    return sickbeard.XBMC_HOST
+    return sickbeard.USE_XBMC and sickbeard.XBMC_UPDATE_LIBRARY
 
 def havePLEX():
-    return sickbeard.PLEX_SERVER_HOST
+    return sickbeard.USE_PLEX and sickbeard.PLEX_UPDATE_LIBRARY
 
 def HomeMenu():
     return [
@@ -2474,21 +2474,31 @@ class Home:
     def testXBMC(self, host=None, username=None, password=None):
         cherrypy.response.headers['Cache-Control'] = "max-age=0,no-cache,no-store"
 
-        result = notifiers.xbmc_notifier.test_notify(urllib.unquote_plus(host), username, password)
-        if len(result.split(":")) > 2 and 'OK' in result.split(":")[2]:
-            return "Test notice sent successfully to "+urllib.unquote_plus(host)
-        else:
-            return "Test notice failed to "+urllib.unquote_plus(host)
+        finalResult = ''
+        for curHost in [x.strip() for x in host.split(",")]:
+            curResult = notifiers.xbmc_notifier.test_notify(urllib.unquote_plus(curHost), username, password)
+            if len(curResult.split(":")) > 2 and 'OK' in curResult.split(":")[2]:
+                finalResult += "Test XBMC notice sent successfully to " + urllib.unquote_plus(curHost)
+            else:
+                finalResult += "Test XBMC notice failed to " + urllib.unquote_plus(curHost)
+            finalResult += "<br />\n"
+
+        return finalResult
 
     @cherrypy.expose
     def testPLEX(self, host=None, username=None, password=None):
         cherrypy.response.headers['Cache-Control'] = "max-age=0,no-cache,no-store"
 
-        result = notifiers.plex_notifier.test_notify(urllib.unquote_plus(host), username, password)
-        if result:
-            return "Test notice sent successfully to "+urllib.unquote_plus(host)
-        else:
-            return "Test notice failed to "+urllib.unquote_plus(host)
+        finalResult = ''
+        for curHost in [x.strip() for x in host.split(",")]:
+            curResult = notifiers.plex_notifier.test_notify(urllib.unquote_plus(curHost), username, password)
+            if len(curResult.split(":")) > 2 and 'OK' in curResult.split(":")[2]:
+                finalResult += "Test Plex notice sent successfully to " + urllib.unquote_plus(curHost)
+            else:
+                finalResult += "Test Plex notice failed to " + urllib.unquote_plus(curHost)
+            finalResult += "<br />\n"
+
+        return finalResult
 
     @cherrypy.expose
     def testLibnotify(self):
@@ -2591,6 +2601,7 @@ class Home:
             showObj = sickbeard.helpers.findCertainShow(sickbeard.showList, int(show))
 
             if showObj == None:
+                return _genericMessage("Error", "Show not in show list")
 
                 return _genericMessage("Error", "Show not in show list")
 
@@ -2900,7 +2911,6 @@ class Home:
 
         redirect("/home/displayShow?show="+str(showObj.tvdbid))
 
-
     @cherrypy.expose
     def subtitleShow(self, show=None, force=0):
 
@@ -2922,24 +2932,21 @@ class Home:
     
     @cherrypy.expose
     def updateXBMC(self, showName=None):
-
-        for curHost in [x.strip() for x in sickbeard.XBMC_HOST.split(",")]:
-            if notifiers.xbmc_notifier.update_library(curHost, showName=showName):
-                ui.notifications.message("Command sent to XBMC host " + curHost + " to update library")
-            else:
-                ui.notifications.error("Unable to contact XBMC host " + curHost)
+        # TODO: configure that each host can have different options / username / pw
+        # only send update to first host in the list -- workaround for xbmc sql backend users
+        firstHost = sickbeard.XBMC_HOST.split(",")[0].strip()
+        if notifiers.xbmc_notifier.update_library(showName=showName):
+            ui.notifications.message("Library update command sent to XBMC host: " + firstHost)
+        else:
+            ui.notifications.error("Unable to contact XBMC host: " + firstHost)
         redirect('/home')
-
 
     @cherrypy.expose
     def updatePLEX(self):
-
-        if notifiers.plex_notifier._update_library():
-            ui.notifications.message("Command sent to Plex Media Server host " + sickbeard.PLEX_HOST + " to update library")
-            logger.log(u"Plex library update initiated for host " + sickbeard.PLEX_HOST, logger.DEBUG)
+        if notifiers.plex_notifier.update_library():
+            ui.notifications.message("Library update command sent to Plex Media Server host: " + sickbeard.PLEX_SERVER_HOST)
         else:
-            ui.notifications.error("Unable to contact Plex Media Server host " + sickbeard.PLEX_HOST)
-            logger.log(u"Plex library update failed for host " + sickbeard.PLEX_HOST, logger.ERROR)
+            ui.notifications.error("Unable to contact Plex Media Server host: " + sickbeard.PLEX_SERVER_HOST)
         redirect('/home')
 
     @cherrypy.expose
@@ -3114,6 +3121,7 @@ class Home:
             root_ep_obj.rename()
 
         redirect("/home/displayShow?show=" + show)
+
 
     @cherrypy.expose
     def searchEpisode(self, show=None, season=None, episode=None):
