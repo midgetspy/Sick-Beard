@@ -57,8 +57,8 @@ ep_regexes = [
                '''
                ^((?P<series_name>.+?)[. _-]+)?             # Show_Name and separator
                s(?P<season_num>\d+)[. _-]*                 # S01 and optional separator
-               e(?P<ep_num>\d+)                            # E02 and separator
-               (([. _-]*e|-)                               # linking e/- char
+               (e|d)(?P<ep_num>\d+)                            # E02 and separator
+               (([. _-]*e|-|d)                               # linking e/- char
                (?P<extra_ep_num>(?!(1080|720)[pi])\d+))*   # additional E03/etc
                [. _-]*((?P<extra_info>.+?)                 # Source_Quality_Etc-
                ((?<![. _-])(?<!WEB)                        # Make sure this is really the release group

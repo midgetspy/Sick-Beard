@@ -149,6 +149,8 @@ class Quality:
             return Quality.HDBLURAY
         elif checkName(["1080p", "bluray", "x264"], all) or checkName(["1080p", "hddvd", "x264"], all):
             return Quality.FULLHDBLURAY
+        elif checkName(["DVDR"],all):
+            return Quality.HDTV
         else:
             return Quality.UNKNOWN
 

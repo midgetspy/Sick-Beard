@@ -23,7 +23,7 @@ import os
 import sys
 import re
 import urllib2
-
+from pprint import pprint
 import sickbeard
 
 from sickbeard import helpers, classes, logger, db
@@ -247,9 +247,14 @@ class GenericProvider:
             try:
                 myParser = NameParser()
                 parse_result = myParser.parse(title)
+
             except InvalidNameException:
                 logger.log(u"Unable to parse the filename "+title+" into a valid episode", logger.WARNING)
                 continue
+
+            logger.log('episode: ' + str(episode.season) + ' , ' + str(episode.episode))
+            logger.log('parse_result: ' + str(parse_result.episode_numbers).strip('[]') )
+            
 
             if episode.show.air_by_date:
                 if parse_result.air_date != episode.airdate:
@@ -260,7 +265,7 @@ class GenericProvider:
                 continue
 
             quality = self.getQuality(item)
-
+            
             if not episode.show.wantEpisode(episode.season, episode.episode, quality, manualSearch):
                 logger.log(u"Ignoring result "+title+" because we don't want an episode that is "+Quality.qualityStrings[quality], logger.DEBUG)
                 continue
