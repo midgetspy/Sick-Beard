@@ -38,6 +38,7 @@ from sickbeard import logger
 from sickbeard import tvcache
 from sickbeard.exceptions import ex
 
+USE_TVRAGE = False
 
 def parseDate(secs):
     if isinstance(secs, ( int , long ) ) :
@@ -61,7 +62,6 @@ def jsonToRSS(json):
         xml += '<item><title>' + urllib.quote_plus(entry['name']) + '</title>\n'
         xml += '<description>' + urllib.quote_plus(entry['name']) + '</description>\n'
         xml += '<link>http://nzbx.co/nzb?' + entry['guid'] + '</link>\n'
-        xml += '<lastBuildDate>' + parseDate(entry['adddate']) + '</lastBuildDate>\n'
         xml += '<pubDate>' + parseDate(entry['postdate']) + '</pubDate>\n'
         xml += '<guid>' + entry['guid'] + '</guid>\n'
         xml += '</item>\n'
@@ -116,14 +116,13 @@ class NzbxProvider(generic.NZBProvider):
             cur_params = {}
 
             # search directly by tvrage id
-            if not show.tvrid:
-                cur_params['index'] = show.tvrid
+            if show.tvrid and USE_TVRAGE:
+                cur_params['q'] = show.tvrid
             # if we can't then fall back on a very basic name search
             else:
                 cur_params['q'] = helpers.sanitizeSceneName(cur_exception)
 
-            if season != None:
-                foo = {}
+                ##if season != None:
                 # air-by-date means &season=2010&q=2010.03, no other way to do it atm
                 #if show.air_by_date:
                  #   #cur_params['season'] = season.split('-')[0]
@@ -135,13 +134,11 @@ class NzbxProvider(generic.NZBProvider):
                  #   logger.log('bar')
                     #cur_params['season'] = season
 
-            # hack to only add a single result if it's a rageid search
-            if not ('index' in cur_params and to_return):
-                to_return.append(cur_params)
-
+                # hack to only add a single result if it's a rageid search
+                #if not ('index' in cur_params and to_return):
+            to_return.append(cur_params)
+                
         return to_return
-
-
     
 
 
@@ -153,10 +150,15 @@ class NzbxProvider(generic.NZBProvider):
             return [params]
 
         logger.log(ep_obj.show.name)
-
-        params['q'] = helpers.sanitizeSceneName(ep_obj.show.name)
+        
+        if ep_obj.show.tvrid and USE_TVRAGE:
+            params['q'] = ep_obj.show.tvrid
+        else:
+            params['q'] = helpers.sanitizeSceneName(ep_obj.show.name)
         
         logger.log(params['q'] )
+
+
 
         if ep_obj.show.air_by_date:
             date_str = str(ep_obj.airdate)
@@ -320,7 +322,9 @@ class NzbxCache(tvcache.TVCache):
 
         logger.log(u"NZBX.co cache update URL: " + url, logger.DEBUG )
 
-        data = json.loads(self.provider.getURL(url))
+        data = self.provider.getURL(url)
+        logger.log(data)
+        data = json.loads(data)
 
         data = jsonToRSS(data)
 
