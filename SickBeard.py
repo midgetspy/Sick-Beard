@@ -116,6 +116,12 @@ def daemonize():
         logger.log(u"Writing PID " + pid + " to " + str(sickbeard.PIDFILE))
         file(sickbeard.PIDFILE, 'w').write("%s\n" % pid)
 
+def bonjour_register_callback(sdRef, flags, errorCode, name, regtype, domain):
+    if errorCode == pybonjour.kDNSServiceErr_NoError:
+        logger.log(u"Announced Sick Beard via bonjour.")
+    else:
+        raise Exception("Bonjour announce failed. Code: %d" % errorCode)
+
 
 def main():
     """
@@ -308,6 +314,12 @@ def main():
             logger.log(u"Launching browser and exiting", logger.ERROR)
             sickbeard.launchBrowser(startPort)
         sys.exit()
+
+    try:
+        import pybonjour
+        sdRef = pybonjour.DNSServiceRegister(name = "Sick Beard", regtype = '_http._tcp.', port = startPort, callBack = bonjour_register_callback)
+    except Exception,e:
+        logger.log(u"Unable to announce Sick Beard via bonjour", logger.ERROR)
 
     # Build from the DB to start with
     logger.log(u"Loading initial show list")
