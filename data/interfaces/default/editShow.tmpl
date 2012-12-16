@@ -1,20 +1,21 @@
 #import sickbeard
 #from sickbeard import common
 #from sickbeard import exceptions
-#set global $title="Edit "+$show.name
+#set global $title="Edit " + $show.name
 #set global $header=$show.name
 
 #set global $sbPath=".."
 
-#set global $topmenu="home"#
+#set global $topmenu="home"
 #import os.path
 #include $os.path.join($sickbeard.PROG_DIR, "data/interfaces/default/inc_top.tmpl")
 
+<script type="text/javascript" src="$sbRoot/js/qualityChooser.js?$sbPID"></script>
 <script type="text/javascript" charset="utf-8">
 <!--
 \$(document).ready(function(){
 
-  \$.getJSON('$sbRoot/home/addShows/getTVDBLanguages', {}, function(data){
+  \$.getJSON('$sbRoot/home/addShows/getTVDBLanguages', {}, function(data) {
         var resultStr = '';
 
         if (data.results.length == 0) {
@@ -22,14 +23,14 @@
             resultStr = '<option value="$show.lang" selected="selected" + flag>$show.lang</option>';
         } else {
             var current_lang_added = false;
-            \$.each(data.results, function(index, obj){
+            \$.each(data.results, function(index, obj) {
 
                 if (obj == "$show.lang") {
-                        selected = ' selected="selected"';
-                        current_lang_added = true;
+                    selected = ' selected="selected"';
+                    current_lang_added = true;
                 }
                 else {
-                        selected = '';
+                    selected = '';
                 }
 
                 flag = ' class="flag" style="background-image:url($sbRoot/images/flags/' + obj + '.png);"';
@@ -41,7 +42,6 @@
         }
         \$('#tvdbLangSelect').html(resultStr)
 
-        \$('#tvdbLangSelect').change(function() { searchTvdb() });
   });
 
 });

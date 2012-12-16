@@ -43,7 +43,7 @@ from sickbeard import encodingKludge as ek
 
 from common import Quality, Overview
 from common import DOWNLOADED, SNATCHED, SNATCHED_PROPER, ARCHIVED, IGNORED, UNAIRED, WANTED, SKIPPED, UNKNOWN
-from common import NAMING_DUPLICATE, NAMING_EXTEND, NAMING_LIMITED_EXTEND, NAMING_SEPARATED_REPEAT
+from common import NAMING_DUPLICATE, NAMING_EXTEND, NAMING_LIMITED_EXTEND, NAMING_SEPARATED_REPEAT, NAMING_LIMITED_EXTEND_E_PREFIXED
 
 class TVShow(object):
 
@@ -1137,7 +1137,7 @@ class TVEpisode(object):
             return
 
 
-        if not myEp["firstaired"]:
+        if not myEp["firstaired"] or myEp["firstaired"] == "0000-00-00":
             myEp["firstaired"] = str(datetime.date.fromordinal(1))
 
         if myEp["episodename"] == None or myEp["episodename"] == "":
@@ -1516,8 +1516,6 @@ class TVEpisode(object):
         Manipulates an episode naming pattern and then fills the template in
         """
         
-        logger.log(u"pattern: "+pattern, logger.DEBUG)
-        
         if pattern == None:
             pattern = sickbeard.NAMING_PATTERN
         
@@ -1574,7 +1572,7 @@ class TVEpisode(object):
                     sep = ' '
 
                 # force 2-3-4 format if they chose to extend
-                if multi in (NAMING_EXTEND, NAMING_LIMITED_EXTEND):
+                if multi in (NAMING_EXTEND, NAMING_LIMITED_EXTEND, NAMING_LIMITED_EXTEND_E_PREFIXED):
                     ep_sep = '-'
                 
                 regex_used = season_ep_regex
@@ -1599,7 +1597,7 @@ class TVEpisode(object):
             for other_ep in self.relatedEps:
                 
                 # for limited extend we only append the last ep
-                if multi == NAMING_LIMITED_EXTEND and other_ep != self.relatedEps[-1]:
+                if multi in (NAMING_LIMITED_EXTEND, NAMING_LIMITED_EXTEND_E_PREFIXED) and other_ep != self.relatedEps[-1]:
                     continue
                 
                 elif multi == NAMING_DUPLICATE:
@@ -1611,6 +1609,10 @@ class TVEpisode(object):
 
                 # add "E04"
                 ep_string += ep_sep
+
+                if multi == NAMING_LIMITED_EXTEND_E_PREFIXED:
+                    ep_string += 'E'
+
                 ep_string += other_ep._format_string(ep_format.upper(), other_ep._replace_map())
 
             if season_ep_match:
@@ -1621,10 +1623,13 @@ class TVEpisode(object):
             # fill out the template for this piece and then insert this piece into the actual pattern
             cur_name_group_result = re.sub('(?i)(?x)'+regex_used, regex_replacement, cur_name_group)
             #cur_name_group_result = cur_name_group.replace(ep_format, ep_string)
-            logger.log(u"found "+ep_format+" as the ep pattern using "+regex_used+" and replaced it with "+regex_replacement+" to result in "+cur_name_group_result+" from "+cur_name_group, logger.DEBUG)
+            #logger.log(u"found "+ep_format+" as the ep pattern using "+regex_used+" and replaced it with "+regex_replacement+" to result in "+cur_name_group_result+" from "+cur_name_group, logger.DEBUG)
             result_name = result_name.replace(cur_name_group, cur_name_group_result)
 
         result_name = self._format_string(result_name, replace_map)
+
+        logger.log(u"formatting pattern: "+pattern+" -> "+result_name, logger.DEBUG)
+        
         
         return result_name
 

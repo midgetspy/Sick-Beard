@@ -12,7 +12,7 @@ Modified from http://code.activestate.com/recipes/491261/
 from __future__ import with_statement
 
 __author__ = "dbr/Ben"
-__version__ = "1.7.2"
+__version__ = "1.8.2"
 
 import os
 import time
