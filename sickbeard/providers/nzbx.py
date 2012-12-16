@@ -156,7 +156,7 @@ class NzbxProvider(generic.NZBProvider):
         else:
             params['q'] = helpers.sanitizeSceneName(ep_obj.show.name)
         
-        logger.log(params['q'] )
+            #logger.log(params['q'] )
 
 
 
