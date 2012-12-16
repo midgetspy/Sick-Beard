@@ -59,9 +59,11 @@ def jsonToRSS(json):
     
     for entry in json:
         #pprint(entry)
-        xml += '<item><title>' + urllib.quote_plus(entry['name']) + '</title>\n'
-        xml += '<description>' + urllib.quote_plus(entry['name']) + '</description>\n'
-        xml += '<link>http://nzbx.co/nzb?' + entry['guid'] + '</link>\n'
+        name = str(entry['name'] )
+        logger.log('parsing ' + name )
+        xml += '<item><title>' + urllib.quote_plus(name) + '</title>\n'
+        xml += '<description>' + urllib.quote_plus(name) + '</description>\n'
+        xml += '<link>http://nzbx.co/nzb?' + str(entry['guid']) + '</link>\n'
         xml += '<pubDate>' + parseDate(entry['postdate']) + '</pubDate>\n'
         xml += '<guid>' + entry['guid'] + '</guid>\n'
         xml += '</item>\n'
@@ -155,10 +157,6 @@ class NzbxProvider(generic.NZBProvider):
             params['q'] = ep_obj.show.tvrid
         else:
             params['q'] = helpers.sanitizeSceneName(ep_obj.show.name)
-        
-            #logger.log(params['q'] )
-
-
 
         if ep_obj.show.air_by_date:
             date_str = str(ep_obj.airdate)
@@ -323,7 +321,7 @@ class NzbxCache(tvcache.TVCache):
         logger.log(u"NZBX.co cache update URL: " + url, logger.DEBUG )
 
         data = self.provider.getURL(url)
-        logger.log(data)
+        #logger.log(data)
         data = json.loads(data)
 
         data = jsonToRSS(data)
