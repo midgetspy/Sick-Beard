@@ -673,7 +673,7 @@ def get_xml_text(node):
     for child_node in node.childNodes:
         if child_node.nodeType in (Node.CDATA_SECTION_NODE, Node.TEXT_NODE):
             text += child_node.data
-    return text.strip()
+    return urllib.unquote_plus(text.strip())
 
 def backupVersionedFile(oldFile, version):
     numTries = 0

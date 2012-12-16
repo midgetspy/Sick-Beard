@@ -40,8 +40,36 @@ from sickbeard.exceptions import ex
 
 
 def parseDate(secs):
-    return str( datetime.date.fromtimestamp(secs))
+    if isinstance(secs, ( int , long ) ) :
+        return str( datetime.date.fromtimestamp(secs))
+    else:
+        return secs
 
+def jsonToRSS(json):
+    xml = '<?xml version="1.0" encoding="ISO-8859-1" ?>\n'
+    xml += '<rss version="2.0">\n'
+    xml += '<channel>\n'
+    xml += '<title>RSS Title</title>\n'
+    xml += '<description>This is an example of an RSS feed</description>\n'
+    xml += '<link>http://www.someexamplerssdomain.com/main.html</link>\n'
+    xml += '<lastBuildDate>' + str(datetime.date.today()) + '</lastBuildDate>\n'
+    xml += '<pubDate>' + str(datetime.date.today()) + '</pubDate>\n'
+    xml += '<ttl>1800</ttl>\n'
+    
+    for entry in json:
+        #pprint(entry)
+        xml += '<item><title>' + urllib.quote_plus(entry['name']) + '</title>\n'
+        xml += '<description>' + urllib.quote_plus(entry['name']) + '</description>\n'
+        xml += '<link>http://nzbx.co/nzb?' + entry['guid'] + '</link>\n'
+        xml += '<lastBuildDate>' + parseDate(entry['adddate']) + '</lastBuildDate>\n'
+        xml += '<pubDate>' + parseDate(entry['postdate']) + '</pubDate>\n'
+        xml += '<guid>' + entry['guid'] + '</guid>\n'
+        xml += '</item>\n'
+
+    xml += '</channel>\n'
+    xml += '</rss>\n'
+
+    return xml
 
 class NzbxProvider(generic.NZBProvider):
 
@@ -51,7 +79,7 @@ class NzbxProvider(generic.NZBProvider):
 
         self.cache = NzbxCache(self)
         
-        self.cache.updateCache()
+        #self.cache.updateCache()
 
         self.url = "http://nzbx.co/"
 
@@ -115,30 +143,6 @@ class NzbxProvider(generic.NZBProvider):
 
 
     
-    def jsonToRSS(self, json):
-        xml = '<?xml version="1.0" encoding="ISO-8859-1" ?>'
-        xml += '<rss version="2.0">'
-        xml += '<channel>'
-        xml += '<title>RSS Title</title>'
-        xml += '<description>This is an example of an RSS feed</description>'
-        xml += '<link>http://www.someexamplerssdomain.com/main.html</link>'
-        xml += '<lastBuildDate>' + str(datetime.date.today()) + '</lastBuildDate>'
-        xml += '<pubDate>' + str(datetime.date.today()) + '</pubDate>'
-        xml += '<ttl>1800</ttl>'
-
-        for entry in json:
-            xml += '<item><title>' + entry['name'] + '</title>'
-            xml += '<description>' + entry['name'] + '</description>'
-            xml += '<link>' + entry['nzb'] + '</link>'
-            xml += '<lastBuildDate>' + parseDate(entry['adddate']) + '</lastBuildDate>'
-            xml += '<pubDate>' + parseDate(entry['postdate']) + '</pubDate>'
-            xml += '<guid>' + entry['guid'] + '</guid>'
-            xml += '</item>'
-
-        xml += '</channel>'
-        xml += '</rss>'
-
-        return xml
 
 
     def _get_episode_search_strings(self, ep_obj):
@@ -231,7 +235,7 @@ class NzbxProvider(generic.NZBProvider):
         #if not data.startswith('<?xml'):
          #   data = '<?xml version="1.0" encoding="ISO-8859-1" ?>' + data
 
-        data = self.jsonToRSS(parsedJSON )
+        data = jsonToRSS(parsedJSON )
 
         try:
             items = parseString(data).getElementsByTagName('item')
@@ -308,7 +312,20 @@ class NzbxCache(tvcache.TVCache):
         tvcache.TVCache.__init__(self, provider)
 
         # only poll newznab providers every 15 minutes max
-        self.minTime = 1
+        self.minTime = 15
+
+        
+    def _getRSSData(self):
+        url = 'http://nzbx.co/api/recent?category=tv'
+
+        logger.log(u"NZBX.co cache update URL: " + url, logger.DEBUG )
+
+        data = json.loads(self.provider.getURL(url))
+
+        data = jsonToRSS(data)
+
+        return data
+    
 
 
     def _checkAuth(self, data):
