@@ -16,6 +16,7 @@
 #set $today = str($datetime.date.today().toordinal())
 #set $downloadedEps = $myDB.select("SELECT showid, COUNT(*) FROM tv_episodes WHERE (status IN ("+",".join([str(x) for x in $Quality.DOWNLOADED + [$ARCHIVED]])+") OR (status IN ("+",".join([str(x) for x in $Quality.SNATCHED + $Quality.SNATCHED_PROPER])+") AND location != '')) AND season != 0 and episode != 0 AND airdate <= "+$today+" GROUP BY showid")
 #set $allEps = $myDB.select("SELECT showid, COUNT(*) FROM tv_episodes WHERE season != 0 and episode != 0 AND (airdate != 1 OR status IN ("+",".join([str(x) for x in ($Quality.DOWNLOADED + $Quality.SNATCHED + $Quality.SNATCHED_PROPER) + [$ARCHIVED]])+")) AND airdate <= "+$today+" AND status != "+str($IGNORED)+" GROUP BY showid")
+#set $layout = $sickbeard.HOME_LAYOUT
 
 <script type="text/javascript" charset="utf-8">
 <!--
@@ -72,19 +73,20 @@
 \$(document).ready(function(){ 
 
     \$("#showListTable:has(tbody tr)").tablesorter({
-        sortList: [[6,0],[2,0]],
-        textExtraction: {
-            4: function(node) { return \$(node).find("span").text(); },
-            6: function(node) { return \$(node).find("img").attr("alt"); }
-        },
-        widgets: ['saveSort', 'zebra'],
-        headers: {
-            0: { sorter: 'isoDate' },
-            2: { sorter: 'loadingNames' },
-            3: { sorter: 'network' },
-            4: { sorter: 'quality' },
-            5: { sorter: 'eps' },
-        }
+	
+	        sortList: [[6,0],[2,0]],
+	        textExtraction: {
+	            4: function(node) { return \$(node).find("span").text(); },
+	            6: function(node) { return \$(node).find("img").attr("alt"); }
+	        },
+	        widgets: ['saveSort', 'zebra'],
+	        headers: {
+	            0: { sorter: 'isoDate' },
+	            2: { sorter: 'loadingNames' },
+	            3: { sorter: 'network' },
+	            4: { sorter: 'quality' },
+	            5: { sorter: 'eps' },
+	        }
     });
 
 });
@@ -99,17 +101,14 @@
 
 <div id="HomeLayout" style="float: right; margin-top: -25px;">
 	<span><b>Layout:</b>
-		<a class="inner" href="$sbRoot/setHomeLayout/?layout=poster" style="font-size: 12px;">Poster</a>·
+		<a class="inner" href="$sbRoot/setHomeLayout/?layout=poster" style="font-size: 12px;">Poster</a> &middot;
 		<a class="inner" href="$sbRoot/setHomeLayout/?layout=banner" style="font-size: 12px;">Banner</a>
 	</span>
 </div>
 
-#set $layout = $sickbeard.HOME_LAYOUT
-
 <table id="showListTable" class="sickbeardTable tablesorter" cellspacing="1" border="0" cellpadding="0">
 
-<!--  <thead><tr><th class="nowrap">Next Ep</th><th>Poster</th></td>#if $layout=="poster" then "<th>Show</th>" else ""#<th>Network</th><th>Quality</th><th>Downloads</th><th>Active</th><th>Status</th></tr></thead>//-->
-  <thead><tr><th class="nowrap">Next Ep</th>#if $layout=="poster" then "<th>Poster</th>" else ""#</td><th>Show</th><th>Network</th><th>Quality</th><th>Downloads</th><th>Active</th><th>Status</th></tr></thead>
+  <thead><tr><th class="nowrap">Next Ep</th>#if $layout=="poster" then "<th>Poster</th>" else "<th style='display: none;'></th>"#<th>Show</th><th>Network</th><th>Quality</th><th>Downloads</th><th>Active</th><th>Status</th></tr></thead>
   <tfoot>
     <tr>
       <th rowspan="1" colspan="1" align="center"><a href="$sbRoot/home/addShows/">&nbsp Add Show</a></th>
@@ -170,10 +169,23 @@ $myShowList.sort(lambda x, y: cmp(x.name, y.name))
   <tr>
     <td align="center" class="nowrap">#if len($curEp) != 0 then $curEp[0].airdate else ""#</td>
     #if $layout == 'poster':
-	    <td><div class="imgHomeWrapper $layout"><a href="$sbRoot/showPoster/?show=$curShow.tvdbid&amp;which=$layout" rel="dialog" title="$curShow.name"><img src="$sbRoot/showPoster/?show=$curShow.tvdbid&amp;which=$which_thumb" class="$layout" alt="$curShow.tvdbid"/></a></div></td>
+	    <td>
+	    	<div class="imgHomeWrapper $layout">
+		    	<a href="$sbRoot/showPoster/?show=$curShow.tvdbid&amp;which=$layout" rel="dialog" title="$curShow.name">
+		    		<img src="$sbRoot/showPoster/?show=$curShow.tvdbid&amp;which=$which_thumb" class="$layout" alt="$curShow.tvdbid"/>
+		    	</a>
+	    	</div>
+	    </td>
     	<td class="tvShow"><a href="$sbRoot/home/displayShow?show=$curShow.tvdbid">$curShow.name</a></td>
 	#else:
-	    <td><div class="imgHomeWrapper $layout"><a href="$sbRoot/home/displayShow?show=$curShow.tvdbid"><img src="$sbRoot/showPoster/?show=$curShow.tvdbid&amp;which=$which_thumb" class="$layout" alt="$curShow.tvdbid" title="$curShow.name"/></div></td>
+    	<td style="display: none;"/>
+	    <td>
+	    	<span style="display: none;">$curShow.name</span>
+	    	<div class="imgHomeWrapper $layout">
+	    		<a href="$sbRoot/home/displayShow?show=$curShow.tvdbid">
+	    		<img src="$sbRoot/showPoster/?show=$curShow.tvdbid&amp;which=$which_thumb" class="$layout" alt="$curShow.tvdbid" title="$curShow.name"/>
+	    	</div>
+	    </td>
     #end if
     <td align="center">$curShow.network</td>
 #if $curShow.quality in $qualityPresets:
