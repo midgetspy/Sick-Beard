@@ -76,6 +76,7 @@
 	
 	        sortList: [[6,0],[2,0]],
 	        textExtraction: {
+	            3: function(node) { return \$(node).find("img").attr("alt"); },
 	            4: function(node) { return \$(node).find("span").text(); },
 	            6: function(node) { return \$(node).find("img").attr("alt"); }
 	        },
@@ -187,7 +188,11 @@ $myShowList.sort(lambda x, y: cmp(x.name, y.name))
 	    	</div>
 	    </td>
     #end if
-    <td align="center">$curShow.network</td>
+    <!--<td align="center">$curShow.network</td>//-->
+    <td align="center">
+        <img id="network" width="44.8" height="22.4" src="/images/network/${curShow.network+".png"}" alt="$curShow.network">
+    </td>
+    
 #if $curShow.quality in $qualityPresets:
     <td align="center"><span class="quality $qualityPresetStrings[$curShow.quality]">$qualityPresetStrings[$curShow.quality]</span></td>
 #else:
