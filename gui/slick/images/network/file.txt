@@ -1,0 +1,208 @@
+ Il volume nell'unit… C Š WINDOWS
+ Numero di serie del volume: B25A-6018
+
+ Directory di C:\Users\dimarinoport\Documents\GitHub\Sick-Beard\gui\slick\images\network_logo\Nuova cartella
+
+16/12/2012  17:50    <DIR>          .
+16/12/2012  17:50    <DIR>          ..
+16/12/2012  17:42             6.955 ++n copia.png
+16/12/2012  17:42             3.429 1live copia.png
+16/12/2012  17:42             6.235 33 copia.png
+16/12/2012  17:42             9.301 3fm copia.png
+16/12/2012  17:42             8.058 3sat copia.png
+16/12/2012  17:42             7.938 7mate copia.png
+16/12/2012  17:42             6.570 a&e copia.png
+16/12/2012  17:42             6.570 aande copia.png
+16/12/2012  17:42            15.882 ABC (Australia) copia.png
+16/12/2012  17:42             7.540 abc copia.png
+16/12/2012  17:42             8.242 ABC Family copia.png
+16/12/2012  17:42             7.540 abc news copia.png
+16/12/2012  17:42             7.335 adult swim copia.png
+16/12/2012  17:42             7.335 adult-swim copia.png
+16/12/2012  17:42             7.335 adultswim copia.png
+16/12/2012  17:42             6.351 amc copia.png
+16/12/2012  17:42            10.250 animal planet copia.png
+16/12/2012  17:42            10.250 animalplanet copia.png
+16/12/2012  17:42            11.235 Animax copia.png
+16/12/2012  17:42             8.753 anime network copia.png
+16/12/2012  17:42            10.633 Antena-3 copia.png
+16/12/2012  17:42             4.363 ard copia.png
+16/12/2012  17:42             4.716 arte copia.png
+16/12/2012  17:42             7.897 AT-X copia.png
+16/12/2012  17:42             4.493 at5 copia.png
+16/12/2012  17:42             7.691 AVRO copia.png
+16/12/2012  17:42             5.401 Bandai copia.png
+16/12/2012  17:42            10.267 Bandai Visual copia.png
+16/12/2012  17:42             5.468 bbc america copia.png
+16/12/2012  17:42             5.468 bbc copia.png
+16/12/2012  17:42             5.468 bbc entertainment copia.png
+16/12/2012  17:42             5.468 bbc four copia.png
+16/12/2012  17:42             5.468 bbc one copia.png
+16/12/2012  17:42             5.468 bbc prime copia.png
+16/12/2012  17:42             5.468 bbc three copia.png
+16/12/2012  17:42             5.468 bbc two copia.png
+16/12/2012  17:42            11.239 bio. copia.png
+16/12/2012  17:42            11.239 Biography-Channel copia.png
+16/12/2012  17:42             9.650 bloomberg copia.png
+16/12/2012  17:42            19.698 bnn copia.png
+16/12/2012  17:42             5.572 bravo copia.png
+16/12/2012  17:42             6.254 canal+ copia.png
+16/12/2012  17:42             6.583 canvas copia.png
+16/12/2012  17:42             9.298 cartoon network copia.png
+16/12/2012  17:42             9.298 cartoonnetwork copia.png
+16/12/2012  17:42             9.395 cbbc copia.png
+16/12/2012  17:42             6.374 CBC copia.png
+16/12/2012  17:42            19.164 CBeebies copia.png
+16/12/2012  17:42            12.440 cbs copia.png
+16/12/2012  17:42             8.057 channel ten copia.png
+16/12/2012  17:42             8.539 channel4 copia.png
+16/12/2012  17:42            13.727 cnn copia.png
+16/12/2012  17:42             9.230 comedy central copia.png
+16/12/2012  17:42             9.230 comedy central Family copia.png
+16/12/2012  17:42             9.230 comedy central HD copia.png
+16/12/2012  17:42            19.260 comedy entral old copia.png
+16/12/2012  17:42             9.230 comedycentral copia.png
+16/12/2012  17:42             8.397 ctv copia.png
+16/12/2012  17:42             8.138 cuatro copia.png
+16/12/2012  17:42             6.075 cw copia.png
+16/12/2012  17:42            11.786 discovery channel copia.png
+16/12/2012  17:42            11.786 discovery copia.png
+16/12/2012  17:42            11.786 discoverychannel copia.png
+16/12/2012  17:42            14.965 disney channel copia.png
+16/12/2012  17:42            14.965 disney copia.png
+16/12/2012  17:42             8.926 Disney XD copia.png
+16/12/2012  17:43            14.965 disneychannel copia.png
+16/12/2012  17:43             8.360 diy network copia.png
+16/12/2012  17:43             4.399 DMAX copia.png
+16/12/2012  17:43            12.831 e! copia.png
+16/12/2012  17:43             8.438 e4 copia.png
+16/12/2012  17:43             3.429 einslive copia.png
+16/12/2012  17:43             9.148 endemol copia.png
+16/12/2012  17:43            12.831 entertainment copia.png
+16/12/2012  17:43            11.642 eredivisie live 1 copia.png
+16/12/2012  17:43            11.642 eredivisie live 2 copia.png
+16/12/2012  17:43            11.642 eredivisie live copia.png
+16/12/2012  17:43             4.665 espn copia.png
+16/12/2012  17:43            12.638 eurosport 1 copia.png
+16/12/2012  17:43            12.638 eurosport 2 copia.png
+16/12/2012  17:43            12.638 eurosport copia.png
+16/12/2012  17:43            12.638 eurosport HD copia.png
+16/12/2012  17:50                 0 file.txt
+16/12/2012  17:43             7.266 five copia.png
+16/12/2012  17:43            11.940 food network copia.png
+16/12/2012  17:43            12.266 fox copia.png
+16/12/2012  17:43            10.088 fox television classics copia.png
+16/12/2012  17:43             4.647 France 2 copia.png
+16/12/2012  17:43             4.573 France 3 copia.png
+16/12/2012  17:43            13.047 Fuji-TV copia.png
+16/12/2012  17:43             7.056 funimation copia.png
+16/12/2012  17:43             8.235 fx copia.png
+16/12/2012  17:43             8.235 fxnetworks copia.png
+16/12/2012  17:43             9.926 G4 copia.png
+16/12/2012  17:43             9.926 G4_2 copia.png
+16/12/2012  17:43             6.547 Game Show Network copia.png
+16/12/2012  17:43             7.904 Global-TV copia.png
+16/12/2012  17:43             7.536 hbo copia.png
+16/12/2012  17:43             9.664 HDNet copia.png
+16/12/2012  17:43            15.609 history copia.png
+16/12/2012  17:43            15.609 historychannel copia.png
+16/12/2012  17:43             2.743 hulu copia.png
+16/12/2012  17:43             2.743 hulu presents copia.png
+16/12/2012  17:43             5.178 IFC copia.png
+16/12/2012  17:43             7.439 itv copia.png
+16/12/2012  17:43             4.717 ITV1 copia.png
+16/12/2012  17:43             8.332 ketnet copia.png
+16/12/2012  17:43             8.058 KRO copia.png
+16/12/2012  17:43            12.849 lasexta copia.png
+16/12/2012  17:43            12.567 lifetime copia.png
+16/12/2012  17:43             7.797 M6 copia.png
+16/12/2012  17:43             7.288 Manhattan Neighborhood Network copia.png
+16/12/2012  17:43             5.338 MDR copia.png
+16/12/2012  17:43             8.078 motorvision copia.png
+16/12/2012  17:43             8.078 motorvision tv copia.png
+16/12/2012  17:43             7.588 mtv copia.png
+16/12/2012  17:43             8.557 Nat Geo Wild copia.png
+16/12/2012  17:43            14.365 National Geographic copia.png
+16/12/2012  17:43            10.306 nbc copia.png
+16/12/2012  17:43            10.306 NBCU TV copia.png
+16/12/2012  17:43             3.687 NDR copia.png
+16/12/2012  17:43             2.892 nederland 1 copia.png
+16/12/2012  17:43             3.733 nederland 2 copia.png
+16/12/2012  17:43             6.734 nederland 3 copia.png
+16/12/2012  17:43             2.189 net 5 copia.png
+16/12/2012  17:43             2.189 net5 copia.png
+16/12/2012  17:43             8.107 Network Ten copia.png
+16/12/2012  17:43            13.982 ngc copia.png
+16/12/2012  17:43            13.478 Nick at Nite copia.png
+16/12/2012  17:43            16.689 nickelodeon copia.png
+16/12/2012  17:43            16.689 NickToons Network copia.png
+16/12/2012  17:43             4.855 ORF copia.png
+16/12/2012  17:45             5.288 ORF1 HD copia.png
+16/12/2012  17:45            13.049 oxygen copia.png
+16/12/2012  17:45             9.440 pbs copia.png
+16/12/2012  17:45             6.404 Playboy TV copia.png
+16/12/2012  17:45             9.677 private spice copia.png
+16/12/2012  17:45             1.828 Pro7 copia.png
+16/12/2012  17:45            10.343 Production I.G. copia.png
+16/12/2012  17:45             5.512 radio west copia.png
+16/12/2012  17:45            11.936 Revision3 copia.png
+16/12/2012  17:45             5.889 rtl 4 copia.png
+16/12/2012  17:45             6.348 rtl 5 copia.png
+16/12/2012  17:45             5.855 rtl 7 copia.png
+16/12/2012  17:45             6.581 rtl 8 copia.png
+16/12/2012  17:45             5.889 rtl4 copia.png
+16/12/2012  17:45             6.348 rtl5 copia.png
+16/12/2012  17:45             5.855 rtl7 copia.png
+16/12/2012  17:45             6.581 rtl8 copia.png
+16/12/2012  17:45            11.747 Sat1 copia.png
+16/12/2012  17:45             8.271 sbs 6 copia.png
+16/12/2012  17:45             8.712 SBS copia.png
+16/12/2012  17:45             8.271 sbs6 copia.png
+16/12/2012  17:45             8.468 scifi copia.png
+16/12/2012  17:45             3.795 Seven Network copia.png
+16/12/2012  17:45             9.964 Showcase copia.png
+16/12/2012  17:45             8.594 showtime copia.png
+16/12/2012  17:45            10.426 sky copia.png
+16/12/2012  17:45            10.426 sky1 copia.png
+16/12/2012  17:45            11.749 Speed Channel copia.png
+16/12/2012  17:45             5.610 Spike TV copia.png
+16/12/2012  17:45             7.939 starz copia.png
+16/12/2012  17:45             7.939 starz! copia.png
+16/12/2012  17:45             7.034 style network copia.png
+16/12/2012  17:45             9.834 Sunrise copia.png
+16/12/2012  17:45            13.947 Super Channel copia.png
+16/12/2012  17:45             8.468 syfy copia.png
+16/12/2012  17:45             5.778 TBS copia.png
+16/12/2012  17:45             5.778 TBS Superstation copia.png
+16/12/2012  17:45             6.092 Telecinco copia.png
+16/12/2012  17:45             6.075 the cw copia.png
+16/12/2012  17:45             7.799 The Movie Network copia.png
+16/12/2012  17:45             8.006 the wb copia.png
+16/12/2012  17:45             6.075 the-cw copia.png
+16/12/2012  17:45             6.075 thecw copia.png
+16/12/2012  17:45             8.006 thewb copia.png
+16/12/2012  17:45             4.863 tmf copia.png
+16/12/2012  17:45             7.435 tnt copia.png
+16/12/2012  17:45            14.766 toei animation copia.png
+16/12/2012  17:45             6.964 Tokyo Mx copia.png
+16/12/2012  17:45             6.572 tv guide copia.png
+16/12/2012  17:45             9.231 TV Tokyo copia.png
+16/12/2012  17:45             5.512 tv west copia.png
+16/12/2012  17:45             6.968 tv3 copia.png
+16/12/2012  17:45             4.409 tve1, la 1 copia.png
+16/12/2012  17:45             5.537 tve2, la 2 copia.png
+16/12/2012  17:45             9.793 UPN copia.png
+16/12/2012  17:45             7.292 USA copia.png
+16/12/2012  17:45             7.292 usa network copia.png
+16/12/2012  17:45             7.292 usa-network copia.png
+16/12/2012  17:45             7.292 usanetwork copia.png
+16/12/2012  17:45             8.322 vara copia.png
+16/12/2012  17:45            13.664 veronica copia.png
+16/12/2012  17:45             7.032 vh1 copia.png
+16/12/2012  17:45             7.638 VIZ Media copia.png
+16/12/2012  17:45             6.470 VOX copia.png
+16/12/2012  17:45            14.279 vpro copia.png
+16/12/2012  17:45             4.743 vtm copia.png
+16/12/2012  17:45            11.340 Xebec copia.png
+             199 File      1.692.416 byte
+               2 Directory  55.676.010.496 byte disponibili
