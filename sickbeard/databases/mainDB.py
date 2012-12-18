@@ -84,8 +84,8 @@ class MainSanityCheck(db.DBSanityCheck):
         else:
             logger.log(u"No orphan episode, check passed")
 
-    def backupDatabase(version):
-        helpers.backupVersionedFile(db.dbFilename(), version)
+def backupDatabase(version):
+    helpers.backupVersionedFile(db.dbFilename(), version)
 
 # ======================
 # = Main DB Migrations =
