@@ -10,12 +10,13 @@
 				if (data.result != "failure" && data.result != "No subtitles downloaded") {
 				// update the subtitles column with new informations
 				var subtitles = data.subtitles.split(',');
+				subtitles_td.empty()
 				$.each(subtitles,function(index, language){
 					if (language != "") {
 						if (index != subtitles.length - 1) {
-							subtitles_td.append($("<img/>").attr({"src": sbRoot+"/images/flags/"+language+".png", "alt": language, "width": 16, "height": 11}).css({'padding-right' : '6px'}));	
+							subtitles_td.append($("<img/>").attr({"src": sbRoot+"/images/flags/"+language+".png", "alt": language, "width": 16, "height": 11}).css({'padding-right' : '6px','padding-bottom' : '4px'}));
 					  } else {
-					  	subtitles_td.append($("<img/>").attr({"src": sbRoot+"/images/flags/"+language+".png", "alt": language, "width": 16, "height": 11}));
+					  	subtitles_td.append($("<img/>").attr({"src": sbRoot+"/images/flags/"+language+".png", "alt": language, "width": 16, "height": 11}).css({'padding-bottom' : '4px'}));
 					  }
 					}
 				});			

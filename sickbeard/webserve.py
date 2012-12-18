@@ -3176,7 +3176,7 @@ class Home:
         else:
             status = 'No subtitles downloaded'
         ui.notifications.message('Subtitles Search', status)
-        return json.dumps({'result': status, 'subtitles': ','.join([subliminal.language.Language(x).name for x in ep_obj.subtitles])})
+        return json.dumps({'result': status, 'subtitles': ','.join([x for x in ep_obj.subtitles])})
 
     @cherrypy.expose
     def mergeEpisodeSubtitles(self, show=None, season=None, episode=None):
