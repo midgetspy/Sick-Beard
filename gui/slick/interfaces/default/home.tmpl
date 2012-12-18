@@ -168,7 +168,7 @@ $myShowList.sort(lambda x, y: cmp(x.name, y.name))
 #set $which_thumb = $layout+"_thumb" 
 
   <tr>
-    <td align="center" class="nowrap">#if len($curEp) != 0 then $curEp[0].airdate else ""#</td>
+    <td align="center" class="nowrap" style="color: #555555;font-weight:bold;">#if len($curEp) != 0 then $curEp[0].airdate else ""#</td>
     #if $layout == 'poster':
 	    <td>
 	    	<div class="imgHomeWrapper $layout">
@@ -190,7 +190,7 @@ $myShowList.sort(lambda x, y: cmp(x.name, y.name))
     #end if
     <!--<td align="center">$curShow.network</td>//-->
     <td align="center">
-        <img id="network" width="44.8" height="22.4" src="/images/network/${curShow.network+".png"}" alt="$curShow.network">
+        <img id="network" width="44.8" height="22.4" src="/images/network/${curShow.network+".png"}" alt="$curShow.network" title="$curShow.network">
     </td>
     
 #if $curShow.quality in $qualityPresets:
@@ -211,7 +211,7 @@ $myShowList.sort(lambda x, y: cmp(x.name, y.name))
         </script>
     </td>
     <td align="center"><img src="$sbRoot/images/#if int($curShow.paused) == 0 and $curShow.status != "Ended" then "yes16.png\" alt=\"Y\"" else "no16.png\" alt=\"N\""# width="16" height="16" /></td>
-    <td align="center">$curShow.status</td>
+    <td align="center" style="color: #555555; font-weight: bold;">$curShow.status</td>
   </tr>
 
 
