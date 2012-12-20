@@ -2027,8 +2027,7 @@ class Home:
     def testXBMC(self, host=None, username=None, password=None):
         cherrypy.response.headers['Cache-Control'] = "max-age=0,no-cache,no-store"
 
-        #return notifiers.xbmc_notifier.test_notify(urllib.unquote_plus(host), username, password)        
-        return notifiers.xbmc_notifier.update_library("Weeds")
+        return notifiers.xbmc_notifier.test_notify(urllib.unquote_plus(host), username, password)        
 
     @cherrypy.expose
     def testPLEX(self, host=None, username=None, password=None):
