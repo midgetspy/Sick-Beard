@@ -73,7 +73,11 @@ class SBRotatingLogHandler(object):
             console.setLevel(logging.INFO)
     
             # set a format which is simpler for console use
-            console.setFormatter(logging.Formatter('%(asctime)s %(levelname)s::%(message)s', '%H:%M:%S'))
+#            console.setFormatter(logging.Formatter('%(asctime)s %(levelname)s::%(message)s', '%H:%M:%S'))
+            console.setFormatter(DispatchingFormatter({'sickbeard'  : logging.Formatter('%(asctime)s %(levelname)s::%(message)s', '%H:%M:%S'),
+                                                       'subliminal' : logging.Formatter('%(asctime)s %(levelname)s::SUBLIMINAL :: %(message)s', '%H:%M:%S'),
+                                                       },
+                                                       logging.Formatter('%(message)s'),))
     
             # add the handler to the root logger
             logging.getLogger('sickbeard').addHandler(console)
@@ -89,7 +93,12 @@ class SBRotatingLogHandler(object):
     
         file_handler = logging.FileHandler(self.log_file)
         file_handler.setLevel(logging.DEBUG)
-        file_handler.setFormatter(logging.Formatter('%(asctime)s %(levelname)-8s %(message)s', '%b-%d %H:%M:%S'))
+#        file_handler.setFormatter(logging.Formatter('%(asctime)s %(levelname)-8s %(message)s', '%b-%d %H:%M:%S'))
+        file_handler.setFormatter(DispatchingFormatter({'sickbeard'  : logging.Formatter('%(asctime)s %(levelname)-8s %(message)s', '%b-%d %H:%M:%S'),
+                                                        'subliminal' : logging.Formatter('%(asctime)s %(levelname)-8s SUBLIMINAL :: %(message)s', '%b-%d %H:%M:%S'),
+                                                        },
+                                                        logging.Formatter('%(message)s'),))
+                                                            
         return file_handler
 
     def _log_file_name(self, i):
@@ -178,6 +187,18 @@ class SBRotatingLogHandler(object):
                     sb_logger.log(logLevel, out_line)
             except ValueError:
                 pass
+
+
+class DispatchingFormatter:
+
+    def __init__(self, formatters, default_formatter):
+        self._formatters = formatters
+        self._default_formatter = default_formatter
+
+    def format(self, record):
+        formatter = self._formatters.get(record.name, self._default_formatter)
+        return formatter.format(record)
+
 
 sb_log_instance = SBRotatingLogHandler('sickbeard.log', NUM_LOGS, LOG_SIZE)
 
