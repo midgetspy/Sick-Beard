@@ -185,7 +185,7 @@ class ThePirateBayProvider(generic.TorrentProvider):
                 ep_string = show_name_helpers.sanitizeSceneName(show_name) +' '+ \
                 sickbeard.config.naming_ep_type[2] % {'seasonnumber': ep_obj.season, 'episodenumber': ep_obj.episode} +'|'+\
                 sickbeard.config.naming_ep_type[0] % {'seasonnumber': ep_obj.season, 'episodenumber': ep_obj.episode} +'|'+\
-                sickbeard.config.naming_ep_type[3] % {'seasonnumber': ep_obj.season, 'episodenumber': ep_obj.episode} +'|'\
+                sickbeard.config.naming_ep_type[3] % {'seasonnumber': ep_obj.season, 'episodenumber': ep_obj.episode} \
 
                 search_string['Episode'].append(ep_string)
     
