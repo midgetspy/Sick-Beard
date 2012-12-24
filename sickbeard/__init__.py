@@ -43,6 +43,8 @@ from common import SD, SKIPPED, NAMING_REPEAT
 from sickbeard.databases import mainDB, cache_db
 
 from lib.configobj import ConfigObj
+from lib.yapsy.PluginManager import PluginManager
+from sickbeard.INotifierPlugin import INotifierPlugin
 
 invoked_command = None
 
@@ -66,6 +68,8 @@ CREATEPID = False
 PIDFILE = ''
 
 DAEMON = None
+
+pluginManager = None
 
 backlogSearchScheduler = None
 currentSearchScheduler = None
@@ -198,92 +202,6 @@ NZBGET_PASSWORD = None
 NZBGET_CATEGORY = None
 NZBGET_HOST = None
 
-USE_XBMC = False
-XBMC_NOTIFY_ONSNATCH = False
-XBMC_NOTIFY_ONDOWNLOAD = False
-XBMC_UPDATE_LIBRARY = False
-XBMC_UPDATE_FULL = False
-XBMC_HOST = ''
-XBMC_USERNAME = None
-XBMC_PASSWORD = None
-
-USE_PLEX = False
-PLEX_NOTIFY_ONSNATCH = False
-PLEX_NOTIFY_ONDOWNLOAD = False
-PLEX_UPDATE_LIBRARY = False
-PLEX_SERVER_HOST = None
-PLEX_HOST = None
-PLEX_USERNAME = None
-PLEX_PASSWORD = None
-
-USE_GROWL = False
-GROWL_NOTIFY_ONSNATCH = False
-GROWL_NOTIFY_ONDOWNLOAD = False
-GROWL_HOST = ''
-GROWL_PASSWORD = None
-
-USE_PROWL = False
-PROWL_NOTIFY_ONSNATCH = False
-PROWL_NOTIFY_ONDOWNLOAD = False
-PROWL_API = None
-PROWL_PRIORITY = 0
-
-USE_TWITTER = False
-TWITTER_NOTIFY_ONSNATCH = False
-TWITTER_NOTIFY_ONDOWNLOAD = False
-TWITTER_USERNAME = None
-TWITTER_PASSWORD = None
-TWITTER_PREFIX = None
-
-USE_NOTIFO = False
-NOTIFO_NOTIFY_ONSNATCH = False
-NOTIFO_NOTIFY_ONDOWNLOAD = False
-NOTIFO_USERNAME = None
-NOTIFO_APISECRET = None
-NOTIFO_PREFIX = None
-
-USE_BOXCAR = False
-BOXCAR_NOTIFY_ONSNATCH = False
-BOXCAR_NOTIFY_ONDOWNLOAD = False
-BOXCAR_USERNAME = None
-BOXCAR_PASSWORD = None
-BOXCAR_PREFIX = None
-
-USE_PUSHOVER = False
-PUSHOVER_NOTIFY_ONSNATCH = False
-PUSHOVER_NOTIFY_ONDOWNLOAD = False
-PUSHOVER_USERKEY = None
-
-USE_LIBNOTIFY = False
-LIBNOTIFY_NOTIFY_ONSNATCH = False
-LIBNOTIFY_NOTIFY_ONDOWNLOAD = False
-
-USE_NMJ = False
-NMJ_HOST = None
-NMJ_DATABASE = None
-NMJ_MOUNT = None
-
-USE_SYNOINDEX = False
-
-USE_TRAKT = False
-TRAKT_USERNAME = None
-TRAKT_PASSWORD = None
-TRAKT_API = ''
-
-USE_PYTIVO = False
-PYTIVO_NOTIFY_ONSNATCH = False
-PYTIVO_NOTIFY_ONDOWNLOAD = False
-PYTIVO_UPDATE_LIBRARY = False
-PYTIVO_HOST = ''
-PYTIVO_SHARE_NAME = ''
-PYTIVO_TIVO_NAME = ''
-
-USE_NMA = False
-NMA_NOTIFY_ONSNATCH = False
-NMA_NOTIFY_ONDOWNLOAD = False
-NMA_API = None
-NMA_PRIORITY = 0
-
 COMING_EPS_LAYOUT = None
 COMING_EPS_DISPLAY_PAUSED = None
 COMING_EPS_SORT = None
@@ -310,34 +228,22 @@ def initialize(consoleLogging=True):
                 USE_NZBS, USE_TORRENTS, NZB_METHOD, NZB_DIR, DOWNLOAD_PROPERS, \
                 SAB_USERNAME, SAB_PASSWORD, SAB_APIKEY, SAB_CATEGORY, SAB_HOST, \
                 NZBGET_PASSWORD, NZBGET_CATEGORY, NZBGET_HOST, currentSearchScheduler, backlogSearchScheduler, \
-                USE_XBMC, XBMC_NOTIFY_ONSNATCH, XBMC_NOTIFY_ONDOWNLOAD, XBMC_UPDATE_FULL, \
-                XBMC_UPDATE_LIBRARY, XBMC_HOST, XBMC_USERNAME, XBMC_PASSWORD, \
-                USE_TRAKT, TRAKT_USERNAME, TRAKT_PASSWORD, TRAKT_API, \
-                USE_PLEX, PLEX_NOTIFY_ONSNATCH, PLEX_NOTIFY_ONDOWNLOAD, PLEX_UPDATE_LIBRARY, \
-                PLEX_SERVER_HOST, PLEX_HOST, PLEX_USERNAME, PLEX_PASSWORD, \
                 showUpdateScheduler, __INITIALIZED__, LAUNCH_BROWSER, showList, loadingShowList, \
                 NZBS, NZBS_UID, NZBS_HASH, EZRSS, TVTORRENTS, TVTORRENTS_DIGEST, TVTORRENTS_HASH, BTN, BTN_API_KEY, TORRENT_DIR, USENET_RETENTION, SOCKET_TIMEOUT, \
                 SEARCH_FREQUENCY, DEFAULT_SEARCH_FREQUENCY, BACKLOG_SEARCH_FREQUENCY, \
                 QUALITY_DEFAULT, FLATTEN_FOLDERS_DEFAULT, STATUS_DEFAULT, \
-                GROWL_NOTIFY_ONSNATCH, GROWL_NOTIFY_ONDOWNLOAD, TWITTER_NOTIFY_ONSNATCH, TWITTER_NOTIFY_ONDOWNLOAD, \
-                USE_GROWL, GROWL_HOST, GROWL_PASSWORD, USE_PROWL, PROWL_NOTIFY_ONSNATCH, PROWL_NOTIFY_ONDOWNLOAD, PROWL_API, PROWL_PRIORITY, PROG_DIR, NZBMATRIX, NZBMATRIX_USERNAME, \
-                USE_PYTIVO, PYTIVO_NOTIFY_ONSNATCH, PYTIVO_NOTIFY_ONDOWNLOAD, PYTIVO_UPDATE_LIBRARY, PYTIVO_HOST, PYTIVO_SHARE_NAME, PYTIVO_TIVO_NAME, \
-                USE_NMA, NMA_NOTIFY_ONSNATCH, NMA_NOTIFY_ONDOWNLOAD, NMA_API, NMA_PRIORITY, \
+                PROG_DIR, NZBMATRIX, NZBMATRIX_USERNAME, \
                 NZBMATRIX_APIKEY, versionCheckScheduler, VERSION_NOTIFY, PROCESS_AUTOMATICALLY, \
                 KEEP_PROCESSED_DIR, TV_DOWNLOAD_DIR, TVDB_BASE_URL, MIN_SEARCH_FREQUENCY, \
                 showQueueScheduler, searchQueueScheduler, ROOT_DIRS, CACHE_DIR, ACTUAL_CACHE_DIR, TVDB_API_PARMS, \
                 NAMING_PATTERN, NAMING_MULTI_EP, NAMING_FORCE_FOLDERS, NAMING_ABD_PATTERN, NAMING_CUSTOM_ABD, \
                 RENAME_EPISODES, properFinderScheduler, PROVIDER_ORDER, autoPostProcesserScheduler, \
                 NZBSRUS, NZBSRUS_UID, NZBSRUS_HASH, WOMBLE, providerList, newznabProviderList, \
-                EXTRA_SCRIPTS, USE_TWITTER, TWITTER_USERNAME, TWITTER_PASSWORD, TWITTER_PREFIX, \
-                USE_NOTIFO, NOTIFO_USERNAME, NOTIFO_APISECRET, NOTIFO_NOTIFY_ONDOWNLOAD, NOTIFO_NOTIFY_ONSNATCH, \
-                USE_BOXCAR, BOXCAR_USERNAME, BOXCAR_PASSWORD, BOXCAR_NOTIFY_ONDOWNLOAD, BOXCAR_NOTIFY_ONSNATCH, \
-                USE_PUSHOVER, PUSHOVER_USERKEY, PUSHOVER_NOTIFY_ONDOWNLOAD, PUSHOVER_NOTIFY_ONSNATCH, \
-                USE_LIBNOTIFY, LIBNOTIFY_NOTIFY_ONSNATCH, LIBNOTIFY_NOTIFY_ONDOWNLOAD, USE_NMJ, NMJ_HOST, NMJ_DATABASE, NMJ_MOUNT, USE_SYNOINDEX, \
+                EXTRA_SCRIPTS, \
                 USE_BANNER, USE_LISTVIEW, METADATA_XBMC, METADATA_MEDIABROWSER, METADATA_PS3, METADATA_SYNOLOGY, metadata_provider_dict, \
                 NEWZBIN, NEWZBIN_USERNAME, NEWZBIN_PASSWORD, GIT_PATH, MOVE_ASSOCIATED_FILES, \
                 COMING_EPS_LAYOUT, COMING_EPS_SORT, COMING_EPS_DISPLAY_PAUSED, METADATA_WDTV, METADATA_TIVO, IGNORE_WORDS, CREATE_MISSING_SHOW_DIRS, \
-                ADD_SHOWS_WO_DIR
+                ADD_SHOWS_WO_DIR, pluginManager
 
         if __INITIALIZED__:
             return False
@@ -568,102 +474,17 @@ def initialize(consoleLogging=True):
         NZBGET_CATEGORY = check_setting_str(CFG, 'NZBget', 'nzbget_category', 'tv')
         NZBGET_HOST = check_setting_str(CFG, 'NZBget', 'nzbget_host', '')
 
-        CheckSection(CFG, 'XBMC')
-        USE_XBMC = bool(check_setting_int(CFG, 'XBMC', 'use_xbmc', 0))
-        XBMC_NOTIFY_ONSNATCH = bool(check_setting_int(CFG, 'XBMC', 'xbmc_notify_onsnatch', 0))
-        XBMC_NOTIFY_ONDOWNLOAD = bool(check_setting_int(CFG, 'XBMC', 'xbmc_notify_ondownload', 0))
-        XBMC_UPDATE_LIBRARY = bool(check_setting_int(CFG, 'XBMC', 'xbmc_update_library', 0))
-        XBMC_UPDATE_FULL = bool(check_setting_int(CFG, 'XBMC', 'xbmc_update_full', 0))
-        XBMC_HOST = check_setting_str(CFG, 'XBMC', 'xbmc_host', '')
-        XBMC_USERNAME = check_setting_str(CFG, 'XBMC', 'xbmc_username', '')
-        XBMC_PASSWORD = check_setting_str(CFG, 'XBMC', 'xbmc_password', '')
-
-        CheckSection(CFG, 'Plex')
-        USE_PLEX = bool(check_setting_int(CFG, 'Plex', 'use_plex', 0))
-        PLEX_NOTIFY_ONSNATCH = bool(check_setting_int(CFG, 'Plex', 'plex_notify_onsnatch', 0))
-        PLEX_NOTIFY_ONDOWNLOAD = bool(check_setting_int(CFG, 'Plex', 'plex_notify_ondownload', 0))
-        PLEX_UPDATE_LIBRARY = bool(check_setting_int(CFG, 'Plex', 'plex_update_library', 0))
-        PLEX_SERVER_HOST = check_setting_str(CFG, 'Plex', 'plex_server_host', '')
-        PLEX_HOST = check_setting_str(CFG, 'Plex', 'plex_host', '')
-        PLEX_USERNAME = check_setting_str(CFG, 'Plex', 'plex_username', '')
-        PLEX_PASSWORD = check_setting_str(CFG, 'Plex', 'plex_password', '')
-
-        CheckSection(CFG, 'Growl')
-        USE_GROWL = bool(check_setting_int(CFG, 'Growl', 'use_growl', 0))
-        GROWL_NOTIFY_ONSNATCH = bool(check_setting_int(CFG, 'Growl', 'growl_notify_onsnatch', 0))
-        GROWL_NOTIFY_ONDOWNLOAD = bool(check_setting_int(CFG, 'Growl', 'growl_notify_ondownload', 0))
-        GROWL_HOST = check_setting_str(CFG, 'Growl', 'growl_host', '')
-        GROWL_PASSWORD = check_setting_str(CFG, 'Growl', 'growl_password', '')
-
-        CheckSection(CFG, 'Prowl')
-        USE_PROWL = bool(check_setting_int(CFG, 'Prowl', 'use_prowl', 0))
-        PROWL_NOTIFY_ONSNATCH = bool(check_setting_int(CFG, 'Prowl', 'prowl_notify_onsnatch', 0))
-        PROWL_NOTIFY_ONDOWNLOAD = bool(check_setting_int(CFG, 'Prowl', 'prowl_notify_ondownload', 0))
-        PROWL_API = check_setting_str(CFG, 'Prowl', 'prowl_api', '')
-        PROWL_PRIORITY = check_setting_str(CFG, 'Prowl', 'prowl_priority', "0")
-
-        CheckSection(CFG, 'Twitter')
-        USE_TWITTER = bool(check_setting_int(CFG, 'Twitter', 'use_twitter', 0))
-        TWITTER_NOTIFY_ONSNATCH = bool(check_setting_int(CFG, 'Twitter', 'twitter_notify_onsnatch', 0))
-        TWITTER_NOTIFY_ONDOWNLOAD = bool(check_setting_int(CFG, 'Twitter', 'twitter_notify_ondownload', 0))
-        TWITTER_USERNAME = check_setting_str(CFG, 'Twitter', 'twitter_username', '')
-        TWITTER_PASSWORD = check_setting_str(CFG, 'Twitter', 'twitter_password', '')
-        TWITTER_PREFIX = check_setting_str(CFG, 'Twitter', 'twitter_prefix', 'Sick Beard')
-
-        CheckSection(CFG, 'Notifo')
-        USE_NOTIFO = bool(check_setting_int(CFG, 'Notifo', 'use_notifo', 0))
-        NOTIFO_NOTIFY_ONSNATCH = bool(check_setting_int(CFG, 'Notifo', 'notifo_notify_onsnatch', 0))
-        NOTIFO_NOTIFY_ONDOWNLOAD = bool(check_setting_int(CFG, 'Notifo', 'notifo_notify_ondownload', 0))
-        NOTIFO_USERNAME = check_setting_str(CFG, 'Notifo', 'notifo_username', '')
-        NOTIFO_APISECRET = check_setting_str(CFG, 'Notifo', 'notifo_apisecret', '')
-
-        CheckSection(CFG, 'Boxcar')
-        USE_BOXCAR = bool(check_setting_int(CFG, 'Boxcar', 'use_boxcar', 0))
-        BOXCAR_NOTIFY_ONSNATCH = bool(check_setting_int(CFG, 'Boxcar', 'boxcar_notify_onsnatch', 0))
-        BOXCAR_NOTIFY_ONDOWNLOAD = bool(check_setting_int(CFG, 'Boxcar', 'boxcar_notify_ondownload', 0))
-        BOXCAR_USERNAME = check_setting_str(CFG, 'Boxcar', 'boxcar_username', '')
-
-        CheckSection(CFG, 'Pushover')
-        USE_PUSHOVER = bool(check_setting_int(CFG, 'Pushover', 'use_pushover', 0))
-        PUSHOVER_NOTIFY_ONSNATCH = bool(check_setting_int(CFG, 'Pushover', 'pushover_notify_onsnatch', 0))
-        PUSHOVER_NOTIFY_ONDOWNLOAD = bool(check_setting_int(CFG, 'Pushover', 'pushover_notify_ondownload', 0))
-        PUSHOVER_USERKEY = check_setting_str(CFG, 'Pushover', 'pushover_userkey', '')
-
-        CheckSection(CFG, 'Libnotify')
-        USE_LIBNOTIFY = bool(check_setting_int(CFG, 'Libnotify', 'use_libnotify', 0))
-        LIBNOTIFY_NOTIFY_ONSNATCH = bool(check_setting_int(CFG, 'Libnotify', 'libnotify_notify_onsnatch', 0))
-        LIBNOTIFY_NOTIFY_ONDOWNLOAD = bool(check_setting_int(CFG, 'Libnotify', 'libnotify_notify_ondownload', 0))
-
-        CheckSection(CFG, 'NMJ')
-        USE_NMJ = bool(check_setting_int(CFG, 'NMJ', 'use_nmj', 0))
-        NMJ_HOST = check_setting_str(CFG, 'NMJ', 'nmj_host', '')
-        NMJ_DATABASE = check_setting_str(CFG, 'NMJ', 'nmj_database', '')
-        NMJ_MOUNT = check_setting_str(CFG, 'NMJ', 'nmj_mount', '')
-
-        CheckSection(CFG, 'Synology')
-        USE_SYNOINDEX = bool(check_setting_int(CFG, 'Synology', 'use_synoindex', 0))
-
-        CheckSection(CFG, 'Trakt')
-        USE_TRAKT = bool(check_setting_int(CFG, 'Trakt', 'use_trakt', 0))
-        TRAKT_USERNAME = check_setting_str(CFG, 'Trakt', 'trakt_username', '')
-        TRAKT_PASSWORD = check_setting_str(CFG, 'Trakt', 'trakt_password', '')
-        TRAKT_API = check_setting_str(CFG, 'Trakt', 'trakt_api', '')
-
-        CheckSection(CFG, 'pyTivo')
-        USE_PYTIVO = bool(check_setting_int(CFG, 'pyTivo', 'use_pytivo', 0))
-        PYTIVO_NOTIFY_ONSNATCH = bool(check_setting_int(CFG, 'pyTivo', 'pytivo_notify_onsnatch', 0))
-        PYTIVO_NOTIFY_ONDOWNLOAD = bool(check_setting_int(CFG, 'pyTivo', 'pytivo_notify_ondownload', 0))
-        PYTIVO_UPDATE_LIBRARY = bool(check_setting_int(CFG, 'pyTivo', 'pyTivo_update_library', 0))
-        PYTIVO_HOST = check_setting_str(CFG, 'pyTivo', 'pytivo_host', '')
-        PYTIVO_SHARE_NAME = check_setting_str(CFG, 'pyTivo', 'pytivo_share_name', '')
-        PYTIVO_TIVO_NAME = check_setting_str(CFG, 'pyTivo', 'pytivo_tivo_name', '')
-
-        CheckSection(CFG, 'NMA')
-        USE_NMA = bool(check_setting_int(CFG, 'NMA', 'use_nma', 0))
-        NMA_NOTIFY_ONSNATCH = bool(check_setting_int(CFG, 'NMA', 'nma_notify_onsnatch', 0))
-        NMA_NOTIFY_ONDOWNLOAD = bool(check_setting_int(CFG, 'NMA', 'nma_notify_ondownload', 0))
-        NMA_API = check_setting_str(CFG, 'NMA', 'nma_api', '')
-        NMA_PRIORITY = check_setting_str(CFG, 'NMA', 'nma_priority', "0")
+        # prepare plugin manager
+        pluginManager = PluginManager()
+        pluginManager.setPluginPlaces([os.path.join(PROG_DIR, "sickbeard/plugins")])
+        pluginManager.setCategoriesFilter({
+            "Notifier" : INotifierPlugin,
+            })
+        pluginManager.collectPlugins()
+        
+        # load Notifier plugin settings
+        for pluginInfo in pluginManager.getPluginsOfCategory("Notifier"):
+                pluginInfo.plugin_object.readConfig(CFG)
 
         # start up all the threads
         logger.sb_log_instance.initLogging(consoleLogging=consoleLogging)
@@ -737,11 +558,15 @@ def start():
     global __INITIALIZED__, currentSearchScheduler, backlogSearchScheduler, \
             showUpdateScheduler, versionCheckScheduler, showQueueScheduler, \
             properFinderScheduler, autoPostProcesserScheduler, searchQueueScheduler, \
-            started
-
+            started, pluginManager
+    
     with INIT_LOCK:
 
         if __INITIALIZED__:
+        
+            # activate and attach 'Notifier' plugins
+            for pluginInfo in pluginManager.getPluginsOfCategory("Notifier"):
+                pluginInfo.plugin_object.activate()
 
             # start the search scheduler
             currentSearchScheduler.thread.start()
@@ -774,11 +599,16 @@ def halt():
 
     global __INITIALIZED__, currentSearchScheduler, backlogSearchScheduler, showUpdateScheduler, \
             showQueueScheduler, properFinderScheduler, autoPostProcesserScheduler, searchQueueScheduler, \
-            started
+            started, pluginManager
 
     with INIT_LOCK:
 
         if __INITIALIZED__:
+        
+            logger.log(u"Unloading all 'Notifier' plugins")
+            
+            for pluginInfo in pluginManager.getPluginsOfCategory("Notifier"):
+                pluginInfo.plugin_object.deactivate()
 
             logger.log(u"Aborting all threads")
 
@@ -1041,103 +871,6 @@ def save_config():
     new_config['NZBget']['nzbget_category'] = NZBGET_CATEGORY
     new_config['NZBget']['nzbget_host'] = NZBGET_HOST
 
-    new_config['XBMC'] = {}
-    new_config['XBMC']['use_xbmc'] = int(USE_XBMC)
-    new_config['XBMC']['xbmc_notify_onsnatch'] = int(XBMC_NOTIFY_ONSNATCH)
-    new_config['XBMC']['xbmc_notify_ondownload'] = int(XBMC_NOTIFY_ONDOWNLOAD)
-    new_config['XBMC']['xbmc_update_library'] = int(XBMC_UPDATE_LIBRARY)
-    new_config['XBMC']['xbmc_update_full'] = int(XBMC_UPDATE_FULL)
-    new_config['XBMC']['xbmc_host'] = XBMC_HOST
-    new_config['XBMC']['xbmc_username'] = XBMC_USERNAME
-    new_config['XBMC']['xbmc_password'] = XBMC_PASSWORD
-
-    new_config['Plex'] = {}
-    new_config['Plex']['use_plex'] = int(USE_PLEX)
-    new_config['Plex']['plex_notify_onsnatch'] = int(PLEX_NOTIFY_ONSNATCH)
-    new_config['Plex']['plex_notify_ondownload'] = int(PLEX_NOTIFY_ONDOWNLOAD)
-    new_config['Plex']['plex_update_library'] = int(PLEX_UPDATE_LIBRARY)
-    new_config['Plex']['plex_server_host'] = PLEX_SERVER_HOST
-    new_config['Plex']['plex_host'] = PLEX_HOST
-    new_config['Plex']['plex_username'] = PLEX_USERNAME
-    new_config['Plex']['plex_password'] = PLEX_PASSWORD
-
-    new_config['Growl'] = {}
-    new_config['Growl']['use_growl'] = int(USE_GROWL)
-    new_config['Growl']['growl_notify_onsnatch'] = int(GROWL_NOTIFY_ONSNATCH)
-    new_config['Growl']['growl_notify_ondownload'] = int(GROWL_NOTIFY_ONDOWNLOAD)
-    new_config['Growl']['growl_host'] = GROWL_HOST
-    new_config['Growl']['growl_password'] = GROWL_PASSWORD
-
-    new_config['Prowl'] = {}
-    new_config['Prowl']['use_prowl'] = int(USE_PROWL)
-    new_config['Prowl']['prowl_notify_onsnatch'] = int(PROWL_NOTIFY_ONSNATCH)
-    new_config['Prowl']['prowl_notify_ondownload'] = int(PROWL_NOTIFY_ONDOWNLOAD)
-    new_config['Prowl']['prowl_api'] = PROWL_API
-    new_config['Prowl']['prowl_priority'] = PROWL_PRIORITY
-
-    new_config['Twitter'] = {}
-    new_config['Twitter']['use_twitter'] = int(USE_TWITTER)
-    new_config['Twitter']['twitter_notify_onsnatch'] = int(TWITTER_NOTIFY_ONSNATCH)
-    new_config['Twitter']['twitter_notify_ondownload'] = int(TWITTER_NOTIFY_ONDOWNLOAD)
-    new_config['Twitter']['twitter_username'] = TWITTER_USERNAME
-    new_config['Twitter']['twitter_password'] = TWITTER_PASSWORD
-    new_config['Twitter']['twitter_prefix'] = TWITTER_PREFIX
-
-    new_config['Notifo'] = {}
-    new_config['Notifo']['use_notifo'] = int(USE_NOTIFO)
-    new_config['Notifo']['notifo_notify_onsnatch'] = int(NOTIFO_NOTIFY_ONSNATCH)
-    new_config['Notifo']['notifo_notify_ondownload'] = int(NOTIFO_NOTIFY_ONDOWNLOAD)
-    new_config['Notifo']['notifo_username'] = NOTIFO_USERNAME
-    new_config['Notifo']['notifo_apisecret'] = NOTIFO_APISECRET
-
-    new_config['Boxcar'] = {}
-    new_config['Boxcar']['use_boxcar'] = int(USE_BOXCAR)
-    new_config['Boxcar']['boxcar_notify_onsnatch'] = int(BOXCAR_NOTIFY_ONSNATCH)
-    new_config['Boxcar']['boxcar_notify_ondownload'] = int(BOXCAR_NOTIFY_ONDOWNLOAD)
-    new_config['Boxcar']['boxcar_username'] = BOXCAR_USERNAME
-
-    new_config['Pushover'] = {}
-    new_config['Pushover']['use_pushover'] = int(USE_PUSHOVER)
-    new_config['Pushover']['pushover_notify_onsnatch'] = int(PUSHOVER_NOTIFY_ONSNATCH)
-    new_config['Pushover']['pushover_notify_ondownload'] = int(PUSHOVER_NOTIFY_ONDOWNLOAD)
-    new_config['Pushover']['pushover_userkey'] = PUSHOVER_USERKEY
-
-    new_config['Libnotify'] = {}
-    new_config['Libnotify']['use_libnotify'] = int(USE_LIBNOTIFY)
-    new_config['Libnotify']['libnotify_notify_onsnatch'] = int(LIBNOTIFY_NOTIFY_ONSNATCH)
-    new_config['Libnotify']['libnotify_notify_ondownload'] = int(LIBNOTIFY_NOTIFY_ONDOWNLOAD)
-
-    new_config['NMJ'] = {}
-    new_config['NMJ']['use_nmj'] = int(USE_NMJ)
-    new_config['NMJ']['nmj_host'] = NMJ_HOST
-    new_config['NMJ']['nmj_database'] = NMJ_DATABASE
-    new_config['NMJ']['nmj_mount'] = NMJ_MOUNT
-
-    new_config['Synology'] = {}
-    new_config['Synology']['use_synoindex'] = int(USE_SYNOINDEX)
-
-    new_config['Trakt'] = {}
-    new_config['Trakt']['use_trakt'] = int(USE_TRAKT)
-    new_config['Trakt']['trakt_username'] = TRAKT_USERNAME
-    new_config['Trakt']['trakt_password'] = TRAKT_PASSWORD
-    new_config['Trakt']['trakt_api'] = TRAKT_API
-
-    new_config['pyTivo'] = {}
-    new_config['pyTivo']['use_pytivo'] = int(USE_PYTIVO)
-    new_config['pyTivo']['pytivo_notify_onsnatch'] = int(PYTIVO_NOTIFY_ONSNATCH)
-    new_config['pyTivo']['pytivo_notify_ondownload'] = int(PYTIVO_NOTIFY_ONDOWNLOAD)
-    new_config['pyTivo']['pyTivo_update_library'] = int(PYTIVO_UPDATE_LIBRARY)
-    new_config['pyTivo']['pytivo_host'] = PYTIVO_HOST
-    new_config['pyTivo']['pytivo_share_name'] = PYTIVO_SHARE_NAME
-    new_config['pyTivo']['pytivo_tivo_name'] = PYTIVO_TIVO_NAME
-
-    new_config['NMA'] = {}
-    new_config['NMA']['use_nma'] = int(USE_NMA)
-    new_config['NMA']['nma_notify_onsnatch'] = int(NMA_NOTIFY_ONSNATCH)
-    new_config['NMA']['nma_notify_ondownload'] = int(NMA_NOTIFY_ONDOWNLOAD)
-    new_config['NMA']['nma_api'] = NMA_API
-    new_config['NMA']['nma_priority'] = NMA_PRIORITY
-
     new_config['Newznab'] = {}
     new_config['Newznab']['newznab_data'] = '!!!'.join([x.configStr() for x in newznabProviderList])
 
@@ -1147,6 +880,10 @@ def save_config():
     new_config['GUI']['coming_eps_sort'] = COMING_EPS_SORT
 
     new_config['General']['config_version'] = CONFIG_VERSION
+    
+    # save Notifier plugin settings
+    for pluginInfo in pluginManager.getPluginsOfCategory("Notifier"):
+        new_config = pluginInfo.plugin_object.writeConfig(new_config)
 
     new_config.write()
 

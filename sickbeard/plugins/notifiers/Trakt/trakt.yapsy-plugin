@@ -1,0 +1,9 @@
+[Core]
+Name = Trakt
+Module = trakt
+
+[Documentation]
+Description = Trakt Notifier
+Author = Nic Wolfe <nic@wolfeden.ca>
+Version = 0.1
+Website = http://code.google.com/p/sickbeard/

@@ -1,0 +1,9 @@
+[Core]
+Name = Boxcar
+Module = boxcar
+
+[Documentation]
+Description = Boxcar Notifier
+Author = Nic Wolfe <nic@wolfeden.ca>
+Version = 0.1
+Website = http://code.google.com/p/sickbeard/

@@ -1,0 +1,31 @@
+#import sickbeard
+#from lib.yapsy.PluginManager import PluginManager
+#set $plugin = $sickbeard.pluginManager.getPluginByName('Synoindex','Notifier').plugin_object
+
+                <div class="component-group clearfix">
+                    <div class="component-group-desc">
+                        <img class="notifier-icon" src="$sbRoot/images/notifiers/synoindex.png" alt="" title="Synology Indexer" />
+                        <h3><a href="http://synology.com/" onclick="window.open(this.href, '_blank'); return false;">Synology Indexer</a></h3>
+                        <p>Synology Indexer is the daemon running on the Synology NAS to build its media database.</p>
+                    </div>
+
+                    <fieldset class="component-group-list">
+                        <div class="field-pair">
+                            <input type="checkbox" class="enabler" name="use_synoindex" id="use_synoindex" #if $plugin.USE_SYNOINDEX then "checked=\"checked\"" else ""# /> 
+                            <label class="clearfix" for="use_synoindex">
+                                <span class="component-title">Enable</span>
+                                <span class="component-desc">Should Sick Beard send notifications to the synoindex daemon?<br /><br />
+                                </span>
+                            </label>
+                            <label class="nocheck clearfix" for="use_synoindex">
+                                <span class="component-title">&nbsp;</span>
+                                <span class="component-desc"><b>Note:</b> Requires SB to be running on your Synology NAS.</span>
+                            </label>
+                        </div>
+
+                        <div id="content_use_synoindex">
+                            <input type="submit" class="btn config_submitter" value="Save Changes" />
+                        </div><!-- /content_use_pytivo //-->
+
+                    </fieldset>
+                </div><!-- /synoindex component-group //-->

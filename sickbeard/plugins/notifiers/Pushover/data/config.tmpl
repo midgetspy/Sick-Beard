@@ -1,0 +1,51 @@
+#import sickbeard
+#from lib.yapsy.PluginManager import PluginManager
+#set $plugin = $sickbeard.pluginManager.getPluginByName('Pushover','Notifier').plugin_object
+
+                <div class="component-group clearfix">
+                    <div class="component-group-desc">
+                        <img class="notifier-icon" src="$sbRoot/images/notifiers/pushover.png" alt="" title="Pushover" />
+                        <h3><a href="http://pushover.net/" onclick="window.open(this.href, '_blank'); return false;">Pushover</a></h3>
+                        <p>Pushover makes it easy to send real-time notifications to your Android and iOS devices.</p>
+                    </div>
+                    <fieldset class="component-group-list">
+                        <div class="field-pair">
+                            <input type="checkbox" class="enabler" name="use_pushover" id="use_pushover" #if $plugin.USE_PUSHOVER then "checked=\"checked\"" else ""# />
+                            <label class="clearfix" for="use_pushover">
+                                <span class="component-title">Enable</span>
+                                <span class="component-desc">Should Sick Beard send notifications through Pushover?</span>
+                            </label>
+                        </div>
+
+                        <div id="content_use_pushover">
+                            <div class="field-pair">
+                                <input type="checkbox" name="pushover_notify_onsnatch" id="pushover_notify_onsnatch" #if $plugin.PUSHOVER_NOTIFY_ONSNATCH then "checked=\"checked\"" else ""# />
+                                <label class="clearfix" for="pushover_notify_onsnatch">
+                                    <span class="component-title">Notify on Snatch</span>
+                                    <span class="component-desc">Send notification when we start a download?</span>
+                                </label>
+                            </div>
+                            <div class="field-pair">
+                                <input type="checkbox" name="pushover_notify_ondownload" id="pushover_notify_ondownload" #if $plugin.PUSHOVER_NOTIFY_ONDOWNLOAD then "checked=\"checked\"" else ""# />
+                                <label class="clearfix" for="pushover_notify_ondownload">
+                                    <span class="component-title">Notify on Download</span>
+                                    <span class="component-desc">Send notification when we finish a download?</span>
+                                </label>
+                            </div>
+                            <div class="field-pair">
+                                <label class="nocheck clearfix">
+                                    <span class="component-title">Pushover User Key</span>
+                                    <input type="text" name="pushover_userkey" id="pushover_userkey" value="$plugin.PUSHOVER_USERKEY" size="35" />
+                                </label>
+                                <label class="nocheck clearfix">
+                                    <span class="component-title">&nbsp;</span>
+                                    <span class="component-desc">User key of your Pushover account</span>
+                                </label>
+                            </div>
+                            <div class="testNotification" id="testPushover-result">Click below to test.</div>
+                            <input type="button" class="btn" value="Test Pushover" id="testPushover" />
+                            <input type="submit" class="btn config_submitter" value="Save Changes" />
+                        </div><!-- /content_use_pushover //-->
+
+                    </fieldset>
+                </div><!-- /pushover component-group //-->

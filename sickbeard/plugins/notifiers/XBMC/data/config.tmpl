@@ -1,0 +1,90 @@
+#import sickbeard
+#from lib.yapsy.PluginManager import PluginManager
+#set $plugin = $sickbeard.pluginManager.getPluginByName('XBMC','Notifier').plugin_object
+
+                <div class="component-group clearfix">
+                    <div class="component-group-desc">
+                        <img class="notifier-icon" src="$sbRoot/images/notifiers/xbmc.png" alt="" title="XBMC" />
+                        <h3><a href="http://xbmc.org/" onclick="window.open(this.href, '_blank'); return false;">XBMC</a></h3>
+                        <p>A free and open source cross-platform media center and home entertainment system software with a 10-foot user interface designed for the living-room TV.</p>
+                        <p>For SickBeard to communicate with XBMC you must turn on the <a href="http://wiki.xbmc.org/index.php?title=Webserver" onclick="window.open(this.href, '_blank'); return false;">XBMC Webserver</a>.</p>
+                    </div>
+                    <fieldset class="component-group-list">
+                        <div class="field-pair">
+                            <input type="checkbox" class="enabler" name="use_xbmc" id="use_xbmc" #if $plugin.USE_XBMC then "checked=\"checked\"" else ""# />
+                            <label class="clearfix" for="use_xbmc">
+                                <span class="component-title">Enable</span>
+                                <span class="component-desc">Should Sick Beard send XBMC commands?</span>
+                            </label>
+                        </div>
+
+                        <div id="content_use_xbmc">
+                            <div class="field-pair">
+                                <input type="checkbox" name="xbmc_notify_onsnatch" id="xbmc_notify_onsnatch" #if $plugin.XBMC_NOTIFY_ONSNATCH then "checked=\"checked\"" else ""# />
+                                <label class="clearfix" for="xbmc_notify_onsnatch">
+                                    <span class="component-title">Notify on Snatch</span>
+                                    <span class="component-desc">Send notification when we start a download?</span>
+                                </label>
+                            </div>
+                            <div class="field-pair">
+                                <input type="checkbox" name="xbmc_notify_ondownload" id="xbmc_notify_ondownload" #if $plugin.XBMC_NOTIFY_ONDOWNLOAD then "checked=\"checked\"" else ""# />
+                                <label class="clearfix" for="xbmc_notify_ondownload">
+                                    <span class="component-title">Notify on Download</span>
+                                    <span class="component-desc">Send notification when we finish a download?</span>
+                                </label>
+                            </div>
+                            <div class="field-pair">
+                                <input type="checkbox" name="xbmc_update_library" id="xbmc_update_library" #if $plugin.XBMC_UPDATE_LIBRARY then "checked=\"checked\"" else ""# />
+                                <label class="clearfix" for="xbmc_update_library">
+                                    <span class="component-title">Update Library</span>
+                                    <span class="component-desc">Update library (show's path) when we finish a download?</span>
+                                </label>
+                            </div>
+                            <div class="field-pair">
+                                <input type="checkbox" name="xbmc_update_full" id="xbmc_update_full" #if $plugin.XBMC_UPDATE_FULL then "checked=\"checked\"" else ""# />
+                                <label class="clearfix" for="xbmc_update_full">
+                                    <span class="component-title">Full Library Update</span>
+                                    <span class="component-desc">Fall back to a full library update if per-show fails?</span>
+                                </label>
+                            </div>
+                            <div class="field-pair">
+                                <label class="nocheck clearfix">
+                                    <span class="component-title">XBMC IP:Port</span>
+                                    <input type="text" name="xbmc_host" id="xbmc_host" value="$plugin.XBMC_HOST" size="35" />
+                                </label>
+                                <label class="nocheck clearfix">
+                                    <span class="component-title">&nbsp;</span>
+                                    <span class="component-desc">Host running XBMC (eg. 192.168.1.100:8080)</span>
+                                </label>
+                                <label class="nocheck clearfix">
+                                    <span class="component-title">&nbsp;</span>
+                                    <span class="component-desc">(multiple host strings must be separated by commas, <br/> the library updates will only be sent to the first host listed)</span>
+                                </label>
+                            </div>
+                            <div class="field-pair">
+                                <label class="nocheck clearfix">
+                                    <span class="component-title">XBMC Username</span>
+                                    <input type="text" name="xbmc_username" id="xbmc_username" value="$plugin.XBMC_USERNAME" size="35" />
+                                </label>
+                                <label class="nocheck clearfix">
+                                    <span class="component-title">&nbsp;</span>
+                                    <span class="component-desc">Username of your XBMC server (blank for none)</span>
+                                </label>
+                            </div>
+                            <div class="field-pair">
+                                <label class="nocheck clearfix">
+                                    <span class="component-title">XBMC Password</span>
+                                    <input type="password" name="xbmc_password" id="xbmc_password" value="$plugin.XBMC_PASSWORD" size="35" />
+                                </label>
+                                <label class="nocheck clearfix">
+                                    <span class="component-title">&nbsp;</span>
+                                    <span class="component-desc">Password of your XBMC server (blank for none)</span>
+                                </label>
+                            </div>
+                            <div class="testNotification" id="testXBMC-result">Click below to test.</div>
+                            <input type="button" class="btn" value="Test XBMC" id="testXBMC" />
+                            <input type="submit" class="btn config_submitter" value="Save Changes" />
+                        </div><!-- /content_use_xbmc //-->
+
+                    </fieldset>
+                </div><!-- /xbmc component-group //-->

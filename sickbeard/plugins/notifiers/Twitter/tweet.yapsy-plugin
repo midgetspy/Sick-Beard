@@ -1,0 +1,9 @@
+[Core]
+Name = Twitter
+Module = tweet
+
+[Documentation]
+Description = Twitter Notifier
+Author = Nic Wolfe <nic@wolfeden.ca>
+Version = 0.1
+Website = http://code.google.com/p/sickbeard/

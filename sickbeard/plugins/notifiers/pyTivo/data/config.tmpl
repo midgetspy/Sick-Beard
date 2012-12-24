@@ -1,0 +1,59 @@
+#import sickbeard
+#from lib.yapsy.PluginManager import PluginManager
+#set $plugin = $sickbeard.pluginManager.getPluginByName('pyTivo','Notifier').plugin_object
+
+                <div class="component-group clearfix">
+                    <div class="component-group-desc">
+                        <img class="notifier-icon" src="$sbRoot/images/notifiers/pytivo.png" alt="" title="pyTivo" />
+                        <h3><a href="http://pytivo.sourceforge.net/wiki/index.php/PyTivo" onclick="window.open(this.href, '_blank'); return false;">pyTivo</a></h3>
+                        <p>pyTivo is both an HMO and GoBack server.  This notifier will load the completed downloads to your Tivo.</p>
+                    </div>
+                    <fieldset class="component-group-list">
+                        <div class="field-pair">
+                            <input type="checkbox" class="enabler" name="use_pytivo" id="use_pytivo" #if $plugin.USE_PYTIVO then "checked=\"checked\"" else ""# /> 
+                            <label class="clearfix" for="use_pytivo">
+                                <span class="component-title">Enable</span>
+                                <span class="component-desc">Should Sick Beard send notifications to pyTivo?<br /><br /></span>
+                            </label>
+                            <label class="nocheck clearfix" for="use_pytivo">
+                                <span class="component-title">&nbsp;</span>
+                                <span class="component-desc">Requires the downloaded files to be accessible to pyTivo.</span>
+                            </label>
+                        </div>
+
+                        <div id="content_use_pytivo">
+                            <div class="field-pair">
+                                <label class="nocheck clearfix">
+                                    <span class="component-title">pyTivo IP:Port</span>
+                                    <input type="text" name="pytivo_host" id="pytivo_host" value="$plugin.PYTIVO_HOST" size="35" />
+                                </label>
+                                <label class="nocheck clearfix">
+                                    <span class="component-title">&nbsp;</span>
+                                    <span class="component-desc">Host running pyTivo (eg. 192.168.1.1:9032)</span>
+                                </label>
+                            </div>
+                            <div class="field-pair">
+                                <label class="nocheck clearfix">
+                                    <span class="component-title">pyTivo Share name</span>
+                                    <input type="text" name="pytivo_share_name" id="pytivo_share_name" value="$plugin.PYTIVO_SHARE_NAME" size="35" />
+                                </label>
+                                <label class="nocheck clearfix">
+                                    <span class="component-title">&nbsp;</span>
+                                    <span class="component-desc">Value used in pyTivo Web Configuration to name the share.</span>
+                                </label>
+                            </div>
+                            <div class="field-pair">
+                                <label class="nocheck clearfix">
+                                    <span class="component-title">Tivo Name</span>
+                                    <input type="text" name="pytivo_tivo_name" id="pytivo_tivo_name" value="$plugin.PYTIVO_TIVO_NAME" size="35" />
+                                </label>
+                                <label class="nocheck clearfix">
+                                    <span class="component-title">&nbsp;</span>
+                                    <span class="component-desc">Messages &amp; Settings > Account &amp; System Information > System Information > DVR name</span>
+                                </label>
+                            </div>
+                            <input type="submit" class="btn config_submitter" value="Save Changes" />
+                        </div><!-- /content_use_pytivo //-->
+
+                    </fieldset>
+                </div><!-- /component-group //-->
