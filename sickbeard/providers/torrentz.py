@@ -145,23 +145,10 @@ class TORRENTZProvider(generic.TorrentProvider):
     def _getTorrentzCache(self, torrentz_url):
         url = ''
         torrentHash = torrentz_url.replace('http://torrentz.eu/','').upper()
-        try:
-            url = "http://torrage.com/torrent/" + torrentHash + '.' + self.providerType
-            urllib2.urlopen(url)
-        except (urllib2.HTTPError,urllib2.URLError) as  eA:
-            logger.log(torrentz_url + ' is not available on torrage : ' + str(eA).decode('utf-8'), logger.DEBUG)
-            try:
-                url = "http://zoink.it/torrent/" + torrentHash + '.' + self.providerType
-                urllib2.urlopen(url)
-            except (urllib2.HTTPError,urllib2.URLError) as eB:
-                logger.log(torrentz_url + ' is not available on zoink : ' + str(eB).decode('utf-8'), logger.DEBUG)
-                try:
-                    url = "http://torcache.net/torrent/" + torrentHash + '.' + self.providerType
-                    urllib2.urlopen(url)
-                except (urllib2.HTTPError,urllib2.URLError) as  eC:
-                    logger.log(torrentz_url + ' is not available on torcache : ' + str(eC).decode('utf-8'), logger.DEBUG)
-                    logger.log(u"No suitable URL for "+torrentz_url, logger.DEBUG)
-                    url = ''
+        
+        url = url + "http://torrage.com/torrent/" + torrentHash + '.' + self.providerType + ";"
+        url = url + "http://zoink.it/torrent/" + torrentHash + '.' + self.providerType + ";"
+        url = url + "http://torcache.net/torrent/" + torrentHash + '.' + self.providerType + ";"
 
         return url
         

@@ -40,6 +40,9 @@ from sickbeard import providers
 from sickbeard.exceptions import ex
 from sickbeard.providers.generic import GenericProvider
 
+import urllib
+import urllib2
+
 def _downloadResult(result):
     """
     Downloads a result to the appropriate black hole folder.
@@ -117,6 +120,19 @@ def snatchEpisode(result, endStatus=SNATCHED):
             dlResult = False
 
     elif result.resultType == "torrent":
+        
+        #this is required for providers that use torrent cache (more than one possibility)
+        #like Torrentz. Maybe convert result.url to an array in the future.
+        if result.url.count(";") > 0:
+            allUrls = result.url.split(";", 3)
+            for url in allUrls:
+                try:
+                    urllib2.urlopen(url)
+                    result.url = url
+                    break
+                except Exception, e:
+                    continue 
+            
         # torrents are always saved to disk
         if sickbeard.TORRENT_METHOD == "blackhole": 
             dlResult = _downloadResult(result)

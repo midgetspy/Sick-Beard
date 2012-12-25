@@ -122,6 +122,8 @@ class GenericProvider:
         """
         logger.log(u"Downloading a result from " + self.name+" at " + result.url)
 
+
+            
         data = self.getURL(result.url)
 
         if data == None:
