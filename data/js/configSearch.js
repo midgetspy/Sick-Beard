@@ -55,6 +55,14 @@ $(document).ready(function(){
             $('#username_desc').text('Transmission Username');
             $('#password_desc').text('Transmission Password');
             $('#directory_desc').text('Transmission Directory');
+		} else if (selectedProvider == "downloadstation") {
+			$('#t_blackhole_settings').hide();
+			$('#torrent_settings').show();
+			$('#torrent_directory').show();
+			$('#host_desc').html('Download Station Host');
+			$('#username_desc').text('Synology Username');
+			$('#password_desc').text('Synology Password');
+			$('#directory_desc').text('Download Station Directory');
         }
     }
     $('#nzb_method').change($(this).nzb_method_handler);
