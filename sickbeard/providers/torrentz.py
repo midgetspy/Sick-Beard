@@ -145,7 +145,7 @@ class TORRENTZProvider(generic.TorrentProvider):
     def _getTorrentzCache(self, torrentz_url):
         url = ''
         torrentHash = torrentz_url.replace('http://torrentz.eu/','').upper()
-        
+        #get all possible urls together to improve performance. 
         url = url + "http://torrage.com/torrent/" + torrentHash + '.' + self.providerType + ";"
         url = url + "http://zoink.it/torrent/" + torrentHash + '.' + self.providerType + ";"
         url = url + "http://torcache.net/torrent/" + torrentHash + '.' + self.providerType + ";"

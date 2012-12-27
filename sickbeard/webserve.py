@@ -1000,9 +1000,11 @@ class ConfigProviders:
     def saveProviders(self, nzbmatrix_username=None, nzbmatrix_apikey=None,
                       nzbs_r_us_uid=None, nzbs_r_us_hash=None, newznab_string=None,
                       tvtorrents_digest=None, tvtorrents_hash=None,
-                      thepiratebay_trusted=None, thepiratebay_proxy=None, thepiratebay_proxy_url=None,
  					  btn_api_key=None,
-                      dtt_norar = None, dtt_single = None, newzbin_username=None, newzbin_password=None,
+                      newzbin_username=None, newzbin_password=None,
+                      thepiratebay_trusted=None, thepiratebay_proxy=None, thepiratebay_proxy_url=None,
+                      dtt_norar = None, dtt_single = None, 
+                      torrentleech_username = None, torrentleech_password = None,
                       torrentz_verified = None,
                       provider_order=None):
 
@@ -1073,6 +1075,8 @@ class ConfigProviders:
                 sickbeard.TVTORRENTS = curEnabled
             elif curProvider == 'dailytvtorrents':
                 sickbeard.DTT = curEnabled
+            elif curProvider == 'torrentleech':
+                sickbeard.TORRENTLEECH = curEnabled
             elif curProvider == 'btn':
                 sickbeard.BTN = curEnabled
             elif curProvider in newznabProviderDict:
@@ -1113,6 +1117,8 @@ class ConfigProviders:
 
         sickbeard.DTT_SINGLE = dtt_single
         
+        sickbeard.TORRENTLEECH_USERNAME = torrentleech_username
+        sickbeard.TORRENTLEECH_PASSWORD = torrentleech_password
         
             
         if torrentz_verified == "on":

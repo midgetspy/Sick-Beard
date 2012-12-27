@@ -138,7 +138,11 @@ def sendTORRENT(torrent):
 
     if not (path == ''):
         params['download-dir'] = path
-
+    
+    #check for cookies
+    if torrent.provider.token:
+        params['cookies'] = torrent.provider.token
+        
     try:
         tc = TransmissionRPC(host.hostname, host.port, sickbeard.TORRENT_USERNAME, sickbeard.TORRENT_PASSWORD)
         torrent = tc.add_torrent(torrent.url, arguments=params)

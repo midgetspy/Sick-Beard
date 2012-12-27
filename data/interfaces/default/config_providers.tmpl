@@ -87,7 +87,7 @@
                                 <span class="component-title jumbo">Configure Provider:</span>
                                 <span class="component-desc">
                                     #set $provider_config_list = []
-                                    #for $cur_provider in ("nzbs_r_us", "newzbin", "nzbmatrix", "thepiratebay","dailytvtorrents", "torrentz", "tvtorrents", "btn"):
+                                    #for $cur_provider in ("nzbs_r_us", "newzbin", "nzbmatrix", "thepiratebay","dailytvtorrents", "torrentz", "tvtorrents", "btn", "torrentleech"):
                                         #set $cur_provider_obj = $sickbeard.providers.getProviderClass($cur_provider)
                                         #if $cur_provider_obj.providerType == $GenericProvider.NZB and not $sickbeard.USE_NZBS:
                                             #continue
@@ -269,6 +269,21 @@
                             </label>
                         </div>
 		    </div><!-- /torrentzDiv //-->
+                
+                    <div class="providerDiv" id="torrentleechDiv">
+                        <div class="field-pair">
+                            <label class="clearfix">
+                                <span class="component-title">Username:</span>
+                                <input class="component-desc" type="text" name="torrentleech_username" value="$sickbeard.TORRENTLEECH_USERNAME" size="40" />
+                            </label>
+                        </div>
+                        <div class="field-pair">
+                            <label class="clearfix">
+                                <span class="component-title">Password:</span>
+                                <input class="component-desc" type="password" name="torrentleech_password" value="$sickbeard.TORRENTLEECH_PASSWORD" size="40" />
+                            </label>
+                        </div>
+                    </div><!-- /torrentleechDiv //-->
 <!-- end div for editing providers -->
 
                     <input type="submit" class="btn config_submitter" value="Save Changes" /><br/>

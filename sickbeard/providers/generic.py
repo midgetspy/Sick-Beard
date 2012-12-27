@@ -48,7 +48,7 @@ class GenericProvider:
         self.providerType = None
         self.name = name
         self.url = ''
-
+        self.token = None
         self.supportsBacklog = False
 
         self.cache = tvcache.TVCache(self)
@@ -105,7 +105,7 @@ class GenericProvider:
 
         if not headers:
             headers = []
-
+        
         result = None
 
         result = helpers.getURL(url, headers)
@@ -123,8 +123,8 @@ class GenericProvider:
         logger.log(u"Downloading a result from " + self.name+" at " + result.url)
 
 
-            
-        data = self.getURL(result.url)
+        headers = [('Referer', self.url)]
+        data = self.getURL(result.url, headers)
 
         if data == None:
             return False

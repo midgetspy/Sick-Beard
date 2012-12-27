@@ -30,7 +30,7 @@ from threading import Lock
 
 # apparently py2exe won't build these unless they're imported somewhere
 from sickbeard import providers, metadata
-from providers import kickass, torrentz, dtt
+from providers import kickass, torrentz, dtt, torrentleech
 from providers import ezrss, tvtorrents, btn,thepiratebay, nzbmatrix, nzbsrus, newznab, womble, newzbin, nzbs_org_old
 from sickbeard.config import CheckSection, check_setting_int, check_setting_str, ConfigMigrator
 
@@ -172,6 +172,10 @@ KICKASS = False
 
 TORRENTZ = False
 TORRENTZ_VERIFIED = False
+
+TORRENTLEECH = False
+TORRENTLEECH_USERNAME = None
+TORRENTLEECH_PASSWORD = None
 
 BTN = False
 BTN_API_KEY = None
@@ -339,6 +343,7 @@ def initialize(consoleLogging=True):
                 PLEX_SERVER_HOST, PLEX_HOST, PLEX_USERNAME, PLEX_PASSWORD, \
                 showUpdateScheduler, __INITIALIZED__, LAUNCH_BROWSER, showList, loadingShowList, \
                 KICKASS, TORRENTZ, TORRENTZ_VERIFIED, \
+                TORRENTLEECH, TORRENTLEECH_USERNAME, TORRENTLEECH_PASSWORD, \
                 NZBS, NZBS_UID, NZBS_HASH, EZRSS, DTT, DTT_NORAR, DTT_SINGLE, THEPIRATEBAY, THEPIRATEBAY_TRUSTED, THEPIRATEBAY_PROXY, THEPIRATEBAY_PROXY_URL, TVTORRENTS, TVTORRENTS_DIGEST, TVTORRENTS_HASH, BTN, BTN_API_KEY, TORRENT_DIR, USENET_RETENTION, SOCKET_TIMEOUT, \
                 SEARCH_FREQUENCY, DEFAULT_SEARCH_FREQUENCY, BACKLOG_SEARCH_FREQUENCY, \
                 QUALITY_DEFAULT, FLATTEN_FOLDERS_DEFAULT, STATUS_DEFAULT, \
@@ -512,6 +517,10 @@ def initialize(consoleLogging=True):
         
         TORRENTZ = bool(check_setting_int(CFG, 'TORRENTZ', 'torrentz', 0))    
         TORRENTZ_VERIFIED = bool(check_setting_int(CFG, 'TORRENTZ', 'torrentz_verified', 0))    
+
+        TORRENTLEECH = bool(check_setting_int(CFG, 'TORRENTLEECH', 'torrentleech', 0))    
+        TORRENTLEECH_USERNAME = check_setting_str(CFG, 'TORRENTLEECH', 'torrentleech_username', '')   
+        TORRENTLEECH_PASSWORD = check_setting_str(CFG, 'TORRENTLEECH', 'torrentleech_password', '')   
 
         NZBS = bool(check_setting_int(CFG, 'NZBs', 'nzbs', 0))
         NZBS_UID = check_setting_str(CFG, 'NZBs', 'nzbs_uid', '')
@@ -1047,6 +1056,11 @@ def save_config():
     new_config['TORRENTZ'] = {}
     new_config['TORRENTZ']['torrentz'] = int(TORRENTZ)
     new_config['TORRENTZ']['torrentz_verified'] = int(TORRENTZ_VERIFIED)
+ 
+    new_config['TORRENTLEECH'] = {}
+    new_config['TORRENTLEECH']['torrentleech'] = int(TORRENTLEECH)
+    new_config['TORRENTLEECH']['torrentleech_username'] = TORRENTLEECH_USERNAME
+    new_config['TORRENTLEECH']['torrentleech_password'] = TORRENTLEECH_PASSWORD
     
     new_config['THEPIRATEBAY'] = {}
     new_config['THEPIRATEBAY']['thepiratebay'] = int(THEPIRATEBAY)

@@ -73,6 +73,9 @@ def sendTORRENT(result):
     # obtained the token
     
     add_url = "%s?action=add-url&token=%s&s=%s" % (host, token, urllib.quote_plus(result.url))
+    if result.provider.token:
+        add_url = add_url + ":COOKIE:" + result.provider.token
+    
     logger.log(u"Calling uTorrent with url: "+add_url,logger.DEBUG)
 
     try:
