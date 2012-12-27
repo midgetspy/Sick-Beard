@@ -156,7 +156,7 @@ def sendTORRENT(torrent):
 def testAuthentication(host, username, password):
 
     try:
-        host = urlparse(sickbeard.TORRENT_HOST)
+        host = urlparse(host)
     except Exception, e:
         return False, u"Host properties are not filled in correctly, port is missing."
 

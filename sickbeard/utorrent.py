@@ -28,7 +28,11 @@ from sickbeard.exceptions import ex
 
 def sendTORRENT(result):
 
-    host = sickbeard.TORRENT_HOST+'gui/'
+    host = sickbeard.TORRENT_HOST
+    if not host.endswith("/"):
+        host = host + "/"
+    host = host+'gui/'
+    
     username = sickbeard.TORRENT_USERNAME
     password = sickbeard.TORRENT_PASSWORD
 
@@ -88,6 +92,8 @@ def sendTORRENT(result):
     
 def testAuthentication(host, username, password):
     
+    if not host.endswith("/"):
+        host = host + "/"
     host = host+'gui/'
     
     # this creates a password manager
