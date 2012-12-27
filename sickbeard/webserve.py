@@ -791,6 +791,8 @@ class ConfigSearch:
         sab_host = re.sub(regex, regex_sub, postData.get('sab_host', ''))
         sickbeard.SAB_HOST = sab_host
 
+        sickbeard.TORRENT_HOST = re.sub(regex, regex_sub, postData.get('torrent_host', ''))
+
         sickbeard.save_config()
 
         if len(results) > 0:
