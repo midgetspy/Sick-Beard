@@ -32,7 +32,7 @@ import cherrypy.lib
 
 import sickbeard
 
-from sickbeard import config, sab, utorrent, transmission
+from sickbeard import config, sab, utorrent, transmission, downloadstation
 from sickbeard import history, notifiers, processTV
 from sickbeard import ui
 from sickbeard import logger, helpers, exceptions, classes, db
@@ -2005,6 +2005,8 @@ class Home:
             connection, accesMsg = utorrent.testAuthentication(host, username, password)
         elif torrent_method == 'transmission':
             connection, accesMsg = transmission.testAuthentication(host, username, password)
+        elif torrent_method == 'downloadstation':
+            connection, accesMsg = downloadstation.testAuthentication(host, username, password)
 
         return accesMsg   
     
