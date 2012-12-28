@@ -198,7 +198,8 @@ class NzbxProvider(generic.NZBProvider):
 
         params = {#"maxage": sickbeard.USENET_RETENTION,
                   "limit": 250,
-                  "index": 'releases'
+                  "index": 'releases',
+                  "source": 'sickbeard',
                   }
 
         # if max_age is set, use it, don't allow it to be missing
