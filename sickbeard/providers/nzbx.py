@@ -63,7 +63,7 @@ def jsonToRSS(json):
         logger.log('parsing ' + name )
         xml += '<item><title>' + urllib.quote_plus(name) + '</title>\n'
         xml += '<description>' + urllib.quote_plus(name) + '</description>\n'
-        xml += '<link>http://nzbx.co/nzb?' + str(entry['guid']) + '</link>\n'
+        xml += '<link>http://nzbx.co/nzb?' + str(entry['guid']) + '*|*' + urllib.quote_plus(name) + '</link>\n'
         xml += '<pubDate>' + parseDate(entry['postdate']) + '</pubDate>\n'
         xml += '<guid>' + entry['guid'] + '</guid>\n'
         xml += '</item>\n'
