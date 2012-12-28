@@ -197,8 +197,7 @@ class NzbxProvider(generic.NZBProvider):
     def _doSearch(self, search_params, show=None, max_age=0):
 
         params = {#"maxage": sickbeard.USENET_RETENTION,
-                  "limit": 100,
-                  #"cat": '5030,5040'}
+                  "limit": 250,
                   "index": 'releases'
                   }
 
