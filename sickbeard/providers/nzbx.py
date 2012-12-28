@@ -85,10 +85,8 @@ class NzbxProvider(generic.NZBProvider):
 
         self.url = "http://nzbx.co/"
 
-        # if a provider doesn't need an api key then this can be false
-        self.needs_auth = False
-
         self.enabled = True
+        self.needs_auth = False
         self.supportsBacklog = True
 
         self.default = False
@@ -111,33 +109,16 @@ class NzbxProvider(generic.NZBProvider):
 
         to_return = []
 
-        # add new query strings for exceptions
         name_exceptions = scene_exceptions.get_scene_exceptions(show.tvdbid) + [show.name]
         for cur_exception in name_exceptions:
 
             cur_params = {}
 
-            # search directly by tvrage id
             if show.tvrid and USE_TVRAGE:
                 cur_params['q'] = show.tvrid
-            # if we can't then fall back on a very basic name search
             else:
                 cur_params['q'] = helpers.sanitizeSceneName(cur_exception)
 
-                ##if season != None:
-                # air-by-date means &season=2010&q=2010.03, no other way to do it atm
-                #if show.air_by_date:
-                 #   #cur_params['season'] = season.split('-')[0]
-                 #   if 'q' in cur_params:
-                 #       cur_params['q'] += '.' + season.replace('-', '.')
-                 #   else:
-                #cur_params['q'] = season.replace('-', '.')
-                #else:
-                 #   logger.log('bar')
-                    #cur_params['season'] = season
-
-                # hack to only add a single result if it's a rageid search
-                #if not ('index' in cur_params and to_return):
             to_return.append(cur_params)
                 
         return to_return
@@ -160,25 +141,14 @@ class NzbxProvider(generic.NZBProvider):
 
         if ep_obj.show.air_by_date:
             date_str = str(ep_obj.airdate)
-            
-            #params['q'] += "&" + ep_obj.season + "&" + ep_obj.episode
-            #params['season'] = date_str.partition('-')[0]
-            #params['ep'] = date_str.partition('-')[2].replace('-', '/')
         else:
             logger.log('fooo')
-            #params['season'] = ep_obj.season
-            #params['ep'] = ep_obj.episode
 
         to_return = [params]
 
-        # only do exceptions if we are searching by name
         if 'q' in params:
-
-            # add new query strings for exceptions
             name_exceptions = scene_exceptions.get_scene_exceptions(ep_obj.show.tvdbid)
             for cur_exception in name_exceptions:
-
-                # don't add duplicates
                 if cur_exception == ep_obj.show.name:
                     continue
 
@@ -196,44 +166,24 @@ class NzbxProvider(generic.NZBProvider):
 
     def _doSearch(self, search_params, show=None, max_age=0):
 
-        params = {#"maxage": sickbeard.USENET_RETENTION,
+        params = {
                   "limit": 250,
                   "index": 'releases',
                   "source": 'sickbeard',
                   }
 
-        # if max_age is set, use it, don't allow it to be missing
-        #if max_age or not params['maxage']:
-        #    params['maxage'] = max_age
-
-        # hack this in for now
-        #if self.getID() == 'nzbs_org':
-        #    params['cat'] += ',5070,5090'
-        
-
         if search_params:
             params.update(search_params)
-
-        #if self.key:
-        #    params['apikey'] = self.key
 
         searchURL = self.url + 'api/search?' + urllib.urlencode(params)
 
         logger.log(u"Search url: " + searchURL, logger.DEBUG)
 
         data = self.getURL(searchURL)
-        #pprint(data)
         parsedJSON = json.loads(data)
-        
-        #pprint (vars(parsedJSON))
-#        logger.log(parsedJSON)
         
         if not data:
             return []
-
-        # hack this in until it's fixed server side
-        #if not data.startswith('<?xml'):
-         #   data = '<?xml version="1.0" encoding="ISO-8859-1" ?>' + data
 
         data = jsonToRSS(parsedJSON )
 
@@ -243,13 +193,6 @@ class NzbxProvider(generic.NZBProvider):
             logger.log(u"Error trying to load " + self.name + " RSS feed: " + ex(e), logger.ERROR)
             logger.log(u"RSS data: " + data, logger.DEBUG)
             return []
-
-        #if not self._checkAuthFromData(data):
-        #    return []
-
-        #if parsedXML.documentElement.tagName != 'rss':
-        #    logger.log(u"Resulting XML from " + self.name + " isn't RSS, not parsing it", logger.ERROR)
-        #    return []
 
         results = []
 
@@ -284,7 +227,6 @@ class NzbxProvider(generic.NZBProvider):
                 descriptionStr = helpers.get_xml_text(description_node)
 
                 try:
-                    # we could probably do dateStr = descriptionStr but we want date in this format
                     dateStr = re.search('(\w{3}, \d{1,2} \w{3} \d{4} \d\d:\d\d:\d\d) [\+\-]\d{4}', descriptionStr).group(1)
                 except:
                     dateStr = None
@@ -310,18 +252,15 @@ class NzbxCache(tvcache.TVCache):
     def __init__(self, provider):
 
         tvcache.TVCache.__init__(self, provider)
-
-        # only poll newznab providers every 15 minutes max
         self.minTime = 15
 
         
     def _getRSSData(self):
-        url = 'http://nzbx.co/api/recent?category=tv'
+        url = 'https://nzbx.co/api/recent?category=tv'
 
-        logger.log(u"NZBX.co cache update URL: " + url, logger.DEBUG )
+        logger.log("NZBX.co cache update URL: " + url, logger.DEBUG )
 
         data = self.provider.getURL(url)
-        #logger.log(data)
         data = json.loads(data)
 
         data = jsonToRSS(data)
