@@ -109,52 +109,42 @@ class NzbxProvider(generic.NZBProvider):
 
         to_return = []
 
-        name_exceptions = scene_exceptions.get_scene_exceptions(show.tvdbid) + [show.name]
-        for cur_exception in name_exceptions:
+        query = helpers.sanitizeSceneName(show.name)
 
-            cur_params = {}
-
-            if show.tvrid and USE_TVRAGE:
-                cur_params['q'] = show.tvrid
+        # Get alternate show names
+        show_names = [helpers.sanitizeSceneName(name) for name in scene_exceptions.get_scene_exceptions(show.tvdbid)]
+        if not query in show_names:
+            show_names += [query]
+        for show_name in show_names:
+            if not season is None:
+                to_return.append({'q':"%s.S%02d*" % (show_name, season)})
+                to_return.append({'q':"%s.%dx*" % (show_name, season)})
             else:
-                cur_params['q'] = helpers.sanitizeSceneName(cur_exception)
-
-            to_return.append(cur_params)
-                
+                to_return.append({'q':show_name})
         return to_return
-    
-
 
     def _get_episode_search_strings(self, ep_obj):
 
-        params = {}
-
         if not ep_obj:
-            return [params]
+            return [{}]
 
         logger.log(ep_obj.show.name)
         
-        if ep_obj.show.tvrid and USE_TVRAGE:
-            params['q'] = ep_obj.show.tvrid
-        else:
-            params['q'] = helpers.sanitizeSceneName(ep_obj.show.name)
-
+        to_return = []
+        query = helpers.sanitizeSceneName(ep_obj.show.name)
+        # Add date string or episode number to search, depending on show type
         if ep_obj.show.air_by_date:
-            date_str = str(ep_obj.airdate)
+            date = ep_obj.airdate
+            add_strs = [".\"%d.%02d.%02d\"" % (date.year, date.month, date.day)]
         else:
-            logger.log('fooo')
-
-        to_return = [params]
-
-        if 'q' in params:
-            name_exceptions = scene_exceptions.get_scene_exceptions(ep_obj.show.tvdbid)
-            for cur_exception in name_exceptions:
-                if cur_exception == ep_obj.show.name:
-                    continue
-
-                cur_return = params.copy()
-                cur_return['q'] = helpers.sanitizeSceneName(cur_exception)
-                to_return.append(cur_return)
+            add_strs = [".S%02dE%02d" % (ep_obj.season, ep_obj.episode), ".%dx%02d" % (ep_obj.season, ep_obj.episode)]
+        # Get alternate show names
+        show_names = [helpers.sanitizeSceneName(name) for name in scene_exceptions.get_scene_exceptions(ep_obj.show.tvdbid)]
+        if not query in show_names:
+            show_names += [query]
+        for show_name in show_names:
+            for add_str in add_strs:
+                to_return.append({'q':"%s%s" % (show_name, add_str)})
 
         return to_return
 
