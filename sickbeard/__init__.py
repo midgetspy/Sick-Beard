@@ -30,7 +30,7 @@ from threading import Lock
 
 # apparently py2exe won't build these unless they're imported somewhere
 from sickbeard import providers, metadata
-from providers import ezrss, tvtorrents, btn, nzbsrus, newznab, womble
+from providers import ezrss, tvtorrents, btn, nzbsrus, newznab, womble, omgwtfnzbs
 from sickbeard.config import CheckSection, check_setting_int, check_setting_str, ConfigMigrator
 
 from sickbeard import searchCurrent, searchBacklog, showUpdater, versionChecker, properFinder, autoPostProcesser
@@ -175,6 +175,10 @@ NZBS_UID = None
 NZBS_HASH = None
 
 WOMBLE = False
+
+OMGWTFNZBS = False
+OMGWTFNZBS_UID = None
+OMGWTFNZBS_HASH = None
 
 NZBSRUS = False
 NZBSRUS_UID = None
@@ -335,7 +339,7 @@ def initialize(consoleLogging=True):
                 USE_PUSHOVER, PUSHOVER_USERKEY, PUSHOVER_NOTIFY_ONDOWNLOAD, PUSHOVER_NOTIFY_ONSNATCH, \
                 USE_LIBNOTIFY, LIBNOTIFY_NOTIFY_ONSNATCH, LIBNOTIFY_NOTIFY_ONDOWNLOAD, USE_NMJ, NMJ_HOST, NMJ_DATABASE, NMJ_MOUNT, USE_SYNOINDEX, \
                 USE_BANNER, USE_LISTVIEW, METADATA_XBMC, METADATA_MEDIABROWSER, METADATA_PS3, METADATA_SYNOLOGY, metadata_provider_dict, \
-                NEWZBIN, NEWZBIN_USERNAME, NEWZBIN_PASSWORD, GIT_PATH, MOVE_ASSOCIATED_FILES, \
+                NEWZBIN, NEWZBIN_USERNAME, NEWZBIN_PASSWORD, GIT_PATH, MOVE_ASSOCIATED_FILES, OMGWTFNZBS, OMGWTFNZBS_UID, OMGWTFNZBS_HASH, \
                 COMING_EPS_LAYOUT, COMING_EPS_SORT, COMING_EPS_DISPLAY_PAUSED, METADATA_WDTV, METADATA_TIVO, IGNORE_WORDS, CREATE_MISSING_SHOW_DIRS, \
                 ADD_SHOWS_WO_DIR
 
@@ -542,6 +546,11 @@ def initialize(consoleLogging=True):
         NZBSRUS = bool(check_setting_int(CFG, 'NZBsRUS', 'nzbsrus', 0))
         NZBSRUS_UID = check_setting_str(CFG, 'NZBsRUS', 'nzbsrus_uid', '')
         NZBSRUS_HASH = check_setting_str(CFG, 'NZBsRUS', 'nzbsrus_hash', '')
+
+        CheckSection(CFG, 'omgwtfnzbs')
+        OMGWTFNZBS = bool(check_setting_int(CFG, 'OMGWTFNZBS', 'omgwtfnzbs', 0))
+        OMGWTFNZBS_UID = check_setting_str(CFG, 'OMGWTFNZBS', 'omgwtfnzbs_uid', '')
+        OMGWTFNZBS_HASH = check_setting_str(CFG, 'OMGWTFNZBS', 'omgwtfnzbs_hash', '')
 
         CheckSection(CFG, 'NZBMatrix')
         NZBMATRIX = bool(check_setting_int(CFG, 'NZBMatrix', 'nzbmatrix', 0))
@@ -1010,6 +1019,11 @@ def save_config():
     new_config['NZBs']['nzbs'] = int(NZBS)
     new_config['NZBs']['nzbs_uid'] = NZBS_UID
     new_config['NZBs']['nzbs_hash'] = NZBS_HASH
+
+    new_config['OMGWTFNZBS'] = {}
+    new_config['OMGWTFNZBS']['omgwtfnzbs'] =  int(OMGWTFNZBS)
+    new_config['OMGWTFNZBS']['omgwtfnzbs_uid']  = OMGWTFNZBS_UID
+    new_config['OMGWTFNZBS']['omgwtfnzbs_hash'] = OMGWTFNZBS_HASH
 
     new_config['NZBsRUS'] = {}
     new_config['NZBsRUS']['nzbsrus'] = int(NZBSRUS)

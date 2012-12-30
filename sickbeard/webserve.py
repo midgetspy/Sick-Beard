@@ -1027,11 +1027,12 @@ class ConfigProviders:
 
     @cherrypy.expose
     def saveProviders(self, nzbmatrix_username=None, nzbmatrix_apikey=None,
-                      nzbs_r_us_uid=None, nzbs_r_us_hash=None, newznab_string=None,
-                      tvtorrents_digest=None, tvtorrents_hash=None,
- 					  btn_api_key=None,
-                      newzbin_username=None, newzbin_password=None,
-                      provider_order=None):
+            nzbs_r_us_uid=None, nzbs_r_us_hash=None, newznab_string=None,
+            tvtorrents_digest=None, tvtorrents_hash=None,
+            btn_api_key=None,
+            omgwtfnzbs_uid=None, omgwtfnzbs_hash=None,
+            newzbin_username=None, newzbin_password=None,
+            provider_order=None):
 
         results = []
 
@@ -1082,6 +1083,8 @@ class ConfigProviders:
                 sickbeard.NZBS = curEnabled
             elif curProvider == 'nzbmatrix':
                 sickbeard.NZBMATRIX = curEnabled
+            elif curProvider == 'omgwtfnzbs':
+                sickbeard.OMGWTFNZBS = curEnabled
             elif curProvider == 'newzbin':
                 sickbeard.NEWZBIN = curEnabled
             elif curProvider == 'bin_req':
@@ -1106,6 +1109,9 @@ class ConfigProviders:
 
         sickbeard.NZBSRUS_UID = nzbs_r_us_uid.strip()
         sickbeard.NZBSRUS_HASH = nzbs_r_us_hash.strip()
+
+        sickbeard.OMGWTFNZBS_UID = omgwtfnzbs_uid.strip()
+        sickbeard.OMGWTFNZBS_HASH = omgwtfnzbs_hash.strip()
 
         sickbeard.NZBMATRIX_USERNAME = nzbmatrix_username
         sickbeard.NZBMATRIX_APIKEY = nzbmatrix_apikey.strip()
