@@ -18,6 +18,7 @@
 
 __all__ = ['ezrss',
            'tvtorrents',
+           'omgwtfnzbs',
            'nzbsrus',
            'womble',
            'btn',

@@ -85,7 +85,7 @@
                                 <span class="component-title jumbo">Configure Provider:</span>
                                 <span class="component-desc">
                                     #set $provider_config_list = []
-                                    #for $cur_provider in ("nzbs_r_us", "tvtorrents", "btn"):
+                                    #for $cur_provider in ("nzbs_r_us", "tvtorrents", "btn", "omgwtfnzbs"):
                                         #set $cur_provider_obj = $sickbeard.providers.getProviderClass($cur_provider)
                                         #if $cur_provider_obj.providerType == $GenericProvider.NZB and not $sickbeard.USE_NZBS:
                                             #continue
@@ -142,11 +142,26 @@
                         </div>
                     </div><!-- /nzbs_r_usDiv //-->
 
+                    <div class="providerDiv" id="omgwtfnzbsDiv">
+                      <div class="field-pair">
+                        <label class="clearfix">
+                          <span class="component-title">omgwtfnzbs UID</span>
+                          <input class="component-desc" type="text" name="omgwtfnzbs_uid" value="$sickbeard.OMGWTFNZBS_UID" size="10" />
+                        </label>
+                      </div>
+                      <div class="field-pair">
+                        <label class="clearfix">
+                          <span class="component-title">omgwtfnzbs API Key</span>
+                          <input class="component-desc" type="text" name="omgwtfnzbs_hash" value="$sickbeard.OMGWTFNZBS_HASH" size="40" />
+                        </label>
+                      </div>
+                    </div>
+
                     <div class="providerDiv" id="tvtorrentsDiv">
-                        <div class="field-pair">
-                            <label class="clearfix">
-                                <span class="component-title">TvTorrents Digest:</span>
-                                <input class="component-desc" type="text" name="tvtorrents_digest" value="$sickbeard.TVTORRENTS_DIGEST" size="40" />
+                      <div class="field-pair">
+                        <label class="clearfix">
+                          <span class="component-title">TvTorrents Digest:</span>
+                          <input class="component-desc" type="text" name="tvtorrents_digest" value="$sickbeard.TVTORRENTS_DIGEST" size="40" />
                             </label>
                         </div>
                         <div class="field-pair">
