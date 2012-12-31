@@ -1107,12 +1107,6 @@ class ConfigProviders:
         sickbeard.NZBSRUS_UID = nzbs_r_us_uid.strip()
         sickbeard.NZBSRUS_HASH = nzbs_r_us_hash.strip()
 
-        sickbeard.NZBMATRIX_USERNAME = nzbmatrix_username
-        sickbeard.NZBMATRIX_APIKEY = nzbmatrix_apikey.strip()
-
-        sickbeard.NEWZBIN_USERNAME = newzbin_username
-        sickbeard.NEWZBIN_PASSWORD = newzbin_password
-
         sickbeard.PROVIDER_ORDER = provider_list
 
         sickbeard.save_config()
