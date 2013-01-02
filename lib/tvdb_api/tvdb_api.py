@@ -308,7 +308,8 @@ class Tvdb:
                 search_all_languages = False,
                 apikey = None,
                 forceConnect=False,
-                useZip=False):
+                useZip=False,
+                base_url=None):
 
         """interactive (True/False):
             When True, uses built-in console UI is used to select the correct show.
@@ -477,7 +478,10 @@ class Tvdb:
 
         # The following url_ configs are based of the
         # http://thetvdb.com/wiki/index.php/Programmers_API
-        self.config['base_url'] = "http://www.thetvdb.com"
+        if base_url is not None:
+            self.config['base_url'] = base_url
+        else:
+            self.config['base_url'] = "http://www.thetvdb.com"
 
         if self.config['search_all_languages']:
             self.config['url_getSeries'] = u"%(base_url)s/api/GetSeries.php?seriesname=%%s&language=all" % self.config

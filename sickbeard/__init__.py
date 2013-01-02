@@ -135,6 +135,7 @@ NAMING_FORCE_FOLDERS = False
 
 TVDB_API_KEY = '9DAF49C96CBF8DAC'
 TVDB_BASE_URL = None
+TVDB_API_BASE_URL = 'http://www.thetvdb.com'
 TVDB_API_PARMS = {}
 
 USE_NZBS = None
@@ -337,7 +338,7 @@ def initialize(consoleLogging=True):
                 USE_BANNER, USE_LISTVIEW, METADATA_XBMC, METADATA_MEDIABROWSER, METADATA_PS3, METADATA_SYNOLOGY, metadata_provider_dict, \
                 NEWZBIN, NEWZBIN_USERNAME, NEWZBIN_PASSWORD, GIT_PATH, MOVE_ASSOCIATED_FILES, \
                 COMING_EPS_LAYOUT, COMING_EPS_SORT, COMING_EPS_DISPLAY_PAUSED, METADATA_WDTV, METADATA_TIVO, IGNORE_WORDS, CREATE_MISSING_SHOW_DIRS, \
-                ADD_SHOWS_WO_DIR
+                ADD_SHOWS_WO_DIR, TVDB_API_BASE_URL
 
         if __INITIALIZED__:
             return False
@@ -399,9 +400,11 @@ def initialize(consoleLogging=True):
             proxy_url = proxies['ftp'] # @UnusedVariable
 
         # Set our common tvdb_api options here
+        TVDB_API_BASE_URL = check_setting_str(CFG, 'General', 'tvdb_api_base_url', 'http://www.thetvdb.com')
         TVDB_API_PARMS = {'apikey': TVDB_API_KEY,
                           'language': 'en',
-                          'useZip': True}
+                          'useZip': True,
+                          'base_url': TVDB_API_BASE_URL}
 
         if CACHE_DIR:
             TVDB_API_PARMS['cache'] = os.path.join(CACHE_DIR, 'tvdb')
@@ -989,6 +992,7 @@ def save_config():
     new_config['General']['extra_scripts'] = '|'.join(EXTRA_SCRIPTS)
     new_config['General']['git_path'] = GIT_PATH
     new_config['General']['ignore_words'] = IGNORE_WORDS
+    new_config['General']['tvdb_api_base_url'] = TVDB_API_BASE_URL
 
     new_config['Blackhole'] = {}
     new_config['Blackhole']['nzb_dir'] = NZB_DIR
