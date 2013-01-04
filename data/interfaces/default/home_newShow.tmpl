@@ -1,5 +1,4 @@
 #import os.path
-#import urllib
 #import sickbeard
 #set global $title="New Show"
 
@@ -14,8 +13,8 @@
 <script type="text/javascript" src="$sbRoot/js/lib/formwizard.js?$sbPID"></script>
 <script type="text/javascript" src="$sbRoot/js/qualityChooser.js?$sbPID"></script>
 <script type="text/javascript" src="$sbRoot/js/newShow.js?$sbPID"></script>
-<script type="text/javascript" src="$sbRoot/js/addShowOptions.js?$sbPID"></script> 
-   
+<script type="text/javascript" src="$sbRoot/js/addShowOptions.js?$sbPID"></script>
+
 <div id="displayText">aoeu</div>
 <br />
 
@@ -36,13 +35,12 @@
                 <option value="en" selected="selected">en</option>
             </select><b>*</b>
             <input type="button" id="searchName" value="Search" class="btn" /><br /><br />
-    
+
             <b>*</b> This will only affect the language of the retrieved metadata file contents and episode filenames.<br />
             This <b>DOES NOT</b> allow Sick Beard to download non-english TV episodes!<br />
             <br />
-            <div id="searchResults" style="height: 225px; overflow: auto;"></div>
+            <div id="searchResults" style="max-height: 225px; overflow: auto;"><br/></div>
         #end if
-
     </div>
 </fieldset>
 
@@ -61,9 +59,10 @@
 
 <fieldset class="sectionwrap">
     <legend class="legendStep">Customize options</legend>
-        <div class="stepDiv">
-            #include $os.path.join($sickbeard.PROG_DIR, "data/interfaces/default/inc_addShowOptions.tmpl")
-        </div>
+
+    <div class="stepDiv">
+        #include $os.path.join($sickbeard.PROG_DIR, "data/interfaces/default/inc_addShowOptions.tmpl")
+    </div>
 </fieldset>
 
 #for $curNextDir in $other_shows:

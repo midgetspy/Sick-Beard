@@ -115,6 +115,9 @@ class ProperFinder():
             # for each show in our list
             for curShow in sickbeard.showList:
 
+                if not parse_result.series_name:
+                    continue
+
                 genericName = self._genericName(parse_result.series_name)
 
                 # get the scene name masks

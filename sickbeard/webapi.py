@@ -1508,6 +1508,10 @@ class CMD_SickBeardSearchTVDB(ApiCall):
                 logger.log(u"API :: Unable to find show with id " + str(self.tvdbid), logger.WARNING)
                 return _responds(RESULT_SUCCESS, {"results": [], "langid": lang_id})
 
+            if not myShow.data['seriesname']:
+                logger.log(u"API :: Found show with tvdbid " + str(self.tvdbid) + ", however it contained no show name", logger.DEBUG)
+                return _responds(RESULT_FAILURE, msg="Show contains no name, invalid result")
+
             showOut = [{"tvdbid": self.tvdbid,
                        "name": unicode(myShow.data['seriesname']),
                        "first_aired": myShow.data['firstaired']}]
@@ -1698,6 +1702,8 @@ class CMD_ShowAddExisting(ApiCall):
         tvdbResult = CMD_SickBeardSearchTVDB([], {"tvdbid": self.tvdbid}).run()
 
         if tvdbResult['result'] == result_type_map[RESULT_SUCCESS]:
+            if not tvdbResult['data']['results']:
+                return _responds(RESULT_FAILURE, msg="Empty results returned, check tvdbid and try again")
             if len(tvdbResult['data']['results']) == 1 and 'name' in tvdbResult['data']['results'][0]:
                 tvdbName = tvdbResult['data']['results'][0]['name']
 
@@ -1826,6 +1832,8 @@ class CMD_ShowAddNew(ApiCall):
         tvdbResult = CMD_SickBeardSearchTVDB([], {"tvdbid": self.tvdbid}).run()
 
         if tvdbResult['result'] == result_type_map[RESULT_SUCCESS]:
+            if not tvdbResult['data']['results']:
+                return _responds(RESULT_FAILURE, msg="Empty results returned, check tvdbid and try again")
             if len(tvdbResult['data']['results']) == 1 and 'name' in tvdbResult['data']['results'][0]:
                 tvdbName = tvdbResult['data']['results'][0]['name']
 

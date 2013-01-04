@@ -9,13 +9,13 @@ browser.css
   margin: 0;
 }
 #fileBrowserDialog ul li {
-  padding: 4px 0;
-  margin: 2px;
+  margin: 2px 0;
   list-style-type: none;
   cursor: pointer;
 }
 #fileBrowserDialog ul li a {
   display: block;
+  padding: 4px 0;
 }
 #fileBrowserDialog ul li a:hover {
   color: #00f;
@@ -58,11 +58,9 @@ browser.css
 /* =======================================================================
 formWizard.css
 ========================================================================== */
-/* TODO: cleanup the fixed height issue with custom quality */
 fieldset.sectionwrap {
   width: 800px;
   padding: 5px;
-  overflow: auto;
   text-align: left;
   border-width: 0;
 }
@@ -78,7 +76,7 @@ div.stepsguide {
 }
 div.stepsguide .step {
   float: left;
-  width: 260px;
+  width: 250px;
   font: bold 24px Arial;
 }
 div.stepsguide .step p {
@@ -122,19 +120,15 @@ div.formpaginate .prev, div.formpaginate .next {
   overflow: hidden;
   clear: both;
 }
-.stepDiv > #customQualityWrapper {
-  height: 190px;
-  overflow: auto;
-}
 #customQualityWrapper div.component-group-desc {
-  float:left;
-  width:165px;
+  float: left;
+  width: 165px;
 }
 #customQualityWrapper div.component-group-desc p {
-  width:85%;
-  margin:.8em 0;
-  font-size:1.2em;
-  color:#666;
+  width: 85%;
+  margin: .8em 0;
+  font-size: 1.2em;
+  color: #666;
 }
 
 /* =======================================================================
@@ -362,7 +356,7 @@ home.tmpl
 /* =======================================================================
 home_postprocess.tmpl
 ========================================================================== */
-#episodeDir {
+#episodeDir, #newRootDir {
   margin-right: 6px;
 }
 
@@ -448,11 +442,6 @@ ul#rootDirStaticList li {
   margin: 2px;
   list-style: none outside none;
   cursor: pointer;
-}
-/* for tabs: manage directories */
-#rootDirs, #rootDirsControls {
-  width: 50%;
-  min-width: 400px;
 }
 /* for tabs: customize options */
 #tabs div.field-pair,
