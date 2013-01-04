@@ -54,7 +54,10 @@ try:
 except ImportError:
     from lib import simplejson as json
 
-import xml.etree.cElementTree as etree
+try:
+    import xml.etree.cElementTree as etree
+except ImportError:
+    import xml.etree.ElementTree as etree
 
 from sickbeard import browser
 
@@ -2684,7 +2687,7 @@ class UI:
 
         return json.dumps(messages)
 
-   
+
 class WebInterface:
 
     @cherrypy.expose
@@ -2710,7 +2713,7 @@ class WebInterface:
             return cherrypy.lib.static.serve_file(default_image_path, content_type="image/png")
 
         cache_obj = image_cache.ImageCache()
-        
+
         if which == 'poster':
             image_file_name = cache_obj.poster_path(showObj.tvdbid)
         # this is for 'banner' but also the default case
@@ -2718,6 +2721,9 @@ class WebInterface:
             image_file_name = cache_obj.banner_path(showObj.tvdbid)
 
         if ek.ek(os.path.isfile, image_file_name):
+            # use startup argument to prevent using PIL even if installed
+            if sickbeard.NO_RESIZE:
+                return cherrypy.lib.static.serve_file(image_file_name, content_type="image/jpeg")
             try:
                 from PIL import Image
                 from cStringIO import StringIO
@@ -2734,10 +2740,10 @@ class WebInterface:
                 else:
                     return cherrypy.lib.static.serve_file(image_file_name, content_type="image/jpeg")
                 im = im.resize(size, Image.ANTIALIAS)
-                buffer = StringIO()
-                im.save(buffer, 'JPEG', quality=85)
+                imgbuffer = StringIO()
+                im.save(imgbuffer, 'JPEG', quality=85)
                 cherrypy.response.headers['Content-Type'] = 'image/jpeg'
-                return buffer.getvalue()
+                return imgbuffer.getvalue()
         else:
             return cherrypy.lib.static.serve_file(default_image_path, content_type="image/png")
 
