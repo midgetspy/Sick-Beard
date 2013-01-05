@@ -23,6 +23,7 @@ import traceback
 import sickbeard
 
 from lib.tvdb_api import tvdb_exceptions, tvdb_api
+from lib.imdb_api.imdb import _exceptions as imdb_exceptions
 
 from sickbeard.common import SKIPPED, WANTED
 
@@ -274,6 +275,9 @@ class QueueItemAdd(ShowQueueItem):
             if self.show.genre and "talk show" in self.show.genre.lower():
                 self.show.air_by_date = 1
 
+            logger.log(u"Retrieving show info from IMDb", logger.DEBUG)
+            self.show.loadIMDbInfo()
+
         except tvdb_exceptions.tvdb_exception, e:
             logger.log(u"Unable to add show due to an error with TVDB: "+ex(e), logger.ERROR)
             if self.show:
@@ -294,6 +298,13 @@ class QueueItemAdd(ShowQueueItem):
             logger.log(traceback.format_exc(), logger.DEBUG)
             self._finishEarly()
             raise
+
+        except imdb_exceptions.IMDbError, e:
+#todo Insert UI notification
+            logger.log(u" Something wrong on IMDb api: "+ex(e), logger.WARNING)
+
+        except imdb_exceptions.IMDbParserError, e:
+            logger.log(u" IMDb_api parser error: "+ex(e), logger.WARNING)
 
         # add it to the show list
         sickbeard.showList.append(self.show)
@@ -436,6 +447,20 @@ class QueueItemUpdate(ShowQueueItem):
             logger.log(u"Unable to contact TVDB, aborting: "+ex(e), logger.WARNING)
             return
 
+        logger.log(u"Retrieving show info from IMDb", logger.DEBUG)
+        try:
+            self.show.loadIMDbInfo()
+        except imdb_exceptions.IMDbError, e:
+            logger.log(u" Something wrong on IMDb api: "+ex(e), logger.WARNING)
+        except imdb_exceptions.IMDbParserError, e:
+            logger.log(u" IMDb api parser error: "+ex(e), logger.WARNING)
+        
+        try:
+            self.show.saveToDB()
+        except Exception, e:
+            logger.log(u"Error saving the episode to the database: " + ex(e), logger.ERROR)
+            logger.log(traceback.format_exc(), logger.DEBUG)
+        
         # get episode list from DB
         logger.log(u"Loading all episodes from the database", logger.DEBUG)
         DBEpList = self.show.loadEpisodesFromDB()

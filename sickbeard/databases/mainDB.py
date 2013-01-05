@@ -560,3 +560,11 @@ class AddSubtitlesSupport(RenameSeasonFolders):
         self.addColumn("tv_episodes", "subtitles_lastsearch", "TIMESTAMP", str(datetime.datetime.min))
         self.incDBVersion()
    
+class AddIMDbInfo(RenameSeasonFolders):    
+    def test(self):
+        return self.checkDBVersion() >= 13
+
+    def execute(self):
+        
+        self.connection.action("CREATE TABLE imdb_info (tvdb_id INTEGER PRIMARY KEY, imdb_id TEXT, title TEXT, year NUMERIC, akas TEXT, runtimes NUMERIC, genres TEXT, countries TEXT, country_codes TEXT, certificates TEXT, rating TEXT, votes INTEGER, last_update NUMERIC)")
+        self.incDBVersion()

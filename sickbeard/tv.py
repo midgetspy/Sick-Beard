@@ -35,6 +35,8 @@ from lib import subliminal
 
 from lib.tvdb_api import tvdb_api, tvdb_exceptions
 
+from lib.imdb_api import imdb
+
 from sickbeard import db
 from sickbeard import helpers, exceptions, logger
 from sickbeard.exceptions import ex
@@ -65,6 +67,7 @@ class TVShow(object):
         self.network = ""
         self.genre = ""
         self.runtime = 0
+        self.imdb_info = {}
         self.quality = int(sickbeard.QUALITY_DEFAULT)
         self.flatten_folders = int(sickbeard.FLATTEN_FOLDERS_DEFAULT)
 
@@ -635,6 +638,15 @@ class TVShow(object):
             if self.imdbid == "":
                 self.imdbid = sqlResults[0]["imdb_id"]                    
 
+        #Get IMDb_info from database
+        sqlResults = myDB.select("SELECT * FROM imdb_info WHERE tvdb_id = ?", [self.tvdbid])
+
+        if len(sqlResults) == 0:
+            logger.log(str(self.tvdbid) + ": Unable to find IMDb show info in the database")
+            return
+        else:
+            self.imdb_info = dict(zip(sqlResults[0].keys(), sqlResults[0]))
+
     def loadFromTVDB(self, cache=True, tvapi=None, cachedSeason=None):
 
         logger.log(str(self.tvdbid) + ": Loading show info from theTVDB")
@@ -679,9 +691,74 @@ class TVShow(object):
         if self.status == None:
             self.status = ""
 
-        self.saveToDB()
+#        self.saveToDB()
 
+    def loadIMDbInfo(self, imdbapi=None):
 
+        imdb_info = {'imdb_id' : self.imdbid,
+                     'title' : '',
+                     'year' : '',
+                     'akas' : [],
+                     'runtimes' : '', 
+                     'genres' : [],
+                     'countries' : '',
+                     'country codes' : '',
+                     'certificates' : [],
+                     'rating' : '',
+                     'votes': '',
+                     'last_update': ''
+                     }
+        
+        logger.log(str(self.tvdbid) + ": Loading show info from IMDb")
+
+        i = imdb.IMDb()
+        imdbTv = i.get_movie(str(self.imdbid[2:]))
+        
+        for key in filter(lambda x: x in imdbTv.keys(), imdb_info.keys()):
+            # Store only the first value for string type
+            if type(imdb_info[key]) == type('') and type(imdbTv.get(key)) == type([]):
+                imdb_info[key] = imdbTv.get(key)[0]
+            else:
+                imdb_info[key] = imdbTv.get(key)
+        
+        #Filter only the value
+        if imdb_info['runtimes']:   
+            imdb_info['runtimes'] = re.search('\d+',imdb_info['runtimes']).group(0)   
+        else:
+            imdb_info['runtimes'] = self.runtime    
+
+        if imdb_info['akas']:
+            imdb_info['akas'] = '|'.join(imdb_info['akas'])
+        else:
+            imdb_info['akas'] = ''    
+        
+        #Join all genres in a string
+        if imdb_info['genres']:
+            imdb_info['genres'] = '|'.join(imdb_info['genres'])
+        else:
+            imdb_info['genres'] = ''    
+            
+        #Get only the production country certificate if any 
+        if imdb_info['certificates'] and imdb_info['countries']:
+            dct = {}
+            for item in imdb_info['certificates']:
+                dct[item.split(':')[0]] = item.split(':')[1]
+
+            try:
+                imdb_info['certificates'] = dct[imdb_info['countries']]
+            except KeyError:
+                imdb_info['certificates'] = ''    
+
+        else:
+            imdb_info['certificates'] = ''       
+        
+        imdb_info['last_update'] = datetime.date.today().toordinal()
+        
+        #Rename dict keys without spaces for DB upsert
+        self.imdb_info = dict((k.replace(' ', '_'),f(v) if hasattr(v,'keys') else v) for k,v in imdb_info.items())
+
+        logger.log(str(self.tvdbid) + ": Obtained info from IMDb ->" +  str(self.imdb_info), logger.DEBUG)
+        
     def loadNFO (self):
 
         if not os.path.isdir(self._location):
@@ -769,7 +846,8 @@ class TVShow(object):
         myDB = db.DBConnection()
         myDB.action("DELETE FROM tv_episodes WHERE showid = ?", [self.tvdbid])
         myDB.action("DELETE FROM tv_shows WHERE tvdb_id = ?", [self.tvdbid])
-
+        myDB.action("DELETE FROM imdb_info WHERE tvdb_id = ?", [self.tvdbid])
+        
         # remove self from show list
         sickbeard.showList = [x for x in sickbeard.showList if x.tvdbid != self.tvdbid]
         
@@ -883,7 +961,12 @@ class TVShow(object):
                         }
 
         myDB.upsert("tv_shows", newValueDict, controlValueDict)
-
+        
+        if not self.imdb_info == {}:
+            controlValueDict = {"tvdb_id": self.tvdbid}
+            newValueDict = self.imdb_info
+            
+            myDB.upsert("imdb_info", newValueDict, controlValueDict)
 
     def __str__(self):
         toReturn = ""
