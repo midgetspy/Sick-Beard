@@ -65,6 +65,7 @@ class SBRotatingLogHandler(object):
     
         logging.getLogger('sickbeard').addHandler(self.cur_handler)
         logging.getLogger('subliminal').addHandler(self.cur_handler)
+        logging.getLogger('imdbpy').addHandler(self.cur_handler)
     
         # define a Handler which writes INFO messages or higher to the sys.stderr
         if consoleLogging:
@@ -73,18 +74,20 @@ class SBRotatingLogHandler(object):
             console.setLevel(logging.INFO)
     
             # set a format which is simpler for console use
-#            console.setFormatter(logging.Formatter('%(asctime)s %(levelname)s::%(message)s', '%H:%M:%S'))
             console.setFormatter(DispatchingFormatter({'sickbeard'  : logging.Formatter('%(asctime)s %(levelname)s::%(message)s', '%H:%M:%S'),
                                                        'subliminal' : logging.Formatter('%(asctime)s %(levelname)s::SUBLIMINAL :: %(message)s', '%H:%M:%S'),
+                                                       'imdbpy'     : logging.Formatter('%(asctime)s %(levelname)s::IMDBPY :: %(message)s', '%H:%M:%S')
                                                        },
                                                        logging.Formatter('%(message)s'),))
     
             # add the handler to the root logger
             logging.getLogger('sickbeard').addHandler(console)
             logging.getLogger('subliminal').addHandler(console)
+            logging.getLogger('imdbpy').addHandler(console)
     
         logging.getLogger('sickbeard').setLevel(logging.DEBUG)
-        logging.getLogger('subliminal').setLevel(logging.DEBUG)
+        logging.getLogger('subliminal').setLevel(logging.WARNING)
+        logging.getLogger('imdbpy').setLevel(logging.WARNING)
 
     def _config_handler(self):
         """
@@ -93,9 +96,9 @@ class SBRotatingLogHandler(object):
     
         file_handler = logging.FileHandler(self.log_file)
         file_handler.setLevel(logging.DEBUG)
-#        file_handler.setFormatter(logging.Formatter('%(asctime)s %(levelname)-8s %(message)s', '%b-%d %H:%M:%S'))
         file_handler.setFormatter(DispatchingFormatter({'sickbeard'  : logging.Formatter('%(asctime)s %(levelname)-8s %(message)s', '%b-%d %H:%M:%S'),
                                                         'subliminal' : logging.Formatter('%(asctime)s %(levelname)-8s SUBLIMINAL :: %(message)s', '%b-%d %H:%M:%S'),
+                                                        'imdbpy'     : logging.Formatter('%(asctime)s %(levelname)-8s IMDBPY :: %(message)s', '%b-%d %H:%M:%S')
                                                         },
                                                         logging.Formatter('%(message)s'),))
                                                             
