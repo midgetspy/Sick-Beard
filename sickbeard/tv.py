@@ -35,7 +35,7 @@ from lib import subliminal
 
 from lib.tvdb_api import tvdb_api, tvdb_exceptions
 
-from lib.imdb_api import imdb
+from lib.imdb import imdb
 
 from sickbeard import db
 from sickbeard import helpers, exceptions, logger
