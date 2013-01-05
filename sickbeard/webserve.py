@@ -1902,7 +1902,7 @@ class NewHomeAddShows:
         if 'en' in result:
             del result[result.index('en')]
         result.sort()
-        result.insert(0,'en')
+        result.insert(0, 'en')
 
         return json.dumps({'results': result})
 
@@ -1915,7 +1915,7 @@ class NewHomeAddShows:
         if not lang or lang == 'null':
                 lang = "en"
 
-        baseURL = "http://thetvdb.com/api/GetSeries.php?"
+        baseURL = "http://www.thetvdb.com/api/GetSeries.php?"
         nameUTF8 = name.encode('utf-8')
 
         logger.log(u"Trying to find Show on thetvdb.com with: " + nameUTF8.decode('utf-8'), logger.DEBUG)
@@ -1937,7 +1937,7 @@ class NewHomeAddShows:
 
             finalURL = baseURL + urllib.urlencode(params)
 
-            logger.log(u"Searching for Show with searchterm: \'" + searchTerm.decode('utf-8')+ u"\' on URL " + finalURL, logger.DEBUG)
+            logger.log(u"Searching for Show with searchterm: \'" + searchTerm.decode('utf-8') + u"\' on URL " + finalURL, logger.DEBUG)
             urlData = helpers.getURL(finalURL)
 
             if urlData is None:
@@ -1951,7 +1951,7 @@ class NewHomeAddShows:
 
                 except Exception, e:
                     # use finalURL in log, because urlData can be too much information
-                    logger.log(u"Unable to parse XML for some reason: "+ex(e)+" from XML: "+finalURL, logger.ERROR)
+                    logger.log(u"Unable to parse XML for some reason: " + ex(e) + " from XML: " + finalURL, logger.ERROR)
                     series = ''
 
                 # add each result to our list
