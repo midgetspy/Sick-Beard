@@ -70,7 +70,7 @@ img {
     float: left;
     height: 50px;
     overflow: hidden;
-/*    border-radius: 4px;*/
+    border-radius: 8px;
 }
 .imgHomeWrapper .poster {
     float: left;
