@@ -6,7 +6,7 @@
 #import os.path, os
 #import datetime
 #set global $title=$show.name
-#set global $header = '<a href="http://thetvdb.com/?tab=series&amp;id=%d" target="_new">%s</a>' % ($show.tvdbid, $show.name)
+##set global $header = '<a></a>' % 
 #set global $topmenu="manageShows"#
 #set $exceptions_string = " | ".join($show.exceptions)
 #include $os.path.join($sickbeard.PROG_DIR, "gui/slick/interfaces/default/inc_top.tmpl")
@@ -41,11 +41,16 @@
 </div>
 
 <div class="showInfo">
-<h1 class="title">$header</h1>
-<span class="headerInfo" style="color: #b7b7b7; line-height: 16px;">($show.startyear) - $show.runtime min - $show.genre[1:-1].replace('|',' | ')
+<h1 class="title"><a>$show.name</a></h1>
+<span class="headerInfo" style="color: #b7b7b7; line-height: 16px;">
+#if $show.imdb_info == {}
+	($show.startyear) - $show.runtime min - $show.genre[1:-1].replace('|',' | ')
+#else
+	<img src="$sbRoot/images/flags/${$show.imdb_info['country_codes']}.png" width="16" height="11" style="margin-top: 3px; margin-left: 3px" /> ($show.imdb_info['year']) - $show.imdb_info['runtimes'] min - $show.imdb_info['genres'].replace('|',' | ')
+#end if
 	<span class="tvshowLink" style="vertical-align: text-top">
-		<a href="http://www.imdb.com/title/$show.imdbid" onclick="window.open(this.href, '_blank'); return false;" title="http://www.imdb.com/title/$show.imdbid"><img alt="[imdb]" height="16" width="16" src="$sbRoot/images/imdb.png" /> 
-	    <a href="http://www.thetvdb.com/?tab=series&amp;id=$show.tvdbid" onclick="window.open(this.href, '_blank'); return false;" title="http://www.thetvdb.com/?tab=series&amp;id=$show.tvdbid"><img alt="[tvdb]" height="16" width="16" src="$sbRoot/images/thetvdb16.png" /></a>
+		<a href="http://www.imdb.com/title/$show.imdbid" onclick="window.open(this.href, '_blank'); return false;" title="http://www.imdb.com/title/$show.imdbid"><img alt="[imdb]" height="16" width="16" src="$sbRoot/images/imdb.png" style="margin-top: -1px;"/>
+		<a href="http://www.thetvdb.com/?tab=series&amp;id=$show.tvdbid" onclick="window.open(this.href, '_blank'); return false;" title="http://www.thetvdb.com/?tab=series&amp;id=$show.tvdbid"><img alt="[tvdb]" height="16" width="16" src="$sbRoot/images/thetvdb16.png" style="margin-top: -1px;"/></a>
 	</span>
 </span> 
 
@@ -131,7 +136,7 @@
     </table>
     <td style="float: right;">
     <table>
-    <tr><td class="showLegend">Language:</td><td><img src="$sbRoot/images/flags/${show.lang}.png" width="16" height="11" alt="$show.lang" title="$show.lang" /></td></tr>
+    <tr><td class="showLegend">Info Language:</td><td><img src="$sbRoot/images/flags/${show.lang}.png" width="16" height="11" alt="$show.lang" title="$show.lang" /></td></tr>
 #if $sickbeard.USE_SUBTITLES
     <tr><td class="showLegend">Subtitles: </td><td><img src="$sbRoot/images/#if int($show.subtitles) == 1 then "yes16.png\" alt=\"Y" else "no16.png\" alt=\"N"#" width="16" height="16" /></td></tr>
 #end if
@@ -253,6 +258,6 @@ $epLoc
    </tr>
 
 #end for
-</table><br />
+</table>
 
 #include $os.path.join($sickbeard.PROG_DIR,"gui/slick/interfaces/default/inc_bottom.tmpl")
