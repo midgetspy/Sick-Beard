@@ -374,7 +374,7 @@ class GitUpdateManager(UpdateManager):
         if not output:
             return self._git_error()
 
-        pull_regex = '(\d+) files? changed, (\d+) insertions?\(\+\), (\d+) deletions?\(\-\)'
+        pull_regex = '(\d+) .+,.+(\d+).+\(\+\),.+(\d+) .+\(\-\)'
 
         (files, insertions, deletions) = (None, None, None)
 

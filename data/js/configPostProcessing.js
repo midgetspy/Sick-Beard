@@ -45,7 +45,7 @@ $(document).ready(function () {
                 } else if (data == "seasonfolders") {
                     $('#naming_pattern').qtip('option', {
                         'content.text': 'This pattern would be invalid without the folders, using it will force "Flatten" off for all shows.',
-                        'style.classes': 'ui-tooltip-rounded ui-tooltip-shadow ui-tooltip-red'
+                        'style.classes': 'ui-tooltip-rounded ui-tooltip-shadow ui-tooltip-cream'
                     });
                     $('#naming_pattern').qtip('toggle', true);
                     $('#naming_pattern').css('background-color', '#FFFFDD');
@@ -62,6 +62,11 @@ $(document).ready(function () {
     }
 
     function fill_abd_examples() {
+    	if (!$('#naming_custom_abd').prop('checked')) {
+    		$('#naming_abd_pattern').qtip('hide');
+    		return;
+    	}
+    	
         var pattern = $('#naming_abd_pattern').val();
 
         $.get(sbRoot + '/config/postProcessing/testNaming', {pattern: pattern, abd: 'True'},

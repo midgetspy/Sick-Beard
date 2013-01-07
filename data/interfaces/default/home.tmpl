@@ -57,11 +57,14 @@
 
         var nums = match[1].split(" / ");
 
+        if (parseInt(nums[0]) === 0)
+            return parseInt(nums[1]);
+
         var finalNum = parseInt((nums[0]/nums[1])*1000)*100;
         if (finalNum > 0)
             finalNum += parseInt(nums[0]);
 
-        return finalNum
+        return finalNum;
     },
     type: 'numeric'
 });
