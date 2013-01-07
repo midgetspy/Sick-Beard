@@ -6,7 +6,7 @@ from sqlalchemy import create_engine, MetaData, Column, Integer, String, Foreign
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, scoped_session
 from sickbeard import logger
-from datetime import date, timedelta
+from datetime import datetime, timedelta
 
 ##define a database and add stuff to it
 #TODO: Rewrite with mappers!
@@ -87,11 +87,23 @@ Session = sessionmaker()
 Session.configure(bind=engine)
 session = scoped_session(Session)
 
+def requestSlug(tvdbid=None, showname=None):
+	if tvdbid:
+		url = "http://tvdb.cytec.us/request.php"
+		data = { "tvdbid": tvdbid, "name": showname }
+		r = requests.post(url, data)
+		if r.status_code == 200:
+			logger.log(u"Requestet german airdates for Show ID: {0} ".format(tvdbid), logger.MESSAGE)
 
-def updateSlugs():
-	url = "http://cytec.us/tvdb/getList.php"
+def updateSlugs(tvdbid, showname):
+	url = u"http://tvdb.cytec.us/getList.php"
 	r = requests.get(url)
 	logger.log(u"Updating german airdate slugs", logger.DEBUG)
+	#check if slug is in result if not request it
+
+	if not str(tvdbid) in r.text:
+		requestSlug(tvdbid=tvdbid, showname=showname)
+
 	for entry in r.json["result"]:
 	 	ins = Slugs(
 	 		id = entry["id"],
@@ -106,7 +118,6 @@ def updateSlugs():
 	session.commit()
 	logger.log(u"german airdate slug update finished", logger.DEBUG)
 	 		
-
 
 def updateEpisode(serieselement):
 	entry = (
@@ -132,25 +143,27 @@ def updateEpisode(serieselement):
 		session.merge(ins)
 		session.commit()
 	else:
-		logger.log(u"Entry {0} is in my Database".format(entry), logger.DEBUG)
+		logger.log(u"Entry {0} is in my Database".format(serieselement), logger.DEBUG)
 
 
-def noSlug(tvdbid):
+def noSlug(tvdbid, showname):
 	is_in_error = session.query(Error).filter(Error.tvdbid == tvdbid).first()
 	if not is_in_error:
-		logger.log(u"Sorry i cant find any slugs for {0}, go to cytec.us/tvdb to add more shows".format(tvdbid), logger.ERROR)
-		updateSlugs()
+		logger.log(u"Sorry i cant find any slugs for {0}, go to http://tvdb.cytec.us to request more shows".format(tvdbid), logger.ERROR)
 		session.merge(Error(tvdbid=tvdbid))
 		session.commit()
+		updateSlugs(tvdbid, showname)
+		
 
-def fsGetDates(tvdbid, test=False):
+def fsGetDates(tvdbid, showname, test=False):
 	my_request = session.query(Slugs).filter(Slugs.id == tvdbid).first()
 	if not my_request:
-		noSlug(tvdbid)
+		noSlug(tvdbid, showname)
 	
 	if my_request and my_request.fernsehserien:
-		url = "http://www.fernsehserien.de/{0}/episodenguide".format(my_request.fernsehserien)
+		url = u"http://www.fernsehserien.de/{0}/episodenguide".format(my_request.fernsehserien)
 		r = requests.get(url)
+		logger.log(u"URL for {0} is {1}".format(tvdbid, url), logger.DEBUG)
 		if r.status_code == 200:
 			soup = BeautifulSoup(r.text)
 			eplist = soup.find_all("tr", {"class": "ep-hover"})
@@ -173,14 +186,15 @@ def fsGetDates(tvdbid, test=False):
 		else:
 			logger.log(u"Seems there was an error with the url {0}".format(url), logger.WARNING)
 
-def sjGetDates(tvdbid, test=False):
+def sjGetDates(tvdbid, showname, test=False):
 	my_request = session.query(Slugs).filter(Slugs.id == tvdbid).first()
 	if not my_request:
-		noSlug(tvdbid)
+		noSlug(tvdbid, showname)
 	
 	if my_request and my_request.serienjunkies:
-		url = "http://www.serienjunkies.de/{0}/alle-serien-staffeln.html".format(my_request.serienjunkies)
+		url = u"http://www.serienjunkies.de/{0}/alle-serien-staffeln.html".format(my_request.serienjunkies)
 		r = requests.get(url)
+		logger.log(u"URL for {0} is {1}".format(tvdbid, url), logger.DEBUG)
 		if r.status_code == 200:
 			soup = BeautifulSoup(r.text)
 			eplist = soup.find("table", {"class": "eplist"})
@@ -201,9 +215,9 @@ def sjGetDates(tvdbid, test=False):
 		else:
 			logger.log(u"Seems there was an error with the url {0}".format(url), logger.WARNING)
 	
-def updateAirDates(tvdbid):
-	now = date.today()
-	t = timedelta(14)
+def updateAirDates(tvdbid, showname):
+	now = datetime.now()
+	t = timedelta(minutes=60)
 	next = now + t
 	result = session.query(Version).first()
 	ins = Version(
@@ -213,19 +227,19 @@ def updateAirDates(tvdbid):
 	if not result:
 		session.merge(ins)
 		logger.log(u"Next AirDates update: {0}".format(next), logger.ERROR)
-	if result and result.nextupdate >= now.toordinal():
-		logger.log(u"Next AirDates update: {0}".format(date.fromordinal(result.nextupdate)), logger.ERROR)
+		updateSlugs(tvdbid, showname)
+	# if result and result.nextupdate >= now.toordinal():
+	# 	logger.log(u"Next AirDates update: {0}".format(date.fromordinal(result.nextupdate)), logger.ERROR)
 	if result and result.nextupdate <= now.toordinal():
 		logger.log(u"Running AirDates update", logger.ERROR)
 		session.merge(ins)
-		updateSlugs()
+		updateSlugs(tvdbid, showname)
 		fsGetDates(tvdbid)
 		sjGetDates(tvdbid)
 	session.commit()
 
 
-def getEpInfo(tvdbid, season, episode):
-
+def getEpInfo(tvdbid, season, episode, showname):
 	if season == 0:
 		return "1.1.1".split(".")
 
@@ -238,12 +252,14 @@ def getEpInfo(tvdbid, season, episode):
 		)
 
 	if not result:
-		updateSlugs()
-		fsGetDates(tvdbid)
-		sjGetDates(tvdbid)
+		updateAirDates(tvdbid, showname)
+		fsGetDates(tvdbid, showname)
+		sjGetDates(tvdbid, showname)
 
 	elif not result.firstaired:
+		updateAirDates(tvdbid, showname)
+		session.remove()
 		return None
-		updateAirDates(tvdbid)
 	else:
+		session.remove()
 		return result.firstaired.split(".")

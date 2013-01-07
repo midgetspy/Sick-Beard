@@ -1144,7 +1144,7 @@ class TVEpisode(object):
 
         ### cytec airdateserver
         if tvdb_lang == "de":
-            airlist = germandates.getEpInfo(self.show.tvdbid, self.season, self.episode)
+            airlist = germandates.getEpInfo(self.show.tvdbid, self.season, self.episode, self.show.name)
         else:
             airlist = None
 

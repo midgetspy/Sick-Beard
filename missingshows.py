@@ -6,7 +6,7 @@ base_path = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(os.path.join(base_path, 'lib'))
 
 from sqlalchemy import *
-import requests
+import requests, json
 
 
 engine = create_engine('sqlite:///sickbeard.db', echo=False)
@@ -27,9 +27,12 @@ myshows = tv_shows.select().order_by(tv_shows.c.show_id.desc()).execute()
 missingshows = u""
 
 for show in myshows:
-    r = requests.get("http://cytec.us/tvdb/exists.php?tvdbid={0}".format(show.tvdb_id))
+    r = requests.get("http://tvdb.cytec.us/tvdb/exist.php?tvdbid={0}".format(show.tvdb_id))
     if r.text.strip() != "1":
         missingshows = missingshows + u"{0}\t{1}\n".format(show.tvdb_id, show.show_name)
+        data = { "tvdbid": show.tvdb_id, "name": show.show_name}
+        r = requests.post("http://tvdb.cytec.us/request.php", data)
+        print r.text
 
 if missingshows:
     print "\nFolgende deiner tvdb ids sind noch nicht in der Datenbank:\n"
@@ -37,13 +40,13 @@ if missingshows:
     f = open('missingshows.txt', 'w')
     f.write("Folgende deiner tvdb ids sind noch nicht in der Datenbank:\n\n")
     f.write(missingshows)
-    f.write("\nBitte hilf mit, gehe auf http://cytec.us/tvdb/ und trage deine TV-Shows ein.\n")
+    f.write("\nBitte hilf mit, gehe auf http://tvdb.cytec.us und trage deine TV-Shows ein.\n")
     f.close()
-    print "\nBitte hilf mit, gehe auf http://cytec.us/tvdb/ und trage deine TV-Shows ein.\n"
+    print "\nBitte hilf mit, gehe auf http://tvdb.cytec.us und trage deine TV-Shows ein.\n"
 
 
 else:
-    print "\nKeine fehlenden Serien gefunden, wenn du dennoch helfen willst, gehe auf http://cytec.us/tvdb/\n"
+    print "\nKeine fehlenden Serien gefunden, wenn du dennoch helfen willst, gehe auf http://tvdb.cytec.us/\n"
     f = open('missingshows.txt', 'w')
-    f.write("Keine fehlenden Serien gefunden, wenn du dennoch helfen willst, gehe auf http://cytec.us/tvdb/")
+    f.write("Keine fehlenden Serien gefunden, wenn du dennoch helfen willst, gehe auf http://tvdb.cytec.us/")
     f.close()
