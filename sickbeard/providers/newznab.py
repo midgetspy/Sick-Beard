@@ -203,8 +203,12 @@ class NewznabProvider(generic.NZBProvider):
             params['apikey'] = self.key
 
         searchURL = self.url + 'api?' + urllib.urlencode(params)
+        
+        logparams = params
+        logparams['apikey'] = "XXXXXXXXXXXXXX"
+        logURL = self.url + 'api?' + urllib.urlencode(logparams)
 
-        logger.log(u"Search url: " + searchURL, logger.DEBUG)
+        logger.log(u"Search url: " + logURL, logger.DEBUG)
 
         data = self.getURL(searchURL)
 

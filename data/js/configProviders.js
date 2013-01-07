@@ -139,7 +139,7 @@ $(document).ready(function(){
 
     });
     
-    $('#newznab_key').change(function(){
+    $('#newznab_key, #newznab_url, #newznab_catIDs').change(function(){
         
         var selectedProvider = $('#editANewznabProvider :selected').val();
 

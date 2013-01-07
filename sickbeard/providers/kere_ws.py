@@ -67,7 +67,11 @@ class KereWSProvider(newznab.NewznabProvider):
 
 		searchURL = sickbeard.KEREWS_URL + 'api?' + urllib.urlencode(params)
 
-		logger.log(u"Search url: " + searchURL, logger.DEBUG)
+		logparams = params
+		logparams['apikey'] = "XXXXXXXXXXXXXX"
+		logURL = sickbeard.KEREWS_URL + 'api?' + urllib.urlencode(logparams)
+
+		logger.log(u"Search url: " + logURL, logger.DEBUG)
 
 		data = self.getURL(searchURL)
 		
