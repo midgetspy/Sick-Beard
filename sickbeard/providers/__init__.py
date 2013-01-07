@@ -45,7 +45,6 @@ def sortedProviderList():
     for curModule in sickbeard.PROVIDER_ORDER:
         if curModule in providerDict:
             newList.append(providerDict[curModule])
-            
 
     # add any modules that are missing from that list
     for curModule in providerDict:
@@ -101,10 +100,10 @@ def makeNewznabProvider(configString):
 
     newznab = sys.modules['sickbeard.providers.newznab']
 
-    newProvider = newznab.NewznabProvider(name, url, catIDs, enabled, key)
-    #newProvider.key = key
-    #newProvider.catIDs = catIDs
-    #newProvider.enabled = enabled == '1'
+    newProvider = newznab.NewznabProvider(name, url)
+    newProvider.key = key
+    newProvider.catIDs = catIDs
+    newProvider.enabled = enabled == '1'
 
     return newProvider
 

@@ -40,7 +40,7 @@ from sickbeard.exceptions import ex
 
 class NewznabProvider(generic.NZBProvider):
 
-    def __init__(self, name, url, catIDs, enabled, key=''):
+    def __init__(self, name, url, key=''):
 
         generic.NZBProvider.__init__(self, name)
         
@@ -50,21 +50,17 @@ class NewznabProvider(generic.NZBProvider):
 
         self.url = url
         self.key = key
-
-        if not catIDs:
-            self.catIDs = '5000'
-            logger.log(u"Using fallback catID: 5000, please select a cat id to search in for provider [" + name + "]", logger.ERROR)
-        else:       
-            self.catIDs = catIDs
-            
-
+        self.catIDs = None
+        # if not catIDs:
+        #     self.catIDs = '5000'
+        #     logger.log(u"Using fallback catID: 5000, please select a cat id to search in for provider [" + name + "]", logger.ERROR)
+        # else:       
+        #     self.catIDs = catIDs
+          
         # if a provider doesn't need an api key then this can be false
         self.needs_auth = True
 
-        if enabled == 0:
-            self.enabled = False
-        else:
-            self.enabled = True
+        self.enabled = True
 
         self.supportsBacklog = True
 
@@ -191,7 +187,8 @@ class NewznabProvider(generic.NZBProvider):
                   "limit": 100,
                   "cat": self.catIDs}
 
-        # if max_age is set, use it, don't allow it to be missing
+
+       # if max_age is set, use it, don't allow it to be missing
         if max_age or not params['maxage']:
             params['maxage'] = max_age
 

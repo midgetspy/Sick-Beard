@@ -1051,7 +1051,7 @@ class ConfigProviders:
 
             curName, curURL, curKey, curCatIDs = curNewznabProviderStr.split('|')
 
-            newProvider = newznab.NewznabProvider(curName, curURL, curCatIDs, curKey)
+            newProvider = newznab.NewznabProvider(curName, curURL)
 
             curID = newProvider.getID()
 
