@@ -234,8 +234,8 @@ def updateAirDates(tvdbid, showname):
 		logger.log(u"Running AirDates update", logger.ERROR)
 		session.merge(ins)
 		updateSlugs(tvdbid, showname)
-		fsGetDates(tvdbid)
-		sjGetDates(tvdbid)
+		fsGetDates(tvdbid, showname)
+		sjGetDates(tvdbid, showname)
 	session.commit()
 
 
