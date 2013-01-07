@@ -1,25 +1,28 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml"> 
-<head>
-<title>API Builder</title>
-<script type="text/javascript" charset="utf-8">
-<!--
-sbRoot = "$sbRoot";
-//-->
-</script>
-<script type="text/javascript" src="$sbRoot/js/lib/jquery-1.7.1.min.js"></script>
-<script type="text/javascript" src="$sbRoot/js/apibuilder.js"></script>
+<!DOCTYPE HTML>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <title>Sick Beard - API Builder</title>
+        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+        <meta name="viewport" content="width=device-width">
+        <meta name="robots" content="noindex">
 
-<style type="text/css">
-<!--
-#apibuilder select { padding: 2px 2px 2px 6px; display: block; float: left; margin: auto 8px 4px auto;
-}
-#apibuilder select option { padding: 1px 6px; line-height: 1.2em; }
-#apibuilder .disabled { color: #ccc; }
-#apibuilder .action { background-color: #efefef; }
--->
-</style>
+        <script type="text/javascript" charset="utf-8">
+        <!--
+            sbRoot = "$sbRoot";
+        //-->
+        </script>
+        <script type="text/javascript" src="$sbRoot/js/lib/jquery-1.7.2.min.js?$sbPID"></script>
+        <script type="text/javascript" src="$sbRoot/js/apibuilder.js?$sbPID"></script>
+
+        <style type="text/css">
+        <!--
+            #apibuilder select { padding: 2px 2px 2px 6px; display: block; float: left; margin: auto 8px 4px auto; }
+            #apibuilder select option { padding: 1px 6px; line-height: 1.2em; }
+            #apibuilder .disabled { color: #ccc; }
+            #apibuilder .action { background-color: #efefef; }
+        -->
+        </style>
 
 <script type="text/javascript">
 var hide_empty_list=true; 
@@ -90,8 +93,8 @@ addList("sb.setdefaults-status", "Archived", "&status=archived", "sb.setdefaults
 addList("sb.setdefaults-status", "Ignored", "&status=ignored", "sb.setdefaults-opt");
 
 addOption("sb.setdefaults-opt", "Optional Param", "", 1);
-addList("sb.setdefaults-opt", "No Season Folder", "&season_folder=0", "quality");
-addList("sb.setdefaults-opt", "Use Season Folder", "&season_folder=1", "quality");
+addList("sb.setdefaults-opt", "Flatten (No Season Folder)", "&flatten_folders=1", "quality");
+addList("sb.setdefaults-opt", "Use Season Folder", "&flatten_folders=0", "quality");
 
 addOption("shows", "Optional Param", "", 1);
 addOption("shows", "Show Only Paused", "&paused=1");
@@ -108,8 +111,8 @@ addList("show.addexisting-tvdbid", "101501 (Ancient Aliens)", "&tvdbid=101501", 
 addList("show.addexisting-tvdbid", "80348 (Chuck)", "&tvdbid=80348", "show.addexisting-opt");
 
 addOption("show.addexisting-opt", "Optional Param", "", 1);
-addList("show.addexisting-opt", "No Season Folder", "&season_folder=0", "quality");
-addList("show.addexisting-opt", "Use Season Folder", "&season_folder=1", "quality");
+addList("show.addexisting-opt", "Flatten (No Season Folder)", "&flatten_folders=1", "quality");
+addList("show.addexisting-opt", "Use Season Folder", "&flatten_folders=0", "quality");
 
 addList("show.addnew", "101501 (Ancient Aliens)", "&tvdbid=101501", "show.addnew-loc");
 addList("show.addnew", "80348 (Chuck)", "&tvdbid=80348", "show.addnew-loc");
@@ -127,8 +130,8 @@ addList("show.addnew-status", "Archived", "&status=archived", "show.addnew-opt")
 addList("show.addnew-status", "Ignored", "&status=ignored", "show.addnew-opt");
 
 addOption("show.addnew-opt", "Optional Param", "", 1);
-addList("show.addnew-opt", "No Season Folder", "&season_folder=0", "quality");
-addList("show.addnew-opt", "Use Season Folder", "&season_folder=1", "quality");
+addList("show.addnew-opt", "Flatten (No Season Folder)", "&flatten_folders=1", "quality");
+addList("show.addnew-opt", "Use Season Folder", "&flatten_folders=0", "quality");
 
 addOptGroup("sb.searchtvdb", "Search by Name");
 addList("sb.searchtvdb", "Lost", "&name=Lost", "sb.searchtvdb-lang");
@@ -258,14 +261,24 @@ addList("episode.setstatus", "$curShow.name", "&tvdbid=$curShow.tvdbid", "episod
 
 // build out each show's season+episode list for episode.setstatus cmd
 #for $curShow in $episodeSQLResults:
+    #set $curSeason = -1
     #for $curShowSeason in $episodeSQLResults[$curShow]:
+        #if $curShowSeason.season != $curSeason and $curShowSeason.season != 0:
+            // insert just the season as the ep number is now optional
+            addList("episode.setstatus-$curShow", "Season $curShowSeason.season", "&season=$curShowSeason.season", "episode-status-$curShow");
+        #end if
+        #set $curSeason = int($curShowSeason.season)
 addList("episode.setstatus-$curShow", "$curShowSeason.season x $curShowSeason.episode", "&season=$curShowSeason.season&episode=$curShowSeason.episode", "episode-status-$curShow");
     #end for
-addOption("episode-status-$curShow", "Wanted", "&status=wanted");
-addOption("episode-status-$curShow", "Skipped", "&status=skipped");
-addOption("episode-status-$curShow", "Archived", "&status=archived");
-addOption("episode-status-$curShow", "Ignored", "&status=ignored");
+addList("episode-status-$curShow", "Wanted", "&status=wanted", "force");
+addList("episode-status-$curShow", "Skipped", "&status=skipped", "force");
+addList("episode-status-$curShow", "Archived", "&status=archived", "force");
+addList("episode-status-$curShow", "Ignored", "&status=ignored", "force");
 #end for
+
+addOption("force", "Optional Param", "", 1);
+addOption("force", "Replace Downloaded EP", "&force=1");
+addOption("force", "Skip Downloaded EP", "&force=0");
 
 addOption("future", "Optional Param", "", 1);
 addList("future", "Sort by Date", "&sort=date", "future-type");

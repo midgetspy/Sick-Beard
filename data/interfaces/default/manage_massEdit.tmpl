@@ -15,18 +15,18 @@
 #set $initial_quality = $common.SD
 #end if
 #set $anyQualities, $bestQualities = $common.Quality.splitQuality($initial_quality)
-<script type="text/javascript" src="$sbRoot/js/qualityChooser.js"></script>
-<script type="text/javascript" src="$sbRoot/js/massEdit.js"></script>
+<script type="text/javascript" src="$sbRoot/js/qualityChooser.js?$sbPID"></script>
+<script type="text/javascript" src="$sbRoot/js/massEdit.js?$sbPID"></script>
 
 <form action="massEditSubmit" method="post">
 <input type="hidden" name="toEdit" value="$showList" />
 
-<div class="optionWrapper">
+<div class="optionWrapper clearfix">
 <span class="selectTitle">Root Directories <span class="separator">*</span></span><br />
         #for $cur_dir in $root_dir_list:
         #set $cur_index = $root_dir_list.index($cur_dir)
         <div style="padding: 6px 0 3px 25px;">
-            <input type="button" class="edit_root_dir" id="edit_root_dir_$cur_index" value="Edit" />
+            <input class="btn edit_root_dir" type="button" id="edit_root_dir_$cur_index" value="Edit" />
             $cur_dir => <span id="display_new_root_dir_$cur_index">$cur_dir</span>
         </div>
         <input type="hidden" name="orig_root_dir_$cur_index" value="$cur_dir" />
@@ -35,7 +35,7 @@
 
 </div>
 
-<div class="optionWrapper alt">
+<div class="optionWrapper clearfix alt container">
 <span class="selectTitle">Quality</span>
     <div class="selectChoices">
         <select id="qualityPreset" name="quality_preset">
@@ -46,11 +46,11 @@
             <option value="$curPreset" #if $quality_value == $curPreset then "selected=\"selected\"" else ""#>$common.qualityPresetStrings[$curPreset]</option>
             #end for
         </select>
-    </div><br />
+    </div>
 
     <div id="customQuality">
         <div style="width: 50%; text-align: center;" class="float-left">
-        <h3>Inital</h3>
+        <h4>Inital</h4>
             #set $anyQualityList = filter(lambda x: x > $common.Quality.NONE, $common.Quality.qualityStrings)
             <select id="anyQualities" name="anyQualities" multiple="multiple" size="len($anyQualityList)">
             #for $curQuality in sorted($anyQualityList):
@@ -59,7 +59,7 @@
             </select>
         </div>
         <div style="width: 50%; text-align: center;" class="float-left">
-        <h3>Archive</h3>
+        <h4>Archive</h4>
             #set $bestQualityList = filter(lambda x: x > $common.Quality.SDTV, $common.Quality.qualityStrings)
             <select id="bestQualities" name="bestQualities" multiple="multiple" size="len($bestQualityList)">
             #for $curQuality in sorted($bestQualityList):
@@ -67,22 +67,21 @@
             #end for
             </select>
         </div>
-    <br />
     </div>
 </div>
 
-<div class="optionWrapper">
-<span class="selectTitle">Season Folders <span class="separator">*</span></span>
+<div class="optionWrapper clearfix">
+<span class="selectTitle">Flatten Folders <span class="separator">*</span></span>
     <div class="selectChoices">
-        <select id="edit_season_folders" name="season_folders">
+        <select id="edit_flatten_folders" name="flatten_folders">
             <option value="keep">&lt; keep &gt;</option>
-            <option value="enable" #if $season_folders_value then "selected=\"selected\"" else ""#>enable</option>
-            <option value="disable" #if $season_folders_value == False then "selected=\"selected\"" else ""#>disable</option>
+            <option value="enable" #if $flatten_folders_value then "selected=\"selected\"" else ""#>enable</option>
+            <option value="disable" #if $flatten_folders_value == False then "selected=\"selected\"" else ""#>disable</option>
         </select>
-    </div><br />
+    </div>
 </div>
 
-<div class="optionWrapper alt">
+<div class="optionWrapper clearfix alt">
     <span class="selectTitle">Paused</span>
     <div class="selectChoices">
         <select id="edit_paused" name="paused">
@@ -93,22 +92,16 @@
     </div><br />
 </div>
 
-<div class="optionWrapper">
+<div class="optionWrapper clearfix">
     <br /><span class="separator" style="font-size: 1.2em; font-weight: 700;">*</span>
     Changing these settings will cause the selected shows to be refreshed.
 </div>
 
-<div class="optionWrapper" style="text-align: center;">
-    <input type="submit" value="Submit" /><br />
+<div class="optionWrapper clearfix" style="text-align: center;">
+    <input class="btn btn-primary" type="submit" value="Submit" /><br />
 </div>
 
 </form>
 <br />
-
-<script type="text/javascript" charset="utf-8">
-<!--
-    jQuery('#location').fileBrowser({ title: 'Select Show Location' });
-//-->
-</script>
 
 #include $os.path.join($sickbeard.PROG_DIR, "data/interfaces/default/inc_bottom.tmpl")

@@ -53,14 +53,19 @@ def logSnatch(searchResult):
 
         _logHistoryItem(action, showid, season, episode, quality, resource, provider)
 
-def logDownload(episode, filename):
+def logDownload(episode, filename, new_ep_quality, release_group=None):
 
     showid = int(episode.show.tvdbid)
     season = int(episode.season)
     epNum = int(episode.episode)
 
-    quality = -1
-    provider = -1
+    quality = new_ep_quality
+    
+    # store the release group as the provider if possible
+    if release_group:
+        provider = release_group
+    else:
+        provider = -1
 
     action = episode.status
 
