@@ -1026,12 +1026,9 @@ class ConfigProviders:
 
 
     @cherrypy.expose
-    def saveProviders(self, nzbmatrix_username=None, nzbmatrix_apikey=None,
-                      nzbs_r_us_uid=None, nzbs_r_us_hash=None, newznab_string=None,
+    def saveProviders(self, nzbs_r_us_uid=None, nzbs_r_us_hash=None, newznab_string=None,
                       tvtorrents_digest=None, tvtorrents_hash=None,
- 					  btn_api_key=None,
-                      newzbin_username=None, newzbin_password=None, 
-                      kerews_url=None, kerews_apikey=None, kerews_catIDs=None,
+ 					  btn_api_key=None, kerews_url=None, kerews_apikey=None, kerews_catIDs=None,
                       provider_order=None):
 
         results = []
@@ -1082,8 +1079,6 @@ class ConfigProviders:
 
             if curProvider == 'nzbs_r_us':
                 sickbeard.NZBSRUS = curEnabled
-            elif curProvider == 'newzbin':
-                sickbeard.NEWZBIN = curEnabled
             elif curProvider == 'nzbindex':
                 sickbeard.NZBINDEX = curEnabled
             elif curProvider == 'kerews':
@@ -1110,12 +1105,6 @@ class ConfigProviders:
 
         sickbeard.NZBSRUS_UID = nzbs_r_us_uid.strip()
         sickbeard.NZBSRUS_HASH = nzbs_r_us_hash.strip()
-
-        sickbeard.NZBMATRIX_USERNAME = nzbmatrix_username
-        sickbeard.NZBMATRIX_APIKEY = nzbmatrix_apikey.strip()
-
-        sickbeard.NEWZBIN_USERNAME = newzbin_username
-        sickbeard.NEWZBIN_PASSWORD = newzbin_password
 
         sickbeard.KEREWS_URL = kerews_url
         sickbeard.KEREWS_APIKEY = kerews_apikey
