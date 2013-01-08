@@ -166,24 +166,27 @@ def fsGetDates(tvdbid, showname, test=False):
 		r = requests.get(url)
 		logger.log(u"URL for {0} is {1}".format(tvdbid, url), logger.DEBUG)
 		if r.status_code == 200:
-			soup = BeautifulSoup(r.text)
-			eplist = soup.find_all("tr", {"class": "ep-hover"})
-			for row in eplist:
-				info = row.find_all("td")
-				if info and len(info) >= 5:
-					rawseason = info[1]["data-href"]
-					regex = ".*guide\/.*?(\d{1,3})/.*"
-					season = re.match(regex, rawseason).group(1)
-					episode = info[1].text
-					name = info[3].text
-					date = info[4].text
-					serieselement = { "tvdbid": tvdbid, "name": name, "firstaired": date, "episode": episode, "season": season }
-					if test:
-						print serieselement
+			try:
+				soup = BeautifulSoup(r.text)
+				eplist = soup.find_all("tr", {"class": "ep-hover"})
+				for row in eplist:
+					info = row.find_all("td")
+					if info and len(info) >= 5:
+						rawseason = info[1]["data-href"]
+						regex = ".*guide\/.*?(\d{1,3})/.*"
+						season = re.match(regex, rawseason).group(1)
+						episode = info[1].text
+						name = info[3].text
+						date = info[4].text
+						serieselement = { "tvdbid": tvdbid, "name": name, "firstaired": date, "episode": episode, "season": season }
+						if test:
+							print serieselement
+						else:
+							updateEpisode(serieselement)
 					else:
-						updateEpisode(serieselement)
-				else:
-					logger.log(u"Something went wrong... unable to parse: {0}".format(row), logger.DEBUG)
+						logger.log(u"Something went wrong... unable to parse: {0}".format(row), logger.DEBUG)
+			except:
+				logger.log(u"Seems there was an error with the url {0}".format(url), logger.WARNING)
 		else:
 			logger.log(u"Seems there was an error with the url {0}".format(url), logger.WARNING)
 
