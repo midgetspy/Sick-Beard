@@ -7,7 +7,6 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, scoped_session
 from sickbeard import logger
 from datetime import datetime, timedelta
-import time
 
 ##define a database and add stuff to it
 #TODO: Rewrite with mappers!
@@ -170,7 +169,7 @@ def fsGetDates(tvdbid, showname, test=False):
 			eplist = soup.find_all("tr", {"class": "ep-hover"})
 			for row in eplist:
 				info = row.find_all("td")
-				if info and len(info) >= 5:
+				if info:
 					rawseason = info[1]["data-href"]
 					regex = ".*guide\/.*?(\d{1,3})/.*"
 					season = re.match(regex, rawseason).group(1)
@@ -201,7 +200,7 @@ def sjGetDates(tvdbid, showname, test=False):
 			eplist = soup.find("table", {"class": "eplist"})
 			for row in eplist:
 				info = row.find_all("td", {"class": re.compile("^e")})
-				if info and len(info) >= 5:
+				if info:
 					season, episode = info[0].text.split("x")
 					name = info[3].text
 					date = info[4].text
@@ -223,7 +222,7 @@ def updateAirDates(tvdbid, showname):
 	result = session.query(Version).first()
 	ins = Version(
 		id = 1,
-		nextupdate=time.mktime(next.timetuple())
+		nextupdate=next.toordinal()
 	)
 	if not result:
 		session.merge(ins)
@@ -231,12 +230,12 @@ def updateAirDates(tvdbid, showname):
 		updateSlugs(tvdbid, showname)
 	# if result and result.nextupdate >= now.toordinal():
 	# 	logger.log(u"Next AirDates update: {0}".format(date.fromordinal(result.nextupdate)), logger.ERROR)
-	if result and result.nextupdate <= time.mktime(now.timetuple()):
+	if result and result.nextupdate <= now.toordinal():
 		logger.log(u"Running AirDates update", logger.ERROR)
 		session.merge(ins)
 		updateSlugs(tvdbid, showname)
-		fsGetDates(tvdbid, showname)
-		#sjGetDates(tvdbid, showname)
+		fsGetDates(tvdbid)
+		sjGetDates(tvdbid)
 	session.commit()
 
 
@@ -255,7 +254,7 @@ def getEpInfo(tvdbid, season, episode, showname):
 	if not result:
 		updateAirDates(tvdbid, showname)
 		fsGetDates(tvdbid, showname)
-		#sjGetDates(tvdbid, showname)
+		sjGetDates(tvdbid, showname)
 
 	elif not result.firstaired:
 		updateAirDates(tvdbid, showname)
