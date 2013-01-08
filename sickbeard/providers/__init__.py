@@ -68,7 +68,7 @@ def getNewznabProviderList(data):
     for curDefault in defaultList:
         if not curDefault:
             continue
-
+        
         # a 0 in the key spot indicates that no key is needed, so set this on the object
         if curDefault.key == '0':
             curDefault.key = ''
@@ -106,7 +106,7 @@ def makeNewznabProvider(configString):
     newProvider = newznab.NewznabProvider(name, url, catIDs, key)
     #newProvider.key = key
     #newProvider.catIDs = catIDs
-    #newProvider.enabled = enabled == '1'
+    newProvider.enabled = enabled == '1'
 
     return newProvider
 
