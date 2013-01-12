@@ -85,7 +85,7 @@
                                 <span class="component-title jumbo">Configure Provider:</span>
                                 <span class="component-desc">
                                     #set $provider_config_list = []
-                                    #for $cur_provider in ("nzbs_r_us", "newzbin", "nzbmatrix", "tvtorrents", "btn"):
+                                    #for $cur_provider in ("nzbs_r_us", "tvtorrents", "btn"):
                                         #set $cur_provider_obj = $sickbeard.providers.getProviderClass($cur_provider)
                                         #if $cur_provider_obj.providerType == $GenericProvider.NZB and not $sickbeard.USE_NZBS:
                                             #continue
@@ -126,51 +126,6 @@
                         </div>
                     </div><!-- /${curNewznabProvider.getID()}Div //-->
 #end for
-<!--
-                    <div class="providerDiv" id="nzbs_orgDiv">
-                        <div class="field-pair">
-                            <label class="clearfix">
-                                <span class="component-title">NZBs.org UID</span>
-                                <input class="component-desc" type="text" name="nzbs_org_uid" value="$sickbeard.NZBS_UID" size="10" />
-                            </label>
-                        </div>
-                        <div class="field-pair">
-                            <label class="clearfix">
-                                <span class="component-title">NZBs.org Hash</span>
-                                <input class="component-desc" type="text" name="nzbs_org_hash" value="$sickbeard.NZBS_HASH" size="40" />
-                            </label>
-                        </div>
-                    </div>
--->
-                    <div class="providerDiv" id="nzbmatrixDiv">
-                        <div class="field-pair">
-                            <label class="clearfix">
-                                <span class="component-title">NZBMatrix Username</span>
-                                <input class="component-desc" type="text" name="nzbmatrix_username" value="$sickbeard.NZBMATRIX_USERNAME" size="10" />
-                            </label>
-                        </div>
-                        <div class="field-pair">
-                            <label class="clearfix">
-                                <span class="component-title">NZBMatrix API Key</span>
-                                <input class="component-desc" type="text" name="nzbmatrix_apikey" value="$sickbeard.NZBMATRIX_APIKEY" size="40" />
-                            </label>
-                        </div>
-                    </div><!-- /nzbmatrixDiv //-->
-
-                    <div class="providerDiv" id="newzbinDiv">
-                        <div class="field-pair">
-                            <label class="clearfix">
-                                <span class="component-title">Newzbin Username</span>
-                                <input class="component-desc" type="text" name="newzbin_username" value="$sickbeard.NEWZBIN_USERNAME" size="10" />
-                            </label>
-                        </div>
-                        <div class="field-pair">
-                            <label class="clearfix">
-                                <span class="component-title">Newzbin Password</span>
-                                <input class="component-desc" type="password" name="newzbin_password" value="$sickbeard.NEWZBIN_PASSWORD" size="40" />
-                            </label>
-                        </div>
-                    </div><!-- /newzbinDiv //-->
 
                     <div class="providerDiv" id="nzbs_r_usDiv">
                         <div class="field-pair">
