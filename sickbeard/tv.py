@@ -1174,7 +1174,7 @@ class TVEpisode(object):
                 logger.log(u"Useing german airdate ({0}) for this episode: {1}x{2}".format(rawAirdate, season, episode), logger.DEBUG)
             except:
                 #set it to never aired
-                rawAirdate = [1,1,1]
+                rawAirdate = [int(x) for x in myEp["firstaired"].split("-")]
                 logger.log(u"No german airdate found for this episode: {1}x{2}... skipping".format(rawAirdate, season, episode), logger.DEBUG)
                 germandate = False
         else:
