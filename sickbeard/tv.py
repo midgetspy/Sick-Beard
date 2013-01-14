@@ -1162,7 +1162,7 @@ class TVEpisode(object):
         #rawAirdate = [int(x) for x in myEp["firstaired"].split("-")]
 
         ### cytec airdateserver
-        if tvdb_lang == "de":
+        if tvdb_lang == "de" and sickbeard.GERMANDATES:
             airlist = germandates.getEpInfo(self.show.tvdbid, self.season, self.episode, self.show.name)
         else:
             airlist = None

@@ -297,6 +297,8 @@ EXTRA_SCRIPTS = []
 
 GIT_PATH = None
 
+GERMANDATES = False
+
 IGNORE_WORDS = "french,core2hd,dutch,swedish"
 
 __INITIALIZED__ = False
@@ -311,7 +313,7 @@ def initialize(consoleLogging=True):
 
     with INIT_LOCK:
 
-        global LOG_DIR, WEB_PORT, WEB_LOG, WEB_ROOT, WEB_USERNAME, WEB_PASSWORD, WEB_HOST, WEB_IPV6, USE_API, API_KEY, ENABLE_HTTPS, HTTPS_CERT, HTTPS_KEY, \
+        global GERMANDATES, LOG_DIR, WEB_PORT, WEB_LOG, WEB_ROOT, WEB_USERNAME, WEB_PASSWORD, WEB_HOST, WEB_IPV6, USE_API, API_KEY, ENABLE_HTTPS, HTTPS_CERT, HTTPS_KEY, \
                 USE_NZBS, USE_TORRENTS, NZB_METHOD, NZB_DIR, DOWNLOAD_PROPERS, \
                 SAB_USERNAME, SAB_PASSWORD, SAB_APIKEY, SAB_CATEGORY, SAB_HOST, \
                 NZBGET_PASSWORD, NZBGET_CATEGORY, NZBGET_HOST, currentSearchScheduler, backlogSearchScheduler, \
@@ -364,6 +366,8 @@ def initialize(consoleLogging=True):
         CheckSection(CFG, 'Synology')
         CheckSection(CFG, 'pyTivo')
         CheckSection(CFG, 'NMA')
+
+        GERMANDATES = bool(check_setting_int(CFG, 'General', 'germandates', 1))
 
         LOG_DIR = check_setting_str(CFG, 'General', 'log_dir', 'Logs')
         if not helpers.makeDir(LOG_DIR):
@@ -964,6 +968,7 @@ def save_config():
     new_config.filename = CONFIG_FILE
 
     new_config['General'] = {}
+    new_config['General']['germandates'] = int(GERMANDATES)
     new_config['General']['log_dir'] = LOG_DIR
     new_config['General']['web_port'] = WEB_PORT
     new_config['General']['web_host'] = WEB_HOST
