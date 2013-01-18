@@ -678,7 +678,7 @@ div#summary tr td {
 }
 #SubMenu {
   float: right;
-  margin-top: -30px;
+  margin-top: -35px;
   position: relative;
   z-index: 99;
 }
@@ -1028,6 +1028,11 @@ span.true {
 .ui-progressbar {
   height: 18px !important;
   line-height: 17px;
+}
+
+.pull-left {
+    float: left;
+    padding-right: 2px
 }
 
 .pull-right {
