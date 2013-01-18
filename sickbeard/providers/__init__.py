@@ -18,6 +18,7 @@
 
 __all__ = ['ezrss',
            'tvtorrents',
+           'torrentleech',
            'nzbsrus',
            'womble',
            'btn',
@@ -74,7 +75,7 @@ def getNewznabProviderList(data):
             providerDict[curDefault.name].name = curDefault.name
             providerDict[curDefault.name].url = curDefault.url
             providerDict[curDefault.name].needs_auth = curDefault.needs_auth
-        
+
     return filter(lambda x: x, providerList)
 
 
