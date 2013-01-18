@@ -166,26 +166,33 @@ def fsGetDates(tvdbid, showname, test=False):
 		r = requests.get(url)
 		logger.log(u"URL for {0} is {1}".format(tvdbid, url), logger.DEBUG)
 		if r.status_code == 200:
-			soup = BeautifulSoup(r.text)
-			eplist = soup.find_all("tr", {"class": "ep-hover"})
-			for row in eplist:
-				info = row.find_all("td")
-				if info and len(info) >= 5:
-					rawseason = info[1]["data-href"]
-					regex = ".*guide\/.*?(\d{1,3})/.*"
-					season = re.match(regex, rawseason).group(1)
-					episode = info[1].text
-					name = info[3].text
-					date = info[4].text
-					serieselement = { "tvdbid": tvdbid, "name": name, "firstaired": date, "episode": episode, "season": season }
-					if test:
-						print serieselement
-					else:
-						updateEpisode(serieselement)
-				else:
-					logger.log(u"Something went wrong... unable to parse: {0}".format(row), logger.DEBUG)
+			try:
+				soup = BeautifulSoup(r.text)
+				eplist = soup.find_all("tr", {"class": "ep-hover"})
+				try:
+					for row in eplist:
+					#info = row.find_all("td")
+						#rawseason = row.find("td", {"class":"episodenliste-episodennummer"})["data-href"]
+						#regex = ".*guide\/.*?(\d{1,3})/.*"
+						#season = re.match(regex, rawseason).group(1)
+						season = row.find_all("td", {"class":"episodenliste-episodennummer"})[1].text.replace(".","")
+						#episode = row.find("td", {"class":"episodenliste-episodennummer"}).text
+						episode = row.find_all("td", {"class":"episodenliste-episodennummer"})[2].text
+						name = row.find("td", {"class":"episodenliste-titel"}).text
+						date = row.find("td", {"class":"episodenliste-ea"}).text
+						if date == u"":
+							date = None
+						serieselement = { "tvdbid": tvdbid, "name": name, "firstaired": date, "episode": episode, "season": season }
+						if test:
+							print serieselement
+						else:
+							updateEpisode(serieselement)
+				except:
+					logger.log(u"Unable to parse rows from: {0}".format(url), logger.WARNING)
+			except:
+				logger.log(u"Seems there was an error with the HTML file from url: {0}".format(url), logger.WARNING)
 		else:
-			logger.log(u"Seems there was an error with the url {0}".format(url), logger.WARNING)
+			logger.log(u"URL {0} doesnt return 200...".format(url), logger.WARNING)
 
 def sjGetDates(tvdbid, showname, test=False):
 	my_request = session.query(Slugs).filter(Slugs.id == tvdbid).first()
