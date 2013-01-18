@@ -63,6 +63,28 @@ img {
     padding-right: 2px;
 }
 
+.imgHomeWrapper {
+	background: url("../images/loading.gif") no-repeat scroll center center #FFFFFF;
+    border: 3px solid #FFFFFF;
+    box-shadow: 1px 1px 2px 0 #555555;
+    float: left;
+    height: 50px;
+    overflow: hidden;
+    border-radius: 8px;
+}
+.imgHomeWrapper .poster {
+    float: left;
+    width: 50px;
+    height: auto;
+    position: relative;
+    vertical-align: middle;
+}
+.imgHomeWrapper .banner {
+    vertical-align: top;
+    height: auto;
+    width: 300px;
+}
+
 html {
   margin: 0;
   padding: 0;
@@ -133,8 +155,8 @@ a{
   background-image: linear-gradient(#555555, #333333) !important;
   background-image: -webkit-linear-gradient(#555555, #333333) !important;
   background-image: -o-linear-gradient(#555555, #333333) !important;
-  filter: progid:dximagetransform.microsoft.gradient(startColorstr=#fdf0d5, endColorstr=#fff9ee) !important;
-  -ms-filter: progid:dximagetransform.microsoft.gradient(startColorstr=#fdf0d5, endColorstr=#fff9ee) !important;
+  filter: progid:dximagetransform.microsoft.gradient(startColorstr=#555555, endColorstr=#333333) !important;
+  -ms-filter: progid:dximagetransform.microsoft.gradient(startColorstr=#555555, endColorstr=#333333) !important;
   border-bottom: 1px solid #CACACA;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
   height: 58px;
@@ -379,6 +401,10 @@ input:not(.btn){margin-right:6px;margin-top:5px;padding-top:4px;padding-bottom:4
   padding: 8px 5px;
 }
 
+#massUpdateTable.tablesorter td.tvShow a{
+  font-size: 16px;
+}
+
 .sickbeardTable th:first-child,
 .sickbeardTable td:first-child {
   border-left: none;
@@ -403,11 +429,28 @@ input:not(.btn){margin-right:6px;margin-top:5px;padding-top:4px;padding-bottom:4
 .sickbeardTable td {
   font-size: 14px;
 }
+
 .sickbeardTable td.title {
   font-size: 14px;
   line-height: normal;
-  width: 25%;
 }
+
+.sickbeardTable td.filename {
+width: 30%;
+
+}
+
+.sickbeardTable td.subtitles_column {
+  vertical-align: middle;
+/*  width: 10%; */
+}
+
+.sickbeardTable td.subtitles_column img {
+  padding-right: 2px;
+  padding-top: 2px;
+}
+
+
 .sickbeardTable td.status_column {
   font-weight: bold;
   line-height: 20px;
@@ -415,6 +458,11 @@ input:not(.btn){margin-right:6px;margin-top:5px;padding-top:4px;padding-bottom:4
   width: 12%;
 	color: #555555;
 }
+
+.sickbeardTable td.search img {
+  padding-right: 2px;
+}
+
 .sickbeardTable td small {
   font-size: 11px;
   font-style: italic;
@@ -452,8 +500,10 @@ input:not(.btn){margin-right:6px;margin-top:5px;padding-top:4px;padding-bottom:4
 .progressbarText {
   text-shadow: 0 0 0.1em #fff;
   position: absolute;
-  top: 0px;
+  top: 0;
   font-size: 12px;
+  color: #555555;
+  font-weight: bold;
   width: 100%;
   height: 100%;
   overflow: visible;
@@ -584,20 +634,31 @@ tr.unaired {
   font-size: 14px;
   font-weight: normal;
   color: #343434;
+  height: 35px;
 }
 .showInfo {
   width: 745px;
   float: right;
   padding-top: 10px;
 }
+
+span .headerInfo {
+ color: #666666;
+}
+
+div .seasonList {
+ padding-top: 12px;
+ padding-right: 10px;
+}
+
 div#summary {
   background-color: #f9f9f9;
   -moz-border-radius: 10px;
   -webkit-border-radius: 10px;
   border-radius: 10px;
-  padding: 10px;
+  padding: 5px 10px;
   border: 1px solid #ddd;
-  margin: 10px 0;
+  margin: 3px 0 10px 0;
 }
 div#summary .infoTable {
   width: 85%;
@@ -617,7 +678,7 @@ div#summary tr td {
 }
 #SubMenu {
   float: right;
-  margin-top: -30px;
+  margin-top: -35px;
   position: relative;
   z-index: 99;
 }
@@ -721,11 +782,15 @@ ul#rootDirStaticList li {
   cursor: pointer;
 }
 
-#rootDirs, #rootDirsControls {
+/*#rootDirs, #rootDirsControls {
   width: 50%;
   min-width: 400px;
 	height:auto !important;
-}
+}*/
+
+#episodeDir, #newRootDir {
+   margin-right: 6px;
+ }
 
 #displayText {
   background-color: #efefef;
@@ -760,9 +825,10 @@ div#addShowPortal button .buttontext {
 
 td.tvShow a {
   text-decoration: none;
-  font-size: 16px;
+  font-size: 18px;
   font-weight: bold;
 }
+
 .navShow {
   display: inline;
   cursor: pointer;
@@ -876,6 +942,12 @@ a.whitelink {
   position: relative;
   margin-right: 3px;
 }
+
+ui-pnotify-text img {
+  /*padding-top: 3px;*/
+  margin-top: -3px;
+}
+
 div.ui-pnotify {
   min-width: 340px;
   max-width: 550px;
@@ -936,6 +1008,13 @@ span.Any {
   /* black */
 
 }
+
+span.Proper {
+  background: none repeat scroll 0 0 #CD7300;
+  /* red */
+
+}
+
 span.false {
   color: #993333;
   /* red */
@@ -949,6 +1028,11 @@ span.true {
 .ui-progressbar {
   height: 18px !important;
   line-height: 17px;
+}
+
+.pull-left {
+    float: left;
+    padding-right: 2px
 }
 
 .pull-right {

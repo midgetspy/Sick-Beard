@@ -1,0 +1,65 @@
+#import sickbeard
+#import subliminal  
+#import datetime
+#from sickbeard import common
+#set global $title="Episode Overview"
+#set global $header="Episode Overview"
+
+#set global $sbPath=".."
+
+#set global $topmenu="manage"#
+#import os.path
+#include $os.path.join($sickbeard.PROG_DIR, "gui/slick/interfaces/default/inc_top.tmpl")
+#if $varExists('header') 
+    <h1 class="header">$header</h1>
+#else 
+    <h1 class="title">$title</h1>
+#end if
+#if $whichSubs:
+#set subsLanguage = $subliminal.language.Language($whichSubs) if not $whichSubs == 'all' else 'All'
+#end if
+#if not $whichSubs or ($whichSubs and not $ep_counts):
+
+#if $whichSubs:
+<h2>All of your episodes have $subsLanguage subtitles.</h2>
+<br />
+#end if
+
+<form action="$sbRoot/manage/subtitleMissed" method="get">
+Manage episodes without <select name="whichSubs">
+<option value="all">All</option>
+#for $sub_lang in $subliminal.language.language_list($sickbeard.SUBTITLES_LANGUAGES):
+<option value="$sub_lang.alpha2">$sub_lang</option>
+#end for
+</select>
+subtitles
+<input class="btn" type="submit" value="Manage" /> 
+</form>
+
+#else
+
+<script type="text/javascript" src="$sbRoot/js/manageSubtitleMissed.js?$sbPID"></script>
+<input type="hidden" id="selectSubLang" name="selectSubLang" value="$whichSubs" />
+
+<form action="$sbRoot/manage/downloadSubtitleMissed" method="post">
+<h2>Episodes without $subsLanguage subtitles.</h2>
+<br />
+Download missed subtitles for selected episodes <input class="btn" type="submit" value="Go" />
+<div class="pull-left">
+	<button type="button" class="btn btn-mini selectAllShows" style="line-height: 8px;"><a>Select all</a></button> 
+	<button type="button" class="btn btn-mini unselectAllShows" style="line-height: 8px;"><a>Clear all</a></button>
+</div>
+<br /><br />
+<table class="sickbeardTable" cellspacing="1" border="0" cellpadding="0">
+#for $cur_tvdb_id in $sorted_show_ids:
+ <tr id="$cur_tvdb_id">
+  <th><input type="checkbox" class="allCheck" id="allCheck-$cur_tvdb_id" name="$cur_tvdb_id-all" checked="checked" /></th>
+  <th colspan="3" style="width: 100%; text-align: left;"><a class="whitelink" href="$sbRoot/home/displayShow?show=$cur_tvdb_id">$show_names[$cur_tvdb_id]</a> ($ep_counts[$cur_tvdb_id]) <input type="button" class="get_more_eps btn" id="$cur_tvdb_id" value="Expand" /></th>
+ </tr>
+#end for
+</table>
+</form>
+
+#end if
+
+#include $os.path.join($sickbeard.PROG_DIR,"gui/slick/interfaces/default/inc_bottom.tmpl")

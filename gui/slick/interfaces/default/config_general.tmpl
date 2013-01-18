@@ -74,20 +74,6 @@
                             </label>
                         </div>
 
-<!--/                       <div class="field-pair">
-							<label class="nocheck clearfix">
-                                <span class="component-title">Web Gui</span>
-                                <span class="component-desc">
-	                            <select name="web_guiname" id="web_guiname">
-								#set $web_gui_text = {'classic': "Classic", 'slick': "Slick"}
-                                #for $curGui in ('classic', 'slick'):
-                                	<option value="$curGui" #if $web_gui_text[$curGui] == $sickbeard.GUI_NAME then "selected=\"selected\"" else ""#>$web_gui_text[$curGui]</option>
-	                            #end for
-	                            </select>
-                                </span>
-                            </label>
-                        </div> //-->
-
                         <input type="submit" class="btn config_submitter" value="Save Changes" />
                     </fieldset>
                 </div><!-- /component-group1 //-->
@@ -223,13 +209,12 @@
                 </div><!-- /component-group4 //-->
                 <br/>
 				<small class="float-right"><b>All non-absolute folder locations are relative to <span class="path">$sickbeard.DATA_DIR</span></b> </small>
-				<input type="submit" class="btn config_submitter button" value="Save Changes" /><br/>
+				<input type="submit" class="btn config_submitter button" value="Save Changes" />
             
             </div><!-- /config-components -->
 		
 </form>
 </div></div>
-
 
 <div class="clearfix"></div>
 

@@ -7,13 +7,13 @@
   padding: 0;
 }
 #fileBrowserDialog ul li {
-  margin: 2px;
-  padding: 4px 0;
+  margin: 2px 0;
   cursor: pointer;
   list-style-type: none;
 }
 #fileBrowserDialog ul li a {
   display: block;
+  padding: 4px 0;
 }
 #fileBrowserDialog ul li a:hover {
   color: blue;

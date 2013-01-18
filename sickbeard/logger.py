@@ -64,6 +64,8 @@ class SBRotatingLogHandler(object):
         self.cur_handler = self._config_handler()
     
         logging.getLogger('sickbeard').addHandler(self.cur_handler)
+        logging.getLogger('subliminal').addHandler(self.cur_handler)
+        logging.getLogger('imdbpy').addHandler(self.cur_handler)
     
         # define a Handler which writes INFO messages or higher to the sys.stderr
         if consoleLogging:
@@ -72,12 +74,20 @@ class SBRotatingLogHandler(object):
             console.setLevel(logging.INFO)
     
             # set a format which is simpler for console use
-            console.setFormatter(logging.Formatter('%(asctime)s %(levelname)s::%(message)s', '%H:%M:%S'))
+            console.setFormatter(DispatchingFormatter({'sickbeard'  : logging.Formatter('%(asctime)s %(levelname)s::%(message)s', '%H:%M:%S'),
+                                                       'subliminal' : logging.Formatter('%(asctime)s %(levelname)s::SUBLIMINAL :: %(message)s', '%H:%M:%S'),
+                                                       'imdbpy'     : logging.Formatter('%(asctime)s %(levelname)s::IMDBPY :: %(message)s', '%H:%M:%S')
+                                                       },
+                                                       logging.Formatter('%(message)s'),))
     
             # add the handler to the root logger
             logging.getLogger('sickbeard').addHandler(console)
+            logging.getLogger('subliminal').addHandler(console)
+            logging.getLogger('imdbpy').addHandler(console)
     
         logging.getLogger('sickbeard').setLevel(logging.DEBUG)
+        logging.getLogger('subliminal').setLevel(logging.WARNING)
+        logging.getLogger('imdbpy').setLevel(logging.WARNING)
 
     def _config_handler(self):
         """
@@ -86,7 +96,12 @@ class SBRotatingLogHandler(object):
     
         file_handler = logging.FileHandler(self.log_file)
         file_handler.setLevel(logging.DEBUG)
-        file_handler.setFormatter(logging.Formatter('%(asctime)s %(levelname)-8s %(message)s', '%b-%d %H:%M:%S'))
+        file_handler.setFormatter(DispatchingFormatter({'sickbeard'  : logging.Formatter('%(asctime)s %(levelname)-8s %(message)s', '%b-%d %H:%M:%S'),
+                                                        'subliminal' : logging.Formatter('%(asctime)s %(levelname)-8s SUBLIMINAL :: %(message)s', '%b-%d %H:%M:%S'),
+                                                        'imdbpy'     : logging.Formatter('%(asctime)s %(levelname)-8s IMDBPY :: %(message)s', '%b-%d %H:%M:%S')
+                                                        },
+                                                        logging.Formatter('%(message)s'),))
+                                                            
         return file_handler
 
     def _log_file_name(self, i):
@@ -112,12 +127,14 @@ class SBRotatingLogHandler(object):
     def _rotate_logs(self):
         
         sb_logger = logging.getLogger('sickbeard')
+        subli_logger = logging.getLogger('subliminal')
         
         # delete the old handler
         if self.cur_handler:
             self.cur_handler.flush()
             self.cur_handler.close()
             sb_logger.removeHandler(self.cur_handler)
+            subli_logger.removeHandler(self.cur_handler)
     
         # rename or delete all the old log files
         for i in range(self._num_logs(), -1, -1):
@@ -136,6 +153,7 @@ class SBRotatingLogHandler(object):
         self.cur_handler = new_file_handler
         
         sb_logger.addHandler(new_file_handler)
+        subli_logger.addHandler(new_file_handler)
 
     def log(self, toLog, logLevel=MESSAGE):
     
@@ -172,6 +190,18 @@ class SBRotatingLogHandler(object):
                     sb_logger.log(logLevel, out_line)
             except ValueError:
                 pass
+
+
+class DispatchingFormatter:
+
+    def __init__(self, formatters, default_formatter):
+        self._formatters = formatters
+        self._default_formatter = default_formatter
+
+    def format(self, record):
+        formatter = self._formatters.get(record.name, self._default_formatter)
+        return formatter.format(record)
+
 
 sb_log_instance = SBRotatingLogHandler('sickbeard.log', NUM_LOGS, LOG_SIZE)
 

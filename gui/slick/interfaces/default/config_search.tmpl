@@ -66,6 +66,21 @@
                             </label>
                         </div>
 
+                        <div class="field-pair">
+                            <label class="nocheck clearfix">
+                                <span class="component-title">Ignore Words</span>
+                                <input type="text" name="ignore_words" value="$sickbeard.IGNORE_WORDS" size="45" />
+                            </label>
+                            <label class="nocheck clearfix">
+                                <span class="component-title">&nbsp;</span>
+                                <span class="component-desc">Comma separated words to check in episode search.</span>
+                            </label>
+                            <label class="nocheck clearfix">
+                                <span class="component-title">&nbsp;</span>
+                                <span class="component-desc">Results containing any word in the list won't be snatched.</span>
+                            </label>
+                        </div>
+
                         <div class="clearfix"></div>
                         <input type="submit" class="btn config_submitter" value="Save Changes" /><br/>
                         
@@ -324,6 +339,17 @@
                                 <label class="nocheck clearfix">
                                     <span class="component-title">&nbsp;</span>
                                     <span class="component-desc">Password of your Torrent Client (blank for none)</span>
+                                </label>
+                            </div>
+
+                            <div class="field-pair" id="Torrent_Label">
+                                <label class="nocheck clearfix">
+                                    <span class="component-title" id="label_desc">Torrent Label</span>
+                                    <input type="text" name="torrent_label" id="torrent_label" value="$sickbeard.TORRENT_LABEL" size="20" />
+                                </label>
+                                <label class="nocheck clearfix">
+                                    <span class="component-title">&nbsp;</span>
+                                    <span class="component-desc">Add a specific label to Torrent</span>
                                 </label>
                             </div>
 

@@ -92,7 +92,7 @@ class ThePirateBayProvider(generic.TorrentProvider):
         return quality_string
 
     def _find_season_quality(self,title,torrent_id):
-        """ Rewrite the title of a Season Torrent with the quality found inspecting torrent file list """
+        """ Return the modified title of a Season Torrent with the quality found inspecting torrent file list """
 
         mediaExtensions = ['avi', 'mkv', 'wmv', 'divx',
                            'vob', 'dvr-ms', 'wtv', 'ts'

@@ -1,5 +1,17 @@
 #import sickbeard
 #from sickbeard.common import *
+#from sickbeard import subtitles
+
+		#if $sickbeard.USE_SUBTITLES:
+        <div class="field-pair alt">
+            <input type="checkbox" name="subtitles" id="subtitles" #if $sickbeard.SUBTITLES_DEFAULT then "checked=\"checked\"" else ""# />
+            <label for="subtitles" class="clearfix">
+                <span class="component-title">Subtitles</span>
+                <span class="component-desc">Download subtitles for this show?</span>
+            </label>
+        </div>
+        #end if
+        
         <div class="field-pair">
             <label for="statusSelect" class="nocheck clearfix">
                 <span class="component-title">

@@ -1,6 +1,5 @@
 fieldset.sectionwrap{
 text-align: left;
-overflow: auto;
 width: 800px;
 border-width:0;
 padding:5px;
@@ -22,7 +21,7 @@ cursor:pointer;
 }
 
 div.stepsguide .step{
-width:260px; /*width of each "steps" text*/
+width:250px; /*width of each "steps" text*/
 font: bold 24px Arial;
 float:left;
 }
@@ -88,5 +87,5 @@ input:not(.btn){float:left;margin-right:6px;margin-top:5px;padding-top:4px;paddi
 
 #customQualityWrapper { /*height: 190px*/; overflow: auto; }
 #customQualityWrapper div.component-group-desc{float:left;width:165px;}
-#customQualityWrapper div.component-group-desc p{width:85%;font-size:1em;color:#666;margin:.8em 0;}
+#customQualityWrapper div.component-group-desc p{width:85%;font-size:1.2em;color:#666;margin:.8em 0;}
 #customQualityWrapper div.component-group-desc p.note{width:90%;font-size:1.2em;color:#333;margin:.8em 0;}

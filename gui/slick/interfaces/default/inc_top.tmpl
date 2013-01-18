@@ -6,10 +6,20 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml"> 
 <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="robots" content="noindex">
     <title>Sick Beard - alpha $sickbeard.version.SICKBEARD_VERSION - $title</title>
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <link rel="shortcut icon" href="$sbRoot/images/favicon.ico" />
-    <link rel="apple-touch-icon" href="$sbRoot/images/sickbeard_touch_icon.png" />
+    <!--[if lt IE 9]>
+         <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+        
+    <link rel="shortcut icon" href="$sbRoot/images/ico/favicon.ico">
+    <link rel="apple-touch-icon-precomposed" sizes="144x144" href="$sbRoot/images/ico/apple-touch-icon-144x144-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" sizes="114x114" href="$sbRoot/images/ico/apple-touch-icon-114x114-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" sizes="72x72" href="$sbRoot/images/ico/apple-touch-icon-72x72-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" href="$sbRoot/images/ico/apple-touch-icon-57x57-precomposed.png">
+
     <link rel="stylesheet" type="text/css" href="$sbRoot/css/default.css?$sbPID" />
     <link rel="stylesheet" type="text/css" href="$sbRoot/css/browser.css?$sbPID" />
     <link rel="stylesheet" type="text/css" href="$sbRoot/css/comingEpisodes.css?$sbPID" />
@@ -50,7 +60,7 @@
 
     <script type="text/javascript" charset="utf-8">
     <!--
-        sbRoot = "$sbRoot";
+        sbRoot = "$sbRoot"; // needed for browser.js & ajaxNotifications.js
         //HTML for scrolltopcontrol, which is auto wrapped in DIV w/ ID="topcontrol"
         top_image_html = '<img src="$sbRoot/images/top.gif" style="width:31px; height:11px" alt="Jump to top" />'; 
     //-->
@@ -62,19 +72,29 @@
 <script type="text/javascript">
 <!--
 	function initActions() {
-		\$("#SubMenu a.confirm").button({ icons: { primary: "ui-icon-power" }  });
-		\$("#SubMenu a:contains('Edit')").button({ icons: { primary: "ui-icon-pencil" }  });
-		\$("#SubMenu a:contains('Delete'),#SubMenu a:contains('Clear'),#SubMenu a:contains('Trim History')").button({ icons: { primary: "ui-icon-trash" }  });
-		\$("#SubMenu a:contains('Re-scan'),#SubMenu a:contains('Backlog Overview'),#SubMenu a[href='/home/updatePLEX/']").button({ icons: { primary: "ui-icon-refresh" }  });
-		\$("#SubMenu a:contains('Force')").button({ icons: { primary: "ui-icon-transfer-e-w" }  });
-		\$("#SubMenu a:contains('Rename')").button({ icons: { primary: "ui-icon-tag" }  });
-		\$("#SubMenu a:contains('Setting'),#SubMenu a:contains('General')").button({ icons: { primary: "ui-icon-gear" }  });
-		\$("#SubMenu a:contains('Search')").button({ icons: { primary: "ui-icon-search" }  });
-		\$("#SubMenu a:contains('Episode Status')").button({ icons: { primary: "ui-icon-transferthick-e-w" }  });
-		\$("#SubMenu a[href='/home/addShows/']").button({ icons: { primary: "ui-icon-video" }  });
-		\$("#SubMenu a:contains('Processing')").button({ icons: { primary: "ui-icon-folder-open" }  });
-		\$("#SubMenu a:contains('Notification')").button({ icons: { primary: "ui-icon-note" }  });
-		\$("#SubMenu a:contains('XBMC')").button({ icons: { primary: "ui-icon-refresh" }  });
+        \$("#SubMenu a[href^='/home/restart/']").addClass('btn').html('<span class="ui-icon ui-icon-power pull-left"></span> Restart </a>');		
+        \$("#SubMenu a[href^='/home/shutdown/']").addClass('btn').html('<span class="ui-icon ui-icon-power pull-left"></span> Shutdown </a>');		
+		\$("#SubMenu a:contains('Edit')").addClass('btn').html('<span class="ui-icon ui-icon-pencil pull-left"></span> Edit </a>');
+		\$("#SubMenu a:contains('Delete')").addClass('btn').html('<span class="ui-icon ui-icon-trash pull-left"></span> Delete </a>');
+		\$("#SubMenu a:contains('Clear')").addClass('btn').html('<span class="ui-icon ui-icon-trash pull-left"></span> Clear History </a>');
+		\$("#SubMenu a:contains('Trim History')").addClass('btn').html('<span class="ui-icon ui-icon-trash pull-left"></span> Trim History </a>');
+		\$("#SubMenu a:contains('Re-scan')").addClass('btn').html('<span class="ui-icon ui-icon-refresh pull-left"></span> Re-scan </a>');
+		\$("#SubMenu a:contains('Backlog Overview')").addClass('btn').html('<span class="ui-icon ui-icon-refresh pull-left"></span> Backlog Overview </a>');
+        \$("#SubMenu a[href='/home/updatePLEX/']").addClass('btn').html('<span class="ui-icon ui-icon-refresh pull-left"></span> Update PLEX </a>');
+		\$("#SubMenu a:contains('Force')").addClass('btn').html('<span class="ui-icon ui-icon-transfer-e-w pull-left"></span> Force Full Update </a>');
+		\$("#SubMenu a:contains('Rename')").addClass('btn').html('<span class="ui-icon ui-icon-tag pull-left"></span> Preview Rename </a>');
+		\$("#SubMenu a:contains('Subtitles')").addClass('btn').html('<span class="ui-icon ui-icon-comment pull-left"></span> Download Subtitles </a>');
+		\$("#SubMenu a:contains('Settings')").addClass('btn').html('<span class="ui-icon ui-icon-search pull-left"></span> Search Settings </a>');
+		\$("#SubMenu a:contains('Provider')").addClass('btn').html('<span class="ui-icon ui-icon-search pull-left"></span> Search Providers </a>');
+		\$("#SubMenu a:contains('General')").addClass('btn').html('<span class="ui-icon ui-icon-gear pull-left"></span> General </a>');
+		\$("#SubMenu a:contains('Episode Status')").addClass('btn').html('<span class="ui-icon ui-icon-transferthick-e-w pull-left"></span> Episode Status Management </a>');
+		\$("#SubMenu a:contains('Missed Subtitle')").addClass('btn').html('<span class="ui-icon ui-icon-transferthick-e-w pull-left"></span> Missed Subtitles </a>');
+		\$("#SubMenu a[href='/home/addShows/']").addClass('btn').html('<span class="ui-icon ui-icon-video pull-left"></span> Add Show </a>');
+		\$("#SubMenu a:contains('Processing')").addClass('btn').html('<span class="ui-icon ui-icon-folder-open pull-left"></span> Manual Post-Processing </a>');
+		\$("#SubMenu a:contains('Manage Searches')").addClass('btn').html('<span class="ui-icon ui-icon-search pull-left"></span> Manage Searches </a>');
+		\$("#SubMenu a:contains('Notification')").addClass('btn').html('<span class="ui-icon ui-icon-note pull-left"></span> Notification </a>');
+        \$("#SubMenu a[href='/home/updateXBMC/']").addClass('btn').html('<span class="ui-icon ui-icon-refresh pull-left"></span> Update XBMC </a>');
+		
 	}
     \$(document).ready(function(){ 
     	
@@ -157,6 +177,9 @@
                             <li><a href="$sbRoot/manage/backlogOverview/"><img src="$sbRoot/images/menu/backlog_view16.png" alt="" width="16" height="16" />Backlog Overview</a></li>
                             <li><a href="$sbRoot/manage/manageSearches/"><img src="$sbRoot/images/menu/managesearches16.png" alt="" width="16" height="16" />Manage Searches</a></li>
                             <li><a href="$sbRoot/manage/episodeStatuses/"><img src="$sbRoot/images/menu/backlog16.png" alt="" width="16" height="16" />Episode Status Management</a></li>
+                            #if $sickbeard.USE_SUBTITLES:
+                            <li><a href="$sbRoot/manage/subtitleMissed/"><img src="$sbRoot/images/menu/backlog16.png" alt="" width="16" height="16" />Missed Subtitle Management</a></li>
+                            #end if
                     </ul>
                 </li>                
                 <li id="NAVerrorlogs"><a href="$sbRoot/errorlogs/" class="log">$logPageTitle</a>
@@ -171,6 +194,7 @@
                             <li><a href="$sbRoot/config/general/"><img src="$sbRoot/images/menu/config16.png" alt="" width="16" height="16" />General</a></li>
                             <li><a href="$sbRoot/config/search/"><img src="$sbRoot/images/menu/config16.png" alt="" width="16" height="16" />Search Settings</a></li>
                             <li><a href="$sbRoot/config/providers/"><img src="$sbRoot/images/menu/config16.png" alt="" width="16" height="16" />Search Providers</a></li>
+                            <li><a href="$sbRoot/config/subtitles/"><img src="$sbRoot/images/menu/config16.png" alt="" width="16" height="16" />Subtitles Settings</a></li>
                             <li><a href="$sbRoot/config/postProcessing/"><img src="$sbRoot/images/menu/config16.png" alt="" width="16" height="16" />Post Processing</a></li>
                             <li><a href="$sbRoot/config/notifications/"><img src="$sbRoot/images/menu/config16.png" alt="" width="16" height="16" />Notifications</a></li>
                     </ul>

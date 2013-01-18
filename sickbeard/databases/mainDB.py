@@ -16,6 +16,8 @@
 # You should have received a copy of the GNU General Public License
 # along with Sick Beard.  If not, see <http://www.gnu.org/licenses/>.
 
+import datetime
+
 import sickbeard
 import os.path
 
@@ -117,6 +119,13 @@ class AddTvrName (AddTvrId):
 
     def execute(self):
         self.addColumn("tv_shows", "tvr_name", "TEXT", "")
+
+class AddImdbId (InitialSchema):
+    def test(self):
+        return self.hasColumn("tv_shows", "imdb_id")
+
+    def execute(self):
+        self.addColumn("tv_shows", "imdb_id", "TEXT", "")
 
 class AddAirdateIndex (AddTvrName):
     def test(self):
@@ -423,7 +432,7 @@ class AddSizeAndSceneNameFields(FixAirByDateSetting):
     
     def execute(self):
 
-        backupDatabase(10)
+        backupDatabase(11)
 
         if not self.hasColumn("tv_episodes", "file_size"):
             self.addColumn("tv_episodes", "file_size")
@@ -537,4 +546,25 @@ class RenameSeasonFolders(AddSizeAndSceneNameFields):
         self.connection.action("UPDATE tv_shows SET flatten_folders = 0 WHERE flatten_folders = 2")
         self.connection.action("DROP TABLE tmp_tv_shows")
 
+        self.incDBVersion()
+
+class AddSubtitlesSupport(RenameSeasonFolders):    
+    def test(self):
+        return self.checkDBVersion() >= 12
+
+    def execute(self):
+        
+        self.addColumn("tv_shows", "subtitles")
+        self.addColumn("tv_episodes", "subtitles", "TEXT", "")
+        self.addColumn("tv_episodes", "subtitles_searchcount")
+        self.addColumn("tv_episodes", "subtitles_lastsearch", "TIMESTAMP", str(datetime.datetime.min))
+        self.incDBVersion()
+   
+class AddIMDbInfo(RenameSeasonFolders):    
+    def test(self):
+        return self.checkDBVersion() >= 13
+
+    def execute(self):
+        
+        self.connection.action("CREATE TABLE imdb_info (tvdb_id INTEGER PRIMARY KEY, imdb_id TEXT, title TEXT, year NUMERIC, akas TEXT, runtimes NUMERIC, genres TEXT, countries TEXT, country_codes TEXT, certificates TEXT, rating TEXT, votes INTEGER, last_update NUMERIC)")
         self.incDBVersion()

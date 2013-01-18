@@ -116,12 +116,12 @@ def retrieve_exceptions():
             name_cache.clearCache()
         else:
             logger.log(u"No scene exceptions update needed")
-        
+                    
 def update_scene_exceptions(tvdb_id, scene_exceptions):
     """
     Given a tvdb_id, and a list of all show scene exceptions, update the db.
     """
-
+    
     myDB = db.DBConnection("cache.db")
     
     myDB.action('DELETE FROM scene_exceptions WHERE tvdb_id=?', [tvdb_id])

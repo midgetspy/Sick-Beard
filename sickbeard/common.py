@@ -37,10 +37,12 @@ SEASON_RESULT = -2
 ### Notification Types
 NOTIFY_SNATCH = 1
 NOTIFY_DOWNLOAD = 2
+NOTIFY_SUBTITLE_DOWNLOAD = 3
 
 notifyStrings = {}
 notifyStrings[NOTIFY_SNATCH] = "Started Download"
 notifyStrings[NOTIFY_DOWNLOAD] = "Download Finished"
+notifyStrings[NOTIFY_SUBTITLE_DOWNLOAD] = "Subtitle Download Finished"
 
 ### Episode statuses
 UNKNOWN = -1 # should never happen
@@ -52,6 +54,21 @@ SKIPPED = 5 # episodes we don't want
 ARCHIVED = 6 # episodes that you don't have locally (counts toward download completion stats)
 IGNORED = 7 # episodes that you don't want included in your download stats
 SNATCHED_PROPER = 9 # qualified with quality
+
+NAMING_REPEAT = 1
+NAMING_EXTEND = 2
+NAMING_DUPLICATE = 4
+NAMING_LIMITED_EXTEND = 8
+NAMING_SEPARATED_REPEAT = 16
+NAMING_LIMITED_EXTEND_E_PREFIXED = 32
+
+multiEpStrings = {}
+multiEpStrings[NAMING_REPEAT] = "Repeat"
+multiEpStrings[NAMING_SEPARATED_REPEAT] = "Repeat (Separated)"
+multiEpStrings[NAMING_DUPLICATE] = "Duplicate"
+multiEpStrings[NAMING_EXTEND] = "Extend"
+multiEpStrings[NAMING_LIMITED_EXTEND] = "Extend (Limited)"
+multiEpStrings[NAMING_LIMITED_EXTEND_E_PREFIXED] = "Extend (Limited, E-prefixed)"
 
 NAMING_REPEAT = 1
 NAMING_EXTEND = 2

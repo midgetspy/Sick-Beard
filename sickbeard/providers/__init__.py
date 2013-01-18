@@ -18,11 +18,8 @@
 
 __all__ = ['ezrss',
            'tvtorrents',
-           'nzbmatrix',
-           'nzbs_org_old',
            'nzbsrus',
            'womble',
-           'newzbin',
            'btn',
            'thepiratebay',
            'dtt',           
@@ -100,6 +97,7 @@ def makeNewznabProvider(configString):
 
 def getDefaultNewznabProviders():
     return 'Sick Beard Index|http://lolo.sickbeard.com/|0|0!!!NZBs.org|http://beta.nzbs.org/||0'
+
 
 def getProviderModule(name):
     name = name.lower()

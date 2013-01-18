@@ -39,7 +39,7 @@ formtowizard.prototype={
 		}	
 		var i=(rawi=="prev")? this.currentsection-1 : (rawi=="next")? this.currentsection+1 : parseInt(rawi) //get index of next section to show
 		i=(i<0)? this.sections.count-1 : (i>this.sections.count-1)? 0 : i //make sure i doesn't exceed min/max limit
-		if (this.currentsection!=i && i<this.sections.count && doload){ //if next section to show isn't the same as the current section shown
+		if (i<this.sections.count && doload){ //if next section to show isn't the same as the current section shown
 			this.$thesteps.eq(this.currentsection).addClass('disabledstep').end().eq(i).removeClass('disabledstep') //dull current "step" text then highlight next "step" text
 			if (this.setting.revealfx[0]=="slide"){
 				this.sections.$sections.css("visibility", "visible")
@@ -69,6 +69,7 @@ formtowizard.prototype={
 			if (this.setting.persistsection) //enable persistence?
 				formtowizard.routines.setCookie(this.setting.formid+"_persist", i)
 			this.currentsection=i
+			if(i === 0) { setTimeout(function() { $('#nameToSearch').focus(); }, 250); }
 		}
 	},
 
