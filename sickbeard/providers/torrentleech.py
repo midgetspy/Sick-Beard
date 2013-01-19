@@ -75,7 +75,7 @@ class TorrentLeechProvider(generic.TorrentProvider):
             cookiejar = cookielib.CookieJar()
             opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(cookiejar))
             urllib2.install_opener(opener)
-            logger.log(u"Logging into "+ self.urls['login'], logger.DEBUG)
+            logger.log(u"Logging into "+ self.urls['login'])
             f = opener.open(self.urls['login'], self.getLoginParams())
             f.read()
             f.close()
@@ -238,6 +238,22 @@ class TorrentLeechProvider(generic.TorrentProvider):
                     return []
 
                 html = BeautifulSoup(data)
+                
+                # Check if session ended and login required.
+                try:
+                    result_table = html.find('div', attrs = {'id' : 'login'})
+                    if result_table:
+
+                        if not self.login():
+                            return []
+                        
+                        data = self.getURL(searchURL)
+                        if not data:
+                            return []
+
+                        html = BeautifulSoup(data)
+                except:
+                    pass
 
                 try:
                     result_table = html.find('table', attrs = {'id' : 'torrenttable'})
