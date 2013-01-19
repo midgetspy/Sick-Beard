@@ -25,21 +25,6 @@ function initHeader() {
 }
 
 
-function initActions() {
-	$("#SubMenu a").button({ icons: { primary: "ui-icon-power" }  });
-	$("#SubMenu a.confirm").button({ icons: { primary: "ui-icon-power" }  });
-	$("#SubMenu a:contains('Edit')").button({ icons: { primary: "ui-icon-pencil" }  });
-	$("#SubMenu a:contains('Delete')").button({ icons: { primary: "ui-icon-trash" }  });
-	$("#SubMenu a:contains('Re-scan')").button({ icons: { primary: "ui-icon-refresh" }  });
-	$("#SubMenu a:contains('Force')").button({ icons: { primary: "ui-icon-transfer-e-w" }  });
-	$("#SubMenu a:contains('Rename')").button({ icons: { primary: "ui-icon-tag" }  });
-	$("#SubMenu a:contains('Subtitles')").button({ icons: { primary: "ui-icon-comment" }  });
-	$("#SubMenu a:contains('Restart')").button({ icons: { primary: "ui-icon-tag" }  });
-	$("#SubMenu a[href='/home/addShows/']").button({ icons: { primary: "ui-icon-video" }  });
-	$("#SubMenu a[href='/home/postprocess/']").button({ icons: { primary: "ui-icon-folder-open" }  });
-	$("#SubMenu a[href='/home/updatePLEX/']").button({ icons: { primary: "ui-icon-refresh" }  });
-}
-
 function showMsg(msg,loader,timeout,ms) {
 	var feedback = $("#ajaxMsg");
 	update = $("#updatebar");

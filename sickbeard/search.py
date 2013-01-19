@@ -28,7 +28,7 @@ from common import SNATCHED, Quality, SEASON_RESULT, MULTI_EP_RESULT
 from sickbeard import logger, db, show_name_helpers, exceptions, helpers
 from sickbeard import sab
 from sickbeard import nzbget
-from sickbeard import utorrent
+from utorrent import uTorrentAPI as utorrent
 from sickbeard import transmission
 from sickbeard import deluge
 from sickbeard import history
@@ -125,12 +125,13 @@ def snatchEpisode(result, endStatus=SNATCHED):
 
     # TORRENTs can be sent to Clients or saved to disk
     elif result.resultType == "torrent":
-        # torrents are always saved to disk
+        # torrents are saved to disk when blackhole mode
         if sickbeard.TORRENT_METHOD == "blackhole": 
             dlResult = _downloadResult(result)
         # torrents are sended to torrent client
         elif sickbeard.TORRENT_METHOD == "utorrent":
-            dlResult = utorrent.sendTORRENT(result)
+#            dlResult = utorrent.sendTORRENT(result)
+            dlResult = utorrent().sendTORRENT(result)   
         elif sickbeard.TORRENT_METHOD == "transmission":
             dlResult = transmission.sendTORRENT(result)
         elif sickbeard.TORRENT_METHOD == "deluge":

@@ -876,7 +876,7 @@ class PostProcessor(object):
         history.logDownload(ep_obj, self.file_path, new_ep_quality, self.release_group)
 
         # send notifications
-        notifiers.notify_download(ep_obj.curEpObj._format_pattern('%SN - %Sx%0E - %EN - %QN'))
+        notifiers.notify_download(ep_obj._format_pattern('%SN - %Sx%0E - %EN - %QN'))
 
         # generate nfo/tbn
         ep_obj.createMetaFiles()
