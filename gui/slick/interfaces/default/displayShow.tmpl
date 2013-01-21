@@ -43,15 +43,19 @@
 <div class="showInfo">
 <h1 class="title"><a>$show.name</a></h1>
 <span class="headerInfo" style="color: #b7b7b7; line-height: 16px;">
-#if $show.imdb_info == {}
+#if not $show.imdbid
 	($show.startyear) - $show.runtime min - $show.genre[1:-1].replace('|',' | ')
+	<span class="tvshowLink" style="vertical-align: text-top">
+		<a href="http://www.thetvdb.com/?tab=series&amp;id=$show.tvdbid" onclick="window.open(this.href, '_blank'); return false;" title="http://www.thetvdb.com/?tab=series&amp;id=$show.tvdbid"><img alt="[tvdb]" height="16" width="16" src="$sbRoot/images/thetvdb16.png" style="margin-top: -1px;"/></a>
+	</span>
 #else
 	<img src="$sbRoot/images/flags/${$show.imdb_info['country_codes']}.png" width="16" height="11" style="margin-top: 3px; margin-left: 3px" /> ($show.imdb_info['year']) - $show.imdb_info['runtimes'] min - $show.imdb_info['genres'].replace('|',' | ')
-#end if
 	<span class="tvshowLink" style="vertical-align: text-top">
 		<a href="http://www.imdb.com/title/$show.imdbid" onclick="window.open(this.href, '_blank'); return false;" title="http://www.imdb.com/title/$show.imdbid"><img alt="[imdb]" height="16" width="16" src="$sbRoot/images/imdb.png" style="margin-top: -1px;"/>
 		<a href="http://www.thetvdb.com/?tab=series&amp;id=$show.tvdbid" onclick="window.open(this.href, '_blank'); return false;" title="http://www.thetvdb.com/?tab=series&amp;id=$show.tvdbid"><img alt="[tvdb]" height="16" width="16" src="$sbRoot/images/thetvdb16.png" style="margin-top: -1px;"/></a>
 	</span>
+
+#end if
 </span> 
 
 ##There is a special/season_0?## 
