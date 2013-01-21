@@ -709,55 +709,57 @@ class TVShow(object):
                      'last_update': ''
                      }
         
-        logger.log(str(self.tvdbid) + ": Loading show info from IMDb")
-
-        i = imdb.IMDb()
-        imdbTv = i.get_movie(str(self.imdbid[2:]))
+        if self.imdbid:
         
-        for key in filter(lambda x: x in imdbTv.keys(), imdb_info.keys()):
-            # Store only the first value for string type
-            if type(imdb_info[key]) == type('') and type(imdbTv.get(key)) == type([]):
-                imdb_info[key] = imdbTv.get(key)[0]
-            else:
-                imdb_info[key] = imdbTv.get(key)
-        
-        #Filter only the value
-        if imdb_info['runtimes']:   
-            imdb_info['runtimes'] = re.search('\d+',imdb_info['runtimes']).group(0)   
-        else:
-            imdb_info['runtimes'] = self.runtime    
-
-        if imdb_info['akas']:
-            imdb_info['akas'] = '|'.join(imdb_info['akas'])
-        else:
-            imdb_info['akas'] = ''    
-        
-        #Join all genres in a string
-        if imdb_info['genres']:
-            imdb_info['genres'] = '|'.join(imdb_info['genres'])
-        else:
-            imdb_info['genres'] = ''    
+            logger.log(str(self.tvdbid) + ": Loading show info from IMDb")
+    
+            i = imdb.IMDb()
+            imdbTv = i.get_movie(str(self.imdbid[2:]))
             
-        #Get only the production country certificate if any 
-        if imdb_info['certificates'] and imdb_info['countries']:
-            dct = {}
-            for item in imdb_info['certificates']:
-                dct[item.split(':')[0]] = item.split(':')[1]
-
-            try:
-                imdb_info['certificates'] = dct[imdb_info['countries']]
-            except KeyError:
-                imdb_info['certificates'] = ''    
-
-        else:
-            imdb_info['certificates'] = ''       
-        
-        imdb_info['last_update'] = datetime.date.today().toordinal()
-        
-        #Rename dict keys without spaces for DB upsert
-        self.imdb_info = dict((k.replace(' ', '_'),f(v) if hasattr(v,'keys') else v) for k,v in imdb_info.items())
-
-        logger.log(str(self.tvdbid) + ": Obtained info from IMDb ->" +  str(self.imdb_info), logger.DEBUG)
+            for key in filter(lambda x: x in imdbTv.keys(), imdb_info.keys()):
+                # Store only the first value for string type
+                if type(imdb_info[key]) == type('') and type(imdbTv.get(key)) == type([]):
+                    imdb_info[key] = imdbTv.get(key)[0]
+                else:
+                    imdb_info[key] = imdbTv.get(key)
+            
+            #Filter only the value
+            if imdb_info['runtimes']:   
+                imdb_info['runtimes'] = re.search('\d+',imdb_info['runtimes']).group(0)   
+            else:
+                imdb_info['runtimes'] = self.runtime    
+    
+            if imdb_info['akas']:
+                imdb_info['akas'] = '|'.join(imdb_info['akas'])
+            else:
+                imdb_info['akas'] = ''    
+            
+            #Join all genres in a string
+            if imdb_info['genres']:
+                imdb_info['genres'] = '|'.join(imdb_info['genres'])
+            else:
+                imdb_info['genres'] = ''    
+                
+            #Get only the production country certificate if any 
+            if imdb_info['certificates'] and imdb_info['countries']:
+                dct = {}
+                for item in imdb_info['certificates']:
+                    dct[item.split(':')[0]] = item.split(':')[1]
+    
+                try:
+                    imdb_info['certificates'] = dct[imdb_info['countries']]
+                except KeyError:
+                    imdb_info['certificates'] = ''    
+    
+            else:
+                imdb_info['certificates'] = ''       
+            
+            imdb_info['last_update'] = datetime.date.today().toordinal()
+            
+            #Rename dict keys without spaces for DB upsert
+            self.imdb_info = dict((k.replace(' ', '_'),f(v) if hasattr(v,'keys') else v) for k,v in imdb_info.items())
+    
+            logger.log(str(self.tvdbid) + ": Obtained info from IMDb ->" +  str(self.imdb_info), logger.DEBUG)
         
     def loadNFO (self):
 
