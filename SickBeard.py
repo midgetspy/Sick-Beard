@@ -138,6 +138,8 @@ def main():
     if not sickbeard.SYS_ENCODING or sickbeard.SYS_ENCODING in ('ANSI_X3.4-1968', 'US-ASCII', 'ASCII'):
         sickbeard.SYS_ENCODING = 'UTF-8'
 
+    logger.log(u"sys.getdefaultencoding: '{0}'  sickbeard.SYS_ENCODING: '{1}'".format(sys.getdefaultencoding(), sickbeard.SYS_ENCODING), logger.ERROR)
+
     # need console logging for SickBeard.py and SickBeard-console.exe
     consoleLogging = (not hasattr(sys, "frozen")) or (sickbeard.MY_NAME.lower().find('-console') > 0)
 
