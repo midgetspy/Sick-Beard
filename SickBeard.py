@@ -151,6 +151,7 @@ def main():
 
     if not hasattr(sys, "setdefaultencoding"):
         reload(sys)
+    
 
     try:
         # pylint: disable=E1101
@@ -160,6 +161,8 @@ def main():
         print 'Sorry, you MUST add the Sick Beard folder to the PYTHONPATH environment variable'
         print 'or find another way to force Python to use ' + sickbeard.SYS_ENCODING + ' for string encoding.'
         sys.exit(1)
+        
+    logger.log(u"sys.getdefaultencoding: '{0}'  sickbeard.SYS_ENCODING: '{1}'".format(sys.getdefaultencoding(), sickbeard.SYS_ENCODING), logger.ERROR)
 
     # Need console logging for SickBeard.py and SickBeard-console.exe
     consoleLogging = (not hasattr(sys, "frozen")) or (sickbeard.MY_NAME.lower().find('-console') > 0)
