@@ -236,6 +236,7 @@ def updateAirDates(tvdbid, showname):
 		session.merge(ins)
 		logger.log(u"Next AirDates update: {0}".format(next), logger.ERROR)
 		updateSlugs(tvdbid, showname)
+		fsGetDates(tvdbid, showname)
 	# if result and result.nextupdate >= now.toordinal():
 	# 	logger.log(u"Next AirDates update: {0}".format(date.fromordinal(result.nextupdate)), logger.ERROR)
 	if result and result.nextupdate <= time.mktime(now.timetuple()):
@@ -261,7 +262,7 @@ def getEpInfo(tvdbid, season, episode, showname):
 
 	if not result:
 		updateAirDates(tvdbid, showname)
-		fsGetDates(tvdbid, showname)
+		#fsGetDates(tvdbid, showname)
 		#sjGetDates(tvdbid, showname)
 
 	elif not result.firstaired:
