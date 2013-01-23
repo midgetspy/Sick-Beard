@@ -246,7 +246,7 @@ $epLoc
 #end if
 #set $curStatus, $curQuality = $Quality.splitCompositeStatus(int($epResult["status"]))
 #if $curQuality != Quality.NONE:   
-    <td class="status_column">$statusStrings[$curStatus] <span class="quality $Quality.qualityStrings[$curQuality]">$Quality.qualityStrings[$curQuality]</span></td>
+    <td class="status_column">$statusStrings[$curStatus] <span class="quality $Quality.qualityStrings[$curQuality].replace("720p","HD720p").replace("1080p","HD1080p").replace("RawHD TV", "RawHD").replace("HD TV", "HD720p")">$Quality.qualityStrings[$curQuality]</span></td>
 #else:    
     <td class="status_column">$statusStrings[$curStatus]</td>
 #end if
