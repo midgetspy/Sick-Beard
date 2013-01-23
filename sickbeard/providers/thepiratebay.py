@@ -82,8 +82,14 @@ class ThePirateBayProvider(generic.TorrentProvider):
             quality_string = 'HDTV x264'
         elif quality == Quality.HDTV:    
             quality_string = '720p HDTV x264'
+        elif quality == Quality.RAWHDTV:
+            quality_string = '720p HDTV mpeg2'
+        elif quality == Quality.FULLHDTV:
+            quality_string = '1080p HDTV x264'        
         elif quality == Quality.HDWEBDL:
             quality_string = '720p WEB-DL'
+        elif quality == Quality.FULLHDWEBDL:
+            quality_string = '1080p WEB-DL'            
         elif quality == Quality.HDBLURAY:
             quality_string = '720p Bluray x264'
         elif quality == Quality.FULLHDBLURAY:
