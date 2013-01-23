@@ -987,34 +987,43 @@ span.quality {
   border-radius: 4px;
 }
 span.Custom {
-  background: none repeat scroll 0 0 #444499;
-  /* blue */
-
+  background: none repeat scroll 0 0 #449;
+  /* purplish blue */
 }
 
-span.HD,
-span.WEB-DL,
-span.BluRay {
-  background: none repeat scroll 0 0 #449944;
-  /* green */
+span.HD {
+  background: none repeat scroll 0 0 #008fbb;
+  /* greenish blue */
+}
 
+span.HD720p {
+  background: none repeat scroll 0 0 #494;
+  /* green */
+}
+
+span.HD1080p {
+  background: none repeat scroll 0 0 #499;
+  /* blue */
+}
+
+span.RawHD {
+  background: none repeat scroll 0 0 #999944;
+  /* dark orange */
 }
 
 span.SD {
-  background: none repeat scroll 0 0 #994444;
+  background: none repeat scroll 0 0 #944;
   /* red */
-
 }
-span.Any {
-  background: none repeat scroll 0 0 #444444;
-  /* black */
 
+span.Any {
+  background: none repeat scroll 0 0 #444;
+  /* black */
 }
 
 span.Proper {
   background: none repeat scroll 0 0 #CD7300;
-  /* red */
-
+  /* orange_red */
 }
 
 span.false {

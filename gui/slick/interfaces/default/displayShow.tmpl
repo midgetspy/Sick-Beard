@@ -128,10 +128,10 @@
 <span class="quality $qualityPresetStrings[$show.quality]">$qualityPresetStrings[$show.quality]</span>
 #else:
 #if $anyQualities:
-<i>Initial:</i> <b><%=", ".join([Quality.qualityStrings[x] for x in anyQualities])%></b> #if $bestQualities then " </br> " else ""#
+<i>Initial:</i> <b><%=", ".join([Quality.qualityStrings[x] for x in sorted(anyQualities)])%></b> #if $bestQualities then " </br> " else ""#
 #end if
 #if $bestQualities:
-<i>Replace with:</i> <b><%=", ".join([Quality.qualityStrings[x] for x in bestQualities])%></b>
+<i>Replace with:</i> <b><%=", ".join([Quality.qualityStrings[x] for x in sorted(bestQualities)])%></b>
 #end if
 #end if
 
@@ -157,14 +157,13 @@
 
 #set $curSeason = -1
 #set $odd = 0
-$Quality.DOWNLOADED.sort()
 
 <div style="clear:both;" class="clearfix"></div>
 
 <div class="float-left">
 	Change selected episodes to 
 	<select id="statusSelect">
-		#for $curStatus in [$WANTED, $SKIPPED, $ARCHIVED, $IGNORED] + $Quality.DOWNLOADED:
+		#for $curStatus in [$WANTED, $SKIPPED, $ARCHIVED, $IGNORED] + sorted($Quality.DOWNLOADED):
 		#if $curStatus == $DOWNLOADED:
 		#continue
 		#end if
