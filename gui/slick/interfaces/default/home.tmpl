@@ -189,11 +189,11 @@ $myShowList.sort(lambda x, y: cmp(x.name, y.name))
 	    </td>
     #end if
     <!--<td align="center">$curShow.network</td>//-->
-    <td align="center">
+    <td align="center" style="color: #555555;font-weight:bold;">
         #if $curShow.network:
-        	<img id="network" width="44.8" height="22.4" src="/images/network/${curShow.network.lower()}.png" alt="$curShow.network" title="$curShow.network">
+        	<img id="network" width="44.8" height="22.4" src="$sbRoot/images/network/${curShow.network.lower()}.png" alt="$curShow.network" title="$curShow.network">
     	#else:
-    		<img id="network" width="44.8" height="22.4" src="/images/network/nonetwork.png" alt="No Network" title="No Network">
+    		<img id="network" width="44.8" height="22.4" src="$sbRoot/images/network/nonetwork.png" alt="No Network" title="No Network">
 		#end if
     </td>
     
