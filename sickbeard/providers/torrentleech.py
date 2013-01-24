@@ -75,7 +75,7 @@ class TorrentLeechProvider(generic.TorrentProvider):
             cookiejar = cookielib.CookieJar()
             opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(cookiejar))
             urllib2.install_opener(opener)
-            logger.log(u"Logging into "+ self.urls['login'])
+            logger.log(u"Logging into "+ self.urls['login'], logger.DEBUG)
             f = opener.open(self.urls['login'], self.getLoginParams())
             f.read()
             f.close()
