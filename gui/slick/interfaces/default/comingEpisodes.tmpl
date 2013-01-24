@@ -66,6 +66,7 @@
         widgets: ['stickyHeaders'],
         sortList: sortList,
         textExtraction: {
+            4: function(node) { return \$(node).find("img").attr("alt"); },
             5: function(node) { return \$(node).find("span").text().toLowerCase(); }
         },
         headers: {
@@ -76,11 +77,17 @@
             4: { sorter: 'loadingNames' },
             5: { sorter: 'quality' },
             6: { sorter: false },
-            7: { sorter: false }
+            7: { sorter: false },
+            8: { sorter: false }
         }
     });
 
     \$('#sbRoot').ajaxEpSearch();
+
+    \$("img#network").on('error', function(){
+    	\$(this).parent().text(\$(this).attr('alt'));
+    	\$(this).remove();
+    });
 
 });
 //-->
