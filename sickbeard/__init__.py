@@ -30,7 +30,7 @@ from threading import Lock
 
 # apparently py2exe won't build these unless they're imported somewhere
 from sickbeard import providers, metadata
-from providers import ezrss, tvtorrents, btn, nzbsrus, newznab, womble
+from providers import ezrss, tvtorrents, btn, nzbsrus, newznab, womble, nzbx
 from sickbeard.config import CheckSection, check_setting_int, check_setting_str, ConfigMigrator
 
 from sickbeard import searchCurrent, searchBacklog, showUpdater, versionChecker, properFinder, autoPostProcesser
@@ -176,6 +176,9 @@ NZBS_UID = None
 NZBS_HASH = None
 
 WOMBLE = False
+
+NZBX = False
+NZBX_COMPLETION = 100
 
 NZBSRUS = False
 NZBSRUS_UID = None
@@ -329,7 +332,7 @@ def initialize(consoleLogging=True):
                 showQueueScheduler, searchQueueScheduler, ROOT_DIRS, CACHE_DIR, ACTUAL_CACHE_DIR, TVDB_API_PARMS, \
                 NAMING_PATTERN, NAMING_MULTI_EP, NAMING_FORCE_FOLDERS, NAMING_ABD_PATTERN, NAMING_CUSTOM_ABD, \
                 RENAME_EPISODES, properFinderScheduler, PROVIDER_ORDER, autoPostProcesserScheduler, \
-                NZBSRUS, NZBSRUS_UID, NZBSRUS_HASH, WOMBLE, providerList, newznabProviderList, \
+                NZBSRUS, NZBSRUS_UID, NZBSRUS_HASH, WOMBLE, NZBX, NZBX_COMPLETION, providerList, newznabProviderList, \
                 EXTRA_SCRIPTS, USE_TWITTER, TWITTER_USERNAME, TWITTER_PASSWORD, TWITTER_PREFIX, \
                 USE_NOTIFO, NOTIFO_USERNAME, NOTIFO_APISECRET, NOTIFO_NOTIFY_ONDOWNLOAD, NOTIFO_NOTIFY_ONSNATCH, \
                 USE_BOXCAR, BOXCAR_USERNAME, BOXCAR_PASSWORD, BOXCAR_NOTIFY_ONDOWNLOAD, BOXCAR_NOTIFY_ONSNATCH, \
@@ -556,6 +559,10 @@ def initialize(consoleLogging=True):
 
         CheckSection(CFG, 'Womble')
         WOMBLE = bool(check_setting_int(CFG, 'Womble', 'womble', 1))
+
+        CheckSection(CFG, 'nzbX')
+        NZBX = bool(check_setting_int(CFG, 'nzbX', 'nzbx', 0))
+        NZBX_COMPLETION = check_setting_int(CFG, 'nzbX', 'nzbx_completion', 100)
 
         CheckSection(CFG, 'SABnzbd')
         SAB_USERNAME = check_setting_str(CFG, 'SABnzbd', 'sab_username', '')
@@ -1029,6 +1036,10 @@ def save_config():
 
     new_config['Womble'] = {}
     new_config['Womble']['womble'] = int(WOMBLE)
+
+    new_config['nzbX'] = {}
+    new_config['nzbX']['nzbx'] = int(NZBX)
+    new_config['nzbX']['nzbx_completion'] = int(NZBX_COMPLETION)
 
     new_config['SABnzbd'] = {}
     new_config['SABnzbd']['sab_username'] = SAB_USERNAME
