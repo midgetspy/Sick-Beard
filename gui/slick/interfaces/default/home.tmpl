@@ -40,7 +40,7 @@
         return false;
     },
     format: function(s) { 
-        return s.replace('hd1080p',5).replace('hd720p',4).replace('hd',3).replace('sd',2).replace('any',1).replace('best',0).replace('custom',7);
+        return s.replace('HD1080p',5).replace('HD720p',4).replace('HD',3).replace('SD',2).replace('Any',1).replace('Best',0).replace('Custom',7);
     },
     type: 'numeric'
 });
@@ -72,6 +72,11 @@
 
 \$(document).ready(function(){ 
 
+    \$("img#network").on('error', function(){
+    	\$(this).parent().text(\$(this).attr('alt'));
+    	\$(this).remove();
+    });
+
     \$("#showListTable:has(tbody tr)").tablesorter({
 	
 	        sortList: [[6,0],[2,0]],
@@ -91,6 +96,7 @@
     });
 
 });
+
 //-->
 </script>
 
@@ -103,7 +109,8 @@
 <div id="HomeLayout" style="float: right; margin-top: -25px;">
 	<span><b>Layout:</b>
 		<a class="inner" href="$sbRoot/setHomeLayout/?layout=poster" style="font-size: 12px;">Poster</a> &middot;
-		<a class="inner" href="$sbRoot/setHomeLayout/?layout=banner" style="font-size: 12px;">Banner</a>
+		<a class="inner" href="$sbRoot/setHomeLayout/?layout=banner" style="font-size: 12px;">Banner</a> &middot;
+		<a class="inner" href="$sbRoot/setHomeLayout/?layout=simple" style="font-size: 12px;">Simple</a>
 	</span>
 </div>
 
@@ -178,7 +185,7 @@ $myShowList.sort(lambda x, y: cmp(x.name, y.name))
 	    	</div>
 	    </td>
     	<td class="tvShow"><a href="$sbRoot/home/displayShow?show=$curShow.tvdbid">$curShow.name</a></td>
-	#else:
+	#else if $layout == 'banner':
     	<td style="display: none;"/>
 	    <td>
 	    	<span style="display: none;">$curShow.name</span>
@@ -187,14 +194,21 @@ $myShowList.sort(lambda x, y: cmp(x.name, y.name))
 	    		<img src="$sbRoot/showPoster/?show=$curShow.tvdbid&amp;which=$which_thumb" class="$layout" alt="$curShow.tvdbid" title="$curShow.name"/>
 	    	</div>
 	    </td>
+	#else if $layout == 'simple':
+	    <td style="display: none;"/>
+	    <td class="tvShow"><a href="$sbRoot/home/displayShow?show=$curShow.tvdbid">$curShow.name</a></td>
     #end if
     <!--<td align="center">$curShow.network</td>//-->
     <td align="center" style="color: #555555;font-weight:bold;">
+    #if $layout != 'simple':	
         #if $curShow.network:
-        	<img id="network" width="44.8" height="22.4" src="$sbRoot/images/network/${curShow.network.lower()}.png" alt="$curShow.network" title="$curShow.network">
+        	<img id="network" width="44.8" height="22.4" src="$sbRoot/images/network/${curShow.network.lower()}.png" alt="$curShow.network" title="$curShow.network" />
     	#else:
-    		<img id="network" width="44.8" height="22.4" src="$sbRoot/images/network/nonetwork.png" alt="No Network" title="No Network">
+    		<img id="network" width="44.8" height="22.4" src="$sbRoot/images/network/nonetwork.png" alt="No Network" title="No Network" />
 		#end if
+	#else:
+		$curShow.network
+	#end if		
     </td>
     
 #if $curShow.quality in $qualityPresets:

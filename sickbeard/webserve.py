@@ -3259,7 +3259,7 @@ class WebInterface:
     @cherrypy.expose
     def setHomeLayout(self, layout):
 
-        if layout not in ('poster', 'banner'):
+        if layout not in ('poster', 'banner', 'simple'):
             layout = 'poster'
 
         sickbeard.HOME_LAYOUT = layout
