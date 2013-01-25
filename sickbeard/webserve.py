@@ -1228,6 +1228,7 @@ class ConfigProviders:
                       btn_api_key=None,
                       dtt_norar = None, dtt_single = None,
                       thepiratebay_trusted=None, thepiratebay_proxy=None, thepiratebay_proxy_url=None,
+                      torrentleech_username=None, torrentleech_password=None,
                       newzbin_username=None, newzbin_password=None,
                       provider_order=None):
 
@@ -1298,7 +1299,9 @@ class ConfigProviders:
             elif curProvider == 'dailytvtorrents':
                 sickbeard.DTT = curEnabled                
             elif curProvider == 'thepiratebay':
-                sickbeard.THEPIRATEBAY = curEnabled                   
+                sickbeard.THEPIRATEBAY = curEnabled
+            elif curProvider == 'torrentleech':
+                sickbeard.TORRENTLEECH = curEnabled
             else:
                 logger.log(u"don't know what "+curProvider+" is, skipping")
 
@@ -1336,6 +1339,9 @@ class ConfigProviders:
             sickbeard.THEPIRATEBAY_PROXY_URL = ""
             
         sickbeard.THEPIRATEBAY_PROXY = thepiratebay_proxy    
+
+        sickbeard.TORRENTLEECH_USERNAME = torrentleech_username
+        sickbeard.TORRENTLEECH_PASSWORD = torrentleech_password
 
         sickbeard.NZBSRUS_UID = nzbs_r_us_uid.strip()
         sickbeard.NZBSRUS_HASH = nzbs_r_us_hash.strip()

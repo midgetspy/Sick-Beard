@@ -104,6 +104,12 @@ def snatchEpisode(result, endStatus=SNATCHED):
     result: SearchResult instance to be snatched.
     endStatus: the episode status that should be used for the episode object once it's snatched.
     """
+    
+    # verify result (URL is still valid)
+    resultValid = result.provider.verifyResult(result)
+    if resultValid == False:
+        logger.log(u"Provider " + result.provider.name + " marked result as invalid.", logger.ERROR)
+        return False
 
     # NZBs can be sent straight to SAB or saved to disk
     if result.resultType in ("nzb", "nzbdata"):

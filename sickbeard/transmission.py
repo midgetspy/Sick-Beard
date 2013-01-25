@@ -29,6 +29,7 @@ import sickbeard
 from sickbeard import logger
 from sickbeard.exceptions import ex
 from urlparse import urlparse
+from base64 import b64encode
 
 class TransmissionRPC(object):
     """TransmissionRPC lite library"""
@@ -99,6 +100,15 @@ class TransmissionRPC(object):
         }
         return self._request(post_data)
 
+    def add_torrent_file(self, torrent, arguments={}):
+        arguments["metainfo"] = torrent
+        post_data = {
+            'arguments': arguments,
+            'method': 'torrent-add',
+            'tag': self.tag
+        }
+        return self._request(post_data)
+
     def set_torrent(self, id, arguments={}):
         arguments["ids"] = id
         post_data = {
@@ -125,8 +135,7 @@ def sendTORRENT(torrent):
 
     if not (ratio == ''):
         change_params['seedRatioLimit'] = ratio
-    else:
-        change_params['seedRatioMode'] = 1
+        change_params['seedRatioMode'] = 0
 
     if not (paused == ''):
         params['paused'] = 0
@@ -136,7 +145,10 @@ def sendTORRENT(torrent):
 
     try:
         tc = TransmissionRPC(host.hostname, host.port, sickbeard.TORRENT_USERNAME, sickbeard.TORRENT_PASSWORD)
-        torrent = tc.add_torrent(torrent.url, arguments=params)
+        if torrent.content == None:
+            torrent = tc.add_torrent(torrent.url, arguments=params)
+        else:
+            torrent = tc.add_torrent_file(b64encode(torrent.content), arguments=params)
         tc.set_torrent(torrent["torrent-added"]["hashString"], change_params)
         return True
     except Exception, e:

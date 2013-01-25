@@ -23,6 +23,7 @@ __all__ = ['ezrss',
            'btn',
            'thepiratebay',
            'dtt',           
+           'torrentleech',
            ]
 
 import sickbeard
