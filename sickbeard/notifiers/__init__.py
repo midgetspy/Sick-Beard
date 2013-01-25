@@ -34,6 +34,7 @@ import nma
 
 import tweet
 import trakt
+import emailnotify
 
 from sickbeard.common import *
 
@@ -54,6 +55,7 @@ nma_notifier = nma.NMA_Notifier()
 # online
 twitter_notifier = tweet.TwitterNotifier()
 trakt_notifier = trakt.TraktNotifier()
+email_notifier = emailnotify.EmailNotifier()
 
 notifiers = [
     libnotify_notifier, # Libnotify notifier goes first because it doesn't involve blocking on network activity.
@@ -70,6 +72,7 @@ notifiers = [
     nma_notifier,
     twitter_notifier,
     trakt_notifier,
+    email_notifier,
 ]
 
 
