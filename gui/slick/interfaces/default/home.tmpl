@@ -72,6 +72,11 @@
 
 \$(document).ready(function(){ 
 
+    \$("img#network").on('error', function(){
+    	\$(this).parent().text(\$(this).attr('alt'));
+    	\$(this).remove();
+    });
+
     \$("#showListTable:has(tbody tr)").tablesorter({
 	
 	        sortList: [[6,0],[2,0]],
