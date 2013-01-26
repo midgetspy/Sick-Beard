@@ -209,8 +209,6 @@ class NyaaProvider(generic.TorrentProvider):
             result.url = url
             result.name = title
             result.quality = quality
-            result.provider = self
-            result.content = None
 
             results.append(result)
 

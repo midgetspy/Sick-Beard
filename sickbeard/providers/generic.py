@@ -271,8 +271,6 @@ class GenericProvider:
             result.url = url
             result.name = title
             result.quality = quality
-            result.provider = self
-            result.content = None
 
             results.append(result)
 
@@ -349,8 +347,6 @@ class GenericProvider:
             result.url = url
             result.name = title
             result.quality = quality
-            result.provider = self
-            result.content = None
 
             if len(epObj) == 1:
                 epNum = epObj[0].episode
@@ -376,8 +372,6 @@ class GenericProvider:
 
         return [classes.Proper(x['name'], x['url'], datetime.datetime.fromtimestamp(x['time'])) for x in results]
 
-    def verifyResult(self, result):
-        return True
 
 class NZBProvider(GenericProvider):
 
