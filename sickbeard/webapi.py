@@ -681,6 +681,68 @@ class CMD_Help(ApiCall):
         else:
             out = _responds(RESULT_FAILURE, msg="No such cmd")
         return out
+        
+class CMD_EpisodesSearch(ApiCall):
+    _help = { "desc" : "display episodes between two dates", 
+    		  "requiredParameters" : { "start" : { "desc" : "start date for the search  (YYYY-MM-DD)" }, "end" : { "desc" : "end date for the search (YYYY-MM-DD)" } },	
+    		  "optionalParameters" : { "tvdbid" : { "desc" : "tvdbid unique show id" }, 
+    		                           "sort" : { "desc" : "TV episodes sorted by date|show|network" }, 
+    		                           "paused": {"desc": "0 to exclude paused shows, 1 to include them, or omitted to use the SB default"} } }
+	
+    def __init__(self, args, kwargs):
+        # required
+        self.startDate, args = self.check_params(args, kwargs, "start", None, True, "date", [])
+        self.endDate, args = self.check_params(args, kwargs, "end", None, True, "date", [])
+        # optional
+        self.sort, args = self.check_params(args, kwargs, "sort", "date", False, "string", ["date", "show", "network"])
+        self.paused, args = self.check_params(args, kwargs, "paused", sickbeard.COMING_EPS_DISPLAY_PAUSED, False, "int", [0, 1])
+        self.tvdbid, args = self.check_params(args, kwargs, "tvdbid", None, False, "int", [])
+        # super, missing, help
+        ApiCall.__init__(self, args, kwargs)
+        
+    def run(self):
+        """ display the episodes between two dates """
+        
+        searchStartDate = datetime.datetime.strptime(self.startDate, dateFormat).toordinal()
+        searchEndDate = datetime.datetime.strptime(self.endDate, dateFormat).toordinal()
+        
+        sorts = {
+            'date': (lambda x, y: cmp(int(x["airdate"]), int(y["airdate"]))),
+            'show': (lambda a, b: cmp(a["show_name"], b["show_name"])),
+            'network': (lambda a, b: cmp(a["network"], b["network"])),
+        }
+        
+        myDB = db.DBConnection(row_type="dict")
+        
+        if not self.tvdbid:
+            sql_results = myDB.select("SELECT airdate, airs, episode, name AS 'ep_name', description AS 'ep_plot', network, season, showid AS 'tvdbid', show_name, tv_shows.quality AS quality, tv_shows.status AS 'show_status', tv_shows.paused AS 'paused' FROM tv_episodes, tv_shows WHERE season != 0 AND airdate >= ? AND airdate < ? AND tv_shows.tvdb_id = tv_episodes.showid", [searchStartDate, searchEndDate])
+        else:
+            sql_results = myDB.select("SELECT airdate, airs, episode, name AS 'ep_name', description AS 'ep_plot', network, season, showid AS 'tvdbid', show_name, tv_shows.quality AS quality, tv_shows.status AS 'show_status', tv_shows.paused AS 'paused' FROM tv_episodes, tv_shows WHERE season != 0 AND airdate >= ? AND airdate < ? AND tv_shows.tvdb_id = tv_episodes.showid AND showid = ?", [searchStartDate, searchEndDate, self.tvdbid])            
+        
+        done_show_list = []
+        
+        sql_results.sort(sorts[self.sort])
+
+        for ep in sql_results:
+            if ep["paused"] and not self.paused:
+                continue
+
+            ordinalAirdate = int(ep["airdate"])
+            
+            if not ep["network"]:
+                ep["network"] = ""
+            
+            ep["airdate"] = _ordinal_to_dateForm(ordinalAirdate)
+            ep["quality"] = _get_quality_string(ep["quality"])
+            ep["airs"] = str(ep["airs"]).replace('am', ' AM').replace('pm', ' PM').replace('  ', ' ')
+            ep["weekday"] = 1 + datetime.date.fromordinal(ordinalAirdate).weekday()
+
+            done_show_list.append(ep)
+            
+        myDB.connection.close()        
+        
+        return _responds(RESULT_SUCCESS, done_show_list)
+        
 
 
 class CMD_ComingEpisodes(ApiCall):
@@ -2420,6 +2482,7 @@ class CMD_ShowsStats(ApiCall):
 # this is reserved for cmd namspaces used while cmd chaining
 _functionMaper = {"help": CMD_Help,
                   "future": CMD_ComingEpisodes,
+                  "episode.search": CMD_EpisodeSearch,                  
                   "episode": CMD_Episode,
                   "episode.search": CMD_EpisodeSearch,
                   "episode.setstatus": CMD_EpisodeSetStatus,
