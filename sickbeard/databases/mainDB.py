@@ -675,4 +675,12 @@ class Add1080pAndRawHDQualities(AddIMDbInfo):
         for cur_entry in historyQuality:
             self.connection.action("UPDATE history SET quality = ? WHERE showid = ? AND date = ?", [self._update_quality(cur_entry["quality"]), cur_entry["showid"], cur_entry["date"]])
 
-        self.incDBVersion()        
+        self.incDBVersion()
+        
+class AddProperNamingSupport(AddIMDbInfo):    
+    def test(self):
+        return self.checkDBVersion() >= 15
+
+    def execute(self):
+        self.addColumn("tv_episodes", "is_proper")
+        self.incDBVersion()

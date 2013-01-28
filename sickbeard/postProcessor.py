@@ -825,6 +825,8 @@ class PostProcessor(object):
 
                 cur_ep.status = common.Quality.compositeStatus(common.DOWNLOADED, new_ep_quality)
 
+                cur_ep.is_proper = self.is_proper
+                
                 cur_ep.saveToDB()
 
         # find the destination folder
