@@ -31,7 +31,7 @@ logger = logging.getLogger("subliminal")
 
 class Podnapisi(ServiceBase):
     server_url = 'http://ssp.podnapisi.net:8000'
-    site_url = 'http://podnapisi.net'
+    site_url = 'http://www.podnapisi.net'
     api_based = True
     languages = language_set(['ar', 'be', 'bg', 'bs', 'ca', 'ca', 'cs', 'da', 'de', 'el', 'en',
                               'es', 'et', 'fa', 'fi', 'fr', 'ga', 'he', 'hi', 'hr', 'hu', 'id',

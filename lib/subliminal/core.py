@@ -16,11 +16,11 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with subliminal.  If not, see <http://www.gnu.org/licenses/>.
 from .exceptions import DownloadFailedError
-from .language import Language, language_set, LANGUAGES
 from .services import ServiceConfig
 from .tasks import DownloadTask, ListTask
 from .utils import get_keywords
 from .videos import Episode, Movie, scan
+from .language import Language
 from collections import defaultdict
 from itertools import groupby
 import bs4
@@ -29,37 +29,11 @@ import logging
 
 
 __all__ = ['SERVICES', 'LANGUAGE_INDEX', 'SERVICE_INDEX', 'SERVICE_CONFIDENCE', 'MATCHING_CONFIDENCE',
-           'get_defaults', 'create_list_tasks', 'create_download_tasks', 'consume_task',
-           'matching_confidence', 'key_subtitles', 'group_by_video']
+           'create_list_tasks', 'create_download_tasks', 'consume_task', 'matching_confidence',
+           'key_subtitles', 'group_by_video']
 logger = logging.getLogger("subliminal")
-SERVICES = ['opensubtitles', 'bierdopje', 'subswiki', 'subtitulos', 'thesubdb', 'addic7ed', 'tvsubtitles', 'podnapisiweb']
+SERVICES = ['opensubtitles', 'bierdopje', 'subswiki', 'subtitulos', 'thesubdb', 'addic7ed', 'tvsubtitles']
 LANGUAGE_INDEX, SERVICE_INDEX, SERVICE_CONFIDENCE, MATCHING_CONFIDENCE = range(4)
-
-
-def get_defaults(paths, languages, services, order, languages_as=language_set):
-    """Return default values for inputs which have not been specified and/or
-    format them into the internally required format.
-
-    :param paths: path(s) to video file or folder
-    :type paths: string or list
-    :param languages: languages to search for, in preferred order
-    :type languages: list of :class:`~subliminal.language.Language` or string
-    :param list services: services to use for the search, in preferred order
-    :param order: preferred order for subtitles sorting
-    :type list: list of :data:`~subliminal.core.LANGUAGE_INDEX`, :data:`~subliminal.core.SERVICE_INDEX`, :data:`~subliminal.core.SERVICE_CONFIDENCE`, :data:`~subliminal.core.MATCHING_CONFIDENCE`
-    :param function languages_as: either :meth:`~subliminal.language.language_set` or :meth:`~subliminal.language.language_list`, depending on the format which you want the languages to be returned in
-    :return: actual values to be used for the inputs
-    :rtype: tuple of (list of paths, list or set of :class:`~subliminal.language.Language`, list of services, list of (:data:`~subliminal.core.LANGUAGE_INDEX`, :data:`~subliminal.core.SERVICE_INDEX`, :data:`~subliminal.core.SERVICE_CONFIDENCE`, :data:`~subliminal.core.MATCHING_CONFIDENCE`))
-
-    """
-    if isinstance(paths, basestring):
-        paths = [paths]
-    if any([not isinstance(p, unicode) for p in paths]):
-        logger.warning(u'Not all entries are unicode')
-    languages = languages_as(languages) if languages is not None else languages_as(LANGUAGES)
-    services = services or SERVICES
-    order = order or [LANGUAGE_INDEX, SERVICE_INDEX, SERVICE_CONFIDENCE, MATCHING_CONFIDENCE]
-    return paths, languages, services, order
 
 
 def create_list_tasks(paths, languages, services, force, multi, cache_dir, max_depth, scan_filter):

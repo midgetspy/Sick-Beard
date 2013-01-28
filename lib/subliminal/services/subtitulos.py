@@ -47,7 +47,7 @@ class Subtitulos(ServiceBase):
     # code chars into their equivalent unicode char
     release_pattern = re.compile('Versi.+n (.+) ([0-9]+).([0-9])+ megabytes')
     extra_keywords_pattern = re.compile("(?:con|para)\s(?:720p)?(?:\-|\s)?([A-Za-z]+)(?:\-|\s)?(?:720p)?(?:\s|\.)(?:y\s)?(?:720p)?(?:\-\s)?([A-Za-z]+)?(?:\-\s)?(?:720p)?(?:\.)?");
-
+    
     def list_checked(self, video, languages):
         return self.query(video.path or video.release, languages, get_keywords(video.guess), video.series, video.season, video.episode)
 
@@ -66,32 +66,37 @@ class Subtitulos(ServiceBase):
         soup = BeautifulSoup(r.content, self.required_features)
         subtitles = []
         for sub in soup('div', {'id': 'version'}):
-            # extract extra compatible keywords
-            extra = sub.find('span', {'class': 'comentario'}).contents[2]
-            if extra != None:
-                extra_key1 = self.extra_keywords_pattern.search(extra).group(1)
-                extra_key2 = self.extra_keywords_pattern.search(extra).group(2)
             sub_keywords = split_keyword(self.release_pattern.search(sub.find('p', {'class': 'title-sub'}).contents[1]).group(1).lower())
-            # add the extra keywords to sub_keywords before checking
-            if extra_key1 != None:
-                sub_keywords.add(extra_key1.lower())
-            if extra_key2 != None:
-                sub_keywords.add(extra_key2.lower())
+			# extract extra compatible keywords
+            try:
+                extra = sub.find('span', {'class': 'comentario'}).contents[2]
+            except AttributeError:
+                extra = None
+            if extra:
+                search_res = self.extra_keywords_pattern.search(extra)
+                if search_res != None:
+                    extra_key1 = search_res.group(1)
+                    extra_key2 = search_res.group(2)
+                    # add the extra keywords to sub_keywords before checking
+                    if extra_key1 != None:
+                        sub_keywords.add(extra_key1.lower())
+                    if extra_key2 != None:
+                        sub_keywords.add(extra_key2.lower())
             if keywords and not keywords & sub_keywords:
                 logger.debug(u'None of subtitle keywords %r in %r' % (sub_keywords, keywords))
                 continue
-            for html_language in sub.find_all_next('ul', {'class': 'sslist'}):
-                language = self.get_language(html_language.find_next('li', {'class': 'li-idioma'}).find('strong').contents[0].string.strip())
+            for html_language in sub.findAllNext('ul', {'class': 'sslist'}):
+                language = self.get_language(html_language.findNext('li', {'class': 'li-idioma'}).find('strong').contents[0].string.strip())
                 if language not in languages:
                     logger.debug(u'Language %r not in wanted languages %r' % (language, languages))
                     continue
-                html_status = html_language.find_next('li', {'class': 'li-estado'})
+                html_status = html_language.findNext('li', {'class': 'li-estado green'})
                 status = html_status.contents[0].string.strip()
                 if status != 'Completado':
                     logger.debug(u'Wrong subtitle status %s' % status)
                     continue
                 path = get_subtitle_path(filepath, language, self.config.multi)
-                subtitle = ResultSubtitle(path, language, self.__class__.__name__.lower(), html_status.find_next('span', {'class': 'descargar green'}).find('a')['href'],
+                subtitle = ResultSubtitle(path, language, self.__class__.__name__.lower(), html_status.findNext('span', {'class': 'descargar green'}).find('a')['href'],
                                           keywords=sub_keywords)
                 subtitles.append(subtitle)
         return subtitles
