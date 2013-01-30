@@ -251,7 +251,7 @@ class QueueItemAdd(ShowQueueItem):
             self.show.location = self.showDir
             self.show.quality = self.quality if self.quality else sickbeard.QUALITY_DEFAULT
             self.show.flatten_folders = self.flatten_folders if self.flatten_folders != None else sickbeard.FLATTEN_FOLDERS_DEFAULT
-            self.show.paused = False
+            self.show.paused = 0
 
             # be smartish about this
             if self.show.genre and "talk show" in self.show.genre.lower():
