@@ -5,7 +5,7 @@ $(document).ready(function(){
         $('#testGrowl-result').html(loading);
         var growl_host = $("#growl_host").val();
         var growl_password = $("#growl_password").val();
-        var growl_result = $.get(sbRoot+"/home/testGrowl", {'host': growl_host, 'password': growl_password}, 
+        var growl_result = $.get(sbRoot+"/home/testGrowl", {'host': growl_host, 'password': growl_password},
         function (data){ $('#testGrowl-result').html(data); });
     });
 
@@ -13,7 +13,7 @@ $(document).ready(function(){
         $('#testProwl-result').html(loading);
         var prowl_api = $("#prowl_api").val();
         var prowl_priority = $("#prowl_priority").val();
-        var prowl_result = $.get(sbRoot+"/home/testProwl", {'prowl_api': prowl_api, 'prowl_priority': prowl_priority}, 
+        var prowl_result = $.get(sbRoot+"/home/testProwl", {'prowl_api': prowl_api, 'prowl_priority': prowl_priority},
         function (data){ $('#testProwl-result').html(data); });
     });
 
@@ -22,8 +22,8 @@ $(document).ready(function(){
         var xbmc_host = $("#xbmc_host").val();
         var xbmc_username = $("#xbmc_username").val();
         var xbmc_password = $("#xbmc_password").val();
-        
-        $.get(sbRoot+"/home/testXBMC", {'host': xbmc_host, 'username': xbmc_username, 'password': xbmc_password}, 
+
+        $.get(sbRoot+"/home/testXBMC", {'host': xbmc_host, 'username': xbmc_username, 'password': xbmc_password},
         function (data){ $('#testXBMC-result').html(data); });
     });
 
@@ -32,8 +32,8 @@ $(document).ready(function(){
         var plex_host = $("#plex_host").val();
         var plex_username = $("#plex_username").val();
         var plex_password = $("#plex_password").val();
-        
-        $.get(sbRoot+"/home/testPLEX", {'host': plex_host, 'username': plex_username, 'password': plex_password}, 
+
+        $.get(sbRoot+"/home/testPLEX", {'host': plex_host, 'username': plex_username, 'password': plex_password},
         function (data){ $('#testPLEX-result').html(data);});
     });
 
@@ -52,6 +52,16 @@ $(document).ready(function(){
         function (data){ $('#testBoxcar-result').html(data); });
     });
 
+    $('#testNotNot').click(function(){
+        $('#testNotNot-result').html(loading);
+        var notnot_api_id = $("#NotNot_api_id").val();
+        var notnot_api_key = $("#NotNot_api_key").val();
+        var notnot_api_type = $("#NotNot_api_type").val();
+        $.get(sbRoot+"/home/testNotNot",
+            {'api_id': notnot_api_id, 'api_key': notnot_api_key, 'api_type': notnot_api_type},
+            function (data){ $('#testNotNot-result').html(data); });
+    });
+
     $('#testPushover').click(function(){
         $('#testPushover-result').html(loading);
         var pushover_userkey = $("#pushover_userkey").val();
@@ -64,7 +74,7 @@ $(document).ready(function(){
         $.get(sbRoot+"/home/testLibnotify",
         function(message){ $('#testLibnotify-result').html(message); });
     });
-  
+
     $('#twitterStep1').click(function(){
         $('#testTwitter-result').html(loading);
         var twitter1_result = $.get(sbRoot+"/home/twitterStep1", function (data){window.open(data)})
@@ -74,12 +84,12 @@ $(document).ready(function(){
     $('#twitterStep2').click(function(){
         $('#testTwitter-result').html(loading);
         var twitter_key = $("#twitter_key").val();
-        $.get(sbRoot+"/home/twitterStep2", {'key': twitter_key}, 
+        $.get(sbRoot+"/home/twitterStep2", {'key': twitter_key},
         function (data){ $('#testTwitter-result').html(data); });
     });
 
     $('#testTwitter').click(function(){
-        $.get(sbRoot+"/home/testTwitter", 
+        $.get(sbRoot+"/home/testTwitter",
         function (data){ $('#testTwitter-result').html(data); });
     });
 
@@ -91,8 +101,8 @@ $(document).ready(function(){
         }
         $('#testNMJ-result').html(loading);
         var nmj_host = $('#nmj_host').val();
-        
-        $.get(sbRoot+"/home/settingsNMJ", {'host': nmj_host}, 
+
+        $.get(sbRoot+"/home/settingsNMJ", {'host': nmj_host},
         function (data){
             if (data == null) {
                 $('#nmj_database').removeAttr('readonly');
@@ -102,12 +112,12 @@ $(document).ready(function(){
             $('#testNMJ-result').html(JSONData.message);
             $('#nmj_database').val(JSONData.database);
             $('#nmj_mount').val(JSONData.mount);
-            
+
             if (JSONData.database)
                 $('#nmj_database').attr('readonly', true);
             else
                 $('#nmj_database').removeAttr('readonly');
-            
+
             if (JSONData.mount)
                 $('#nmj_mount').attr('readonly', true);
             else
@@ -120,8 +130,8 @@ $(document).ready(function(){
         var nmj_host = $("#nmj_host").val();
         var nmj_database = $("#nmj_database").val();
         var nmj_mount = $("#nmj_mount").val();
-        
-        $.get(sbRoot+"/home/testNMJ", {'host': nmj_host, 'database': nmj_database, 'mount': nmj_mount}, 
+
+        $.get(sbRoot+"/home/testNMJ", {'host': nmj_host, 'database': nmj_database, 'mount': nmj_mount},
         function (data){ $('#testNMJ-result').html(data); });
     });
 
@@ -139,7 +149,7 @@ $(document).ready(function(){
         $('#testNMA-result').html(loading);
         var nma_api = $("#nma_api").val();
         var nma_priority = $("#nma_priority").val();
-        var nma_result = $.get(sbRoot+"/home/testNMA", {'nma_api': nma_api, 'nma_priority': nma_priority}, 
+        var nma_result = $.get(sbRoot+"/home/testNMA", {'nma_api': nma_api, 'nma_priority': nma_priority},
         function (data){ $('#testNMA-result').html(data); });
     });
 });
