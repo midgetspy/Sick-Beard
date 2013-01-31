@@ -249,6 +249,13 @@ BOXCAR_USERNAME = None
 BOXCAR_PASSWORD = None
 BOXCAR_PREFIX = None
 
+USE_NOTNOT = False
+NOTNOT_NOTIFY_ONSNATCH = False
+NOTNOT_NOTIFY_ONDOWNLOAD = False
+NOTNOT_API_TYPE = None
+NOTNOT_API_ID = None
+NOTNOT_API_KEY = None
+
 USE_PUSHOVER = False
 PUSHOVER_NOTIFY_ONSNATCH = False
 PUSHOVER_NOTIFY_ONDOWNLOAD = False
@@ -332,6 +339,7 @@ def initialize(consoleLogging=True):
                 EXTRA_SCRIPTS, USE_TWITTER, TWITTER_USERNAME, TWITTER_PASSWORD, TWITTER_PREFIX, \
                 USE_NOTIFO, NOTIFO_USERNAME, NOTIFO_APISECRET, NOTIFO_NOTIFY_ONDOWNLOAD, NOTIFO_NOTIFY_ONSNATCH, \
                 USE_BOXCAR, BOXCAR_USERNAME, BOXCAR_PASSWORD, BOXCAR_NOTIFY_ONDOWNLOAD, BOXCAR_NOTIFY_ONSNATCH, \
+                USE_NOTNOT, NOTNOT_API_TYPE, NOTNOT_API_KEY, NOTNOT_API_ID, NOTNOT_NOTIFY_ONDOWNLOAD, NOTNOT_NOTIFY_ONSNATCH, \
                 USE_PUSHOVER, PUSHOVER_USERKEY, PUSHOVER_NOTIFY_ONDOWNLOAD, PUSHOVER_NOTIFY_ONSNATCH, \
                 USE_LIBNOTIFY, LIBNOTIFY_NOTIFY_ONSNATCH, LIBNOTIFY_NOTIFY_ONDOWNLOAD, USE_NMJ, NMJ_HOST, NMJ_DATABASE, NMJ_MOUNT, USE_SYNOINDEX, \
                 USE_BANNER, USE_LISTVIEW, METADATA_XBMC, METADATA_MEDIABROWSER, METADATA_PS3, METADATA_SYNOLOGY, metadata_provider_dict, \
@@ -628,6 +636,14 @@ def initialize(consoleLogging=True):
         PUSHOVER_NOTIFY_ONSNATCH = bool(check_setting_int(CFG, 'Pushover', 'pushover_notify_onsnatch', 0))
         PUSHOVER_NOTIFY_ONDOWNLOAD = bool(check_setting_int(CFG, 'Pushover', 'pushover_notify_ondownload', 0))
         PUSHOVER_USERKEY = check_setting_str(CFG, 'Pushover', 'pushover_userkey', '')
+
+        CheckSection(CFG, 'NotNot')
+        USE_NOTNOT = bool(check_setting_int(CFG, 'NotNot', 'use_notnot', 0))
+        NOTNOT_NOTIFY_ONSNATCH = bool(check_setting_int(CFG, 'NotNot', 'notnot_notify_onsnatch', 0))
+        NOTNOT_NOTIFY_ONDOWNLOAD = bool(check_setting_int(CFG, 'NotNot', 'notnot_notify_ondownload', 0))
+        NOTNOT_API_TYPE = check_setting_int(CFG, 'NotNot', 'notnot_api_type', 0)
+        NOTNOT_API_ID = check_setting_str(CFG, 'NotNot', 'notnot_api_id', '')
+        NOTNOT_API_KEY = check_setting_str(CFG, 'NotNot', 'notnot_api_key', '')
 
         CheckSection(CFG, 'Libnotify')
         USE_LIBNOTIFY = bool(check_setting_int(CFG, 'Libnotify', 'use_libnotify', 0))
@@ -1095,6 +1111,14 @@ def save_config():
     new_config['Boxcar']['boxcar_notify_onsnatch'] = int(BOXCAR_NOTIFY_ONSNATCH)
     new_config['Boxcar']['boxcar_notify_ondownload'] = int(BOXCAR_NOTIFY_ONDOWNLOAD)
     new_config['Boxcar']['boxcar_username'] = BOXCAR_USERNAME
+
+    new_config['NotNot'] = {}
+    new_config['NotNot']['use_notnot'] = int(USE_NOTNOT)
+    new_config['NotNot']['notnot_notify_onsnatch'] = int(NOTNOT_NOTIFY_ONSNATCH)
+    new_config['NotNot']['notnot_notify_ondownload'] = int(NOTNOT_NOTIFY_ONDOWNLOAD)
+    new_config['NotNot']['notnot_api_type'] = int(NOTNOT_API_TYPE)
+    new_config['NotNot']['notnot_api_id'] = NOTNOT_API_ID
+    new_config['NotNot']['notnot_api_key'] = NOTNOT_API_KEY
 
     new_config['Pushover'] = {}
     new_config['Pushover']['use_pushover'] = int(USE_PUSHOVER)

@@ -17,6 +17,7 @@
 # along with Sick Beard.  If not, see <http://www.gnu.org/licenses/>.
 
 import sickbeard
+from sickbeard.notifiers import notnot
 
 import xbmc
 import plex
@@ -49,6 +50,7 @@ prowl_notifier = prowl.ProwlNotifier()
 notifo_notifier = notifo.NotifoNotifier()
 libnotify_notifier = libnotify.LibnotifyNotifier()
 pushover_notifier = pushover.PushoverNotifier()
+notnot_notifier = notnot.NotNotNotifier()
 boxcar_notifier = boxcar.BoxcarNotifier()
 nma_notifier = nma.NMA_Notifier()
 # online
@@ -66,6 +68,7 @@ notifiers = [
     prowl_notifier,
     notifo_notifier,
     pushover_notifier,
+    notnot_notifier,
     boxcar_notifier,
     nma_notifier,
     twitter_notifier,
