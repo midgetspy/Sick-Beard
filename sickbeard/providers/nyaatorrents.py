@@ -187,22 +187,7 @@ class NyaaProvider(generic.TorrentProvider):
             return match.group(1)
         return None
 
-    def debug(self):
-        
-        if REMOTE_DBG:
-                # Make pydev debugger works for auto reload.
-                # Note pydevd module need to be copied in XBMC\system\python\Lib\pysrc
-            try:
-                import pysrc.pydevd as pydevd
-                # stdoutToServer and stderrToServer redirect stdout and stderr to eclipse console
-                pydevd.settrace('localhost', port=5678, stdoutToServer=True, stderrToServer=True)
-            except ImportError:
-                sys.stderr.write("Error: " +
-                        "You must add org.python.pydev.debug.pysrc to your PYTHONPATH.")
-                sys.exit(1)         
-        
-        return
-    
+   
 class NyaaCache(tvcache.TVCache):
 
     def __init__(self, provider):
