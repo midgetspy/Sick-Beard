@@ -148,7 +148,7 @@ class TorrentLeechProvider(generic.TorrentProvider):
         if data:
             allItems = re.findall("<a\\s(?:[^\\s>]*?\\s)*?href=\"(?:mailto:)?(.*?)\".*?>(.+?)</a>", data)
             for url, title in allItems:
-                if url.startswith("/torrent/") and url.count("#") == 0:
+                if url and url.startswith("/torrent/") and url.count("#") == 0:
                     url = self.url + url
                     url = url.replace("//torrent/", "/download/") + "/" + title.replace(" ", ".") + ".torrent"
                     results.append((title, url))
@@ -206,7 +206,7 @@ class TorrentLeechProvider(generic.TorrentProvider):
             result = response.read()
 
             
-            if result.count("Invalid Username/password") > 0 or result.count("<title>Login :: TorrentLeech.org</title>") > 0:
+            if result == None or result.count("Invalid Username/password") > 0 or result.count("<title>Login :: TorrentLeech.org</title>") > 0:
                 response.close()
                 raise Exception("Invalid username or password for " + self.name + ". Check your settings.") 
              
