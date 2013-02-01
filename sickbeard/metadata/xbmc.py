@@ -53,7 +53,7 @@ class XBMCMetadata(generic.GenericMetadata):
         self.eg_show_metadata = "tvshow.nfo"
         self.eg_episode_metadata = "Season##\\<i>filename</i>.nfo"
         self.eg_fanart = "fanart.jpg"
-        self.eg_poster = "folder.jpg"
+        self.eg_poster = "poster.jpg"
         self.eg_episode_thumbnails = "Season##\\<i>filename</i>.tbn"
         self.eg_season_thumbnails = "season##.tbn"
     
