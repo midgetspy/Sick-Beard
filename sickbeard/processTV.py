@@ -21,9 +21,10 @@ from __future__ import with_statement
 import os
 import shutil
 
-import sickbeard 
+import sickbeard
 from sickbeard import postProcessor
-from sickbeard import db, helpers, exceptions
+from sickbeard import helpers, exceptions
+from sickbeard.db_peewee import TvShow
 
 from sickbeard import encodingKludge as ek
 from sickbeard.exceptions import ex
@@ -74,10 +75,8 @@ def processDir (dirName, nzbName=None, recurse=False):
         return returnStr
 
     # make sure the dir isn't inside a show dir
-    myDB = db.DBConnection()
-    sqlResults = myDB.select("SELECT * FROM tv_shows")
-    for sqlShow in sqlResults:
-        if dirName.lower().startswith(ek.ek(os.path.realpath, sqlShow["location"]).lower()+os.sep) or dirName.lower() == ek.ek(os.path.realpath, sqlShow["location"]).lower():
+    for sqlShow in TvShow.select():
+        if dirName.lower().startswith(ek.ek(os.path.realpath, sqlShow.location).lower()+os.sep) or dirName.lower() == ek.ek(os.path.realpath, sqlShow.location).lower():
             returnStr += logHelper(u"You're trying to post process an episode that's already been moved to its show dir", logger.ERROR)
             return returnStr
 

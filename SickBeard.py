@@ -49,6 +49,7 @@ import getopt
 import sickbeard
 
 from sickbeard import db
+from sickbeard import db_peewee
 from sickbeard.tv import TVShow
 from sickbeard import logger
 from sickbeard.version import SICKBEARD_VERSION
@@ -308,6 +309,9 @@ def main():
             logger.log(u"Launching browser and exiting", logger.ERROR)
             sickbeard.launchBrowser(startPort)
         sys.exit()
+
+    # Init PeeWee DB Connections
+    db_peewee.maindb.init(os.path.join(sickbeard.PROG_DIR,'sickbeard.db'))
 
     # Build from the DB to start with
     logger.log(u"Loading initial show list")

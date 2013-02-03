@@ -20,6 +20,7 @@
 import unittest
 
 import sqlite3
+import yaml
 
 import sys, os.path
 sys.path.append(os.path.abspath('..'))
@@ -29,6 +30,7 @@ import sickbeard
 import shutil, time
 from sickbeard import encodingKludge as ek, providers, tvcache
 from sickbeard import db
+from sickbeard import db_peewee
 from sickbeard.databases import mainDB
 from sickbeard.databases import cache_db
 
@@ -69,6 +71,7 @@ sickbeard.showList = []
 sickbeard.QUALITY_DEFAULT = 4
 sickbeard.SEASON_FOLDERS_DEFAULT = 1
 sickbeard.SEASON_FOLDERS_FORMAT = 'Season %02d'
+sickbeard.FLATTEN_FOLDERS_DEFAULT = False
 
 sickbeard.NAMING_SHOW_NAME = 1
 sickbeard.NAMING_EP_NAME = 1
@@ -121,6 +124,41 @@ class SickbeardTestDBCase(unittest.TestCase):
         tearDown_test_episode_file()
         tearDown_test_show_dir()
 
+    def resetDatabase(self):
+      for t in [
+          db_peewee.TvEpisode,
+          db_peewee.TvShow,
+          db_peewee.Info,
+          db_peewee.History,
+          db_peewee.DbVersion]:
+        t.drop_table(fail_silently=True)
+        t.create_table()
+
+    def loadFixtures(self):
+      ep_data = yaml.load(
+          open(
+            os.path.join(TESTDIR, 'fixtures/tv_episodes.yaml')).read())
+      show_data = yaml.load(
+          open(
+            os.path.join(TESTDIR, 'fixtures/tv_show_fixtures.yaml')).read())
+      db_peewee.TvEpisode._meta.auto_increment = False
+      db_peewee.TvShow._meta.auto_increment = False
+      with db_peewee.maindb.transaction():
+        for ep in ep_data:
+          t = db_peewee.TvEpisode()
+          for key, value in ep_data[ep].items():
+            setattr(t, key, value)
+          t.save(force_insert=True)
+
+        for show in show_data:
+          t = db_peewee.TvShow()
+          for key, value in show_data[show].items():
+            setattr(t, key, value)
+          t.save(force_insert=True)
+
+      db_peewee.TvShow._meta.auto_increment = True
+      db_peewee.TvEpisode._meta.auto_increment = True
+
 
 class TestDBConnection(db.DBConnection, object):
 
@@ -156,6 +194,8 @@ class TestCacheDBConnection(TestDBConnection, object):
 sickbeard.db.DBConnection = TestDBConnection
 sickbeard.tvcache.CacheDBConnection = TestCacheDBConnection
 
+db_peewee.maindb.init(os.path.join(TESTDIR, 'sickbeard.db'))
+db_peewee.cachedb.init(os.path.join(TESTDIR, 'cache.db'))
 
 #=================
 # test functions
@@ -167,7 +207,7 @@ def setUp_test_db():
     db.upgradeDatabase(db.DBConnection(), mainDB.InitialSchema)
     # fix up any db problems
     db.sanityCheckDatabase(db.DBConnection(), mainDB.MainSanityCheck)
-    
+
     #and for cache.b too
     db.upgradeDatabase(db.DBConnection("cache.db"), cache_db.InitialSchema)
 

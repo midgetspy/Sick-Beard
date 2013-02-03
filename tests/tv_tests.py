@@ -63,6 +63,13 @@ class TVShowTests(test.SickbeardTestDBCase):
         show.loadFromDB(skipNFO=True)
         self.assertEqual(show.name, "newName")
 
+    def test_getAllEpisodes(self):
+        self.resetDatabase()
+        self.loadFixtures()
+        show = TVShow(82066, "en")
+        show.loadFromDB()
+        self.assertEqual(show.name, 'Fringe')
+
 
 class TVEpisodeTests(test.SickbeardTestDBCase):
 
@@ -105,13 +112,4 @@ if __name__ == '__main__':
     print "STARTING - TV TESTS"
     print "=================="
     print "######################################################################"
-    suite = unittest.TestLoader().loadTestsFromTestCase(TVShowTests)
-    unittest.TextTestRunner(verbosity=2).run(suite)
-    print "######################################################################"
-    suite = unittest.TestLoader().loadTestsFromTestCase(TVEpisodeTests)
-    unittest.TextTestRunner(verbosity=2).run(suite)
-    print "######################################################################"
-    suite = unittest.TestLoader().loadTestsFromTestCase(TVTests)
-    unittest.TextTestRunner(verbosity=2).run(suite)
-
-
+    unittest.main()
