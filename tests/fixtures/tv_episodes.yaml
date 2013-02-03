@@ -1,0 +1,52 @@
+fringe_ep_one:
+  episode_id: 1
+  showid: 82066
+  name: Unaired Pilot
+  season: 0
+  episode: 1
+  has_nfo: false
+  has_thumbnail: false
+
+fringe_ep_two:
+  episode_id: 2
+  showid: 82066
+  name: Access All Areas
+  season: 0
+  episode: 2
+  airdate: 1
+  has_nfo: false
+  has_thumbnail: false
+
+fringe_ep_three:
+  episode_id: 3
+  showid: 82066
+  name: Past + Present + Future
+  season: 0
+  episode: 3
+  airdate: 1
+  has_nfo: false
+  has_thumbnail: false
+  created_at: '2013-01-31 04:48:53.723537'
+  updated_at: '2013-01-31 04:48:53.723537'
+
+fringe_ep_four:
+  episode_id: 4
+  showid: 82066
+  name: Past + Present + Future -- A Tragic Past
+  season: 0
+  episode: 4
+  description: Walter Bishop does the unthinkable to save his son Peter.
+  airdate: 1
+  has_nfo: false
+  has_thumbnail: false
+
+fringe_ep_five:
+  episode_id: 115
+  showid: 82066
+  name: An Enemy of Fate
+  season: 5
+  episode: 13
+  description: Peter, Olivia, Walter, Astrid and Broyles face off against the Observers in one final and extraordinary battle for the fate of mankind.
+  airdate: 1
+  has_nfo: false
+  has_thumbnail: false
