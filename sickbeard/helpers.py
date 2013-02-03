@@ -36,6 +36,7 @@ from sickbeard import logger, classes
 from sickbeard.common import USER_AGENT, mediaExtensions, XML_NSMAP
 
 from sickbeard import db
+from sickbeard.db_peewee import TvShow
 from sickbeard import encodingKludge as ek
 
 from lib.tvdb_api import tvdb_api, tvdb_exceptions
@@ -342,36 +343,51 @@ def buildNFOXML(myShow):
 
 
 def searchDBForShow(regShowName):
+    """
+    Try to find a show name in the DB using wildcards.
+
+    Matches against the show_name or the tvr_name.
+
+    Args:
+        regShowName: string, name of show to look up.
+
+    Returns:
+        Tuple of (tvdb_id, show_name) or None if no show is found.
+    """
 
     showNames = [re.sub('[. -]', ' ', regShowName)]
-
-    myDB = db.DBConnection()
 
     yearRegex = "([^()]+?)\s*(\()?(\d{4})(?(2)\))$"
 
     for showName in showNames:
+        query = TvShow.select().where(
+                (TvShow.show_name ** showName) |
+                (TvShow.tvr_name ** showName)
+                )
+        result = [s for s in query]
 
-        sqlResults = myDB.select("SELECT * FROM tv_shows WHERE show_name LIKE ? OR tvr_name LIKE ?", [showName, showName])
-
-        if len(sqlResults) == 1:
-            return (int(sqlResults[0]["tvdb_id"]), sqlResults[0]["show_name"])
+        if result:
+            return (result[0].tvdb_id, result[0].show_name)
 
         else:
-
             # if we didn't get exactly one result then try again with the year stripped off if possible
             match = re.match(yearRegex, showName)
             if match and match.group(1):
                 logger.log(u"Unable to match original name but trying to manually strip and specify show year", logger.DEBUG)
-                sqlResults = myDB.select("SELECT * FROM tv_shows WHERE (show_name LIKE ? OR tvr_name LIKE ?) AND startyear = ?", [match.group(1)+'%', match.group(1)+'%', match.group(3)])
+                query = TvShow.select().where(
+                        ((TvShow.show_name ** match.group(1)+'%') | (TvShow.tvr_name ** match.group(1)+'%')) &
+                        (TvShow.startyear == match.group(3))
+                        )
+                result = [s for s in query]
 
-            if len(sqlResults) == 0:
+            if not result:
                 logger.log(u"Unable to match a record in the DB for "+showName, logger.DEBUG)
                 continue
-            elif len(sqlResults) > 1:
+            elif len(result) > 1:
                 logger.log(u"Multiple results for "+showName+" in the DB, unable to match show name", logger.DEBUG)
                 continue
             else:
-                return (int(sqlResults[0]["tvdb_id"]), sqlResults[0]["show_name"])
+                return (result[0].tvdb_id, result[0].show_name)
 
 
     return None

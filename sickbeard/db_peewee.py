@@ -136,7 +136,7 @@ class Lastupdate(CacheBaseModel):
         db_table = 'lastUpdate'
 
 
-class SceneExceptions(CacheBaseModel):
+class SceneException(CacheBaseModel):
     exception_id = peewee.PrimaryKeyField()
     show_name = peewee.TextField(null=True)
     tvdb_id = peewee.IntegerField(null=True)
@@ -145,7 +145,7 @@ class SceneExceptions(CacheBaseModel):
         db_table = 'scene_exceptions'
 
 
-class SceneNames(CacheBaseModel):
+class SceneName(CacheBaseModel):
     name = peewee.TextField(null=True)
     tvdb_id = peewee.IntegerField(null=True)
 
