@@ -54,7 +54,10 @@ try:
 except ImportError:
     from lib import simplejson as json
 
-import xml.etree.cElementTree as etree
+try:
+    import xml.etree.cElementTree as etree
+except ImportError:
+    import xml.etree.ElementTree as etree
 
 from sickbeard import browser
 
@@ -1497,7 +1500,7 @@ class NewHomeAddShows:
         if 'en' in result:
             del result[result.index('en')]
         result.sort()
-        result.insert(0,'en')
+        result.insert(0, 'en')
 
         return json.dumps({'results': result})
 
@@ -1510,7 +1513,7 @@ class NewHomeAddShows:
         if not lang or lang == 'null':
                 lang = "en"
 
-        baseURL = "http://thetvdb.com/api/GetSeries.php?"
+        baseURL = "http://www.thetvdb.com/api/GetSeries.php?"
         nameUTF8 = name.encode('utf-8')
 
         logger.log(u"Trying to find Show on thetvdb.com with: " + nameUTF8.decode('utf-8'), logger.DEBUG)
@@ -1532,7 +1535,7 @@ class NewHomeAddShows:
 
             finalURL = baseURL + urllib.urlencode(params)
 
-            logger.log(u"Searching for Show with searchterm: \'" + searchTerm.decode('utf-8')+ u"\' on URL " + finalURL, logger.DEBUG)
+            logger.log(u"Searching for Show with searchterm: \'" + searchTerm.decode('utf-8') + u"\' on URL " + finalURL, logger.DEBUG)
             urlData = helpers.getURL(finalURL)
 
             if urlData is None:
@@ -1546,7 +1549,7 @@ class NewHomeAddShows:
 
                 except Exception, e:
                     # use finalURL in log, because urlData can be too much information
-                    logger.log(u"Unable to parse XML for some reason: "+ex(e)+" from XML: "+finalURL, logger.ERROR)
+                    logger.log(u"Unable to parse XML for some reason: " + ex(e) + " from XML: " + finalURL, logger.ERROR)
                     series = ''
 
                 # add each result to our list
@@ -2684,7 +2687,7 @@ class UI:
 
         return json.dumps(messages)
 
-   
+
 class WebInterface:
 
     @cherrypy.expose
@@ -2710,7 +2713,7 @@ class WebInterface:
             return cherrypy.lib.static.serve_file(default_image_path, content_type="image/png")
 
         cache_obj = image_cache.ImageCache()
-        
+
         if which == 'poster':
             image_file_name = cache_obj.poster_path(showObj.tvdbid)
         # this is for 'banner' but also the default case
@@ -2718,6 +2721,9 @@ class WebInterface:
             image_file_name = cache_obj.banner_path(showObj.tvdbid)
 
         if ek.ek(os.path.isfile, image_file_name):
+            # use startup argument to prevent using PIL even if installed
+            if sickbeard.NO_RESIZE:
+                return cherrypy.lib.static.serve_file(image_file_name, content_type="image/jpeg")
             try:
                 from PIL import Image
                 from cStringIO import StringIO
@@ -2734,10 +2740,10 @@ class WebInterface:
                 else:
                     return cherrypy.lib.static.serve_file(image_file_name, content_type="image/jpeg")
                 im = im.resize(size, Image.ANTIALIAS)
-                buffer = StringIO()
-                im.save(buffer, 'JPEG', quality=85)
+                imgbuffer = StringIO()
+                im.save(imgbuffer, 'JPEG', quality=85)
                 cherrypy.response.headers['Content-Type'] = 'image/jpeg'
-                return buffer.getvalue()
+                return imgbuffer.getvalue()
         else:
             return cherrypy.lib.static.serve_file(default_image_path, content_type="image/png")
 

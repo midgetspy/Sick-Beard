@@ -163,9 +163,9 @@ def main():
     threading.currentThread().name = "MAIN"
 
     try:
-        opts, args = getopt.getopt(sys.argv[1:], "qfdp::", ['quiet', 'forceupdate', 'daemon', 'port=', 'pidfile=', 'nolaunch', 'config=', 'datadir='])  # @UnusedVariable
+        opts, args = getopt.getopt(sys.argv[1:], "qfdp::", ['quiet', 'forceupdate', 'port=', 'daemon', 'noresize', 'pidfile=', 'nolaunch', 'config=', 'datadir='])  # @UnusedVariable
     except getopt.GetoptError:
-        print "Available Options: --quiet, --forceupdate, --port, --daemon, --pidfile, --config, --datadir"
+        print "Available Options: --quiet, --forceupdate, --port, --daemon, --noresize, --pidfile, --nolaunch, --config, --datadir"
         sys.exit()
 
     forceUpdate = False
@@ -198,6 +198,10 @@ def main():
             else:
                 consoleLogging = False
                 sickbeard.DAEMON = True
+
+        # Prevent resizing of the banner/posters even if PIL is installed
+        if o in ('--noresize',):
+            sickbeard.NO_RESIZE = True
 
         # Specify folder to load the config file from
         if o in ('--config',):
