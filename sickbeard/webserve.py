@@ -32,7 +32,8 @@ import cherrypy.lib
 
 import sickbeard
 
-from sickbeard import config, sab, utorrent, transmission, deluge
+from sickbeard import config, sab
+from sickbeard import clients
 from sickbeard import history, notifiers, processTV
 from sickbeard import ui
 from sickbeard import logger, helpers, exceptions, classes, db
@@ -2374,12 +2375,11 @@ class Home:
         if not host.endswith("/"):
             host = host + "/"
         
-        if torrent_method == 'utorrent':
-            connection, accesMsg = utorrent.testAuthentication(host, username, password)
-        elif torrent_method == 'transmission':
-            connection, accesMsg = transmission.testAuthentication(host, username, password)
-        elif torrent_method == 'deluge':
-            connection, accesMsg = deluge.testAuthentication(host, "admin", password)
+        logger.log(u"Sending Torrent to Deluge Client", logger.DEBUG)
+
+        client = clients.getClientIstance(torrent_method)
+        
+        connection, accesMsg = client(host, username, password).testAuthentication()
 
         return accesMsg     
 

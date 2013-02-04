@@ -91,11 +91,10 @@ class GenericProvider:
             result = classes.TorrentSearchResult(episodes)
         else:
             result = classes.SearchResult(episodes)
-
-        result.provider = self
-
+        
+        result.provider = self    
+            
         return result
-
 
     def getURL(self, url, headers=None):
         """
@@ -271,12 +270,14 @@ class GenericProvider:
             result.url = url
             result.name = title
             result.quality = quality
-
+            result.provider = self
+            result.content = self.getURL(result.url) \
+                            if self.providerType == GenericProvider.TORRENT \
+                            and not result.url.startswith('magnet') else None 
+            
             results.append(result)
 
         return results
-
-
 
     def findSeasonResults(self, show, season):
 
@@ -347,6 +348,10 @@ class GenericProvider:
             result.url = url
             result.name = title
             result.quality = quality
+            result.provider = self
+            result.content = self.getURL(result.url) \
+                            if self.providerType == GenericProvider.TORRENT \
+                            and not result.url.startswith('magnet') else None 
 
             if len(epObj) == 1:
                 epNum = epObj[0].episode
@@ -362,7 +367,6 @@ class GenericProvider:
                 results[epNum].append(result)
             else:
                 results[epNum] = [result]
-
 
         return results
 

@@ -356,7 +356,7 @@
                         	<div class="field-pair" id="Torrent_Path">
                                 <label class="nocheck clearfix">
                                     <span class="component-title" id="directory_desc">Torrent Directory</span>
-                                    <input type="text" name="torrent_path" id="torrent_path" value="$sickbeard.TORRENT_PATH" size="45" />
+                                    <input type="text" name="torrent_path" id="torrent_path" value="$sickbeard.TORRENT_PATH" size="35" />
                                 </label>
                                 <label class="nocheck clearfix">
                                     <span class="component-title">&nbsp;</span>
@@ -415,6 +415,7 @@
 	jQuery('#config-components').tabs();
     jQuery('#nzb_dir').fileBrowser({ title: 'Select NZB Black Hole/Watch Directory' });
     jQuery('#torrent_dir').fileBrowser({ title: 'Select Torrent Black Hole/Watch Directory' });
+    jQuery('#torrent_path').fileBrowser({ title: 'Select Torrent Download Directory' });
     jQuery('#tv_download_dir').fileBrowser({ title: 'Select TV Download Directory' });
     
 //-->
