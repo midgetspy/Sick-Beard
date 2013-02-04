@@ -31,10 +31,6 @@ def getClientModule(name):
     prefix = "sickbeard.clients."
     return __import__(prefix+name, fromlist=__all__)
 
-def getClientClass(name):
-    
-    return getClientModule(name).api.__class__.__name__
-
 def getClientIstance(name):
     
     module = getClientModule(name)

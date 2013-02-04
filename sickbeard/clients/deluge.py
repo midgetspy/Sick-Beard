@@ -42,7 +42,8 @@ class DelugeAPI(GenericClient):
                                  "id": 1
                                  })
         response = self.session.post(self.url, data=post_data.encode('utf-8'))
-        return response.json['result']
+        self.auth = response.json['result']
+        return self.auth
      
     def _add_torrent_uri(self, result):
 
@@ -76,40 +77,42 @@ class DelugeAPI(GenericClient):
         return self._request(method='post', data=post_data)
     
     def _set_torrent_ratio(self, result):
-        
-        post_data.json.dumps({ "method": "core.set_torrent_stop_at_ratio",
-                               "params": [self._get_torrent_hash(result),True],
-                               "id": 5
-                               })        
-        self._request(method='post', data=post_data)
-        
-        post_data.json.dumps({ "method": "core.set_torrent_stop_ratio",
-                               "params": [self._get_torrent_hash(result),float(sickbeard.TORRENT_RATIO)],
-                               "id": 6
-                               })        
-        self._request(method='post', data=post_data)
+
+        if sickbeard.TORRENT_RATIO != '':
+            post_data = json.dumps({"method": "core.set_torrent_stop_at_ratio",
+                                    "params": [self._get_torrent_hash(result), True],
+                                    "id": 5
+                                    })        
+            self._request(method='post', data=post_data)
+            
+            post_data = json.dumps({"method": "core.set_torrent_stop_ratio",
+                                    "params": [self._get_torrent_hash(result),float(sickbeard.TORRENT_RATIO)],
+                                    "id": 6
+                                    })        
+            return self._request(method='post', data=post_data)
 
     def _set_torrent_path(self, result):
 
         if sickbeard.TORRENT_PATH != '':
-            post_data.json.dumps({ "method": "core.set_torrent_move_on_completed",
+            post_data = json.dumps({ "method": "core.set_torrent_move_on_completed",
                                    "params": [self._get_torrent_hash(result), True],
                                    "id": 7
                                    })        
             self._request(method='post', data=post_data)
             
-            post_data.json.dumps({ "method": "core.set_torrent_move_on_completed_path",
+            post_data = json.dumps({ "method": "core.set_torrent_move_on_completed_path",
                                    "params": [self._get_torrent_hash(result), sickbeard.TORRENT_PATH],
                                    "id": 8
                                    })        
-            self._request(method='post', data=post_data)
+            return self._request(method='post', data=post_data)
         
     def _set_torrent_pause(self, result):
         
-        post_data.json.dumps({ "method": "core.pause_torrent",
-                               "params": [self._get_torrent_hash(result),{}],
-                               "id": 8
-                               })
-        return self._request(method='post', data=post_data)
+        if sickbeard.TORRENT_PAUSED:
+            post_data = json.dumps({ "method": "core.pause_torrent",
+                                   "params": [self._get_torrent_hash(result)],
+                                   "id": 8
+                                   })
+            return self._request(method='post', data=post_data)
 
 api = DelugeAPI()
