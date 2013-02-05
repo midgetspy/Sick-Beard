@@ -64,7 +64,6 @@ class TVShowTests(test.SickbeardTestDBCase):
         self.assertEqual(show.name, "newName")
 
     def test_getAllEpisodes(self):
-        self.resetDatabase()
         self.loadFixtures()
         show = TVShow(82066, "en")
         show.loadFromDB()
@@ -82,7 +81,7 @@ class TVEpisodeTests(test.SickbeardTestDBCase):
         ep = TVEpisode(show, 1, 1)
         ep.name = "asdasdasdajkaj"
         ep.saveToDB()
-        ep.loadFromDB(1, 1)
+        ep.loadFromDB()
         self.assertEqual(ep.name, "asdasdasdajkaj")
 
 

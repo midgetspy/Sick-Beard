@@ -17,26 +17,25 @@
 # You should have received a copy of the GNU General Public License
 # along with Sick Beard.  If not, see <http://www.gnu.org/licenses/>.
 
-from collections import defaultdict
-
 import unittest
 import test_lib as test
-from sickbeard import helpers
 from sickbeard.db_peewee import *
-import sickbeard
+from sickbeard import history
 
-class HelpersTests(test.SickbeardTestDBCase):
 
-    def test_searchDBForShow(self):
-        self.assertIsNone(helpers.searchDBForShow('Testing Show'))
-        TvShow(tvdb_id=1, show_name='Testing Show').save(force_insert=True)
-        self.assertIsNotNone(helpers.searchDBForShow('Testing Show'))
+class HistoryTests(test.SickbeardTestDBCase):
+    def test_logHistoryItem(self):
+        self.assertEqual(History.select().count(), 0)
+        history._logHistoryItem(1, 2, 3, 4, 5, 'resource', 'provider')
+        self.assertEqual(History.select().count(), 1)
+        h = History.select().get()
+        self.assertEqual(h.resource, 'resource')
 
 
 if __name__ == '__main__':
 
     print "=================="
-    print "STARTING - Config TESTS"
+    print "STARTING - DB PeeWee TESTS"
     print "=================="
     print "######################################################################"
     unittest.main()

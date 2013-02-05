@@ -17,26 +17,30 @@
 # You should have received a copy of the GNU General Public License
 # along with Sick Beard.  If not, see <http://www.gnu.org/licenses/>.
 
-from collections import defaultdict
-
+import datetime
 import unittest
 import test_lib as test
-from sickbeard import helpers
 from sickbeard.db_peewee import *
-import sickbeard
+from sickbeard import webserve
 
-class HelpersTests(test.SickbeardTestDBCase):
+class WebserveTests(test.SickbeardTestDBCase):
+    def test_ComingEpisodes(self):
+        self.loadFixtures()
+        t = TvShow().select().first()
+        t.status = 'Continuing'
+        t.save()
+        e = TvEpisode.select().where(TvEpisode.name=='An Enemy of Fate').get()
+        e.airdate = (datetime.date.today() + datetime.timedelta(days=3)).toordinal()
+        e.save()
 
-    def test_searchDBForShow(self):
-        self.assertIsNone(helpers.searchDBForShow('Testing Show'))
-        TvShow(tvdb_id=1, show_name='Testing Show').save(force_insert=True)
-        self.assertIsNotNone(helpers.searchDBForShow('Testing Show'))
+        w = webserve.WebInterface()
+        w.comingEpisodes()
 
 
 if __name__ == '__main__':
 
     print "=================="
-    print "STARTING - Config TESTS"
+    print "STARTING - Webserve TESTS"
     print "=================="
     print "######################################################################"
     unittest.main()

@@ -16,7 +16,7 @@
 # You should have received a copy of the GNU General Public License
 # along with Sick Beard.  If not, see <http://www.gnu.org/licenses/>.
 
-import db
+from sickbeard.db_peewee import History
 import datetime
 
 from sickbeard.common import SNATCHED, Quality
@@ -26,16 +26,21 @@ dateFormat = "%Y%m%d%H%M%S"
 def _logHistoryItem(action, showid, season, episode, quality, resource, provider):
 
     logDate = datetime.datetime.today().strftime(dateFormat)
-
-    myDB = db.DBConnection()
-    myDB.action("INSERT INTO history (action, date, showid, season, episode, quality, resource, provider) VALUES (?,?,?,?,?,?,?,?)",
-                [action, logDate, showid, season, episode, quality, resource, provider])
+    History(
+        action=action,
+        date=logDate,
+        episode=episode,
+        provider=provider,
+        quality=quality,
+        resource=resource,
+        season=season,
+        show=showid
+    ).save()
 
 
 def logSnatch(searchResult):
 
     for curEpObj in searchResult.episodes:
-
         showid = int(curEpObj.show.tvdbid)
         season = int(curEpObj.season)
         episode = int(curEpObj.episode)
@@ -60,7 +65,7 @@ def logDownload(episode, filename, new_ep_quality, release_group=None):
     epNum = int(episode.episode)
 
     quality = new_ep_quality
-    
+
     # store the release group as the provider if possible
     if release_group:
         provider = release_group

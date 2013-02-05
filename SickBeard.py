@@ -262,6 +262,10 @@ def main():
 
     sickbeard.CFG = ConfigObj(sickbeard.CONFIG_FILE)
 
+    # Init PeeWee DB Connections
+    db_peewee.maindb.init(os.path.join(sickbeard.PROG_DIR,'sickbeard.db'))
+    db_peewee.cachedb.init(os.path.join(sickbeard.PROG_DIR,'cache.db'))
+
     # Initialize the config and our threads
     sickbeard.initialize(consoleLogging=consoleLogging)
 
@@ -314,8 +318,6 @@ def main():
             sickbeard.launchBrowser(startPort)
         sys.exit()
 
-    # Init PeeWee DB Connections
-    db_peewee.maindb.init(os.path.join(sickbeard.PROG_DIR,'sickbeard.db'))
 
     # Build from the DB to start with
     logger.log(u"Loading initial show list")

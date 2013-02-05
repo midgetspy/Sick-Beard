@@ -27,7 +27,7 @@ import sickbeard
 from sickbeard import logger
 from sickbeard.common import UNAIRED
 
-from sickbeard import db
+from sickbeard.db_peewee import TvEpisode
 from sickbeard import exceptions, helpers
 from sickbeard.exceptions import ex
 
@@ -142,13 +142,16 @@ class TVRage:
 
                     logger.log(u"Trying against DB instead", logger.DEBUG)
 
-                    myDB = db.DBConnection()
-                    sqlResults = myDB.select("SELECT * FROM tv_episodes WHERE showid = ? AND season = ? and episode = ?", [self.show.tvdbid, self.lastEpInfo['season'], self.lastEpInfo['episode']])
+                    result = TvEpisode.select().where(
+                        (TvEpisode.show == self.show.tvdbid) &
+                        (TvEpisode.season == self.lastEpInfo['season']) &
+                        (TvEpisode.episode == self.lastEpInfo['episode'])
+                    ).first()
 
-                    if len(sqlResults) == 0:
+                    if result is not None:
                         raise exceptions.EpisodeNotFoundException("Unable to find episode in DB")
                     else:
-                        airdate = datetime.date.fromordinal(int(sqlResults[0]["airdate"]))
+                        airdate = datetime.date.fromordinal(result.airdate)
 
 
                 # check if TVRage and TVDB have the same airdate for this episode
@@ -203,13 +206,17 @@ class TVRage:
 
                 logger.log(u"Trying against DB instead", logger.DEBUG)
 
-                myDB = db.DBConnection()
-                sqlResults = myDB.select("SELECT * FROM tv_episodes WHERE showid = ? AND season = ? and episode = ?", [self.show.tvdbid, self.lastEpInfo['season'], self.lastEpInfo['episode']])
+                result = TvEpisode.select().where(
+                    (TvEpisode.show == self.show.tvdbid) &
+                    (TvEpisode.season == self.lastEpInfo['season']) &
+                    (TvEpisode.episode == self.lastEpInfo['episode'])
+                ).first()
 
-                if len(sqlResults) == 0:
+
+                if result is not None:
                     raise exceptions.EpisodeNotFoundException("Unable to find episode in DB")
                 else:
-                    airdate = datetime.date.fromordinal(int(sqlResults[0]["airdate"]))
+                    airdate = datetime.date.fromordinal(result.airdate)
 
             logger.log(u"Date from TVDB for episode " + str(self.lastEpInfo['season']) + "x" + str(self.lastEpInfo['episode']) + ": " + str(airdate), logger.DEBUG)
             logger.log(u"Date from TVRage for episode " + str(self.lastEpInfo['season']) + "x" + str(self.lastEpInfo['episode']) + ": " + str(self.lastEpInfo['airdate']), logger.DEBUG)
@@ -318,17 +325,28 @@ class TVRage:
         if not self.checkSync(info):
             raise exceptions.TVRageException("TVRage info isn't in sync with TVDB, not using data")
 
-        myDB = db.DBConnection()
-
         # double check that it's not already in there
-        sqlResults = myDB.select("SELECT * FROM tv_episodes WHERE showid = ? AND season = ? AND episode = ?", [self.show.tvdbid, self.nextEpInfo['season'], self.nextEpInfo['episode']])
+        result = TvEpisode.select().where(
+            (TvEpisode.show == self.show.tvdbid) &
+            (TvEpisode.season == self.nextEpInfo['season']) &
+            (TvEpisode.episode == self.nextEpInfo['episode'])
+        ).first()
 
-        if len(sqlResults) > 0:
+        if result is not None:
             raise exceptions.TVRageException("Show is already in database, not adding the TVRage info")
 
         # insert it
-        myDB.action("INSERT INTO tv_episodes (showid, tvdbid, name, season, episode, description, airdate, hasnfo, hastbn, status, location) VALUES (?,?,?,?,?,?,?,?,?,?,?)", \
-                    [self.show.tvdbid, -1, self.nextEpInfo['name'], self.nextEpInfo['season'], self.nextEpInfo['episode'], '', self.nextEpInfo['airdate'].toordinal(), 0, 0, UNAIRED, ''])
+        TvEpisode(showid = self.show.tvdbid,
+                  tvdbid = -1,
+                  name = self.nextEpInfo['name'],
+                  season = self.nextEpInfo['season'],
+                  episode = self.nextEpInfo['episode'],
+                  description = '',
+                  airdate = self.nextEpInfo['airdate'].toordinal(),
+                  hasnfo = False,
+                  hastbn = False,
+                  status = UNAIRED,
+                  location = '').save()
 
         # once it's in the DB make an object and return it
         ep = None

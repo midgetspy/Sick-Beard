@@ -72,7 +72,7 @@ sickbeard.QUALITY_DEFAULT = 4
 sickbeard.SEASON_FOLDERS_DEFAULT = 1
 sickbeard.SEASON_FOLDERS_FORMAT = 'Season %02d'
 sickbeard.FLATTEN_FOLDERS_DEFAULT = False
-
+sickbeard.COMING_EPS_SORT = 'date'
 sickbeard.NAMING_SHOW_NAME = 1
 sickbeard.NAMING_EP_NAME = 1
 sickbeard.NAMING_EP_TYPE = 0
@@ -81,6 +81,8 @@ sickbeard.NAMING_SEP_TYPE = 0
 sickbeard.NAMING_USE_PERIODS = 0
 sickbeard.NAMING_QUALITY = 0
 sickbeard.NAMING_DATES = 1
+sickbeard.NAMING_PATTERN = 'Season %0S/%SN - S%0SE%0E - %EN - %QN'
+sickbeard.NAMING_ABD_PATTERN = '%SN - %A-D - %EN'
 
 sickbeard.PROVIDER_ORDER = ["sick_beard_index"]
 sickbeard.newznabProviderList = providers.getNewznabProviderList("Sick Beard Index|http://momo.sickbeard.com/||1!!!NZBs.org|http://beta.nzbs.org/||0")
@@ -123,16 +125,6 @@ class SickbeardTestDBCase(unittest.TestCase):
         tearDown_test_db()
         tearDown_test_episode_file()
         tearDown_test_show_dir()
-
-    def resetDatabase(self):
-      for t in [
-          db_peewee.TvEpisode,
-          db_peewee.TvShow,
-          db_peewee.Info,
-          db_peewee.History,
-          db_peewee.DbVersion]:
-        t.drop_table(fail_silently=True)
-        t.create_table()
 
     def loadFixtures(self):
       ep_data = yaml.load(
@@ -194,8 +186,7 @@ class TestCacheDBConnection(TestDBConnection, object):
 sickbeard.db.DBConnection = TestDBConnection
 sickbeard.tvcache.CacheDBConnection = TestCacheDBConnection
 
-db_peewee.maindb.init(os.path.join(TESTDIR, 'sickbeard.db'))
-db_peewee.cachedb.init(os.path.join(TESTDIR, 'cache.db'))
+
 
 #=================
 # test functions
@@ -203,6 +194,9 @@ db_peewee.cachedb.init(os.path.join(TESTDIR, 'cache.db'))
 def setUp_test_db():
     """upgrades the db to the latest version
     """
+    db_peewee.maindb.init(os.path.join(TESTDIR, 'sickbeard.db'))
+    db_peewee.cachedb.init(os.path.join(TESTDIR, 'cache.db'))
+
     # upgrading the db
     db.upgradeDatabase(db.DBConnection(), mainDB.InitialSchema)
     # fix up any db problems
@@ -211,11 +205,14 @@ def setUp_test_db():
     #and for cache.b too
     db.upgradeDatabase(db.DBConnection("cache.db"), cache_db.InitialSchema)
 
-
 def tearDown_test_db():
     """Deletes the test db
         although this seams not to work on my system it leaves me with an zero kb file
     """
+    if not db_peewee.maindb.is_closed():
+        db_peewee.maindb.close()
+    if not db_peewee.cachedb.is_closed():
+        db_peewee.cachedb.close()
     # uncomment next line so leave the db intact beween test and at the end
     #return False
     if os.path.exists(os.path.join(TESTDIR, TESTDBNAME)):

@@ -24,7 +24,6 @@ import re
 from sickbeard import helpers
 from sickbeard import logger
 from sickbeard import naming
-from sickbeard import db
 from sickbeard import db_peewee
 
 import sickbeard

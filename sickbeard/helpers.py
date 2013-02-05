@@ -35,7 +35,6 @@ from sickbeard.exceptions import MultipleShowObjectsException, ex
 from sickbeard import logger, classes
 from sickbeard.common import USER_AGENT, mediaExtensions, XML_NSMAP
 
-from sickbeard import db
 from sickbeard.db_peewee import TvShow
 from sickbeard import encodingKludge as ek
 

@@ -48,11 +48,19 @@ class DBConnection:
     def __init__(self, filename="sickbeard.db", suffix=None, row_type=None):
 
         self.filename = filename
-        self.connection = sqlite3.connect(dbFilename(filename), 20)
-        if row_type == "dict":
+        self.row_type = row_type
+        self._reconnect()
+
+    def _reconnect(self):
+        """Reconnect to the db.  Fixes problems with peewee and this class
+        not being on the same page for some state like table creation.
+        """
+        self.connection = sqlite3.connect(dbFilename(self.filename), 20)
+        if self.row_type == "dict":
             self.connection.row_factory = self._dict_factory
         else:
             self.connection.row_factory = sqlite3.Row
+
 
     def action(self, query, args=None):
 
@@ -116,12 +124,13 @@ class DBConnection:
 
     def tableInfo(self, tableName):
         # FIXME ? binding is not supported here, but I cannot find a way to escape a string manually
+        self._reconnect()
         cursor = self.connection.execute("PRAGMA table_info(%s)" % tableName)
         columns = {}
         for column in cursor:
             columns[column['name']] = { 'type': column['type'] }
         return columns
-    
+
     # http://stackoverflow.com/questions/3300464/how-can-i-get-dict-from-sqlite-query
     def _dict_factory(self, cursor, row):
         d = {}
@@ -173,9 +182,11 @@ class SchemaUpgrade (object):
         self.connection = connection
 
     def hasTable(self, tableName):
+        self.connection._reconnect()
         return len(self.connection.action("SELECT 1 FROM sqlite_master WHERE name = ?;", (tableName, )).fetchall()) > 0
 
     def hasColumn(self, tableName, column):
+        res = self.connection.tableInfo(tableName).get(column,None)
         return column in self.connection.tableInfo(tableName)
 
     def addColumn(self, table, column, type="NUMERIC", default=0):

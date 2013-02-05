@@ -1172,21 +1172,20 @@ def getEpList(epIDs, showid=None):
     if epIDs == None or len(epIDs) == 0:
         return []
 
-    query = "SELECT * FROM tv_episodes WHERE tvdbid in (%s)" % (",".join(['?'] * len(epIDs)),)
-    params = epIDs
+    query = TvEpisode.select().where(
+        (TvEpisode.tvdbid << epIDs)
+    )
 
     if showid != None:
-        query += " AND showid = ?"
-        params.append(showid)
-
-    myDB = db.DBConnection()
-    sqlResults = myDB.select(query, params)
+        query = query.where(
+            (TvEpisode.show == showid)
+        )
 
     epList = []
 
-    for curEp in sqlResults:
-        curShowObj = helpers.findCertainShow(showList, int(curEp["showid"]))
-        curEpObj = curShowObj.getEpisode(int(curEp["season"]), int(curEp["episode"]))
+    for curEp in query:
+        curShowObj = helpers.findCertainShow(showList, curEp.showid)
+        curEpObj = curShowObj.getEpisode(curEp.season, curEp.episode)
         epList.append(curEpObj)
 
     return epList

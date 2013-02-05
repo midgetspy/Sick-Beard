@@ -25,7 +25,6 @@ class DBPeeweeTests(test.SickbeardTestDBCase):
 
     def setUp(self):
         super(DBPeeweeTests, self).setUp()
-        self.resetDatabase()
         self.loadFixtures()
 
     def testHasMany(self):
@@ -46,7 +45,7 @@ class DBPeeweeTests(test.SickbeardTestDBCase):
 
     def testSelectByShow(self):
       t = TvShow.select().get()
-      q = TvEpisode.select().where(TvEpisode.showid == t.tvdb_id)
+      q = TvEpisode.select().join(TvShow).where(TvShow.tvdb_id == t.tvdb_id)
       self.assertEqual(q.count(), 5)
 
     def testMultiWhereClauses(self):
@@ -57,6 +56,22 @@ class DBPeeweeTests(test.SickbeardTestDBCase):
       query = query.where(TvEpisode.location == '')
       sql = query.sql()[0]
       self.assertIn('"location" = ?', sql)
+
+    def testAlterTable(self):
+        eps = [t for t in TvEpisode.select()]
+        with maindb.transaction():
+            q = peewee.RawQuery(
+                TvEpisode,
+                'alter table tv_episodes rename to tv_episodes_old')
+            q._execute()
+            q= peewee.RawQuery(
+                TvEpisode,
+                'drop index if exists tv_episodes_showid')
+            q._execute()
+            TvEpisode.create_table()
+            for e in eps:
+                e.set_id(None)
+                e.save(force_insert=True)
 
 
 if __name__ == '__main__':

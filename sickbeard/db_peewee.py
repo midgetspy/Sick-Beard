@@ -39,20 +39,6 @@ class DbVersion(BaseSickbeardModel):
         db_table = 'db_version'
 
 
-class History(BaseSickbeardModel):
-    action = peewee.IntegerField(null=True)
-    date = peewee.DateTimeField(null=True)
-    episode = peewee.IntegerField(null=True)
-    provider = peewee.TextField(null=True)
-    quality = peewee.IntegerField(null=True)
-    resource = peewee.TextField(null=True)
-    season = peewee.IntegerField(null=True)
-    showid = peewee.IntegerField(null=True)
-
-    class Meta:
-        db_table = 'history'
-
-
 class Info(BaseSickbeardModel):
     last_backlog = peewee.IntegerField(null=True)
     last_tvdb = peewee.IntegerField(null=True)
@@ -62,7 +48,6 @@ class Info(BaseSickbeardModel):
 
 
 class TvShow(BaseSickbeardModel):
-    show_name = peewee.CharField(null=True)
     air_by_date = peewee.BooleanField(default=False)
     airs = peewee.CharField(null=True)
     flatten_folders = peewee.BooleanField(default=False)
@@ -71,23 +56,28 @@ class TvShow(BaseSickbeardModel):
     location = peewee.TextField(null=True)
     network = peewee.TextField(null=True)
     paused = peewee.BooleanField(default=False)
-    #TODO: what should this be set to?
     quality = peewee.IntegerField(default=common.ANY)
     runtime = peewee.IntegerField(default=0)
-    show_id = peewee.PrimaryKeyField()
+    show_id = peewee.IntegerField()
     show_name = peewee.TextField(null=True)
     startyear = peewee.DateField(null=True)
     status = peewee.CharField(null=True)
-    tvdb_id = peewee.IntegerField(null=True)
+    tvdb_id = peewee.IntegerField(primary_key=True)
     tvr_id = peewee.IntegerField(null=True)
     tvr_name = peewee.TextField(null=True)
 
+    def save(self, force_insert=False):
+        #tvdb_id is the defacto unique id for shows and is used in all table
+        #joins everywhere.  There is a show_id in the table as the primary key
+        #though, this is a hack for now.
+        if self.tvdb_id is None:
+            raise ValueError('tvdb_id must be manually set')
+
+        self.show_id = self.tvdb_id
+        return super(TvShow, self).save(force_insert=force_insert)
+
     class Meta:
         db_table = 'tv_shows'
-
-    @property
-    def episodes(self):
-        return TvEpisode.select().where(TvEpisode.showid == self.tvdb_id)
 
 
 class TvEpisode(BaseSickbeardModel):
@@ -102,19 +92,34 @@ class TvEpisode(BaseSickbeardModel):
     name = peewee.TextField(null=True)
     release_name = peewee.TextField(null=True)
     season = peewee.IntegerField(null=True)
-    showid = peewee.IntegerField()
+    show = peewee.ForeignKeyField(TvShow,
+                                  related_name='episodes',
+                                  db_column='showid'
+                                 )
     status = peewee.IntegerField(null=True)
     tvdbid = peewee.IntegerField(null=True)
-
-    @property
-    def show(self):
-        return TvShow.select().where(TvShow.tvdb_id == self.showid).get()
 
     class Meta:
         db_table = 'tv_episodes'
 
+class History(BaseSickbeardModel):
+    action = peewee.IntegerField(null=True)
+    date = peewee.DateTimeField(null=True)
+    episode = peewee.IntegerField(null=True)
+    provider = peewee.TextField(null=True)
+    quality = peewee.IntegerField(null=True)
+    resource = peewee.TextField(null=True)
+    season = peewee.IntegerField(null=True)
+    show = peewee.ForeignKeyField(TvShow,
+                                  related_name='hostory',
+                                  db_column='showid'
+                                 )
 
-cachedb = peewee.SqliteDatabase(None)
+    class Meta:
+        db_table = 'history'
+
+
+cachedb = peewee.SqliteDatabase(None, threadlocals=True)
 
 class CacheBaseModel(peewee.Model):
     class Meta:

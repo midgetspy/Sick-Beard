@@ -30,13 +30,14 @@ import traceback
 import cherrypy
 import sickbeard
 import webserve
-from sickbeard import db, logger, exceptions, history, ui, helpers
+from sickbeard import logger, exceptions, history, ui, helpers
 from sickbeard.exceptions import ex
 from sickbeard import encodingKludge as ek
 from sickbeard import search_queue
 from sickbeard.common import SNATCHED, SNATCHED_PROPER, DOWNLOADED, SKIPPED, UNAIRED, IGNORED, ARCHIVED, WANTED, UNKNOWN
 from common import ANY, Quality, qualityPresetStrings, statusStrings
 from sickbeard import image_cache
+from sickbeard.db_peewee import TvEpisode
 from lib.tvdb_api import tvdb_api, tvdb_exceptions
 try:
     import json
@@ -136,20 +137,31 @@ class Api:
 
         t.sortedShowList = sorted(sickbeard.showList, lambda x, y: cmp(titler(x.name), titler(y.name)))
 
-        myDB = db.DBConnection(row_type="dict")
         seasonSQLResults = {}
         episodeSQLResults = {}
 
         for curShow in t.sortedShowList:
-            seasonSQLResults[curShow.tvdbid] = myDB.select("SELECT DISTINCT season FROM tv_episodes WHERE showid = ? ORDER BY season DESC", [curShow.tvdbid])
+            seasonSQLResults[curShow.tvdbid] = TvEpisode.select(
+                peewee.fn.Distinct(TvEpisode.season).alias('season')
+            ).where(
+                TvEpisode.showid == curShow.tvdbid
+            )
 
         for curShow in t.sortedShowList:
-            episodeSQLResults[curShow.tvdbid] = myDB.select("SELECT DISTINCT season,episode FROM tv_episodes WHERE showid = ? ORDER BY season DESC, episode DESC", [curShow.tvdbid])
+            episodeSQLResults[curShow.tvdbid] = TvEpisode.select(
+                peewee.fn.Distinct(
+                    TvEpisode.season, TvEpisode.episode
+                ).alias('season')
+            ).where(
+                TvEpisode.showid == curShow.tvdbid
+            ).order_by(
+                TvEpisode.season.desc(),
+                TvEpisode.episode.desc()
+            )
 
         t.seasonSQLResults = seasonSQLResults
         t.episodeSQLResults = episodeSQLResults
 
-        myDB.connection.close()
         if len(sickbeard.API_KEY) == 32:
             t.apikey = sickbeard.API_KEY
         else:
@@ -805,11 +817,13 @@ class CMD_Episode(ApiCall):
         if not showObj:
             return _responds(RESULT_FAILURE, msg="Show not found")
 
-        myDB = db.DBConnection(row_type="dict")
-        sqlResults = myDB.select("SELECT name, description, airdate, status, location, file_size, release_name FROM tv_episodes WHERE showid = ? AND episode = ? AND season = ?", [self.tvdbid, self.e, self.s])
-        if not len(sqlResults) == 1:
+        episode = TvEpisode.select().where(
+            (TvEpisode.showid == self.tvdbid) &
+            (TvEpisode.season == self.s) &
+            (TvEpisode.episode == self.e)
+        ).first()
+        if episode is None:
             raise ApiError("Episode not found")
-        episode = sqlResults[0]
         # handle path options
         # absolute vs relative vs broken
         showPath = None

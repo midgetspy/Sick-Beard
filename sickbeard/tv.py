@@ -120,20 +120,16 @@ class TVShow(object):
 
     def getAllEpisodes(self, season=None, has_location=False):
 
-        query = self.db_tvshow.episodes.select()
+        query = self.db_tvshow.episodes
         if season is not None:
           query = query.where(db_peewee.TvEpisode.season == season)
         if has_location is not None:
-          query = query.where(db_peewee.TvEpisode.location == location)
+          query = query.where(db_peewee.TvEpisode.location == has_location)
 
         # need ORDER episode ASC to rename multi-episodes in order S01E01-02
         query.order_by(
             db_peewee.TvEpisode.season.asc(),
             db_peewee.TvEpisode.episode.asc())
-
-        #TODO: figure out how to make PeeWee handle self joins.
-        # subselection to detect multi-episodes early, share_location > 0
-        # sql_selection =" (SELECT COUNT (*) FROM tv_episodes WHERE showid = tve.showid AND season = tve.season AND location != '' AND location = tve.location AND episode != tve.episode) AS share_location "
 
         ep_list = []
         for cur_result in query:
@@ -810,9 +806,10 @@ class TVShow(object):
     def saveToDB(self):
 
         logger.log(str(self.tvdbid) + ": Saving show info to database", logger.DEBUG)
-
+        new_save = False
         if self.db_tvshow is None:
-          self._db_tvshow = db_peewee.TvShow()
+            new_save = True
+            self._db_tvshow = db_peewee.TvShow()
 
         self.db_tvshow.tvdb_id = self.tvdbid
         self.db_tvshow.show_name = self.name
@@ -830,7 +827,7 @@ class TVShow(object):
         self.db_tvshow.startyear = self.startyear
         self.db_tvshow.tvr_name = self.tvrname
         self.db_tvshow.lang = self.lang
-        self.db_tvshow.save()
+        self.db_tvshow.save(force_insert=new_save)
 
 
     def __str__(self):
@@ -992,9 +989,10 @@ class TVEpisode(object):
                 str(self.season) + "x" + str(self.episode), logger.DEBUG)
 
             query = db_peewee.TvEpisode.select().where(
-                (db_peewee.TvEpisode.showid == self.show.tvdbid) &
+                (db_peewee.TvEpisode.show == self.show.db_tvshow) &
                 (db_peewee.TvEpisode.season == self.season) &
-                (db_peewee.TvEpisode.episode == self.episode))
+                (db_peewee.TvEpisode.episode == self.episode)
+            )
             logger.log(query.sql()[0], logger.DEBUG)
 
             if query.count() > 1:
@@ -1388,7 +1386,7 @@ class TVEpisode(object):
         self.db_tvepisode.location = self.location
         self.db_tvepisode.file_size = self.file_size
         self.db_tvepisode.release_name = self.release_name
-        self.db_tvepisode.showid = self.show.tvdbid
+        self.db_tvepisode.show = self.show.db_tvshow
         self.db_tvepisode.season = self.season
         self.db_tvepisode.episode = self.episode
 
@@ -1704,7 +1702,7 @@ class TVEpisode(object):
                 pattern = sickbeard.NAMING_ABD_PATTERN
             else:
                 pattern = sickbeard.NAMING_PATTERN
-            
+
         # split off the filename only, if they exist
         name_groups = re.split(r'[\\/]', pattern)
         return self._format_pattern(name_groups[-1], multi)

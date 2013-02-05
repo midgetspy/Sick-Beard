@@ -17,26 +17,44 @@
 # You should have received a copy of the GNU General Public License
 # along with Sick Beard.  If not, see <http://www.gnu.org/licenses/>.
 
-from collections import defaultdict
-
 import unittest
 import test_lib as test
-from sickbeard import helpers
+from sickbeard import name_cache
 from sickbeard.db_peewee import *
-import sickbeard
 
-class HelpersTests(test.SickbeardTestDBCase):
+class NameCacheTests(test.SickbeardTestDBCase):
 
-    def test_searchDBForShow(self):
-        self.assertIsNone(helpers.searchDBForShow('Testing Show'))
-        TvShow(tvdb_id=1, show_name='Testing Show').save(force_insert=True)
-        self.assertIsNotNone(helpers.searchDBForShow('Testing Show'))
+    def test_addNameToCache(self):
+        self.assertEqual(
+            SceneName.select().where(SceneName.name == 'foo').count(),
+            0
+        )
+        name_cache.addNameToCache('foo', 1)
+        self.assertEqual(
+            SceneName.select().where(SceneName.name == 'foo').count(),
+            1
+        )
 
+    def test_retrieveNameFromCache(self):
+        self.assertEqual(
+            SceneName.select().where(SceneName.name == 'foo').count(),
+            0
+        )
+        self.assertIsNone(name_cache.retrieveNameFromCache('foo'))
+        name_cache.addNameToCache('foo', 1)
+        self.assertIsNotNone(name_cache.retrieveNameFromCache('foo'))
+
+    def test_clearCache(self):
+        name_cache.addNameToCache('foo', 0)
+        self.assertIsNotNone(name_cache.retrieveNameFromCache('foo'))
+        name_cache.clearCache()
+        self.assertIsNone(name_cache.retrieveNameFromCache('foo'))
 
 if __name__ == '__main__':
 
     print "=================="
-    print "STARTING - Config TESTS"
+    print "STARTING - Name Cache TESTS"
     print "=================="
     print "######################################################################"
     unittest.main()
+

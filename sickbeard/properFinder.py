@@ -21,7 +21,7 @@ import operator
 
 import sickbeard
 
-from sickbeard import db
+from sickbeard.db_peewee import TvEpisode, History
 from sickbeard import helpers, logger, show_name_helpers
 from sickbeard import providers
 from sickbeard import search
@@ -172,12 +172,17 @@ class ProperFinder():
                     continue
 
             # check if we actually want this proper (if it's the right quality)
-            sqlResults = db.DBConnection().select("SELECT status FROM tv_episodes WHERE showid = ? AND season = ? AND episode = ?", [curProper.tvdbid, curProper.season, curProper.episode])
-            if not sqlResults:
+            result = TvEpisode.select().where(
+                (TvEpisode.show == curProper.tvdbid) &
+                (TvEpisode.episode == curProper.episode) &
+                (TvEpisode.season == curProper.season)
+            ).first()
+            if result is None:
                 continue
-            oldStatus, oldQuality = Quality.splitCompositeStatus(int(sqlResults[0]["status"]))
+            oldStatus, oldQuality = Quality.splitCompositeStatus(result.status)
 
-            # only keep the proper if we have already retrieved the same quality ep (don't get better/worse ones)
+            # only keep the proper if we have already retrieved the same
+            # quality ep (don't get better/worse ones)
             if oldStatus not in (DOWNLOADED, SNATCHED) or oldQuality != curProper.quality:
                 continue
 
@@ -195,15 +200,17 @@ class ProperFinder():
             historyLimit = datetime.datetime.today() - datetime.timedelta(days=30)
 
             # make sure the episode has been downloaded before
-            myDB = db.DBConnection()
-            historyResults = myDB.select(
-                "SELECT resource FROM history "
-                "WHERE showid = ? AND season = ? AND episode = ? AND quality = ? AND date >= ? "
-                "AND action IN (" + ",".join([str(x) for x in Quality.SNATCHED]) + ")",
-                        [curProper.tvdbid, curProper.season, curProper.episode, curProper.quality, historyLimit.strftime(history.dateFormat)])
+            result = History.select().where(
+                (History.show == curProper.tvdbid) &
+                (History.season == curProper.season) &
+                (History.episode == curProper.episode) &
+                (History.quality == curProper.quality) &
+                (History.date >= historyLimit.strftime(history.dateFormat)) &
+                (History.aciton << [str(x) for x in Quality.SNATCHED])
+            ).first()
 
             # if we didn't download this episode in the first place we don't know what quality to use for the proper so we can't do it
-            if len(historyResults) == 0:
+            if result is not None:
                 logger.log(u"Unable to find an original history entry for proper "+curProper.name+" so I'm not downloading it.")
                 continue
 

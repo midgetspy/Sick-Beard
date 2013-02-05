@@ -16,50 +16,51 @@
 # You should have received a copy of the GNU General Public License
 # along with Sick Beard.  If not, see <http://www.gnu.org/licenses/>.
 
-from sickbeard import db
+from sickbeard.db_peewee import SceneName
 from sickbeard.helpers import sanitizeSceneName
 
 def addNameToCache(name, tvdb_id):
     """
     Adds the show & tvdb id to the scene_names table in cache.db.
-    
+
     name: The show name to cache
-    tvdb_id: The tvdb id that this show should be cached with (can be None/0 for unknown)
+    tvdb_id: The tvdb id that this show should be cached with (can be None/0
+        for unknown)
     """
-    
-    # standardize the name we're using to account for small differences in providers (aka NZBMatrix sucks)
+
+    # standardize the name we're using to account for small differences
+    # in providers (aka NZBMatrix sucks)
     name = sanitizeSceneName(name)
-    
+
     if not tvdb_id:
         tvdb_id = 0
-    
-    cacheDB = db.DBConnection('cache.db')
-    cacheDB.action("INSERT INTO scene_names (tvdb_id, name) VALUES (?, ?)", [tvdb_id, name])
+
+    SceneName(tvdb_id=tvdb_id, name=name).save(force_insert=True)
+
 
 def retrieveNameFromCache(name):
     """
     Looks up the given name in the scene_names table in cache.db.
-    
-    name: The show name to look up.
-    
-    Returns: the tvdb id that resulted from the cache lookup or None if the show wasn't found in the cache
-    """
-    
-    # standardize the name we're using to account for small differences in providers (aka NZBMatrix sucks)
-    name = sanitizeSceneName(name)
-    
-    cacheDB = db.DBConnection('cache.db')
-    cache_results = cacheDB.select("SELECT * FROM scene_names WHERE name = ?", [name])
 
-    if not cache_results:
+    name: The show name to look up.
+
+    Returns: the tvdb id that resulted from the cache lookup or None if
+    the show wasn't found in the cache
+    """
+
+    # standardize the name we're using to account for small differences
+    # in providers (aka NZBMatrix sucks)
+    name = sanitizeSceneName(name)
+
+    result = SceneName.select().where(SceneName.name == name).first()
+    if not result:
         return None
-    
-    return int(cache_results[0]["tvdb_id"])
+
+    return result.tvdb_id
+
 
 def clearCache():
     """
     Deletes all "unknown" entries from the cache (names with tvdb_id of 0).
     """
-    cacheDB = db.DBConnection('cache.db')
-    cacheDB.action("DELETE FROM scene_names WHERE tvdb_id = ?", [0])
-
+    SceneName.delete().where(SceneName.tvdb_id == 0).execute()

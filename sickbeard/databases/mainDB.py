@@ -18,9 +18,11 @@
 
 import sickbeard
 import os.path
+import peewee
 
 from sickbeard import db, common, helpers, logger
 from sickbeard.providers.generic import GenericProvider
+from sickbeard.db_peewee import *
 
 from sickbeard import encodingKludge as ek
 from sickbeard.name_parser.parser import NameParser, InvalidNameException 
@@ -95,14 +97,10 @@ class InitialSchema (db.SchemaUpgrade):
         return self.hasTable("tv_shows")
 
     def execute(self):
-        queries = [
-            "CREATE TABLE tv_shows (show_id INTEGER PRIMARY KEY, location TEXT, show_name TEXT, tvdb_id NUMERIC, network TEXT, genre TEXT, runtime NUMERIC, quality NUMERIC, airs TEXT, status TEXT, seasonfolders NUMERIC, paused NUMERIC, startyear NUMERIC);",
-            "CREATE TABLE tv_episodes (episode_id INTEGER PRIMARY KEY, showid NUMERIC, tvdbid NUMERIC, name TEXT, season NUMERIC, episode NUMERIC, description TEXT, airdate NUMERIC, hasnfo NUMERIC, hastbn NUMERIC, status NUMERIC, location TEXT);",
-            "CREATE TABLE info (last_backlog NUMERIC, last_tvdb NUMERIC);",
-            "CREATE TABLE history (action NUMERIC, date NUMERIC, showid NUMERIC, season NUMERIC, episode NUMERIC, quality NUMERIC, resource TEXT, provider NUMERIC);"
-        ]
-        for query in queries:
-            self.connection.action(query)
+        tables = [TvShow, TvEpisode, Info, History]
+        with maindb.transaction():
+            for table in tables:
+                table.create_table()
 
 class AddTvrId (InitialSchema):
     def test(self):
@@ -139,23 +137,44 @@ class NumericProviders (AddAirdateIndex):
                 7: 'ezrss'}
 
     def execute(self):
-        self.connection.action("ALTER TABLE history RENAME TO history_old")
-        self.connection.action("CREATE TABLE history (action NUMERIC, date NUMERIC, showid NUMERIC, season NUMERIC, episode NUMERIC, quality NUMERIC, resource TEXT, provider TEXT);")
+        histories = [h for h in History.select()]
+        with maindb.transaction():
+            q = peewee.RawQuery(
+                History,
+                'alter table history rename to history_old')
+            q._execute()
+            History.create_table()
+            for h in histories:
+                provider = 'unknown'
+                try:
+                    provider = self.histMap[int(curResult["provider"])]
+                except ValueError:
+                    provider = curResult["provider"]
+                h.set_id(None)
+                h.provider = provider
+                h.save(force_insert=True)
 
-        for x in self.histMap.keys():
-            self.upgradeHistory(x, self.histMap[x])
 
-    def upgradeHistory(self, number, name):
-        oldHistory = self.connection.action("SELECT * FROM history_old").fetchall()
-        for curResult in oldHistory:
-            sql = "INSERT INTO history (action, date, showid, season, episode, quality, resource, provider) VALUES (?,?,?,?,?,?,?,?)"
-            provider = 'unknown'
-            try:
-                provider = self.histMap[int(curResult["provider"])]
-            except ValueError:
-                provider = curResult["provider"]
-            args = [curResult["action"], curResult["date"], curResult["showid"], curResult["season"], curResult["episode"], curResult["quality"], curResult["resource"], provider]
-            self.connection.action(sql, args)
+class AddHistoryPrimaryKey(InitialSchema):
+    def test(self):
+        return self.hasColumn("history", "id")
+
+    class HistoryOld(History):
+        class Meta:
+            db_table = 'history_old'
+
+    def execute(self):
+        histories = [h for h in History.select()]
+        with maindb.transaction():
+            q = peewee.RawQuery(
+                History,
+                'alter table history rename to history_old')
+            q._execute()
+            History.create_table()
+            for h in histories:
+                h.set_id(None)
+                h.save(force_insert=True)
+
 
 class NewQualitySettings (NumericProviders):
     def test(self):
@@ -287,7 +306,7 @@ class DropOldHistoryTable(NewQualitySettings):
         return self.checkDBVersion() >= 2
 
     def execute(self):
-        self.connection.action("DROP TABLE history_old")
+        self.connection.action("DROP TABLE IF EXISTS history_old")
         self.incDBVersion()
 
 class UpgradeHistoryForGenericProviders(DropOldHistoryTable):
@@ -308,7 +327,7 @@ class UpgradeHistoryForGenericProviders(DropOldHistoryTable):
 
 class AddAirByDateOption(UpgradeHistoryForGenericProviders):
     def test(self):
-        return self.checkDBVersion() >= 4
+        return self.hasColumn('tv_shows', 'air_by_date')
 
     def execute(self):
         self.connection.action("ALTER TABLE tv_shows ADD air_by_date NUMERIC")
@@ -519,7 +538,7 @@ class AddSizeAndSceneNameFields(FixAirByDateSetting):
 class RenameSeasonFolders(AddSizeAndSceneNameFields):
 
     def test(self):
-        return self.checkDBVersion() >= 11
+        return not self.hasColumn("tv_shows", "seasonfolders")
     
     def execute(self):
         

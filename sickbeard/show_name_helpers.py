@@ -17,12 +17,13 @@
 # along with Sick Beard.  If not, see <http://www.gnu.org/licenses/>.
 
 import sickbeard
+import peewee
 
 from sickbeard.common import countryList
 from sickbeard.helpers import sanitizeSceneName
 from sickbeard.scene_exceptions import get_scene_exceptions
 from sickbeard import logger
-from sickbeard import db
+from sickbeard.db_peewee import TvEpisode, TvShow
 
 import re
 import datetime
@@ -113,19 +114,22 @@ def makeSceneShowSearchStrings(show):
     return map(sanitizeSceneName, showNames)
 
 
-def makeSceneSeasonSearchString (show, segment, extraSearchType=None):
-
-    myDB = db.DBConnection()
+def makeSceneSeasonSearchString(show, segment, extraSearchType=None):
 
     if show.air_by_date:
         numseasons = 0
-        
+
         # the search string for air by date shows is just 
         seasonStrings = [segment]
-    
+
     else:
-        numseasonsSQlResult = myDB.select("SELECT COUNT(DISTINCT season) as numseasons FROM tv_episodes WHERE showid = ? and season != 0", [show.tvdbid])
-        numseasons = int(numseasonsSQlResult[0][0])
+        numseasons = TvEpisode.select(
+            peewee.fn.Count(
+                peewee.fn.Distinct(TvEpisode.season)
+            ).alias('numseasons')
+        ).where(
+            (TvEpisode.season != 0)
+        ).join(TvShow).scalar()
 
         seasonStrings = ["S%02d" % segment]
         # since nzbmatrix allows more than one search per request we search SxEE results too
@@ -161,8 +165,8 @@ def makeSceneSeasonSearchString (show, segment, extraSearchType=None):
                     term_list = ['"'+x+'"' for x in term_list]
 
                 toReturn.append('"'+curShow+'"')
-    
-    if extraSearchType == "nzbmatrix":     
+
+    if extraSearchType == "nzbmatrix":
         toReturn = ['+('+','.join(toReturn)+')']
         if term_list:
             toReturn.append('+('+','.join(term_list)+')')
@@ -171,9 +175,13 @@ def makeSceneSeasonSearchString (show, segment, extraSearchType=None):
 
 def makeSceneSearchString (episode):
 
-    myDB = db.DBConnection()
-    numseasonsSQlResult = myDB.select("SELECT COUNT(DISTINCT season) as numseasons FROM tv_episodes WHERE showid = ? and season != 0", [episode.show.tvdbid])
-    numseasons = int(numseasonsSQlResult[0][0])
+    numseasons = TvEpisode.select(
+        peewee.fn.Count(
+            peewee.fn.Distinct(TvEpisode.season)
+        ).alias('numseasons')
+    ).where(
+        (TvEpisode.season != 0)
+    ).join(TvShow).scalar()
 
     # see if we should use dates instead of episodes
     if episode.show.air_by_date and episode.airdate != datetime.date.fromordinal(1):

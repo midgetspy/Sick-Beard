@@ -89,6 +89,12 @@ class SceneTests(test.SickbeardTestDBCase):
         self._test_filterBadReleases('German.Show.S02.Some.Stuff-Grp', True)
         self._test_filterBadReleases('Show.S02.This.Is.German', False)
 
+    def test_makeSceneSeasonSearchString(self):
+        self.loadFixtures()
+        s = Show(82066)
+        segment = 5
+        result = show_name_helpers.makeSceneSeasonSearchString(s, segment)
+        self.assertEqual(result, [u'Fringe'])
 
 class SceneExceptionTestCase(test.SickbeardTestDBCase):
 
@@ -131,11 +137,8 @@ class SceneExceptionTestCase(test.SickbeardTestDBCase):
 
 
 if __name__ == '__main__':
-    if len(sys.argv) > 1:
-        suite = unittest.TestLoader().loadTestsFromName('scene_helpers_tests.SceneExceptionTestCase.test_' + sys.argv[1])
-        unittest.TextTestRunner(verbosity=2).run(suite)
-    else:
-        suite = unittest.TestLoader().loadTestsFromTestCase(SceneTests)
-        unittest.TextTestRunner(verbosity=2).run(suite)
-        suite = unittest.TestLoader().loadTestsFromTestCase(SceneExceptionTestCase)
-        unittest.TextTestRunner(verbosity=2).run(suite)
+    print "=================="
+    print "STARTING - Scene Helpers Tests"
+    print "=================="
+    print "######################################################################"
+    unittest.main()
