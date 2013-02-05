@@ -61,15 +61,16 @@ class uTorrentAPI(GenericClient):
     def _set_torrent_label(self, result):
         
         params = {'action':'setsetting', 
-                  'hash':self._get_torrent_hash(result), 
+                  'hash':result.hash, 
                   's':'label', 
                   'v':sickbeard.TORRENT_LABEL
                   }
         return self._request(params=params)
     
     def set_torrent_pause(self, result):
+
         if sickbeard.TORRENT_PAUSED:
-            params = {'action':'pause', 'hash':self._get_torrent_hash(result)}
+            params = {'action':'pause', 'hash':result.hash}
             return self._request(params=params)
         
 api = uTorrentAPI()       

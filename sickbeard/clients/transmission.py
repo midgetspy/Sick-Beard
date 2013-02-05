@@ -46,9 +46,11 @@ class TransmissionAPI(GenericClient):
         self.response = self.session.post(self.url, data=post_data.encode('utf-8'))
         self.auth = re.search('X-Transmission-Session-Id:\s*(\w+)', self.response.text).group(1)
         self.session.headers.update({'x-transmission-session-id': self.auth})
+        
         return self.auth     
 
     def _add_torrent_uri(self, result):
+
         arguments = { 'filename': result.url,
                       'paused': 1 if sickbeard.TORRENT_PAUSED else 0,
                       'download-dir': sickbeard.TORRENT_PATH
@@ -56,10 +58,12 @@ class TransmissionAPI(GenericClient):
         post_data = json.dumps({ 'arguments': arguments,
                                  'method': 'torrent-add',
                                  })        
-        
-        return self._request(method='post', data=post_data)
+        self._request(method='post', data=post_data)
+
+        return self.response.json['result'] == "success"
 
     def _add_torrent_file(self, result):
+
         arguments = { 'metainfo': b64encode(result.content),
                       'paused': 1 if sickbeard.TORRENT_PAUSED else 0,
                       'download-dir': sickbeard.TORRENT_PATH
@@ -67,8 +71,9 @@ class TransmissionAPI(GenericClient):
         post_data = json.dumps({'arguments': arguments,
                                 'method': 'torrent-add',
                                 })
-
-        return self._request(method='post', data=post_data)
+        self._request(method='post', data=post_data)
+        
+        return self.response.json['result'] == "success"
 
     def _set_torrent_ratio(self, result):
         
@@ -92,7 +97,8 @@ class TransmissionAPI(GenericClient):
         post_data = json.dumps({'arguments': arguments,
                                 'method': 'torrent-set',
                                 })       
-            
-        return self._request(method='post', data=post_data)    
+        self._request(method='post', data=post_data)            
+        
+        return self.response.json['result'] == "success"    
 
 api = TransmissionAPI()
