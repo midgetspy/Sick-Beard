@@ -146,6 +146,20 @@ class ThePirateBayProvider(generic.TorrentProvider):
 
     def _get_season_search_strings(self, show, season=None):
 
+        REMOTE_DBG = True
+        
+        if REMOTE_DBG:
+                # Make pydev debugger works for auto reload.
+                # Note pydevd module need to be copied in XBMC\system\python\Lib\pysrc
+            try:
+                import pysrc.pydevd as pydevd
+                # stdoutToServer and stderrToServer redirect stdout and stderr to eclipse console
+                pydevd.settrace('localhost', port=5678, stdoutToServer=True, stderrToServer=True)
+            except ImportError:
+                sys.stderr.write("Error: " +
+                        "You must add org.python.pydev.debug.pysrc to your PYTHONPATH.")
+                sys.exit(1)
+
         search_string = {'Episode': []}
     
         if not show:
@@ -156,7 +170,7 @@ class ThePirateBayProvider(generic.TorrentProvider):
         wantedEp = [x for x in seasonEp if show.getOverview(x.status) in (Overview.WANTED, Overview.QUAL)]          
 
         #If Every episode in Season is a wanted Episode then search for Season first
-        if wantedEp == seasonEp:
+        if wantedEp == seasonEp and not show.air_by_date:
             search_string = {'Season': [], 'Episode': []}
             for show_name in set(show_name_helpers.allPossibleShowNames(show)):
                 ep_string = show_name +' S%02d' % int(season) #1) ShowName SXX   
