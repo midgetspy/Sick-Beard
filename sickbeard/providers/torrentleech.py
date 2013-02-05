@@ -54,7 +54,7 @@ class TorrentLeechProvider(generic.TorrentProvider):
         
         self.categories = "2,26,32"
         
-        self.session = requests.Session()
+        self.session = None
     
     def _doLogin(self):
 
@@ -63,6 +63,8 @@ class TorrentLeechProvider(generic.TorrentProvider):
                         'remember_me': 'on',
                         'login': 'submit',
                         }
+        
+        self.session = requests.Session()
         
         try:
             response = self.session.get(self.urls['login'], params=login_params, timeout=30)
@@ -212,6 +214,9 @@ class TorrentLeechProvider(generic.TorrentProvider):
 
     def getURL(self, url, headers=None):
 
+        if not self.session:
+            self._doLogin()
+
         if not headers:
             headers = []
 
@@ -222,7 +227,6 @@ class TorrentLeechProvider(generic.TorrentProvider):
             return None
 
         return response.content
-
        
 class TorrentLeechCache(tvcache.TVCache):
 

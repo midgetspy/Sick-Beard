@@ -2381,8 +2381,6 @@ class Home:
         if not host.endswith("/"):
             host = host + "/"
         
-        logger.log(u"Sending Torrent to Deluge Client", logger.DEBUG)
-
         client = clients.getClientIstance(torrent_method)
         
         connection, accesMsg = client(host, username, password).testAuthentication()
