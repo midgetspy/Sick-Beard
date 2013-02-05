@@ -160,6 +160,8 @@ class Quality:
 
         if checkName(["(pdtv|hdtv|dsr|tvrip).(xvid|x264)"], all) and not checkName(["(720|1080)[pi]"], all):
             return Quality.SDTV
+        elif checkName(["(web.dl|webrip).(x264|h.?264)"], any) and not checkName(["(720|1080)[pi]"], all):
+            return Quality.SDTV
         elif checkName(["(dvdrip|bdrip)(.ws)?.(xvid|divx|x264)"], any) and not checkName(["(720|1080)[pi]"], all):
             return Quality.SDDVD
         elif checkName(["720p", "hdtv", "x264"], all) or checkName(["hr.ws.pdtv.x264"], any) and not checkName(["(1080)[pi]"], all):          
@@ -170,6 +172,8 @@ class Quality:
             return Quality.FULLHDTV                                                                    
         elif checkName(["720p", "web.dl"], all) or checkName(["720p", "itunes", "h.?264"], all):       
             return Quality.HDWEBDL                                                                     
+        elif checkName(["720p", "webrip", "(x264|h.?264)"], all):
+            return Quality.HDWEBDL
         elif checkName(["1080p", "web.dl"], all) or checkName(["1080p", "itunes", "h.?264"], all):     
             return Quality.FULLHDWEBDL                                                                 
         elif checkName(["720p", "bluray", "x264"], all) or checkName(["720p", "hddvd", "x264"], all):  
