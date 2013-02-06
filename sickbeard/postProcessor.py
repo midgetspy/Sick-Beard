@@ -744,10 +744,8 @@ class PostProcessor(object):
             release_name = self._get_release_name()
             if release_name is not None:
                 self._log(u"Marking release as bad: " + release_name, logger.DEBUG)
-                # We don't want a record added if it doesn't exist (e.g., when post-processing the folder from an nzb
-                # that SB didn't find), so we don't use upsert here.
-                myDB = db.DBConnection()
-                myDB.select("UPDATE history SET failed=1 WHERE resource LIKE ?", [re.sub("[\.\-\ ]", "_", release_name)])
+                myDB = db.DBConnection('failed.db')
+                myDB.select("INSERT INTO failed (release) VALUES (?)", [re.sub("[\.\-\ ]", "_", release_name)])
             else:
                 self._log(u"Release name not found. Can't mark as invalid. REPORT THIS", logger.ERROR)
                 return False

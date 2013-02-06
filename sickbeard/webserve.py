@@ -150,6 +150,7 @@ ManageMenu = [
     { 'title': 'Backlog Overview',          'path': 'manage/backlogOverview' },
     { 'title': 'Manage Searches',           'path': 'manage/manageSearches'  },
     { 'title': 'Episode Status Management', 'path': 'manage/episodeStatuses' },
+    { 'title': 'Failed Downloads',          'path': 'manage/failedDownloads' },
 ]
 
 class ManageSearches:
@@ -567,6 +568,31 @@ class Manage:
                           messageDetail)
 
         redirect("/manage")
+
+    @cherrypy.expose
+    def failedDownloads(self, limit=100, toRemove=None):
+
+        myDB = db.DBConnection("failed.db")
+
+        if toRemove != None:
+            toRemove = toRemove.split("|")
+        else:
+            toRemove = []
+
+        for release in toRemove:
+            myDB.action('DELETE FROM failed WHERE release = ?', [release])
+
+        if limit == "0":
+            sqlResults = myDB.select("SELECT * FROM failed")
+        else:
+            sqlResults = myDB.select("SELECT * FROM failed LIMIT ?", [limit])
+
+        t = PageTemplate(file="manage_failedDownloads.tmpl")
+        t.failedResults = sqlResults
+        t.limit = limit
+        t.submenu = ManageMenu
+
+        return _munge(t)
 
 
 class History:

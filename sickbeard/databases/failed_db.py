@@ -1,4 +1,4 @@
-# Author: Nic Wolfe <nic@wolfeden.ca>
+# Author: Tyler Fenby <tylerfenby@gmail.com>
 # URL: http://code.google.com/p/sickbeard/
 #
 # This file is part of Sick Beard.
@@ -16,4 +16,21 @@
 # You should have received a copy of the GNU General Public License
 # along with Sick Beard.  If not, see <http://www.gnu.org/licenses/>.
 
-__all__ = ["mainDB", "cache", "failed"]
+from sickbeard import db
+
+# Add new migrations at the bottom of the list; subclass the previous migration.
+class InitialSchema(db.SchemaUpgrade):
+    def test(self):
+        return self.hasTable("failed")
+
+    def execute(self):
+        queries = [
+            ("CREATE TABLE failed (release TEXT);",),
+            ("CREATE TABLE db_version (db_version INTEGER);",),
+            ("INSERT INTO db_version (db_version) VALUES (?)", 1),
+        ]
+        for query in queries:
+            if len(query) == 1:
+                self.connection.action(query[0])
+            else:
+                self.connection.action(query[0], query[1:])
