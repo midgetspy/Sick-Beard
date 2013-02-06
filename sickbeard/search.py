@@ -20,6 +20,7 @@ from __future__ import with_statement
 
 import os
 import traceback
+import re
 
 import sickbeard
 
@@ -207,7 +208,7 @@ def pickBestResult(results, quality_list=None):
             continue
 
         myDB = db.DBConnection()
-        sql_results = myDB.select("SELECT failed FROM history WHERE failed = 1 AND resource = ?", [cur_result.name])
+        sql_results = myDB.select("SELECT failed FROM history WHERE failed = 1 AND resource LIKE ?", [re.sub("[\.\-\ ]", "_", cur_result.name)])
         if len(sql_results) > 0:
             logger.log(cur_result.name+" has previously failed, rejecting it")
             continue

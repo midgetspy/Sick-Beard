@@ -697,14 +697,29 @@ class PostProcessor(object):
         
         return False
 
+    def _get_release_name(self):
+        cur_release_name = None
+        if self.good_results[self.NZB_NAME]:
+            cur_release_name = self.nzb_name
+            if cur_release_name.lower().endswith('.nzb'):
+                cur_release_name = cur_release_name.rpartition('.')[0]
+        elif self.good_results[self.FOLDER_NAME]:
+            cur_release_name = self.folder_name
+        elif self.good_results[self.FILE_NAME]:
+            cur_release_name = self.file_name
+            # take the extension off the filename, it's not needed
+            if '.' in self.file_name:
+                cur_release_name = self.file_name.rpartition('.')[0]
+        return cur_release_name
+
     def process(self):
         """
-        Post-process a given file
+        Post-process a given file or (if failed) dir/nzb
         """
 
         self._log(u"Processing " + self.file_path + " (" + str(self.nzb_name) + ")")
 
-        if os.path.isdir(self.file_path):
+        if os.path.isdir(self.file_path) and not self.failed:
             self._log(u"File " + self.file_path + " seems to be a directory")
             return False
         for ignore_file in self.IGNORED_FILESTRINGS:
@@ -726,6 +741,18 @@ class PostProcessor(object):
         ep_obj = self._get_ep_obj(tvdb_id, season, episodes)
 
         if self.failed:
+            release_name = self._get_release_name()
+            if release_name is not None:
+                self._log(u"Marking release as bad: " + release_name, logger.DEBUG)
+                # We don't want a record added if it doesn't exist (e.g., when post-processing the folder from an nzb
+                # that SB didn't find), so we don't use upsert here.
+                myDB = db.DBConnection()
+                myDB.select("UPDATE history SET failed=1 WHERE resource LIKE ?", [re.sub("[\.\-\ ]", "_", release_name)])
+            else:
+                self._log(u"Release name not found. Can't mark as invalid. REPORT THIS", logger.ERROR)
+                return False
+
+            logger.log(u"Setting episode(s) back to Wanted", logger.DEBUG)
             for curEp in [ep_obj] + ep_obj.relatedEps:
                 self._log(u"Setting episode back to wanted: "+curEp.name)
                 with curEp.lock:
@@ -792,20 +819,7 @@ class PostProcessor(object):
         # update the ep info before we rename so the quality & release name go into the name properly
         for cur_ep in [ep_obj] + ep_obj.relatedEps:
             with cur_ep.lock:
-                cur_release_name = None
-
-                # use the best possible representation of the release name
-                if self.good_results[self.NZB_NAME]:
-                    cur_release_name = self.nzb_name
-                    if cur_release_name.lower().endswith('.nzb'):
-                        cur_release_name = cur_release_name.rpartition('.')[0]
-                elif self.good_results[self.FOLDER_NAME]:
-                    cur_release_name = self.folder_name
-                elif self.good_results[self.FILE_NAME]:
-                    cur_release_name = self.file_name
-                    # take the extension off the filename, it's not needed
-                    if '.' in self.file_name:
-                        cur_release_name = self.file_name.rpartition('.')[0]
+                cur_release_name = self._get_release_name()
 
                 if cur_release_name:
                     self._log("Found release name " + cur_release_name, logger.DEBUG)
