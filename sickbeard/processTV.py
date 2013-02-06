@@ -68,34 +68,8 @@ def processDir (dirName, nzbName=None, recurse=False, failed=False):
         return returnStr
 
     if failed:
-        if nzbName != None:
-            # Assume we're being passed an nzb w/ the .nzb extension
-            # TODO: Verify whether or not this is always the case
-            if '.' in nzbName:
-                nzbName = nzbName.rpartition(".")[0]
-        else:
-            # Assume folder name = resource name
-            nzbName = ek.ek(os.path.basename, dirName)
-            returnStr += logHelper(u"nzb name not provided. Guessing from dir name: " + nzbName)
-
-        returnStr += logHelper(u"Failed download detected: " + nzbName)
-
-        myDB = db.DBConnection()
-        # We don't want a record added if it doesn't exist (e.g., when post-processing the folder from an nzb
-        # that SB didn't find), so we don't use upsert here.
-        myDB.select("UPDATE history SET failed=1 WHERE resource=?", [nzbName])
-
-        if sickbeard.DELETE_FAILED:
-            returnStr += logHelper(u"Deleting folder of failed download " + dirName, logger.DEBUG)
-            try:
-                shutil.rmtree(dirName)
-            except (OSError, IOError), e:
-                returnStr += logHelper(u"Warning: Unable to remove the failed folder " + dirName + ": " + ex(e), logger.WARNING)
-
-        returnStr += logHelper(u"Setting episode(s) back to Wanted")
-
+        returnStr += logHelper(u"Failed download detected: (" + nzbName + ", " + dirName + ")")
         try:
-            # w/ nzbName properly set, we should get all related episodes
             processor = postProcessor.PostProcessor(dirName, nzbName, failed=failed)
             process_result = processor.process()
             process_fail_message = ""
@@ -104,6 +78,13 @@ def processDir (dirName, nzbName=None, recurse=False, failed=False):
             process_fail_message = ex(e)
 
         returnStr += processor.log 
+
+        if sickbeard.DELETE_FAILED and process_result:
+            returnStr += logHelper(u"Deleting folder of failed download " + dirName, logger.DEBUG)
+            try:
+                shutil.rmtree(dirName)
+            except (OSError, IOError), e:
+                returnStr += logHelper(u"Warning: Unable to remove the failed folder " + dirName + ": " + ex(e), logger.WARNING)
 
         if process_result:
             returnStr += logHelper(u"Processing succeeded for "+nzbName)
