@@ -536,3 +536,12 @@ class RenameSeasonFolders(AddSizeAndSceneNameFields):
         self.connection.action("DROP TABLE tmp_tv_shows")
 
         self.incDBVersion()
+
+class TrackFailedInHistory(RenameSeasonFolders):
+
+    def test(self):
+        return self.checkDBVersion() >= 12
+
+    def execute(self):
+        self.addColumn("history", "failed")
+        self.incDBVersion()

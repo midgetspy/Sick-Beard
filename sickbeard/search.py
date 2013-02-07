@@ -20,6 +20,7 @@ from __future__ import with_statement
 
 import os
 import traceback
+import re
 
 import sickbeard
 
@@ -34,6 +35,7 @@ from sickbeard import nzbSplitter
 from sickbeard import ui
 from sickbeard import encodingKludge as ek
 from sickbeard import providers
+from sickbeard import db
 
 from sickbeard.exceptions import ex
 from sickbeard.providers.generic import GenericProvider
@@ -203,6 +205,12 @@ def pickBestResult(results, quality_list=None):
         
         if quality_list and cur_result.quality not in quality_list:
             logger.log(cur_result.name+" is a quality we know we don't want, rejecting it", logger.DEBUG)
+            continue
+
+        myDB = db.DBConnection()
+        sql_results = myDB.select("SELECT failed FROM history WHERE failed = 1 AND resource LIKE ?", [re.sub("[\.\-\ ]", "_", cur_result.name)])
+        if len(sql_results) > 0:
+            logger.log(cur_result.name+" has previously failed, rejecting it")
             continue
         
         if not bestResult or bestResult.quality < cur_result.quality and cur_result.quality != Quality.UNKNOWN:

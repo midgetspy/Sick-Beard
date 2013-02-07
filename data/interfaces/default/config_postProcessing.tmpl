@@ -92,6 +92,14 @@
                             </label>
                         </div>
 
+                        <div class="field-pair">
+                            <input type="checkbox" name="delete_failed" id="delete_failed" #if $sickbeard.DELETE_FAILED == True then "checked=\"checked\"" else ""# />
+                            <label class="clearfix" for="delete_failed">
+                                <span class="component-title">Delete Failed</span>
+                                <span class="component-desc">Delete files left over from a failed download?</span>
+                            </label>
+                        </div>
+
                         <div class="clearfix"></div>
                         <input type="submit" class="btn config_submitter" value="Save Changes" /><br/>
 
