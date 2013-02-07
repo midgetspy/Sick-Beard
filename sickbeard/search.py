@@ -106,6 +106,7 @@ def snatchEpisode(result, endStatus=SNATCHED):
     if result.resultType in ("nzb", "nzbdata"):
         if sickbeard.NZB_METHOD == "blackhole":
             dlResult = _downloadResult(result)
+            logger.log(u"nzb parameters: {0}".format(result.__dict__), logger.ERROR)
         elif sickbeard.NZB_METHOD == "sabnzbd":
             dlResult = sab.sendNZB(result)
         elif sickbeard.NZB_METHOD == "nzbget":

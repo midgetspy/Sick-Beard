@@ -23,6 +23,7 @@ __all__ = ['ezrss',
            'nzbindex',
            'kere_ws',
            'btn',
+           'nzbclub'
            ]
 
 import sickbeard

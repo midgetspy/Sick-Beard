@@ -1081,6 +1081,8 @@ class ConfigProviders:
                 sickbeard.NZBSRUS = curEnabled
             elif curProvider == 'nzbindex':
                 sickbeard.NZBINDEX = curEnabled
+            elif curProvider == 'nzbclub':
+                sickbeard.NZBCLUB = curEnabled
             elif curProvider == 'kerews':
                 sickbeard.KEREWS = curEnabled
             elif curProvider == 'bin_req':
