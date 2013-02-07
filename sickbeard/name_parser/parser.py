@@ -25,6 +25,7 @@ import regexes
 import sickbeard
 
 from sickbeard import logger
+from sickbeard.helpers import intFromRoman
 
 class NameParser(object):
     def __init__(self, file_name=True):
@@ -162,23 +163,13 @@ class NameParser(object):
         if type(number) == int:
             return number
 
-        # the lazy way
-        if number.lower() == 'i': return 1
-        if number.lower() == 'ii': return 2
-        if number.lower() == 'iii': return 3
-        if number.lower() == 'iv': return 4
-        if number.lower() == 'v': return 5
-        if number.lower() == 'vi': return 6
-        if number.lower() == 'vii': return 7
-        if number.lower() == 'viii': return 8
-        if number.lower() == 'ix': return 9
-        if number.lower() == 'x': return 10
-        if number.lower() == 'xi': return 11
-        if number.lower() == 'xii': return 12
-        if number.lower() == 'xiii': return 13
-        if number.lower() == 'xiv': return 14
-        if number.lower() == 'xv': return 15
+        # will throw a NameError if not a 
+        # valid Roman numeral
+        conv = intFromRoman(number.lower())
 
+        if type(conv) == int:
+            return conv
+            
         return int(number)
 
     def parse(self, name):

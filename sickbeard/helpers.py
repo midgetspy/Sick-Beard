@@ -698,3 +698,25 @@ def backupVersionedFile(oldFile, version):
         if numTries >= 10:
             logger.log(u"Unable to back up "+oldFile+", please do it manually.")
             sys.exit(1)
+
+def intFromRoman(x):
+    # Roman Numerals
+    # 2010-06-15, Eljakim Schrijvers
+    mapping = [ ('cd',4*'c'),
+                ('xl',4*'x'),
+                ('iv',4*'i'),
+                ('d',5*'c'),
+                ('l',5*'x'),
+                ('v',5*'i'),
+                ('cm',9*'c'),
+                ('xc',9*'x'),
+                ('ix',9*'i')]
+
+    bignums = [ ('m',1000), ('c',100), ('x', 10), ('i',1) ]
+
+    for (shortv, longv) in mapping: x= x.replace(shortv, longv) ## reverse order needed
+    x = '+'.join(list(x))
+    for (character, word) in bignums: x = x.replace(character, str(word))
+    if x=='': x = '0'
+    return eval(x)
+    
