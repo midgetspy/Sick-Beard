@@ -3,9 +3,8 @@ import time
 from hashlib import sha1
 
 import sickbeard
-from sickbeard import logger, helpers
+from sickbeard import logger
 from sickbeard.exceptions import ex
-from sickbeard.encodingKludge import fixStupidEncodings
 from lib.bencode import bencode, bdecode
 from lib import requests
 
@@ -90,12 +89,12 @@ class GenericClient(object):
     def _get_torrent_hash(self, result):
         
         if result.url.startswith('magnet'):
-            hash = re.findall('urn:btih:([\w]{32,40})', result.url)[0]
+            torrent_hash = re.findall('urn:btih:([\w]{32,40})', result.url)[0]
         else:
             info = bdecode(result.content)["info"]
-            hash = sha1(bencode(info)).hexdigest().upper()
+            torrent_hash = sha1(bencode(info)).hexdigest()
         
-        return hash
+        return torrent_hash
         
     def sendTORRENT(self, result):
         
@@ -136,7 +135,7 @@ class GenericClient(object):
         
         try:
             self.response = self.session.get(self.url)
-        except requests.exceptions.ConnectionError, e:
+        except requests.exceptions.ConnectionError:
             return False, 'Unable to connect to '+ self.name
         except requests.exceptions.MissingSchema, requests.exceptions.InvalidURL:
             return False,'Error: Invalid ' + self.name + ' host'    
@@ -145,10 +144,10 @@ class GenericClient(object):
             return False, 'Invalid ' + self.name + 'Username or Password, check your config'        
         
         try: 
-          self._get_auth()
-          if self.auth:
-              return True, 'Success: Connected and Authenticated'
-          else:
-              return False, 'Unable to connect to ' + self.name
-        except Exception, e:    
+            self._get_auth()
+            if self.auth:
+                return True, 'Success: Connected and Authenticated'
+            else:
+                return False, 'Unable to connect to ' + self.name
+        except Exception:    
             return False, 'Unable to connect to '+ self.name

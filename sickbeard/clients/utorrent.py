@@ -17,13 +17,8 @@
 # along with Sick Beard.  If not, see <http://www.gnu.org/licenses/>.
 
 import re
-import time
 
 import sickbeard
-from sickbeard import logger, helpers
-from sickbeard.exceptions import ex
-from sickbeard.encodingKludge import fixStupidEncodings
-from lib import requests
 from sickbeard.clients.generic import GenericClient
 
 class uTorrentAPI(GenericClient):

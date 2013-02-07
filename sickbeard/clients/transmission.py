@@ -16,19 +16,12 @@
 # You should have received a copy of the GNU General Public License
 # along with Sick Beard.  If not, see <http://www.gnu.org/licenses/>.
 
-import urllib2
-import httplib
 import re
 import json
 from base64 import b64encode
 
 import sickbeard
-from sickbeard import logger
-from sickbeard.exceptions import ex
 from sickbeard.clients.generic import GenericClient
-
-from sickbeard import helpers
-
 
 class TransmissionAPI(GenericClient):
     
@@ -77,7 +70,7 @@ class TransmissionAPI(GenericClient):
 
     def _set_torrent_ratio(self, result):
         
-        id = self.response.json["arguments"]["torrent-added"]["id"]
+        torrent_id = self.response.json["arguments"]["torrent-added"]["id"]
         
         if sickbeard.TORRENT_RATIO == '':
             # Use global settings
@@ -90,7 +83,7 @@ class TransmissionAPI(GenericClient):
             ratio = float(sickbeard.TORRENT_RATIO)
             mode = 1 # Stop seeding at seedRatioLimit
 
-        arguments = { 'ids': [id],
+        arguments = { 'ids': [torrent_id],
                       'seedRatioLimit': ratio,
                       'seedRatioMode': mode
                       } 
