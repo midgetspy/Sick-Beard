@@ -25,6 +25,11 @@ import sickbeard
 
 from os import sys
 
+default_host = {'utorrent':'http://localhost:8000', 
+                'transmission' :'http://localhost:9091', 
+                'deluge':'http://localhost:8113'
+                }
+
 def getClientModule(name):
 
     name = name.lower()

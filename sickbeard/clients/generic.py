@@ -29,6 +29,8 @@ class GenericClient(object):
             self.last_time = time.time()
             self._get_auth()
         
+        logger.log(self.name + u': Requested a ' + method.upper() + ' connection to url '+ self.url + ' with Params= ' + str(params) + ' Data=' + str(data), logger.DEBUG)
+        
         try:
             self.response = self.session.__getattribute__(method)(self.url, params=params, data=data, files=files)
         except requests.exceptions.ConnectionError, e:
@@ -37,10 +39,22 @@ class GenericClient(object):
         except requests.exceptions.MissingSchema, requests.exceptions.InvalidURL:
             logger.log(u'Invalid '+self.name+' host', logger.ERROR)
             return False
+        except request.exception.HTTPError, e:
+            logger.log(self.name + u': Invalid HTTP Request ' + ex(e), logger.ERROR)
+            return False
+        except Exception, e:
+            logger.log(u'Unknown exception raised when send torrent to ' + self.name + ': ' + ex(e), logger.ERROR)
+            return False
         
-        if self.response.status_code == '401':
+        if self.response.status_code == 401:
             logger.log(u'Invalid '+self.name+' Username or Password, check your config', logger.ERROR)    
             return False
+
+        if self.response.status_code == 301:
+            logger.log(self.name + u': HTTP Timeout ', logger.DEBUG)        
+            return False
+        
+        logger.log(self.name + u': Response to previous request is ' + self.response.text, logger.DEBUG)
         
         return True
 
@@ -80,7 +94,7 @@ class GenericClient(object):
 
     def _set_torrent_path(self, torrent_path):
         
-        return False
+        return True
     
     def _set_torrent_pause(self, result):
 
@@ -142,6 +156,8 @@ class GenericClient(object):
 
         if self.response.status_code == 401:
             return False, 'Invalid ' + self.name + 'Username or Password, check your config'        
+        
+        logger.log(u'Response to ' + self.name + ' Authentication request is ' + self.response.text, logger.DEBUG)
         
         try: 
             self._get_auth()

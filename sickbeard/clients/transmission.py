@@ -33,9 +33,7 @@ class TransmissionAPI(GenericClient):
 
     def _get_auth(self):
 
-        post_data = json.dumps({
-            'method': 'session-get',
-        })
+        post_data = json.dumps({'method': 'session-get',})
         self.response = self.session.post(self.url, data=post_data.encode('utf-8'))
         self.auth = re.search('X-Transmission-Session-Id:\s*(\w+)', self.response.text).group(1)
         self.session.headers.update({'x-transmission-session-id': self.auth})
