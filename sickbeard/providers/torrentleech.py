@@ -81,7 +81,7 @@ class TorrentLeechProvider(generic.TorrentProvider):
         return True
 
     def isEnabled(self):
-        return sickbeard.TORRENTLEECH
+        return False
         
     def imageName(self):
         return 'torrentleech.png'
