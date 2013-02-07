@@ -1600,6 +1600,21 @@ class ConfigNotifications:
         else:
             use_trakt = 0
 
+        if trakt_remove_watchlist == "on":
+            trakt_remove_watchlist = 1
+        else:
+            trakt_remove_watchlist = 0
+
+        if trakt_use_watchlist == "on":
+            trakt_use_watchlist = 1
+        else:
+            trakt_use_watchlist = 0
+
+        if trakt_start_paused == "on":
+            trakt_start_paused = 1
+        else:
+            trakt_start_paused = 0
+
         if use_pytivo == "on":
             use_pytivo = 1
         else:
@@ -1724,6 +1739,10 @@ class ConfigNotifications:
         sickbeard.TRAKT_USERNAME = trakt_username
         sickbeard.TRAKT_PASSWORD = trakt_password
         sickbeard.TRAKT_API = trakt_api
+        sickbeard.TRAKT_REMOVE_WATCHLIST = trakt_remove_watchlist
+        sickbeard.TRAKT_USE_WATCHLIST = trakt_use_watchlist
+        sickbeard.TRAKT_METHOD_ADD = trakt_method_add
+        sickbeard.TRAKT_START_PAUSED = trakt_start_paused
 
         sickbeard.USE_PYTIVO = use_pytivo
         sickbeard.PYTIVO_NOTIFY_ONSNATCH = pytivo_notify_onsnatch == "off"

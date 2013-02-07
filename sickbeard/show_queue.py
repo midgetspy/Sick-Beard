@@ -345,6 +345,9 @@ class QueueItemAdd(ShowQueueItem):
 
         self.show.flushEpisodes()
 
+        # if there are specific episodes that need to be added by trakt
+        sickbeard.traktWatchListCheckerSchedular.action.manageNewShow(self.show)
+
         self.finish()
 
     def _finishEarly(self):
