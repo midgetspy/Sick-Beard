@@ -178,6 +178,7 @@ class NameParser(object):
         if number.lower() == 'xiii': return 13
         if number.lower() == 'xiv': return 14
         if number.lower() == 'xv': return 15
+        if number.lower() == 'xxiv': return 24
 
         return int(number)
 
