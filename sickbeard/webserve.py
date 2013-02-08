@@ -1082,6 +1082,8 @@ class ConfigProviders:
                 sickbeard.DTT = curEnabled
             elif curProvider == 'torrentleech':
                 sickbeard.TORRENTLEECH = curEnabled
+            elif curProvider == 'publichd':
+                sickbeard.PUBLICHD = curEnabled
             elif curProvider == 'btn':
                 sickbeard.BTN = curEnabled
             elif curProvider in newznabProviderDict:
