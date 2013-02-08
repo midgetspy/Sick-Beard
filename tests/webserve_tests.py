@@ -20,21 +20,125 @@
 import datetime
 import unittest
 import test_lib as test
-from sickbeard.db_peewee import *
-from sickbeard import webserve
+import mox
+import cptestcase
+import cherrypy
 
-class WebserveTests(test.SickbeardTestDBCase):
+import sickbeard
+from sickbeard.db_peewee import *
+from sickbeard import tv
+from sickbeard import webserve, scheduler, searchBacklog
+
+def setUpModule():
+    cherrypy.tree.mount(webserve.WebInterface(), '/')
+    cherrypy.engine.start()
+setup_module = setUpModule
+
+def tearDownModule():
+    cherrypy.engine.exit()
+teardown_module = tearDownModule
+
+class WebserveTests(test.SickbeardTestDBCase, cptestcase.BaseCherryPyTestCase):
+    def setUp(self):
+        test.SickbeardTestDBCase.setUp(self)
+        sickbeard.USE_API = True
+        sickbeard.API_KEY = 'testing'
+        self.mox = mox.Mox()
+        mock_sched = self.mox.CreateMock(scheduler.Scheduler)
+        mock_sched.timeLeft().AndReturn('')
+        mock_backlog_sched = self.mox.CreateMock(searchBacklog.BacklogSearchScheduler)
+        mock_backlog_sched.nextRun().AndReturn(datetime.datetime.today())
+        sickbeard.currentSearchScheduler=mock_sched
+        sickbeard.backlogSearchScheduler=mock_backlog_sched
+
+    def tearDown(self):
+        test.SickbeardTestDBCase.tearDown(self)
+        self.mox.UnsetStubs()
+
     def test_ComingEpisodes(self):
         self.loadFixtures()
+
         t = TvShow().select().first()
         t.status = 'Continuing'
         t.save()
         e = TvEpisode.select().where(TvEpisode.name=='An Enemy of Fate').get()
-        e.airdate = (datetime.date.today() + datetime.timedelta(days=3)).toordinal()
+        e.airdate = (datetime.date.today() +
+                     datetime.timedelta(days=3)).toordinal()
         e.save()
 
-        w = webserve.WebInterface()
-        w.comingEpisodes()
+        self.mox.ReplayAll()
+        response = self.request('/comingEpisodes/')
+        self.assertEqual(response.output_status, '200 OK')
+        self.assertIn('5x13 - An Enemy of Fate', response.body[0])
+
+    def test_Api(self):
+        response = self.request('/api/testing/', cmd='logs', min_level='debug')
+        self.assertIn('success', response.body[0])
+
+    def test_future_Api(self):
+        response = self.request('/api/testing/', cmd='future')
+        self.assertIn('success', response.body[0])
+
+    def test_history_Api(self):
+        self.loadFixtures()
+        response = self.request('/api/testing/', cmd='history', debug=1)
+        self.assertIn('Fringe', response.body[0])
+        response = self.request('/api/testing/', cmd='history',
+                                limit=100, debug=1)
+        self.assertIn('Fringe', response.body[0])
+
+    def test_exceptions_Api(self):
+        self.loadFixtures()
+        response = self.request('/api/testing/', cmd='exceptions')
+        self.assertIn('success', response.body[0])
+
+        sickbeard.showList = [tv.TVShow(82066)]
+        response = self.request('/api/testing/',
+                                cmd='exceptions', tvdbid='82066', debug=1)
+        self.assertIn('success', response.body[0])
+
+    def test_show_season_list_api(self):
+        self.loadFixtures()
+        sickbeard.showList = [tv.TVShow(82066)]
+        response = self.request('/api/testing/',
+                                cmd='show.seasonlist',
+                                tvdbid=82066,
+                                debug=1)
+        self.assertIn('success', response.body[0])
+
+    def test_show_seasons(self):
+        self.loadFixtures()
+        sickbeard.showList = [tv.TVShow(82066)]
+        response = self.request('/api/testing/',
+                                cmd='show.seasons',
+                                tvdbid=82066,
+                                debug=1)
+        self.assertIn('success', response.body[0])
+
+        response = self.request('/api/testing/',
+                                cmd='show.seasons',
+                                tvdbid=82066,
+                                season=5,
+                                debug=1)
+        self.assertIn('success', response.body[0])
+
+    def test_show_stats(self):
+        self.loadFixtures()
+        sickbeard.showList = [tv.TVShow(82066)]
+        response = self.request('/api/testing/',
+                                cmd='show.stats',
+                                tvdbid=82066,
+                                debug=1)
+        self.assertIn('success', response.body[0])
+
+    def test_shows_stats(self):
+        self.loadFixtures()
+        sickbeard.showList = [tv.TVShow(82066)]
+        response = self.request('/api/testing/',
+                                cmd='shows.stats',
+                                debug=1)
+        self.assertIn('success', response.body[0])
+        self.assertIn('"ep_total": 1', response.body[0])
 
 
 if __name__ == '__main__':

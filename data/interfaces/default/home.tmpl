@@ -1,7 +1,6 @@
 #import sickbeard
 #import datetime
 #from sickbeard.common import *
-#from sickbeard import db
 
 #set global $title="Home"
 #set global $header="Show List"
@@ -12,10 +11,6 @@
 #import os.path
 #include $os.path.join($sickbeard.PROG_DIR, "data/interfaces/default/inc_top.tmpl")
 
-#set $myDB = $db.DBConnection()
-#set $today = str($datetime.date.today().toordinal())
-#set $downloadedEps = $myDB.select("SELECT showid, COUNT(*) FROM tv_episodes WHERE (status IN ("+",".join([str(x) for x in $Quality.DOWNLOADED + [$ARCHIVED]])+") OR (status IN ("+",".join([str(x) for x in $Quality.SNATCHED + $Quality.SNATCHED_PROPER])+") AND location != '')) AND season != 0 and episode != 0 AND airdate <= "+$today+" GROUP BY showid")
-#set $allEps = $myDB.select("SELECT showid, COUNT(*) FROM tv_episodes WHERE season != 0 and episode != 0 AND (airdate != 1 OR status IN ("+",".join([str(x) for x in ($Quality.DOWNLOADED + $Quality.SNATCHED + $Quality.SNATCHED_PROPER) + [$ARCHIVED]])+")) AND airdate <= "+$today+" AND status != "+str($IGNORED)+" GROUP BY showid")
 
 <script type="text/javascript" charset="utf-8">
 <!--
@@ -130,8 +125,8 @@ $myShowList.sort(lambda x, y: cmp(x.name, y.name))
 #for $curShow in $myShowList:
 #set $curEp = $curShow.nextEpisode()
 
-#set $curShowDownloads = [x[1] for x in $downloadedEps if int(x[0]) == $curShow.tvdbid]
-#set $curShowAll = [x[1] for x in $allEps if int(x[0]) == $curShow.tvdbid]
+#set $curShowDownloads = [x.count for x in $downloadedEps if x.show.tvdb_id == $curShow.tvdbid]
+#set $curShowAll = [x.count for x in $allEps if x.show.tvdb_id == $curShow.tvdbid]
 #if len($curShowAll) != 0:
   #if len($curShowDownloads) != 0:
     #set $dlStat = str($curShowDownloads[0])+" / "+str($curShowAll[0])

@@ -25,18 +25,55 @@ from sickbeard import common
 
 peewee.logger = logging.getLogger('sickbeard')
 
-maindb = peewee.SqliteDatabase(None, threadlocals=True)
+#maindb = peewee.SqliteDatabase(None, threadlocals=True)
+#cachedb = peewee.SqliteDatabase(None, threadlocals=True)
+maindb = peewee.MySQLDatabase(None, threadlocals=True)
+cachedb = maindb
+
+def createAllTables():
+    for t in [BaseDbVersion,
+              Info,
+              TvShow,
+              TvEpisode,
+              History,
+              CacheDbVersion,
+              Lastupdate,
+              SceneException,SceneName,ProviderCache]:
+        if not t.table_exists():
+            t.create_table(fail_silently=False)
+
+def dropAllTables():
+    for t in [BaseDbVersion,
+              Info,
+              TvEpisode,
+              History,
+              CacheDbVersion,
+              Lastupdate,
+              TvShow,
+              SceneException,SceneName,ProviderCache]:
+        t.drop_table(fail_silently=True)
 
 class BaseSickbeardModel(peewee.Model):
+    def to_dict(self):
+        d = {}
+        for f in self._meta.get_fields():
+            d[f.db_column] = self._data[f.name]
+        return d
+
     class Meta:
         database = maindb
 
 
-class DbVersion(BaseSickbeardModel):
+class CacheBaseModel(BaseSickbeardModel):
+    class Meta:
+        database = cachedb
+
+
+class BaseDbVersion(BaseSickbeardModel):
     db_version = peewee.IntegerField(null=True)
 
     class Meta:
-        db_table = 'db_version'
+        db_table = 'base_db_version'
 
 
 class Info(BaseSickbeardModel):
@@ -96,11 +133,12 @@ class TvEpisode(BaseSickbeardModel):
                                   related_name='episodes',
                                   db_column='showid'
                                  )
-    status = peewee.IntegerField(null=True)
+    status = peewee.IntegerField(default=common.WANTED, null=True)
     tvdbid = peewee.IntegerField(null=True)
 
     class Meta:
         db_table = 'tv_episodes'
+
 
 class History(BaseSickbeardModel):
     action = peewee.IntegerField(null=True)
@@ -119,18 +157,11 @@ class History(BaseSickbeardModel):
         db_table = 'history'
 
 
-cachedb = peewee.SqliteDatabase(None, threadlocals=True)
-
-class CacheBaseModel(peewee.Model):
-    class Meta:
-        database = cachedb
-
-
-class DbVersion(CacheBaseModel):
+class CacheDbVersion(CacheBaseModel):
     db_version = peewee.IntegerField(null=True)
 
     class Meta:
-        db_table = 'db_version'
+        db_table = 'cache_db_version'
 
 
 class Lastupdate(CacheBaseModel):
@@ -158,15 +189,16 @@ class SceneName(CacheBaseModel):
         db_table = 'scene_names'
 
 
-class WombleSIndex(CacheBaseModel):
-    episodes = peewee.TextField(null=True)
-    name = peewee.TextField(null=True)
-    quality = peewee.TextField(null=True)
-    season = peewee.IntegerField(null=True)
-    time = peewee.IntegerField(null=True)
-    tvdbid = peewee.IntegerField(null=True)
+class ProviderCache(CacheBaseModel):
+    episodes = peewee.TextField()
+    provider = peewee.CharField()
+    name = peewee.TextField()
+    quality = peewee.IntegerField()
+    season = peewee.IntegerField()
+    time = peewee.IntegerField()
+    tvdbid = peewee.IntegerField()
     tvrid = peewee.IntegerField(null=True)
-    url = peewee.TextField(null=True)
+    url = peewee.TextField()
 
     class Meta:
-        db_table = 'womble_s_index'
+        db_table = 'provider_cache'

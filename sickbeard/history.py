@@ -21,11 +21,9 @@ import datetime
 
 from sickbeard.common import SNATCHED, Quality
 
-dateFormat = "%Y%m%d%H%M%S"
-
 def _logHistoryItem(action, showid, season, episode, quality, resource, provider):
 
-    logDate = datetime.datetime.today().strftime(dateFormat)
+    logDate = datetime.datetime.today()
     History(
         action=action,
         date=logDate,

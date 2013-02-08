@@ -18,6 +18,7 @@
 # along with Sick Beard.  If not, see <http://www.gnu.org/licenses/>.
 
 import unittest
+import peewee
 import test_lib as test
 from sickbeard.db_peewee import *
 
@@ -56,6 +57,18 @@ class DBPeeweeTests(test.SickbeardTestDBCase):
       query = query.where(TvEpisode.location == '')
       sql = query.sql()[0]
       self.assertIn('"location" = ?', sql)
+
+    def testNextEpisodeSelection(self):
+        print [e.name for e in TvEpisode.select(TvEpisode, peewee.fn.Min(TvEpisode.airdate).alias('test'), TvShow).where(
+            (TvEpisode.airdate > 733770)
+        ).join(TvShow).order_by(
+            TvEpisode.airdate.desc()
+        )]
+
+    def test_data_as_dict(self):
+        t = TvEpisode.select().get()
+        d = t.to_dict()
+        self.assertIn('showid', d)
 
     def testAlterTable(self):
         eps = [t for t in TvEpisode.select()]

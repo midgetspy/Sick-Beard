@@ -26,6 +26,7 @@ import re
 import threading
 import datetime
 import random
+import peewee
 
 from Cheetah.Template import Template
 import cherrypy.lib
@@ -45,7 +46,7 @@ from sickbeard.db_peewee import History as DbHistory
 
 from sickbeard.providers import newznab
 from sickbeard.common import Quality, Overview, statusStrings
-from sickbeard.common import SNATCHED, SKIPPED, UNAIRED, IGNORED, ARCHIVED, WANTED
+from sickbeard.common import SNATCHED, SKIPPED, UNAIRED, IGNORED, ARCHIVED, WANTED, SNATCHED_PROPER
 from sickbeard.exceptions import ex
 from sickbeard.webapi import Api
 
@@ -1957,6 +1958,40 @@ class Home:
     def index(self):
 
         t = PageTemplate(file="home.tmpl")
+
+        qual = (
+            Quality.DOWNLOADED +
+            Quality.SNATCHED +
+            Quality.SNATCHED_PROPER +
+            [ARCHIVED]
+        )
+        t.downloadedEps = [e for e in TvEpisode.select(
+            TvEpisode,
+            peewee.fn.Count(TvEpisode.episode_id).alias('count')
+        ).where(
+            (
+                (TvEpisode.status << Quality.DOWNLOADED + [ARCHIVED]) |
+                (TvEpisode.status << Quality.SNATCHED + Quality.SNATCHED_PROPER)
+            ) &
+            (TvEpisode.location != '') &
+            (TvEpisode.season != 0) &
+            (TvEpisode.episode != 0) &
+            (TvEpisode.airdate <= datetime.date.today().toordinal())
+        ).group_by(TvEpisode.show)]
+
+        t.allEps = [e for e in TvEpisode.select(
+            TvEpisode,
+            peewee.fn.Count(TvEpisode.episode_id).alias('count')
+        ).where(
+            (TvEpisode.season != 0) &
+            (TvEpisode.episode != 0) &
+            (TvEpisode.airdate <= datetime.date.today().toordinal()) &
+            (TvEpisode.status != IGNORED) &
+            (
+                (TvEpisode.airdate != 1) |
+                (TvEpisode.status << qual)
+            )
+        ).group_by(TvEpisode.show)]
         t.submenu = HomeMenu()
         return _munge(t)
 
@@ -2634,10 +2669,8 @@ class Home:
 
             epInfo = curEp.split('x')
 
-            # this is probably the worst possible way to deal with double eps but I've kinda painted myself into a corner here with this stupid database
-            #ep_result = myDB.select("SELECT * FROM tv_episodes WHERE showid = ? AND season = ? AND episode = ? AND 5=5", [show, epInfo[0], epInfo[1]])
             ep_result = TvEpisode.select().where(
-                (TvEpisode.showid == show) &
+                (TvEpisode.show == show) &
                 (TvEpisode.season == epInfo[0]) &
                 (TvEpisode.episode == epInfo[1])
             ).first()

@@ -152,13 +152,14 @@ class RSSSearchQueueItem(generic_queue.QueueItem):
 
         for sqlEp in query:
             try:
-                show = helpers.findCertainShow(sickbeard.showList, sqlEp.showid)
+                show = helpers.findCertainShow(sickbeard.showList,
+                                               sqlEp.show.tvdb_id)
             except exceptions.MultipleShowObjectsException:
-                logger.log(u"ERROR: expected to find a single show matching " + sqlEp.showid)
+                logger.log(u"ERROR: expected to find a single show matching " + sqlEp.show.tvdb_id)
                 return None
 
             if show == None:
-                logger.log(u"Unable to find the show with ID "+str(sqlEp.showid)+" in your show list! DB value was "+str(sqlEp), logger.ERROR)
+                logger.log(u"Unable to find the show with ID "+str(sqlEp.show.tvdb_id)+" in your show list! DB value was "+str(sqlEp), logger.ERROR)
                 return None
 
             ep = show.getEpisode(sqlEp.season, sqlEp.episode)

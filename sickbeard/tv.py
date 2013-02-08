@@ -822,7 +822,7 @@ class TVShow(object):
         self.db_tvshow.airs = self.airs
         self.db_tvshow.status = self.status
         self.db_tvshow.flatten_folders = self.flatten_folders
-        self.db_tvshow.paused = self.paused
+        self.db_tvshow.paused = bool(self.paused)
         self.db_tvshow.air_by_date = self.air_by_date
         self.db_tvshow.startyear = self.startyear
         self.db_tvshow.tvr_name = self.tvrname

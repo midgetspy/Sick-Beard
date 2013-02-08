@@ -22,7 +22,7 @@ import sqlite3
 
 import sickbeard
 
-from sickbeard import db
+from sickbeard.db_peewee import ProviderCache, Lastupdate
 from sickbeard import logger
 from sickbeard.common import Quality
 
@@ -38,29 +38,6 @@ from lib.tvdb_api import tvdb_api, tvdb_exceptions
 from name_parser.parser import NameParser, InvalidNameException
 
 
-class CacheDBConnection(db.DBConnection):
-
-    def __init__(self, providerName):
-        db.DBConnection.__init__(self, "cache.db")
-
-        # Create the table if it's not already there
-        try:
-            sql = "CREATE TABLE "+providerName+" (name TEXT, season NUMERIC, episodes TEXT, tvrid NUMERIC, tvdbid NUMERIC, url TEXT, time NUMERIC, quality TEXT);"
-            self.connection.execute(sql)
-            self.connection.commit()
-        except sqlite3.OperationalError, e:
-            if str(e) != "table "+providerName+" already exists":
-                raise
-
-        # Create the table if it's not already there
-        try:
-            sql = "CREATE TABLE lastUpdate (provider TEXT, time NUMERIC);"
-            self.connection.execute(sql)
-            self.connection.commit()
-        except sqlite3.OperationalError, e:
-            if str(e) != "table lastUpdate already exists":
-                raise
-
 class TVCache():
 
     def __init__(self, provider):
@@ -69,20 +46,14 @@ class TVCache():
         self.providerID = self.provider.getID()
         self.minTime = 10
 
-    def _getDB(self):
-
-        return CacheDBConnection(self.providerID)
-
     def _clearCache(self):
-
-        myDB = self._getDB()
-
-        myDB.action("DELETE FROM "+self.providerID+" WHERE 1")
+        ProviderCache.delete().where(
+            ProviderCache.provider == self.providerID
+        ).execute()
 
     def _getRSSData(self):
 
         data = None
-
         return data
 
     def _checkAuth(self, data):
@@ -124,7 +95,6 @@ class TVCache():
             return []
 
         for item in items:
-
             self._parseItem(item)
 
     def _translateLinkURL(self, url):
@@ -148,11 +118,12 @@ class TVCache():
         self._addCacheEntry(title, url)
 
     def _getLastUpdate(self):
-        myDB = self._getDB()
-        sqlResults = myDB.select("SELECT time FROM lastUpdate WHERE provider = ?", [self.providerID])
+        sqlResults = Lastupdate.select().where(
+            Lastupdate.provider == self.providerID
+        ).first()
 
         if sqlResults:
-            lastTime = int(sqlResults[0]["time"])
+            lastTime = sqlResults.time
         else:
             lastTime = 0
 
@@ -163,10 +134,16 @@ class TVCache():
         if not toDate:
             toDate = datetime.datetime.today()
 
-        myDB = self._getDB()
-        myDB.upsert("lastUpdate",
-                    {'time': int(time.mktime(toDate.timetuple()))},
-                    {'provider': self.providerID})
+        try:
+            last_update = Lastupdate.select().where(
+                Lastupdate.provider == self.providerID
+            ).get()
+        except Lastupdate.DoesNotExist:
+            last_update = Lastupdate()
+
+        last_update.time = time.mktime(toDate.timetuple())
+        last_update.provider = self.providerID
+        last_update.save()
 
     lastUpdate = property(_getLastUpdate)
 
@@ -179,8 +156,6 @@ class TVCache():
         return True
 
     def _addCacheEntry(self, name, url, season=None, episodes=None, tvdb_id=0, tvrage_id=0, quality=None, extraNames=[]):
-
-        myDB = self._getDB()
 
         parse_result = None
 
@@ -309,8 +284,17 @@ class TVCache():
         if not quality:
             quality = Quality.nameQuality(name)
 
-        myDB.action("INSERT INTO "+self.providerID+" (name, season, episodes, tvrid, tvdbid, url, time, quality) VALUES (?,?,?,?,?,?,?,?)",
-                    [name, season, episodeText, tvrage_id, tvdb_id, url, curTimestamp, quality])
+        entry = ProviderCache(
+            provider = self.providerID,
+            name = name,
+            season = season,
+            episodes = episodeText,
+            tvrid = tvrage_id,
+            tvdbid = tvdb_id,
+            url = url,
+            time = curTimestamp,
+            quality = quality)
+        entry.save(force_insert=True)
 
 
     def searchCache(self, episode, manualSearch=False):
@@ -319,15 +303,17 @@ class TVCache():
 
     def listPropers(self, date=None, delimiter="."):
 
-        myDB = self._getDB()
-
-        sql = "SELECT * FROM "+self.providerID+" WHERE name LIKE '%.PROPER.%' OR name LIKE '%.REPACK.%'"
+        sql = ProviderCache.select().where(
+            (ProviderCache.name ** '%.PROPER.%') |
+            (ProviderCache.name ** '%.REPACK.%')
+        )
 
         if date != None:
-            sql += " AND time >= "+str(int(time.mktime(date.timetuple())))
+            sql = sql.where(
+                ProviderCache.time >= int(time.mktime(date.timetuple()))
+            )
 
-        #return filter(lambda x: x['tvdbid'] != 0, myDB.select(sql))
-        return myDB.select(sql)
+        return [c.to_dict() for c in sql]
 
     def findNeededEpisodes(self, episode = None, manualSearch=False):
         neededEps = {}
@@ -335,38 +321,45 @@ class TVCache():
         if episode:
             neededEps[episode] = []
 
-        myDB = self._getDB()
-
         if not episode:
-            sqlResults = myDB.select("SELECT * FROM "+self.providerID)
+            sqlResults = ProviderCache.select().where(
+                ProviderCache.provider == self.providerID
+            )
         else:
-            sqlResults = myDB.select("SELECT * FROM "+self.providerID+" WHERE tvdbid = ? AND season = ? AND episodes LIKE ?", [episode.show.tvdbid, episode.season, "%|"+str(episode.episode)+"|%"])
+            sqlResults = ProviderCache.select().where(
+                (ProviderCache.provider == self.providerID) &
+                (ProviderCache.tvdbid == episode.show.tvdbid) &
+                (ProviderCache.tvdbid == episode.season) &
+                (ProviderCache.tvdbid % "%|"+str(episode.episode)+"|%")
+
+            )
 
         # for each cache entry
         for curResult in sqlResults:
 
-            # skip non-tv crap (but allow them for Newzbin cause we assume it's filtered well)
-            if self.providerID != 'newzbin' and not show_name_helpers.filterBadReleases(curResult["name"]):
+            # skip non-tv crap (but allow them for Newzbin cause we
+            # assume it's filtered well)
+            if self.providerID != 'newzbin' and not show_name_helpers.filterBadReleases(curResult.name):
                 continue
 
             # get the show object, or if it's not one of our shows then ignore it
-            showObj = helpers.findCertainShow(sickbeard.showList, int(curResult["tvdbid"]))
+            showObj = helpers.findCertainShow(sickbeard.showList, curResult.tvdbid)
             if not showObj:
                 continue
 
             # get season and ep data (ignoring multi-eps for now)
-            curSeason = int(curResult["season"])
+            curSeason = curResult.season
             if curSeason == -1:
                 continue
-            curEp = curResult["episodes"].split("|")[1]
+            curEp = curResult.episodes.split("|")[1]
             if not curEp:
                 continue
             curEp = int(curEp)
-            curQuality = int(curResult["quality"])
+            curQuality = curResult.quality
 
             # if the show says we want that episode then add it to the list
             if not showObj.wantEpisode(curSeason, curEp, curQuality, manualSearch):
-                logger.log(u"Skipping "+curResult["name"]+" because we don't want an episode that's "+Quality.qualityStrings[curQuality], logger.DEBUG)
+                logger.log(u"Skipping "+curResult.name+" because we don't want an episode that's "+Quality.qualityStrings[curQuality], logger.DEBUG)
 
             else:
 
@@ -376,8 +369,8 @@ class TVCache():
                     epObj = showObj.getEpisode(curSeason, curEp)
 
                 # build a result object
-                title = curResult["name"]
-                url = curResult["url"]
+                title = curResult.name
+                url = curResult.url
 
                 logger.log(u"Found result " + title + " at " + url)
 

@@ -17,35 +17,28 @@
 # along with Sick Beard.  If not, see <http://www.gnu.org/licenses/>.
 
 from sickbeard import db
-from sickbeard import db_peewee
+from sickbeard.db_peewee import *
 
 # Add new migrations at the bottom of the list; subclass the previous migration.
 class InitialSchema (db.SchemaUpgrade):
+    cache_tables = [
+        ProviderCache,
+        Lastupdate,
+        DbVersion,
+        SceneException,
+        SceneName
+    ]
     def test(self):
-        return self.hasTable("lastUpdate")
+        for t in self.cache_tables:
+            if not t.table_exists():
+                return False
+        return True
 
     def execute(self):
-        with db_peewee.cachedb.transaction():
-            tables = [db_peewee.Lastupdate, db_peewee.DbVersion]
-            for t in tables:
-                t.create_table()
-            db_peewee.DbVersion(db_version=1).save(force_insert=True)
+        ProviderCache.create_table(fail_silently=True)
+        Lastupdate.create_table(fail_silently=True)
+        DbVersion.create_table(fail_silently=True)
+        SceneException.create_table(fail_silently=True)
+        SceneName.create_table(fail_silently=True)
 
-
-class AddSceneExceptions(InitialSchema):
-    def test(self):
-        return self.hasTable("scene_exceptions")
-
-    def execute(self):
-        db_peewee.SceneException.create_table()
-
-
-class AddSceneNameCache(AddSceneExceptions):
-    def test(self):
-        return (
-            self.hasTable("scene_names") and
-            self.hasColumn("scene_names", "id"))
-
-    def execute(self):
-        db_peewee.SceneName.drop_table(fail_silently=True)
-        db_peewee.SceneName.create_table()
+        DbVersion(db_version=1).save(force_insert=True)

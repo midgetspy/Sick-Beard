@@ -37,7 +37,7 @@ from sickbeard import search_queue
 from sickbeard.common import SNATCHED, SNATCHED_PROPER, DOWNLOADED, SKIPPED, UNAIRED, IGNORED, ARCHIVED, WANTED, UNKNOWN
 from common import ANY, Quality, qualityPresetStrings, statusStrings
 from sickbeard import image_cache
-from sickbeard.db_peewee import TvEpisode
+from sickbeard.db_peewee import *
 from lib.tvdb_api import tvdb_api, tvdb_exceptions
 try:
     import json
@@ -721,22 +721,36 @@ class CMD_ComingEpisodes(ApiCall):
         done_show_list = []
         qualList = Quality.DOWNLOADED + Quality.SNATCHED + [ARCHIVED, IGNORED]
 
-        myDB = db.DBConnection(row_type="dict")
-        sql_results = myDB.select("SELECT airdate, airs, episode, name AS 'ep_name', description AS 'ep_plot', network, season, showid AS 'tvdbid', show_name, tv_shows.quality AS quality, tv_shows.status AS 'show_status', tv_shows.paused AS 'paused' FROM tv_episodes, tv_shows WHERE season != 0 AND airdate >= ? AND airdate < ? AND tv_shows.tvdb_id = tv_episodes.showid AND tv_episodes.status NOT IN (" + ','.join(['?'] * len(qualList)) + ")", [today, next_week] + qualList)
+        sql_results = [e for e in TvEpisode.select(TvEpisode, TvShow).where(
+            (TvEpisode.season != 0) &
+            (TvEpisode.airdate >= today) &
+            (TvEpisode.airdate < next_week)
+        ).join(TvShow).where(
+            ~(TvShow.status << qualList)
+        )]
         for cur_result in sql_results:
             done_show_list.append(int(cur_result["tvdbid"]))
 
-        more_sql_results = myDB.select("SELECT airdate, airs, episode, name AS 'ep_name', description AS 'ep_plot', network, season, showid AS 'tvdbid', show_name, tv_shows.quality AS quality, tv_shows.status AS 'show_status', tv_shows.paused AS 'paused' FROM tv_episodes outer_eps, tv_shows WHERE season != 0 AND showid NOT IN (" + ','.join(['?'] * len(done_show_list)) + ") AND tv_shows.tvdb_id = outer_eps.showid AND airdate = (SELECT airdate FROM tv_episodes inner_eps WHERE inner_eps.showid = outer_eps.showid AND inner_eps.airdate >= ? ORDER BY inner_eps.airdate ASC LIMIT 1) AND outer_eps.status NOT IN (" + ','.join(['?'] * len(Quality.DOWNLOADED + Quality.SNATCHED)) + ")", done_show_list + [next_week] + Quality.DOWNLOADED + Quality.SNATCHED)
-        sql_results += more_sql_results
+        sql_results += [e for e in TvEpisode.select(TvEpisode, TvShow).where(
+            (TvEpisode.season !=0 ) &
+            (TvEpisode.airdate >= next_week) &
+            ~(TvEpisode.status << (Quality.DOWNLOADED + Quality.SNATCHED))
+        ).join(TvShow).where(
+            ~(TvShow.tvdb_id << done_show_list)
+        ).order_by(TvEpisode.airdate.asc()).group_by(TvEpisode.show)]
 
-        more_sql_results = myDB.select("SELECT airdate, airs, episode, name AS 'ep_name', description AS 'ep_plot', network, season, showid AS 'tvdbid', show_name, tv_shows.quality AS quality, tv_shows.status AS 'show_status', tv_shows.paused AS 'paused' FROM tv_episodes, tv_shows WHERE season != 0 AND tv_shows.tvdb_id = tv_episodes.showid AND airdate < ? AND airdate >= ? AND tv_episodes.status = ? AND tv_episodes.status NOT IN (" + ','.join(['?'] * len(qualList)) + ")", [today, recently, WANTED] + qualList)
-        sql_results += more_sql_results
+        sql_results += [e for e in TvEpisode.select(TvEpisode, TvShow).where(
+            (TvEpisode.season != 0) &
+            (TvEpisode.airdate < today) &
+            (TvEpisode.airdate >= recently) &
+            (TvEpisode.status == WANTED)
+        ).join(TvShow)]
 
         # sort by air date
         sorts = {
-            'date': (lambda x, y: cmp(int(x["airdate"]), int(y["airdate"]))),
-            'show': (lambda a, b: cmp(a["show_name"], b["show_name"])),
-            'network': (lambda a, b: cmp(a["network"], b["network"])),
+            'date': (lambda x, y: cmp(x.airdate, y.airdate)),
+            'show': (lambda a, b: cmp(a.show.show_name, b.show.show_name)),
+            'network': (lambda a, b: cmp(a.show.network, b.show.network)),
         }
 
         sql_results.sort(sorts[self.sort])
@@ -747,6 +761,7 @@ class CMD_ComingEpisodes(ApiCall):
             finalEpResults[curType] = []
 
         for ep in sql_results:
+            ep = ep.to_dict()
             """
                 Missed:   yesterday... (less than 1week)
                 Today:    today
@@ -787,7 +802,6 @@ class CMD_ComingEpisodes(ApiCall):
                 finalEpResults[status] = []
 
             finalEpResults[status].append(ep)
-        myDB.connection.close()
         return _responds(RESULT_SUCCESS, finalEpResults)
 
 
@@ -847,7 +861,6 @@ class CMD_Episode(ApiCall):
         episode["quality"] = _get_quality_string(quality)
         episode["file_size_human"] = _sizeof_fmt(episode["file_size"])
 
-        myDB.connection.close()
         return _responds(RESULT_SUCCESS, episode)
 
 
@@ -1007,12 +1020,13 @@ class CMD_Exceptions(ApiCall):
 
     def run(self):
         """ display scene exceptions for all or a given show """
-        myDB = db.DBConnection("cache.db", row_type="dict")
 
         if self.tvdbid == None:
-            sqlResults = myDB.select("SELECT show_name, tvdb_id AS 'tvdbid' FROM scene_exceptions")
+
+            sqlResults = [e.to_dict for e in SceneException.select()]
             scene_exceptions = {}
             for row in sqlResults:
+                row['tvdbid'] = row["tvdb_id"]
                 tvdbid = row["tvdbid"]
                 if not tvdbid in scene_exceptions:
                     scene_exceptions[tvdbid] = []
@@ -1023,12 +1037,11 @@ class CMD_Exceptions(ApiCall):
             if not showObj:
                 return _responds(RESULT_FAILURE, msg="Show not found")
 
-            sqlResults = myDB.select("SELECT show_name, tvdb_id AS 'tvdbid' FROM scene_exceptions WHERE tvdb_id = ?", [self.tvdbid])
+            sqlResults = [e.to_dict for e in SceneException.select().where(SceneException.tvdb_id == int(self.tvdbid))]
             scene_exceptions = []
             for row in sqlResults:
                 scene_exceptions.append(row["show_name"])
 
-        myDB.connection.close()
         return _responds(RESULT_SUCCESS, scene_exceptions)
 
 
@@ -1060,30 +1073,28 @@ class CMD_History(ApiCall):
         else:
             typeCodes = Quality.SNATCHED + Quality.DOWNLOADED
 
-        myDB = db.DBConnection(row_type="dict")
-
         ulimit = min(int(self.limit), 100)
         if ulimit == 0:
-            sqlResults = myDB.select("SELECT h.*, show_name FROM history h, tv_shows s WHERE h.showid=s.tvdb_id AND action in (" + ','.join(['?'] * len(typeCodes)) + ") ORDER BY date DESC", typeCodes)
+            query = History.select().where(History.action << typeCodes).join(TvShow)
         else:
-            sqlResults = myDB.select("SELECT h.*, show_name FROM history h, tv_shows s WHERE h.showid=s.tvdb_id AND action in (" + ','.join(['?'] * len(typeCodes)) + ") ORDER BY date DESC LIMIT ?", typeCodes + [ulimit])
+            query = History.select().where(History.action << typeCodes).join(TvShow).limit(ulimit)
 
         results = []
-        for row in sqlResults:
-            status, quality = Quality.splitCompositeStatus(int(row["action"]))
+        for row in query:
+            hdict = row.to_dict()
+            status, quality = Quality.splitCompositeStatus(int(hdict["action"]))
             status = _get_status_Strings(status)
             if self.type and not status == self.type:
                 continue
-            row["status"] = status
-            row["quality"] = _get_quality_string(quality)
-            row["date"] = _historyDate_to_dateTimeForm(str(row["date"]))
-            del row["action"]
-            _rename_element(row, "showid", "tvdbid")
-            row["resource_path"] = os.path.dirname(row["resource"])
-            row["resource"] = os.path.basename(row["resource"])
-            results.append(row)
+            hdict["status"] = status
+            hdict["quality"] = _get_quality_string(quality)
+            del hdict["action"]
+            _rename_element(hdict, "showid", "tvdbid")
+            hdict["resource_path"] = os.path.dirname(hdict["resource"])
+            hdict["resource"] = os.path.basename(hdict["resource"])
+            hdict["show_name"] = row.show.show_name
+            results.append(hdict)
 
-        myDB.connection.close()
         return _responds(RESULT_SUCCESS, results)
 
 
@@ -1099,10 +1110,8 @@ class CMD_HistoryClear(ApiCall):
 
     def run(self):
         """ clear sickbeard's history """
-        myDB = db.DBConnection()
-        myDB.action("DELETE FROM history WHERE 1=1")
+        History.delete().execute()
 
-        myDB.connection.close()
         return _responds(RESULT_SUCCESS, msg="History cleared")
 
 
@@ -1118,10 +1127,8 @@ class CMD_HistoryTrim(ApiCall):
 
     def run(self):
         """ trim sickbeard's history """
-        myDB = db.DBConnection()
-        myDB.action("DELETE FROM history WHERE date < " + str((datetime.datetime.today() - datetime.timedelta(days=30)).strftime(history.dateFormat)))
+        History.delete().where(History.date < (datetime.datetime.today() - datetime.timedelta(days=30)).strftime(history.dateFormat)).execute()
 
-        myDB.connection.close()
         return _responds(RESULT_SUCCESS, msg="Removed history entries greater than 30 days old")
 
 
@@ -1269,8 +1276,7 @@ class CMD_SickBeardCheckScheduler(ApiCall):
 
     def run(self):
         """ query the scheduler """
-        myDB = db.DBConnection()
-        sqlResults = myDB.select("SELECT last_backlog FROM info")
+        sqlResults = Info.select().first()
 
         backlogPaused = sickbeard.searchQueueScheduler.action.is_backlog_paused() #@UndefinedVariable
         backlogRunning = sickbeard.searchQueueScheduler.action.is_backlog_in_progress() #@UndefinedVariable
@@ -1278,8 +1284,7 @@ class CMD_SickBeardCheckScheduler(ApiCall):
         nextSearch = str(sickbeard.currentSearchScheduler.timeLeft()).split('.')[0]
         nextBacklog = sickbeard.backlogSearchScheduler.nextRun().strftime(dateFormat).decode(sickbeard.SYS_ENCODING)
 
-        myDB.connection.close()
-        data = {"backlog_is_paused": int(backlogPaused), "backlog_is_running": int(backlogRunning), "last_backlog": _ordinal_to_dateForm(sqlResults[0]["last_backlog"]), "search_is_running": int(searchStatus), "next_search": nextSearch, "next_backlog": nextBacklog}
+        data = {"backlog_is_paused": int(backlogPaused), "backlog_is_running": int(backlogRunning), "last_backlog": _ordinal_to_dateForm(sqlResults.last_backlog), "search_is_running": int(searchStatus), "next_search": nextSearch, "next_backlog": nextBacklog}
         return _responds(RESULT_SUCCESS, data)
 
 
@@ -2074,16 +2079,18 @@ class CMD_ShowSeasonList(ApiCall):
         if not showObj:
             return _responds(RESULT_FAILURE, msg="Show not found")
 
-        myDB = db.DBConnection(row_type="dict")
+        sqlResults = TvEpisode.select(TvEpisode.season).where(
+            (TvEpisode.show == self.tvdbid)
+        ).distinct()
+
         if self.sort == "asc":
-            sqlResults = myDB.select("SELECT DISTINCT season FROM tv_episodes WHERE showid = ? ORDER BY season ASC", [self.tvdbid])
+            sqlResults.order_by(TvEpisode.season.asc())
         else:
-            sqlResults = myDB.select("SELECT DISTINCT season FROM tv_episodes WHERE showid = ? ORDER BY season DESC", [self.tvdbid])
+            sqlResults.order_by(TvEpisode.season.desc())
         seasonList = [] # a list with all season numbers
         for row in sqlResults:
-            seasonList.append(int(row["season"]))
+            seasonList.append(row.season)
 
-        myDB.connection.close()
         return _responds(RESULT_SUCCESS, seasonList)
 
 
@@ -2109,18 +2116,19 @@ class CMD_ShowSeasons(ApiCall):
         if not showObj:
             return _responds(RESULT_FAILURE, msg="Show not found")
 
-        myDB = db.DBConnection(row_type="dict")
-
         if self.season == None:
-            sqlResults = myDB.select("SELECT name, episode, airdate, status, season FROM tv_episodes WHERE showid = ?", [self.tvdbid])
+            sqlResults = TvEpisode.select().where(
+                TvEpisode.show == self.tvdbid
+            )
             seasons = {}
-            for row in sqlResults:
-                status, quality = Quality.splitCompositeStatus(int(row["status"]))
+            for episode in sqlResults:
+                row = episode.to_dict()
+                status, quality = Quality.splitCompositeStatus(row["status"])
                 row["status"] = _get_status_Strings(status)
                 row["quality"] = _get_quality_string(quality)
                 row["airdate"] = _ordinal_to_dateForm(row["airdate"])
-                curSeason = int(row["season"])
-                curEpisode = int(row["episode"])
+                curSeason = row["season"]
+                curEpisode = row["episode"]
                 del row["season"]
                 del row["episode"]
                 if not curSeason in seasons:
@@ -2128,14 +2136,18 @@ class CMD_ShowSeasons(ApiCall):
                 seasons[curSeason][curEpisode] = row
 
         else:
-            sqlResults = myDB.select("SELECT name, episode, airdate, status FROM tv_episodes WHERE showid = ? AND season = ?", [self.tvdbid, self.season])
+            sqlResults = [e for e in TvEpisode.select().where(
+                (TvEpisode.show == self.tvdbid) &
+                (TvEpisode.season == self.season)
+            )]
             if len(sqlResults) is 0:
                 return _responds(RESULT_FAILURE, msg="Season not found")
             seasons = {}
-            for row in sqlResults:
-                curEpisode = int(row["episode"])
+            for episode in sqlResults:
+                row = episode.to_dict()
+                curEpisode = row["episode"]
                 del row["episode"]
-                status, quality = Quality.splitCompositeStatus(int(row["status"]))
+                status, quality = Quality.splitCompositeStatus(row["status"])
                 row["status"] = _get_status_Strings(status)
                 row["quality"] = _get_quality_string(quality)
                 row["airdate"] = _ordinal_to_dateForm(row["airdate"])
@@ -2143,7 +2155,6 @@ class CMD_ShowSeasons(ApiCall):
                     seasons[curEpisode] = {}
                 seasons[curEpisode] = row
 
-        myDB.connection.close()
         return _responds(RESULT_SUCCESS, seasons)
 
 
@@ -2270,8 +2281,9 @@ class CMD_ShowStats(ApiCall):
                 continue
             episode_qualities_counts_snatch[statusCode] = 0
 
-        myDB = db.DBConnection(row_type="dict")
-        sqlResults = myDB.select("SELECT status, season FROM tv_episodes WHERE showid = ?", [self.tvdbid])
+        sqlResults = [e.to_dict() for e in TvEpisode.select().where(
+            TvEpisode.show == self.tvdbid
+        )]
         # the main loop that goes through all episodes
         for row in sqlResults:
             status, quality = Quality.splitCompositeStatus(int(row["status"]))
@@ -2324,7 +2336,6 @@ class CMD_ShowStats(ApiCall):
             statusString = statusStrings.statusStrings[statusCode].lower().replace(" ", "_").replace("(", "").replace(")", "")
             episodes_stats[statusString] = episode_status_counts_total[statusCode]
 
-        myDB.connection.close()
         return _responds(RESULT_SUCCESS, episodes_stats)
 
 
@@ -2417,14 +2428,27 @@ class CMD_ShowsStats(ApiCall):
         """ display the global shows and episode stats """
         stats = {}
 
-        myDB = db.DBConnection()
         today = str(datetime.date.today().toordinal())
         stats["shows_total"] = len(sickbeard.showList)
         stats["shows_active"] = len([show for show in sickbeard.showList if show.paused == 0 and show.status != "Ended"])
-        stats["ep_downloaded"] = myDB.select("SELECT COUNT(*) FROM tv_episodes WHERE status IN (" + ",".join([str(show) for show in Quality.DOWNLOADED + [ARCHIVED]]) + ") AND season != 0 and episode != 0 AND airdate <= " + today + "")[0][0]
-        stats["ep_total"] = myDB.select("SELECT COUNT(*) FROM tv_episodes WHERE season != 0 and episode != 0 AND (airdate != 1 OR status IN (" + ",".join([str(show) for show in (Quality.DOWNLOADED + Quality.SNATCHED + Quality.SNATCHED_PROPER) + [ARCHIVED]]) + ")) AND airdate <= " + today + " AND status != " + str(IGNORED) + "")[0][0]
+        stats["ep_downloaded"] = TvEpisode.select().where(
+            (TvEpisode.status << Quality.DOWNLOADED + [ARCHIVED]) &
+            (TvEpisode.season != 0) &
+            (TvEpisode.episode != 0) &
+            (TvEpisode.airdate <= today)
+        ).count()
+        stats["ep_total"] = TvEpisode.select().where(
+            (TvEpisode.season != 0) &
+            (TvEpisode.episode != 0) &
+            (TvEpisode.airdate <= today) &
+            (TvEpisode.status != IGNORED) &
+            (
+                (TvEpisode.airdate != 1) |
+                (TvEpisode.status << (Quality.DOWNLOADED + Quality.SNATCHED + Quality.SNATCHED_PROPER) + [ARCHIVED])
+            )
+        ).count()
 
-        myDB.connection.close()
+
         return _responds(RESULT_SUCCESS, stats)
 
 # WARNING: never define a cmd call string that contains a "_" (underscore)
