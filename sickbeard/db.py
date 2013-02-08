@@ -16,7 +16,7 @@
 # You should have received a copy of the GNU General Public License
 # along with Sick Beard.  If not, see <http://www.gnu.org/licenses/>.
 
-from __future__ import with_statement 
+from __future__ import with_statement
 
 import os.path
 import re
@@ -31,17 +31,12 @@ from sickbeard import logger
 from sickbeard.exceptions import ex
 
 
-class DBConnection(object):
-    def __init__(self, *args, **kwargs):
-        pass
-
 class DBSanityCheck(object):
-    def __init__(self, connection):
-        self.connection = connection
-
     def check(self):
         pass
 
+def sanityCheckDatabase(sanity_check):
+    sanity_check().check()
+
 class SchemaUpgrade (object):
-    def __init__(self, connection):
-        self.connection = connection
+    pass

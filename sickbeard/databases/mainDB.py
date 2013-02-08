@@ -25,7 +25,7 @@ from sickbeard.providers.generic import GenericProvider
 from sickbeard.db_peewee import *
 
 from sickbeard import encodingKludge as ek
-from sickbeard.name_parser.parser import NameParser, InvalidNameException 
+from sickbeard.name_parser.parser import NameParser, InvalidNameException
 
 class MainSanityCheck(db.DBSanityCheck):
 
@@ -35,51 +35,57 @@ class MainSanityCheck(db.DBSanityCheck):
         self.fix_orphan_episodes()
 
     def fix_duplicate_shows(self):
-
-        sqlResults = self.connection.select("SELECT show_id, tvdb_id, COUNT(tvdb_id) as count FROM tv_shows GROUP BY tvdb_id HAVING count > 1")
+        sqlResults = TvShow.select(
+            TvShow.show_id, peewee.fn.Count(TvShow.tvdb_id)
+        ).group_by(TvShow.tvdb_id).having(
+            peewee.fn.Count(TvShow.tvdb_id) > 1
+        )
 
         for cur_duplicate in sqlResults:
+            logger.log(u"Duplicate show detected! tvdb_id: " + str(cur_duplicate.tvdb_id) + u" count: " + str(cur_duplicate.count), logger.DEBUG)
 
-            logger.log(u"Duplicate show detected! tvdb_id: " + str(cur_duplicate["tvdb_id"]) + u" count: " + str(cur_duplicate["count"]), logger.DEBUG)
-
-            cur_dupe_results = self.connection.select("SELECT show_id, tvdb_id FROM tv_shows WHERE tvdb_id = ? LIMIT ?",
-                                           [cur_duplicate["tvdb_id"], int(cur_duplicate["count"])-1]
-                                           )
+            cur_dupe_results = TvShow.select().where(TvShow.tvdb_id == cur_duplicate.tvdb_id).limit(cur_duplicate.count - 1)
 
             for cur_dupe_id in cur_dupe_results:
-                logger.log(u"Deleting duplicate show with tvdb_id: " + str(cur_dupe_id["tvdb_id"]) + u" show_id: " + str(cur_dupe_id["show_id"]))
-                self.connection.action("DELETE FROM tv_shows WHERE show_id = ?", [cur_dupe_id["show_id"]])
+                logger.log(u"Deleting duplicate show with tvdb_id: " + str(cur_dupe_id.tvdb_id) + u" show_id: " + str(cur_dupe_id.show_id))
+                cur_dupe_id.delete_instance()
 
         else:
             logger.log(u"No duplicate show, check passed")
 
     def fix_duplicate_episodes(self):
 
-        sqlResults = self.connection.select("SELECT showid, season, episode, COUNT(showid) as count FROM tv_episodes GROUP BY showid, season, episode HAVING count > 1")
+        sqlResults = TvEpisode.select(TvEpisode, peewee.fn.Count(TvEpisode.show)).group_by(
+            TvEpisode.show, TvEpisode.season, TvEpisode.episode
+        ).having(
+            peewee.fn.Count(TvEpisode.show) > 1
+        )
 
         for cur_duplicate in sqlResults:
+            logger.log(u"Duplicate episode detected! showid: " + str(cur_duplicate.show) + u" season: "+str(cur_duplicate.season) + u" episode: "+str(cur_duplicate.episode) + u" count: " + str(cur_duplicate.count), logger.DEBUG)
 
-            logger.log(u"Duplicate episode detected! showid: " + str(cur_duplicate["showid"]) + u" season: "+str(cur_duplicate["season"]) + u" episode: "+str(cur_duplicate["episode"]) + u" count: " + str(cur_duplicate["count"]), logger.DEBUG)
-
-            cur_dupe_results = self.connection.select("SELECT episode_id FROM tv_episodes WHERE showid = ? AND season = ? and episode = ? ORDER BY episode_id DESC LIMIT ?",
-                                           [cur_duplicate["showid"], cur_duplicate["season"], cur_duplicate["episode"], int(cur_duplicate["count"])-1]
-                                           )
+            cur_dupe_results = TvEpisode.select().where(
+                (TvEpisode.show == cur_duplicate.show) &
+                (TvEpisode.season == cur_duplicate.season) &
+                (TvEpisode.episode == cur_duplicate.episode)
+            ).order_by(TvEpisode.episode_id.desc()).limit(cur_duplicate.count-1)
 
             for cur_dupe_id in cur_dupe_results:
-                logger.log(u"Deleting duplicate episode with episode_id: " + str(cur_dupe_id["episode_id"]))
-                self.connection.action("DELETE FROM tv_episodes WHERE episode_id = ?", [cur_dupe_id["episode_id"]])
+                logger.log(u"Deleting duplicate episode with episode_id: " + str(cur_dupe_id.episode_id))
+                cur_dupe_id.delete_instance()
 
         else:
             logger.log(u"No duplicate episode, check passed")
 
     def fix_orphan_episodes(self):
-
-        sqlResults = self.connection.select("SELECT episode_id, showid, tv_shows.tvdb_id FROM tv_episodes LEFT JOIN tv_shows ON tv_episodes.showid=tv_shows.tvdb_id WHERE tv_shows.tvdb_id is NULL")
+        sqlResults = TvEpisode.select(TvEpisode, TvShow).where(
+            TvShow.tvdb_id == None
+        ).join(TvShow)
 
         for cur_orphan in sqlResults:
-            logger.log(u"Orphan episode detected! episode_id: " + str(cur_orphan["episode_id"]) + " showid: " + str(cur_orphan["showid"]), logger.DEBUG)
-            logger.log(u"Deleting orphan episode with episode_id: "+str(cur_orphan["episode_id"]))
-            self.connection.action("DELETE FROM tv_episodes WHERE episode_id = ?", [cur_orphan["episode_id"]])
+            logger.log(u"Orphan episode detected! episode_id: " + str(cur_orphan.episode_id) + " showid: " + str(cur_orphan.show.tvdb_id), logger.DEBUG)
+            logger.log(u"Deleting orphan episode with episode_id: "+str(cur_orphan.episode_id))
+            cur_orphan.delete_instance()
 
         else:
             logger.log(u"No orphan episode, check passed")
@@ -90,11 +96,14 @@ class MainSanityCheck(db.DBSanityCheck):
 # Add new migrations at the bottom of the list; subclass the previous migration.
 
 class InitialSchema (db.SchemaUpgrade):
+    tables = [TvShow, TvEpisode, Info, History]
     def test(self):
-        return self.hasTable("tv_shows")
+        for table in self.tables:
+            if not table.table_exists():
+                return False
+        return True
 
     def execute(self):
-        tables = [TvShow, TvEpisode, Info, History]
         with maindb.transaction():
-            for table in tables:
+            for table in self.tables:
                 table.create_table()

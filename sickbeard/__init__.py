@@ -677,7 +677,7 @@ def initialize(consoleLogging=True):
         #db.upgradeDatabase(db.DBConnection("cache.db"), cache_db.InitialSchema)
 
         # fix up any db problems
-        #db.sanityCheckDatabase(db.DBConnection(), mainDB.MainSanityCheck)
+        db.sanityCheckDatabase(mainDB.MainSanityCheck)
         db_peewee.createAllTables()
 
 

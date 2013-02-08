@@ -163,15 +163,7 @@ class SickbeardTestDBCase(unittest.TestCase):
         db_peewee.TvEpisode._meta.auto_increment = True
 
 
-class TestDBConnection(db.DBConnection, object):
-
-    def __init__(self, dbFileName=TESTDBNAME, row_type=None):
-        dbFileName = os.path.join(TESTDIR, dbFileName)
-        super(TestDBConnection, self).__init__(dbFileName, row_type=row_type)
-
-
 # this will override the normal db connection
-sickbeard.db.DBConnection = None
 db_peewee.maindb.init('sickbeard_test', user='sickbeard')
 db_peewee.cachedb.init('sickbeard_test', user='sickbeard')
 
@@ -189,7 +181,7 @@ def setUp_test_db():
     # upgrading the db
     #db.upgradeDatabase(db.DBConnection(), mainDB.InitialSchema)
     # fix up any db problems
-    #db.sanityCheckDatabase(db.DBConnection(), mainDB.MainSanityCheck)
+    db.sanityCheckDatabase(mainDB.MainSanityCheck)
 
     #and for cache.b too
     #db.upgradeDatabase(db.DBConnection("cache.db"), cache_db.InitialSchema)
