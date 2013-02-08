@@ -146,7 +146,7 @@ def main():
         pass
 
     # For OSes that are poorly configured I'll just randomly force UTF-8
-    if not sickbeard.SYS_ENCODING or sickbeard.SYS_ENCODING in ('ANSI_X3.4-1968', 'US-ASCII', 'ASCII'):
+    if not sickbeard.SYS_ENCODING or sickbeard.SYS_ENCODING in ('ANSI_X3.4-1968', 'US-ASCII', 'ASCII', 'cp1252'):
         sickbeard.SYS_ENCODING = 'UTF-8'
 
     if not hasattr(sys, "setdefaultencoding"):
