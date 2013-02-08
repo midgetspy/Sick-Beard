@@ -130,14 +130,22 @@ class PublicHDProvider(generic.TorrentProvider):
         return search_string
 
     def _doSearch(self, search_params, show=None):
-        baseUrl = self.url + "index.php?page=torrents&search=%s&active=0&category=2;5;8;9;20;7;24;14;23&order=5&by=2&pages="
+        baseUrl = self.url + "index.php?"
 
-        searchUrl = baseUrl % search_params
-        #logger.log(u"Search string: " + searchUrl) #, logger.DEBUG)       
-        
+        searchUrl = ''
         data = []
         for index in [1,2,3,4,5]:
-            newItems = self.parseResults(searchUrl + str(index))
+            searchUrl = baseUrl + urllib.urlencode({
+                'page': 'torrents',    
+                'search': search_params,    
+                'active': '0',    
+                'category': '2;5;8;9;20;7;24;14;23',    
+                'order': '5',    
+                'by': '2',    
+                'pages': str(index)   
+            })
+
+            newItems = self.parseResults(searchUrl)
             data = data + newItems
             #logger.log(str(len(newItems)) + " - " + str(len(data)))
             if len(newItems) < 30:

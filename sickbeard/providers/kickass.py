@@ -178,7 +178,7 @@ class KICKASSCache(tvcache.TVCache):
     def _getRSSData(self):
         url = self.provider.url + 'tv/?rss=1'
 
-        logger.log(u"KICKASS cache update URL: " + url)
+        #logger.log(u"KICKASS cache update URL: " + url)
 
         data = self.provider.getURL(url)
         return data
