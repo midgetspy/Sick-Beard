@@ -18,9 +18,9 @@
 # along with Sick Beard.  If not, see <http://www.gnu.org/licenses/>.
 
 import unittest
-import peewee
 import test_lib as test
 from sickbeard.db_peewee import *
+from lib import peewee
 
 class DBPeeweeTests(test.SickbeardTestDBCase):
 
@@ -52,11 +52,11 @@ class DBPeeweeTests(test.SickbeardTestDBCase):
     def testMultiWhereClauses(self):
       # You can chain multiple where clauses but they don't modify the object
       # you call it on, they return a clone.  Thus the query = query.where()
-      query = TvEpisode.select()
+      query = TvEpisode.select(TvEpisode.name)
       query.where(TvEpisode.name == 'foo')
       query = query.where(TvEpisode.location == '')
       sql = query.sql()[0]
-      self.assertIn('"location" = ?', sql)
+      self.assertIn('location', sql)
 
     def testNextEpisodeSelection(self):
         print [e.name for e in TvEpisode.select(TvEpisode, peewee.fn.Min(TvEpisode.airdate).alias('test'), TvShow).where(
@@ -69,22 +69,6 @@ class DBPeeweeTests(test.SickbeardTestDBCase):
         t = TvEpisode.select().get()
         d = t.to_dict()
         self.assertIn('showid', d)
-
-    def testAlterTable(self):
-        eps = [t for t in TvEpisode.select()]
-        with maindb.transaction():
-            q = peewee.RawQuery(
-                TvEpisode,
-                'alter table tv_episodes rename to tv_episodes_old')
-            q._execute()
-            q= peewee.RawQuery(
-                TvEpisode,
-                'drop index if exists tv_episodes_showid')
-            q._execute()
-            TvEpisode.create_table()
-            for e in eps:
-                e.set_id(None)
-                e.save(force_insert=True)
 
 
 if __name__ == '__main__':

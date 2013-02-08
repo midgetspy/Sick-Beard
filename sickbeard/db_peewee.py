@@ -17,12 +17,11 @@
 # You should have received a copy of the GNU General Public License
 # along with Sick Beard.  If not, see <http://www.gnu.org/licenses/>.
 
-import peewee
 import logging
-
+import sickbeard
 from sickbeard import logger
 from sickbeard import common
-
+from lib import peewee
 peewee.logger = logging.getLogger('sickbeard')
 
 #maindb = peewee.SqliteDatabase(None, threadlocals=True)
@@ -31,27 +30,49 @@ maindb = peewee.MySQLDatabase(None, threadlocals=True)
 cachedb = maindb
 
 def createAllTables():
-    for t in [BaseDbVersion,
-              Info,
-              TvShow,
-              TvEpisode,
-              History,
-              CacheDbVersion,
-              Lastupdate,
-              SceneException,SceneName,ProviderCache]:
-        if not t.table_exists():
-            t.create_table(fail_silently=False)
+    with maindb.transaction():
+        for t in [
+            BaseDbVersion,
+            Info,
+            TvShow,
+            TvEpisode,
+            History
+        ]:
+            if not t.table_exists():
+                t.create_table(fail_silently=False)
+
+    with cachedb.transaction():
+        for t in [
+            CacheDbVersion,
+            Lastupdate,
+            SceneException,
+            SceneName,
+            ProviderCache]:
+            if not t.table_exists():
+                t.create_table(fail_silently=False)
 
 def dropAllTables():
-    for t in [BaseDbVersion,
-              Info,
-              TvEpisode,
-              History,
-              CacheDbVersion,
-              Lastupdate,
-              TvShow,
-              SceneException,SceneName,ProviderCache]:
-        t.drop_table(fail_silently=True)
+    with maindb.transaction():
+        for t in [
+            BaseDbVersion,
+            Info,
+            TvEpisode,
+            History,
+            TvShow,
+        ]:
+            if t.table_exists():
+                t.drop_table(fail_silently=True)
+
+    with cachedb.transaction():
+        for t in [
+            CacheDbVersion,
+            Lastupdate,
+            SceneException,
+            SceneName,
+            ProviderCache]:
+            if t.table_exists():
+                t.drop_table(fail_silently=True)
+
 
 class BaseSickbeardModel(peewee.Model):
     def to_dict(self):

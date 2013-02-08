@@ -796,7 +796,6 @@ class QueryCompiler(object):
 
         parts = ['UPDATE %s SET' % self.quote(model._meta.db_table)]
         sets, params = self.parse_field_dict(query._update)
-
         parts.append(', '.join('%s=%s' % (f, v) for f, v in sets))
 
         where, w_params = self.parse_query_node(query._where, None)
@@ -1528,10 +1527,10 @@ class Database(object):
 
     def execute_sql(self, sql, params=None, require_commit=True):
         cursor = self.get_cursor()
+        logger.debug((sql, params))
         res = cursor.execute(sql, params or ())
         if require_commit and self.get_autocommit():
             self.commit()
-        logger.debug((sql, params))
         return cursor
 
     def begin(self):

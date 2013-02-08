@@ -141,10 +141,10 @@ class SickbeardTestDBCase(unittest.TestCase):
         db_peewee.TvShow._meta.auto_increment = False
         with db_peewee.maindb.transaction():
             for show in show_data:
-                t = db_peewee.TvShow()
+                s = db_peewee.TvShow()
                 for key, value in show_data[show].items():
-                    setattr(t, key, value)
-                t.save(force_insert=True)
+                    setattr(s, key, value)
+                s.save(force_insert=True)
 
             for ep in ep_data:
                 t = db_peewee.TvEpisode()
@@ -170,32 +170,10 @@ class TestDBConnection(db.DBConnection, object):
         super(TestDBConnection, self).__init__(dbFileName, row_type=row_type)
 
 
-class TestCacheDBConnection(TestDBConnection, object):
-
-    def __init__(self, providerName):
-        db.DBConnection.__init__(self, os.path.join(TESTDIR, TESTCACHEDBNAME))
-
-        # Create the table if it's not already there
-        try:
-            sql = "CREATE TABLE "+providerName+" (name TEXT, season NUMERIC, episodes TEXT, tvrid NUMERIC, tvdbid NUMERIC, url TEXT, time NUMERIC, quality TEXT);"
-            self.connection.execute(sql)
-            self.connection.commit()
-        except sqlite3.OperationalError, e:
-            if str(e) != "table "+providerName+" already exists":
-                raise
-
-        # Create the table if it's not already there
-        try:
-            sql = "CREATE TABLE lastUpdate (provider TEXT, time NUMERIC);"
-            self.connection.execute(sql)
-            self.connection.commit()
-        except sqlite3.OperationalError, e:
-            if str(e) != "table lastUpdate already exists":
-                raise
-
 # this will override the normal db connection
-sickbeard.db.DBConnection = TestDBConnection
-
+sickbeard.db.DBConnection = None
+db_peewee.maindb.init('sickbeard_test', user='sickbeard')
+db_peewee.cachedb.init('sickbeard_test', user='sickbeard')
 
 #=================
 # test functions
@@ -205,8 +183,7 @@ def setUp_test_db():
     """
     #db_peewee.maindb.init(os.path.join(TESTDIR, 'sickbeard.db'))
     #db_peewee.cachedb.init(os.path.join(TESTDIR, 'cache.db'))
-    db_peewee.maindb.init('sickbeard_test', user='sickbeard')
-    db_peewee.cachedb.init('sickbeard_test', user='sickbeard')
+    #db_peewee.cachedb.init('sickbeard_test', user='sickbeard')
 
     db_peewee.createAllTables()
     # upgrading the db
@@ -232,6 +209,8 @@ def tearDown_test_db():
         os.remove(os.path.join(TESTDIR, TESTDBNAME))
     if os.path.exists(os.path.join(TESTDIR, TESTCACHEDBNAME)):
         os.remove(os.path.join(TESTDIR, TESTCACHEDBNAME))
+
+db_peewee.dropAllTables()
 
 def setUp_test_episode_file():
     if not os.path.exists(FILEDIR):

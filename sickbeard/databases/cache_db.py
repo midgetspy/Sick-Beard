@@ -24,7 +24,7 @@ class InitialSchema (db.SchemaUpgrade):
     cache_tables = [
         ProviderCache,
         Lastupdate,
-        DbVersion,
+        CacheDbVersion,
         SceneException,
         SceneName
     ]

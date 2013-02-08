@@ -827,6 +827,7 @@ class TVShow(object):
         self.db_tvshow.startyear = self.startyear
         self.db_tvshow.tvr_name = self.tvrname
         self.db_tvshow.lang = self.lang
+
         self.db_tvshow.save(force_insert=new_save)
 
 

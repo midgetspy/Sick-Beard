@@ -17,7 +17,7 @@
 # along with Sick Beard.  If not, see <http://www.gnu.org/licenses/>.
 
 import re
-import peewee
+from lib import peewee
 
 from sickbeard import helpers
 from sickbeard import name_cache

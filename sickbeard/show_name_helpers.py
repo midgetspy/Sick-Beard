@@ -17,7 +17,7 @@
 # along with Sick Beard.  If not, see <http://www.gnu.org/licenses/>.
 
 import sickbeard
-import peewee
+from lib import peewee
 
 from sickbeard.common import countryList
 from sickbeard.helpers import sanitizeSceneName

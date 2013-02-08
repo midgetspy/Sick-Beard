@@ -25,7 +25,7 @@ import shlex
 import subprocess
 
 import sickbeard
-import peewee
+from lib import peewee
 
 from sickbeard.db_peewee import TvEpisode, TvShow, History
 from sickbeard import classes

@@ -22,7 +22,7 @@ import datetime
 import threading
 
 import sickbeard
-import peewee
+from lib import peewee
 
 from sickbeard.db_peewee import Info, TvEpisode, TvShow
 from sickbeard import scheduler
@@ -165,7 +165,7 @@ class BacklogSearcher:
     def _get_air_by_date_segments(self, tvdb_id, fromDate):
         # query the DB for all dates for this show
         query = TvEpisode.select(
-            TvEpisode, TvShow.paused.alias('paused')
+            TvEpisode, TvShow.paused
         ).where(
             (TvEpisode.season != 0) &
             (TvEpisode.show == tvdb_id) &

@@ -573,11 +573,6 @@ def _ordinal_to_dateForm(ordinal):
     return date.strftime(dateFormat)
 
 
-def _historyDate_to_dateTimeForm(timeString):
-    date = datetime.datetime.strptime(timeString, history.dateFormat)
-    return date.strftime(dateTimeFormat)
-
-
 def _replace_statusStrings_with_statusCodes(statusStrings):
     statusCodes = []
     if "snatched" in statusStrings:

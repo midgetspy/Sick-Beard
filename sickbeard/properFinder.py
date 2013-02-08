@@ -205,7 +205,7 @@ class ProperFinder():
                 (History.season == curProper.season) &
                 (History.episode == curProper.episode) &
                 (History.quality == curProper.quality) &
-                (History.date >= historyLimit.strftime(history.dateFormat)) &
+                (History.date >= historyLimit) &
                 (History.aciton << [str(x) for x in Quality.SNATCHED])
             ).first()
 

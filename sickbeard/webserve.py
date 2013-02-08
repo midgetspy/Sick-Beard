@@ -26,7 +26,7 @@ import re
 import threading
 import datetime
 import random
-import peewee
+from lib import peewee
 
 from Cheetah.Template import Template
 import cherrypy.lib
@@ -614,8 +614,7 @@ class History:
     @cherrypy.expose
     def trimHistory(self):
 
-        cutoff = (datetime.datetime.today() -
-                  datetime.timedelta(days=30)).strftime(history.dateFormat)
+        cutoff = datetime.datetime.today() - datetime.timedelta(days=30)
         DbHistory.delete().where(
             (DbHistory.date < cutoff)
         ).execute()
