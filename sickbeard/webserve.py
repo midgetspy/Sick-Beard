@@ -1138,6 +1138,7 @@ class ConfigProviders:
 
         redirect("/config/providers/")
 
+
 class ConfigNotifications:
 
     @cherrypy.expose
@@ -1147,7 +1148,7 @@ class ConfigNotifications:
         return _munge(t)
 
     @cherrypy.expose
-    def saveNotifications(self, use_xbmc=None, xbmc_notify_onsnatch=None, xbmc_notify_ondownload=None,
+    def saveNotifications(self, use_xbmc=None, xbmc_notify_onsnatch=None, xbmc_notify_ondownload=None, xbmc_update_onlyfirst=None,
                           xbmc_update_library=None, xbmc_update_full=None, xbmc_host=None, xbmc_username=None, xbmc_password=None,
                           use_plex=None, plex_notify_onsnatch=None, plex_notify_ondownload=None, plex_update_library=None,
                           plex_server_host=None, plex_host=None, plex_username=None, plex_password=None,
@@ -1186,6 +1187,11 @@ class ConfigNotifications:
             xbmc_update_full = 1
         else:
             xbmc_update_full = 0
+
+        if xbmc_update_onlyfirst == "on":
+            xbmc_update_onlyfirst = 1
+        else:
+            xbmc_update_onlyfirst = 0
 
         if use_xbmc == "on":
             use_xbmc = 1
@@ -1357,6 +1363,7 @@ class ConfigNotifications:
         sickbeard.XBMC_NOTIFY_ONDOWNLOAD = xbmc_notify_ondownload
         sickbeard.XBMC_UPDATE_LIBRARY = xbmc_update_library
         sickbeard.XBMC_UPDATE_FULL = xbmc_update_full
+        sickbeard.XBMC_UPDATE_ONLYFIRST = xbmc_update_onlyfirst
         sickbeard.XBMC_HOST = xbmc_host
         sickbeard.XBMC_USERNAME = xbmc_username
         sickbeard.XBMC_PASSWORD = xbmc_password
@@ -1425,7 +1432,7 @@ class ConfigNotifications:
 
         sickbeard.USE_PYTIVO = use_pytivo
         sickbeard.PYTIVO_NOTIFY_ONSNATCH = pytivo_notify_onsnatch == "off"
-        sickbeard.PYTIVO_NOTIFY_ONDOWNLOAD = pytivo_notify_ondownload ==  "off"
+        sickbeard.PYTIVO_NOTIFY_ONDOWNLOAD = pytivo_notify_ondownload == "off"
         sickbeard.PYTIVO_UPDATE_LIBRARY = pytivo_update_library
         sickbeard.PYTIVO_HOST = pytivo_host
         sickbeard.PYTIVO_SHARE_NAME = pytivo_share_name
@@ -2494,17 +2501,20 @@ class Home:
         # just give it some time
         time.sleep(3)
 
-        redirect("/home/displayShow?show="+str(showObj.tvdbid))
+        redirect("/home/displayShow?show=" + str(showObj.tvdbid))
 
     @cherrypy.expose
     def updateXBMC(self, showName=None):
-        # TODO: configure that each host can have different options / username / pw
-        # only send update to first host in the list -- workaround for xbmc sql backend users
-        firstHost = sickbeard.XBMC_HOST.split(",")[0].strip()
-        if notifiers.xbmc_notifier.update_library(showName=showName):
-            ui.notifications.message("Library update command sent to XBMC host: " + firstHost)
+        if sickbeard.XBMC_UPDATE_ONLYFIRST:
+            # only send update to first host in the list -- workaround for xbmc sql backend users
+            host = sickbeard.XBMC_HOST.split(",")[0].strip()
         else:
-            ui.notifications.error("Unable to contact XBMC host: " + firstHost)
+            host = sickbeard.XBMC_HOST
+
+        if notifiers.xbmc_notifier.update_library(showName=showName):
+            ui.notifications.message("Library update command sent to XBMC host(s): " + host)
+        else:
+            ui.notifications.error("Unable to contact one or more XBMC host(s): " + host)
         redirect('/home')
 
     @cherrypy.expose

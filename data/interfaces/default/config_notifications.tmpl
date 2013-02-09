@@ -67,6 +67,13 @@
                                 </label>
                             </div>
                             <div class="field-pair">
+                                <input type="checkbox" name="xbmc_update_onlyfirst" id="xbmc_update_onlyfirst" #if $sickbeard.XBMC_UPDATE_ONLYFIRST then "checked=\"checked\"" else ""# />
+                                <label class="clearfix" for="xbmc_update_onlyfirst">
+                                    <span class="component-title">Only Update First Host</span>
+                                    <span class="component-desc">Only send library update to the first host?</span>
+                                </label>
+                            </div>
+                            <div class="field-pair">
                                 <label class="nocheck clearfix">
                                     <span class="component-title">XBMC IP:Port</span>
                                     <input type="text" name="xbmc_host" id="xbmc_host" value="$sickbeard.XBMC_HOST" size="35" />
@@ -359,7 +366,7 @@
 
                     <fieldset class="component-group-list">
                         <div class="field-pair">
-                            <input type="checkbox" class="enabler" name="use_synoindex" id="use_synoindex" #if $sickbeard.USE_SYNOINDEX then "checked=\"checked\"" else ""# /> 
+                            <input type="checkbox" class="enabler" name="use_synoindex" id="use_synoindex" #if $sickbeard.USE_SYNOINDEX then "checked=\"checked\"" else ""# />
                             <label class="clearfix" for="use_synoindex">
                                 <span class="component-title">Enable</span>
                                 <span class="component-desc">Should Sick Beard send notifications to the synoindex daemon?<br /><br />
@@ -387,7 +394,7 @@
                     </div>
                     <fieldset class="component-group-list">
                         <div class="field-pair">
-                            <input type="checkbox" class="enabler" name="use_pytivo" id="use_pytivo" #if $sickbeard.USE_PYTIVO then "checked=\"checked\"" else ""# /> 
+                            <input type="checkbox" class="enabler" name="use_pytivo" id="use_pytivo" #if $sickbeard.USE_PYTIVO then "checked=\"checked\"" else ""# />
                             <label class="clearfix" for="use_pytivo">
                                 <span class="component-title">Enable</span>
                                 <span class="component-desc">Should Sick Beard send notifications to pyTivo?<br /><br /></span>
@@ -452,7 +459,7 @@
                     </div>
                     <fieldset class="component-group-list">
                         <div class="field-pair">
-                            <input type="checkbox" class="enabler" name="use_growl" id="use_growl" #if $sickbeard.USE_GROWL then "checked=\"checked\"" else ""# /> 
+                            <input type="checkbox" class="enabler" name="use_growl" id="use_growl" #if $sickbeard.USE_GROWL then "checked=\"checked\"" else ""# />
                             <label class="clearfix" for="use_growl">
                                 <span class="component-title">Enable</span>
                                 <span class="component-desc">Should Sick Beard send Growl notifications?</span>
@@ -461,7 +468,7 @@
 
                         <div id="content_use_growl">
                             <div class="field-pair">
-                                <input type="checkbox" name="growl_notify_onsnatch" id="growl_notify_onsnatch" #if $sickbeard.GROWL_NOTIFY_ONSNATCH then "checked=\"checked\"" else ""# /> 
+                                <input type="checkbox" name="growl_notify_onsnatch" id="growl_notify_onsnatch" #if $sickbeard.GROWL_NOTIFY_ONSNATCH then "checked=\"checked\"" else ""# />
                                 <label class="clearfix" for="growl_notify_onsnatch">
                                     <span class="component-title">Notify on Snatch</span>
                                     <span class="component-desc">Send notification when we start a download?</span>
@@ -515,7 +522,7 @@
                     </div>
                     <fieldset class="component-group-list">
                         <div class="field-pair">
-                            <input type="checkbox" class="enabler" name="use_prowl" id="use_prowl" #if $sickbeard.USE_PROWL then "checked=\"checked\"" else ""# /> 
+                            <input type="checkbox" class="enabler" name="use_prowl" id="use_prowl" #if $sickbeard.USE_PROWL then "checked=\"checked\"" else ""# />
                             <label class="clearfix" for="use_prowl">
                                 <span class="component-title">Enable</span>
                                 <span class="component-desc">Should Sick Beard send Prowl notifications?</span>
@@ -524,7 +531,7 @@
 
                         <div id="content_use_prowl">
                             <div class="field-pair">
-                                <input type="checkbox" name="prowl_notify_onsnatch" id="prowl_notify_onsnatch" #if $sickbeard.PROWL_NOTIFY_ONSNATCH then "checked=\"checked\"" else ""# /> 
+                                <input type="checkbox" name="prowl_notify_onsnatch" id="prowl_notify_onsnatch" #if $sickbeard.PROWL_NOTIFY_ONSNATCH then "checked=\"checked\"" else ""# />
                                 <label class="clearfix" for="prowl_notify_onsnatch">
                                     <span class="component-title">Notify on Snatch</span>
                                     <span class="component-desc">Send notification when we start a download?</span>
@@ -639,7 +646,7 @@
                     </div>
                     <fieldset class="component-group-list">
                         <div class="field-pair">
-                            <input type="checkbox" class="enabler" name="use_libnotify" id="use_libnotify" #if $sickbeard.USE_LIBNOTIFY then "checked=\"checked\"" else ""# /> 
+                            <input type="checkbox" class="enabler" name="use_libnotify" id="use_libnotify" #if $sickbeard.USE_LIBNOTIFY then "checked=\"checked\"" else ""# />
                             <label class="clearfix" for="use_libnotify">
                                 <span class="component-title">Enable</span>
                                 <span class="component-desc">Should Sick Beard send Libnotify notifications?</span>
@@ -648,7 +655,7 @@
 
                         <div id="content_use_libnotify">
                             <div class="field-pair">
-                                <input type="checkbox" name="libnotify_notify_onsnatch" id="libnotify_notify_onsnatch" #if $sickbeard.LIBNOTIFY_NOTIFY_ONSNATCH then "checked=\"checked\"" else ""# /> 
+                                <input type="checkbox" name="libnotify_notify_onsnatch" id="libnotify_notify_onsnatch" #if $sickbeard.LIBNOTIFY_NOTIFY_ONSNATCH then "checked=\"checked\"" else ""# />
                                 <label class="clearfix" for="libnotify_notify_onsnatch">
                                     <span class="component-title">Notify on Snatch</span>
                                     <span class="component-desc">Send notification when we start a download?</span>
@@ -775,7 +782,7 @@
                     </div>
                     <fieldset class="component-group-list">
                         <div class="field-pair">
-                            <input type="checkbox" class="enabler" name="use_nma" id="use_nma" #if $sickbeard.USE_NMA then "checked=\"checked\"" else ""# /> 
+                            <input type="checkbox" class="enabler" name="use_nma" id="use_nma" #if $sickbeard.USE_NMA then "checked=\"checked\"" else ""# />
                             <label class="clearfix" for="use_nma">
                                 <span class="component-title">Enable</span>
                                 <span class="component-desc">Should Sick Beard send NMA notifications?</span>
@@ -784,7 +791,7 @@
 
                         <div id="content_use_nma">
                             <div class="field-pair">
-                                <input type="checkbox" name="nma_notify_onsnatch" id="nma_notify_onsnatch" #if $sickbeard.NMA_NOTIFY_ONSNATCH then "checked=\"checked\"" else ""# /> 
+                                <input type="checkbox" name="nma_notify_onsnatch" id="nma_notify_onsnatch" #if $sickbeard.NMA_NOTIFY_ONSNATCH then "checked=\"checked\"" else ""# />
                                 <label class="clearfix" for="nma_notify_onsnatch">
                                     <span class="component-title">Notify on Snatch</span>
                                     <span class="component-desc">Send notification when we start a download?</span>
@@ -861,7 +868,7 @@
 
                         <div id="content_use_twitter">
                             <div class="field-pair">
-                                <input type="checkbox" name="twitter_notify_onsnatch" id="twitter_notify_onsnatch" #if $sickbeard.TWITTER_NOTIFY_ONSNATCH then "checked=\"checked\"" else ""# /> 
+                                <input type="checkbox" name="twitter_notify_onsnatch" id="twitter_notify_onsnatch" #if $sickbeard.TWITTER_NOTIFY_ONSNATCH then "checked=\"checked\"" else ""# />
                                 <label class="clearfix" for="twitter_notify_onsnatch">
                                     <span class="component-title">Notify on Snatch</span>
                                     <span class="component-desc">Send notification when we start a download?</span>
