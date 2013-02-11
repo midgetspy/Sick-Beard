@@ -33,6 +33,7 @@ from sickbeard.common import Overview
 from sickbeard.exceptions import ex
 from sickbeard import encodingKludge as ek
 from lib import requests
+from bs4 import BeautifulSoup
 
 
 class TorrentLeechProvider(generic.TorrentProvider):
@@ -67,7 +68,7 @@ class TorrentLeechProvider(generic.TorrentProvider):
         self.session = requests.Session()
         
         try:
-            response = self.session.get(self.urls['login'], params=login_params, timeout=30)
+            response = self.session.post(self.urls['login'], data=login_params, timeout=30)
         except (requests.exceptions.ConnectionError, requests.exceptions.HTTPError), e:
             logger.log(u'Unable to connect to ' + self.name + ' provider: ' +ex(e), logger.ERROR)
             return False
@@ -81,7 +82,7 @@ class TorrentLeechProvider(generic.TorrentProvider):
         return True
 
     def isEnabled(self):
-        return False
+        return sickbeard.TORRENTLEECH
         
     def imageName(self):
         return 'torrentleech.png'
