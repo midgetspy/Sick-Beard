@@ -90,7 +90,7 @@ class Quality:
                       SDDVD: "SD DVD",
                       HDTV: "HD TV",
                       RAWHDTV: "RawHD TV",
-                      FULLHDTV: "1080p HDTV",
+                      FULLHDTV: "1080p HD TV",
                       HDWEBDL: "720p WEB-DL",
                       FULLHDWEBDL: "1080p WEB-DL",
                       HDBLURAY: "720p BluRay",
@@ -133,7 +133,7 @@ class Quality:
         name = os.path.basename(name)
 
         # if we have our exact text then assume we put it there
-        for x in Quality.qualityStrings:
+        for x in sorted(Quality.qualityStrings, reverse=True):
             if x == Quality.UNKNOWN:
                 continue
 
