@@ -8,8 +8,8 @@
 #set $selected = None
 <select id="qualityPreset">
 <option value="0">Custom</option>
-#for $curPreset in sorted($qualityPresets):
-<option value="$curPreset" #if $curPreset == $overall_quality then "selected=\"selected\"" else ""#>$qualityPresetStrings[$curPreset]</option>
+#for $curPreset in sorted($qualityPresets, reverse=True):
+<option value="$curPreset" #if $curPreset == $overall_quality then "selected=\"selected\"" else ""# #if $qualityPresetStrings[$curPreset].endswith("0p") then "style=\"padding-left: 15px;\"" else ""#>$qualityPresetStrings[$curPreset]</option>
 #end for
 </select>
 </span>
@@ -36,7 +36,7 @@
 
         <div style="text-align: center;" class="float-left">
             <h4>Archive</h4>
-            #set $bestQualityList = filter(lambda x: x > $Quality.SDTV, $Quality.qualityStrings)
+            #set $bestQualityList = filter(lambda x: x > $Quality.SDTV and x < $Quality.UNKNOWN, $Quality.qualityStrings)
             <select id="bestQualities" name="bestQualities" multiple="multiple" size="$len($bestQualityList)">
             #for $curQuality in sorted($bestQualityList):
                 <option value="$curQuality" #if $curQuality in $bestQualities then "selected=\"selected\"" else ""#>$Quality.qualityStrings[$curQuality]</option>
