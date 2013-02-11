@@ -23,9 +23,7 @@ from xml.dom.minidom import parseString
 import sickbeard
 import generic
 
-from sickbeard import helpers
-from sickbeard import logger
-from sickbeard import tvcache
+from sickbeard import helpers, logger, exceptions, tvcache
 
 
 class TorrentLeechProvider(generic.TorrentProvider):
@@ -53,23 +51,23 @@ class TorrentLeechCache(tvcache.TVCache):
         self.minTime = 15
 
     def _getRSSData(self):
+
+        if not sickbeard.TORRENTLEECH_KEY:
+            raise exceptions.AuthException("TorrentLeech requires an API key to work correctly")
+
         url = 'http://rss.torrentleech.org/' + sickbeard.TORRENTLEECH_KEY
         logger.log(u"TorrentLeech cache update URL: " + url, logger.DEBUG)
 
         data = self.provider.getURL(url)
 
-        parsedXML = parseString(data)
-        channel = parsedXML.getElementsByTagName('channel')[0]
-        description = channel.getElementsByTagName('description')[0]
-
-        description_text = helpers.get_xml_text(description)
-
-        if "Your RSS key is invalid" in description_text:
-            logger.log(u"TorrentLeech key invalid, check your config", logger.ERROR)
-
         return data
 
     def _parseItem(self, item):
+        description = helpers.get_xml_text(item.getElementsByTagName('description')[0])
+
+        if "Your RSS key is invalid" in description:
+            raise exceptions.AuthException("TorrentLeech key invalid")
+
         (title, url) = self.provider._get_title_and_url(item)
 
         # torrentleech converts dots to spaces, undo this
