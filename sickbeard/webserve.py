@@ -1800,7 +1800,7 @@ class ConfigSubtitles:
 
         sickbeard.USE_SUBTITLES = use_subtitles
         sickbeard.SUBTITLES_LANGUAGES = [lang.alpha2 for lang in subtitles.isValidLanguage(subtitles_languages.replace(' ', '').split(','))] if subtitles_languages != ''  else ''
-        sickbeard.SUBTITLES_SUBDIR = subtitles_dir
+        sickbeard.SUBTITLES_DIR = subtitles_dir
 
         # Subtitles services
         services_str_list = service_order.split()

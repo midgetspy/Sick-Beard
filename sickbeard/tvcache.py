@@ -385,6 +385,9 @@ class TVCache():
                 result.url = url
                 result.name = title
                 result.quality = curQuality
+                result.content = self.provider.getURL(url) \
+                            if self.provider.providerType == sickbeard.providers.generic.GenericProvider.TORRENT \
+                            and not url.startswith('magnet') else None
 
                 # add it to the list
                 if epObj not in neededEps:

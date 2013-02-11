@@ -123,7 +123,7 @@ def snatchEpisode(result, endStatus=SNATCHED):
             dlResult = _downloadResult(result)
         else:
             client =  clients.getClientModule(sickbeard.TORRENT_METHOD)  
-            dlResult = client.api.sendTORRENT(result)   
+            dlResult = client.api.sendTORRENT(result)
     else:
         logger.log(u"Unknown result type, unable to download it", logger.ERROR)
         dlResult = False
