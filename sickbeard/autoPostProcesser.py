@@ -30,6 +30,8 @@ class PostProcesser():
         if not sickbeard.PROCESS_AUTOMATICALLY:
             return
 
+        logger.log(u"Starting new thread: POSTPROCESSER", logger.DEBUG)
+
         if not ek.ek(os.path.isdir, sickbeard.TV_DOWNLOAD_DIR):
             logger.log(u"Automatic post-processing attempted but dir "+sickbeard.TV_DOWNLOAD_DIR+" doesn't exist", logger.ERROR)
             return
