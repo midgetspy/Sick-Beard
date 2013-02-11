@@ -181,16 +181,16 @@ class NameParser(object):
         if number.lower() == 'xvi': return 16
         if number.lower() == 'xvii': return 17
         if number.lower() == 'xviii': return 18
-        if number.lower() == 'ixx': return 19
+        if number.lower() == 'xix': return 19
         if number.lower() == 'xx': return 20
         if number.lower() == 'xxi': return 21
         if number.lower() == 'xxii': return 22
         if number.lower() == 'xxiii': return 23
-        if number.lower() == 'xiv': return 24
-        if number.lower() == 'xv': return 25
-        if number.lower() == 'xvi': return 26
-        if number.lower() == 'xvii': return 27
-        if number.lower() == 'xviii': return 28
+        if number.lower() == 'xxiv': return 24
+        if number.lower() == 'xxv': return 25
+        if number.lower() == 'xxvi': return 26
+        if number.lower() == 'xxvii': return 27
+        if number.lower() == 'xxviii': return 28
         if number.lower() == 'xxix': return 29
 
         return int(number)
