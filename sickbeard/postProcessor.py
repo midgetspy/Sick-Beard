@@ -141,7 +141,6 @@ class PostProcessor(object):
             return PostProcessor.DOESNT_EXIST
 
     def _list_associated_files(self, file_path, subtitles_only=False):
-
         """
         For a given file path searches for files with the same name but different extension and returns their absolute paths
         
@@ -173,13 +172,10 @@ class PostProcessor(object):
             # only add associated to list
             if associated_file_path == file_path:
                 continue
-            # only list it if the only non-shared part is the extension
-            if '.' in associated_file_path[len(base_name):]:
-                continue
             # only list it if the only non-shared part is the extension or if it is a subtitle
-            if '.' in associated_file_path[len(base_name):] and not associated_file_path.endswith('srt'):
+            if '.' in associated_file_path[len(base_name):] and not associated_file_path[len(associated_file_path)-4:] in common.subtitleExtensions:
                 continue
-            if subtitles_only and not associated_file_path.endswith('srt'):
+            if subtitles_only and not associated_file_path[len(associated_file_path)-4:] in common.subtitleExtensions:
                 continue
 
             file_path_list.append(associated_file_path)

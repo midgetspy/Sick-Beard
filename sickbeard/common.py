@@ -30,6 +30,8 @@ mediaExtensions = ['avi', 'mkv', 'mpg', 'mpeg', 'wmv',
                    'mov', 'rmvb', 'vob', 'dvr-ms', 'wtv',
                    'ogv', '3gp']
 
+subtitleExtensions = ['.srt', '.sub', '.ass']
+
 ### Other constants
 MULTI_EP_RESULT = -1
 SEASON_RESULT = -2
