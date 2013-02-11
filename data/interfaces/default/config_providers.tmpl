@@ -87,17 +87,17 @@
                                     #set $provider_config_list = []
                                     #for $cur_provider in ("nzbs_r_us", "tvtorrents", "torrentleech", "btn"):
                                         #set $cur_provider_obj = $sickbeard.providers.getProviderClass($cur_provider)
-                                        #if $cur_provider_obj.providerType == $GenericProvider.NZB and not $sickbeard.USE_NZBS:
-                                            #continue
-                                        #elif $cur_provider_obj.providerType == $GenericProvider.TORRENT and not $sickbeard.USE_TORRENTS:
-                                            #continue
-                                        #end if
                                         $provider_config_list.append($cur_provider_obj)
                                     #end for
 
                                     #if $provider_config_list:
                                     <select id="editAProvider" class="input-medium" >
                                         #for $cur_provider in $provider_config_list + [$curProvider for $curProvider in $sickbeard.newznabProviderList if $curProvider.default and $curProvider.needs_auth]:
+	                                        #if $cur_provider.providerType == $GenericProvider.NZB and not $sickbeard.USE_NZBS:
+	                                            #continue
+	                                        #elif $cur_provider.providerType == $GenericProvider.TORRENT and not $sickbeard.USE_TORRENTS:
+	                                            #continue
+	                                        #end if
                                             <option value="$cur_provider.getID()">$cur_provider.name</option>
                                         #end for
                                     </select>
@@ -181,6 +181,7 @@
 
                     </fieldset>
                 </div><!-- /component-group2 //-->
+#if $sickbeard.USE_NZBS:
 
                 <div id="core-component-group3" class="component-group clearfix">
 
@@ -236,7 +237,7 @@
 
                     </fieldset>
                 </div><!-- /component-group3 //-->
-
+#end if
                 <div class="component-group-save">
                     <input type="submit" class="btn config_submitter" value="Save Changes" />
                 </div><br />
