@@ -68,4 +68,6 @@ class uTorrentAPI(GenericClient):
             params = {'action':'pause', 'hash':result.hash}
             return self._request(params=params)
         
+        return True
+        
 api = uTorrentAPI()       
