@@ -66,7 +66,7 @@ class NotifoNotifier:
             result = json.load(data)
 
         except ValueError, e:
-            logger.log(u"Unable to decode JSON: "+data, logger.ERROR)
+            logger.log(u"Unable to decode JSON: " + repr(data), logger.ERROR)
             return False
         
         except IOError, e:
