@@ -30,7 +30,7 @@ from threading import Lock
 
 # apparently py2exe won't build these unless they're imported somewhere
 from sickbeard import providers, metadata
-from providers import ezrss, tvtorrents, torrentleech, btn, nzbsrus, newznab, womble
+from providers import ezrss, tvtorrents, torrentleech, btn, nzbsrus, newznab, womble, iptorrents
 from sickbeard.config import CheckSection, check_setting_int, check_setting_str, ConfigMigrator
 
 from sickbeard import searchCurrent, searchBacklog, showUpdater, versionChecker, properFinder, autoPostProcesser
@@ -163,6 +163,10 @@ TORRENTLEECH_KEY = None
 
 BTN = False
 BTN_API_KEY = None
+
+IPTORRENTS = False
+IPTORRENTS_UID = None
+IPTORRENTS_PASSKEY = None
 
 TORRENT_DIR = None
 
@@ -320,7 +324,7 @@ def initialize(consoleLogging=True):
                 USE_PLEX, PLEX_NOTIFY_ONSNATCH, PLEX_NOTIFY_ONDOWNLOAD, PLEX_UPDATE_LIBRARY, \
                 PLEX_SERVER_HOST, PLEX_HOST, PLEX_USERNAME, PLEX_PASSWORD, \
                 showUpdateScheduler, __INITIALIZED__, LAUNCH_BROWSER, showList, loadingShowList, \
-                NZBS, NZBS_UID, NZBS_HASH, EZRSS, TVTORRENTS, TVTORRENTS_DIGEST, TVTORRENTS_HASH, BTN, BTN_API_KEY, TORRENTLEECH, TORRENTLEECH_KEY, \
+                NZBS, NZBS_UID, NZBS_HASH, EZRSS, TVTORRENTS, TVTORRENTS_DIGEST, TVTORRENTS_HASH, BTN, BTN_API_KEY, IPTORRENTS, IPTORRENTS_UID, IPTORRENTS_PASSKEY, TORRENTLEECH, TORRENTLEECH_KEY, \
                 TORRENT_DIR, USENET_RETENTION, SOCKET_TIMEOUT, \
                 SEARCH_FREQUENCY, DEFAULT_SEARCH_FREQUENCY, BACKLOG_SEARCH_FREQUENCY, \
                 QUALITY_DEFAULT, FLATTEN_FOLDERS_DEFAULT, STATUS_DEFAULT, \
@@ -537,6 +541,11 @@ def initialize(consoleLogging=True):
         CheckSection(CFG, 'BTN')
         BTN = bool(check_setting_int(CFG, 'BTN', 'btn', 0))
         BTN_API_KEY = check_setting_str(CFG, 'BTN', 'btn_api_key', '')
+
+        CheckSection(CFG, 'IPTORRENTS')
+        IPTORRENTS = bool(check_setting_int(CFG, 'IPTORRENTS', 'iptorrents', 0))
+        IPTORRENTS_UID = check_setting_str(CFG, 'IPTORRENTS', 'iptorrents_uid', '')
+        IPTORRENTS_PASSKEY = check_setting_str(CFG, 'IPTORRENTS', 'iptorrents_passkey', '')
 
         CheckSection(CFG, 'TorrentLeech')
         TORRENTLEECH = bool(check_setting_int(CFG, 'TorrentLeech', 'torrentleech', 0))
@@ -1014,6 +1023,11 @@ def save_config():
     new_config['BTN'] = {}
     new_config['BTN']['btn'] = int(BTN)
     new_config['BTN']['btn_api_key'] = BTN_API_KEY
+
+    new_config['IPTORRENTS'] = {}
+    new_config['IPTORRENTS']['iptorrents'] = int(IPTORRENTS)
+    new_config['IPTORRENTS']['iptorrents_uid'] = IPTORRENTS_UID
+    new_config['IPTORRENTS']['iptorrents_passkey'] = IPTORRENTS_PASSKEY
 
     new_config['TorrentLeech'] = {}
     new_config['TorrentLeech']['torrentleech'] = int(TORRENTLEECH)
