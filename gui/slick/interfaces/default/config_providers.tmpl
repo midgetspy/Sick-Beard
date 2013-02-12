@@ -98,7 +98,7 @@ var show_nzb_providers = #if $sickbeard.USE_NZBS then "true" else "false"#;
                                 <span class="component-title jumbo">Configure Provider:</span>
                                 <span class="component-desc">
                                     #set $provider_config_list = []
-                                    #for $cur_provider in ("nzbs_r_us", "thepiratebay", "dailytvtorrents", "tvtorrents", "btn", "torrentleech"):
+                                    #for $cur_provider in ("nzbs_r_us", "thepiratebay", "dailytvtorrents", "tvtorrents", "btn", "torrentleech", "iptorrents"):
                                         #set $cur_provider_obj = $sickbeard.providers.getProviderClass($cur_provider)
                                         #if $cur_provider_obj.providerType == $GenericProvider.NZB and not $sickbeard.USE_NZBS:
                                             #continue
@@ -241,6 +241,21 @@ var show_nzb_providers = #if $sickbeard.USE_NZBS then "true" else "false"#;
                             </label>
                         </div>
 </div>
+
+<div class="providerDiv" id="iptorrentsDiv">
+                        <div class="field-pair">
+                            <label class="clearfix">
+                                <span class="component-title">IPTorrents UID:</span>
+                                <input class="component-desc" type="text" name="iptorrents_uid" value="$sickbeard.IPTORRENTS_UID" size="40" />
+                            </label>
+                        </div>
+                        <div class="field-pair">
+                            <label class="clearfix">
+                                <span class="component-title">IPTorrents PassKey:</span>
+                                <input class="component-desc" type="text" name="iptorrents_passkey" value="$sickbeard.IPTORRENTS_PASSKEY" size="40" />
+                            </label>
+                        </div>
+</div><!-- /iptorrentsDiv //-->
 
 <!-- end div for editing providers -->
 
