@@ -135,7 +135,7 @@
         #end if
             $cur_result["name"]
         </td>
-        <td align="center"><img id="network" width="40" height="20" src="$sbRoot/images/network/${cur_result["network"]}.png" alt="$cur_result["network"]" title="$cur_result["network"]"></td>
+        <td align="center">$cur_result["network"]</td>
         <td align="center">
 #if int($cur_result["quality"]) in $qualityPresets:
     <span class="quality $qualityPresetStrings[int($cur_result["quality"])]">$qualityPresetStrings[int($cur_result["quality"])]</span>
