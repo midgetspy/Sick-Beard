@@ -64,23 +64,30 @@ img {
 }
 
 .imgHomeWrapper {
-	background: url("../images/loading.gif") no-repeat scroll center center #FFFFFF;
+    background: url("../images/loading.gif") no-repeat scroll center center #FFFFFF;
     border: 3px solid #FFFFFF;
     box-shadow: 1px 1px 2px 0 #555555;
     float: left;
     height: 52px;
     overflow: hidden;
+}
+
+.imgHomeWrapperRounded{
     border-radius: 8px;
 }
+
 .imgHomeWrapper .poster {
     float: left;
     width: 50px;
     height: auto;
     position: relative;
     vertical-align: middle;
-    border-radius: 8px;
 }
+
 .imgHomeWrapper .banner {
+    height: 52px;
+    overflow: hidden;
+    border-radius: 8px;
     vertical-align: top;
     height: auto;
     width: 300px;
