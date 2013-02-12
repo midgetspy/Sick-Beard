@@ -624,6 +624,44 @@
                                     <span class="component-desc">User key of your Pushover account</span>
                                 </label>
                             </div>
+                            <div class="field-pair">
+                                <label class="nocheck clearfix">
+                                    <span class="component-title">Pushover Device</span>
+                                    <input type="text" name="pushover_device" id="pushover_device" value="$sickbeard.PUSHOVER_DEVICE" size="35" />
+                                </label>
+                                <label class="nocheck clearfix">
+                                    <span class="component-title">&nbsp;</span>
+                                    <span class="component-desc">Leave empty to send notifications to all devices in your Pushover account</span>
+                                </label>
+                            </div>
+                            <div class="field-pair">
+                                <label class="nocheck clearfix">
+                                    <span class="component-title">Pushover Sound</span>
+                                   <select id="pushover_sound" name="pushover_sound">
+                                        <option value="pushover" #if $sickbeard.PUSHOVER_SOUND == "pushover" then 'selected="selected"' else ""#>Pushover (default)</option>
+                                        <option value="bike" #if $sickbeard.PUSHOVER_SOUND == "bike" then 'selected="selected"' else ""#>Bike</option>
+                                        <option value="bugle" #if $sickbeard.PUSHOVER_SOUND == "bugle" then 'selected="selected"' else ""#>Bugle</option>
+                                        <option value="cashregister" #if $sickbeard.PUSHOVER_SOUND == "cashregister" then 'selected="selected"' else ""#>Cash Register</option>
+                                        <option value="classical" #if $sickbeard.PUSHOVER_SOUND == "classical" then 'selected="selected"' else ""#>Classical</option>
+                                        <option value="cosmic" #if $sickbeard.PUSHOVER_SOUND == "cosmic" then 'selected="selected"' else ""#>Cosmic</option>
+                                        <option value="falling" #if $sickbeard.PUSHOVER_SOUND == "falling" then 'selected="selected"' else ""#>Falling</option>
+                                        <option value="gamelan" #if $sickbeard.PUSHOVER_SOUND == "gamelan" then 'selected="selected"' else ""#>Gamelan</option>
+                                        <option value="incoming" #if $sickbeard.PUSHOVER_SOUND == "incoming" then 'selected="selected"' else ""#>Incoming</option>
+                                        <option value="intermission" #if $sickbeard.PUSHOVER_SOUND == "intermission" then 'selected="selected"' else ""#>Intermission</option>
+                                        <option value="magic" #if $sickbeard.PUSHOVER_SOUND == "magic" then 'selected="selected"' else ""#>Magic</option>
+                                        <option value="mechanical" #if $sickbeard.PUSHOVER_SOUND == "mechanical" then 'selected="selected"' else ""#>Mechanical</option>
+                                        <option value="pianobar" #if $sickbeard.PUSHOVER_SOUND == "pianobar" then 'selected="selected"' else ""#>Piano Bar</option>
+                                        <option value="siren" #if $sickbeard.PUSHOVER_SOUND == "siren" then 'selected="selected"' else ""#>Siren</option>
+                                        <option value="spacealarm" #if $sickbeard.PUSHOVER_SOUND == "spacealarm" then 'selected="selected"' else ""#>Space Alarm</option>
+                                        <option value="tugboat" #if $sickbeard.PUSHOVER_SOUND == "tugboat" then 'selected="selected"' else ""#>Tug Boat</option>
+                                        <option value="none" #if $sickbeard.PUSHOVER_SOUND == "none" then 'selected="selected"' else ""#>None (silent)</option>                                        
+                                    </select>
+                                </label>
+                                <label class="nocheck clearfix">
+                                    <span class="component-title">&nbsp;</span>
+                                    <span class="component-desc">Select one of the predefined sounds for your notifications</span>
+                                </label>
+                            </div>
                             <div class="testNotification" id="testPushover-result">Click below to test.</div>
                             <input type="button" class="btn" value="Test Pushover" id="testPushover" />
                             <input type="submit" class="btn config_submitter" value="Save Changes" />

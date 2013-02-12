@@ -53,13 +53,24 @@ class PushoverNotifier:
         msg = msg.strip()
         curUrl = API_URL
 
-        data = urllib.urlencode({
-            'token': API_KEY,
-            'title': title,
-            'user': userKey,
-            'message': msg.encode('utf-8'),
-            'timestamp': int(time.time())
-			})
+        # Create package for pushover
+        opts = {
+                'token': API_KEY,
+                'title': title,
+                'user': userKey,
+                'message': msg.encode('utf-8'),
+                'timestamp': int(time.time())
+            }
+
+        # Add only 1 device?
+        if (sickbeard.PUSHOVER_DEVICE != '')
+            opts.device = sickbeard.PUSHOVER_DEVICE
+
+        # Add custom sound?
+        if (sickbeard.PUSHOVER_SOUND != '')
+            opts.sound = sickbeard.PUSHOVER_SOUND
+            
+        data = urllib.urlencode(opts)
 
 
         # send the request to pushover
@@ -123,13 +134,8 @@ class PushoverNotifier:
             logger.log("Notification for Pushover not enabled, skipping this notification", logger.DEBUG)
             return False
 
-        # if no userKey was given then use the one from the config
-        if not userKey:
-            userKey = sickbeard.PUSHOVER_USERKEY
-
         logger.log("Sending notification for " + message, logger.DEBUG)
 
-        # self._sendPushover(message, title, userKey)
         self._sendPushover(message, title)
         return True
 
