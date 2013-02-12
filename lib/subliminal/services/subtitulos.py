@@ -35,7 +35,7 @@ class Subtitulos(ServiceBase):
     site_url = 'http://www.subtitulos.es'
     api_based = False
     languages = language_set(['eng-US', 'eng-GB', 'eng', 'fre', 'por-BR', 'por', 'spa-ES', u'spa', u'ita', u'cat'])
-    language_map = {u'Español': Language('spa'), u'Español (España)': Language('spa'), u'Español (Latinoamérica)': Language('spa'),
+    language_map = {u'Español': Language('spa'), u'Español (España)': Language('spa'), #u'Español (Latinoamérica)': Language('spa'),
                     u'Català': Language('cat'), u'Brazilian': Language('por-BR'), u'English (US)': Language('eng-US'),
                     u'English (UK)': Language('eng-GB'), 'Galego': Language('glg')}
     language_code = 'name'
@@ -52,7 +52,7 @@ class Subtitulos(ServiceBase):
         return self.query(video.path or video.release, languages, get_keywords(video.guess), video.series, video.season, video.episode)
 
     def query(self, filepath, languages, keywords, series, season, episode):
-        request_series = series.lower().replace(' ', '_')
+        request_series = series.lower().replace(' ', '_').replace('&', '@').replace('(','').replace(')','')
         if isinstance(request_series, unicode):
             request_series = unicodedata.normalize('NFKD', request_series).encode('ascii', 'ignore')
         logger.debug(u'Getting subtitles for %s season %d episode %d with languages %r' % (series, season, episode, languages))
@@ -67,21 +67,6 @@ class Subtitulos(ServiceBase):
         subtitles = []
         for sub in soup('div', {'id': 'version'}):
             sub_keywords = split_keyword(self.release_pattern.search(sub.find('p', {'class': 'title-sub'}).contents[1]).group(1).lower())
-			# extract extra compatible keywords
-            try:
-                extra = sub.find('span', {'class': 'comentario'}).contents[2]
-            except AttributeError:
-                extra = None
-            if extra:
-                search_res = self.extra_keywords_pattern.search(extra)
-                if search_res != None:
-                    extra_key1 = search_res.group(1)
-                    extra_key2 = search_res.group(2)
-                    # add the extra keywords to sub_keywords before checking
-                    if extra_key1 != None:
-                        sub_keywords.add(extra_key1.lower())
-                    if extra_key2 != None:
-                        sub_keywords.add(extra_key2.lower())
             if keywords and not keywords & sub_keywords:
                 logger.debug(u'None of subtitle keywords %r in %r' % (sub_keywords, keywords))
                 continue
