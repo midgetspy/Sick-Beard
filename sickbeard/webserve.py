@@ -1303,7 +1303,9 @@ class ConfigProviders:
             elif curProvider == 'thepiratebay':
                 sickbeard.THEPIRATEBAY = curEnabled
             elif curProvider == 'torrentleech':
-                sickbeard.TORRENTLEECH = curEnabled                       
+                sickbeard.TORRENTLEECH = curEnabled
+            elif curProvider == 'nzbx':
+                sickbeard.NZBX = curEnabled    
             else:
                 logger.log(u"don't know what "+curProvider+" is, skipping")
 
