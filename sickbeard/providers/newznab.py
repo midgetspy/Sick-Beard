@@ -61,7 +61,7 @@ class NewznabProvider(generic.NZBProvider):
         return self.name + '|' + self.url + '|' + self.key + '|' + str(int(self.enabled))
 
     def imageName(self):
-        if ek.ek(os.path.isfile, ek.ek(os.path.join, sickbeard.PROG_DIR, 'data', 'images', 'providers', self.getID() + '.png')):
+        if ek.ek(os.path.isfile, ek.ek(os.path.join, sickbeard.PROG_DIR, 'gui', 'slick', 'images', 'providers', self.getID() + '.png')):
             return self.getID() + '.png'
         return 'newznab.png'
 
