@@ -17,23 +17,17 @@
 # along with Sick Beard.  If not, see <http://www.gnu.org/licenses/>.
 
 import re
-import urllib, urllib2
-import sys
-import os
 
 import sickbeard
 import generic
 from sickbeard.common import Quality
-from sickbeard.name_parser.parser import NameParser, InvalidNameException
 from sickbeard import logger
 from sickbeard import tvcache
-from sickbeard import helpers
 from sickbeard import show_name_helpers
 from sickbeard.common import Overview 
 from sickbeard.exceptions import ex
-from sickbeard import encodingKludge as ek
 from lib import requests
-from bs4 import BeautifulSoup
+from lib.bs4 import BeautifulSoup
 
 
 class TorrentLeechProvider(generic.TorrentProvider):
@@ -56,7 +50,18 @@ class TorrentLeechProvider(generic.TorrentProvider):
         self.categories = "2,26,32"
         
         self.session = None
+
+    def isEnabled(self):
+        return sickbeard.TORRENTLEECH
+        
+    def imageName(self):
+        return 'torrentleech.png'
     
+    def getQuality(self, item):
+        
+        quality = Quality.nameQuality(item[0])
+        return quality    
+
     def _doLogin(self):
 
         login_params = {'username': sickbeard.TORRENTLEECH_USERNAME,
@@ -81,17 +86,6 @@ class TorrentLeechProvider(generic.TorrentProvider):
         
         return True
 
-    def isEnabled(self):
-        return sickbeard.TORRENTLEECH
-        
-    def imageName(self):
-        return 'torrentleech.png'
-    
-    def getQuality(self, item):
-        
-        quality = Quality.nameQuality(item[0])
-        return quality    
-
     def _get_season_search_strings(self, show, season=None):
 
         search_string = {'Episode': []}
@@ -104,7 +98,7 @@ class TorrentLeechProvider(generic.TorrentProvider):
         wantedEp = [x for x in seasonEp if show.getOverview(x.status) in (Overview.WANTED, Overview.QUAL)]          
 
         #If Every episode in Season is a wanted Episode then search for Season first
-        if wantedEp == seasonEp:
+        if wantedEp == seasonEp and not show.air_by_date:
             search_string = {'Season': [], 'Episode': []}
             for show_name in set(show_name_helpers.allPossibleShowNames(show)):
                 ep_string = show_name +' S%02d' % int(season) #1) ShowName SXX   
@@ -151,7 +145,7 @@ class TorrentLeechProvider(generic.TorrentProvider):
         for mode in search_params.keys():
             for search_string in search_params[mode]:
                 
-                searchURL = self.urls['search'] % (urllib.quote(search_string), self.categories)
+                searchURL = self.urls['search'] % (search_string, self.categories)
 
                 logger.log(u"Search string: " + searchURL, logger.DEBUG)
         
@@ -171,7 +165,6 @@ class TorrentLeechProvider(generic.TorrentProvider):
 
                             link = result.find('td', attrs = {'class' : 'name'}).find('a')
                             url = result.find('td', attrs = {'class' : 'quickdownload'}).find('a')
-                            details = result.find('td', attrs = {'class' : 'name'}).find('a')
 
                             title = link.string
                             download_url = self.urls['download'] % url['href']
@@ -195,7 +188,7 @@ class TorrentLeechProvider(generic.TorrentProvider):
                             items[mode].append(item)
 
                 except:
-                    logger.log(u"Failed to parsing "+self.name+": "+traceback.format_exc(), logger.ERROR)
+                    logger.log(u"Failed to parsing " + self.name + " page url: " + searchURL, logger.ERROR)
 
             #For each search mode sort all the items by seeders
             items[mode].sort(key=lambda tup: tup[3], reverse=True)        
