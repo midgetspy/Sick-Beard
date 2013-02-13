@@ -30,7 +30,7 @@ mediaExtensions = ['avi', 'mkv', 'mpg', 'mpeg', 'wmv',
                    'mov', 'rmvb', 'vob', 'dvr-ms', 'wtv',
                    'ogv', '3gp']
 
-subtitleExtensions = ['.srt', '.sub', '.ass']
+subtitleExtensions = ['srt', 'sub', 'ass', 'idx', 'ssa']
 
 ### Other constants
 MULTI_EP_RESULT = -1

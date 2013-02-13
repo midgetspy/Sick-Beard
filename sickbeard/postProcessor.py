@@ -173,9 +173,9 @@ class PostProcessor(object):
             if associated_file_path == file_path:
                 continue
             # only list it if the only non-shared part is the extension or if it is a subtitle
-            if '.' in associated_file_path[len(base_name):] and not associated_file_path[len(associated_file_path)-4:] in common.subtitleExtensions:
+            if '.' in associated_file_path[len(base_name):] and not associated_file_path[len(associated_file_path)-3:] in common.subtitleExtensions:
                 continue
-            if subtitles_only and not associated_file_path[len(associated_file_path)-4:] in common.subtitleExtensions:
+            if subtitles_only and not associated_file_path[len(associated_file_path)-3:] in common.subtitleExtensions:
                 continue
 
             file_path_list.append(associated_file_path)
@@ -245,7 +245,7 @@ class PostProcessor(object):
             cur_extension = cur_file_path.rpartition('.')[-1]
             
             # check if file have language of subtitles
-            if cur_extension == 'srt':
+            if cur_extension in common.subtitleExtensions:
                 cur_lang = cur_file_path.rpartition('.')[0].rpartition('.')[-1]
                 if cur_lang in sickbeard.SUBTITLES_LANGUAGES:
                     cur_extension = cur_lang + '.' + cur_extension
@@ -261,7 +261,7 @@ class PostProcessor(object):
             else:
                 new_file_name = helpers.replaceExtension(cur_file_name, cur_extension)
             
-            if sickbeard.SUBTITLES_DIR and cur_extension.endswith('srt'):
+            if sickbeard.SUBTITLES_DIR and cur_extension in common.subtitleExtensions:
                 subs_new_path = ek.ek(os.path.join, new_path, sickbeard.SUBTITLES_DIR)
                 if not ek.ek(os.path.isdir, subs_new_path):
                     ek.ek(os.mkdir, subs_new_path)
