@@ -482,7 +482,7 @@ class Mede8erMetadata(generic.GenericMetadata):
             
             nfo_file = ek.ek(open, nfo_file_path, 'w')
     
-            data.write(nfo_file, encoding="utf-8", xml_declaration=True)
+            data.write(nfo_file, encoding="utf-8")
             nfo_file.close()
             helpers.chmodAsParent(nfo_file_path)
         except IOError, e:
@@ -523,7 +523,7 @@ class Mede8erMetadata(generic.GenericMetadata):
             
             nfo_file = ek.ek(open, nfo_file_path, 'w')
     
-            data.write(nfo_file, encoding="utf-8", xml_declaration=True)
+            data.write(nfo_file, encoding="utf-8")
             nfo_file.close()
             helpers.chmodAsParent(nfo_file_path)
         except IOError, e:
