@@ -208,10 +208,10 @@ class PostProcessor(object):
             self._log(u"Deleting file "+cur_file, logger.DEBUG)
             if ek.ek(os.path.isfile, cur_file):
                 #check first the read-only attribute
-                file_attribute = os.stat(cur_file)[0]
+                file_attribute = ek.ek(os.stat, cur_file)[0]
                 if (not file_attribute & stat.S_IWRITE):
                     # File is read-only, so make it writeable
-                    os.chmod(cur_file, stat.S_IWRITE)                
+                    ek.ek(os.chmod,cur_file,stat.S_IWRITE)
                 ek.ek(os.remove, cur_file)
                 # do the library update for synoindex
                 notifiers.synoindex_notifier.deleteFile(cur_file)
