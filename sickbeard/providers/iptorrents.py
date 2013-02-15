@@ -161,36 +161,44 @@ class IPTorrentsProvider(generic.TorrentProvider):
                 html = BeautifulSoup(data)
                 
                 try:
-                    result_table = html.find('table', attrs = {'class' : 'torrents'})
-                    if result_table:
+                    find_string = html.find(text='Nothing found!')
 
-                        entries = result_table.find_all('tr')
+                    if find_string:
 
-                        for result in entries[1:]:
+                        logger.log(u"No results found for: " + search_string + "(" + searchURL + ")", logger.DEBUG)
 
-                            torrent = result.find_all('td')[1].find('a')
+                    else:
 
-                            torrent_id = int(torrent['href'].replace('/details.php?id=', ''))
-                            torrent_name = torrent.string
-                            torrent_download_url = self.urls['download'] % (torrent_id, torrent_name.replace(' ', '.'))
-                            torrent_details_url = self.urls['detail'] % (torrent_id)
-                            torrent_seeders = int(result.find('td', attrs = {'class' : 'ac t_seeders'}).string)
-                            torrent_leechers = int(result.find('td', attrs = {'class' : 'ac t_leechers'}).string)
+                        result_table = html.find('table', attrs = {'class' : 'torrents'})
+                        if result_table:
 
-                            #Filter unseeded torrent
-                            if torrent_seeders == 0:
-                                continue 
+                            entries = result_table.find_all('tr')
 
-                            if not show_name_helpers.filterBadReleases(torrent_name):
-                                continue
+                            for result in entries[1:]:
 
-                            if not torrent_name:
-                                continue
+                                torrent = result.find_all('td')[1].find('a')
 
-                            item = torrent_name, torrent_download_url, torrent_id, torrent_seeders, torrent_leechers
-                            logger.log(u"Found result: " + torrent_name + "(" + searchURL + ")", logger.DEBUG)
+                                torrent_id = int(torrent['href'].replace('/details.php?id=', ''))
+                                torrent_name = torrent.string
+                                torrent_download_url = self.urls['download'] % (torrent_id, torrent_name.replace(' ', '.'))
+                                torrent_details_url = self.urls['detail'] % (torrent_id)
+                                torrent_seeders = int(result.find('td', attrs = {'class' : 'ac t_seeders'}).string)
+                                torrent_leechers = int(result.find('td', attrs = {'class' : 'ac t_leechers'}).string)
 
-                            items[mode].append(item)
+                                #Filter unseeded torrent
+                                if torrent_seeders == 0:
+                                    continue 
+
+                                if not show_name_helpers.filterBadReleases(torrent_name):
+                                    continue
+
+                                if not torrent_name:
+                                    continue
+
+                                item = torrent_name, torrent_download_url, torrent_id, torrent_seeders, torrent_leechers
+                                logger.log(u"Found result: " + torrent_name + "(" + searchURL + ")", logger.DEBUG)
+
+                                items[mode].append(item)
 
                 except:
                     logger.log(u"Failed to parsing " + self.name + " page url: " + searchURL, logger.ERROR)
