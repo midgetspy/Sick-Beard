@@ -27,7 +27,7 @@ from sickbeard import show_name_helpers
 from sickbeard.common import Overview 
 from sickbeard.exceptions import ex
 from lib import requests
-from lib.bs4 import BeautifulSoup
+from bs4 import BeautifulSoup
 
 
 class TorrentLeechProvider(generic.TorrentProvider):
