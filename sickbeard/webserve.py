@@ -45,8 +45,9 @@ from sickbeard import scene_exceptions
 from sickbeard import subtitles
 
 from sickbeard.providers import newznab
-from sickbeard.common import Quality, Overview, statusStrings
+from sickbeard.common import Quality, Overview, statusStrings, qualityPresetStrings
 from sickbeard.common import SNATCHED, SKIPPED, UNAIRED, IGNORED, ARCHIVED, WANTED
+from sickbeard.common import SD, HD720p, HD1080p
 from sickbeard.exceptions import ex
 from sickbeard.webapi import Api
 
@@ -3168,7 +3169,17 @@ class Home:
 
         # return the correct json value
         if ep_queue_item.success:
-            return json.dumps({'result': statusStrings[ep_obj.status]})
+            #Find the quality class for the episode
+            quality_class = Quality.qualityStrings[Quality.UNKNOWN]
+            ep_status, ep_quality = Quality.splitCompositeStatus(ep_obj.status)
+            for x in (SD, HD720p, HD1080p):
+                if ep_quality in Quality.splitQuality(x)[0]: 
+                    quality_class = qualityPresetStrings[x]
+                    break 
+                
+            return json.dumps({'result': statusStrings[ep_obj.status], 
+                               'quality': quality_class 
+                               })
 
         return json.dumps({'result': 'failure'})
     
