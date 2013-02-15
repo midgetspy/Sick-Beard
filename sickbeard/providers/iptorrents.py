@@ -175,7 +175,7 @@ class IPTorrentsProvider(generic.TorrentProvider):
                             torrent_download_url = self.urls['download'] % (torrent_id, torrent_name.replace(' ', '.'))
                             torrent_details_url = self.urls['detail'] % (torrent_id)
                             torrent_seeders = int(result.find('td', attrs = {'class' : 'ac t_seeders'}).string)
-		            torrent_leechers = int(result.find('td', attrs = {'class' : 'ac t_leechers'}).string)
+                            torrent_leechers = int(result.find('td', attrs = {'class' : 'ac t_leechers'}).string)
 
                             #Filter unseeded torrent
                             if torrent_seeders == 0:
