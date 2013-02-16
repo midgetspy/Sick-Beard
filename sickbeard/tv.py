@@ -58,6 +58,8 @@ class TVShow(object):
         self.network = ""
         self.genre = ""
         self.runtime = 0
+        self.seasonoffset = 0
+        self.episodeoffset = 0
         self.quality = int(sickbeard.QUALITY_DEFAULT)
         self.flatten_folders = int(sickbeard.FLATTEN_FOLDERS_DEFAULT)
 
@@ -602,6 +604,8 @@ class TVShow(object):
             if self.air_by_date == None:
                 self.air_by_date = 0
 
+            self.seasonoffset = int(sqlResults[0]["seasonoffset"])
+            self.episodeoffset = int(sqlResults[0]["episodeoffset"])
             self.quality = int(sqlResults[0]["quality"])
             self.flatten_folders = int(sqlResults[0]["flatten_folders"])
             self.paused = int(sqlResults[0]["paused"])
@@ -819,6 +823,8 @@ class TVShow(object):
                         "quality": self.quality,
                         "airs": self.airs,
                         "status": self.status,
+                        "seasonoffset": self.seasonoffset,
+                        "episodeoffset": self.episodeoffset,
                         "flatten_folders": self.flatten_folders,
                         "paused": self.paused,
                         "air_by_date": self.air_by_date,
@@ -845,6 +851,8 @@ class TVShow(object):
         toReturn += "genre: " + self.genre + "\n"
         toReturn += "runtime: " + str(self.runtime) + "\n"
         toReturn += "quality: " + str(self.quality) + "\n"
+        toReturn += "seasonoffset: " + str(self.seasonoffset) + "\n"
+        toReturn += "episodeoffset: " + str(self.episodeoffset) + "\n"
         return toReturn
 
 
@@ -957,6 +965,9 @@ class TVEpisode(object):
         self.show = show
         self._location = file
 
+        self.sceneseason  = max(season  + show.seasonoffset , 0)
+        self.sceneepisode = max(episode + show.episodeoffset, 1)
+
         self.lock = threading.Lock()
 
         self.specifyEpisode(self.season, self.episode)
@@ -1066,6 +1077,8 @@ class TVEpisode(object):
                 self.name = sqlResults[0]["name"]
             self.season = season
             self.episode = episode
+            self.sceneseason  = max(season  + self.show.seasonoffset , 0)
+            self.sceneepisode = max(episode + self.show.episodeoffset, 1)
             self.description = sqlResults[0]["description"]
             if self.description == None:
                 self.description = ""

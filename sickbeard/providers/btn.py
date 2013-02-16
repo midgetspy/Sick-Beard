@@ -1,5 +1,5 @@
 # coding=utf-8
-# Author: Daniël Heimans
+# Author: DaniÃ«l Heimans
 # URL: http://code.google.com/p/sickbeard
 #
 # This file is part of Sick Beard.
@@ -232,7 +232,7 @@ class BTNProvider(generic.TorrentProvider):
 
         else:
             # Do a general name search for the episode, formatted like SXXEYY
-            search_params['name'] = "S%02dE%02d" % (ep_obj.season,ep_obj.episode)
+            search_params['name'] = "S%02dE%02d" % (ep_obj.sceneseason,ep_obj.sceneepisode)
 
         to_return = [search_params]
 

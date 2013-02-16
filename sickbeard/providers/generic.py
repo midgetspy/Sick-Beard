@@ -255,7 +255,7 @@ class GenericProvider:
                 if parse_result.air_date != episode.airdate:
                     logger.log("Episode "+title+" didn't air on "+str(episode.airdate)+", skipping it", logger.DEBUG)
                     continue
-            elif parse_result.season_number != episode.season or episode.episode not in parse_result.episode_numbers:
+            elif parse_result.season_number != episode.sceneseason or episode.sceneepisode not in parse_result.episode_numbers:
                 logger.log("Episode "+title+" isn't "+str(episode.season)+"x"+str(episode.episode)+", skipping it", logger.DEBUG)
                 continue
 

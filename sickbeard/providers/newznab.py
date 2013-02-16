@@ -125,8 +125,8 @@ class NewznabProvider(generic.NZBProvider):
             params['season'] = date_str.partition('-')[0]
             params['ep'] = date_str.partition('-')[2].replace('-', '/')
         else:
-            params['season'] = ep_obj.season
-            params['ep'] = ep_obj.episode
+            params['season'] = ep_obj.sceneseason
+            params['ep'] = ep_obj.sceneepisode
 
         to_return = [params]
 

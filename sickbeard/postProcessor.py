@@ -545,6 +545,15 @@ class PostProcessor(object):
                     season = 1
             
             if tvdb_id and season != None and episodes:
+                try:
+                    showObj = helpers.findCertainShow(sickbeard.showList, tvdb_id)
+                    if(showObj != None):
+                        season -= showObj.seasonoffset
+                        for curEp in episodes:
+                            curEp -= showObj.episodeoffset
+                except exceptions.MultipleShowObjectsException:
+                    raise #TODO: later I'll just log this, for now I want to know about it ASAP
+
                 return (tvdb_id, season, episodes)
     
         return (tvdb_id, season, episodes)

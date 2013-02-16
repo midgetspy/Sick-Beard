@@ -66,6 +66,13 @@ This <b>DOES NOT</b> allow Sick Beard to download non-english TV episodes!<br />
 <br />
 <br />
 Flatten files (no folders): <input type="checkbox" name="flatten_folders" #if $show.flatten_folders == 1 and not $sickbeard.NAMING_FORCE_FOLDERS then "checked=\"checked\"" else ""# #if $sickbeard.NAMING_FORCE_FOLDERS then "disabled=\"disabled\"" else ""#/><br /><br />
+
+Season Offset: <input type="text" name="seasonoffset" id="seasonoffset" value="$show.seasonoffset" size="5" /><br />
+Episode Offset: <input type="text" name="episodeoffset" id="episodeoffset" value="$show.episodeoffset" size="5" /><br />
+Use these values to correct any differences in the numbering between 'the scene' and thetvdb.org. <br />
+<b>Example:</b> Having season offset set to -1 and episode offset set to 2, results in SickBeard searching for an episode with number S07E12, while SickBeard is looking for S08E10.<br />
+When using the SickBeard post processor, the values are corrected again. So you'll end up with the correct values and names for episodes.<br /><br />
+
 Paused: <input type="checkbox" name="paused" #if $show.paused == 1 then "checked=\"checked\"" else ""# /><br /><br />
 
 Air by date: 
