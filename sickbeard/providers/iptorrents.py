@@ -141,7 +141,7 @@ class IPTorrentsProvider(generic.TorrentProvider):
         if not self._doLogin():
             return 
 
-        freeleech = '' if sickbeard.IPTORRENTS_FREELEECH else '&free=on'
+        freeleech = '&free=on' if sickbeard.IPTORRENTS_FREELEECH else ''
         
         for mode in search_params.keys():
             for search_string in search_params[mode]:
@@ -157,8 +157,13 @@ class IPTorrentsProvider(generic.TorrentProvider):
                 html = BeautifulSoup(data)
                 
                 try:
-                    if html.find(text='Nothing found!') or not html.find('table', attrs = {'class' : 'torrents'}):
-
+                    if html.find(text='Nothing found!'):
+                        logger.log(u"No results found for: " + search_string + "(" + searchURL + ")", logger.DEBUG)
+                        return []
+                    
+                    result_table = html.find('table', attrs = {'class' : 'torrents'})
+                    
+                    if not result_table:
                         logger.log(u"No results found for: " + search_string + "(" + searchURL + ")", logger.DEBUG)
                         return []
                     
@@ -230,7 +235,7 @@ class IPTorrentsCache(tvcache.TVCache):
 
     def _getData(self):
        
-        freeleech = '&free=on' if sickbeard.IPTORRENTS_FREELEECH else ""
+        freeleech = '&free=on' if sickbeard.IPTORRENTS_FREELEECH else ''
        
         #url for the last 50 tv-show
         url = self.provider.urls['search'] % (self.provider.categories, freeleech, "")
