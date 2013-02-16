@@ -166,7 +166,7 @@ class SubtitlesFinder():
         - the episode: new or old
         - the number of searches done so far (searchcount), represented by the index of the list
         """
-        return {'old': [0, 24], 'new': [0, 4, 8, 16, 24, 24, 24]}
+        return {'old': [0, 24], 'new': [0, 4, 8, 4, 16, 24, 24]}
 
     def _refreshShows(self, toRefresh, now):
         """Refresh episodes with new subtitles"""
