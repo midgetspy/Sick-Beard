@@ -226,7 +226,7 @@ class ThePirateBayProvider(generic.TorrentProvider):
                     leechers = int(torrent.group('leechers'))
 
                     #Filter unseeded torrent
-                    if torrent_seeders == 0 or not torrent_name \
+                    if seeders == 0 or not torrent_name \
                     or not show_name_helpers.filterBadReleases(torrent_name):
                         continue 
                    
