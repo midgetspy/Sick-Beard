@@ -226,11 +226,9 @@ class ThePirateBayProvider(generic.TorrentProvider):
                     leechers = int(torrent.group('leechers'))
 
                     #Filter unseeded torrent
-                    if seeders == 0:
+                    if torrent_seeders == 0 or not torrent_name \
+                    or not show_name_helpers.filterBadReleases(torrent_name):
                         continue 
-                       
-                    if not show_name_helpers.filterBadReleases(title):
-                        continue
                    
                     #Accept Torrent only from Good People for every Episode Search
                     if sickbeard.THEPIRATEBAY_TRUSTED and re.search('(VIP|Trusted|Helper)',torrent.group(0))== None:

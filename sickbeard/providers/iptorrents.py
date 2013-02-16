@@ -47,9 +47,9 @@ class IPTorrentsProvider(generic.TorrentProvider):
 
         self.cache = IPTorrentsCache(self)
         
-        self.categories = 73
-        
         self.session = None
+
+        self.categories = 73
 
     def isEnabled(self):
         return sickbeard.IPTORRENTS
@@ -140,15 +140,11 @@ class IPTorrentsProvider(generic.TorrentProvider):
         
         if not self._doLogin():
             return 
+
+        freeleech = '' if sickbeard.IPTORRENTS_FREELEECH else '&free=on'
         
         for mode in search_params.keys():
             for search_string in search_params[mode]:
-
-	        if sickbeard.IPTORRENTS_FREELEECH == 0:
-                    freeleech = ''
-	        else:
-                    freeleech = '&free=on'
-
 
                 searchURL = self.urls['search'] % (self.categories, freeleech, search_string)
 
@@ -161,44 +157,32 @@ class IPTorrentsProvider(generic.TorrentProvider):
                 html = BeautifulSoup(data)
                 
                 try:
-                    find_string = html.find(text='Nothing found!')
-
-                    if find_string:
+                    if html.find(text='Nothing found!') or not html.find('table', attrs = {'class' : 'torrents'}):
 
                         logger.log(u"No results found for: " + search_string + "(" + searchURL + ")", logger.DEBUG)
+                        return []
+                    
+                    entries = result_table.find_all('tr')
 
-                    else:
+                    for result in entries[1:]:
 
-                        result_table = html.find('table', attrs = {'class' : 'torrents'})
-                        if result_table:
+                        torrent = result.find_all('td')[1].find('a')
+                        
+                        torrent_id = int(torrent['href'].replace('/details.php?id=', ''))
+                        torrent_name = torrent.string
+                        torrent_download_url = self.urls['download'] % (torrent_id, torrent_name.replace(' ', '.'))
+                        torrent_details_url = self.urls['detail'] % (torrent_id)
+                        torrent_seeders = int(result.find('td', attrs = {'class' : 'ac t_seeders'}).string)
+                        torrent_leechers = int(result.find('td', attrs = {'class' : 'ac t_leechers'}).string)
 
-                            entries = result_table.find_all('tr')
+                        #Filter unseeded torrent
+                        if torrent_seeders == 0 or not torrent_name \
+                        or not show_name_helpers.filterBadReleases(torrent_name):
+                            continue 
 
-                            for result in entries[1:]:
-
-                                torrent = result.find_all('td')[1].find('a')
-
-                                torrent_id = int(torrent['href'].replace('/details.php?id=', ''))
-                                torrent_name = torrent.string
-                                torrent_download_url = self.urls['download'] % (torrent_id, torrent_name.replace(' ', '.'))
-                                torrent_details_url = self.urls['detail'] % (torrent_id)
-                                torrent_seeders = int(result.find('td', attrs = {'class' : 'ac t_seeders'}).string)
-                                torrent_leechers = int(result.find('td', attrs = {'class' : 'ac t_leechers'}).string)
-
-                                #Filter unseeded torrent
-                                if torrent_seeders == 0:
-                                    continue 
-
-                                if not show_name_helpers.filterBadReleases(torrent_name):
-                                    continue
-
-                                if not torrent_name:
-                                    continue
-
-                                item = torrent_name, torrent_download_url, torrent_id, torrent_seeders, torrent_leechers
-                                logger.log(u"Found result: " + torrent_name + "(" + searchURL + ")", logger.DEBUG)
-
-                                items[mode].append(item)
+                        item = torrent_name, torrent_download_url, torrent_id, torrent_seeders, torrent_leechers
+                        logger.log(u"Found result: " + torrent_name + "(" + searchURL + ")", logger.DEBUG)
+                        items[mode].append(item)
 
                 except:
                     logger.log(u"Failed to parsing " + self.name + " page url: " + searchURL, logger.ERROR)
@@ -245,14 +229,11 @@ class IPTorrentsCache(tvcache.TVCache):
         self.minTime = 20
 
     def _getData(self):
-
-	if sickbeard.IPTORRENTS_FREELEECH == 0:
-            freeleech = ''
-	else:
-            freeleech = '&free=on'
+       
+        freeleech = '&free=on' if sickbeard.IPTORRENTS_FREELEECH else ""
        
         #url for the last 50 tv-show
-        url = self.provider.urls['search'] % (self.categories, freeleech, "")
+        url = self.provider.urls['search'] % (self.provider.categories, freeleech, "")
 
         logger.log(u"IPTorrents cache update URL: "+ url, logger.DEBUG)
 
