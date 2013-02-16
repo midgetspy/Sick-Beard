@@ -174,7 +174,7 @@ class TorrentLeechProvider(generic.TorrentProvider):
                         leechers = int(result.find('td', attrs = {'class' : 'leechers'}).string)
 
                         #Filter unseeded torrent
-                        if torrent_seeders == 0 or not torrent_name \
+                        if seeders == 0 or not torrent_name \
                         or not show_name_helpers.filterBadReleases(torrent_name):
                             continue 
 
