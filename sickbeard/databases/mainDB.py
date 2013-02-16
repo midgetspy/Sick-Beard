@@ -536,3 +536,16 @@ class RenameSeasonFolders(AddSizeAndSceneNameFields):
         self.connection.action("DROP TABLE tmp_tv_shows")
 
         self.incDBVersion()
+
+class AddSeasonAndEpisodeOffset(RenameSeasonFolders):
+
+    def test(self):
+        return self.checkDBVersion() >= 12
+
+    def execute(self):
+
+        if self.hasColumn("tv_shows", "seasonoffset") is not True:
+            self.addColumn("tv_shows", "seasonoffset")
+            self.addColumn("tv_shows", "episodeoffset")
+
+        self.incDBVersion()

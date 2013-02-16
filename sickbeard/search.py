@@ -321,7 +321,7 @@ def findSeason(show, season):
             continue
 
         try:
-            curResults = curProvider.findSeasonResults(show, season)
+            curResults = curProvider.findSeasonResults(show, season + show.seasonoffset)
 
             # make a list of all the results for this provider
             for curEp in curResults:

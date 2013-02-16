@@ -2267,7 +2267,7 @@ class Home:
         return result['description'] if result else 'Episode not found.'
 
     @cherrypy.expose
-    def editShow(self, show=None, location=None, anyQualities=[], bestQualities=[], flatten_folders=None, paused=None, directCall=False, air_by_date=None, tvdbLang=None):
+    def editShow(self, show=None, location=None, anyQualities=[], bestQualities=[], seasonoffset=None, episodeoffset=None, flatten_folders=None, paused=None, directCall=False, air_by_date=None, tvdbLang=None):
 
         if show == None:
             errString = "Invalid show ID: "+str(show)
@@ -2293,6 +2293,30 @@ class Home:
                 t.show = showObj
 
             return _munge(t)
+
+        errors = []
+        maxOffset = 10
+
+        try:
+            seasonoffset = int(seasonoffset)
+        except ValueError:
+            errors.append(seasonoffset + " is not a valid season offset value")
+            seasonoffset = showObj.seasonoffset
+
+        if seasonoffset < -maxOffset or seasonoffset > maxOffset:
+            errors.append("Season offset value should be between -10 and 10")
+            seasonoffset = showObj.seasonoffset
+
+        try:
+            episodeoffset = int(episodeoffset)
+        except ValueError:
+            errors.append(episodeoffset + " is not a valid episode offset value")
+            episodeoffset = showObj.episodeoffset
+
+        if episodeoffset < -maxOffset or episodeoffset > maxOffset:
+            errors.append("Episode offset value should be between -10 and 10")
+            episodeoffset = showObj.episodeoffset
+
 
         if flatten_folders == "on":
             flatten_folders = 1
@@ -2328,7 +2352,6 @@ class Home:
         if type(bestQualities) != list:
             bestQualities = [bestQualities]
 
-        errors = []
         with showObj.lock:
             newQuality = Quality.combineQualities(map(int, anyQualities), map(int, bestQualities))
             showObj.quality = newQuality
@@ -2342,6 +2365,8 @@ class Home:
                     errors.append("Unable to refresh this show: "+ex(e))
 
             showObj.paused = paused
+            showObj.seasonoffset = seasonoffset
+            showObj.episodeoffset = episodeoffset
             showObj.air_by_date = air_by_date
             showObj.lang = tvdb_lang
 
