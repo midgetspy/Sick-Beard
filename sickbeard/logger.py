@@ -38,11 +38,13 @@ ERROR = logging.ERROR
 WARNING = logging.WARNING
 MESSAGE = logging.INFO
 DEBUG = logging.DEBUG
+DB    = 5
 
 reverseNames = {u'ERROR': ERROR,
                 u'WARNING': WARNING,
                 u'INFO': MESSAGE,
-                u'DEBUG': DEBUG}
+                u'DEBUG': DEBUG,
+                u'DB' : DB}
 
 class SBRotatingLogHandler(object):
 
@@ -62,7 +64,9 @@ class SBRotatingLogHandler(object):
         self.log_file = os.path.join(sickbeard.LOG_DIR, self.log_file)
     
         self.cur_handler = self._config_handler()
-    
+        
+        logging.addLevelName(5,'DB')
+        
         logging.getLogger('sickbeard').addHandler(self.cur_handler)
         logging.getLogger('subliminal').addHandler(self.cur_handler)
         logging.getLogger('imdbpy').addHandler(self.cur_handler)
@@ -85,7 +89,7 @@ class SBRotatingLogHandler(object):
             logging.getLogger('subliminal').addHandler(console)
             logging.getLogger('imdbpy').addHandler(console)
     
-        logging.getLogger('sickbeard').setLevel(logging.DEBUG)
+        logging.getLogger('sickbeard').setLevel(DB)
         logging.getLogger('subliminal').setLevel(logging.WARNING)
         logging.getLogger('imdbpy').setLevel(logging.WARNING)
 
@@ -95,7 +99,7 @@ class SBRotatingLogHandler(object):
         """
     
         file_handler = logging.FileHandler(self.log_file)
-        file_handler.setLevel(logging.DEBUG)
+        file_handler.setLevel(DB)
         file_handler.setFormatter(DispatchingFormatter({'sickbeard'  : logging.Formatter('%(asctime)s %(levelname)-8s %(message)s', '%b-%d %H:%M:%S'),
                                                         'subliminal' : logging.Formatter('%(asctime)s %(levelname)-8s SUBLIMINAL :: %(message)s', '%b-%d %H:%M:%S'),
                                                         'imdbpy'     : logging.Formatter('%(asctime)s %(levelname)-8s IMDBPY :: %(message)s', '%b-%d %H:%M:%S')
@@ -173,6 +177,7 @@ class SBRotatingLogHandler(object):
             out_line = message.encode('utf-8')
         
             sb_logger = logging.getLogger('sickbeard')
+            setattr(sb_logger, 'db', lambda *args: sb_logger.log(DB, *args))    
     
             try:
                 if logLevel == DEBUG:
@@ -183,9 +188,12 @@ class SBRotatingLogHandler(object):
                     sb_logger.warning(out_line)
                 elif logLevel == ERROR:
                     sb_logger.error(out_line)
-            
+
                     # add errors to the UI logger
                     classes.ErrorViewer.add(classes.UIError(message))
+                elif logLevel == DB:    
+                    sb_logger.db(out_line)
+
                 else:
                     sb_logger.log(logLevel, out_line)
             except ValueError:
