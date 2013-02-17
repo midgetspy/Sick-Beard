@@ -32,7 +32,7 @@ from bs4 import BeautifulSoup
 
 class IPTorrentsProvider(generic.TorrentProvider):
 
-    urls = {'test' : 'http://www.iptorrents.com/',
+    urls = {'base_url' : 'http://www.iptorrents.com/',
             'login' : 'http://www.iptorrents.com/torrents/',
             'detail' : 'http://www.iptorrents.com/details.php?id=%s',
             'search' : 'http://www.iptorrents.com/torrents/?l%d=1%s&q=%s&qf=ti',
@@ -46,6 +46,8 @@ class IPTorrentsProvider(generic.TorrentProvider):
         self.supportsBacklog = True
 
         self.cache = IPTorrentsCache(self)
+        
+        self.url = self.urls['base_url']
         
         self.session = None
 

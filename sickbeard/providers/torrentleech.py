@@ -32,7 +32,7 @@ from bs4 import BeautifulSoup
 
 class TorrentLeechProvider(generic.TorrentProvider):
 
-    urls = {'test' : 'http://torrentleech.org/',
+    urls = {'base_url' : 'http://torrentleech.org/',
             'login' : 'http://torrentleech.org/user/account/login/',
             'detail' : 'http://torrentleech.org/torrent/%s',
             'search' : 'http://torrentleech.org/torrents/browse/index/query/%s/categories/%s',
@@ -46,6 +46,8 @@ class TorrentLeechProvider(generic.TorrentProvider):
         self.supportsBacklog = True
 
         self.cache = TorrentLeechCache(self)
+        
+        self.url = self.urls['base_url']
         
         self.categories = "2,26,32"
         
