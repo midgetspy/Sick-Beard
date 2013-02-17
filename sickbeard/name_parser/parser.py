@@ -158,42 +158,33 @@ class NameParser(object):
                 obj = unicode(obj, encoding)
         return obj
 
-    def _convert_number(self, number):
-        if type(number) == int:
-            return number
-
-        # good lord I'm lazy
-        if number.lower() == 'i': return 1
-        if number.lower() == 'ii': return 2
-        if number.lower() == 'iii': return 3
-        if number.lower() == 'iv': return 4
-        if number.lower() == 'v': return 5
-        if number.lower() == 'vi': return 6
-        if number.lower() == 'vii': return 7
-        if number.lower() == 'viii': return 8
-        if number.lower() == 'ix': return 9
-        if number.lower() == 'x': return 10
-        if number.lower() == 'xi': return 11
-        if number.lower() == 'xii': return 12
-        if number.lower() == 'xiii': return 13
-        if number.lower() == 'xiv': return 14
-        if number.lower() == 'xv': return 15
-        if number.lower() == 'xvi': return 16
-        if number.lower() == 'xvii': return 17
-        if number.lower() == 'xviii': return 18
-        if number.lower() == 'xix': return 19
-        if number.lower() == 'xx': return 20
-        if number.lower() == 'xxi': return 21
-        if number.lower() == 'xxii': return 22
-        if number.lower() == 'xxiii': return 23
-        if number.lower() == 'xxiv': return 24
-        if number.lower() == 'xxv': return 25
-        if number.lower() == 'xxvi': return 26
-        if number.lower() == 'xxvii': return 27
-        if number.lower() == 'xxviii': return 28
-        if number.lower() == 'xxix': return 29
-
-        return int(number)
+    def _convert_number(self, string):
+        if type(string) == int:
+            return string
+            
+        rtoiMap = (('M', 1000),
+                ('CM', 900),
+                ('D', 500),
+                ('CD', 400),
+                ('C', 100),
+                ('XC', 90),
+                ('L', 50),
+                ('XL', 40),
+                ('X', 10),
+                ('IX', 9),
+                ('V', 5),
+                ('IV', 4),
+                ('I', 1))
+        
+        r = 0
+        i = 0
+        
+        for d, integer in rtoiMap:
+                while string[i:i+len(d)].upper() == d:
+                        r += integer
+                        i += len(d)
+        
+        return int(r);
 
     def parse(self, name):
         
