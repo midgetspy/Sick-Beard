@@ -23,6 +23,7 @@ import base64
 import time
 
 import sickbeard
+import os
 
 from sickbeard import logger
 from sickbeard import common
@@ -41,6 +42,8 @@ except ImportError:
 
 
 class XBMCNotifier:
+
+    sickbeard_logo_path = os.path.join(os.path.abspath(""), "gui/slick/images/xbmc-notify.png")
 
     def _get_json_version(self, host, username, password):
         """Returns XBMC JSON-RPC API version (odd # = dev, even # = stable)
@@ -122,13 +125,13 @@ class XBMCNotifier:
             if xbmcapi:
                 if (xbmcapi <= 4):
                     logger.log(u"Detected XBMC version <= 11, using XBMC HTTP API", logger.DEBUG)
-                    command = {'command': 'ExecBuiltIn', 'parameter': 'Notification(' + title.encode("utf-8") + ',' + message.encode("utf-8") + ')'}
+                    command = {'command': 'ExecBuiltIn', 'parameter': 'Notification(' + title.encode("utf-8") + ',' + message.encode("utf-8") + ',' + self.sickbeard_logo_url.encode("utf-8") + ')'}
                     notifyResult = self._send_to_xbmc(command, curHost, username, password)
                     if notifyResult:
                         result += curHost + ':' + str(notifyResult)
                 else:
                     logger.log(u"Detected XBMC version >= 12, using XBMC JSON API", logger.DEBUG)
-                    command = '{"jsonrpc":"2.0","method":"GUI.ShowNotification","params":{"title":"%s","message":"%s"},"id":1}' % (title.encode("utf-8"), message.encode("utf-8"))
+                    command = '{"jsonrpc":"2.0","method":"GUI.ShowNotification","params":{"title":"%s","message":"%s","image":"%s"},"id":1}' % (title.encode("utf-8"), message.encode("utf-8"), self.sickbeard_logo_path.encode("utf-8"))
                     notifyResult = self._send_to_xbmc_json(command, curHost, username, password)
                     if notifyResult:
                         result += curHost + ':' + notifyResult["result"].decode(sickbeard.SYS_ENCODING)
