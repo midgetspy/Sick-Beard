@@ -125,7 +125,7 @@ class XBMCNotifier:
             if xbmcapi:
                 if (xbmcapi <= 4):
                     logger.log(u"Detected XBMC version <= 11, using XBMC HTTP API", logger.DEBUG)
-                    command = {'command': 'ExecBuiltIn', 'parameter': 'Notification(' + title.encode("utf-8") + ',' + message.encode("utf-8") + ',' + self.sickbeard_logo_url.encode("utf-8") + ')'}
+                    command = {'command': 'ExecBuiltIn', 'parameter': 'Notification(' + title.encode("utf-8") + ',' + message.encode("utf-8") + ')'}
                     notifyResult = self._send_to_xbmc(command, curHost, username, password)
                     if notifyResult:
                         result += curHost + ':' + str(notifyResult)
