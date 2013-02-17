@@ -306,6 +306,11 @@
                                           <td>%RG</td>
                                           <td>RLSGROUP</td>
                                         </tr>
+                                        <tr>
+                                          <td class="align-right"><i class="icon-info-sign" title="If episode is proper/repack add 'proper' to name."></i> <b>Release Type:</b></td>
+                                          <td>%RT</td>
+                                          <td>PROPER</td>
+                                        </tr>
                                     </tbody>
                                   </table>
                                   <br/>
@@ -339,6 +344,18 @@
                                 <span class="jumbo" id="naming_example_multi">&nbsp;</span>
                             </div>
                             <br/>
+                        </div>
+
+                        <div class="field-pair">                                                                                                                          
+                            <input type="checkbox" id="naming_strip_year"  name="naming_strip_year" #if $sickbeard.NAMING_STRIP_YEAR then "checked=\"checked\"" else ""#/> 
+                            <label class="clearfix" for="naming_strip_year">                                                                                              
+                                <span class="component-title">Strip Show Year</span>                                                                                      
+                                <span class="component-desc">Remove the TV show's year when renaming the file?</span>                                                     
+                            </label>                                                                                                                                      
+                            <label class="nocheck clearfix">                                                                                                              
+                                <span class="component-title">&nbsp;</span>                                                                                               
+                                <span class="component-desc">Only applies to shows that have year inside parentheses</span>                                         
+                            </label>                                                                                                                                      
                         </div>
 
                         <div class="field-pair clearfix">
@@ -497,6 +514,11 @@
                                               <td>%RG</td>
                                               <td>RLSGROUP</td>
                                             </tr>
+                                            <tr>
+                                              <td class="align-right"><i class="icon-info-sign" title="If episode is proper/repack add 'proper' to name."></i> <b>Release Type:</b></td>
+                                              <td>%RT</td>
+                                              <td>PROPER</td>
+                                            </tr>
                                         </tbody>
                                       </table>
                                       <br/>
@@ -512,18 +534,6 @@
                             </div>
 
                         </div><!-- /naming_abd_different -->
-
-                        <div class="field-pair">                                                                                                                          
-                            <input type="checkbox" id="naming_strip_year"  name="naming_strip_year" #if $sickbeard.NAMING_STRIP_YEAR then "checked=\"checked\"" else ""#/> 
-                            <label class="clearfix" for="naming_strip_year">                                                                                              
-                                <span class="component-title">Strip Show Year</span>                                                                                      
-                                <span class="component-desc">Remove the TV show's year when renaming the file?</span>                                                     
-                            </label>                                                                                                                                      
-                            <label class="nocheck clearfix">                                                                                                              
-                                <span class="component-title">&nbsp;</span>                                                                                               
-                                <span class="component-desc">Only applies to shows that have year inside parentheses</span>                                         
-                            </label>                                                                                                                                      
-                        </div>
 
                         <div class="clearfix"></div>
                         <input type="submit" class="btn config_submitter" value="Save Changes" /><br/>

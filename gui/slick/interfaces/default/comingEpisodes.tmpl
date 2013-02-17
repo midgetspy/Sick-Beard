@@ -48,7 +48,7 @@
         return false;
     },
     format: function(s) {
-        return s.replace('hd',3).replace('sd',1).replace('any',0).replace('best',2).replace('custom',4); 
+        return s.replace('hd1080p',5).replace('hd720p',4).replace('hd',3).replace('sd',2).replace('any',1).replace('best',0).replace('custom',7);
     },
     type: 'numeric'
 });
@@ -66,6 +66,7 @@
         widgets: ['stickyHeaders'],
         sortList: sortList,
         textExtraction: {
+            4: function(node) { return \$(node).find("img").attr("alt"); },
             5: function(node) { return \$(node).find("span").text().toLowerCase(); }
         },
         headers: {
@@ -76,7 +77,8 @@
             4: { sorter: 'loadingNames' },
             5: { sorter: 'quality' },
             6: { sorter: false },
-            7: { sorter: false }
+            7: { sorter: false },
+            8: { sorter: false }
         }
     });
 
@@ -128,7 +130,7 @@
         #end if
             $cur_result["name"]
         </td>
-        <td align="center"><img id="network" width="40" height="20" src="$sbRoot/images/network/${cur_result["network"]}.png" alt="$cur_result["network"]" title="$cur_result["network"]"></td>
+        <td align="center">$cur_result["network"]</td>
         <td align="center">
 #if int($cur_result["quality"]) in $qualityPresets:
     <span class="quality $qualityPresetStrings[int($cur_result["quality"])]">$qualityPresetStrings[int($cur_result["quality"])]</span>

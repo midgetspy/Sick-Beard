@@ -28,9 +28,7 @@ from common import SNATCHED, Quality, SEASON_RESULT, MULTI_EP_RESULT
 from sickbeard import logger, db, show_name_helpers, exceptions, helpers
 from sickbeard import sab
 from sickbeard import nzbget
-from utorrent import uTorrentAPI as utorrent
-from sickbeard import transmission
-from sickbeard import deluge
+from sickbeard import clients
 from sickbeard import history
 from sickbeard import notifiers
 from sickbeard import nzbSplitter
@@ -40,6 +38,7 @@ from sickbeard import providers
 
 from sickbeard.exceptions import ex
 from sickbeard.providers.generic import GenericProvider
+
 
 def _downloadResult(result):
     """
@@ -117,19 +116,14 @@ def snatchEpisode(result, endStatus=SNATCHED):
             logger.log(u"Unknown NZB action specified in config: " + sickbeard.NZB_METHOD, logger.ERROR)
             dlResult = False
 
-    # TORRENTs can be sent to Clients or saved to disk
+    # TORRENTs can be sent to clients or saved to disk
     elif result.resultType == "torrent":
         # torrents are saved to disk when blackhole mode
         if sickbeard.TORRENT_METHOD == "blackhole": 
             dlResult = _downloadResult(result)
-        # torrents are sended to torrent client
-        elif sickbeard.TORRENT_METHOD == "utorrent":
-#            dlResult = utorrent.sendTORRENT(result)
-            dlResult = utorrent().sendTORRENT(result)   
-        elif sickbeard.TORRENT_METHOD == "transmission":
-            dlResult = transmission.sendTORRENT(result)
-        elif sickbeard.TORRENT_METHOD == "deluge":
-            dlResult = deluge.sendTORRENT(result)      
+        else:
+            client =  clients.getClientModule(sickbeard.TORRENT_METHOD)  
+            dlResult = client.api.sendTORRENT(result)
     else:
         logger.log(u"Unknown result type, unable to download it", logger.ERROR)
         dlResult = False

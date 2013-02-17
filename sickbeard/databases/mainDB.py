@@ -147,7 +147,8 @@ class NumericProviders (AddAirdateIndex):
                 6: 'tvnzb',
                 7: 'ezrss',
                 8: 'thepiratebay',
-                9: 'dtt' }
+                9: 'dtt',
+                10: 'torrentleech' }
                 
     def execute(self):
         self.connection.action("ALTER TABLE history RENAME TO history_old")
@@ -567,4 +568,120 @@ class AddIMDbInfo(RenameSeasonFolders):
     def execute(self):
         
         self.connection.action("CREATE TABLE imdb_info (tvdb_id INTEGER PRIMARY KEY, imdb_id TEXT, title TEXT, year NUMERIC, akas TEXT, runtimes NUMERIC, genres TEXT, countries TEXT, country_codes TEXT, certificates TEXT, rating TEXT, votes INTEGER, last_update NUMERIC)")
+        self.incDBVersion()
+        
+class Add1080pAndRawHDQualities(AddIMDbInfo):
+    """Add support for 1080p related qualities along with RawHD
+
+    Quick overview of what the upgrade needs to do:
+
+           quality   | old  | new
+        --------------------------
+        hdwebdl      | 1<<3 | 1<<5
+        hdbluray     | 1<<4 | 1<<7
+        fullhdbluray | 1<<5 | 1<<8
+        --------------------------
+        rawhdtv      |      | 1<<3
+        fullhdtv     |      | 1<<4
+        fullhdwebdl  |      | 1<<6
+    """
+
+    def test(self):
+        return self.checkDBVersion() >= 14
+
+    def _update_status(self, old_status):
+        (status, quality) = common.Quality.splitCompositeStatus(old_status)
+        return common.Quality.compositeStatus(status, self._update_quality(quality))
+
+    def _update_quality(self, old_quality):
+        """Update bitwise flags to reflect new quality values
+
+        Check flag bits (clear old then set their new locations) starting
+        with the highest bits so we dont overwrite data we need later on
+        """
+
+        result = old_quality
+        # move fullhdbluray from 1<<5 to 1<<8 if set
+        if(result & (1<<5)):
+            result = result & ~(1<<5)
+            result = result | (1<<8)
+        # move hdbluray from 1<<4 to 1<<7 if set
+        if(result & (1<<4)):
+            result = result & ~(1<<4)
+            result = result | (1<<7)
+        # move hdwebdl from 1<<3 to 1<<5 if set
+        if(result & (1<<3)):
+            result = result & ~(1<<3)
+            result = result | (1<<5)
+
+        return result
+
+    def _update_composite_qualities(self, status):
+        """Unpack, Update, Return new quality values
+
+        Unpack the composite archive/initial values.
+        Update either qualities if needed.
+        Then return the new compsite quality value.
+        """
+
+        best = (status & (0xffff << 16)) >> 16
+        initial = status & (0xffff)
+
+        best = self._update_quality(best)
+        initial = self._update_quality(initial)
+
+        result = ((best << 16) | initial)
+        return result
+
+    def execute(self):
+        backupDatabase(self.checkDBVersion())
+
+        # update the default quality so we dont grab the wrong qualities after migration
+        sickbeard.QUALITY_DEFAULT = self._update_composite_qualities(sickbeard.QUALITY_DEFAULT)
+        sickbeard.save_config()
+
+        # upgrade previous HD to HD720p -- shift previous qualities to new placevalues
+        old_hd = common.Quality.combineQualities([common.Quality.HDTV, common.Quality.HDWEBDL >> 2, common.Quality.HDBLURAY >> 3], [])
+        new_hd = common.Quality.combineQualities([common.Quality.HDTV, common.Quality.HDWEBDL, common.Quality.HDBLURAY], [])
+
+        # update ANY -- shift existing qualities and add new 1080p qualities, note that rawHD was not added to the ANY template
+        old_any = common.Quality.combineQualities([common.Quality.SDTV, common.Quality.SDDVD, common.Quality.HDTV, common.Quality.HDWEBDL >> 2, common.Quality.HDBLURAY >> 3, common.Quality.UNKNOWN], [])
+        new_any = common.Quality.combineQualities([common.Quality.SDTV, common.Quality.SDDVD, common.Quality.HDTV, common.Quality.FULLHDTV, common.Quality.HDWEBDL, common.Quality.FULLHDWEBDL, common.Quality.HDBLURAY, common.Quality.FULLHDBLURAY, common.Quality.UNKNOWN], [])
+
+        # update qualities (including templates)
+        shows = self.connection.select("SELECT * FROM tv_shows")
+        for cur_show in shows:
+            if cur_show["quality"] == old_hd:
+                new_quality = new_hd
+            elif cur_show["quality"] == old_any:
+                new_quality = new_any
+            else:
+                new_quality = self._update_composite_qualities(cur_show["quality"])
+            self.connection.action("UPDATE tv_shows SET quality = ? WHERE tvdb_id = ?", [new_quality, cur_show["tvdb_id"]])
+
+        # update status that are are within the old hdwebdl (1<<3 which is 8) and better -- exclude unknown (1<<15 which is 32768)
+        episodes = self.connection.select("SELECT * FROM tv_episodes WHERE status/100 < 32768 AND status/100 >= 8")
+        for cur_episode in episodes:
+            self.connection.action("UPDATE tv_episodes SET status = ? WHERE episode_id = ?", [self._update_status(cur_episode["status"]), cur_episode["episode_id"]])
+
+        # make two seperate passes through the history since snatched and downloaded (action & quality) may not always coordinate together
+
+        # update previous history so it shows the correct action
+        historyAction = self.connection.select("SELECT * FROM history WHERE action/100 < 32768 AND action/100 >= 8")
+        for cur_entry in historyAction:
+            self.connection.action("UPDATE history SET action = ? WHERE showid = ? AND date = ?", [self._update_status(cur_entry["action"]), cur_entry["showid"], cur_entry["date"]])
+
+        # update previous history so it shows the correct quality
+        historyQuality = self.connection.select("SELECT * FROM history WHERE quality < 32768 AND quality >= 8")
+        for cur_entry in historyQuality:
+            self.connection.action("UPDATE history SET quality = ? WHERE showid = ? AND date = ?", [self._update_quality(cur_entry["quality"]), cur_entry["showid"], cur_entry["date"]])
+
+        self.incDBVersion()
+        
+class AddProperNamingSupport(AddIMDbInfo):    
+    def test(self):
+        return self.checkDBVersion() >= 15
+
+    def execute(self):
+        self.addColumn("tv_episodes", "is_proper")
         self.incDBVersion()

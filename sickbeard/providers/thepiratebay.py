@@ -80,10 +80,18 @@ class ThePirateBayProvider(generic.TorrentProvider):
 
         if quality == Quality.SDTV:
             quality_string = 'HDTV x264'
+        if quality == Quality.SDDVD:
+            quality_string = 'DVDRIP'    
         elif quality == Quality.HDTV:    
             quality_string = '720p HDTV x264'
+        elif quality == Quality.FULLHDTV:
+            quality_string = '1080p HDTV x264'        
+        elif quality == Quality.RAWHDTV:
+            quality_string = '1080i HDTV mpeg2'
         elif quality == Quality.HDWEBDL:
             quality_string = '720p WEB-DL'
+        elif quality == Quality.FULLHDWEBDL:
+            quality_string = '1080p WEB-DL'            
         elif quality == Quality.HDBLURAY:
             quality_string = '720p Bluray x264'
         elif quality == Quality.FULLHDBLURAY:
@@ -220,11 +228,9 @@ class ThePirateBayProvider(generic.TorrentProvider):
                     leechers = int(torrent.group('leechers'))
 
                     #Filter unseeded torrent
-                    if seeders == 0:
+                    if seeders == 0 or not title \
+                    or not show_name_helpers.filterBadReleases(title):
                         continue 
-                       
-                    if not show_name_helpers.filterBadReleases(title):
-                        continue
                    
                     #Accept Torrent only from Good People for every Episode Search
                     if sickbeard.THEPIRATEBAY_TRUSTED and re.search('(VIP|Trusted|Helper)',torrent.group(0))== None:
@@ -233,10 +239,7 @@ class ThePirateBayProvider(generic.TorrentProvider):
 
                     #Try to find the real Quality for full season torrent analyzing files in torrent 
                     if mode == 'Season' and Quality.nameQuality(title) == Quality.UNKNOWN:     
-                        title = self._find_season_quality(title,id)
-                    
-                    if not title:
-                        continue
+                        if not self._find_season_quality(title,id): continue
                         
                     item = title, url, id, seeders, leechers
                     

@@ -23,6 +23,7 @@ import os
 import re
 import shlex
 import subprocess
+import stat
 
 import sickbeard
 
@@ -141,7 +142,6 @@ class PostProcessor(object):
             return PostProcessor.DOESNT_EXIST
 
     def _list_associated_files(self, file_path, subtitles_only=False):
-
         """
         For a given file path searches for files with the same name but different extension and returns their absolute paths
         
@@ -173,13 +173,10 @@ class PostProcessor(object):
             # only add associated to list
             if associated_file_path == file_path:
                 continue
-            # only list it if the only non-shared part is the extension
-            if '.' in associated_file_path[len(base_name):]:
-                continue
             # only list it if the only non-shared part is the extension or if it is a subtitle
-            if '.' in associated_file_path[len(base_name):] and not associated_file_path.endswith('srt'):
+            if '.' in associated_file_path[len(base_name):] and not associated_file_path[len(associated_file_path)-3:] in common.subtitleExtensions:
                 continue
-            if subtitles_only and not associated_file_path.endswith('srt'):
+            if subtitles_only and not associated_file_path[len(associated_file_path)-3:] in common.subtitleExtensions:
                 continue
 
             file_path_list.append(associated_file_path)
@@ -210,6 +207,11 @@ class PostProcessor(object):
         for cur_file in file_list:
             self._log(u"Deleting file "+cur_file, logger.DEBUG)
             if ek.ek(os.path.isfile, cur_file):
+                #check first the read-only attribute
+                file_attribute = ek.ek(os.stat, cur_file)[0]
+                if (not file_attribute & stat.S_IWRITE):
+                    # File is read-only, so make it writeable
+                    ek.ek(os.chmod,cur_file,stat.S_IWRITE)
                 ek.ek(os.remove, cur_file)
                 # do the library update for synoindex
                 notifiers.synoindex_notifier.deleteFile(cur_file)
@@ -249,7 +251,7 @@ class PostProcessor(object):
             cur_extension = cur_file_path.rpartition('.')[-1]
             
             # check if file have language of subtitles
-            if cur_extension == 'srt':
+            if cur_extension in common.subtitleExtensions:
                 cur_lang = cur_file_path.rpartition('.')[0].rpartition('.')[-1]
                 if cur_lang in sickbeard.SUBTITLES_LANGUAGES:
                     cur_extension = cur_lang + '.' + cur_extension
@@ -265,7 +267,7 @@ class PostProcessor(object):
             else:
                 new_file_name = helpers.replaceExtension(cur_file_name, cur_extension)
             
-            if sickbeard.SUBTITLES_DIR and cur_extension.endswith('srt'):
+            if sickbeard.SUBTITLES_DIR and cur_extension in common.subtitleExtensions:
                 subs_new_path = ek.ek(os.path.join, new_path, sickbeard.SUBTITLES_DIR)
                 if not ek.ek(os.path.isdir, subs_new_path):
                     ek.ek(os.mkdir, subs_new_path)
@@ -825,6 +827,8 @@ class PostProcessor(object):
 
                 cur_ep.status = common.Quality.compositeStatus(common.DOWNLOADED, new_ep_quality)
 
+                cur_ep.is_proper = self.is_proper
+                
                 cur_ep.saveToDB()
 
         # find the destination folder

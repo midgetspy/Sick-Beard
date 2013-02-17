@@ -30,10 +30,11 @@ from threading import Lock
 
 # apparently py2exe won't build these unless they're imported somewhere
 from sickbeard import providers, metadata
-from providers import ezrss, tvtorrents, btn, nzbsrus, newznab, womble, thepiratebay, dtt
+from providers import ezrss, tvtorrents, btn, nzbsrus, newznab, womble, thepiratebay, dtt, torrentleech, nzbx, iptorrents
 from sickbeard.config import CheckSection, check_setting_int, check_setting_str, ConfigMigrator
 
-from sickbeard import searchCurrent, searchBacklog, showUpdater, versionChecker, properFinder, autoPostProcesser, subtitles
+
+from sickbeard import searchCurrent, searchBacklog, showUpdater, versionChecker, properFinder, autoPostProcesser, subtitles, traktWatchListChecker
 from sickbeard import helpers, db, exceptions, show_queue, search_queue, scheduler
 from sickbeard import logger
 from sickbeard import naming
@@ -76,6 +77,7 @@ searchQueueScheduler = None
 properFinderScheduler = None
 autoPostProcesserScheduler = None
 subtitlesFinderScheduler = None
+traktWatchListCheckerSchedular = None
 
 showList = None
 loadingShowList = None
@@ -123,6 +125,7 @@ METADATA_PS3 = None
 METADATA_WDTV = None
 METADATA_TIVO = None
 METADATA_SYNOLOGY = None
+METADATA_MEDE8ER = None
 
 QUALITY_DEFAULT = None
 STATUS_DEFAULT = None
@@ -177,6 +180,16 @@ THEPIRATEBAY_PROXY = False
 THEPIRATEBAY_PROXY_URL = None
 THEPIRATEBAY_BLACKLIST = None
 
+TORRENTLEECH = False
+TORRENTLEECH_USERNAME = None
+TORRENTLEECH_PASSWORD = None
+
+IPTORRENTS = False
+IPTORRENTS_USERNAME = None
+IPTORRENTS_PASSWORD = None
+IPTORRENTS_FREELEECH = False
+
+
 ADD_SHOWS_WO_DIR = None
 CREATE_MISSING_SHOW_DIRS = None
 RENAME_EPISODES = False
@@ -202,6 +215,9 @@ NZBMATRIX_APIKEY = None
 NEWZBIN = False
 NEWZBIN_USERNAME = None
 NEWZBIN_PASSWORD = None
+
+NZBX = False
+NZBX_COMPLETION = 100
 
 SAB_USERNAME = None
 SAB_PASSWORD = None
@@ -306,6 +322,10 @@ USE_TRAKT = False
 TRAKT_USERNAME = None
 TRAKT_PASSWORD = None
 TRAKT_API = ''
+TRAKT_REMOVE_WATCHLIST = False
+TRAKT_USE_WATCHLIST = False
+TRAKT_METHOD_ADD = 0
+TRAKT_START_PAUSED = False
 
 USE_PYTIVO = False
 PYTIVO_NOTIFY_ONSNATCH = False
@@ -329,6 +349,7 @@ DISPLAY_SHOW_SPECIALS = None
 COMING_EPS_LAYOUT = None
 COMING_EPS_DISPLAY_PAUSED = None
 COMING_EPS_SORT = None
+COMING_EPS_MISSED_RANGE = None
 
 USE_SUBTITLES = False
 SUBTITLES_LANGUAGES = []
@@ -359,13 +380,13 @@ def initialize(consoleLogging=True):
                 TORRENT_USERNAME, TORRENT_PASSWORD, TORRENT_HOST, TORRENT_PATH, TORRENT_RATIO, TORRENT_PAUSED, TORRENT_LABEL, \
                 USE_XBMC, XBMC_NOTIFY_ONSNATCH, XBMC_NOTIFY_ONDOWNLOAD, XBMC_NOTIFY_ONSUBTITLEDOWNLOAD, XBMC_UPDATE_FULL, \
                 XBMC_UPDATE_LIBRARY, XBMC_HOST, XBMC_USERNAME, XBMC_PASSWORD, \
-                USE_TRAKT, TRAKT_USERNAME, TRAKT_PASSWORD, TRAKT_API, \
+                USE_TRAKT, TRAKT_USERNAME, TRAKT_PASSWORD, TRAKT_API, TRAKT_REMOVE_WATCHLIST, TRAKT_USE_WATCHLIST, TRAKT_METHOD_ADD, TRAKT_START_PAUSED, traktWatchListCheckerSchedular, \
                 USE_PLEX, PLEX_NOTIFY_ONSNATCH, PLEX_NOTIFY_ONDOWNLOAD, PLEX_NOTIFY_ONSUBTITLEDOWNLOAD, PLEX_UPDATE_LIBRARY, \
                 PLEX_SERVER_HOST, PLEX_HOST, PLEX_USERNAME, PLEX_PASSWORD, \
                 showUpdateScheduler, __INITIALIZED__, LAUNCH_BROWSER, UPDATE_SHOWS_ON_START, showList, loadingShowList, \
                 NZBS, NZBS_UID, NZBS_HASH, EZRSS, TVTORRENTS, TVTORRENTS_DIGEST, TVTORRENTS_HASH, BTN, BTN_API_KEY, \
-                DTT, DTT_NORAR, DTT_SINGLE, THEPIRATEBAY, THEPIRATEBAY_TRUSTED, THEPIRATEBAY_PROXY, THEPIRATEBAY_PROXY_URL, THEPIRATEBAY_BLACKLIST, TORRENT_DIR, USENET_RETENTION, SOCKET_TIMEOUT, \
-                SEARCH_FREQUENCY, DEFAULT_SEARCH_FREQUENCY, BACKLOG_SEARCH_FREQUENCY, \
+                DTT, DTT_NORAR, DTT_SINGLE, THEPIRATEBAY, THEPIRATEBAY_TRUSTED, THEPIRATEBAY_PROXY, THEPIRATEBAY_PROXY_URL, THEPIRATEBAY_BLACKLIST, TORRENTLEECH, TORRENTLEECH_USERNAME, TORRENTLEECH_PASSWORD, \
+                IPTORRENTS, IPTORRENTS_USERNAME, IPTORRENTS_PASSWORD, IPTORRENTS_FREELEECH, TORRENT_DIR, USENET_RETENTION, SOCKET_TIMEOUT, SEARCH_FREQUENCY, DEFAULT_SEARCH_FREQUENCY, BACKLOG_SEARCH_FREQUENCY, \
                 QUALITY_DEFAULT, FLATTEN_FOLDERS_DEFAULT, SUBTITLES_DEFAULT, STATUS_DEFAULT, \
                 GROWL_NOTIFY_ONSNATCH, GROWL_NOTIFY_ONDOWNLOAD, GROWL_NOTIFY_ONSUBTITLEDOWNLOAD, TWITTER_NOTIFY_ONSNATCH, TWITTER_NOTIFY_ONDOWNLOAD, TWITTER_NOTIFY_ONSUBTITLEDOWNLOAD, \
                 USE_GROWL, GROWL_HOST, GROWL_PASSWORD, USE_PROWL, PROWL_NOTIFY_ONSNATCH, PROWL_NOTIFY_ONDOWNLOAD, PROWL_NOTIFY_ONSUBTITLEDOWNLOAD, PROWL_API, PROWL_PRIORITY, PROG_DIR, NZBMATRIX, NZBMATRIX_USERNAME, \
@@ -376,16 +397,16 @@ def initialize(consoleLogging=True):
                 showQueueScheduler, searchQueueScheduler, ROOT_DIRS, CACHE_DIR, ACTUAL_CACHE_DIR, TVDB_API_PARMS, \
                 NAMING_PATTERN, NAMING_MULTI_EP, NAMING_FORCE_FOLDERS, NAMING_ABD_PATTERN, NAMING_CUSTOM_ABD, NAMING_STRIP_YEAR, \
                 RENAME_EPISODES, properFinderScheduler, PROVIDER_ORDER, autoPostProcesserScheduler, \
-                NZBSRUS, NZBSRUS_UID, NZBSRUS_HASH, WOMBLE, providerList, newznabProviderList, \
+                NZBSRUS, NZBSRUS_UID, NZBSRUS_HASH, WOMBLE, NZBX, NZBX_COMPLETION, providerList, newznabProviderList, \
                 EXTRA_SCRIPTS, USE_TWITTER, TWITTER_USERNAME, TWITTER_PASSWORD, TWITTER_PREFIX, \
                 USE_NOTIFO, NOTIFO_USERNAME, NOTIFO_APISECRET, NOTIFO_NOTIFY_ONDOWNLOAD, NOTIFO_NOTIFY_ONSUBTITLEDOWNLOAD, NOTIFO_NOTIFY_ONSNATCH, \
                 USE_BOXCAR, BOXCAR_USERNAME, BOXCAR_PASSWORD, BOXCAR_NOTIFY_ONDOWNLOAD, BOXCAR_NOTIFY_ONSUBTITLEDOWNLOAD, BOXCAR_NOTIFY_ONSNATCH, \
                 USE_PUSHOVER, PUSHOVER_USERKEY, PUSHOVER_NOTIFY_ONDOWNLOAD, PUSHOVER_NOTIFY_ONSUBTITLEDOWNLOAD, PUSHOVER_NOTIFY_ONSNATCH, \
                 USE_LIBNOTIFY, LIBNOTIFY_NOTIFY_ONSNATCH, LIBNOTIFY_NOTIFY_ONDOWNLOAD, LIBNOTIFY_NOTIFY_ONSUBTITLEDOWNLOAD, USE_NMJ, NMJ_HOST, NMJ_DATABASE, NMJ_MOUNT, USE_SYNOINDEX, \
                 USE_SYNOLOGYNOTIFIER, SYNOLOGYNOTIFIER_NOTIFY_ONSNATCH, SYNOLOGYNOTIFIER_NOTIFY_ONDOWNLOAD, SYNOLOGYNOTIFIER_NOTIFY_ONSUBTITLEDOWNLOAD, \
-                USE_BANNER, USE_LISTVIEW, METADATA_XBMC, METADATA_MEDIABROWSER, METADATA_PS3, METADATA_SYNOLOGY, metadata_provider_dict, \
+                USE_BANNER, USE_LISTVIEW, METADATA_XBMC, METADATA_MEDIABROWSER, METADATA_PS3, METADATA_SYNOLOGY, METADATA_MEDE8ER, metadata_provider_dict, \
                 NEWZBIN, NEWZBIN_USERNAME, NEWZBIN_PASSWORD, GIT_PATH, MOVE_ASSOCIATED_FILES, \
-                GUI_NAME, HOME_LAYOUT, DISPLAY_SHOW_SPECIALS, COMING_EPS_LAYOUT, COMING_EPS_SORT, COMING_EPS_DISPLAY_PAUSED, METADATA_WDTV, METADATA_TIVO, IGNORE_WORDS, CREATE_MISSING_SHOW_DIRS, \
+                GUI_NAME, HOME_LAYOUT, DISPLAY_SHOW_SPECIALS, COMING_EPS_LAYOUT, COMING_EPS_SORT, COMING_EPS_DISPLAY_PAUSED, COMING_EPS_MISSED_RANGE, METADATA_WDTV, METADATA_TIVO, IGNORE_WORDS, CREATE_MISSING_SHOW_DIRS, \
                 ADD_SHOWS_WO_DIR, USE_SUBTITLES, SUBTITLES_LANGUAGES, SUBTITLES_DIR, SUBTITLES_SERVICES_LIST, SUBTITLES_SERVICES_ENABLED, subtitlesFinderScheduler
 
         if __INITIALIZED__:
@@ -541,6 +562,15 @@ def initialize(consoleLogging=True):
         THEPIRATEBAY_PROXY_URL = check_setting_str(CFG, 'THEPIRATEBAY', 'thepiratebay_proxy_url', '')        
         THEPIRATEBAY_BLACKLIST = check_setting_str(CFG, 'THEPIRATEBAY', 'thepiratebay_blacklist', '')        
 
+        TORRENTLEECH = bool(check_setting_int(CFG, 'TORRENTLEECH', 'torrentleech', 0))
+        TORRENTLEECH_USERNAME = check_setting_str(CFG, 'TORRENTLEECH', 'torrentleech_username', '')
+        TORRENTLEECH_PASSWORD = check_setting_str(CFG, 'TORRENTLEECH', 'torrentleech_password', '')
+
+        IPTORRENTS = bool(check_setting_int(CFG, 'IPTORRENTS', 'iptorrents', 0))
+        IPTORRENTS_USERNAME = check_setting_str(CFG, 'IPTORRENTS', 'iptorrents_username', '')
+        IPTORRENTS_PASSWORD = check_setting_str(CFG, 'IPTORRENTS', 'iptorrents_password', '')
+        IPTORRENTS_FREELEECH = bool(check_setting_int(CFG, 'IPTORRENTS', 'iptorrents_freeleech', 0))
+
         NZBS = bool(check_setting_int(CFG, 'NZBs', 'nzbs', 0))
         NZBS_UID = check_setting_str(CFG, 'NZBs', 'nzbs_uid', '')
         NZBS_HASH = check_setting_str(CFG, 'NZBs', 'nzbs_hash', '')
@@ -558,6 +588,9 @@ def initialize(consoleLogging=True):
         NEWZBIN_PASSWORD = check_setting_str(CFG, 'Newzbin', 'newzbin_password', '')
 
         WOMBLE = bool(check_setting_int(CFG, 'Womble', 'womble', 1))
+
+        NZBX = bool(check_setting_int(CFG, 'nzbX', 'nzbx', 0))
+        NZBX_COMPLETION = check_setting_int(CFG, 'nzbX', 'nzbx_completion', 100)
 
         SAB_USERNAME = check_setting_str(CFG, 'SABnzbd', 'sab_username', '')
         SAB_PASSWORD = check_setting_str(CFG, 'SABnzbd', 'sab_password', '')
@@ -659,7 +692,12 @@ def initialize(consoleLogging=True):
         TRAKT_USERNAME = check_setting_str(CFG, 'Trakt', 'trakt_username', '')
         TRAKT_PASSWORD = check_setting_str(CFG, 'Trakt', 'trakt_password', '')
         TRAKT_API = check_setting_str(CFG, 'Trakt', 'trakt_api', '')
-        
+        TRAKT_REMOVE_WATCHLIST = bool(check_setting_int(CFG, 'Trakt', 'trakt_remove_watchlist', 0))
+        TRAKT_USE_WATCHLIST = bool(check_setting_int(CFG, 'Trakt', 'trakt_use_watchlist', 0))
+        TRAKT_METHOD_ADD = check_setting_str(CFG, 'Trakt', 'trakt_method_add', "0")
+        TRAKT_START_PAUSED = bool(check_setting_int(CFG, 'Trakt', 'trakt_start_paused', 0))
+
+        CheckSection(CFG, 'pyTivo')
         USE_PYTIVO = bool(check_setting_int(CFG, 'pyTivo', 'use_pytivo', 0))
         PYTIVO_NOTIFY_ONSNATCH = bool(check_setting_int(CFG, 'pyTivo', 'pytivo_notify_onsnatch', 0))
         PYTIVO_NOTIFY_ONDOWNLOAD = bool(check_setting_int(CFG, 'pyTivo', 'pytivo_notify_ondownload', 0))
@@ -708,6 +746,8 @@ def initialize(consoleLogging=True):
                 old_metadata_class = metadata.mediabrowser.metadata_class
             elif METADATA_TYPE == 'ps3':
                 old_metadata_class = metadata.ps3.metadata_class
+            elif METADATA_TYPE == 'mede8er':
+                old_metadata_class = metadata.mede8er.metadata_class                
         
             if old_metadata_class:
                 
@@ -736,6 +776,7 @@ def initialize(consoleLogging=True):
             METADATA_WDTV = check_setting_str(CFG, 'General', 'metadata_wdtv', '0|0|0|0|0|0')
             METADATA_TIVO = check_setting_str(CFG, 'General', 'metadata_tivo', '0|0|0|0|0|0')
             METADATA_SYNOLOGY = check_setting_str(CFG, 'General', 'metadata_synology', '0|0|0|0|0|0')
+            METADATA_MEDE8ER = check_setting_str(CFG, 'General', 'metadata_mede8er', '0|0|0|0|0|0')
 
             for cur_metadata_tuple in [(METADATA_XBMC, metadata.xbmc),
                                        (METADATA_MEDIABROWSER, metadata.mediabrowser),
@@ -743,6 +784,7 @@ def initialize(consoleLogging=True):
                                        (METADATA_WDTV, metadata.wdtv),
                                        (METADATA_TIVO, metadata.tivo),
                                        (METADATA_SYNOLOGY, metadata.synology),
+                                       (METADATA_MEDE8ER, metadata.mede8er),
                                        ]:
 
                 (cur_metadata_config, cur_metadata_class) = cur_metadata_tuple
@@ -757,6 +799,7 @@ def initialize(consoleLogging=True):
         COMING_EPS_LAYOUT = check_setting_str(CFG, 'GUI', 'coming_eps_layout', 'banner')
         COMING_EPS_DISPLAY_PAUSED = bool(check_setting_int(CFG, 'GUI', 'coming_eps_display_paused', 0))
         COMING_EPS_SORT = check_setting_str(CFG, 'GUI', 'coming_eps_sort', 'date')
+        COMING_EPS_MISSED_RANGE = check_setting_int(CFG, 'GUI', 'coming_eps_sort', 7)
 
         newznabData = check_setting_str(CFG, 'Newznab', 'newznab_data', '')
         newznabProviderList = providers.getNewznabProviderList(newznabData)
@@ -816,6 +859,11 @@ def initialize(consoleLogging=True):
                                                      threadName="POSTPROCESSER",
                                                      runImmediately=True)
 
+        traktWatchListCheckerSchedular = scheduler.Scheduler(traktWatchListChecker.TraktChecker(),
+                                                     cycleTime=datetime.timedelta(minutes=10),
+                                                     threadName="TRAKTWATCHLIST",
+                                                     runImmediately=True)
+
         backlogSearchScheduler = searchBacklog.BacklogSearchScheduler(searchBacklog.BacklogSearcher(),
                                                                       cycleTime=datetime.timedelta(minutes=get_backlog_cycle_time()),
                                                                       threadName="BACKLOG",
@@ -839,7 +887,8 @@ def start():
     global __INITIALIZED__, currentSearchScheduler, backlogSearchScheduler, \
             showUpdateScheduler, versionCheckScheduler, showQueueScheduler, \
             properFinderScheduler, autoPostProcesserScheduler, searchQueueScheduler, \
-            subtitlesFinderScheduler, started, USE_SUBTITLES
+            subtitlesFinderScheduler, started, USE_SUBTITLES, \
+            traktWatchListCheckerSchedular, started
 
     with INIT_LOCK:
 
@@ -868,18 +917,22 @@ def start():
 
             # start the proper finder
             autoPostProcesserScheduler.thread.start()
-            
+
             # start the subtitles finder
             if USE_SUBTITLES:
                 subtitlesFinderScheduler.thread.start()
-            
+
+            # start the trakt watchlist
+            traktWatchListCheckerSchedular.thread.start()
+
             started = True
 
 def halt ():
 
     global __INITIALIZED__, currentSearchScheduler, backlogSearchScheduler, showUpdateScheduler, \
             showQueueScheduler, properFinderScheduler, autoPostProcesserScheduler, searchQueueScheduler, \
-            subtitlesFinderScheduler, started
+            subtitlesFinderScheduler, started, \
+            traktWatchListCheckerSchedular
 
     with INIT_LOCK:
 
@@ -935,6 +988,13 @@ def halt ():
             logger.log(u"Waiting for the POSTPROCESSER thread to exit")
             try:
                 autoPostProcesserScheduler.thread.join(10)
+            except:
+                pass
+
+            traktWatchListCheckerSchedular.abort = True
+            logger.log(u"Waiting for the TRAKTWATCHLIST thread to exit")
+            try:
+                traktWatchListCheckerSchedular.thread.join(10)
             except:
                 pass
 
@@ -1090,6 +1150,7 @@ def save_config():
     new_config['General']['metadata_wdtv'] = metadata_provider_dict['WDTV'].get_config()
     new_config['General']['metadata_tivo'] = metadata_provider_dict['TIVO'].get_config()
     new_config['General']['metadata_synology'] = metadata_provider_dict['Synology'].get_config()
+    new_config['General']['metadata_mede8er'] = metadata_provider_dict['Mede8er'].get_config()
 
     new_config['General']['cache_dir'] = ACTUAL_CACHE_DIR if ACTUAL_CACHE_DIR else 'cache'
     new_config['General']['root_dirs'] = ROOT_DIRS if ROOT_DIRS else ''
@@ -1133,6 +1194,17 @@ def save_config():
     new_config['THEPIRATEBAY']['thepiratebay_proxy_url'] = THEPIRATEBAY_PROXY_URL
     new_config['THEPIRATEBAY']['thepiratebay_blacklist'] = THEPIRATEBAY_BLACKLIST
 
+    new_config['TORRENTLEECH'] = {}
+    new_config['TORRENTLEECH']['torrentleech'] = int(TORRENTLEECH)
+    new_config['TORRENTLEECH']['torrentleech_username'] = TORRENTLEECH_USERNAME
+    new_config['TORRENTLEECH']['torrentleech_password'] = TORRENTLEECH_PASSWORD
+
+    new_config['IPTORRENTS'] = {}
+    new_config['IPTORRENTS']['iptorrents'] = int(IPTORRENTS)
+    new_config['IPTORRENTS']['iptorrents_username'] = IPTORRENTS_USERNAME
+    new_config['IPTORRENTS']['iptorrents_password'] = IPTORRENTS_PASSWORD
+    new_config['IPTORRENTS']['iptorrents_freeleech'] = int(IPTORRENTS_FREELEECH)
+
     new_config['NZBs'] = {}
     new_config['NZBs']['nzbs'] = int(NZBS)
     new_config['NZBs']['nzbs_uid'] = NZBS_UID
@@ -1155,6 +1227,10 @@ def save_config():
 
     new_config['Womble'] = {}
     new_config['Womble']['womble'] = int(WOMBLE)
+    
+    new_config['nzbX'] = {}
+    new_config['nzbX']['nzbx'] = int(NZBX)    
+    new_config['nzbX']['nzbx_completion'] = int(NZBX_COMPLETION)
 
     new_config['SABnzbd'] = {}
     new_config['SABnzbd']['sab_username'] = SAB_USERNAME
@@ -1272,6 +1348,10 @@ def save_config():
     new_config['Trakt']['trakt_username'] = TRAKT_USERNAME
     new_config['Trakt']['trakt_password'] = TRAKT_PASSWORD
     new_config['Trakt']['trakt_api'] = TRAKT_API
+    new_config['Trakt']['trakt_remove_watchlist'] = int(TRAKT_REMOVE_WATCHLIST)
+    new_config['Trakt']['trakt_use_watchlist'] = int(TRAKT_USE_WATCHLIST)
+    new_config['Trakt']['trakt_method_add'] = TRAKT_METHOD_ADD
+    new_config['Trakt']['trakt_start_paused'] = int(TRAKT_START_PAUSED)
 
     new_config['pyTivo'] = {}
     new_config['pyTivo']['use_pytivo'] = int(USE_PYTIVO)
@@ -1301,6 +1381,7 @@ def save_config():
     new_config['GUI']['coming_eps_layout'] = COMING_EPS_LAYOUT
     new_config['GUI']['coming_eps_display_paused'] = int(COMING_EPS_DISPLAY_PAUSED)
     new_config['GUI']['coming_eps_sort'] = COMING_EPS_SORT
+    new_config['GUI']['coming_eps_missed_range'] = int(COMING_EPS_MISSED_RANGE)
 
     new_config['Subtitles'] = {}
     new_config['Subtitles']['use_subtitles'] = int(USE_SUBTITLES)

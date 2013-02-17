@@ -159,27 +159,24 @@ class NameParser(object):
         return obj
 
     def _convert_number(self, number):
-        if type(number) == int:
-            return number
-
-        # the lazy way
-        if number.lower() == 'i': return 1
-        if number.lower() == 'ii': return 2
-        if number.lower() == 'iii': return 3
-        if number.lower() == 'iv': return 4
-        if number.lower() == 'v': return 5
-        if number.lower() == 'vi': return 6
-        if number.lower() == 'vii': return 7
-        if number.lower() == 'viii': return 8
-        if number.lower() == 'ix': return 9
-        if number.lower() == 'x': return 10
-        if number.lower() == 'xi': return 11
-        if number.lower() == 'xii': return 12
-        if number.lower() == 'xiii': return 13
-        if number.lower() == 'xiv': return 14
-        if number.lower() == 'xv': return 15
-
-        return int(number)
+        
+        try:
+            return int(number)
+        except:
+            numeral_map = zip(
+                (1000, 900, 500, 400, 100, 90, 50, 40, 10, 9, 5, 4, 1),
+                ('M', 'CM', 'D', 'CD', 'C', 'XC', 'L', 'XL', 'X', 'IX', 'V', 'IV', 'I')
+            )
+                
+            n = unicode(number).upper()    
+            
+            i = result = 0
+            for integer, numeral in numeral_map:
+                while n[i:i + len(numeral)] == numeral:
+                    result += integer
+                    i += len(numeral)
+            
+            return result
 
     def parse(self, name):
         

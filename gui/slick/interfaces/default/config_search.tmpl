@@ -1,4 +1,5 @@
 #import sickbeard
+#from sickbeard import clients
 #set global $title="Config - Episode Search"
 #set global $header="Search Options"
 
@@ -65,7 +66,7 @@
                                 <span class="component-desc">Age limit in days for usenet articles to be used. (eg. 500)</span>
                             </label>
                         </div>
-
+                        
                         <div class="field-pair">
                             <label class="nocheck clearfix">
                                 <span class="component-title">Ignore Words</span>
@@ -341,7 +342,7 @@
                                     <span class="component-desc">Password of your Torrent Client (blank for none)</span>
                                 </label>
                             </div>
-
+                            
                             <div class="field-pair" id="Torrent_Label">
                                 <label class="nocheck clearfix">
                                     <span class="component-title" id="label_desc">Torrent Label</span>
@@ -351,27 +352,31 @@
                                     <span class="component-title">&nbsp;</span>
                                     <span class="component-desc">Add a specific label to Torrent</span>
                                 </label>
+                                <label class="nocheck clearfix" id="deluge_label_warning">
+                                    <span class="component-title">&nbsp;</span>
+                                    <span class="component-desc"><b>Note:</b> Label plugin must be enabled in Deluge client</span>
+                                </label>
                             </div>
 
                         	<div class="field-pair" id="Torrent_Path">
                                 <label class="nocheck clearfix">
                                     <span class="component-title" id="directory_desc">Torrent Directory</span>
-                                    <input type="text" name="torrent_path" id="torrent_path" value="$sickbeard.TORRENT_PATH" size="45" />
+                                    <input type="text" name="torrent_path" id="torrent_path" value="$sickbeard.TORRENT_PATH" size="35" />
                                 </label>
                                 <label class="nocheck clearfix">
                                     <span class="component-title">&nbsp;</span>
-                                    <span class="component-desc">Where should it save the downloaded files?(blank for default)</span>
+                                    <span class="component-desc">Where should it save the downloaded files? (blank for default)</span>
                                 </label>
                             </div>
 
                             <div class="field-pair" id="Torrent_Ratio">
                                 <label class="nocheck clearfix">
                                     <span class="component-title" id="torrent_ratio_desc">Torrent Ratio</span>
-                                    <input type="text" name="torrent_ratio" id="torrent_ratio" value="$sickbeard.TORRENT_RATIO" size="2" />
+                                    <input type="number" step="0.1" name="torrent_ratio" id="torrent_ratio" value="$sickbeard.TORRENT_RATIO" size="2" />
                                 </label>
                                 <label class="nocheck clearfix">
                                     <span class="component-title">&nbsp;</span>
-                                    <span class="component-desc">Stop transfer when reaching ratio(blank for default)</span>
+                                    <span class="component-desc">Stop transfer when reaching ratio (blank for default)</span>
                                 </label>
                             </div>
 
@@ -415,6 +420,7 @@
 	jQuery('#config-components').tabs();
     jQuery('#nzb_dir').fileBrowser({ title: 'Select NZB Black Hole/Watch Directory' });
     jQuery('#torrent_dir').fileBrowser({ title: 'Select Torrent Black Hole/Watch Directory' });
+    jQuery('#torrent_path').fileBrowser({ title: 'Select Torrent Download Directory' });
     jQuery('#tv_download_dir').fileBrowser({ title: 'Select TV Download Directory' });
     
 //-->

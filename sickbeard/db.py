@@ -67,10 +67,10 @@ class DBConnection:
             while attempt < 5:
                 try:
                     if args == None:
-                        logger.log(self.filename+": "+query, logger.DEBUG)
+                        logger.log(self.filename+": "+query, logger.DB)
                         sqlResult = self.connection.execute(query)
                     else:
-                        logger.log(self.filename+": "+query+" with args "+str(args), logger.DEBUG)
+                        logger.log(self.filename+": "+query+" with args "+str(args), logger.DB)
                         sqlResult = self.connection.execute(query, args)
                     self.connection.commit()
                     # get out of the connection attempt loop since we were successful

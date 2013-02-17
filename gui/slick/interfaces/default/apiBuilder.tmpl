@@ -8,7 +8,7 @@
 sbRoot = "$sbRoot";
 //-->
 </script>
-<script type="text/javascript" src="$sbRoot/js/jquery-1.7.1.min.js?$sbPID"></script>
+<script type="text/javascript" src="$sbRoot/js/lib/jquery-1.8.3.min.js?$sbPID"></script>
 <script type="text/javascript" src="$sbRoot/js/apibuilder.js?$sbPID"></script>
 
 <style type="text/css">
@@ -187,14 +187,19 @@ addList("show.setquality", "$curShow.name", "&tvdbid=$curShow.tvdbid", "quality"
 //build out generic quality options
 addOptGroup("quality", "Quality Templates");
 addOption("quality", "SD", "&initial=sdtv|sddvd");
-addOption("quality", "HD", "&initial=hdtv|hdwebdl|hdbluray");
-addOption("quality", "ANY", "&initial=sdtv|sddvd|hdtv|hdwebdl|hdbluray|unknown");
+addOption("quality", "HD", "&initial=hdtv|fullhdtv|hdwebdl|fullhdwebdl|hdbluray|fullhdbluray");
+addOption("quality", "HD720p", "&initial=hdtv|hdwebdl|hdbluray");
+addOption("quality", "HD1080p", "&initial=fullhdtv|fullhdwebdl|fullhdbluray");
+addOption("quality", "ANY", "&initial=sdtv|sddvd|hdtv|fullhdtv|hdwebdl|fullhdwebdl|hdbluray|fullhdbluray|unknown");
 endOptGroup("quality");
 addOptGroup("quality", "Inital (Custom)");
 addList("quality", "SD TV", "&initial=sdtv", "quality-archive");
 addList("quality", "SD DVD", "&initial=sddvd", "quality-archive");
 addList("quality", "HD TV", "&initial=hdtv", "quality-archive");
+addList("quality", "RawHD TV", "&initial=rawhdtv", "quality-archive");
+addList("quality", "1080p HD TV", "&initial=fullhdtv", "quality-archive");
 addList("quality", "720p Web-DL", "&initial=hdwebdl", "quality-archive");
+addList("quality", "1080p Web-DL", "&initial=fullhdwebdl", "quality-archive");
 addList("quality", "720p BluRay", "&initial=hdbluray", "quality-archive");
 addList("quality", "1080p BluRay", "&initial=fullhdbluray", "quality-archive");
 addList("quality", "Unknown", "&initial=unknown", "quality-archive");
@@ -208,10 +213,12 @@ addOption("quality-archive", "Optional Param", "", 1);
 addOptGroup("quality-archive", "Archive (Custom)");
 addList("quality-archive", "SD DVD", "&archive=sddvd");
 addList("quality-archive", "HD TV", "&archive=hdtv");
+addList("quality-archive", "RawHD TV", "&archive=rawhdtv");
+addList("quality-archive", "1080p HD TV", "&archive=fullhdtv");
 addList("quality-archive", "720p Web-DL", "&archive=hdwebdl");
+addList("quality-archive", "1080p Web-DL", "&archive=fullhdwebdl");
 addList("quality-archive", "720p BluRay", "&archive=hdbluray");
 addList("quality-archive", "1080p BluRay", "&archive=fullhdbluray");
-addList("quality-archive", "Unknown", "&archive=unknown");
 endOptGroup("quality-archive");
 addOptGroup("quality-archive", "Random (Custom)");
 addList("quality-archive", "HD TV/1080p BluRay", "&archive=hdtv|fullhdbluray");

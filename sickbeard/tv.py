@@ -620,8 +620,10 @@ class TVShow(object):
                 self.air_by_date = 0
             
             self.subtitles = sqlResults[0]["subtitles"]
-            if self.subtitles == None:
-                self.subtitles = 0
+            if self.subtitles:
+                self.subtitles = 1
+            else:
+                self.subtitles = 0    
 
             self.quality = int(sqlResults[0]["quality"])
             self.flatten_folders = int(sqlResults[0]["flatten_folders"])
@@ -1093,6 +1095,7 @@ class TVEpisode(object):
         self._tvdbid = 0
         self._file_size = 0
         self._release_name = ''
+        self._is_proper = False
 
         # setting any of the above sets the dirty flag
         self.dirty = True
@@ -1123,6 +1126,7 @@ class TVEpisode(object):
     #location = property(lambda self: self._location, dirty_setter("_location"))
     file_size = property(lambda self: self._file_size, dirty_setter("_file_size"))
     release_name = property(lambda self: self._release_name, dirty_setter("_release_name"))
+    is_proper = property(lambda self: self._is_proper, dirty_setter("_is_proper"))
 
     def _set_location(self, new_location):
         logger.log(u"Setter sets location to " + new_location, logger.DEBUG)
@@ -1272,6 +1276,9 @@ class TVEpisode(object):
             
             if sqlResults[0]["release_name"] != None:
                 self.release_name = sqlResults[0]["release_name"]
+
+            if sqlResults[0]["is_proper"]:
+                self.is_proper = int(sqlResults[0]["is_proper"])
 
             self.dirty = False
             return True
@@ -1560,7 +1567,8 @@ class TVEpisode(object):
                         "status": self.status,
                         "location": self.location,
                         "file_size": self.file_size,
-                        "release_name": self.release_name}
+                        "release_name": self.release_name,
+                        "is_proper": self.is_proper}
         controlValueDict = {"showid": self.show.tvdbid,
                             "season": self.season,
                             "episode": self.episode}
@@ -1665,7 +1673,7 @@ class TVEpisode(object):
         epStatus, epQual = Quality.splitCompositeStatus(self.status) #@UnusedVariable
 
         if sickbeard.NAMING_STRIP_YEAR:
-            show_name = re.sub("\(\w+\)$", "", self.show.name).rstrip()
+            show_name = re.sub("\(\d+\)$", "", self.show.name).rstrip()
         else:
             show_name = self.show.name 
         
@@ -1694,6 +1702,7 @@ class TVEpisode(object):
                    '%D': str(self.airdate.day),
                    '%0M': '%02d' % self.airdate.month,
                    '%0D': '%02d' % self.airdate.day,
+                   '%RT': "PROPER" if self.is_proper else "",
                    }
 
     def _format_string(self, pattern, replace_map):

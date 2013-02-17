@@ -42,7 +42,7 @@
 //--> 
 </style>
 
-    <script type="text/javascript" src="$sbRoot/js/lib/jquery-1.7.2.min.js?$sbPID"></script>
+    <script type="text/javascript" src="$sbRoot/js/lib/jquery-1.8.3.min.js?$sbPID"></script>
     <script type="text/javascript" src="$sbRoot/js/lib/jquery-ui-1.8.24.custom.min.js?$sbPID"></script>
     <script type="text/javascript" src="$sbRoot/js/lib/superfish-1.4.8.js?$sbPID"></script>
     <script type="text/javascript" src="$sbRoot/js/lib/supersubs-0.2b.js?$sbPID"></script>
@@ -76,9 +76,8 @@
         \$("#SubMenu a[href^='/home/shutdown/']").addClass('btn').html('<span class="ui-icon ui-icon-power pull-left"></span> Shutdown </a>');		
 		\$("#SubMenu a:contains('Edit')").addClass('btn').html('<span class="ui-icon ui-icon-pencil pull-left"></span> Edit </a>');
 		\$("#SubMenu a:contains('Delete')").addClass('btn').html('<span class="ui-icon ui-icon-trash pull-left"></span> Delete </a>');
-		\$("#SubMenu a:contains('Clear History')").addClass('btn').html('<span class="ui-icon ui-icon-trash pull-left"></span> Clear History </a>');
-		\$("#SubMenu a:contains('Clear History')").addClass('btn').html('<span class="ui-icon ui-icon-trash pull-left"></span> Clear History </a>');
-		\$("#SubMenu a:contains('Trim History')").addClass('btn').html('<span class="ui-icon ui-icon-trash pull-left"></span> Trim History </a>');
+		\$("#SubMenu a:contains('Clear History')").addClass('btn confirm').html('<span class="ui-icon ui-icon-trash pull-left"></span> Clear History </a>');
+		\$("#SubMenu a:contains('Trim History')").addClass('btn confirm').html('<span class="ui-icon ui-icon-trash pull-left"></span> Trim History </a>');
         \$("#SubMenu a[href='/errorlogs/clearerrors']").addClass('btn').html('<span class="ui-icon ui-icon-trash pull-left"></span> Clear Logs </a>');
 		\$("#SubMenu a:contains('Re-scan')").addClass('btn').html('<span class="ui-icon ui-icon-refresh pull-left"></span> Re-scan </a>');
 		\$("#SubMenu a:contains('Backlog Overview')").addClass('btn').html('<span class="ui-icon ui-icon-refresh pull-left"></span> Backlog Overview </a>');
@@ -92,7 +91,7 @@
 		\$("#SubMenu a:contains('Episode Status')").addClass('btn').html('<span class="ui-icon ui-icon-transferthick-e-w pull-left"></span> Episode Status Management </a>');
 		\$("#SubMenu a:contains('Missed Subtitle')").addClass('btn').html('<span class="ui-icon ui-icon-transferthick-e-w pull-left"></span> Missed Subtitles </a>');
 		\$("#SubMenu a[href='/home/addShows/']").addClass('btn').html('<span class="ui-icon ui-icon-video pull-left"></span> Add Show </a>');
-		\$("#SubMenu a:contains('Processing')").addClass('btn').html('<span class="ui-icon ui-icon-folder-open pull-left"></span> Manual Post-Processing </a>');
+		\$("#SubMenu a:contains('Processing')").addClass('btn').html('<span class="ui-icon ui-icon-folder-open pull-left"></span> Post-Processing </a>');
 		\$("#SubMenu a:contains('Manage Searches')").addClass('btn').html('<span class="ui-icon ui-icon-search pull-left"></span> Manage Searches </a>');
 		\$("#SubMenu a:contains('Notification')").addClass('btn').html('<span class="ui-icon ui-icon-note pull-left"></span> Notification </a>');
 		\$("#SubMenu a:contains('Update show in XBMC')").addClass('btn').html('<span class="ui-icon ui-icon-refresh pull-left"></span> Update show in XBMC </a>');

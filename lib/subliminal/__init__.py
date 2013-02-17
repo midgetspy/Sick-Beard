@@ -31,4 +31,4 @@ except ImportError:
 
 __all__ = ['SERVICES', 'LANGUAGE_INDEX', 'SERVICE_INDEX', 'SERVICE_CONFIDENCE',
            'MATCHING_CONFIDENCE', 'list_subtitles', 'download_subtitles', 'Pool']
-logging.getLogger(__name__).addHandler(NullHandler())
+logging.getLogger("subliminal").addHandler(NullHandler())
