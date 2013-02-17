@@ -894,6 +894,7 @@ class PostProcessor(object):
         # nmj_notifier kicks off its library update when the notify_download is issued (inside notifiers)
 
         # do the library update for Synology Indexer
+        notifiers.synoindex_notifier.addFolder(os.path.dirname(ep_obj.location))
         notifiers.synoindex_notifier.addFile(ep_obj.location)
 
         # do the library update for pyTivo
