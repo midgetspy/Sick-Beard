@@ -80,12 +80,14 @@ class ThePirateBayProvider(generic.TorrentProvider):
 
         if quality == Quality.SDTV:
             quality_string = 'HDTV x264'
+        if quality == Quality.SDDVD:
+            quality_string = 'DVDRIP'    
         elif quality == Quality.HDTV:    
             quality_string = '720p HDTV x264'
-        elif quality == Quality.RAWHDTV:
-            quality_string = '720p HDTV mpeg2'
         elif quality == Quality.FULLHDTV:
             quality_string = '1080p HDTV x264'        
+        elif quality == Quality.RAWHDTV:
+            quality_string = '1080i HDTV mpeg2'
         elif quality == Quality.HDWEBDL:
             quality_string = '720p WEB-DL'
         elif quality == Quality.FULLHDWEBDL:
