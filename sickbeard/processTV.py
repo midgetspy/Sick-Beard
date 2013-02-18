@@ -68,7 +68,7 @@ def processDir (dirName, nzbName=None, recurse=False, failed=False):
         return returnStr
 
     if failed:
-        returnStr += logHelper(u"Failed download detected: (" + nzbName + ", " + dirName + ")")
+        returnStr += logHelper(u"Failed download detected: (" + str(nzbName) + ", " + dirName + ")")
         try:
             processor = postProcessor.PostProcessor(dirName, nzbName, failed=failed)
             process_result = processor.process()
@@ -87,9 +87,9 @@ def processDir (dirName, nzbName=None, recurse=False, failed=False):
                 returnStr += logHelper(u"Warning: Unable to remove the failed folder " + dirName + ": " + ex(e), logger.WARNING)
 
         if process_result:
-            returnStr += logHelper(u"Processing succeeded for "+nzbName)
+            returnStr += logHelper(u"Processing succeeded: ("+str(nzbName) + ", " + dirName + ")")
         else:
-            returnStr += logHelper(u"Processing failed for "+nzbName+": "+process_fail_message, logger.WARNING)
+            returnStr += logHelper(u"Processing failed: (" + str(nzbName)  + ", " + dirName + "): "+process_fail_message, logger.WARNING)
         return returnStr
 
     if ek.ek(os.path.basename, dirName).startswith('_UNDERSIZED_'):
