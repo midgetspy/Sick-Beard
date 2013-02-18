@@ -285,6 +285,14 @@ NMA_NOTIFY_ONDOWNLOAD = False
 NMA_API = None
 NMA_PRIORITY = 0
 
+USE_TWILIO = False
+TWILIO_NOTIFY_ONSNATCH = False
+TWILIO_NOTIFY_ONDOWNLOAD = False
+TWILIO_FROM_NUMBER = None
+TWILIO_TO_NUMBER = None
+TWILIO_ACCOUNT_SID = None
+TWILIO_AUTH_TOKEN = None
+
 COMING_EPS_LAYOUT = None
 COMING_EPS_DISPLAY_PAUSED = None
 COMING_EPS_SORT = None
@@ -333,6 +341,7 @@ def initialize(consoleLogging=True):
                 EXTRA_SCRIPTS, USE_TWITTER, TWITTER_USERNAME, TWITTER_PASSWORD, TWITTER_PREFIX, \
                 USE_NOTIFO, NOTIFO_USERNAME, NOTIFO_APISECRET, NOTIFO_NOTIFY_ONDOWNLOAD, NOTIFO_NOTIFY_ONSNATCH, \
                 USE_BOXCAR, BOXCAR_USERNAME, BOXCAR_PASSWORD, BOXCAR_NOTIFY_ONDOWNLOAD, BOXCAR_NOTIFY_ONSNATCH, \
+                USE_TWILIO, TWILIO_NOTIFY_ONSNATCH, TWILIO_NOTIFY_ONDOWNLOAD, TWILIO_FROM_NUMBER, TWILIO_TO_NUMBER, TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN, \
                 USE_PUSHOVER, PUSHOVER_USERKEY, PUSHOVER_NOTIFY_ONDOWNLOAD, PUSHOVER_NOTIFY_ONSNATCH, \
                 USE_LIBNOTIFY, LIBNOTIFY_NOTIFY_ONSNATCH, LIBNOTIFY_NOTIFY_ONDOWNLOAD, USE_NMJ, NMJ_HOST, NMJ_DATABASE, NMJ_MOUNT, USE_SYNOINDEX, \
                 USE_BANNER, USE_LISTVIEW, METADATA_XBMC, METADATA_MEDIABROWSER, METADATA_PS3, METADATA_SYNOLOGY, metadata_provider_dict, \
@@ -665,6 +674,15 @@ def initialize(consoleLogging=True):
         NMA_NOTIFY_ONDOWNLOAD = bool(check_setting_int(CFG, 'NMA', 'nma_notify_ondownload', 0))
         NMA_API = check_setting_str(CFG, 'NMA', 'nma_api', '')
         NMA_PRIORITY = check_setting_str(CFG, 'NMA', 'nma_priority', "0")
+
+        CheckSection(CFG, 'Twilio')
+        USE_TWILIO = bool(check_setting_int(CFG, 'Twilio', 'use_twilio', 0))
+        TWILIO_NOTIFY_ONSNATCH = bool(check_setting_int(CFG, 'Twilio', 'twilio_notify_onsnatch', 0))
+        TWILIO_NOTIFY_ONDOWNLOAD = bool(check_setting_int(CFG, 'Twilio', 'twilio_notify_ondownload', 0))
+        TWILIO_FROM_NUMBER = check_setting_str(CFG, 'Twilio', 'twilio_from_number', '')
+        TWILIO_TO_NUMBER = check_setting_str(CFG, 'Twilio', 'twilio_to_number', '')
+        TWILIO_ACCOUNT_SID = check_setting_str(CFG, 'Twilio', 'twilio_account_sid', '')
+        TWILIO_AUTH_TOKEN = check_setting_str(CFG, 'Twilio', 'twilio_auth_token', '')
 
         # start up all the threads
         logger.sb_log_instance.initLogging(consoleLogging=consoleLogging)
@@ -1138,6 +1156,15 @@ def save_config():
     new_config['NMA']['nma_notify_ondownload'] = int(NMA_NOTIFY_ONDOWNLOAD)
     new_config['NMA']['nma_api'] = NMA_API
     new_config['NMA']['nma_priority'] = NMA_PRIORITY
+
+    new_config['Twilio'] = {}
+    new_config['Twilio']['use_twilio'] = int(USE_TWILIO)
+    new_config['Twilio']['twilio_notify_onsnatch'] = int(TWILIO_NOTIFY_ONSNATCH)
+    new_config['Twilio']['twilio_notify_ondownload'] = int(TWILIO_NOTIFY_ONDOWNLOAD)
+    new_config['Twilio']['twilio_from_number'] = TWILIO_FROM_NUMBER
+    new_config['Twilio']['twilio_to_number'] = TWILIO_TO_NUMBER
+    new_config['Twilio']['twilio_account_sid'] = TWILIO_ACCOUNT_SID
+    new_config['Twilio']['twilio_auth_token'] = TWILIO_AUTH_TOKEN
 
     new_config['Newznab'] = {}
     new_config['Newznab']['newznab_data'] = '!!!'.join([x.configStr() for x in newznabProviderList])

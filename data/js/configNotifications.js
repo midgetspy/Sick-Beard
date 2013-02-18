@@ -142,4 +142,19 @@ $(document).ready(function(){
         var nma_result = $.get(sbRoot+"/home/testNMA", {'nma_api': nma_api, 'nma_priority': nma_priority}, 
         function (data){ $('#testNMA-result').html(data); });
     });
+
+    $('#testTwilio').click(function(){
+        $('#testTwilio-result').html(loading);
+        var twilio_from_number = $("#twilio_from_number").val();
+        var twilio_to_number = $("#twilio_to_number").val();
+        var twilio_account_sid = $("#twilio_account_sid").val();
+        var twilio_auth_token = $("#twilio_auth_token").val();
+        $.get(sbRoot+"/home/testTwilio", {
+            'from_number': twilio_from_number,
+            'to_number': twilio_to_number,
+            'account_sid': twilio_account_sid,
+            'auth_token': twilio_auth_token
+        },
+        function (data){ $('#testTwilio-result').html(data); });
+    });
 });
