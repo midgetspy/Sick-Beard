@@ -48,7 +48,8 @@ class TIVOMetadata(generic.GenericMetadata):
                  poster=False,
                  fanart=False,
                  episode_thumbnails=False,
-                 season_thumbnails=False):
+                 season_thumbnails=False,
+                 subtitles=False):
 
         generic.GenericMetadata.__init__(self,
                                          show_metadata,
@@ -56,7 +57,8 @@ class TIVOMetadata(generic.GenericMetadata):
                                          poster,
                                          fanart,
                                          episode_thumbnails,
-                                         season_thumbnails)
+                                         season_thumbnails,
+                                         subtitles)
         
         self._ep_nfo_extension = "txt"
         

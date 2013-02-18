@@ -31,7 +31,9 @@ from sickbeard import encodingKludge as ek
 from sickbeard.exceptions import ex
 
 from lib.tvdb_api import tvdb_api, tvdb_exceptions
+from lib import subliminal
 
+SUBTITLE_SERVICES = ['opensubtitles', 'addic7ed', 'tvsubtitles', 'subswiki', 'subtitulos', 'thesubdb']
 
 class GenericMetadata():
     """
@@ -44,6 +46,7 @@ class GenericMetadata():
     - episode thumbnail
     - episode metadata file
     - season thumbnails
+    - episode subtitles
     """
     
     def __init__(self,
@@ -52,7 +55,8 @@ class GenericMetadata():
                  poster=False,
                  fanart=False,
                  episode_thumbnails=False,
-                 season_thumbnails=False):
+                 season_thumbnails=False,
+                 subtitles=False):
 
         self._show_file_name = "tvshow.nfo"
         self._ep_nfo_extension = "nfo"
@@ -71,9 +75,12 @@ class GenericMetadata():
         self.fanart = fanart
         self.episode_thumbnails = episode_thumbnails
         self.season_thumbnails = season_thumbnails
-    
+        self.subtitles = subtitles
+        
+        self.eg_subtitles = "Season##\\<i>filename.language</i>.srt"
+        
     def get_config(self):
-        config_list = [self.show_metadata, self.episode_metadata, self.poster, self.fanart, self.episode_thumbnails, self.season_thumbnails]
+        config_list = [self.show_metadata, self.episode_metadata, self.poster, self.fanart, self.episode_thumbnails, self.season_thumbnails, self.subtitles]
         return '|'.join([str(int(x)) for x in config_list])
 
     def get_id(self):
@@ -91,6 +98,7 @@ class GenericMetadata():
         self.fanart = config_list[3]
         self.episode_thumbnails = config_list[4]
         self.season_thumbnails = config_list[5]
+        self.subtitles = config_list[6]
     
     def _has_show_metadata(self, show_obj):
         result = ek.ek(os.path.isfile, self.get_show_file_path(show_obj))
@@ -117,6 +125,17 @@ class GenericMetadata():
         result = location != None and ek.ek(os.path.isfile, location)
         if location:
             logger.log("Checking if "+location+" exists: "+str(result), logger.DEBUG)
+        return result
+
+    def _has_episode_subtitle(self, ep_obj):
+        locations = self.get_episode_subtitle_path(ep_obj)
+        result = False
+        for location in locations:
+            result = location != None and ek.ek(os.path.isfile, location)
+            if location:
+                logger.log("Checking if "+location+" exists: "+str(result), logger.DEBUG)
+            if result:
+                break
         return result
     
     def _has_season_thumb(self, show_obj, season):
@@ -152,6 +171,22 @@ class GenericMetadata():
         
         return tbn_filename
     
+    def get_episode_subtitle_path(self, ep_obj):
+        """
+        Returns the path where the episode subtitle should be stored. Defaults to
+        the same path as the episode file but with a language.srt extension.
+        
+        ep_obj: a TVEpisode instance for which to create the subtitles
+        """
+        epName = ep_obj.location.rpartition(".")[0]
+        filenames = []
+        subLanguages = sickbeard.SUBTITLE_LANGUAGES.split(",")
+        if ek.ek(os.path.isfile, ep_obj.location):
+            for item in subLanguages:
+                filenames.append(epName + "." + item + ".srt")
+        
+        return filenames
+        
     def get_season_thumb_path(self, show_obj, season):
         """
         Returns the full path to the file for a given season thumb.
@@ -218,7 +253,13 @@ class GenericMetadata():
             logger.log("Metadata provider "+self.name+" creating season thumbnails for "+show_obj.name, logger.DEBUG)
             return self.save_season_thumbs(show_obj)
         return False
-    
+
+    def create_subtitles(self, ep_obj, force=False):
+        if self.subtitles and ep_obj and not self._has_episode_subtitle(ep_obj):
+            logger.log("Metadata provider "+self.name+" searching subtitles "+ep_obj.prettyName(), logger.DEBUG)
+            return self.search_subtitles(ep_obj, force)
+        return  False
+        
     def _get_episode_thumb_url(self, ep_obj):
         """
         Returns the URL to use for downloading an episode's thumbnail. Uses
@@ -468,6 +509,46 @@ class GenericMetadata():
             self._write_image(seasonData, season_thumb_file_path)
     
         return True
+
+    def search_subtitles(self, ep_obj, force = False):
+        if not ek.ek(os.path.isfile, ep_obj.location):
+            logger.log(str(ep_obj.show.tvdbid) + ": Episode file doesn't exist, can't download subtitles for episode " + str(ep_obj.season) + "x" + str(ep_obj.episode), logger.DEBUG)
+            return
+        epName = ep_obj.location.rpartition(".")[0]
+        subLanguages = sickbeard.SUBTITLE_LANGUAGES.split(",")
+        for lang in subLanguages:
+            langS = lang.split("-")
+            if len(langS) > 1:
+                subLanguages.append(langS[0])
+        
+        logger.log(str(ep_obj.show.tvdbid) + ": Downloading subtitles for episode " + str(ep_obj.season) + "x" + str(ep_obj.episode), logger.DEBUG)
+
+        try:
+            subEpisodes = subliminal.download_subtitles([ep_obj.location], 
+                                                      languages=subLanguages, 
+                                                      services=SUBTITLE_SERVICES, 
+                                                      force=force, 
+                                                      multi=True, 
+                                                      cache_dir=sickbeard.CACHE_DIR, 
+                                                      max_depth=3, 
+                                                      scan_filter=None, 
+                                                      order=None)
+        except Exception, e:
+            logger.log("Error while downloading subtitles: %s" % str(e), logger.ERROR)
+            return False
+        subCount = 0
+        for subEpisode in subEpisodes:
+            subtitles = subEpisodes[subEpisode]
+            for subtitle in subtitles:
+                helpers.chmodAsParent(subtitle.path)
+                subCount += 1
+                
+        if subCount > 0:
+            logger.log("Downloaded " + str(subCount) + " subtitles for " + ep_obj.show.name + " - " + ep_obj.prettyName(), logger.DEBUG)
+            return True
+        else:
+            logger.log("No subtitles downloaded for " + ep_obj.show.name + " - " + ep_obj.prettyName(), logger.DEBUG)
+            return False
 
     def _write_image(self, image_data, image_path):
         """

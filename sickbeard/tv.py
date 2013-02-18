@@ -191,7 +191,7 @@ class TVShow(object):
             result = cur_provider.create_show_metadata(self) or result
 
         return result
-
+    
     def writeMetadata(self, show_only=False):
 
         if not ek.ek(os.path.isdir, self._location):
@@ -199,8 +199,6 @@ class TVShow(object):
             return
 
         self.getImages()
-
-        self.writeShowNFO()
         
         if not show_only:
             self.writeEpisodeNFOs()
@@ -1301,6 +1299,7 @@ class TVEpisode(object):
 
         self.createNFO(force)
         self.createThumbnail(force)
+        self.createSubtitles(force)
 
         if self.checkForMetaFiles():
             self.saveToDB()
@@ -1323,6 +1322,15 @@ class TVEpisode(object):
 
         return result
 
+    def createSubtitles(self, force=False):
+
+        result = False
+
+        for cur_provider in sickbeard.metadata_provider_dict.values():
+            result = cur_provider.create_subtitles(self) or result
+
+        return result
+    
     def deleteEpisode(self):
 
         logger.log(u"Deleting "+self.show.name+" "+str(self.season)+"x"+str(self.episode)+" from the DB", logger.DEBUG)

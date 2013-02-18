@@ -477,6 +477,7 @@
             <label for="${cur_id}_poster" class="clearfix"><input type="checkbox" class="float-left metadata_checkbox" id="${cur_id}_poster" #if $cur_metadata_inst.poster then "checked=\"checked\"" else ""#/>&nbsp;Show Folder Image</label>
             <label for="${cur_id}_episode_thumbnails" class="clearfix"><input type="checkbox" class="float-left metadata_checkbox" id="${cur_id}_episode_thumbnails" #if $cur_metadata_inst.episode_thumbnails then "checked=\"checked\"" else ""#/>&nbsp;Episode Thumbnail</label>
             <label for="${cur_id}_season_thumbnails" class="clearfix"><input type="checkbox" class="float-left metadata_checkbox" id="${cur_id}_season_thumbnails" #if $cur_metadata_inst.season_thumbnails then "checked=\"checked\"" else ""#/>&nbsp;Season Thumbnail</label>
+            <label for="${cur_id}_subtitles" class="clearfix"><input type="checkbox" class="float-left metadata_checkbox" id="${cur_id}_subtitles" #if $cur_metadata_inst.subtitles then "checked=\"checked\"" else ""#/>&nbsp;Subtitles</label>
         </div>
     </div>
     <div class="metadata-example-wrapper">
@@ -488,6 +489,7 @@
             <label for="${cur_id}_poster"><span id="${cur_id}_eg_poster">$cur_metadata_inst.eg_poster</span></label>
             <label for="${cur_id}_episode_thumbnails"><span id="${cur_id}_eg_episode_thumbnails">$cur_metadata_inst.eg_episode_thumbnails</span></label>
             <label for="${cur_id}_season_thumbnails"><span id="${cur_id}_eg_season_thumbnails">$cur_metadata_inst.eg_season_thumbnails</span></label>
+            <label for="${cur_id}_subtitles"><span id="${cur_id}_eg_subtitles">$cur_metadata_inst.eg_subtitles</span></label>
         </div>
     </div>
 
@@ -502,7 +504,19 @@
                                 <span class="component-desc">Use banners instead of posters for 'Show Folder Image'</span>
                             </label>
                         </div>
-
+                        <div class="field-pair clearfix">
+                            <label class="clearfix">
+                                <span class="component-title">Subtitle languages:</span>
+                                <span class="component-desc">
+                                	<input type="text" name="subtitle_languages" id="subtitle_languages" value="$sickbeard.SUBTITLE_LANGUAGES" size="35" />
+                                </span>
+                            </label>
+                            <label class="clearfix">
+                                <span class="component-title">&nbsp;</span>
+                            	<span class="component-desc">Download subtitles of the specified languages. Use comma separated values. Eg: en-us,pt-br,pt</span>
+                            </label>
+                        </div>
+                        
                         <input type="submit" class="btn config_submitter" value="Save Changes" /><br/>
 
                     </fieldset>

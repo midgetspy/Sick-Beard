@@ -57,7 +57,8 @@ class MediaBrowserMetadata(generic.GenericMetadata):
                  poster=False,
                  fanart=False,
                  episode_thumbnails=False,
-                 season_thumbnails=False):
+                 season_thumbnails=False,
+                 subtitles=False):
 
         generic.GenericMetadata.__init__(self,
                                          show_metadata,
@@ -65,7 +66,8 @@ class MediaBrowserMetadata(generic.GenericMetadata):
                                          poster,
                                          fanart,
                                          episode_thumbnails,
-                                         season_thumbnails)
+                                         season_thumbnails,
+                                         subtitles)
         
         self.fanart_name = "backdrop.jpg"
         self._show_file_name = 'series.xml'
