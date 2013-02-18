@@ -1032,7 +1032,7 @@ class ConfigProviders:
     def saveProviders(self, nzbmatrix_username=None, nzbmatrix_apikey=None,
                       nzbs_r_us_uid=None, nzbs_r_us_hash=None, newznab_string=None,
                       tvtorrents_digest=None, tvtorrents_hash=None,
- 					  btn_api_key=None,
+ 					  btn_api_key=None, binnewz_language=None,
                       newzbin_username=None, newzbin_password=None,
                       provider_order=None):
 
@@ -1097,6 +1097,8 @@ class ConfigProviders:
                 sickbeard.TVTORRENTS = curEnabled
             elif curProvider == 'btn':
                 sickbeard.BTN = curEnabled
+            elif curProvider == 'binnewz':
+                sickbeard.BINNEWZ = curEnabled
             elif curProvider in newznabProviderDict:
                 newznabProviderDict[curProvider].enabled = bool(curEnabled)
             else:
@@ -1106,6 +1108,8 @@ class ConfigProviders:
         sickbeard.TVTORRENTS_HASH = tvtorrents_hash.strip()
 
         sickbeard.BTN_API_KEY = btn_api_key.strip()
+        
+        sickbeard.BINNEWZ_LANGUAGE = binnewz_language
 
         sickbeard.NZBSRUS_UID = nzbs_r_us_uid.strip()
         sickbeard.NZBSRUS_HASH = nzbs_r_us_hash.strip()

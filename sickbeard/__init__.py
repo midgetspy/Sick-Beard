@@ -30,7 +30,7 @@ from threading import Lock
 
 # apparently py2exe won't build these unless they're imported somewhere
 from sickbeard import providers, metadata
-from providers import ezrss, tvtorrents, btn, nzbsrus, newznab, womble
+from providers import ezrss, tvtorrents, btn, nzbsrus, newznab, womble, binnewz
 from sickbeard.config import CheckSection, check_setting_int, check_setting_str, ConfigMigrator
 
 from sickbeard import searchCurrent, searchBacklog, showUpdater, versionChecker, properFinder, autoPostProcesser
@@ -181,6 +181,9 @@ NZBSRUS = False
 NZBSRUS_UID = None
 NZBSRUS_HASH = None
 
+BINNEWZ = False
+BINNEWZ_LANGUAGE = "vostfr"
+
 NZBMATRIX = False
 NZBMATRIX_USERNAME = None
 NZBMATRIX_APIKEY = None
@@ -318,6 +321,7 @@ def initialize(consoleLogging=True):
                 PLEX_SERVER_HOST, PLEX_HOST, PLEX_USERNAME, PLEX_PASSWORD, \
                 showUpdateScheduler, __INITIALIZED__, LAUNCH_BROWSER, showList, loadingShowList, \
                 NZBS, NZBS_UID, NZBS_HASH, EZRSS, TVTORRENTS, TVTORRENTS_DIGEST, TVTORRENTS_HASH, BTN, BTN_API_KEY, TORRENT_DIR, USENET_RETENTION, SOCKET_TIMEOUT, \
+				BINNEWZ, BINNEWZ_LANGUAGE, \
                 SEARCH_FREQUENCY, DEFAULT_SEARCH_FREQUENCY, BACKLOG_SEARCH_FREQUENCY, \
                 QUALITY_DEFAULT, FLATTEN_FOLDERS_DEFAULT, STATUS_DEFAULT, \
                 GROWL_NOTIFY_ONSNATCH, GROWL_NOTIFY_ONDOWNLOAD, TWITTER_NOTIFY_ONSNATCH, TWITTER_NOTIFY_ONDOWNLOAD, \
@@ -548,6 +552,10 @@ def initialize(consoleLogging=True):
         NZBMATRIX = bool(check_setting_int(CFG, 'NZBMatrix', 'nzbmatrix', 0))
         NZBMATRIX_USERNAME = check_setting_str(CFG, 'NZBMatrix', 'nzbmatrix_username', '')
         NZBMATRIX_APIKEY = check_setting_str(CFG, 'NZBMatrix', 'nzbmatrix_apikey', '')
+
+        CheckSection(CFG, 'BinNewz')
+        BINNEWZ = bool(check_setting_int(CFG, 'BinNewz', 'binnewz', 0))
+        BINNEWZ_LANGUAGE = check_setting_str(CFG, 'BinNewz', 'language', 'vo')
 
         CheckSection(CFG, 'Newzbin')
         NEWZBIN = bool(check_setting_int(CFG, 'Newzbin', 'newzbin', 0))
@@ -1026,6 +1034,10 @@ def save_config():
     new_config['Newzbin']['newzbin'] = int(NEWZBIN)
     new_config['Newzbin']['newzbin_username'] = NEWZBIN_USERNAME
     new_config['Newzbin']['newzbin_password'] = NEWZBIN_PASSWORD
+
+    new_config['BinNewz'] = {}
+    new_config['BinNewz']['binnewz'] = int(BINNEWZ)
+    new_config['BinNewz']['language'] = BINNEWZ_LANGUAGE
 
     new_config['Womble'] = {}
     new_config['Womble']['womble'] = int(WOMBLE)
