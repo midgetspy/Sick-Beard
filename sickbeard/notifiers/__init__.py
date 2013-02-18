@@ -31,6 +31,7 @@ from . import libnotify
 import pushover
 import boxcar
 import nma
+import twilio
 
 import tweet
 import trakt
@@ -51,6 +52,7 @@ libnotify_notifier = libnotify.LibnotifyNotifier()
 pushover_notifier = pushover.PushoverNotifier()
 boxcar_notifier = boxcar.BoxcarNotifier()
 nma_notifier = nma.NMA_Notifier()
+twilio_notifier = twilio.TwilioNotifier()
 # online
 twitter_notifier = tweet.TwitterNotifier()
 trakt_notifier = trakt.TraktNotifier()
@@ -68,6 +70,7 @@ notifiers = [
     pushover_notifier,
     boxcar_notifier,
     nma_notifier,
+    twilio_notifier,
     twitter_notifier,
     trakt_notifier,
 ]

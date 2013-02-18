@@ -1104,7 +1104,8 @@ class ConfigNotifications:
                           use_trakt=None, trakt_username=None, trakt_password=None, trakt_api=None,
                           use_pytivo=None, pytivo_notify_onsnatch=None, pytivo_notify_ondownload=None, pytivo_update_library=None,
                           pytivo_host=None, pytivo_share_name=None, pytivo_tivo_name=None,
-                          use_nma=None, nma_notify_onsnatch=None, nma_notify_ondownload=None, nma_api=None, nma_priority=0):
+                          use_nma=None, nma_notify_onsnatch=None, nma_notify_ondownload=None, nma_api=None, nma_priority=0,
+                          use_twilio=False, twilio_notify_onsnatch=False, twilio_notify_ondownload=False, twilio_from_number=None, twilio_to_number=None, twilio_account_sid=None, twilio_auth_token=None):
 
         results = []
 
@@ -1190,6 +1191,14 @@ class ConfigNotifications:
         sickbeard.TRAKT_USERNAME = trakt_username
         sickbeard.TRAKT_PASSWORD = trakt_password
         sickbeard.TRAKT_API = trakt_api
+
+        sickbeard.USE_TWILIO = config.checkbox_to_value(use_twilio)
+        sickbeard.TWILIO_NOTIFY_ONSNATCH = config.checkbox_to_value(twilio_notify_onsnatch)
+        sickbeard.TWILIO_NOTIFY_ONDOWNLOAD = config.checkbox_to_value(twilio_notify_ondownload)
+        sickbeard.TWILIO_FROM_NUMBER = twilio_from_number
+        sickbeard.TWILIO_TO_NUMBER = twilio_to_number
+        sickbeard.TWILIO_ACCOUNT_SID = twilio_account_sid
+        sickbeard.TWILIO_AUTH_TOKEN = twilio_auth_token
 
         sickbeard.save_config()
 
@@ -2027,6 +2036,16 @@ class Home:
             return "Test NMA notice sent successfully"
         else:
             return "Test NMA notice failed"
+
+    @cherrypy.expose
+    def testTwilio(self, from_number=None, to_number=None, account_sid=None, auth_token=None):
+        cherrypy.response.headers['Cache-Control'] = "max-age=0,no-cache,no-store"
+
+        result = notifiers.twilio_notifier.test_notify(from_number, to_number, account_sid, auth_token)
+        if result:
+            return "Twilio notification succeeded. Check your phone to make sure it worked"
+        else:
+            return "Error sending Twilio notification"
 
     @cherrypy.expose
     def shutdown(self, pid=None):
