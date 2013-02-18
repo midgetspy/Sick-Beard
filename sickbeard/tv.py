@@ -45,6 +45,7 @@ from sickbeard import image_cache
 from sickbeard import notifiers
 from sickbeard import postProcessor
 from sickbeard import subtitles
+from sickbeard import history
 
 from sickbeard import encodingKludge as ek
 
@@ -1152,7 +1153,8 @@ class TVEpisode(object):
         logger.log(str(self.show.tvdbid) + ": Downloading subtitles for episode " + str(self.season) + "x" + str(self.episode), logger.DEBUG)
         
         try:
-            subtitles = subliminal.download_subtitles([self.location], languages=sickbeard.SUBTITLES_LANGUAGES, services=sickbeard.subtitles.getEnabledServiceList(), force=False, multi=True, cache_dir=sickbeard.CACHE_DIR)
+            need_languages = set(sickbeard.SUBTITLES_LANGUAGES) - set(self.subtitles)
+            subtitles = subliminal.download_subtitles([self.location], languages=need_languages, services=sickbeard.subtitles.getEnabledServiceList(), force=False, multi=True, cache_dir=sickbeard.CACHE_DIR)
             
         except Exception as e:
             logger.log("Error occurred when downloading subtitles: " + str(e), logger.DEBUG)
@@ -1163,7 +1165,8 @@ class TVEpisode(object):
             for video in subtitles:
                 for subtitle in subtitles.get(video):
                     subtitleList.append(subtitle.language.name)
-            
+                    history.logSubtitle(self.show.tvdbid, self.season, self.episode, self.status, subtitle)
+                    
             logger.log(str(self.show.tvdbid) + ": Downloaded " + ", ".join(subtitleList) + " subtitles for episode " + str(self.season) + "x" + str(self.episode), logger.DEBUG)
             
             notifiers.notify_subtitle_download(self.prettyName(), ", ".join(subtitleList))
