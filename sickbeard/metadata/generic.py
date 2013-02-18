@@ -98,7 +98,7 @@ class GenericMetadata():
         self.fanart = config_list[3]
         self.episode_thumbnails = config_list[4]
         self.season_thumbnails = config_list[5]
-        self.subtitles = config_list[6]
+        self.subtitles = config_list[6] if len(config_list >= 7) else 0
     
     def _has_show_metadata(self, show_obj):
         result = ek.ek(os.path.isfile, self.get_show_file_path(show_obj))
