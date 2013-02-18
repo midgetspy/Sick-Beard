@@ -745,6 +745,72 @@
                     </fieldset>
                 </div><!-- /nma component-group //-->
 
+                <div class="component-group clearfix">
+                    <div class="component-group-desc">
+                        <img class="notifier-icon" src="$sbRoot/images/notifiers/twilio.png" alt="" title="Twilio" />
+                        <h3><a href="http://www.twilio.com/" onclick="window.open(this.href, '_blank'); return false;">Twilio</a></h3>
+                        <p>Twilio is an online Voice &amp; SMS API.  The Twilio Sick Beard integration allows you to send SMS messages to any mobile phone.</p>
+                    </div>
+                    <fieldset class="component-group-list">
+                        <div class="field-pair">
+                            <input type="checkbox" class="enabler" name="use_twilio" id="use_twilio" #if $sickbeard.USE_TWILIO then "checked=\"checked\"" else ""# /> 
+                            <label class="clearfix" for="use_twilio">
+                                <span class="component-title">Enable</span>
+                                <span class="component-desc">Should Sick Beard send SMS notifications with Twilio?</span>
+                            </label>
+                        </div>
+
+                        <div id="content_use_twilio">
+                            <div class="field-pair">
+                                <input type="checkbox" name="twilio_notify_onsnatch" id="twilio_notify_onsnatch" #if $sickbeard.TWILIO_NOTIFY_ONSNATCH then "checked=\"checked\"" else ""# /> 
+                                <label class="clearfix" for="twilio_notify_onsnatch">
+                                    <span class="component-title">Notify on Snatch</span>
+                                    <span class="component-desc">Send notification when we start a download?</span>
+                                </label>
+                            </div>
+                            <div class="field-pair">
+                                <input type="checkbox" name="twilio_notify_ondownload" id="twilio_notify_ondownload" #if $sickbeard.TWILIO_NOTIFY_ONDOWNLOAD then "checked=\"checked\"" else ""# />
+                                <label class="clearfix" for="twilio_notify_ondownload">
+                                    <span class="component-title">Notify on Download</span>
+                                    <span class="component-desc">Send notification when we finish a download?</span>
+                                </label>
+                            </div>
+                            <div class="field-pair">
+                                <label class="nocheck clearfix">
+                                    <span class="component-title">Twilio Account SID:</span>
+                                    <input type="text" name="twilio_account_sid" id="twilio_account_sid" value="$sickbeard.TWILIO_ACCOUNT_SID" size="35" />
+                                </label>
+                            </div>
+                            <div class="field-pair">
+                                <label class="nocheck clearfix">
+                                    <span class="component-title">Twilio Auth Token:</span>
+                                    <input type="text" name="twilio_auth_token" id="twilio_auth_token" value="$sickbeard.TWILIO_AUTH_TOKEN" size="35" />
+                                </label>
+                            </div>
+                            <div class="field-pair">
+                                <label class="nocheck clearfix">
+                                    <span class="component-title">From Phone Number:</span>
+                                    <input type="text" name="twilio_from_number" id="twilio_from_number" value="$sickbeard.TWILIO_FROM_NUMBER" size="16" />
+                                </label>
+                            </div>
+                            <div class="field-pair">
+                                <label class="nocheck clearfix">
+                                    <span class="component-title">To Phone Number:</span>
+                                    <input type="text" name="twilio_to_number" id="twilio_to_number" value="$sickbeard.TWILIO_TO_NUMBER" size="16" />
+                                </label>
+                                <label class="nocheck clearfix">
+                                    <span class="component-title">&nbsp;</span>
+                                    <span class="component-desc">Phone numbers should be in the <a href="http://en.wikipedia.org/wiki/E.164">E.164</a> format, eg. +14031234567</span>
+                                </label>
+                            </div>
+                            <div class="testNotification" id="testTwilio-result">Click below to test.</div>
+                            <input type="button" class="btn" value="Test Twilio" id="testTwilio" />
+                            <input type="submit" class="btn config_submitter" value="Save Changes" />
+                        </div><!-- /content_use_twilio //-->
+
+                    </fieldset>
+                </div><!-- /nma component-group //-->
+
                 <div class="component-group-save">
                     <input type="submit" class="btn config_submitter" value="Save Changes" />
                 </div><br />
