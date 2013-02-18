@@ -296,15 +296,17 @@ class QueueItemAdd(ShowQueueItem):
             self._finishEarly()
             raise
 
-            logger.log(u"Retrieving show info from IMDb", logger.DEBUG)
+        logger.log(u"Retrieving show info from IMDb", logger.DEBUG)
+        try:
             self.show.loadIMDbInfo()
-
         except imdb_exceptions.IMDbError, e:
             #todo Insert UI notification
             logger.log(u" Something wrong on IMDb api: "+ex(e), logger.WARNING)
-
         except imdb_exceptions.IMDbParserError, e:
             logger.log(u" IMDb_api parser error: "+ex(e), logger.WARNING)
+        except Exception, e:
+            logger.log(u"Error loading IMDb info: "+ex(e), logger.ERROR)
+            logger.log(traceback.format_exc(), logger.DEBUG)
 
         # add it to the show list
         sickbeard.showList.append(self.show)
@@ -457,6 +459,9 @@ class QueueItemUpdate(ShowQueueItem):
             logger.log(u" Something wrong on IMDb api: "+ex(e), logger.WARNING)
         except imdb_exceptions.IMDbParserError, e:
             logger.log(u" IMDb api parser error: "+ex(e), logger.WARNING)
+        except Exception, e:
+            logger.log(u"Error loading IMDb info: " + ex(e), logger.ERROR)
+            logger.log(traceback.format_exc(), logger.DEBUG)
         
         try:
             self.show.saveToDB()

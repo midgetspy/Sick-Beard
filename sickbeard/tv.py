@@ -746,12 +746,12 @@ class TVShow(object):
             #Get only the production country certificate if any 
             if imdb_info['certificates'] and imdb_info['countries']:
                 dct = {}
-                for item in imdb_info['certificates']:
-                    dct[item.split(':')[0]] = item.split(':')[1]
-    
                 try:
+                    for item in imdb_info['certificates']:
+                        dct[item.split(':')[0]] = item.split(':')[1]
+        
                     imdb_info['certificates'] = dct[imdb_info['countries']]
-                except KeyError:
+                except:
                     imdb_info['certificates'] = ''    
     
             else:
@@ -967,7 +967,7 @@ class TVShow(object):
 
         myDB.upsert("tv_shows", newValueDict, controlValueDict)
         
-        if not self.imdb_info == {}:
+        if self.imdbid:
             controlValueDict = {"tvdb_id": self.tvdbid}
             newValueDict = self.imdb_info
             
