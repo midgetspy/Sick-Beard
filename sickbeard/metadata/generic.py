@@ -254,10 +254,10 @@ class GenericMetadata():
             return self.save_season_thumbs(show_obj)
         return False
 
-    def create_subtitles(self, ep_obj):
+    def create_subtitles(self, ep_obj, force=False):
         if self.subtitles and ep_obj and not self._has_episode_subtitle(ep_obj):
             logger.log("Metadata provider "+self.name+" searching subtitles "+ep_obj.prettyName(), logger.DEBUG)
-            return self.search_subtitles(ep_obj)
+            return self.search_subtitles(ep_obj, force)
         return  False
         
     def _get_episode_thumb_url(self, ep_obj):

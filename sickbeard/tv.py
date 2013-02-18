@@ -200,8 +200,6 @@ class TVShow(object):
 
         self.getImages()
         
-        self.writeSubtitles()
-        
         if not show_only:
             self.writeEpisodeNFOs()
 
