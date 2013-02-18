@@ -210,6 +210,7 @@ $(document).ready(function () {
             var poster = $("#" + generator_name + "_poster").prop('checked');
             var episode_thumbnails = $("#" + generator_name + "_episode_thumbnails").prop('checked');
             var season_thumbnails = $("#" + generator_name + "_season_thumbnails").prop('checked');
+            var subtitles = $("#" + generator_name + "_subtitles").prop('checked');
 
             config_arr.push(show_metadata ? '1' : '0');
             config_arr.push(episode_metadata ? '1' : '0');
@@ -217,6 +218,7 @@ $(document).ready(function () {
             config_arr.push(fanart ? '1' : '0');
             config_arr.push(episode_thumbnails ? '1' : '0');
             config_arr.push(season_thumbnails ? '1' : '0');
+            config_arr.push(subtitles ? '1' : '0');
 
             var cur_num = 0;
             for (var i = 0; i < config_arr.length; i++)
@@ -232,6 +234,7 @@ $(document).ready(function () {
             $("#" + generator_name + "_eg_fanart").attr('class', fanart ? 'enabled' : 'disabled');
             $("#" + generator_name + "_eg_episode_thumbnails").attr('class', episode_thumbnails ? 'enabled' : 'disabled');
             $("#" + generator_name + "_eg_season_thumbnails").attr('class', season_thumbnails ? 'enabled' : 'disabled');
+            $("#" + generator_name + "_eg_subtitles").attr('class', subtitles ? 'enabled' : 'disabled');
             $("#" + generator_name + "_data").val(config_arr.join('|'))
 
         });

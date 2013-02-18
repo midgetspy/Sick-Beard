@@ -39,7 +39,8 @@ class PS3Metadata(generic.GenericMetadata):
                  poster=False,
                  fanart=False,
                  episode_thumbnails=False,
-                 season_thumbnails=False):
+                 season_thumbnails=False,
+                 subtitles=False):
 
         generic.GenericMetadata.__init__(self,
                                          show_metadata,
@@ -47,7 +48,8 @@ class PS3Metadata(generic.GenericMetadata):
                                          poster,
                                          fanart,
                                          episode_thumbnails,
-                                         season_thumbnails)
+                                         season_thumbnails,
+                                         subtitles)
         
         self.poster_name = 'cover.jpg'
         self.name = 'Sony PS3'
