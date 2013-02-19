@@ -52,11 +52,12 @@ class BinNewzProvider(generic.NZBProvider):
         return result
 
     def _get_episode_search_strings(self, ep_obj):
-
-        sceneSearchStrings = set(show_name_helpers.makeSceneSearchString(ep_obj))
-
-        # search for all show names and episode numbers like ("a","b","c") in a single search
-        return ['("' + '","'.join(sceneSearchStrings) + '")']
+        strings = []
+        
+        strings.append("%s S%02dE%2d" % ( ep_obj.show.name, ep_obj.season, ep_obj.episode) )
+        strings.append("%s %dx%d" % ( ep_obj.show.name, ep_obj.season, ep_obj.episode ) )
+        
+        return strings
     
     def _get_title_and_url(self, item):
         return (item.title, item.url)
@@ -120,9 +121,9 @@ class BinNewzProvider(generic.NZBProvider):
             
         return binsearch_results        
     
-    def _doSearch(self, curString, quotes=False, show=None):
+    def _doSearch(self, searchString, quotes=False, show=None):
         
-        data = urllib.urlencode({'b_submit': 'BinnewZ', 'cats[]' : all, 'edSearchAll' : curString, 'sections[]': 'all'})
+        data = urllib.urlencode({'b_submit': 'BinnewZ', 'cats[]' : all, 'edSearchAll' : searchString, 'sections[]': 'all'})
         headers = {"Content-type": "application/x-www-form-urlencoded", "Accept": "text/plain"}
         h = httplib.HTTPConnection('www.binnews.in:80')
         h.request('POST', '/_bin/search2.php', data, headers)
@@ -161,6 +162,7 @@ class BinNewzProvider(generic.NZBProvider):
                     language = "vo"
     
                 if language != sickbeard.BINNEWZ_LANGUAGE:
+                    print "Skipping download, language found: %s wanted: %s" % (language, sickbeard.BINNEWZ_LANGUAGE)
                     continue
                 
                 # blacklist_groups = [ "alt.binaries.multimedia" ]
@@ -198,6 +200,8 @@ class BinNewzProvider(generic.NZBProvider):
                         newsgroup = "alt.binaries.echange-web"
                     elif newsgroup == "abmdfvost":
                         newsgroup = "alt.binaries.movies.divx.french.vost"
+                    elif newsgroup == "abdvdr":
+                        newsgroup = "alt.binaries.dvdr"
                     elif newsgroup == "abmzeromov":
                         newsgroup = "alt.binaries.movies.zeromovies"
                     else:
@@ -264,34 +268,10 @@ class BinNewzProvider(generic.NZBProvider):
                     results.append( BinNewzSearchResult( name, binsearch_result.nzbdata, binsearch_result.url, quality))
 
         return results
-
-
-    def findPropers(self, date=None):
-
-        results = []
-
-        for curResult in self._doSearch("(PROPER,REPACK)"):
-
-            (title, url) = self._get_title_and_url(curResult)
-
-            description_node = curResult.getElementsByTagName('description')[0]
-            descriptionStr = helpers.get_xml_text(description_node)
-
-            dateStr = re.search('<b>Added:</b> (\d{4}-\d\d-\d\d \d\d:\d\d:\d\d)', descriptionStr).group(1)
-            if not dateStr:
-                logger.log(u"Unable to figure out the date for entry "+title+", skipping it")
-                continue
-            else:
-                resultDate = datetime.datetime.strptime(dateStr, "%Y-%m-%d %H:%M:%S")
-
-            if date == None or resultDate > date:
-                results.append(classes.Proper(title, url, resultDate))                
-
-        return results
     
     def getResult(self, episodes):
         """
-        Returns a result of the correct type for this provider
+        Returnshttp://binsearch.info/?adv_age=&adv_g=alt.binaries.multimedia&max=250&q=Breaking.Bad.S03E13.Full.Measure.HDTV.XviD-FQM+&server=1http://binsearch.info/?adv_age=&adv_g=alt.binaries.multimedia&max=250&q=Breaking.Bad.S03E13.Full.Measure.HDTV.XviD-FQM+&server=1http://binsearch.info/?adv_age=&adv_g=alt.binaries.multimedia&max=250&q=Breaking.Bad.S03E13.Full.Measure.HDTV.XviD-FQM+&server=1http://binsearch.info/?adv_age=&adv_g=alt.binaries.multimedia&max=250&q=Breaking.Bad.S03E13.Full.Measure.HDTV.XviD-FQM+&server=1http://binsearch.info/?adv_age=&adv_g=alt.binaries.multimedia&max=250&q=Breaking.Bad.S03E13.Full.Measure.HDTV.XviD-FQM+&server=1 a result of the correct type for this provider
         """
         result = classes.NZBDataSearchResult(episodes)
         result.provider = self
