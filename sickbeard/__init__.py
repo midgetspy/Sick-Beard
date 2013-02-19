@@ -35,6 +35,7 @@ from sickbeard.config import CheckSection, check_setting_int, check_setting_str,
 
 from sickbeard import searchCurrent, searchBacklog, showUpdater, versionChecker, properFinder, autoPostProcesser
 from sickbeard import helpers, db, exceptions, show_queue, search_queue, scheduler
+from sickbeard import subtitle_queue
 from sickbeard import logger
 from sickbeard import naming
 
@@ -76,6 +77,7 @@ showQueueScheduler = None
 searchQueueScheduler = None
 properFinderScheduler = None
 autoPostProcesserScheduler = None
+subtitleQueueScheduler = None
 
 showList = None
 loadingShowList = None
@@ -337,7 +339,7 @@ def initialize(consoleLogging=True):
                 USE_PUSHOVER, PUSHOVER_USERKEY, PUSHOVER_NOTIFY_ONDOWNLOAD, PUSHOVER_NOTIFY_ONSNATCH, \
                 USE_LIBNOTIFY, LIBNOTIFY_NOTIFY_ONSNATCH, LIBNOTIFY_NOTIFY_ONDOWNLOAD, USE_NMJ, NMJ_HOST, NMJ_DATABASE, NMJ_MOUNT, USE_SYNOINDEX, \
                 USE_BANNER, USE_LISTVIEW, METADATA_XBMC, METADATA_MEDIABROWSER, METADATA_PS3, METADATA_SYNOLOGY, metadata_provider_dict, \
-                SUBTITLE_LANGUAGES, \
+                SUBTITLE_LANGUAGES, subtitleQueueScheduler, \
                 NEWZBIN, NEWZBIN_USERNAME, NEWZBIN_PASSWORD, GIT_PATH, MOVE_ASSOCIATED_FILES, \
                 COMING_EPS_LAYOUT, COMING_EPS_SORT, COMING_EPS_DISPLAY_PAUSED, METADATA_WDTV, METADATA_TIVO, IGNORE_WORDS, CREATE_MISSING_SHOW_DIRS, \
                 ADD_SHOWS_WO_DIR
@@ -731,6 +733,11 @@ def initialize(consoleLogging=True):
                                                                       runImmediately=True)
         backlogSearchScheduler.action.cycleTime = BACKLOG_SEARCH_FREQUENCY
 
+        subtitleQueueScheduler = scheduler.Scheduler(subtitle_queue.SubtitleQueue(),
+                                               cycleTime=datetime.timedelta(seconds=3),
+                                               threadName="SUBTITLEQUEUE",
+                                               silent=True)
+
         showList = []
         loadingShowList = {}
 
@@ -743,6 +750,7 @@ def start():
     global __INITIALIZED__, currentSearchScheduler, backlogSearchScheduler, \
             showUpdateScheduler, versionCheckScheduler, showQueueScheduler, \
             properFinderScheduler, autoPostProcesserScheduler, searchQueueScheduler, \
+            subtitleQueueScheduler, \
             started
 
     with INIT_LOCK:
@@ -772,6 +780,9 @@ def start():
 
             # start the proper finder
             autoPostProcesserScheduler.thread.start()
+            
+            #start subtitle queue
+            subtitleQueueScheduler.thread.start()
 
             started = True
 
@@ -780,6 +791,7 @@ def halt():
 
     global __INITIALIZED__, currentSearchScheduler, backlogSearchScheduler, showUpdateScheduler, \
             showQueueScheduler, properFinderScheduler, autoPostProcesserScheduler, searchQueueScheduler, \
+            subtitleQueueScheduler, \
             started
 
     with INIT_LOCK:
@@ -846,6 +858,13 @@ def halt():
             except:
                 pass
 
+            subtitleQueueScheduler.abort = True
+            logger.log(u"Waiting for the SUBTITLEQUEUE thread to exit")
+            try:
+                subtitleQueueScheduler.thread.abort()
+            except:
+                pass
+            
             __INITIALIZED__ = False
 
 

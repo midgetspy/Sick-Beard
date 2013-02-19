@@ -31,9 +31,8 @@ from sickbeard import encodingKludge as ek
 from sickbeard.exceptions import ex
 
 from lib.tvdb_api import tvdb_api, tvdb_exceptions
-from lib import subliminal
 
-SUBTITLE_SERVICES = ['opensubtitles', 'addic7ed', 'tvsubtitles', 'subswiki', 'subtitulos', 'thesubdb']
+from sickbeard import subtitle_queue
 
 class GenericMetadata():
     """
@@ -179,7 +178,7 @@ class GenericMetadata():
         ep_obj: a TVEpisode instance for which to create the subtitles
         """
         epName = ep_obj.location.rpartition(".")[0]
-        filenames = []
+        filenames = [epName + ".srt"]
         subLanguages = sickbeard.SUBTITLE_LANGUAGES.split(",")
         if ek.ek(os.path.isfile, ep_obj.location):
             for item in subLanguages:
@@ -257,7 +256,11 @@ class GenericMetadata():
     def create_subtitles(self, ep_obj, force=False):
         if self.subtitles and ep_obj and not self._has_episode_subtitle(ep_obj):
             logger.log("Metadata provider "+self.name+" searching subtitles "+ep_obj.prettyName(), logger.DEBUG)
-            return self.search_subtitles(ep_obj, force)
+            # make a queue item for it and put it on the queue
+            sub_queue_item = subtitle_queue.SubtitleQueueItem(ep_obj, force)
+            sickbeard.subtitleQueueScheduler.action.add_item(sub_queue_item) 
+
+            return True
         return  False
         
     def _get_episode_thumb_url(self, ep_obj):
@@ -509,46 +512,6 @@ class GenericMetadata():
             self._write_image(seasonData, season_thumb_file_path)
     
         return True
-
-    def search_subtitles(self, ep_obj, force = False):
-        if not ek.ek(os.path.isfile, ep_obj.location):
-            logger.log(str(ep_obj.show.tvdbid) + ": Episode file doesn't exist, can't download subtitles for episode " + str(ep_obj.season) + "x" + str(ep_obj.episode), logger.DEBUG)
-            return
-        epName = ep_obj.location.rpartition(".")[0]
-        subLanguages = sickbeard.SUBTITLE_LANGUAGES.split(",")
-        for lang in subLanguages:
-            langS = lang.split("-")
-            if len(langS) > 1:
-                subLanguages.append(langS[0])
-        
-        logger.log(str(ep_obj.show.tvdbid) + ": Downloading subtitles for episode " + str(ep_obj.season) + "x" + str(ep_obj.episode), logger.DEBUG)
-
-        try:
-            subEpisodes = subliminal.download_subtitles([ep_obj.location], 
-                                                      languages=subLanguages, 
-                                                      services=SUBTITLE_SERVICES, 
-                                                      force=force, 
-                                                      multi=True, 
-                                                      cache_dir=sickbeard.CACHE_DIR, 
-                                                      max_depth=3, 
-                                                      scan_filter=None, 
-                                                      order=None)
-        except Exception, e:
-            logger.log("Error while downloading subtitles: %s" % str(e), logger.ERROR)
-            return False
-        subCount = 0
-        for subEpisode in subEpisodes:
-            subtitles = subEpisodes[subEpisode]
-            for subtitle in subtitles:
-                helpers.chmodAsParent(subtitle.path)
-                subCount += 1
-                
-        if subCount > 0:
-            logger.log("Downloaded " + str(subCount) + " subtitles for " + ep_obj.show.name + " - " + ep_obj.prettyName(), logger.DEBUG)
-            return True
-        else:
-            logger.log("No subtitles downloaded for " + ep_obj.show.name + " - " + ep_obj.prettyName(), logger.DEBUG)
-            return False
 
     def _write_image(self, image_data, image_path):
         """
