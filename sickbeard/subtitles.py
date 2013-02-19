@@ -24,7 +24,7 @@ from sickbeard import logger
 from sickbeard import helpers
 from sickbeard import encodingKludge as ek
 from sickbeard import db
-
+from sickbeard import history
 from lib import subliminal
 
 SINGLE = 'und'
