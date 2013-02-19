@@ -60,7 +60,7 @@ cursor:hand;
 cursor:pointer;
 }
 
-.stepDiv {padding: 15px;}
+.stepDiv {padding: 21px 15px 15px 15px;}
 
 input:not(.btn){float:left;margin-right:6px;margin-top:5px;padding-top:4px;padding-bottom:4px;padding-right:4px;padding-left:4px;border-bottom-left-radius:3px;border-bottom-right-radius:3px;border-top-left-radius:3px;border-top-right-radius:3px;border-top-width: 1px;
     border-left-width: 1px;
@@ -85,7 +85,7 @@ input:not(.btn){float:left;margin-right:6px;margin-top:5px;padding-top:4px;paddi
 
 /* step 3 related */
 
-#customQualityWrapper { /*height: 190px*/; overflow: auto; }
+#customQualityWrapper {/* height: 190px;*/ overflow: hidden; }
 #customQualityWrapper div.component-group-desc{float:left;width:165px;}
-#customQualityWrapper div.component-group-desc p{width:85%;font-size:1.2em;color:#666;margin:.8em 0;}
-#customQualityWrapper div.component-group-desc p.note{width:90%;font-size:1.2em;color:#333;margin:.8em 0;}
+#customQualityWrapper div.component-group-desc p{width:85%;font-size:14px;color:#666;margin:.8em 0;}
+#customQualityWrapper div.component-group-desc p.note{width:90%;font-size:14px;color:#333;margin:.8em 0;}

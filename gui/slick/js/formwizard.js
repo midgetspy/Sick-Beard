@@ -131,7 +131,7 @@ formtowizard.prototype={
 			var $stepsguide=$('<div class="stepsguide" />') //create Steps Container to house the "steps" text
 			var $sections=$theform.find('fieldset.sectionwrap').hide() //find all fieldset elements within form and hide them initially
 			if (setting.revealfx[0]=="slide"){ //create outer DIV that will house all the fieldset.sectionwrap elements
-				$sectionswrapper=$('<div style="position:relative;overflow:visible;"></div>').insertBefore($sections.eq(0)) //add DIV above the first fieldset.sectionwrap element
+				$sectionswrapper=$('<div style="position:relative;overflow:hidden;"></div>').insertBefore($sections.eq(0)) //add DIV above the first fieldset.sectionwrap element
 				$sectionswrapper_inner=$('<div style="position:absolute;left:0;top:0;"></div>') //create inner DIV of $sectionswrapper that will scroll to reveal a fieldset element
 			}
 			var maxfieldsetwidth=$sections.eq(0).outerWidth() //variable to get width of widest fieldset.sectionwrap
