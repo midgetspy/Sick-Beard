@@ -155,6 +155,9 @@ class SubtitlesFinder():
             for video in subtitles:
                 notifiers.notify_subtitle_download(os.path.basename(video.path).rpartition(".")[0], ",".join([subtitle.language.name for subtitle in subtitles.get(video)]))
                 for subtitle in subtitles.get(video):
+                    #Find to the correct Shows episode with the unique video path of episode 
+                    sql_index = next(index for (index, d) in enumerate(sqlResults) if d["location"] == video.path)
+                    epToSub = sqlResults[sql_index]
                     history.logSubtitle(epToSub['showid'], epToSub['season'], epToSub['episode'], epToSub['status'], subtitle)
         else:
             logger.log('No subtitles found', logger.MESSAGE)
