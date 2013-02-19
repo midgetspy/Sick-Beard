@@ -54,7 +54,7 @@
   <tr>
     <td class="nowrap">$datetime.datetime.strptime(str($hItem["date"]), $history.dateFormat)</td>
     <td width="35%"><a style="color: #000000; text-align: center;" href="$sbRoot/home/displayShow?show=$hItem["showid"]#season-$hItem["season"]">$hItem["show_name"] - <%=str(hItem["season"]) +"x"+ "%02i" % int(hItem["episode"]) %>#if "proper" in $hItem["resource"].lower or "repack" in $hItem["resource"].lower then ' <span class="quality Proper">Proper</span>' else ""#</a></td>
-    <td align="center"><span style="cursor: help;" title="$os.path.basename($hItem["resource"])">$statusStrings[$curStatus]</span>
+    <td align="center" #if $curStatus == SUBTITLED then 'class="subtitles_column"' else ''#><span style="cursor: help;" title="$os.path.basename($hItem["resource"])">$statusStrings[$curStatus]</span>
     	#if $curStatus == SUBTITLED:
     		<img width="16" height="11" src="/images/flags/<%= hItem["resource"][len(hItem["resource"])-6:len(hItem["resource"])-4]+'.png'%>">
 		#end if    
