@@ -707,9 +707,6 @@ class PostProcessor(object):
             cur_release_name = self.folder_name
         elif self.good_results[self.FILE_NAME]:
             cur_release_name = self.file_name
-            # take the extension off the filename, it's not needed
-            if '.' in self.file_name:
-                cur_release_name = self.file_name.rpartition('.')[0]
         return cur_release_name
 
     def process(self):
