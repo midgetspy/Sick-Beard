@@ -82,7 +82,7 @@
 	        <img src="$sbRoot/images/providers/missing.png" width="16" height="16" alt="missing provider" title="missing provider"/>
 	        #end if
 		#else:
-	  		<img src="$sbRoot/images/subtitles/<%=hItem["provider"]+'.png' %>" width="16" height="16" alt="$hItem["provider"]" title="$hItem["provider"]"/>
+	  		<img src="$sbRoot/images/subtitles/<%=hItem["provider"]+'.png' %>" width="16" height="16" alt="$hItem["provider"]" title="<%=hItem["provider"].capitalize()%>"/>
         #end if
 	  #end if
     #end if
