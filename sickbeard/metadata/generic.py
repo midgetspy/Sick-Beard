@@ -131,6 +131,7 @@ class GenericMetadata():
         #Assumes that an episode have subtitles if any srt file is on the disk
         #with the following pattern: episode_file_name_without_extension*.srt
         subtitlePath = ep_obj.location.rpartition(".")[0] + "*.srt"
+        subtitlePath = subtitlePath.replace("[", "*").replace("]", "*")
         locations = glob.glob(subtitlePath)
         logger.log("Checking if "+subtitlePath+" exists: "+str(len(locations)), logger.DEBUG)
         return True if len(locations) > 0 else False

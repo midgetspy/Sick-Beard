@@ -28,6 +28,7 @@ from sickbeard import search
 import os.path
 from sickbeard import encodingKludge as ek
 from lib import subliminal
+import random
 
 SUBTITLE_SEARCH = 35
 SUBTITLE_SERVICES = ['opensubtitles', 'addic7ed', 'tvsubtitles', 'subswiki', 'subtitulos', 'thesubdb']
@@ -53,7 +54,7 @@ class SubtitleQueue(generic_queue.GenericQueue):
 
 class SubtitleQueueItem(generic_queue.QueueItem):
     def __init__(self, ep_obj, force):
-        generic_queue.QueueItem.__init__(self, 'Subtitle Search', SUBTITLE_SEARCH)
+        generic_queue.QueueItem.__init__(self, 'Search', SUBTITLE_SEARCH)
         self.priority = generic_queue.QueuePriorities.NORMAL
         
         self.ep_obj = ep_obj
@@ -67,6 +68,7 @@ class SubtitleQueueItem(generic_queue.QueueItem):
         ep_obj = self.ep_obj
         force = self.force
         
+        random.shuffle(SUBTITLE_SERVICES)
         logger.log("Searching subtitles for " + ep_obj.prettyName())
 
         if not ek.ek(os.path.isfile, ep_obj.location):
@@ -101,10 +103,14 @@ class SubtitleQueueItem(generic_queue.QueueItem):
                 subCount += 1
                 
         if subCount > 0:
-            logger.log("Downloaded " + str(subCount) + " subtitles for " + ep_obj.prettyName(), logger.DEBUG)
+            for subEpisode in subEpisodes:
+                subtitles = subEpisodes[subEpisode]
+                for item in subtitles:
+                    logger.log("Downloaded subtitle for %s: %s from %s" % (ep_obj.prettyName(), item.language, item.service))
+
             self.success = True
         else:
-            logger.log("No subtitles downloaded for " + ep_obj.prettyName(), logger.DEBUG)
+            logger.log("No subtitles downloaded for " + ep_obj.prettyName())
             self.success = False
 
     def finish(self):
