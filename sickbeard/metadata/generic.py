@@ -33,6 +33,7 @@ from sickbeard.exceptions import ex
 from lib.tvdb_api import tvdb_api, tvdb_exceptions
 
 from sickbeard import subtitle_queue
+import glob
 
 class GenericMetadata():
     """
@@ -127,15 +128,12 @@ class GenericMetadata():
         return result
 
     def _has_episode_subtitle(self, ep_obj):
-        locations = self.get_episode_subtitle_path(ep_obj)
-        result = False
-        for location in locations:
-            result = location != None and ek.ek(os.path.isfile, location)
-            if location:
-                logger.log("Checking if "+location+" exists: "+str(result), logger.DEBUG)
-            if result:
-                break
-        return result
+        #Assumes that an episode have subtitles if any srt file is on the disk
+        #with the following pattern: episode_file_name_without_extension*.srt
+        subtitlePath = ep_obj.location.rpartition(".")[0] + "*.srt"
+        locations = glob.glob(subtitlePath)
+        logger.log("Checking if "+subtitlePath+" exists: "+str(len(locations)), logger.DEBUG)
+        return True if len(locations) > 0 else False
     
     def _has_season_thumb(self, show_obj, season):
         location = self.get_season_thumb_path(show_obj, season)
@@ -170,22 +168,6 @@ class GenericMetadata():
         
         return tbn_filename
     
-    def get_episode_subtitle_path(self, ep_obj):
-        """
-        Returns the path where the episode subtitle should be stored. Defaults to
-        the same path as the episode file but with a language.srt extension.
-        
-        ep_obj: a TVEpisode instance for which to create the subtitles
-        """
-        epName = ep_obj.location.rpartition(".")[0]
-        filenames = [epName + ".srt"]
-        subLanguages = sickbeard.SUBTITLE_LANGUAGES.split(",")
-        if ek.ek(os.path.isfile, ep_obj.location):
-            for item in subLanguages:
-                filenames.append(epName + "." + item + ".srt")
-        
-        return filenames
-        
     def get_season_thumb_path(self, show_obj, season):
         """
         Returns the full path to the file for a given season thumb.
