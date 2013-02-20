@@ -816,6 +816,9 @@ class Tvdb:
         for cur_ep in epsEt.findall("Episode"):
             seas_no = int(cur_ep.find('SeasonNumber').text)
             ep_no = int(cur_ep.find('EpisodeNumber').text)
+            #Fix the Season and Episide numbers as TVDB
+            #out of sync with other sources
+            #is able to download the correct episodes from NZBs
             #American Dad!
             if sid == 73141:
                 if seas_no == 2:
