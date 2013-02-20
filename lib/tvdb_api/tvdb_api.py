@@ -816,6 +816,22 @@ class Tvdb:
         for cur_ep in epsEt.findall("Episode"):
             seas_no = int(cur_ep.find('SeasonNumber').text)
             ep_no = int(cur_ep.find('EpisodeNumber').text)
+            #American Dad!
+            if sid == 73141:
+                if seas_no == 2:
+                    seas_no = 1
+                    ep_no = ep_no + 7
+                if seas_no > 2:
+                    seas_no=seas_no - 1
+            #Kitchen Nightmares (US)
+            if sid == 80552:
+                if seas_no > 1:
+                    seas_no = seas_no + 1
+                if seas_no == 1:
+                    if ep_no > 10:
+                        seas_no = 2
+                        ep_no = ep_no - 10
+
             for cur_item in cur_ep.getchildren():
                 tag = cur_item.tag.lower()
                 value = cur_item.text
