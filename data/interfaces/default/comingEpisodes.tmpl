@@ -242,7 +242,7 @@
         <tr>
 #end if          
           <td class="nextEp">
-            <span class="title">Next Episode:</span> <span><%=str(cur_result["season"])+"x"+"%02i" % int(cur_result["episode"]) %> - $cur_result["name"] ($datetime.date.fromordinal(int($cur_result["airdate"])))</span>
+            <span class="title">Next Episode:</span> <span><%="S%02i" % int(cur_result["season"])+"E%02i" % int(cur_result["episode"]) %> - $cur_result["name"] ($datetime.date.fromordinal(int($cur_result["airdate"])))</span>
           </td>
         </tr>
         <tr>
