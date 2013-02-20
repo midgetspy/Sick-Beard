@@ -290,11 +290,11 @@ class GitUpdateManager(UpdateManager):
         branch_info = self._run_git('symbolic-ref -q HEAD')
 
         if not branch_info or not branch_info[0]:
-            return 'torrentProviders'
+            return 'torrent_1080_subtitles'
 
         branch = branch_info[0].strip().replace('refs/heads/', '', 1)
 
-        return branch or 'torrentProviders'
+        return branch or 'torrent_1080_subtitles'
 
 
     def _check_github_for_update(self):
