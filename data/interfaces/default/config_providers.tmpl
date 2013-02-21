@@ -85,7 +85,7 @@
                                 <span class="component-title jumbo">Configure Provider:</span>
                                 <span class="component-desc">
                                     #set $provider_config_list = []
-                                    #for $cur_provider in ("nzbs_r_us", "tvtorrents", "torrentleech", "btn"):
+                                    #for $cur_provider in ("nzbs_r_us", "omgwtfnzbs", "tvtorrents", "torrentleech", "btn"):
                                         #set $cur_provider_obj = $sickbeard.providers.getProviderClass($cur_provider)
                                         $provider_config_list.append($cur_provider_obj)
                                     #end for
@@ -141,6 +141,21 @@
                             </label>
                         </div>
                     </div><!-- /nzbs_r_usDiv //-->
+                    
+                    <div class="providerDiv" id="omgwtfnzbsDiv">
+                        <div class="field-pair">
+                            <label class="clearfix">
+                                <span class="component-title">omgwtfnzbs User ID</span>
+                                <input class="component-desc" type="text" name="omgwtfnzbs_uid" value="$sickbeard.OMGWTFNZBS_UID" size="10" />
+                            </label>
+                        </div>
+                        <div class="field-pair">
+                            <label class="clearfix">
+                                <span class="component-title">omgwtfnzbs API Key</span>
+                                <input class="component-desc" type="text" name="omgwtfnzbs_key" value="$sickbeard.OMGWTFNZBS_KEY" size="40" />
+                            </label>
+                        </div>
+                    </div><!-- /omgwtfnzbsDiv //-->
 
                     <div class="providerDiv" id="tvtorrentsDiv">
                         <div class="field-pair">
