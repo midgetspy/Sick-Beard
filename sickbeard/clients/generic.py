@@ -121,11 +121,8 @@ class GenericClient(object):
         try:
             if result.url.startswith('magnet'):
                 r_code = self._add_torrent_uri(result)
-            elif result.url.endswith('.torrent'):
-                r_code = self._add_torrent_file(result)
             else:
-                logger.log(self.name + u': Unknown result type: ' + result.url, logger.ERROR)    
-                return False
+                r_code = self._add_torrent_file(result)
                 
             if not self._set_torrent_pause(result):
                 logger.log(self.name + u': Unable to set the pause for Torrent', logger.ERROR)
