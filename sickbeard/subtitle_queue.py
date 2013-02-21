@@ -29,6 +29,7 @@ import os.path
 from sickbeard import encodingKludge as ek
 from lib import subliminal
 import random
+import sys
 
 SUBTITLE_SEARCH = 35
 SUBTITLE_SERVICES = ['opensubtitles', 'addic7ed', 'tvsubtitles', 'subswiki', 'subtitulos', 'thesubdb']
@@ -77,10 +78,16 @@ class SubtitleQueueItem(generic_queue.QueueItem):
         
         epName = ep_obj.location.rpartition(".")[0]
         subLanguages = sickbeard.SUBTITLE_LANGUAGES.split(",")
-        for lang in subLanguages:
-            langS = lang.split("-")
-            if len(langS) > 1:
-                subLanguages.append(langS[0])
+        if len(subLanguages) < 1 and ep_obj.show.lang:
+            subLanguages.append(ep_obj.show.lang)
+        
+        if len(subLanguages) < 1:
+            logger.log("Can't download subtitles for " + ep_obj.prettyName() + ". Configure the language to search at post processing options.", logger.DEBUG)
+            return
+        #for lang in subLanguages:
+            #langS = lang.split("-")
+            #if len(langS) > 1:
+                #subLanguages.append(langS[0])
         
         try:
             subEpisodes = subliminal.download_subtitles([ep_obj.location], 
@@ -93,7 +100,9 @@ class SubtitleQueueItem(generic_queue.QueueItem):
                                                       scan_filter=None, 
                                                       order=None)
         except Exception, e:
-            logger.log("Error while downloading subtitles: %s" % str(e), logger.ERROR)
+            exc_type, exc_value, exc_traceback = sys.exc_info()
+
+            logger.log("Error while downloading subtitles for %s: %s" % (ep_obj.prettyName(), str(e)), logger.ERROR)
             return False
         subCount = 0
         for subEpisode in subEpisodes:
