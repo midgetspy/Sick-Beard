@@ -57,6 +57,7 @@ SKIPPED = 5 # episodes we don't want
 ARCHIVED = 6 # episodes that you don't have locally (counts toward download completion stats)
 IGNORED = 7 # episodes that you don't want included in your download stats
 SNATCHED_PROPER = 9 # qualified with quality
+SUBTITLED = 10 # qualified with quality
 
 NAMING_REPEAT = 1
 NAMING_EXTEND = 2
@@ -254,7 +255,8 @@ class StatusStrings:
                               SNATCHED_PROPER: "Snatched (Proper)",
                               WANTED: "Wanted",
                               ARCHIVED: "Archived",
-                              IGNORED: "Ignored"}
+                              IGNORED: "Ignored",
+                              SUBTITLED: "Subtitled"}
 
     def __getitem__(self, name):
         if name in Quality.DOWNLOADED + Quality.SNATCHED + Quality.SNATCHED_PROPER:

@@ -9,8 +9,8 @@ $(document).ready(function () {
         $.get(sbRoot + '/config/general/saveAddShowDefaults', {defaultStatus: $('#statusSelect').val(),
                                                              anyQualities: anyQualArray.join(','),
                                                              bestQualities: bestQualArray.join(','),
-                                                             defaultFlattenFolders: $('#flatten_folders').prop('checked')},
-                                                             subtitles: $('#subtitles').prop('checked')} );
+                                                             defaultFlattenFolders: $('#flatten_folders').prop('checked'),
+                                                             subtitles: $('#subtitles').prop('checked') });
                                                              
         $(this).attr('disabled', true);
         $.pnotify({

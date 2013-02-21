@@ -54,7 +54,11 @@
   <tr>
     <td class="nowrap">$datetime.datetime.strptime(str($hItem["date"]), $history.dateFormat)</td>
     <td width="35%"><a style="color: #000000; text-align: center;" href="$sbRoot/home/displayShow?show=$hItem["showid"]#season-$hItem["season"]">$hItem["show_name"] - <%=str(hItem["season"]) +"x"+ "%02i" % int(hItem["episode"]) %>#if "proper" in $hItem["resource"].lower or "repack" in $hItem["resource"].lower then ' <span class="quality Proper">Proper</span>' else ""#</a></td>
-    <td align="center"><span style="cursor: help;" title="$os.path.basename($hItem["resource"])">$statusStrings[$curStatus]</span></td>
+    <td align="center" #if $curStatus == SUBTITLED then 'class="subtitles_column"' else ''#><span style="cursor: help;" title="$os.path.basename($hItem["resource"])">$statusStrings[$curStatus]</span>
+    	#if $curStatus == SUBTITLED:
+    		<img width="16" height="11" src="/images/flags/<%= hItem["resource"][len(hItem["resource"])-6:len(hItem["resource"])-4]+'.png'%>">
+		#end if    
+    </td>
     <td align="center">
     #if $curStatus == DOWNLOADED:
       #set $match = $re.search("\-(\w+)\.\w{3}\Z", $os.path.basename($hItem["resource"]))
@@ -70,13 +74,17 @@
       #end if
     #else
       #if $hItem["provider"] > 0
-        #set $provider = $providers.getProviderClass($generic.GenericProvider.makeID($hItem["provider"]))
-        #if $provider != None: 
-        <img src="$sbRoot/images/providers/<%=provider.imageName()%>" width="16" height="16" alt="$provider.name" title="$provider.name"/>
-        #else:
-        <img src="$sbRoot/images/providers/missing.png" width="16" height="16" alt="missing provider" title="missing provider"/>
+        #if $curStatus == SNATCHED:
+	        #set $provider = $providers.getProviderClass($generic.GenericProvider.makeID($hItem["provider"]))
+	        #if $provider != None: 
+	        <img src="$sbRoot/images/providers/<%=provider.imageName()%>" width="16" height="16" alt="$provider.name" title="$provider.name"/>
+	        #else:
+	        <img src="$sbRoot/images/providers/missing.png" width="16" height="16" alt="missing provider" title="missing provider"/>
+	        #end if
+		#else:
+	  		<img src="$sbRoot/images/subtitles/<%=hItem["provider"]+'.png' %>" width="16" height="16" alt="$hItem["provider"]" title="<%=hItem["provider"].capitalize()%>"/>
         #end if
-      #end if
+	  #end if
     #end if
     </td>
     <td align="center"><span class="quality $Quality.qualityStrings[$curQuality].replace("720p","HD720p").replace("1080p","HD1080p").replace("RawHD TV", "RawHD").replace("HD TV", "HD720p")">$Quality.qualityStrings[$curQuality]</span></td>

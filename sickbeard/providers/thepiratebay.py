@@ -40,7 +40,6 @@ proxy_dict = {
               'Rapidproxy.us (GB)' : 'http://rapidproxy.us/',
               'Proxite.eu (DE)' :'http://proxite.eu/',
               'Shieldmagic.com (GB)' : 'http://www.shieldmagic.com/',
-              'Wowspeed.co.uk (GB)' : 'http://wowspeed.co.uk/' ,             
               'Webproxy.cz (CZ)' : 'http://webproxy.cz/',
               'Freeproxy.cz (CZ)' : 'http://www.freeproxy.cz/',
              }

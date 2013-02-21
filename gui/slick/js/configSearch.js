@@ -84,10 +84,10 @@ $(document).ready(function(){
 
     $('#testSABnzbd').click(function(){
         $('#testSABnzbd-result').html(loading);
-        var sab_host = $("input=[name='sab_host']").val();
-        var sab_username = $("input=[name='sab_username']").val();
-        var sab_password = $("input=[name='sab_password']").val();
-        var sab_apiKey = $("input=[name='sab_apikey']").val();
+        var sab_host = $('#sab_host').val();
+        var sab_username = $('#sab_username').val();
+        var sab_password = $('#sab_password').val();
+        var sab_apiKey = $('#sab_apikey').val();
         
         $.get(sbRoot+"/home/testSABnzbd", {'host': sab_host, 'username': sab_username, 'password': sab_password, 'apikey': sab_apiKey}, 
         function (data){ $('#testSABnzbd-result').html(data); });

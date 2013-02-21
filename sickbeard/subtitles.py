@@ -24,7 +24,7 @@ from sickbeard import logger
 from sickbeard import helpers
 from sickbeard import encodingKludge as ek
 from sickbeard import db
-
+from sickbeard import history
 from lib import subliminal
 
 SINGLE = 'und'
@@ -106,7 +106,7 @@ class SubtitlesFinder():
         myDB = db.DBConnection()
         today = datetime.date.today().toordinal()
         # you have 5 minutes to understand that one. Good luck
-        sqlResults = myDB.select('SELECT s.show_name, e.showid, e.season, e.episode, e.subtitles_searchcount AS searchcount, e.subtitles_lastsearch AS lastsearch, e.location, (? - e.airdate) AS airdate_daydiff FROM tv_episodes AS e INNER JOIN tv_shows AS s ON (e.showid = s.tvdb_id) WHERE s.subtitles = 1 AND e.subtitles NOT LIKE (?) AND ((e.subtitles_searchcount <= 2 AND (? - e.airdate) > 7) OR (e.subtitles_searchcount <= 7 AND (? - e.airdate) <= 7)) AND (e.status IN ('+','.join([str(x) for x in Quality.DOWNLOADED + [ARCHIVED]])+') OR (e.status IN ('+','.join([str(x) for x in Quality.SNATCHED + Quality.SNATCHED_PROPER])+') AND e.location != ""))', [today, wantedLanguages(True), today, today])
+        sqlResults = myDB.select('SELECT s.show_name, e.showid, e.season, e.episode, e.status, e.subtitles, e.subtitles_searchcount AS searchcount, e.subtitles_lastsearch AS lastsearch, e.location, (? - e.airdate) AS airdate_daydiff FROM tv_episodes AS e INNER JOIN tv_shows AS s ON (e.showid = s.tvdb_id) WHERE s.subtitles = 1 AND e.subtitles NOT LIKE (?) AND ((e.subtitles_searchcount <= 2 AND (? - e.airdate) > 7) OR (e.subtitles_searchcount <= 7 AND (? - e.airdate) <= 7)) AND (e.status IN ('+','.join([str(x) for x in Quality.DOWNLOADED + [ARCHIVED]])+') OR (e.status IN ('+','.join([str(x) for x in Quality.SNATCHED + Quality.SNATCHED_PROPER])+') AND e.location != ""))', [today, wantedLanguages(True), today, today])
         locations = []
         toRefresh = []
         rules = self._getRules()
@@ -153,7 +153,12 @@ class SubtitlesFinder():
             logger.log('Downloaded %d subtitles' % len(subtitles), logger.MESSAGE)
             
             for video in subtitles:
-                notifiers.notify_subtitle_download(os.path.basename(video.path).rpartition(".")[0], ",".join([subtitle.language.name for subtitle in subtitles.get(video)]))
+                #Find to the correct Shows episode with the unique video path of episode 
+                sql_index = next(index for (index, d) in enumerate(sqlResults) if d["location"] == video.path)
+                epToSub = sqlResults[sql_index]
+                notifiers.notify_subtitle_download(os.path.basename(video.path).rpartition(".")[0], ",".join([subtitle.language.name for subtitle in subtitles.get(video) if subtitle.language.alpha2 not in epToSub['subtitles'].split(',')]))
+                for subtitle in filter(lambda x: x.language.alpha2 not in epToSub['subtitles'].split(','), subtitles.get(video)):
+                    history.logSubtitle(epToSub['showid'], epToSub['season'], epToSub['episode'], epToSub['status'], subtitle)
         else:
             logger.log('No subtitles found', logger.MESSAGE)
 

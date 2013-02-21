@@ -1659,21 +1659,20 @@ input[type="submit"].btn.btn-mini {
 
 #customQuality {
     clear: both;
-    display: block;
-
+    display: block ;
+    overflow-x: hidden; 
+    overflow-y: hidden;
     padding-bottom: 10px;
     padding-left: 0;
     padding-right: 0;
     padding-top: 10px;
-    height:220px !important;*/
-    font-size: 0.9em;
+    font-size: 14px;
     padding-left:20px;
 }
 
 .stepDiv > #customQualityWrapper {
-    height: 255px !important;
-    overflow-x: auto;
-    overflow-y: auto;
+    overflow-x: hidden;
+    overflow-y: hidden;
 }
 
 #customQualityWrapper div.component-group-desc {
