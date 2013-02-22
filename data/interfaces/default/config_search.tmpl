@@ -28,6 +28,17 @@
 
                     <fieldset class="component-group-list">
                         <div class="field-pair">
+                            <label class="clearfix">
+                                <span class="component-title" id="ignore_words_desc">Ignored words</span>
+                                <input type="text" name="ignore_words" id="ignore_words" value="$sickbeard.IGNORE_WORDS" size="45" />
+                            </label>
+                            <label class="clearfix">
+                                <span class="component-title">&nbsp;</span>
+                                <span class="component-desc">Ignore releases that contain at least one set of words.</span>
+                            </label>
+                        </div>
+                            
+                        <div class="field-pair">
                             <input type="checkbox" name="download_propers" id="download_propers" #if $sickbeard.DOWNLOAD_PROPERS == True then "checked=\"checked\"" else ""# />
                             <label class="clearfix" for="download_propers">
                                 <span class="component-title">Download Propers</span>
