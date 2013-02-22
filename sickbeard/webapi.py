@@ -1467,7 +1467,7 @@ class CMD_SickBeardSearchTVDB(ApiCall):
     def run(self):
         """ search for show at tvdb with a given string and language """
         if self.name and not self.tvdbid: # only name was given
-            baseURL = "http://thetvdb.com/api/GetSeries.php?"
+            baseURL = "http://www.thetvdb.com/api/GetSeries.php?"
             params = {"seriesname": str(self.name).encode('utf-8'), 'language': self.lang}
             finalURL = baseURL + urllib.urlencode(params)
             urlData = sickbeard.helpers.getURL(finalURL)

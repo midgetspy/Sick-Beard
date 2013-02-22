@@ -105,8 +105,7 @@ def makeNewznabProvider(configString):
     return newProvider
 
 def getDefaultNewznabProviders():
-    return 'Sick Beard Index|http://lolo.sickbeard.com/|0|5000|0!!!NZBs.org|http://beta.nzbs.org/|0|5000|0'
-
+    return 'Sick Beard Index|http://lolo.sickbeard.com/|0|5000|0!!!NZBs.org|http://beta.nzbs.org/|0|5000|0!!!Usenet-Crawler|http://www.usenet-crawler.com/|0|5000|0'
 
 
 def getProviderModule(name):
