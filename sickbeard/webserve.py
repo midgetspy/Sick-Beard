@@ -1099,7 +1099,7 @@ class ConfigProviders:
             elif curProvider == 'btn':
                 sickbeard.BTN = curEnabled
             elif curProvider in newznabProviderDict:
-                newznabProviderDict[curProvider].enabled = bool(curEnabled)
+                newznabProviderDict[curProvider].enabled = int(curEnabled)
             else:
                 logger.log(u"don't know what "+curProvider+" is, skipping")
 
