@@ -30,6 +30,7 @@ from sickbeard import encodingKludge as ek
 from lib import subliminal
 import random
 import sys
+import traceback
 
 SUBTITLE_SEARCH = 35
 SUBTITLE_SERVICES = ['opensubtitles', 'addic7ed', 'tvsubtitles', 'subswiki', 'subtitulos', 'thesubdb']
@@ -100,9 +101,8 @@ class SubtitleQueueItem(generic_queue.QueueItem):
                                                       scan_filter=None, 
                                                       order=None)
         except Exception, e:
-            exc_type, exc_value, exc_traceback = sys.exc_info()
-
             logger.log("Error while downloading subtitles for %s: %s" % (ep_obj.prettyName(), str(e)), logger.ERROR)
+            logger.log(traceback.print_exc(), logger.DEBUG)
             return False
         subCount = 0
         for subEpisode in subEpisodes:
