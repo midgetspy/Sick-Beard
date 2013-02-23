@@ -85,7 +85,7 @@
                                 <span class="component-title jumbo">Configure Provider:</span>
                                 <span class="component-desc">
                                     #set $provider_config_list = []
-                                    #for $cur_provider in ("nzbs_r_us", "tvtorrents", "btn"):
+                                    #for $cur_provider in ("nzbs_r_us", "dailytvtorrents", "tvtorrents", "btn"):
                                         #set $cur_provider_obj = $sickbeard.providers.getProviderClass($cur_provider)
                                         #if $cur_provider_obj.providerType == $GenericProvider.NZB and not $sickbeard.USE_NZBS:
                                             #continue
@@ -156,6 +156,48 @@
                             </label>
                         </div>
                     </div><!-- /tvtorrentsDiv //-->
+
+                    <div class="providerDiv" id="dailytvtorrentsDiv">
+                        <h3>DailyTvTorrents RSS Feed Parameters</h3>
+                        <div class="field-pair">
+                            <label class="clearfix">
+                                <span class="component-title">Quality Preference</span>
+                                <select name="dailytvtorrents_prefer_or_only" id="dailytvtorrents_prefer_or_only" style="display: inline-block;">
+                                    <option value="">-- none --</option>
+                                    <option value="prefer" #if 'prefer' == $sickbeard.DAILYTVTORRENTS_PREFER_OR_ONLY then "selected=\"selected\"" else ""#>Prefer</option>
+                                    <option value="only" #if 'only' == $sickbeard.DAILYTVTORRENTS_PREFER_OR_ONLY then "selected=\"selected\"" else ""#>Only</option>
+                                </select>
+                                <select name="dailytvtorrents_prefer_type" id="dailytvtorrents_prefer_type"  style="display: inline-block;">
+                                    <option value="">-- none --</option>
+                                    <option value="hd" #if 'hd' == $sickbeard.DAILYTVTORRENTS_PREFER_TYPE then "selected=\"selected\"" else ""#>HDTV (lower than 720p)</option>
+                                    <option value="720" #if '720' == $sickbeard.DAILYTVTORRENTS_PREFER_TYPE then "selected=\"selected\"" else ""#>720p</option>
+                                </select>
+                            </label>
+                        </div>
+                        <div class="field-pair">
+                            <label class="clearfix">
+                                <span class="component-title">Minimum Age</span>
+                                <input class="component-desc" type="text" name="dailytvtorrents_minage" value="$sickbeard.DAILYTVTORRENTS_MINAGE" size="5">hours</label>
+                            </label>
+                        </div>
+                        <div class="field-pair">
+                            <label class="clearfix">
+                                <span class="component-title">Wait Time</span>
+                                <input class="component-desc" type="text" name="dailytvtorrents_wait" value="$sickbeard.DAILYTVTORRENTS_WAIT" size="5">hours</label>
+                            </label>
+                        </div>
+                        <div class="field-pair">
+                            <label class="clearfix" for="dailytvtorrents_norar">
+                                <span class="component-title">No compressed files (<em>norar</em>)</span>
+                                <input type="checkbox" name="dailytvtorrents_norar" id="dailytvtorrents_norar" #if $sickbeard.DAILYTVTORRENTS_NORAR == "1" then "checked=\"checked\"" else ""# value="1" />
+                            </label>
+                        </div>
+
+                        <div>
+                            <p>For more information on the DailyTvTorrents RSS feed parameters, go to <a href="http://www.dailytvtorrents.org/blog/rss-feed-parameters-for-hardcore-geeks--3" target="_blank">http://www.dailytvtorrents.org/blog/rss-feed-parameters-for-hardcore-geeks--3</a></p>
+                        </div>
+
+                    </div><!-- /dailytvtorrentsDiv //-->
 
                     <div class="providerDiv" id="btnDiv">
                         <div class="field-pair">
