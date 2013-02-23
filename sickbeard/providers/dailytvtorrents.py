@@ -104,7 +104,10 @@ class DailyTvTorrentsProvider(generic.TorrentProvider):
         if not show:
             return params
 
-        params['show_name'] = sanitizeSceneName(show.name, ezrss=False).replace('.', '-').encode('utf-8').lower()
+        if not show.dailytvtorrents_show_name == None:
+            params['show_name'] = sanitizeSceneName(show.dailytvtorrents_show_name, ezrss=False).replace('.', '-').encode('utf-8').lower()
+        else:
+            params['show_name'] = sanitizeSceneName(show.name, ezrss=False).replace('.', '-').encode('utf-8').lower()
 
         return [params]
 

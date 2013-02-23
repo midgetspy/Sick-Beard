@@ -537,3 +537,11 @@ class RenameSeasonFolders(AddSizeAndSceneNameFields):
         self.connection.action("DROP TABLE tmp_tv_shows")
 
         self.incDBVersion()
+
+class AddDailyTvTorrentsFields(RenameSeasonFolders):
+
+    def test(self):
+        return self.hasColumn("tv_shows", "dailytvtorrents_show_name")
+
+    def execute(self):
+        self.addColumn("tv_shows", "dailytvtorrents_show_name", "TEXT", "")

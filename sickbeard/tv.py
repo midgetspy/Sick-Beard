@@ -67,6 +67,7 @@ class TVShow(object):
         self.paused = 0
         self.air_by_date = 0
         self.lang = lang
+        self.dailytvtorrents_show_name = ""
 
         self.lock = threading.Lock()
         self._isDirGood = False
@@ -614,6 +615,8 @@ class TVShow(object):
             if self.lang == "":
                 self.lang = sqlResults[0]["lang"]
 
+            self.dailytvtorrents_show_name = sqlResults[0]["dailytvtorrents_show_name"]
+
 
     def loadFromTVDB(self, cache=True, tvapi=None, cachedSeason=None):
 
@@ -824,7 +827,8 @@ class TVShow(object):
                         "air_by_date": self.air_by_date,
                         "startyear": self.startyear,
                         "tvr_name": self.tvrname,
-                        "lang": self.lang
+                        "lang": self.lang,
+                        "dailytvtorrents_show_name": self.dailytvtorrents_show_name
                         }
 
         myDB.upsert("tv_shows", newValueDict, controlValueDict)
