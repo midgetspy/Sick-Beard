@@ -24,7 +24,7 @@ import re
 from sickbeard import helpers
 from sickbeard import logger
 from sickbeard import naming
-from sickbeard import db
+from sickbeard import db_peewee
 
 import sickbeard
 
@@ -298,8 +298,8 @@ class ConfigMigrator():
         sickbeard.NAMING_MULTI_EP = int(check_setting_int(self.config_obj, 'General', 'naming_multi_ep_type', 1))
 
         # see if any of their shows used season folders
-        myDB = db.DBConnection()
-        season_folder_shows = myDB.select("SELECT * FROM tv_shows WHERE flatten_folders = 0")
+        season_folder_shows = db_peewee.TvShow.select().where(
+            db_peewee.TvShow.flatten_folders == False).count()
 
         # if any shows had season folders on then prepend season folder to the pattern
         if season_folder_shows:
@@ -324,7 +324,7 @@ class ConfigMigrator():
             logger.log(u"No shows were using season folders before so I'm disabling flattening on all shows")
 
             # don't flatten any shows at all
-            myDB.action("UPDATE tv_shows SET flatten_folders = 0")
+            db_peewee.TvShow.update(flatten_folders=False)
 
         sickbeard.NAMING_FORCE_FOLDERS = naming.check_force_season_folders()
 

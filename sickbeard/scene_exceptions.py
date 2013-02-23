@@ -17,20 +17,20 @@
 # along with Sick Beard.  If not, see <http://www.gnu.org/licenses/>.
 
 import re
+from lib import peewee
 
 from sickbeard import helpers
 from sickbeard import name_cache
 from sickbeard import logger
-from sickbeard import db
+from sickbeard.db_peewee import SceneException
 
 def get_scene_exceptions(tvdb_id):
     """
     Given a tvdb_id, return a list of all the scene exceptions.
     """
 
-    myDB = db.DBConnection("cache.db")
-    exceptions = myDB.select("SELECT show_name FROM scene_exceptions WHERE tvdb_id = ?", [tvdb_id])
-    return [cur_exception["show_name"] for cur_exception in exceptions]
+    return [exception.show_name for exception in
+            SceneException.select().where(SceneException.tvdb_id == tvdb_id)]
 
 
 def get_scene_exception_by_name(show_name):
@@ -39,18 +39,16 @@ def get_scene_exception_by_name(show_name):
     is present.
     """
 
-    myDB = db.DBConnection("cache.db")
-
     # try the obvious case first
-    exception_result = myDB.select("SELECT tvdb_id FROM scene_exceptions WHERE LOWER(show_name) = ?", [show_name.lower()])
-    if exception_result:
-        return int(exception_result[0]["tvdb_id"])
+    exception_result = SceneException.select().where(
+        peewee.fn.Lower(SceneException.show_name == show_name.lower())).first()
 
-    all_exception_results = myDB.select("SELECT show_name, tvdb_id FROM scene_exceptions")
-    for cur_exception in all_exception_results:
+    if exception_result is not None:
+        return exception_result.tvdb_id
 
-        cur_exception_name = cur_exception["show_name"]
-        cur_tvdb_id = int(cur_exception["tvdb_id"])
+    for cur_exception in SceneException.select():
+        cur_exception_name = cur_exception.show_name
+        cur_tvdb_id = cur_exception.tvdb_id
 
         if show_name.lower() in (cur_exception_name.lower(), helpers.sanitizeSceneName(cur_exception_name).lower().replace('.', ' ')):
             logger.log(u"Scene exception lookup got tvdb id "+str(cur_tvdb_id)+u", using that", logger.DEBUG)
@@ -94,23 +92,24 @@ def retrieve_exceptions():
 
             exception_dict[tvdb_id] = alias_list
 
-        myDB = db.DBConnection("cache.db")
-
         changed_exceptions = False
 
         # write all the exceptions we got off the net into the database
         for cur_tvdb_id in exception_dict:
-
-            # get a list of the existing exceptions for this ID
-            existing_exceptions = [x["show_name"] for x in myDB.select("SELECT * FROM scene_exceptions WHERE tvdb_id = ?", [cur_tvdb_id])]
+            existing_exceptions = [s.show_name for s in SceneException.select(
+                SceneException.show_name).where(
+                    SceneException.tvdb_id == cur_tvdb_id)]
 
             for cur_exception in exception_dict[cur_tvdb_id]:
                 # if this exception isn't already in the DB then add it
                 if cur_exception not in existing_exceptions:
-                    myDB.action("INSERT INTO scene_exceptions (tvdb_id, show_name) VALUES (?,?)", [cur_tvdb_id, cur_exception])
+                    SceneException(
+                        tvdb_id=cur_tvdb_id,
+                        show_name=cur_exception).save()
                     changed_exceptions = True
 
-        # since this could invalidate the results of the cache we clear it out after updating
+        # since this could invalidate the results of the cache we clear
+        # it out after updating
         if changed_exceptions:
             logger.log(u"Updated scene exceptions")
             name_cache.clearCache()

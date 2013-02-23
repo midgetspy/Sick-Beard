@@ -22,8 +22,10 @@ import datetime
 import threading
 
 import sickbeard
+from lib import peewee
 
-from sickbeard import db, scheduler
+from sickbeard.db_peewee import Info, TvEpisode, TvShow
+from sickbeard import scheduler
 from sickbeard import search_queue
 from sickbeard import logger
 from sickbeard import ui
@@ -91,9 +93,6 @@ class BacklogSearcher:
         self.amActive = True
         self.amPaused = False
 
-        #myDB = db.DBConnection()
-        #numSeasonResults = myDB.select("SELECT DISTINCT(season), showid FROM tv_episodes ep, tv_shows show WHERE season != 0 AND ep.showid = show.tvdb_id AND show.paused = 0 AND ep.airdate > ?", [fromDate.toordinal()])
-
         # get separate lists of the season/date shows
         #season_shows = [x for x in show_list if not x.air_by_date]
         air_by_date_shows = [x for x in show_list if x.air_by_date]
@@ -142,54 +141,65 @@ class BacklogSearcher:
 
         logger.log(u"Retrieving the last check time from the DB", logger.DEBUG)
 
-        myDB = db.DBConnection()
-        sqlResults = myDB.select("SELECT * FROM info")
+        result = Info.select().first()
 
-        if len(sqlResults) == 0:
+        if result is None:
             lastBacklog = 1
-        elif sqlResults[0]["last_backlog"] == None or sqlResults[0]["last_backlog"] == "":
+        elif result.last_backlog is None or result.last_backlog == "":
             lastBacklog = 1
         else:
-            lastBacklog = int(sqlResults[0]["last_backlog"])
+            lastBacklog = result.last_backlog
 
         self._lastBacklog = lastBacklog
         return self._lastBacklog
 
     def _get_season_segments(self, tvdb_id, fromDate):
-        myDB = db.DBConnection()
-        sqlResults = myDB.select("SELECT DISTINCT(season) as season FROM tv_episodes WHERE showid = ? AND season > 0 and airdate > ?", [tvdb_id, fromDate.toordinal()])
-        return [int(x["season"]) for x in sqlResults]
+        results = TvEpisode.select(
+            peewee.fn.Distinct(TvEpisode.season).alias('season')).where(
+                (TvEpisode.show == tvdb_id) &
+                (TvEpisode.season > 0) &
+                (TvEpisode.airdate > fromDate.toordinal())
+            )
+        return [x.season for x in results]
 
     def _get_air_by_date_segments(self, tvdb_id, fromDate):
         # query the DB for all dates for this show
-        myDB = db.DBConnection()
-        num_air_by_date_results = myDB.select("SELECT airdate, showid FROM tv_episodes ep, tv_shows show WHERE season != 0 AND ep.showid = show.tvdb_id AND show.paused = 0 ANd ep.airdate > ? AND ep.showid = ?",
-                                 [fromDate.toordinal(), tvdb_id])
+        query = TvEpisode.select(
+            TvEpisode, TvShow.paused
+        ).where(
+            (TvEpisode.season != 0) &
+            (TvEpisode.show == tvdb_id) &
+            (TvEpisode.airdate > fromDate.toordinal())
+        ).join(TvShow)
 
         # break them apart into month/year strings
         air_by_date_segments = []
-        for cur_result in num_air_by_date_results:
-            cur_date = datetime.date.fromordinal(int(cur_result["airdate"]))
+        for cur_result in query:
+            if cur_result.show.paused:
+                continue
+            cur_date = datetime.date.fromordinal(cur_result.airdate)
             cur_date_str = str(cur_date)[:7]
-            cur_tvdb_id = int(cur_result["showid"])
-            
+            cur_tvdb_id = cur_result.show.tvdb_id
+
             cur_result_tuple = (cur_tvdb_id, cur_date_str)
             if cur_result_tuple not in air_by_date_segments:
                 air_by_date_segments.append(cur_result_tuple)
-        
+
         return air_by_date_segments
 
     def _set_lastBacklog(self, when):
 
         logger.log(u"Setting the last backlog in the DB to " + str(when), logger.DEBUG)
 
-        myDB = db.DBConnection()
-        sqlResults = myDB.select("SELECT * FROM info")
-
-        if len(sqlResults) == 0:
-            myDB.action("INSERT INTO info (last_backlog, last_TVDB) VALUES (?,?)", [str(when), 0])
+        info = Info.select().first()
+        if info is None:
+            Info(
+                last_backlog=when,
+                last_tvdb=0
+            ).save()
         else:
-            myDB.action("UPDATE info SET last_backlog=" + str(when))
+            info.last_backlog = when
+            info.save()
 
 
     def run(self):

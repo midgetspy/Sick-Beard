@@ -22,10 +22,11 @@ import datetime
 import time
 
 import sickbeard
-from sickbeard import db, logger, common, exceptions, helpers
+from sickbeard import logger, common, exceptions, helpers
 from sickbeard import generic_queue
 from sickbeard import search
 from sickbeard import ui
+from sickbeard.db_peewee import TvEpisode
 
 BACKLOG_SEARCH = 10
 RSS_SEARCH = 20
@@ -144,22 +145,24 @@ class RSSSearchQueueItem(generic_queue.QueueItem):
 
         curDate = datetime.date.today().toordinal()
 
-        myDB = db.DBConnection()
-        sqlResults = myDB.select("SELECT * FROM tv_episodes WHERE status = ? AND airdate < ?", [common.UNAIRED, curDate])
+        query = TvEpisode.select().where(
+            (TvEpisode.status == common.UNAIRED) &
+            (TvEpisode.airdate < curDate)
+        )
 
-        for sqlEp in sqlResults:
-
+        for sqlEp in query:
             try:
-                show = helpers.findCertainShow(sickbeard.showList, int(sqlEp["showid"]))
+                show = helpers.findCertainShow(sickbeard.showList,
+                                               sqlEp.show.tvdb_id)
             except exceptions.MultipleShowObjectsException:
-                logger.log(u"ERROR: expected to find a single show matching " + sqlEp["showid"])
+                logger.log(u"ERROR: expected to find a single show matching " + sqlEp.show.tvdb_id)
                 return None
 
             if show == None:
-                logger.log(u"Unable to find the show with ID "+str(sqlEp["showid"])+" in your show list! DB value was "+str(sqlEp), logger.ERROR)
+                logger.log(u"Unable to find the show with ID "+str(sqlEp.show.tvdb_id)+" in your show list! DB value was "+str(sqlEp), logger.ERROR)
                 return None
 
-            ep = show.getEpisode(sqlEp["season"], sqlEp["episode"])
+            ep = show.getEpisode(sqlEp.season, sqlEp.episode)
             with ep.lock:
                 if ep.show.paused:
                     ep.status = common.SKIPPED
@@ -178,11 +181,12 @@ class BacklogQueueItem(generic_queue.QueueItem):
 
         logger.log(u"Seeing if we need any episodes from "+self.show.name+" season "+str(self.segment))
 
-        myDB = db.DBConnection()
-
         # see if there is anything in this season worth searching for
         if not self.show.air_by_date:
-            statusResults = myDB.select("SELECT status FROM tv_episodes WHERE showid = ? AND season = ?", [self.show.tvdbid, self.segment])
+            statusResults = TvEpisode.select().where(
+                (TvEpisode.season == self.segment) &
+                (TvEpisode.show == self.show.tvdbid)
+            )
         else:
             segment_year, segment_month = map(int, self.segment.split('-'))
             min_date = datetime.date(segment_year, segment_month, 1)
@@ -193,10 +197,14 @@ class BacklogQueueItem(generic_queue.QueueItem):
             else:
                 max_date = datetime.date(segment_year, segment_month+1, 1) - datetime.timedelta(days=1)
 
-            statusResults = myDB.select("SELECT status FROM tv_episodes WHERE showid = ? AND airdate >= ? AND airdate <= ?",
-                                        [self.show.tvdbid, min_date.toordinal(), max_date.toordinal()])
-            
-        anyQualities, bestQualities = common.Quality.splitQuality(self.show.quality) #@UnusedVariable
+            statusResults = TvEpisode.select().where(
+                (TvEpisode.airdate >= min_date.toordinal()) &
+                (TvEpisode.airdate <= max_date.toordinal()) &
+                (TvEpisode.show == self.show.tvdbid)
+            )
+
+        anyQualities, bestQualities = common.Quality.splitQuality(
+            self.show.quality) #@UnusedVariable
         self.wantSeason = self._need_any_episodes(statusResults, bestQualities)
 
     def execute(self):
@@ -215,11 +223,12 @@ class BacklogQueueItem(generic_queue.QueueItem):
     def _need_any_episodes(self, statusResults, bestQualities):
 
         wantSeason = False
-        
+
         # check through the list of statuses to see if we want any
         for curStatusResult in statusResults:
-            curCompositeStatus = int(curStatusResult["status"])
-            curStatus, curQuality = common.Quality.splitCompositeStatus(curCompositeStatus)
+            curCompositeStatus = curStatusResult.status
+            curStatus, curQuality = common.Quality.splitCompositeStatus(
+                curCompositeStatus)
 
             if bestQualities:
                 highestBestQuality = max(bestQualities)

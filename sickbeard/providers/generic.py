@@ -315,10 +315,12 @@ class GenericProvider:
                     logger.log(u"This is supposed to be an air-by-date search but the result "+title+" didn't parse as one, skipping it", logger.DEBUG)
                     continue
                 
-                myDB = db.DBConnection()
-                sql_results = myDB.select("SELECT season, episode FROM tv_episodes WHERE showid = ? AND airdate = ?", [show.tvdbid, parse_result.air_date.toordinal()])
+                sql_results = TvEpisode.select().where(
+                    (TvEpisode.show == show.tvdbid) &
+                    (TvEpisode.airdate == parse_result.air_date.toordinal())
+                ).first()
 
-                if len(sql_results) != 1:
+                if sql_results is None:
                     logger.log(u"Tried to look up the date for the episode "+title+" but the database didn't give proper results, skipping it", logger.WARNING)
                     continue
                 

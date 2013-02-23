@@ -25,8 +25,9 @@ import shlex
 import subprocess
 
 import sickbeard
+from lib import peewee
 
-from sickbeard import db
+from sickbeard.db_peewee import TvEpisode, TvShow, History
 from sickbeard import classes
 from sickbeard import common
 from sickbeard import exceptions
@@ -313,17 +314,18 @@ class PostProcessor(object):
         if self.folder_name:
             names.append(self.folder_name)
 
-        myDB = db.DBConnection()
-    
-        # search the database for a possible match and return immediately if we find one
+        # search the database for a possible match and return
+        # immediately if we find one
         for curName in names:
-            sql_results = myDB.select("SELECT * FROM history WHERE resource LIKE ?", [re.sub("[\.\-\ ]", "_", curName)])
-    
-            if len(sql_results) == 0:
+            result = History.select(History, TvShow).where(
+                (History.resource ** re.sub("[\.\-\ ]", "_", curName))
+            ).join(TvShow).first()
+
+            if result is None:
                 continue
-    
-            tvdb_id = int(sql_results[0]["showid"])
-            season = int(sql_results[0]["season"])
+
+            tvdb_id = result.show.tvdb_id
+            season = result.season
 
             self.in_history = True
             to_return = (tvdb_id, season, [])
@@ -538,12 +540,16 @@ class PostProcessor(object):
 
             # if there's no season then we can hopefully just use 1 automatically
             elif season == None and tvdb_id:
-                myDB = db.DBConnection()
-                numseasonsSQlResult = myDB.select("SELECT COUNT(DISTINCT season) as numseasons FROM tv_episodes WHERE showid = ? and season != 0", [tvdb_id])
-                if int(numseasonsSQlResult[0][0]) == 1 and season == None:
+                result = TvEpisode.select(
+                    peewee.fn.Count(peewee.fn.Distinct(TvEpisode.season))
+                ).where(
+                    (TvEpisode.show == tvdb_id) & (TvEpisode.season != 0)
+                ).scalar()
+
+                if result == 1 and season == None:
                     self._log(u"Don't have a season number, but this show appears to only have 1 season, setting seasonnumber to 1...", logger.DEBUG)
                     season = 1
-            
+
             if tvdb_id and season != None and episodes:
                 return (tvdb_id, season, episodes)
     

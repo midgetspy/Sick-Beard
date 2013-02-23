@@ -25,7 +25,8 @@ import sickbeard
 
 from common import SNATCHED, Quality, SEASON_RESULT, MULTI_EP_RESULT
 
-from sickbeard import logger, db, show_name_helpers, exceptions, helpers
+from sickbeard import logger, show_name_helpers, exceptions, helpers
+from sickbeard.db_peewee import TvEpisode
 from sickbeard import sab
 from sickbeard import nzbget
 from sickbeard import history
@@ -371,8 +372,10 @@ def findSeason(show, season):
         seasonQual = bestSeasonNZB.quality
         logger.log(u"The quality of the season NZB is "+Quality.qualityStrings[seasonQual], logger.DEBUG)
 
-        myDB = db.DBConnection()
-        allEps = [int(x["episode"]) for x in myDB.select("SELECT episode FROM tv_episodes WHERE showid = ? AND season = ?", [show.tvdbid, season])]
+        allEps = [e.episode for e in TvEpisode.select().where(
+            (TvEpisode.show == show.tvdbid) &
+            (TvEpisode.season == season)
+        )]
         logger.log(u"Episode list: "+str(allEps), logger.DEBUG)
 
         allWanted = True

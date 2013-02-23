@@ -37,6 +37,7 @@ from sickbeard import searchCurrent, searchBacklog, showUpdater, versionChecker,
 from sickbeard import helpers, db, exceptions, show_queue, search_queue, scheduler
 from sickbeard import logger
 from sickbeard import naming
+from sickbeard import db_peewee
 
 from common import SD, SKIPPED, NAMING_REPEAT
 
@@ -696,13 +697,15 @@ def initialize(consoleLogging=True):
         logger.sb_log_instance.initLogging(consoleLogging=consoleLogging)
 
         # initialize the main SB database
-        db.upgradeDatabase(db.DBConnection(), mainDB.InitialSchema)
+        #db.upgradeDatabase(db.DBConnection(), mainDB.InitialSchema)
 
         # initialize the cache database
-        db.upgradeDatabase(db.DBConnection("cache.db"), cache_db.InitialSchema)
+        #db.upgradeDatabase(db.DBConnection("cache.db"), cache_db.InitialSchema)
 
         # fix up any db problems
-        db.sanityCheckDatabase(db.DBConnection(), mainDB.MainSanityCheck)
+        db.sanityCheckDatabase(mainDB.MainSanityCheck)
+        db_peewee.createAllTables()
+
 
         # migrate the config if it needs it
         migrator = ConfigMigrator(CFG)
@@ -1212,21 +1215,20 @@ def getEpList(epIDs, showid=None):
     if epIDs == None or len(epIDs) == 0:
         return []
 
-    query = "SELECT * FROM tv_episodes WHERE tvdbid in (%s)" % (",".join(['?'] * len(epIDs)),)
-    params = epIDs
+    query = TvEpisode.select().where(
+        (TvEpisode.tvdbid << epIDs)
+    )
 
     if showid != None:
-        query += " AND showid = ?"
-        params.append(showid)
-
-    myDB = db.DBConnection()
-    sqlResults = myDB.select(query, params)
+        query = query.where(
+            (TvEpisode.show == showid)
+        )
 
     epList = []
 
-    for curEp in sqlResults:
-        curShowObj = helpers.findCertainShow(showList, int(curEp["showid"]))
-        curEpObj = curShowObj.getEpisode(int(curEp["season"]), int(curEp["episode"]))
+    for curEp in query:
+        curShowObj = helpers.findCertainShow(showList, curEp.showid)
+        curEpObj = curShowObj.getEpisode(curEp.season, curEp.episode)
         epList.append(curEpObj)
 
     return epList

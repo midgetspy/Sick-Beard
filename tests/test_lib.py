@@ -20,6 +20,7 @@
 import unittest
 
 import sqlite3
+import yaml
 
 import sys, os.path
 sys.path.append(os.path.abspath('..'))
@@ -29,6 +30,7 @@ import sickbeard
 import shutil, time
 from sickbeard import encodingKludge as ek, providers, tvcache
 from sickbeard import db
+from sickbeard import db_peewee
 from sickbeard.databases import mainDB
 from sickbeard.databases import cache_db
 
@@ -69,7 +71,8 @@ sickbeard.showList = []
 sickbeard.QUALITY_DEFAULT = 4
 sickbeard.SEASON_FOLDERS_DEFAULT = 1
 sickbeard.SEASON_FOLDERS_FORMAT = 'Season %02d'
-
+sickbeard.FLATTEN_FOLDERS_DEFAULT = False
+sickbeard.COMING_EPS_SORT = 'date'
 sickbeard.NAMING_SHOW_NAME = 1
 sickbeard.NAMING_EP_NAME = 1
 sickbeard.NAMING_EP_TYPE = 0
@@ -78,6 +81,9 @@ sickbeard.NAMING_SEP_TYPE = 0
 sickbeard.NAMING_USE_PERIODS = 0
 sickbeard.NAMING_QUALITY = 0
 sickbeard.NAMING_DATES = 1
+sickbeard.NAMING_PATTERN = 'Season %0S/%SN - S%0SE%0E - %EN - %QN'
+sickbeard.NAMING_ABD_PATTERN = '%SN - %A-D - %EN'
+sickbeard.WEB_ROOT = '/'
 
 sickbeard.PROVIDER_ORDER = ["sick_beard_index"]
 sickbeard.newznabProviderList = providers.getNewznabProviderList("Sick Beard Index|http://momo.sickbeard.com/||1!!!NZBs.org|http://nzbs.org/||0")
@@ -121,41 +127,45 @@ class SickbeardTestDBCase(unittest.TestCase):
         tearDown_test_episode_file()
         tearDown_test_show_dir()
 
+    def loadFixtures(self):
+        ep_data = yaml.load(
+            open(
+                os.path.join(TESTDIR, 'fixtures/tv_episodes.yaml')).read())
+        show_data = yaml.load(
+            open(
+                os.path.join(TESTDIR, 'fixtures/tv_show_fixtures.yaml')).read())
+        history_data = yaml.load(
+            open(
+                os.path.join(TESTDIR, 'fixtures/history.yaml')).read())
+        db_peewee.TvEpisode._meta.auto_increment = False
+        db_peewee.TvShow._meta.auto_increment = False
+        with db_peewee.maindb.transaction():
+            for show in show_data:
+                s = db_peewee.TvShow()
+                for key, value in show_data[show].items():
+                    setattr(s, key, value)
+                s.save(force_insert=True)
 
-class TestDBConnection(db.DBConnection, object):
+            for ep in ep_data:
+                t = db_peewee.TvEpisode()
+                for key, value in ep_data[ep].items():
+                    setattr(t, key, value)
+                t.save(force_insert=True)
 
-    def __init__(self, dbFileName=TESTDBNAME):
-        dbFileName = os.path.join(TESTDIR, dbFileName)
-        super(TestDBConnection, self).__init__(dbFileName)
+            for history in history_data:
+                h = db_peewee.History()
+                for key, value in history_data[history].items():
+                    setattr(h, key, value)
+                h.save()
 
 
-class TestCacheDBConnection(TestDBConnection, object):
+        db_peewee.TvShow._meta.auto_increment = True
+        db_peewee.TvEpisode._meta.auto_increment = True
 
-    def __init__(self, providerName):
-        db.DBConnection.__init__(self, os.path.join(TESTDIR, TESTCACHEDBNAME))
-
-        # Create the table if it's not already there
-        try:
-            sql = "CREATE TABLE "+providerName+" (name TEXT, season NUMERIC, episodes TEXT, tvrid NUMERIC, tvdbid NUMERIC, url TEXT, time NUMERIC, quality TEXT);"
-            self.connection.execute(sql)
-            self.connection.commit()
-        except sqlite3.OperationalError, e:
-            if str(e) != "table "+providerName+" already exists":
-                raise
-
-        # Create the table if it's not already there
-        try:
-            sql = "CREATE TABLE lastUpdate (provider TEXT, time NUMERIC);"
-            self.connection.execute(sql)
-            self.connection.commit()
-        except sqlite3.OperationalError, e:
-            if str(e) != "table lastUpdate already exists":
-                raise
 
 # this will override the normal db connection
-sickbeard.db.DBConnection = TestDBConnection
-sickbeard.tvcache.CacheDBConnection = TestCacheDBConnection
-
+db_peewee.maindb.init('sickbeard_test', user='sickbeard')
+db_peewee.cachedb.init('sickbeard_test', user='sickbeard')
 
 #=================
 # test functions
@@ -163,25 +173,36 @@ sickbeard.tvcache.CacheDBConnection = TestCacheDBConnection
 def setUp_test_db():
     """upgrades the db to the latest version
     """
-    # upgrading the db
-    db.upgradeDatabase(db.DBConnection(), mainDB.InitialSchema)
-    # fix up any db problems
-    db.sanityCheckDatabase(db.DBConnection(), mainDB.MainSanityCheck)
-    
-    #and for cache.b too
-    db.upgradeDatabase(db.DBConnection("cache.db"), cache_db.InitialSchema)
+    #db_peewee.maindb.init(os.path.join(TESTDIR, 'sickbeard.db'))
+    #db_peewee.cachedb.init(os.path.join(TESTDIR, 'cache.db'))
+    #db_peewee.cachedb.init('sickbeard_test', user='sickbeard')
 
+    db_peewee.createAllTables()
+    # upgrading the db
+    #db.upgradeDatabase(db.DBConnection(), mainDB.InitialSchema)
+    # fix up any db problems
+    db.sanityCheckDatabase(mainDB.MainSanityCheck)
+
+    #and for cache.b too
+    #db.upgradeDatabase(db.DBConnection("cache.db"), cache_db.InitialSchema)
 
 def tearDown_test_db():
     """Deletes the test db
         although this seams not to work on my system it leaves me with an zero kb file
     """
+    db_peewee.dropAllTables()
+    if not db_peewee.maindb.is_closed():
+        db_peewee.maindb.close()
+    if not db_peewee.cachedb.is_closed():
+        db_peewee.cachedb.close()
     # uncomment next line so leave the db intact beween test and at the end
     #return False
     if os.path.exists(os.path.join(TESTDIR, TESTDBNAME)):
         os.remove(os.path.join(TESTDIR, TESTDBNAME))
     if os.path.exists(os.path.join(TESTDIR, TESTCACHEDBNAME)):
         os.remove(os.path.join(TESTDIR, TESTCACHEDBNAME))
+
+db_peewee.dropAllTables()
 
 def setUp_test_episode_file():
     if not os.path.exists(FILEDIR):
@@ -203,8 +224,6 @@ def setUp_test_show_dir():
 
 def tearDown_test_show_dir():
     shutil.rmtree(SHOWDIR)
-
-tearDown_test_db()
 
 if __name__ == '__main__':
     print "=================="

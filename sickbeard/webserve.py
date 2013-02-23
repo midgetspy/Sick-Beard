@@ -26,6 +26,7 @@ import re
 import threading
 import datetime
 import random
+from lib import peewee
 
 from Cheetah.Template import Template
 import cherrypy.lib
@@ -35,11 +36,13 @@ import sickbeard
 from sickbeard import config, sab
 from sickbeard import history, notifiers, processTV
 from sickbeard import ui
-from sickbeard import logger, helpers, exceptions, classes, db
+from sickbeard import logger, helpers, exceptions, classes
 from sickbeard import encodingKludge as ek
 from sickbeard import search_queue
 from sickbeard import image_cache
 from sickbeard import naming
+from sickbeard.db_peewee import TvShow, TvEpisode
+from sickbeard.db_peewee import History as DbHistory
 
 from sickbeard.providers import newznab
 from sickbeard.common import Quality, Overview, statusStrings
@@ -210,23 +213,23 @@ class Manage:
 
     @cherrypy.expose
     def showEpisodeStatuses(self, tvdb_id, whichStatus):
-        myDB = db.DBConnection()
-
         status_list = [int(whichStatus)]
         if status_list[0] == SNATCHED:
             status_list = Quality.SNATCHED + Quality.SNATCHED_PROPER
 
-        cur_show_results = myDB.select("SELECT season, episode, name FROM tv_episodes WHERE showid = ? AND season != 0 AND status IN ("+','.join(['?']*len(status_list))+")", [int(tvdb_id)] + status_list)
-
+        results = TvEpisode.select().where(
+            (TvEpisode.show == tvdb_id) &
+            (TvEpisode.season != 0) &
+            (TvEpisode.status << status_list)
+        )
         result = {}
-        for cur_result in cur_show_results:
-            cur_season = int(cur_result["season"])
-            cur_episode = int(cur_result["episode"])
-
+        for cur_result in results:
+            cur_season = cur_result.season
+            cur_episode = cur_result.episode
             if cur_season not in result:
                 result[cur_season] = {}
 
-            result[cur_season][cur_episode] = cur_result["name"]
+            result[cur_season][cur_episode] = cur_result.name
 
         return json.dumps(result)
 
@@ -249,20 +252,22 @@ class Manage:
         if not status_list:
             return _munge(t)
 
-        myDB = db.DBConnection()
-        status_results = myDB.select("SELECT show_name, tv_shows.tvdb_id as tvdb_id FROM tv_episodes, tv_shows WHERE tv_episodes.status IN ("+','.join(['?']*len(status_list))+") AND season != 0 AND tv_episodes.showid = tv_shows.tvdb_id ORDER BY show_name", status_list)
+        results = TvEpisode.select(TvEpisode, TvShow).where(
+            (TvEpisode.season != 0) &
+            (TvEpisode.status << status_list)
+        ).join(TvShow).order_by(TvShow.show_name)
 
         ep_counts = {}
         show_names = {}
         sorted_show_ids = []
-        for cur_status_result in status_results:
-            cur_tvdb_id = int(cur_status_result["tvdb_id"])
+        for cur_status_result in results:
+            cur_tvdb_id = cur_status_result.tvdb_id
             if cur_tvdb_id not in ep_counts:
                 ep_counts[cur_tvdb_id] = 1
             else:
                 ep_counts[cur_tvdb_id] += 1
 
-            show_names[cur_tvdb_id] = cur_status_result["show_name"]
+            show_names[cur_tvdb_id] = cur_status_result.show_name
             if cur_tvdb_id not in sorted_show_ids:
                 sorted_show_ids.append(cur_tvdb_id)
 
@@ -293,14 +298,16 @@ class Manage:
 
             to_change[tvdb_id].append(what)
 
-        myDB = db.DBConnection()
-
         for cur_tvdb_id in to_change:
 
             # get a list of all the eps we want to change if they just said "all"
             if 'all' in to_change[cur_tvdb_id]:
-                all_eps_results = myDB.select("SELECT season, episode FROM tv_episodes WHERE status IN ("+','.join(['?']*len(status_list))+") AND season != 0 AND showid = ?", status_list + [cur_tvdb_id])
-                all_eps = [str(x["season"])+'x'+str(x["episode"]) for x in all_eps_results]
+                results = TvEpisode.select().where(
+                    (TvEpisode.status << status_list) &
+                    (TvEpisode.season != 0) &
+                    (TvEpisode.show == cur_tvdb_id)
+                )
+                all_eps = [str(x.season)+'x'+str(x.episode) for x in results]
                 to_change[cur_tvdb_id] = all_eps
 
             Home().setStatus(cur_tvdb_id, '|'.join(to_change[cur_tvdb_id]), newStatus, direct=True)
@@ -323,8 +330,6 @@ class Manage:
         t = PageTemplate(file="manage_backlogOverview.tmpl")
         t.submenu = ManageMenu
 
-        myDB = db.DBConnection()
-
         showCounts = {}
         showCats = {}
         showSQLResults = {}
@@ -340,17 +345,21 @@ class Manage:
             epCounts[Overview.UNAIRED] = 0
             epCounts[Overview.SNATCHED] = 0
 
-            sqlResults = myDB.select("SELECT * FROM tv_episodes WHERE showid = ? ORDER BY season DESC, episode DESC", [curShow.tvdbid])
+            results = [e for e in TvEpisode.select().where(
+                (TvEpisode.show == curShow.tvdbid)
+            ).order_by(
+                TvEpisode.season.desc(),
+                TvEpisode.episode.desc()
+            )]
 
-            for curResult in sqlResults:
-
-                curEpCat = curShow.getOverview(int(curResult["status"]))
-                epCats[str(curResult["season"]) + "x" + str(curResult["episode"])] = curEpCat
+            for curResult in results:
+                curEpCat = curShow.getOverview(curResult.status)
+                epCats[str(curResult.season) + "x" + str(curResult.episode)] = curEpCat
                 epCounts[curEpCat] += 1
 
             showCounts[curShow.tvdbid] = epCounts
             showCats[curShow.tvdbid] = epCats
-            showSQLResults[curShow.tvdbid] = sqlResults
+            showSQLResults[curShow.tvdbid] = results
 
         t.showCounts = showCounts
         t.showCats = showCats
@@ -575,16 +584,17 @@ class History:
     @cherrypy.expose
     def index(self, limit=100):
 
-        myDB = db.DBConnection()
-
-#        sqlResults = myDB.select("SELECT h.*, show_name, name FROM history h, tv_shows s, tv_episodes e WHERE h.showid=s.tvdb_id AND h.showid=e.showid AND h.season=e.season AND h.episode=e.episode ORDER BY date DESC LIMIT "+str(numPerPage*(p-1))+", "+str(numPerPage))
         if limit == "0":
-            sqlResults = myDB.select("SELECT h.*, show_name FROM history h, tv_shows s WHERE h.showid=s.tvdb_id ORDER BY date DESC")
+            sqlResults = DbHistory.select(DbHistory, TvShow).join(TvShow).order_by(
+                DbHistory.date.desc()
+            )
         else:
-            sqlResults = myDB.select("SELECT h.*, show_name FROM history h, tv_shows s WHERE h.showid=s.tvdb_id ORDER BY date DESC LIMIT ?", [limit])
+            sqlResults = DbHistory.select(DbHistory, TvShow).join(TvShow).order_by(
+                DbHistory.date.desc()
+            ).limit(limit)
 
         t = PageTemplate(file="history.tmpl")
-        t.historyResults = sqlResults
+        t.historyResults = [h for h in sqlResults]
         t.limit = limit
         t.submenu = [
             { 'title': 'Clear History', 'path': 'history/clearHistory' },
@@ -597,8 +607,7 @@ class History:
     @cherrypy.expose
     def clearHistory(self):
 
-        myDB = db.DBConnection()
-        myDB.action("DELETE FROM history WHERE 1=1")
+        DbHistory.delete().execute()
         ui.notifications.message('History cleared')
         redirect("/history")
 
@@ -606,8 +615,10 @@ class History:
     @cherrypy.expose
     def trimHistory(self):
 
-        myDB = db.DBConnection()
-        myDB.action("DELETE FROM history WHERE date < "+str((datetime.datetime.today()-datetime.timedelta(days=30)).strftime(history.dateFormat)))
+        cutoff = datetime.datetime.today() - datetime.timedelta(days=30)
+        DbHistory.delete().where(
+            (DbHistory.date < cutoff)
+        ).execute()
         ui.notifications.message('Removed history entries greater than 30 days old')
         redirect("/history")
 
@@ -1590,8 +1601,6 @@ class NewHomeAddShows:
         t = PageTemplate(file="home_massAddTable.tmpl")
         t.submenu = HomeMenu()
 
-        myDB = db.DBConnection()
-
         if not rootDir:
             return "No folders selected."
         elif type(rootDir) != list:
@@ -1628,9 +1637,11 @@ class NewHomeAddShows:
                            }
 
                 # see if the folder is in XBMC already
-                dirResults = myDB.select("SELECT * FROM tv_shows WHERE location = ?", [cur_path])
+                dirResults = TvShow.select().where(
+                    (TvShow.location == cur_path)
+                ).first()
 
-                if dirResults:
+                if dirResults is not None:
                     cur_dir['added_already'] = True
                 else:
                     cur_dir['added_already'] = False
@@ -1965,6 +1976,40 @@ class Home:
     def index(self):
 
         t = PageTemplate(file="home.tmpl")
+
+        qual = (
+            Quality.DOWNLOADED +
+            Quality.SNATCHED +
+            Quality.SNATCHED_PROPER +
+            [ARCHIVED]
+        )
+        t.downloadedEps = [e for e in TvEpisode.select(
+            TvEpisode,
+            peewee.fn.Count(TvEpisode.episode_id).alias('count')
+        ).where(
+            (
+                (TvEpisode.status << Quality.DOWNLOADED + [ARCHIVED]) |
+                (TvEpisode.status << Quality.SNATCHED + Quality.SNATCHED_PROPER)
+            ) &
+            (TvEpisode.location != '') &
+            (TvEpisode.season != 0) &
+            (TvEpisode.episode != 0) &
+            (TvEpisode.airdate <= datetime.date.today().toordinal())
+        ).group_by(TvEpisode.show)]
+
+        t.allEps = [e for e in TvEpisode.select(
+            TvEpisode,
+            peewee.fn.Count(TvEpisode.episode_id).alias('count')
+        ).where(
+            (TvEpisode.season != 0) &
+            (TvEpisode.episode != 0) &
+            (TvEpisode.airdate <= datetime.date.today().toordinal()) &
+            (TvEpisode.status != IGNORED) &
+            (
+                (TvEpisode.airdate != 1) |
+                (TvEpisode.status << qual)
+            )
+        ).group_by(TvEpisode.show)]
         t.submenu = HomeMenu()
         return _munge(t)
 
@@ -2221,17 +2266,13 @@ class Home:
             if showObj == None:
                 return _genericMessage("Error", "Show not in show list")
 
-        myDB = db.DBConnection()
+        seasonResults = [e for e in TvEpisode.select().distinct().where(
+            (TvEpisode.show == showObj.tvdbid)
+        ).order_by(TvEpisode.season.desc())]
 
-        seasonResults = myDB.select(
-            "SELECT DISTINCT season FROM tv_episodes WHERE showid = ? ORDER BY season desc",
-            [showObj.tvdbid]
-        )
-
-        sqlResults = myDB.select(
-            "SELECT * FROM tv_episodes WHERE showid = ? ORDER BY season DESC, episode DESC",
-            [showObj.tvdbid]
-        )
+        sqlResults = [e for e in TvEpisode.select().where(
+            (TvEpisode.show == showObj.tvdbid)
+        ).order_by(TvEpisode.season.desc(), TvEpisode.episode.desc())]
 
         t = PageTemplate(file="displayShow.tmpl")
         t.submenu = [ { 'title': 'Edit', 'path': 'home/editShow?show=%d'%showObj.tvdbid } ]
@@ -2281,9 +2322,8 @@ class Home:
         epCounts[Overview.SNATCHED] = 0
 
         for curResult in sqlResults:
-
-            curEpCat = showObj.getOverview(int(curResult["status"]))
-            epCats[str(curResult["season"])+"x"+str(curResult["episode"])] = curEpCat
+            curEpCat = showObj.getOverview(curResult.status)
+            epCats[str(curResult.season)+"x"+str(curResult.episode)] = curEpCat
             epCounts[curEpCat] += 1
 
         def titler(x):
@@ -2303,8 +2343,12 @@ class Home:
 
     @cherrypy.expose
     def plotDetails(self, show, season, episode):
-        result = db.DBConnection().action("SELECT description FROM tv_episodes WHERE showid = ? AND season = ? AND episode = ?", (show, season, episode)).fetchone()
-        return result['description'] if result else 'Episode not found.'
+        result = TvEpisode.select().where(
+            (TvEpisode.show == show) &
+            (TvEpisode.season == season) &
+            (TvEpisode.episode == episode)
+        ).first()
+        return result.description if result else 'Episode not found.'
 
     @cherrypy.expose
     def editShow(self, show=None, location=None, anyQualities=[], bestQualities=[], flatten_folders=None, paused=None, directCall=False, air_by_date=None, tvdbLang=None):
@@ -2657,8 +2701,6 @@ class Home:
         except exceptions.ShowDirNotFoundException:
             return _genericMessage("Error", "Can't rename episodes when the show dir is missing.")
 
-        myDB = db.DBConnection()
-
         if eps == None:
             redirect("/home/displayShow?show=" + show)
 
@@ -2666,16 +2708,25 @@ class Home:
 
             epInfo = curEp.split('x')
 
-            # this is probably the worst possible way to deal with double eps but I've kinda painted myself into a corner here with this stupid database
-            ep_result = myDB.select("SELECT * FROM tv_episodes WHERE showid = ? AND season = ? AND episode = ? AND 5=5", [show, epInfo[0], epInfo[1]])
-            if not ep_result:
+            ep_result = TvEpisode.select().where(
+                (TvEpisode.show == show) &
+                (TvEpisode.season == epInfo[0]) &
+                (TvEpisode.episode == epInfo[1])
+            ).first()
+            if ep_result is None:
                 logger.log(u"Unable to find an episode for "+curEp+", skipping", logger.WARNING)
                 continue
-            related_eps_result = myDB.select("SELECT * FROM tv_episodes WHERE location = ? AND episode != ?", [ep_result[0]["location"], epInfo[1]])
+            related_eps_result = TvEpisode.select().where(
+                (TvEpisode.location == ep_result.location) &
+                (TvEpisode.episode == epInfo[1])
+            )
 
             root_ep_obj = show_obj.getEpisode(int(epInfo[0]), int(epInfo[1]))
             for cur_related_ep in related_eps_result:
-                related_ep_obj = show_obj.getEpisode(int(cur_related_ep["season"]), int(cur_related_ep["episode"]))
+                related_ep_obj = show_obj.getEpisode(
+                    cur_related_ep.season,
+                    cur_related_ep.episode
+                )
                 if related_ep_obj not in root_ep_obj.relatedEps:
                     root_ep_obj.relatedEps.append(related_ep_obj)
 
@@ -2815,31 +2866,47 @@ class WebInterface:
     @cherrypy.expose
     def comingEpisodes(self, layout="None"):
 
-        myDB = db.DBConnection()
-
         today = datetime.date.today().toordinal()
         next_week = (datetime.date.today() + datetime.timedelta(days=7)).toordinal()
         recently = (datetime.date.today() - datetime.timedelta(days=3)).toordinal()
 
         done_show_list = []
         qualList = Quality.DOWNLOADED + Quality.SNATCHED + [ARCHIVED, IGNORED]
-        sql_results = myDB.select("SELECT *, tv_shows.status as show_status FROM tv_episodes, tv_shows WHERE season != 0 AND airdate >= ? AND airdate < ? AND tv_shows.tvdb_id = tv_episodes.showid AND tv_episodes.status NOT IN ("+','.join(['?']*len(qualList))+")", [today, next_week] + qualList)
+        sql_results = [e for e in TvEpisode.select(TvEpisode, TvShow).where(
+            (TvEpisode.season != 0) &
+            (TvEpisode.airdate >= today) &
+            (TvEpisode.airdate < next_week)
+        ).join(TvShow).where(
+            ~(TvShow.status << qualList)
+        )]
         for cur_result in sql_results:
-            done_show_list.append(int(cur_result["showid"]))
+            done_show_list.append(cur_result.show.tvdb_id)
 
-        more_sql_results = myDB.select("SELECT *, tv_shows.status as show_status FROM tv_episodes outer_eps, tv_shows WHERE season != 0 AND showid NOT IN ("+','.join(['?']*len(done_show_list))+") AND tv_shows.tvdb_id = outer_eps.showid AND airdate = (SELECT airdate FROM tv_episodes inner_eps WHERE inner_eps.showid = outer_eps.showid AND inner_eps.airdate >= ? ORDER BY inner_eps.airdate ASC LIMIT 1) AND outer_eps.status NOT IN ("+','.join(['?']*len(Quality.DOWNLOADED+Quality.SNATCHED))+")", done_show_list + [next_week] + Quality.DOWNLOADED + Quality.SNATCHED)
-        sql_results += more_sql_results
+#        more_sql_results = myDB.select("SELECT *, tv_shows.status as show_status FROM tv_episodes outer_eps, tv_shows WHERE season != 0 AND showid NOT IN ("+','.join(['?']*len(done_show_list))+") AND tv_shows.tvdb_id = outer_eps.showid AND airdate = (SELECT airdate FROM tv_episodes inner_eps WHERE inner_eps.showid = outer_eps.showid AND inner_eps.airdate >= ? ORDER BY inner_eps.airdate ASC LIMIT 1) AND outer_eps.status NOT IN ("+','.join(['?']*len(Quality.DOWNLOADED+Quality.SNATCHED))+")", done_show_list + [next_week] + Quality.DOWNLOADED + Quality.SNATCHED)
+        # Not sure how to handle the inner select
+        sql_results += [e for e in TvEpisode.select(TvEpisode, TvShow).where(
+            (TvEpisode.season !=0 ) &
+            (TvEpisode.airdate >= next_week) &
+            ~(TvEpisode.status << (Quality.DOWNLOADED + Quality.SNATCHED))
+        ).join(TvShow).where(
+            ~(TvShow.tvdb_id << done_show_list)
+        ).order_by(TvEpisode.airdate.asc()).group_by(TvEpisode.show)]
 
-        more_sql_results = myDB.select("SELECT *, tv_shows.status as show_status FROM tv_episodes, tv_shows WHERE season != 0 AND tv_shows.tvdb_id = tv_episodes.showid AND airdate < ? AND airdate >= ? AND tv_episodes.status = ? AND tv_episodes.status NOT IN ("+','.join(['?']*len(qualList))+")", [today, recently, WANTED] + qualList)
-        sql_results += more_sql_results
+        #more_sql_results = myDB.select("SELECT *, tv_shows.status as show_status FROM tv_episodes, tv_shows WHERE season != 0 AND tv_shows.tvdb_id = tv_episodes.showid AND airdate < ? AND airdate >= ? AND tv_episodes.status = ? AND tv_episodes.status NOT IN ("+','.join(['?']*len(qualList))+")", [today, recently, WANTED] + qualList)
+        sql_results += [e for e in TvEpisode.select(TvEpisode, TvShow).where(
+            (TvEpisode.season != 0) &
+            (TvEpisode.airdate < today) &
+            (TvEpisode.airdate >= recently) &
+            (TvEpisode.status == WANTED)
+        ).join(TvShow)]
 
         #epList = sickbeard.comingList
 
         # sort by air date
         sorts = {
-            'date': (lambda x, y: cmp(int(x["airdate"]), int(y["airdate"]))),
-            'show': (lambda a, b: cmp(a["show_name"], b["show_name"])),
-            'network': (lambda a, b: cmp(a["network"], b["network"])),
+            'date': (lambda x, y: cmp(x.airdate, y.airdate)),
+            'show': (lambda a, b: cmp(a.show.show_name, b.show.show_name)),
+            'network': (lambda a, b: cmp(a.show.network, b.show.network)),
         }
 
         #epList.sort(sorts[sort])

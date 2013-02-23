@@ -49,6 +49,7 @@ import getopt
 import sickbeard
 
 from sickbeard import db
+from sickbeard import db_peewee
 from sickbeard.tv import TVShow
 from sickbeard import logger
 from sickbeard.version import SICKBEARD_VERSION
@@ -66,12 +67,9 @@ def loadShowsFromDB():
     Populates the showList with shows from the database
     """
 
-    myDB = db.DBConnection()
-    sqlResults = myDB.select("SELECT * FROM tv_shows")
-
-    for sqlShow in sqlResults:
+    for sqlShow in db_peewee.TvShow.select():
         try:
-            curShow = TVShow(int(sqlShow["tvdb_id"]))
+            curShow = TVShow(sqlShow.tvdb_id)
             sickbeard.showList.append(curShow)
         except Exception, e:
             logger.log(u"There was an error creating the show in " + sqlShow["location"] + ": " + str(e).decode('utf-8'), logger.ERROR)
@@ -261,6 +259,12 @@ def main():
 
     sickbeard.CFG = ConfigObj(sickbeard.CONFIG_FILE)
 
+    # Init PeeWee DB Connections
+    #db_peewee.maindb.init(os.path.join(sickbeard.PROG_DIR,'sickbeard.db'))
+    #db_peewee.cachedb.init(os.path.join(sickbeard.PROG_DIR,'cache.db'))
+    db_peewee.maindb.init('sickbeard', user='sickbeard')
+    #db_peewee.cachedb.init('sickbeard', user='sickbeard')
+
     # Initialize the config and our threads
     sickbeard.initialize(consoleLogging=consoleLogging)
 
@@ -312,6 +316,7 @@ def main():
             logger.log(u"Launching browser and exiting", logger.ERROR)
             sickbeard.launchBrowser(startPort)
         sys.exit()
+
 
     # Build from the DB to start with
     logger.log(u"Loading initial show list")

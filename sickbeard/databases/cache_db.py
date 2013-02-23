@@ -17,35 +17,28 @@
 # along with Sick Beard.  If not, see <http://www.gnu.org/licenses/>.
 
 from sickbeard import db
+from sickbeard.db_peewee import *
 
 # Add new migrations at the bottom of the list; subclass the previous migration.
 class InitialSchema (db.SchemaUpgrade):
+    cache_tables = [
+        ProviderCache,
+        Lastupdate,
+        CacheDbVersion,
+        SceneException,
+        SceneName
+    ]
     def test(self):
-        return self.hasTable("lastUpdate")
+        for t in self.cache_tables:
+            if not t.table_exists():
+                return False
+        return True
 
     def execute(self):
+        ProviderCache.create_table(fail_silently=True)
+        Lastupdate.create_table(fail_silently=True)
+        DbVersion.create_table(fail_silently=True)
+        SceneException.create_table(fail_silently=True)
+        SceneName.create_table(fail_silently=True)
 
-        queries = [
-            ("CREATE TABLE lastUpdate (provider TEXT, time NUMERIC);",),
-            ("CREATE TABLE db_version (db_version INTEGER);",),
-            ("INSERT INTO db_version (db_version) VALUES (?)", 1),
-        ]
-        for query in queries:
-            if len(query) == 1:
-                self.connection.action(query[0])
-            else:
-                self.connection.action(query[0], query[1:])
-
-class AddSceneExceptions(InitialSchema):
-    def test(self):
-        return self.hasTable("scene_exceptions")
-
-    def execute(self):
-        self.connection.action("CREATE TABLE scene_exceptions (exception_id INTEGER PRIMARY KEY, tvdb_id INTEGER KEY, show_name TEXT)")
-
-class AddSceneNameCache(AddSceneExceptions):
-    def test(self):
-        return self.hasTable("scene_names")
-
-    def execute(self):
-        self.connection.action("CREATE TABLE scene_names (tvdb_id INTEGER, name TEXT)")
+        DbVersion(db_version=1).save(force_insert=True)

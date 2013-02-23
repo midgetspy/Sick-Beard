@@ -31,13 +31,14 @@ from sickbeard import exceptions, logger, ui, db
 from sickbeard import generic_queue
 from sickbeard import name_cache
 from sickbeard.exceptions import ex
-
+from sickbeard.db_peewee import TvEpisode
 
 class ShowQueue(generic_queue.GenericQueue):
 
     def __init__(self):
         generic_queue.GenericQueue.__init__(self)
         self.queue_name = "SHOWQUEUE"
+
 
     def _isInQueue(self, show, actions):
         return show in [x.show for x in self.queue if x.action_id in actions]
@@ -251,7 +252,7 @@ class QueueItemAdd(ShowQueueItem):
             self.show.location = self.showDir
             self.show.quality = self.quality if self.quality else sickbeard.QUALITY_DEFAULT
             self.show.flatten_folders = self.flatten_folders if self.flatten_folders != None else sickbeard.FLATTEN_FOLDERS_DEFAULT
-            self.show.paused = 0
+            self.show.paused = False
 
             # be smartish about this
             if self.show.genre and "talk show" in self.show.genre.lower():
@@ -306,9 +307,12 @@ class QueueItemAdd(ShowQueueItem):
 
         # if they gave a custom status then change all the eps to it
         if self.default_status != SKIPPED:
-            logger.log(u"Setting all episodes to the specified default status: " + str(self.default_status))
-            myDB = db.DBConnection()
-            myDB.action("UPDATE tv_episodes SET status = ? WHERE status = ? AND showid = ? AND season != 0", [self.default_status, SKIPPED, self.show.tvdbid])
+            logger.log(u"Setting all episodes to the specified default status: "+str(self.default_status))
+            TvEpisode.update(status=self.default_status).where(
+                (TvEpisode.status == SKIPPED) &
+                (TvEpisode.show == self.show.tvdbid) &
+                (TvEpisode.season != 0)
+            )
 
         # if they started with WANTED eps then run the backlog
         if self.default_status == WANTED:

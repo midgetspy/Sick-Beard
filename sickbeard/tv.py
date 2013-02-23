@@ -32,7 +32,7 @@ from name_parser.parser import NameParser, InvalidNameException
 
 from lib.tvdb_api import tvdb_api, tvdb_exceptions
 
-from sickbeard import db
+from sickbeard import db_peewee
 from sickbeard import helpers, exceptions, logger
 from sickbeard.exceptions import ex
 from sickbeard import tvrage
@@ -77,6 +77,8 @@ class TVShow(object):
         if otherShow != None:
             raise exceptions.MultipleShowObjectsException("Can't create a show if it already exists")
 
+        self._db_tvshow = None
+
         self.loadFromDB()
 
         self.saveToDB()
@@ -118,35 +120,32 @@ class TVShow(object):
 
     def getAllEpisodes(self, season=None, has_location=False):
 
-        myDB = db.DBConnection()
-
-        sql_selection = "SELECT season, episode, "
-
-        # subselection to detect multi-episodes early, share_location > 0
-        sql_selection = sql_selection + " (SELECT COUNT (*) FROM tv_episodes WHERE showid = tve.showid AND season = tve.season AND location != '' AND location = tve.location AND episode != tve.episode) AS share_location "
-
-        sql_selection = sql_selection + " FROM tv_episodes tve WHERE showid = " + str(self.tvdbid)
-
+        query = self.db_tvshow.episodes
         if season is not None:
-            sql_selection = sql_selection + " AND season = " + str(season)
-        if has_location:
-            sql_selection = sql_selection + " AND location != '' "
+          query = query.where(db_peewee.TvEpisode.season == season)
+        if has_location is not None:
+          query = query.where(db_peewee.TvEpisode.location == has_location)
 
         # need ORDER episode ASC to rename multi-episodes in order S01E01-02
-        sql_selection = sql_selection + " ORDER BY season ASC, episode ASC"
-
-        results = myDB.select(sql_selection)
+        query.order_by(
+            db_peewee.TvEpisode.season.asc(),
+            db_peewee.TvEpisode.episode.asc())
 
         ep_list = []
-        for cur_result in results:
-            cur_ep = self.getEpisode(int(cur_result["season"]), int(cur_result["episode"]))
+        for cur_result in query:
+            cur_ep = self.getEpisode(cur_result.season, cur_result.episode)
             if cur_ep:
                 if cur_ep.location:
                     # if there is a location, check if it's a multi-episode (share_location > 0) and put them in relatedEps
-                    if cur_result["share_location"] > 0:
-                        related_eps_result = myDB.select("SELECT * FROM tv_episodes WHERE showid = ? AND season = ? AND location = ? AND episode != ? ORDER BY episode ASC", [self.tvdbid, cur_ep.season, cur_ep.location, cur_ep.episode])
-                        for cur_related_ep in related_eps_result:
-                            related_ep = self.getEpisode(int(cur_related_ep["season"]), int(cur_related_ep["episode"]))
+                    related_query = db_peewee.TvEpisode.select().where(
+                        db_peewee.TvEpisode.show == self.tvdbid &
+                        db_peewee.TvEpisode.season == cur_ep.season &
+                        db_peewee.TvEpisode.location == cur_ep.location &
+                        db_peewee.TvEpisode.episode == cur_ep.episode)
+                    related_query.order_by(db_peewee.TvEpisode.episode.asc())
+                    if related_query.count() > 0:
+                        for cur_related_ep in related_query:
+                            related_ep = self.getEpisode(cur_related_ep.season, cur_related_ep.episode)
                             if related_ep not in cur_ep.relatedEps:
                                 cur_ep.relatedEps.append(related_ep)
                 ep_list.append(cur_ep)
@@ -173,7 +172,7 @@ class TVShow(object):
                 ep = TVEpisode(self, season, episode, file)
             else:
                 ep = TVEpisode(self, season, episode)
-
+            #TODO: can this happen?
             if ep != None:
                 self.episodes[season][episode] = ep
 
@@ -213,12 +212,12 @@ class TVShow(object):
 
         logger.log(str(self.tvdbid) + ": Writing NFOs for all episodes")
 
-        myDB = db.DBConnection()
-        sqlResults = myDB.select("SELECT * FROM tv_episodes WHERE showid = ? AND location != ''", [self.tvdbid])
+        query = self.db_tvshow.episodes.where(
+            db_peewee.TvEpisode.location != '')
 
-        for epResult in sqlResults:
-            logger.log(str(self.tvdbid) + ": Retrieving/creating episode " + str(epResult["season"]) + "x" + str(epResult["episode"]), logger.DEBUG)
-            curEp = self.getEpisode(epResult["season"], epResult["episode"])
+        for epResult in query:
+            logger.log(str(self.tvdbid) + ": Retrieving/creating episode " + str(epResult.season) + "x" + str(epResult.episode), logger.DEBUG)
+            curEp = self.getEpisode(epResult.season, epResult.episode)
             curEp.createMetaFiles()
 
 
@@ -261,7 +260,7 @@ class TVShow(object):
                 parse_result = np.parse(ep_file_name)
             except InvalidNameException:
                 pass
-        
+
             if not ' ' in ep_file_name and parse_result and parse_result.release_group:
                 logger.log(u"Name " + ep_file_name + " gave release group of " + parse_result.release_group + ", seems valid", logger.DEBUG)
                 curEpisode.release_name = ep_file_name
@@ -275,10 +274,6 @@ class TVShow(object):
 
         logger.log(u"Loading all episodes from the DB")
 
-        myDB = db.DBConnection()
-        sql = "SELECT * FROM tv_episodes WHERE showid = ?"
-        sqlResults = myDB.select(sql, [self.tvdbid])
-
         scannedEps = {}
 
         ltvdb_api_parms = sickbeard.TVDB_API_PARMS.copy()
@@ -291,12 +286,11 @@ class TVShow(object):
         cachedShow = t[self.tvdbid]
         cachedSeasons = {}
 
-        for curResult in sqlResults:
-
+        for curResult in self.db_tvshow.episodes:
             deleteEp = False
-                    
-            curSeason = int(curResult["season"])
-            curEpisode = int(curResult["episode"])
+
+            curSeason = curResult.season
+            curEpisode = curResult.episode
             if curSeason not in cachedSeasons:
                 try:
                     cachedSeasons[curSeason] = cachedShow[curSeason]
@@ -311,12 +305,12 @@ class TVShow(object):
 
             try:
                 curEp = self.getEpisode(curSeason, curEpisode)
-                
+
                 # if we found out that the ep is no longer on TVDB then delete it from our database too
                 if deleteEp:
                     curEp.deleteEpisode()
-                
-                curEp.loadFromDB(curSeason, curEpisode)
+
+                curEp.loadFromDB()
                 curEp.loadFromTVDB(tvapi=t, cachedSeason=cachedSeasons[curSeason])
                 scannedEps[curSeason][curEpisode] = True
             except exceptions.EpisodeDeletedException:
@@ -563,56 +557,62 @@ class TVShow(object):
 
         return rootEp
 
+    @property
+    def db_tvshow(self):
+        if self._db_tvshow is None:
+            logger.log(str(self.tvdbid) + ": Loading show info from database")
+
+            db_tvshow = db_peewee.TvShow.select().where(
+                db_peewee.TvShow.tvdb_id == self.tvdbid)
+
+            if db_tvshow.count() > 1:
+                raise exceptions.MultipleDBShowsException()
+            elif db_tvshow.count() == 0:
+                logger.log(
+                    str(self.tvdbid) + ": Unable to find the show in the database")
+                return
+            else:
+                self._db_tvshow = db_tvshow.get()
+
+        return self._db_tvshow
 
     def loadFromDB(self, skipNFO=False):
-
-        logger.log(str(self.tvdbid) + ": Loading show info from database")
-
-        myDB = db.DBConnection()
-
-        sqlResults = myDB.select("SELECT * FROM tv_shows WHERE tvdb_id = ?", [self.tvdbid])
-
-        if len(sqlResults) > 1:
-            raise exceptions.MultipleDBShowsException()
-        elif len(sqlResults) == 0:
-            logger.log(str(self.tvdbid) + ": Unable to find the show in the database")
-            return
-        else:
+        if self.db_tvshow:
             if self.name == "":
-                self.name = sqlResults[0]["show_name"]
-            self.tvrname = sqlResults[0]["tvr_name"]
+                self.name = self.db_tvshow.show_name
+            self.tvrname = self.db_tvshow.tvr_name
             if self.network == "":
-                self.network = sqlResults[0]["network"]
+                self.network = self.db_tvshow.network
             if self.genre == "":
-                self.genre = sqlResults[0]["genre"]
+                self.genre = self.db_tvshow.genre
 
-            self.runtime = sqlResults[0]["runtime"]
+            self.runtime = self.db_tvshow.runtime
 
-            self.status = sqlResults[0]["status"]
+            self.status = self.db_tvshow.status
             if self.status == None:
                 self.status = ""
-            self.airs = sqlResults[0]["airs"]
+            self.airs = self.db_tvshow.airs
             if self.airs == None:
                 self.airs = ""
-            self.startyear = sqlResults[0]["startyear"]
+            self.startyear = self.db_tvshow.startyear
             if self.startyear == None:
                 self.startyear = 0
 
-            self.air_by_date = sqlResults[0]["air_by_date"]
+            self.air_by_date = self.db_tvshow.air_by_date
             if self.air_by_date == None:
                 self.air_by_date = 0
 
-            self.quality = int(sqlResults[0]["quality"])
-            self.flatten_folders = int(sqlResults[0]["flatten_folders"])
-            self.paused = int(sqlResults[0]["paused"])
+            self.quality = int(self.db_tvshow.quality)
+            self.flatten_folders = int(self.db_tvshow.flatten_folders)
+            self.paused = int(self.db_tvshow.paused)
 
-            self._location = sqlResults[0]["location"]
+            self._location = self.db_tvshow.location
 
-            if self.tvrid == 0:
-                self.tvrid = int(sqlResults[0]["tvr_id"])
+            if self.tvrid == 0 and self.db_tvshow.tvr_id:
+                self.tvrid = int(self.db_tvshow.tvr_id)
 
             if self.lang == "":
-                self.lang = sqlResults[0]["lang"]
+                self.lang = self.db_tvshow.lang
 
 
     def loadFromTVDB(self, cache=True, tvapi=None, cachedSeason=None):
@@ -715,21 +715,20 @@ class TVShow(object):
 
         logger.log(str(self.tvdbid) + ": Finding the episode which airs next", logger.DEBUG)
 
-        myDB = db.DBConnection()
-        innerQuery = "SELECT airdate FROM tv_episodes WHERE showid = ? AND airdate >= ? AND status = ? ORDER BY airdate ASC LIMIT 1"
-        innerParams = [self.tvdbid, datetime.date.today().toordinal(), UNAIRED]
-        query = "SELECT * FROM tv_episodes WHERE showid = ? AND airdate >= ? AND airdate <= (" + innerQuery + ") and status = ?"
-        params = [self.tvdbid, datetime.date.today().toordinal()] + innerParams + [UNAIRED]
-        sqlResults = myDB.select(query, params)
+        # Get the next UNAIRED episode with an airdate > now
+        query = self.db_tvshow.episodes.where(
+            db_peewee.TvEpisode.airdate >= datetime.date.today().toordinal())
+        query = query.where(db_peewee.TvEpisode.status == UNAIRED)
 
-        if sqlResults == None or len(sqlResults) == 0:
+        if query.count() == 0:
             logger.log(str(self.tvdbid) + ": No episode found... need to implement tvrage and also show status", logger.DEBUG)
             return []
         else:
-            logger.log(str(self.tvdbid) + ": Found episode " + str(sqlResults[0]["season"]) + "x" + str(sqlResults[0]["episode"]), logger.DEBUG)
+            episode = query.first()
+            logger.log(str(self.tvdbid) + ": Found episode " + str(episode.season) + "x" + str(episode.episode), logger.DEBUG)
             foundEps = []
-            for sqlEp in sqlResults:
-                curEp = self.getEpisode(int(sqlEp["season"]), int(sqlEp["episode"]))
+            for ep in query:
+                curEp = self.getEpisode(ep.season, ep.episode)
                 foundEps.append(curEp)
             return foundEps
 
@@ -744,13 +743,14 @@ class TVShow(object):
 
     def deleteShow(self):
 
-        myDB = db.DBConnection()
-        myDB.action("DELETE FROM tv_episodes WHERE showid = ?", [self.tvdbid])
-        myDB.action("DELETE FROM tv_shows WHERE tvdb_id = ?", [self.tvdbid])
+        with db_peewee.maindb.transaction():
+          for ep in self.db_tvshow.episodes:
+            ep.delete_instance()
+          self.db_tvshow.delete_instance()
 
         # remove self from show list
         sickbeard.showList = [x for x in sickbeard.showList if x.tvdbid != self.tvdbid]
-        
+
         # clear the cache
         image_cache_dir = ek.ek(os.path.join, sickbeard.CACHE_DIR, 'images')
         for cache_file in ek.ek(glob.glob, ek.ek(os.path.join, image_cache_dir, str(self.tvdbid)+'.*')):
@@ -759,7 +759,7 @@ class TVShow(object):
 
     def populateCache(self):
         cache_inst = image_cache.ImageCache()
-        
+
         logger.log(u"Checking & filling cache for show "+self.name)
         cache_inst.fill_cache(self)
 
@@ -775,13 +775,13 @@ class TVShow(object):
         # run through all locations from DB, check that they exist
         logger.log(str(self.tvdbid) + ": Loading all episodes with a location from the database")
 
-        myDB = db.DBConnection()
-        sqlResults = myDB.select("SELECT * FROM tv_episodes WHERE showid = ? AND location != ''", [self.tvdbid])
+        query = self.db_tvshow.episodes.where(
+            db_peewee.TvEpisode.location != '')
 
-        for ep in sqlResults:
-            curLoc = os.path.normpath(ep["location"])
-            season = int(ep["season"])
-            episode = int(ep["episode"])
+        for ep in query:
+            curLoc = os.path.normpath(ep.location)
+            season = ep.season
+            episode = ep.episode
 
             try:
                 curEp = self.getEpisode(season, episode)
@@ -806,28 +806,29 @@ class TVShow(object):
     def saveToDB(self):
 
         logger.log(str(self.tvdbid) + ": Saving show info to database", logger.DEBUG)
+        new_save = False
+        if self.db_tvshow is None:
+            new_save = True
+            self._db_tvshow = db_peewee.TvShow()
 
-        myDB = db.DBConnection()
+        self.db_tvshow.tvdb_id = self.tvdbid
+        self.db_tvshow.show_name = self.name
+        self.db_tvshow.tvr_id = self.tvrid
+        self.db_tvshow.location = self._location
+        self.db_tvshow.network = self.network
+        self.db_tvshow.genre = self.genre
+        self.db_tvshow.runtime = self.runtime
+        self.db_tvshow.quality = self.quality
+        self.db_tvshow.airs = self.airs
+        self.db_tvshow.status = self.status
+        self.db_tvshow.flatten_folders = self.flatten_folders
+        self.db_tvshow.paused = bool(self.paused)
+        self.db_tvshow.air_by_date = self.air_by_date
+        self.db_tvshow.startyear = self.startyear
+        self.db_tvshow.tvr_name = self.tvrname
+        self.db_tvshow.lang = self.lang
 
-        controlValueDict = {"tvdb_id": self.tvdbid}
-        newValueDict = {"show_name": self.name,
-                        "tvr_id": self.tvrid,
-                        "location": self._location,
-                        "network": self.network,
-                        "genre": self.genre,
-                        "runtime": self.runtime,
-                        "quality": self.quality,
-                        "airs": self.airs,
-                        "status": self.status,
-                        "flatten_folders": self.flatten_folders,
-                        "paused": self.paused,
-                        "air_by_date": self.air_by_date,
-                        "startyear": self.startyear,
-                        "tvr_name": self.tvrname,
-                        "lang": self.lang
-                        }
-
-        myDB.upsert("tv_shows", newValueDict, controlValueDict)
+        self.db_tvshow.save(force_insert=new_save)
 
 
     def __str__(self):
@@ -860,14 +861,15 @@ class TVShow(object):
             logger.log(u"I know for sure I don't want this episode, saying no", logger.DEBUG)
             return False
 
-        myDB = db.DBConnection()
-        sqlResults = myDB.select("SELECT status FROM tv_episodes WHERE showid = ? AND season = ? AND episode = ?", [self.tvdbid, season, episode])
+        query = self.db_tvshow.episodes.where(
+            db_peewee.TvEpisode.season == season)
+        query = query.where(db_peewee.TvEpisode.episode == episode)
 
-        if not sqlResults or not len(sqlResults):
+        if query.count() == 0:
             logger.log(u"Unable to find the episode", logger.DEBUG)
             return False
 
-        epStatus = int(sqlResults[0]["status"])
+        epStatus = query.first().status
 
         logger.log(u"current episode status: "+str(epStatus), logger.DEBUG)
 
@@ -953,6 +955,8 @@ class TVEpisode(object):
         self._file_size = 0
         self._release_name = ''
 
+        self._db_tvepisode = None
+
         # setting any of the above sets the dirty flag
         self.dirty = True
 
@@ -979,6 +983,33 @@ class TVEpisode(object):
     #location = property(lambda self: self._location, dirty_setter("_location"))
     file_size = property(lambda self: self._file_size, dirty_setter("_file_size"))
     release_name = property(lambda self: self._release_name, dirty_setter("_release_name"))
+
+    @property
+    def db_tvepisode(self):
+        if self._db_tvepisode is None:
+            logger.log(str(self.show.tvdbid) +
+                ": Loading episode details from DB for "+str(self.show.tvdbid)+"episode " +
+                str(self.season) + "x" + str(self.episode), logger.DEBUG)
+
+            query = db_peewee.TvEpisode.select().where(
+                (db_peewee.TvEpisode.show == self.show.db_tvshow) &
+                (db_peewee.TvEpisode.season == self.season) &
+                (db_peewee.TvEpisode.episode == self.episode)
+            )
+            logger.log(query.sql()[0], logger.DEBUG)
+
+            if query.count() > 1:
+                raise exceptions.MultipleDBEpisodesException("Your DB has two records for the same show somehow.")
+            elif query.count() == 0:
+                logger.log(str(self.show.tvdbid) +
+                    ": Episode " + str(self.season) +
+                    "x" + str(self.episode) +
+                    " not found in the database", logger.DEBUG)
+                return False
+            else:
+                self._db_tvepisode = query.get()
+
+        return self._db_tvepisode
 
     def _set_location(self, new_location):
         logger.log(u"Setter sets location to " + new_location, logger.DEBUG)
@@ -1024,7 +1055,7 @@ class TVEpisode(object):
 
     def specifyEpisode(self, season, episode):
 
-        sqlResult = self.loadFromDB(season, episode)
+        sqlResult = self.loadFromDB()
 
         if not sqlResult:
             # only load from NFO if we didn't load from DB
@@ -1050,43 +1081,32 @@ class TVEpisode(object):
         if self.dirty:
             self.saveToDB()
 
-    def loadFromDB(self, season, episode):
-
-        logger.log(str(self.show.tvdbid) + ": Loading episode details from DB for episode " + str(season) + "x" + str(episode), logger.DEBUG)
-
-        myDB = db.DBConnection()
-        sqlResults = myDB.select("SELECT * FROM tv_episodes WHERE showid = ? AND season = ? AND episode = ?", [self.show.tvdbid, season, episode])
-
-        if len(sqlResults) > 1:
-            raise exceptions.MultipleDBEpisodesException("Your DB has two records for the same show somehow.")
-        elif len(sqlResults) == 0:
-            logger.log(str(self.show.tvdbid) + ": Episode " + str(self.season) + "x" + str(self.episode) + " not found in the database", logger.DEBUG)
+    def loadFromDB(self):
+        if not self.db_tvepisode:
             return False
         else:
             #NAMEIT logger.log(u"AAAAA from" + str(self.season)+"x"+str(self.episode) + " -" + self.name + " to " + str(sqlResults[0]["name"]))
-            if sqlResults[0]["name"] != None:
-                self.name = sqlResults[0]["name"]
-            self.season = season
-            self.episode = episode
-            self.description = sqlResults[0]["description"]
+            if self.db_tvepisode.name != None:
+                self.name = self.db_tvepisode.name
+            self.description = self.db_tvepisode.description
             if self.description == None:
                 self.description = ""
-            self.airdate = datetime.date.fromordinal(int(sqlResults[0]["airdate"]))
+            self.airdate = datetime.date.fromordinal(self.db_tvepisode.airdate)
             #logger.log(u"1 Status changes from " + str(self.status) + " to " + str(sqlResults[0]["status"]), logger.DEBUG)
-            self.status = int(sqlResults[0]["status"])
+            self.status = self.db_tvepisode.status
 
             # don't overwrite my location
-            if sqlResults[0]["location"] != "" and sqlResults[0]["location"] != None:
-                self.location = os.path.normpath(sqlResults[0]["location"])
-            if sqlResults[0]["file_size"]:
-                self.file_size = int(sqlResults[0]["file_size"])
+            if self.db_tvepisode.location != "" and self.db_tvepisode.location != None:
+                self.location = os.path.normpath(self.db_tvepisode.location)
+            if self.db_tvepisode.file_size:
+                self.file_size = self.db_tvepisode.file_size
             else:
                 self.file_size = 0
 
-            self.tvdbid = int(sqlResults[0]["tvdbid"])
-            
-            if sqlResults[0]["release_name"] != None:
-                self.release_name = sqlResults[0]["release_name"]
+            self.tvdbid = self.db_tvepisode.tvdbid
+
+            if self.db_tvepisode.release_name != None:
+                self.release_name = self.db_tvepisode.release_name
 
             self.dirty = False
             return True
@@ -1326,7 +1346,6 @@ class TVEpisode(object):
         return result
 
     def deleteEpisode(self):
-
         logger.log(u"Deleting "+self.show.name+" "+str(self.season)+"x"+str(self.episode)+" from the DB", logger.DEBUG)
 
         # remove myself from the show dictionary
@@ -1336,20 +1355,19 @@ class TVEpisode(object):
 
         # delete myself from the DB
         logger.log(u"Deleting myself from the database", logger.DEBUG)
-        myDB = db.DBConnection()
-        sql = "DELETE FROM tv_episodes WHERE showid="+str(self.show.tvdbid)+" AND season="+str(self.season)+" AND episode="+str(self.episode)
-        myDB.action(sql)
+        if self.db_tvepisode:
+          self.db_tvepisode.delete_instance()
 
         raise exceptions.EpisodeDeletedException()
 
     def saveToDB(self, forceSave=False):
         """
         Saves this episode to the database if any of its data has been changed since the last save.
-        
+
         forceSave: If True it will save to the database even if no data has been changed since the
                     last save (aka if the record is not dirty).
         """
-        
+
         if not self.dirty and not forceSave:
             logger.log(str(self.show.tvdbid) + ": Not saving episode to db - record is not dirty", logger.DEBUG)
             return
@@ -1358,23 +1376,25 @@ class TVEpisode(object):
 
         logger.log(u"STATUS IS " + str(self.status), logger.DEBUG)
 
-        myDB = db.DBConnection()
-        newValueDict = {"tvdbid": self.tvdbid,
-                        "name": self.name,
-                        "description": self.description,
-                        "airdate": self.airdate.toordinal(),
-                        "hasnfo": self.hasnfo,
-                        "hastbn": self.hastbn,
-                        "status": self.status,
-                        "location": self.location,
-                        "file_size": self.file_size,
-                        "release_name": self.release_name}
-        controlValueDict = {"showid": self.show.tvdbid,
-                            "season": self.season,
-                            "episode": self.episode}
+        if not self.db_tvepisode:
+          self._db_tvepisode = db_peewee.TvEpisode()
 
-        # use a custom update/insert method to get the data into the DB
-        myDB.upsert("tv_episodes", newValueDict, controlValueDict)
+        self.db_tvepisode.tvdbid = self.tvdbid
+        self.db_tvepisode.name = self.name
+        self.db_tvepisode.description = self.description
+        self.db_tvepisode.airdate = self.airdate.toordinal()
+        self.db_tvepisode.hasnfo = self.hasnfo
+        self.db_tvepisode.hastbn = self.hastbn
+        self.db_tvepisode.status = self.status
+        self.db_tvepisode.location = self.location
+        self.db_tvepisode.file_size = self.file_size
+        self.db_tvepisode.release_name = self.release_name
+        self.db_tvepisode.show = self.show.db_tvshow
+        self.db_tvepisode.season = self.season
+        self.db_tvepisode.episode = self.episode
+
+        self.db_tvepisode.save()
+
 
     def fullPath (self):
         if self.location == None or self.location == "":
@@ -1625,7 +1645,7 @@ class TVEpisode(object):
             # fill out the template for this piece and then insert this piece into the actual pattern
             cur_name_group_result = re.sub('(?i)(?x)'+regex_used, regex_replacement, cur_name_group)
             #cur_name_group_result = cur_name_group.replace(ep_format, ep_string)
-            #logger.log(u"found "+ep_format+" as the ep pattern using "+regex_used+" and replaced it with "+regex_replacement+" to result in "+cur_name_group_result+" from "+cur_name_group, logger.DEBUG)
+            logger.log(u"found "+ep_format+" as the ep pattern using "+regex_used+" and replaced it with "+regex_replacement+" to result in "+cur_name_group_result+" from "+cur_name_group, logger.DEBUG)
             result_name = result_name.replace(cur_name_group, cur_name_group_result)
 
         result_name = self._format_string(result_name, replace_map)
@@ -1685,10 +1705,9 @@ class TVEpisode(object):
                 pattern = sickbeard.NAMING_ABD_PATTERN
             else:
                 pattern = sickbeard.NAMING_PATTERN
-            
+
         # split off the filename only, if they exist
         name_groups = re.split(r'[\\/]', pattern)
-        
         return self._format_pattern(name_groups[-1], multi)
 
     def rename(self):
