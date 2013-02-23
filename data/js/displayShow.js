@@ -2,6 +2,8 @@ $(document).ready(function(){
 
     $('#sbRoot').ajaxEpSearch({'colorRow': true});
 
+    $("td.status_column:contains('Snatched')").parent().css("background-color", "#EBC1EA");
+
     $('#seasonJump').change(function() {
         var id = $(this).val();
         if (id && id != 'jump') {
