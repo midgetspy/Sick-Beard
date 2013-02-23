@@ -54,7 +54,7 @@ class BinNewzProvider(generic.NZBProvider):
     def _get_episode_search_strings(self, ep_obj):
         strings = []
         
-        strings.append("%s S%02dE%2d" % ( ep_obj.show.name, ep_obj.season, ep_obj.episode) )
+        strings.append("%s S%02dE%02d" % ( ep_obj.show.name, ep_obj.season, ep_obj.episode) )
         strings.append("%s %dx%d" % ( ep_obj.show.name, ep_obj.season, ep_obj.episode ) )
         
         return strings
