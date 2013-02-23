@@ -81,15 +81,13 @@ class T411Provider(generic.TorrentProvider):
         data = urllib.urlencode({'login': login, 'password' : password, 'submit' : 'Connexion', 'remember': 1, 'url' : '/'})
         self.opener.open(self.url + '/users/login', data)
     
-    def _doSearch(self, searchParams, quotes=False, show=None):
+    def _doSearch(self, searchString, show=None, season=None):
         
         if not self.login_done:
             self._doLogin( sickbeard.T411_USERNAME, sickbeard.T411_PASSWORD )
 
         results = []
-        searchUrl = self.url + '/torrents/search/?' + searchParams
-        
-        print searchUrl
+        searchUrl = self.url + '/torrents/search/?' + searchString
         
         r = self.opener.open( searchUrl )
         soup = BeautifulSoup( r )

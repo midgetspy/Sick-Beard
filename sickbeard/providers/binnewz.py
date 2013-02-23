@@ -124,7 +124,7 @@ class BinNewzProvider(generic.NZBProvider):
             
         return binsearch_results        
     
-    def _doSearch(self, searchString, quotes=False, show=None):
+    def _doSearch(self, searchString, show=None, season=None):
         
         data = urllib.urlencode({'b_submit': 'BinnewZ', 'cats[]' : all, 'edSearchAll' : searchString, 'sections[]': 'all'})
         headers = {"Content-type": "application/x-www-form-urlencoded", "Accept": "text/plain"}
@@ -160,14 +160,10 @@ class BinNewzProvider(generic.NZBProvider):
                 if show.audio_lang == "fr":
                     if not "_fr" in language:
                         continue
-                
-                if "_stfr" in language:
-                    language = "vostfr"
-                elif "_fr" in language:
-                    language = "vf"
-                else:
-                    language = "vo"
-               
+                elif show.audio_lang == "en":
+                    if "_fr" in language:
+                        continue                
+  
                 # blacklist_groups = [ "alt.binaries.multimedia" ]
                 blacklist_groups = []                
                 

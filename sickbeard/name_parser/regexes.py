@@ -184,5 +184,14 @@ ep_regexes = [
                -(?P<release_group>[^- ]+))?)?$              # Group
                '''
                ),
+              
+              ('mm',
+               # engrenages S0311 HDTV Divx 
+               '''
+               ^(?P<series_name>.+?)[. _-]+                # Show_Name and separator
+               s(?P<season_num>\d+)[. _-]*                 # S01 and optional separator
+               (?P<ep_num>\d+)                            # 02 and separator
+               '''
+               ),
               ]
 
