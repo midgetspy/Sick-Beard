@@ -90,7 +90,7 @@ def _downloadResult(result):
 
         # save the data to disk
         try:
-            fileOut = open(fileName, "w")
+            fileOut = open(fileName, "wb")
             fileOut.write(result.extraInfo[0])
             fileOut.close()
             helpers.chmodAsParent(fileName)
