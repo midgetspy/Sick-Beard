@@ -17,15 +17,10 @@
 # You should have received a copy of the GNU General Public License
 # along with Sick Beard.  If not, see <http://www.gnu.org/licenses/>.
 
-from StringIO import StringIO
 from bs4 import BeautifulSoup
-from sickbeard import helpers, logger, classes, show_name_helpers
+from sickbeard import classes, show_name_helpers
 from sickbeard.common import Quality
-from sickbeard.exceptions import ex
-import datetime
 import generic
-import gzip
-import re
 import cookielib
 import sickbeard
 import urllib
@@ -49,13 +44,21 @@ class T411Provider(generic.TorrentProvider):
         
     def isEnabled(self):
         return sickbeard.T411
+    
+    def getSearchParams(self, searchString, audio_lang):
+        if audio_lang == "en":
+            return urllib.urlencode( {'search': searchString, 'cat' : 210, 'submit' : 'Recherche', 'subcat': 433 } ) + "&term%5B17%5D%5B%5D=540&term%5B17%5D%5B%5D=721"
+        elif audio_lang == "fr":
+            return urllib.urlencode( {'search': searchString, 'cat' : 210, 'submit' : 'Recherche', 'subcat': 433 } ) + "&term%5B17%5D%5B%5D=541&term%5B17%5D%5B%5D=542"
+        else:
+            return urllib.urlencode( {'search': searchString, 'cat' : 210, 'submit' : 'Recherche', 'subcat': 433 } )
 
     def _get_season_search_strings(self, show, season):
 
         showNames = show_name_helpers.allPossibleShowNames(show)
         results = []
         for showName in showNames:
-            results.append( urllib.urlencode( {'search': showName + " S%02d" % season, 'cat' : 210, 'submit' : 'Recherche', 'subcat': 433 } ) )
+            results.append( self.getSearchParams(showName + " S%02d" % season, show.audio_lang ))
         return results
 
     def _get_episode_search_strings(self, ep_obj):
@@ -63,8 +66,8 @@ class T411Provider(generic.TorrentProvider):
         showNames = show_name_helpers.allPossibleShowNames(ep_obj.show)
         results = []
         for showName in showNames:
-            results.append( urllib.urlencode( {'search': "%s S%02dE%02d" % ( showName, ep_obj.season, ep_obj.episode), 'cat' : 210, 'submit' : 'Recherche', 'subcat': 433 } ) )
-            results.append( urllib.urlencode( {'search': "%s %dx%d" % ( showName, ep_obj.season, ep_obj.episode ), 'cat' : 210, 'submit' : 'Recherche', 'subcat': 433 } ) )
+            results.append( self.getSearchParams( "%s S%02dE%02d" % ( showName, ep_obj.season, ep_obj.episode), ep_obj.show.audio_lang ) )
+            results.append( self.getSearchParams( "%s %dx%d" % ( showName, ep_obj.season, ep_obj.episode ), ep_obj.show.audio_lang ) )
         return results
     
     def _get_title_and_url(self, item):
@@ -98,13 +101,9 @@ class T411Provider(generic.TorrentProvider):
                 link = row.find("a", title=True)
                 title = link['title']
                 
-                if sickbeard.T411_LANGUAGE == "vostfr":
-                    if not "vostfr" in title.lower():
-                        continue
-                
                 torrentPage = self.opener.open( link['href'] )
                 torrentSoup = BeautifulSoup( torrentPage )
-                
+               
                 downloadTorrentLink = torrentSoup.find("a", text=u"Télécharger")
                 if downloadTorrentLink:
                     

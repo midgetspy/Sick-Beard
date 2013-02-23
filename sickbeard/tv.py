@@ -67,6 +67,8 @@ class TVShow(object):
         self.paused = 0
         self.air_by_date = 0
         self.lang = lang
+        self.audio_lang = ""
+        self.custom_search_names = ""
 
         self.lock = threading.Lock()
         self._isDirGood = False
@@ -613,7 +615,12 @@ class TVShow(object):
 
             if self.lang == "":
                 self.lang = sqlResults[0]["lang"]
+                
+            if self.audio_lang == "":
+                self.audio_lang = sqlResults[0]["audio_lang"]                
 
+            if self.custom_search_names == "":
+                self.custom_search_names = sqlResults[0]["custom_search_names"]                
 
     def loadFromTVDB(self, cache=True, tvapi=None, cachedSeason=None):
 
@@ -656,6 +663,12 @@ class TVShow(object):
 
         if self.status == None:
             self.status = ""
+        
+        if myEp["audio_lang"]:
+            self.audio_lang = myEp["audio_lang"]
+
+        if myEp["custom_search_names"]:
+            self.custom_search_names = myEp["custom_search_names"]   
 
         self.saveToDB()
 
@@ -824,7 +837,9 @@ class TVShow(object):
                         "air_by_date": self.air_by_date,
                         "startyear": self.startyear,
                         "tvr_name": self.tvrname,
-                        "lang": self.lang
+                        "lang": self.lang,
+                        "audio_lang": self.audio_lang,
+                        "custom_search_names": self.custom_search_names
                         }
 
         myDB.upsert("tv_shows", newValueDict, controlValueDict)

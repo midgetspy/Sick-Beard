@@ -182,12 +182,10 @@ NZBSRUS_UID = None
 NZBSRUS_HASH = None
 
 BINNEWZ = False
-BINNEWZ_LANGUAGE = "vostfr"
 
 T411 = False
 T411_USERNAME = None
 T411_PASSWORD = None
-T411_LANGUAGE = "vostfr"
 
 NZBMATRIX = False
 NZBMATRIX_USERNAME = None
@@ -326,8 +324,8 @@ def initialize(consoleLogging=True):
                 PLEX_SERVER_HOST, PLEX_HOST, PLEX_USERNAME, PLEX_PASSWORD, \
                 showUpdateScheduler, __INITIALIZED__, LAUNCH_BROWSER, showList, loadingShowList, \
                 NZBS, NZBS_UID, NZBS_HASH, EZRSS, TVTORRENTS, TVTORRENTS_DIGEST, TVTORRENTS_HASH, BTN, BTN_API_KEY, TORRENT_DIR, USENET_RETENTION, SOCKET_TIMEOUT, \
-				BINNEWZ, BINNEWZ_LANGUAGE, \
-                T411, T411_LANGUAGE, T411_USERNAME, T411_PASSWORD, \
+				BINNEWZ, \
+                T411, T411_USERNAME, T411_PASSWORD, \
                 SEARCH_FREQUENCY, DEFAULT_SEARCH_FREQUENCY, BACKLOG_SEARCH_FREQUENCY, \
                 QUALITY_DEFAULT, FLATTEN_FOLDERS_DEFAULT, STATUS_DEFAULT, \
                 GROWL_NOTIFY_ONSNATCH, GROWL_NOTIFY_ONDOWNLOAD, TWITTER_NOTIFY_ONSNATCH, TWITTER_NOTIFY_ONDOWNLOAD, \
@@ -561,11 +559,9 @@ def initialize(consoleLogging=True):
 
         CheckSection(CFG, 'BinNewz')
         BINNEWZ = bool(check_setting_int(CFG, 'BinNewz', 'binnewz', 0))
-        BINNEWZ_LANGUAGE = check_setting_str(CFG, 'BinNewz', 'language', 'vo')
 
         CheckSection(CFG, 'T411')
         T411 = bool(check_setting_int(CFG, 'T411', 't411', 0))
-        T411_LANGUAGE = check_setting_str(CFG, 'T411', 'language', 'vo')
         T411_USERNAME = check_setting_str(CFG, 'T411', 'username', '')
         T411_PASSWORD = check_setting_str(CFG, 'T411', 'password', '')
 
@@ -1049,13 +1045,11 @@ def save_config():
 
     new_config['BinNewz'] = {}
     new_config['BinNewz']['binnewz'] = int(BINNEWZ)
-    new_config['BinNewz']['language'] = BINNEWZ_LANGUAGE
 
     new_config['T411'] = {}
     new_config['T411']['t411'] = int(T411)
     new_config['T411']['username'] = T411_USERNAME
     new_config['T411']['password'] = T411_PASSWORD
-    new_config['T411']['language'] = T411_LANGUAGE
 
     new_config['Womble'] = {}
     new_config['Womble']['womble'] = int(WOMBLE)

@@ -28,6 +28,7 @@ import gzip
 import re
 import sickbeard
 import urllib
+import urllib2
 from sickbeard.common import Quality
 
 class BinNewzProvider(generic.NZBProvider):
@@ -53,10 +54,12 @@ class BinNewzProvider(generic.NZBProvider):
 
     def _get_episode_search_strings(self, ep_obj):
         strings = []
-        
-        strings.append("%s S%02dE%02d" % ( ep_obj.show.name, ep_obj.season, ep_obj.episode) )
-        strings.append("%s %dx%d" % ( ep_obj.show.name, ep_obj.season, ep_obj.episode ) )
-        
+
+        showNames = show_name_helpers.allPossibleShowNames(ep_obj.show)
+        for showName in showNames:
+            strings.append("%s S%02dE%02d" % ( showName, ep_obj.season, ep_obj.episode) )
+            strings.append("%s %dx%d" % ( showName, ep_obj.season, ep_obj.episode ) )
+
         return strings
     
     def _get_title_and_url(self, item):
@@ -64,7 +67,7 @@ class BinNewzProvider(generic.NZBProvider):
     
     def getQuality(self, item):
         return item.getQuality()
-    
+
     def doBinSearch(self, filename, minSize, newsgroup=None):
         
         binsearch_results = []
@@ -153,6 +156,10 @@ class BinNewzProvider(generic.NZBProvider):
                     encoder = encoderSpan.contents[0]
                 name = cells[2].text.strip()
                 language = cells[3].find("img").get("src")
+
+                if show.audio_lang == "fr":
+                    if not "_fr" in language:
+                        continue
                 
                 if "_stfr" in language:
                     language = "vostfr"
@@ -160,11 +167,7 @@ class BinNewzProvider(generic.NZBProvider):
                     language = "vf"
                 else:
                     language = "vo"
-    
-                if language != sickbeard.BINNEWZ_LANGUAGE:
-                    print "Skipping download, language found: %s wanted: %s" % (language, sickbeard.BINNEWZ_LANGUAGE)
-                    continue
-                
+               
                 # blacklist_groups = [ "alt.binaries.multimedia" ]
                 blacklist_groups = []                
                 
@@ -262,9 +265,9 @@ class BinNewzProvider(generic.NZBProvider):
                     print "Range detected"
                     
                 binsearch_results = self.doBinSearch( filename, minSize, newsgroup )
+                # binsearch_results = self.doNZBClub( filename, minSize, newsgroup )
                 
                 for binsearch_result in binsearch_results:
-                    print "adding result from %s, quality: %s, size: %8.2f MB" % (binsearch_result.url, qualityStr, binsearch_result.sizeInMegs)
                     results.append( BinNewzSearchResult( name, binsearch_result.nzbdata, binsearch_result.url, quality))
 
         return results
