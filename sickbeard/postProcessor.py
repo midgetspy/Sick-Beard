@@ -767,6 +767,8 @@ class PostProcessor(object):
             self._log(u"Show directory doesn't exist, creating it", logger.DEBUG)
             try:
                 ek.ek(os.mkdir, ep_obj.show._location)
+                # do the library update for synoindex
+                notifiers.synoindex_notifier.addFolder(ep_obj.show._location)
 
             except (OSError, IOError):
                 raise exceptions.PostProcessingFailed("Unable to create the show directory: " + ep_obj.show._location)
