@@ -63,7 +63,7 @@ class T411Provider(generic.TorrentProvider):
         showNames = show_name_helpers.allPossibleShowNames(ep_obj.show)
         results = []
         for showName in showNames:
-            results.append( urllib.urlencode( {'search': "%s S%02dE%2d" % ( showName, ep_obj.season, ep_obj.episode), 'cat' : 210, 'submit' : 'Recherche', 'subcat': 433 } ) )
+            results.append( urllib.urlencode( {'search': "%s S%02dE%02d" % ( showName, ep_obj.season, ep_obj.episode), 'cat' : 210, 'submit' : 'Recherche', 'subcat': 433 } ) )
             results.append( urllib.urlencode( {'search': "%s %dx%d" % ( showName, ep_obj.season, ep_obj.episode ), 'cat' : 210, 'submit' : 'Recherche', 'subcat': 433 } ) )
         return results
     
@@ -110,22 +110,21 @@ class T411Provider(generic.TorrentProvider):
                     
                     downloadURL = self.url + downloadTorrentLink['href']
 
-                    nzbdata = self.opener.open( downloadURL ).read()
+                    torrentdata = self.opener.open( downloadURL , 'wb').read()
                     
                     if "720p" in title:
                         if "bluray" in title:
                             quality = Quality.HDBLURAY
+                        elif "web-dl" in title.lower() or "web.dl" in title.lower():
+                            quality = Quality.HDWEBDL
                         else:
                             quality = Quality.HDTV
                     elif "1080p" in title:
-                        if "bluray" in title:
-                            quality = Quality.FULLHDBLURAY
-                        else:
-                            quality = Quality.HDTV
+                        quality = Quality.FULLHDBLURAY
                     else:
                         quality = Quality.SDTV
 
-                    results.append( T411SearchResult( link['title'], nzbdata, downloadURL, quality ) )
+                    results.append( T411SearchResult( link['title'], torrentdata, downloadURL, quality ) )
 
         return results
     
@@ -140,17 +139,13 @@ class T411Provider(generic.TorrentProvider):
     
 class T411SearchResult:
     
-    def __init__(self, title, nzbdata, url, quality):
+    def __init__(self, title, torrentdata, url, quality):
         self.title = title
         self.url = url
-        self.extraInfo = [nzbdata] 
+        self.extraInfo = [torrentdata] 
         self.quality = quality
         
     def getQuality(self):
         return self.quality
 
-provider = T411Provider()   
-#provider._doLogin("mozvip01", "password01")
-#searches = []
-#searches.append( {'search': "dexter" + " S%02d" % 7, 'cat' : 210, 'submit' : 'Recherche', 'subcat': 433, 'term[46][]' : 936 } )
-#provider._doSearch( searches )
+provider = T411Provider()
