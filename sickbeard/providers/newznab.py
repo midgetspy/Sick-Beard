@@ -283,7 +283,6 @@ class NewznabCache(tvcache.TVCache):
     def _getRSSData(self):
 
         params = {"t": "tvsearch",
-                  "age": sickbeard.USENET_RETENTION,
                   "cat": '5040,5030'}
 
         # hack this in for now
