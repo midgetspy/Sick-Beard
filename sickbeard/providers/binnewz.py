@@ -271,7 +271,7 @@ class BinNewzProvider(generic.NZBProvider):
     
     def getResult(self, episodes):
         """
-        Returnshttp://binsearch.info/?adv_age=&adv_g=alt.binaries.multimedia&max=250&q=Breaking.Bad.S03E13.Full.Measure.HDTV.XviD-FQM+&server=1http://binsearch.info/?adv_age=&adv_g=alt.binaries.multimedia&max=250&q=Breaking.Bad.S03E13.Full.Measure.HDTV.XviD-FQM+&server=1http://binsearch.info/?adv_age=&adv_g=alt.binaries.multimedia&max=250&q=Breaking.Bad.S03E13.Full.Measure.HDTV.XviD-FQM+&server=1http://binsearch.info/?adv_age=&adv_g=alt.binaries.multimedia&max=250&q=Breaking.Bad.S03E13.Full.Measure.HDTV.XviD-FQM+&server=1http://binsearch.info/?adv_age=&adv_g=alt.binaries.multimedia&max=250&q=Breaking.Bad.S03E13.Full.Measure.HDTV.XviD-FQM+&server=1 a result of the correct type for this provider
+        Returns a result of the correct type for this provider
         """
         result = classes.NZBDataSearchResult(episodes)
         result.provider = self

@@ -79,6 +79,25 @@ def _downloadResult(result):
             logger.log(u"Error trying to save NZB to black hole: "+ex(e), logger.ERROR)
             newResult = False
 
+    elif result.resultType == "torrentdata":
+        
+        # get the final file path to the nzb
+        fileName = ek.ek(os.path.join, sickbeard.TORRENT_DIR, result.name + ".torrent")
+
+        logger.log(u"Saving Torrent to " + fileName)
+
+        newResult = True
+
+        # save the data to disk
+        try:
+            fileOut = open(fileName, "w")
+            fileOut.write(result.extraInfo[0])
+            fileOut.close()
+            helpers.chmodAsParent(fileName)
+        except IOError, e:
+            logger.log(u"Error trying to save Torrent to black hole: "+ex(e), logger.ERROR)
+            newResult = False
+
     elif resProvider.providerType == "torrent":
         newResult = resProvider.downloadResult(result)
 
@@ -115,7 +134,7 @@ def snatchEpisode(result, endStatus=SNATCHED):
             dlResult = False
 
     # torrents are always saved to disk
-    elif result.resultType == "torrent":
+    elif result.resultType in ("torrent", "torrentdata"):
         dlResult = _downloadResult(result)
     else:
         logger.log(u"Unknown result type, unable to download it", logger.ERROR)

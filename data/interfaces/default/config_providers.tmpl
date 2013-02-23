@@ -85,7 +85,7 @@
                                 <span class="component-title jumbo">Configure Provider:</span>
                                 <span class="component-desc">
                                     #set $provider_config_list = []
-                                    #for $cur_provider in ("nzbs_r_us", "tvtorrents", "btn", "binnewz"):
+                                    #for $cur_provider in ("nzbs_r_us", "tvtorrents", "btn", "binnewz", "t411"):
                                         #set $cur_provider_obj = $sickbeard.providers.getProviderClass($cur_provider)
                                         #if $cur_provider_obj.providerType == $GenericProvider.NZB and not $sickbeard.USE_NZBS:
                                             #continue
@@ -169,6 +169,31 @@
                             </label>
                         </div>
                     </div><!-- /tvtorrentsDiv //-->
+
+                    <div class="providerDiv" id="t411Div">
+                        <div class="field-pair">
+                            <label class="clearfix">
+                                <span class="component-title">T411 User name:</span>
+                                <input class="component-desc" type="text" name="t411_username" value="$sickbeard.T411_USERNAME" size="40" />
+                            </label>
+                        </div>
+                        <div class="field-pair">
+                            <label class="clearfix">
+                                <span class="component-title">T411 Password:</span>
+                                <input class="component-desc" type="text" name="t411_password" value="$sickbeard.T411_PASSWORD" size="40" />
+                            </label>
+                        </div>
+                        <div class="field-pair">
+							<label class="clearfix">
+                                <span class="component-title">T411 Language</span>
+                                <select class="component-desc" name="t411_language" value="$sickbeard.T411_LANGUAGE">
+                                	<option value="vostfr" #if $sickbeard.T411_LANGUAGE == "vostfr" then "selected=\"true\"" else ""#>VOSTFR</option>
+                                	<option value="vf" #if $sickbeard.T411_LANGUAGE == "vf" then "selected=\"true\"" else ""#>VF</option>
+                                	<option value="vo" #if $sickbeard.T411_LANGUAGE == "vo" then "selected=\"true\"" else ""#>VO</option>
+                                </select>
+                            </label>
+                        </div>
+                    </div><!-- /t411Div //-->
 
                     <div class="providerDiv" id="btnDiv">
                         <div class="field-pair">

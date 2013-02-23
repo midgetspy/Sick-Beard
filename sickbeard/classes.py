@@ -115,6 +115,12 @@ class NZBDataSearchResult(SearchResult):
     """
     resultType = "nzbdata"
 
+class TorrentDataSearchResult(SearchResult):
+    """
+    Torrent result where the actual torrent data is stored in the extraInfo
+    """
+    resultType = "torrentdata"
+
 class TorrentSearchResult(SearchResult):
     """
     Torrent result with an URL to the torrent
