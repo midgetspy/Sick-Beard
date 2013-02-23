@@ -1032,7 +1032,8 @@ class ConfigProviders:
     def saveProviders(self, nzbmatrix_username=None, nzbmatrix_apikey=None,
                       nzbs_r_us_uid=None, nzbs_r_us_hash=None, newznab_string=None,
                       tvtorrents_digest=None, tvtorrents_hash=None,
- 					  btn_api_key=None,
+                      btn_api_key=None,
+                      dailytvtorrents_prefer_or_only=None, dailytvtorrents_prefer_quality=None, dailytvtorrents_minage=None, dailytvtorrents_wait=None, dailytvtorrents_norar=None, dailytvtorrents_single=None,
                       newzbin_username=None, newzbin_password=None,
                       provider_order=None):
 
@@ -1091,6 +1092,8 @@ class ConfigProviders:
                 sickbeard.BINREQ = curEnabled
             elif curProvider == 'womble_s_index':
                 sickbeard.WOMBLE = curEnabled
+            elif curProvider == 'dailytvtorrents':
+                sickbeard.DAILYTVTORRENTS = curEnabled
             elif curProvider == 'ezrss':
                 sickbeard.EZRSS = curEnabled
             elif curProvider == 'tvtorrents':
@@ -1106,6 +1109,13 @@ class ConfigProviders:
         sickbeard.TVTORRENTS_HASH = tvtorrents_hash.strip()
 
         sickbeard.BTN_API_KEY = btn_api_key.strip()
+
+        sickbeard.DAILYTVTORRENTS_PREFER_OR_ONLY = dailytvtorrents_prefer_or_only.strip()
+        sickbeard.DAILYTVTORRENTS_PREFER_QUALITY = dailytvtorrents_prefer_quality.strip()
+        sickbeard.DAILYTVTORRENTS_MINAGE = dailytvtorrents_minage.strip()
+        sickbeard.DAILYTVTORRENTS_WAIT = dailytvtorrents_wait.strip()
+        sickbeard.DAILYTVTORRENTS_NORAR = dailytvtorrents_norar
+        sickbeard.DAILYTVTORRENTS_SINGLE = dailytvtorrents_single
 
         sickbeard.NZBSRUS_UID = nzbs_r_us_uid.strip()
         sickbeard.NZBSRUS_HASH = nzbs_r_us_hash.strip()

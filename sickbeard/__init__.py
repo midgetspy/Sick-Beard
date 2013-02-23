@@ -30,7 +30,7 @@ from threading import Lock
 
 # apparently py2exe won't build these unless they're imported somewhere
 from sickbeard import providers, metadata
-from providers import ezrss, tvtorrents, btn, nzbsrus, newznab, womble
+from providers import dailytvtorrents, ezrss, tvtorrents, btn, nzbsrus, newznab, womble
 from sickbeard.config import CheckSection, check_setting_int, check_setting_str, ConfigMigrator
 
 from sickbeard import searchCurrent, searchBacklog, showUpdater, versionChecker, properFinder, autoPostProcesser
@@ -154,9 +154,18 @@ MIN_SEARCH_FREQUENCY = 10
 DEFAULT_SEARCH_FREQUENCY = 60
 
 EZRSS = False
+
 TVTORRENTS = False
 TVTORRENTS_DIGEST = None
 TVTORRENTS_HASH = None
+
+DAILYTVTORRENTS = False
+DAILYTVTORRENTS_PREFER_OR_ONLY = None
+DAILYTVTORRENTS_PREFER_QUALITY = None
+DAILYTVTORRENTS_MINAGE = None
+DAILYTVTORRENTS_WAIT = None
+DAILYTVTORRENTS_NORAR = None
+DAILYTVTORRENTS_SINGLE = None
 
 BTN = False
 BTN_API_KEY = None
@@ -318,6 +327,7 @@ def initialize(consoleLogging=True):
                 PLEX_SERVER_HOST, PLEX_HOST, PLEX_USERNAME, PLEX_PASSWORD, \
                 showUpdateScheduler, __INITIALIZED__, LAUNCH_BROWSER, showList, loadingShowList, \
                 NZBS, NZBS_UID, NZBS_HASH, EZRSS, TVTORRENTS, TVTORRENTS_DIGEST, TVTORRENTS_HASH, BTN, BTN_API_KEY, TORRENT_DIR, USENET_RETENTION, SOCKET_TIMEOUT, \
+                DAILYTVTORRENTS, DAILYTVTORRENTS_PREFER_OR_ONLY, DAILYTVTORRENTS_PREFER_QUALITY, DAILYTVTORRENTS_MINAGE, DAILYTVTORRENTS_WAIT, DAILYTVTORRENTS_NORAR, DAILYTVTORRENTS_SINGLE, \
                 SEARCH_FREQUENCY, DEFAULT_SEARCH_FREQUENCY, BACKLOG_SEARCH_FREQUENCY, \
                 QUALITY_DEFAULT, FLATTEN_FOLDERS_DEFAULT, STATUS_DEFAULT, \
                 GROWL_NOTIFY_ONSNATCH, GROWL_NOTIFY_ONDOWNLOAD, TWITTER_NOTIFY_ONSNATCH, TWITTER_NOTIFY_ONDOWNLOAD, \
@@ -529,6 +539,15 @@ def initialize(consoleLogging=True):
         TVTORRENTS = bool(check_setting_int(CFG, 'TVTORRENTS', 'tvtorrents', 0))
         TVTORRENTS_DIGEST = check_setting_str(CFG, 'TVTORRENTS', 'tvtorrents_digest', '')
         TVTORRENTS_HASH = check_setting_str(CFG, 'TVTORRENTS', 'tvtorrents_hash', '')
+
+        CheckSection(CFG, 'DailyTvTorrents')
+        DAILYTVTORRENTS = bool(check_setting_int(CFG, 'DailyTvTorrents', 'dailytvtorrents', 1))
+        DAILYTVTORRENTS_PREFER_OR_ONLY = check_setting_str(CFG, 'DailyTvTorrents', 'dailytvtorrents_prefer_or_only', '')
+        DAILYTVTORRENTS_PREFER_QUALITY = check_setting_str(CFG, 'DailyTvTorrents', 'dailytvtorrents_prefer_quality', '')
+        DAILYTVTORRENTS_MINAGE = check_setting_str(CFG, 'DailyTvTorrents', 'dailytvtorrents_minage', '')
+        DAILYTVTORRENTS_WAIT = check_setting_str(CFG, 'DailyTvTorrents', 'dailytvtorrents_wait', '')
+        DAILYTVTORRENTS_NORAR = check_setting_str(CFG, 'DailyTvTorrents', 'dailytvtorrents_norar', '')
+        DAILYTVTORRENTS_SINGLE = check_setting_str(CFG, 'DailyTvTorrents', 'dailytvtorrents_single', '')
 
         CheckSection(CFG, 'BTN')
         BTN = bool(check_setting_int(CFG, 'BTN', 'btn', 0))
@@ -1002,6 +1021,14 @@ def save_config():
     new_config['TVTORRENTS']['tvtorrents'] = int(TVTORRENTS)
     new_config['TVTORRENTS']['tvtorrents_digest'] = TVTORRENTS_DIGEST
     new_config['TVTORRENTS']['tvtorrents_hash'] = TVTORRENTS_HASH
+
+    new_config['DailyTvTorrents'] = {}
+    new_config['DailyTvTorrents']['dailytvtorrents_prefer_or_only'] = DAILYTVTORRENTS_PREFER_OR_ONLY
+    new_config['DailyTvTorrents']['dailytvtorrents_prefer_quality'] = DAILYTVTORRENTS_PREFER_QUALITY
+    new_config['DailyTvTorrents']['dailytvtorrents_minage'] = DAILYTVTORRENTS_MINAGE
+    new_config['DailyTvTorrents']['dailytvtorrents_wait'] = DAILYTVTORRENTS_WAIT
+    new_config['DailyTvTorrents']['dailytvtorrents_norar'] = DAILYTVTORRENTS_NORAR
+    new_config['DailyTvTorrents']['dailytvtorrents_single'] = DAILYTVTORRENTS_SINGLE
 
     new_config['BTN'] = {}
     new_config['BTN']['btn'] = int(BTN)
