@@ -663,12 +663,6 @@ class TVShow(object):
 
         if self.status == None:
             self.status = ""
-        
-        if myEp["audio_lang"]:
-            self.audio_lang = myEp["audio_lang"]
-
-        if myEp["custom_search_names"]:
-            self.custom_search_names = myEp["custom_search_names"]   
 
         self.saveToDB()
 
