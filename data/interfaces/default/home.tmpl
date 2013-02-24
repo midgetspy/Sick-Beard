@@ -16,7 +16,6 @@
 #set $today = str($datetime.date.today().toordinal())
 #set $downloadedEps = $myDB.select("SELECT showid, COUNT(*) FROM tv_episodes WHERE (status IN ("+",".join([str(x) for x in $Quality.DOWNLOADED + [$ARCHIVED]])+") OR (status IN ("+",".join([str(x) for x in $Quality.SNATCHED + $Quality.SNATCHED_PROPER])+") AND location != '')) AND season != 0 and episode != 0 AND airdate <= "+$today+" GROUP BY showid")
 #set $allEps = $myDB.select("SELECT showid, COUNT(*) FROM tv_episodes WHERE season != 0 and episode != 0 AND (airdate != 1 OR status IN ("+",".join([str(x) for x in ($Quality.DOWNLOADED + $Quality.SNATCHED + $Quality.SNATCHED_PROPER) + [$ARCHIVED]])+")) AND airdate <= "+$today+" AND status != "+str($IGNORED)+" GROUP BY showid")
-#set $fr = $myDB.select("SELECT showid, COUNT(*) FROM tv_episodes WHERE audio_langs = 'fr' AND location != '' AND season != 0 and episode != 0 AND airdate <= "+$today+" GROUP BY showid")
 
 <script type="text/javascript" charset="utf-8">
 <!--
@@ -73,19 +72,18 @@
 \$(document).ready(function(){ 
 
     \$("#showListTable:has(tbody tr)").tablesorter({
-        sortList: [[6,1],[1,0]],
+        sortList: [[5,1],[1,0]],
         textExtraction: {
             3: function(node) { return \$(node).find("span").text().toLowerCase(); },
             4: function(node) { return \$(node).find("span").text(); },
-            6: function(node) { return \$(node).find("img").attr("alt"); }
+            5: function(node) { return \$(node).find("img").attr("alt"); }
         },
         widgets: ['saveSort', 'zebra', 'stickyHeaders'],
         headers: {
             0: { sorter: 'isoDate' },
             1: { sorter: 'loadingNames' },
             3: { sorter: 'quality' },
-            4: { sorter: 'eps' },
-            5: { sorter: 'eps' }
+            4: { sorter: 'eps' }
         }
     });
 
@@ -95,11 +93,11 @@
 
 <table id="showListTable" class="tablesorter" cellspacing="1" border="0" cellpadding="0">
 
-  <thead><tr><th class="nowrap">Next Ep</th><th>Show</th><th>Network</th><th>Quality</th><th>Downloads</th><th>French</th><th>Active</th><th>Audio</th><th>Status</th></tr></thead>
+  <thead><tr><th class="nowrap">Next Ep</th><th>Show</th><th>Network</th><th>Quality</th><th>Downloads</th><th>Active</th><th>Status</th></tr></thead>
   <tfoot>
     <tr>
       <th rowspan="1" colspan="1" align="center"><a href="$sbRoot/home/addShows/">Add Show</a></th>
-      <th rowspan="1" colspan="8"></th>
+      <th rowspan="1" colspan="6"></th>
     </tr>
   </tfoot>
   <tbody>
@@ -133,7 +131,6 @@ $myShowList.sort(lambda x, y: cmp(x.name, y.name))
 #set $curEp = $curShow.nextEpisode()
 
 #set $curShowDownloads = [x[1] for x in $downloadedEps if int(x[0]) == $curShow.tvdbid]
-#set $curfr = [x[1] for x in $fr if int(x[0]) == $curShow.tvdbid]
 #set $curShowAll = [x[1] for x in $allEps if int(x[0]) == $curShow.tvdbid]
 #if len($curShowAll) != 0:
   #if len($curShowDownloads) != 0:
@@ -149,21 +146,6 @@ $myShowList.sort(lambda x, y: cmp(x.name, y.name))
   #set $dlStat = "?"
   #set $nom = 0
   #set $den = 1
-#end if
-#if len($curShowDownloads) != 0:
-  #if len($curfr) != 0:
-    #set $frStat = str($curfr[0])+" / "+str($curShowDownloads[0])
-    #set $nomfr = $curfr[0]
-    #set $denfr = $curShowDownloads[0]
-  #else
-    #set $frStat = "0 / "+str($curShowDownloads[0])
-    #set $nomfr = 0
-    #set $denfr = $curShowDownloads[0]
-  #end if
-#else
-  #set $frStat = "0 / 0"
-  #set $nomfr = 0
-  #set $denfr = 1
 #end if
 
 
@@ -188,22 +170,7 @@ $myShowList.sort(lambda x, y: cmp(x.name, y.name))
         //-->
         </script>
     </td>
-	<td align="center"><span style="display: none;">$frStat</span><div id="progressbar2$curShow.tvdbid" style="position:relative;"></div>
-        <script type="text/javascript">
-        <!--
-            \$(function() {
-               \$("\#progressbar2$curShow.tvdbid").progressbar({
-                   value: parseInt($nomfr) * 100 / parseInt($denfr)
-               });
-               \$("\#progressbar2$curShow.tvdbid").append( "<div class='progressbarText'>$frStat</div>" )
-            });
-        //-->
-        </script>
-    </td>
     <td align="center"><img src="$sbRoot/images/#if int($curShow.paused) == 0 and $curShow.status != "Ended" then "yes16.png\" alt=\"Y\"" else "no16.png\" alt=\"N\""# width="16" height="16" /></td>
-    <td align="center">        
-            <img src="$sbRoot/images/flags/${curShow.audio_lang}.png" alt="$curShow.audio_lang" width="16" />
-    </td>
     <td align="center">$curShow.status</td>
   </tr>
 

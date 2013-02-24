@@ -88,9 +88,6 @@ class SearchResult:
 
         # release name
         self.name = ""
-        
-        # audio languages
-        self.audio_langs = []
 
     def __str__(self):
 

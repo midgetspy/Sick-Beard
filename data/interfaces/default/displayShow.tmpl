@@ -1,43 +1,14 @@
 #import sickbeard
 #import sickbeard.helpers
 #from sickbeard.common import *
-#from sickbeard import db
 #import os.path, os
 #import datetime
 #set global $title=$show.name
 #set global $header = '<a href="http://thetvdb.com/?tab=series&amp;id=%d" target="_new">%s</a>' % ($show.tvdbid, $show.name)
-#set $myDB = $db.DBConnection()
-#set $today = str($datetime.date.today().toordinal())
+
 #set global $topmenu="manageShows"#
 #include $os.path.join($sickbeard.PROG_DIR, "data/interfaces/default/inc_top.tmpl")
-#set $fr = $myDB.select("SELECT showid, COUNT(*) FROM tv_episodes WHERE audio_langs = 'fr' AND location != '' AND season != 0 and episode != 0 AND airdate <= "+$today+" GROUP BY showid")
-#set $curfr = [x[1] for x in $fr if int(x[0]) == $show.tvdbid]
-#if len($curfr) != 0:
-   #set $lfr = $curfr[0]
-#else 
-   #set $lfr = 0
-#end if
-#set $en = $myDB.select("SELECT showid, COUNT(*) FROM tv_episodes WHERE audio_langs = 'en' AND location != '' AND season != 0 and episode != 0 AND airdate <= "+$today+" GROUP BY showid")
-#set $curen = [x[1] for x in $en if int(x[0]) == $show.tvdbid]
-#if len($curen) != 0:
-   #set $leng = $curen[0]
-#else
-   #set $leng = 0
-#end if
-#set $no = $myDB.select("SELECT showid, COUNT(*) FROM tv_episodes WHERE audio_langs = '' AND location != '' AND season != 0 and episode != 0 AND airdate <= "+$today+" GROUP BY showid")
-#set $curno = [x[1] for x in $no if int(x[0]) == $show.tvdbid]
-#if len($curno) != 0:
-   #set $lno = $curno[0]
-#else 
-   #set $lno = 0
-#end if
-#set $manq = $myDB.select("SELECT showid, COUNT(*) FROM tv_episodes WHERE location = '' AND season != 0 and episode != 0 AND (airdate <= "+$today+" and airdate != 1) GROUP BY showid")
-#set $curmanq = [x[1] for x in $manq if int(x[0]) == $show.tvdbid]
-#if len($curmanq) != 0:
-   #set $lmanq = $curmanq[0]
-#else 
-   #set $lmanq = 0
-#end if
+
 <script type="text/javascript" src="$sbRoot/js/lib/jquery.bookmarkscroll.js?$sbPID"></script>
 
 
@@ -115,20 +86,9 @@ replace with: <b><%=", ".join([Quality.qualityStrings[x] for x in bestQualities]
 #end if
     </td></tr>
     <tr><td class="showLegend">Language:</td><td><img src="$sbRoot/images/flags/${show.lang}.png" width="16" height="11" alt="" /> $show.lang</td></tr>
-    <tr>
-        <td class="showLegend">Audio languages:</td>
-        <td>
-                <img src="$sbRoot/images/flags/${show.audio_lang}.png" alt="$show.audio_lang" width="16" /> $show.audio_lang
-        </td>
-    </tr>
-	<tr><td class="showLegend">Custom Search Names:</td><td>$show.custom_search_names</td></tr>
     <tr><td class="showLegend">Flatten Folders: </td><td><img src="$sbRoot/images/#if $show.flatten_folders == 1 or $sickbeard.NAMING_FORCE_FOLDERS then "yes16.png\" alt=\"Y" else "no16.png\" alt=\"N"#" width="16" height="16" /></td></tr>
     <tr><td class="showLegend">Paused: </td><td><img src="$sbRoot/images/#if int($show.paused) == 1 then "yes16.png\" alt=\"Y" else "no16.png\" alt=\"N"#" width="16" height="16" /></td></tr>
     <tr><td class="showLegend">Air-by-Date: </td><td><img src="$sbRoot/images/#if int($show.air_by_date) == 1 then "yes16.png\" alt=\"Y" else "no16.png\" alt=\"N"#" width="16" height="16" /></td></tr>
-	<tr><td class="showLegend">French Episodes : </td><td>$lfr</td></tr>
-    <tr><td class="showLegend">English Episodes : </td><td>$leng</td></tr>
-    <tr><td class="showLegend">Unknown Episodes : </td><td>$lno</td></tr>
-	<tr><td class="showLegend">Missing Episodes : </td><td>$lmanq</td></tr>
 </table>
 </div>
 
@@ -144,19 +104,6 @@ Change selected episodes to
 </select>
 <input type="hidden" id="showID" value="$show.tvdbid" />
 <input type="button" class="btn" id="changeStatus" value="Go" /><br />
-<br />
-<br />
-</div>
-
-<div class="float-right">
-Change Audio of selected episodes to 
-<select id="audioSelect">
-#for $audio in ['fr','en','']:
-<option value="$audio">$showLanguages[$audio]</option>
-#end for
-</select>
-<input type="hidden" id="showID" value="$show.tvdbid" />
-<input type="button" class="btn" id="changeAudio" value="Go" /><br />
 <br />
 <br />
 </div>
@@ -187,7 +134,7 @@ Change Audio of selected episodes to
         <h2>#if int($epResult["season"]) == 0 then "Specials" else "Season "+str($epResult["season"])#</h2>
     </td>
   </tr>
-  <tr id="season-$epResult["season"]-cols"><th width="1%"><input type="checkbox" class="seasonCheck" id="$epResult["season"]" /></th><th>NFO</th><th>TBN</th><th>Episode</th><th>Name</th><th class="nowrap">Airdate</th><th>Filename</th><th>Audio</th><th>Status</th><th>Search</th></tr>
+  <tr id="season-$epResult["season"]-cols"><th width="1%"><input type="checkbox" class="seasonCheck" id="$epResult["season"]" /></th><th>NFO</th><th>TBN</th><th>Episode</th><th>Name</th><th class="nowrap">Airdate</th><th>Filename</th><th>Status</th><th>Search</th></tr>
         #set $curSeason = int($epResult["season"])
     #end if    
 
@@ -216,13 +163,6 @@ $epLoc[len($show._location)+1:]
 $epLoc
 #end if
 
-    </td>
-    <td align="center" class="audio_langs_column">
-        #if len($epResult["audio_langs"]) > 0:
-            #for $language in $epResult["audio_langs"].split("|"):
-                <img src="$sbRoot/images/flags/${language}.png" alt="$language" width="16" />
-            #end for
-        #end if  
     </td>
     <td class="status_column">$statusStrings[int($epResult["status"])]</td>
     <td align="center">
