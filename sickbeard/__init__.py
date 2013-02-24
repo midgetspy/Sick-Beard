@@ -198,6 +198,10 @@ NZBGET_PASSWORD = None
 NZBGET_CATEGORY = None
 NZBGET_HOST = None
 
+USE_CMDNOTIFY = False
+CMDNOTIFY_UPDATE_CMD = ''
+CMDNOTIFY_I_KNOW_WHAT_I_AM_DOING = False
+
 USE_XBMC = False
 XBMC_NOTIFY_ONSNATCH = False
 XBMC_NOTIFY_ONDOWNLOAD = False
@@ -322,6 +326,7 @@ def initialize(consoleLogging=True):
                 GROWL_NOTIFY_ONSNATCH, GROWL_NOTIFY_ONDOWNLOAD, TWITTER_NOTIFY_ONSNATCH, TWITTER_NOTIFY_ONDOWNLOAD, \
                 USE_GROWL, GROWL_HOST, GROWL_PASSWORD, USE_PROWL, PROWL_NOTIFY_ONSNATCH, PROWL_NOTIFY_ONDOWNLOAD, PROWL_API, PROWL_PRIORITY, PROG_DIR, NZBMATRIX, NZBMATRIX_USERNAME, \
                 USE_PYTIVO, PYTIVO_NOTIFY_ONSNATCH, PYTIVO_NOTIFY_ONDOWNLOAD, PYTIVO_UPDATE_LIBRARY, PYTIVO_HOST, PYTIVO_SHARE_NAME, PYTIVO_TIVO_NAME, \
+                USE_CMDNOTIFY, CMDNOTIFY_UPDATE_CMD, CMDNOTIFY_I_KNOW_WHAT_I_AM_DOING, \
                 USE_NMA, NMA_NOTIFY_ONSNATCH, NMA_NOTIFY_ONDOWNLOAD, NMA_API, NMA_PRIORITY, \
                 NZBMATRIX_APIKEY, versionCheckScheduler, VERSION_NOTIFY, PROCESS_AUTOMATICALLY, \
                 KEEP_PROCESSED_DIR, TV_DOWNLOAD_DIR, TVDB_BASE_URL, MIN_SEARCH_FREQUENCY, \
@@ -577,6 +582,11 @@ def initialize(consoleLogging=True):
         XBMC_HOST = check_setting_str(CFG, 'XBMC', 'xbmc_host', '')
         XBMC_USERNAME = check_setting_str(CFG, 'XBMC', 'xbmc_username', '')
         XBMC_PASSWORD = check_setting_str(CFG, 'XBMC', 'xbmc_password', '')
+
+        CheckSection(CFG, 'Cmdnotify')
+        USE_CMDNOTIFY = bool(check_setting_int(CFG, 'Cmdnotify', 'use_cmdnotify', 0))
+        CMDNOTIFY_UPDATE_CMD = check_setting_str(CFG, 'Cmdnotify', 'cmdnotify_update_cmd', '')
+        CMDNOTIFY_I_KNOW_WHAT_I_AM_DOING = bool(check_setting_int(CFG, 'Cmdnotify', 'cmdnotify_I_KNOW_WHAT_I_AM_DOING', 0))
 
         CheckSection(CFG, 'Plex')
         USE_PLEX = bool(check_setting_int(CFG, 'Plex', 'use_plex', 0))
@@ -1050,6 +1060,11 @@ def save_config():
     new_config['XBMC']['xbmc_host'] = XBMC_HOST
     new_config['XBMC']['xbmc_username'] = XBMC_USERNAME
     new_config['XBMC']['xbmc_password'] = XBMC_PASSWORD
+
+    new_config['Cmdnotify'] = {}
+    new_config['Cmdnotify']['use_cmdnotify'] = int(USE_CMDNOTIFY)
+    new_config['Cmdnotify']['cmdnotify_I_KNOW_WHAT_I_AM_DOING'] = int(CMDNOTIFY_I_KNOW_WHAT_I_AM_DOING)
+    new_config['Cmdnotify']['cmdnotify_update_cmd'] = CMDNOTIFY_UPDATE_CMD
 
     new_config['Plex'] = {}
     new_config['Plex']['use_plex'] = int(USE_PLEX)

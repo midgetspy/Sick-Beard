@@ -36,6 +36,9 @@ class CmdNotifier:
 		pass
 
 	def update_library(self, ep, cmd=None, test=False):
+		if not sickbeard.CMDNOTIFY_I_KNOW_WHAT_I_AM_DOING:
+			logger.log(u"Cmdnotify not enabled, I_KNOW_WHAT_I_AM_DOING is False, skipping", logger.DEBUG)
+			return False
 		if not sickbeard.USE_CMDNOTIFY and not test:
 			logger.log(u"Cmdnotify not enabled, skipping", logger.DEBUG)
 			return False
@@ -49,13 +52,13 @@ class CmdNotifier:
 
 		cmd = str(cmd if cmd else sickbeard.CMDNOTIFY_UPDATE_CMD).strip()
 
-		path = ep.fullPath() if not test else '/path/to/file'
-		name = ep.prettyName() if not test else 'Herp.Derp S01E02'
+		path = ep.fullPath() if not test else '/path/to/series/Some Show/Some.Ep.S01.E02.mkv'
+		name = ep.prettyName() if not test else 'Some Show S01E02'
 
-		eshow = ep.show.name if not test else 'Durrr'
+		eshow = ep.show.name if not test else 'Some Show'
 		eseason = str(ep.season if not test else 1)
 		eep = str(ep.episode if not test else 2)
-		etitle = str(ep.name if not test else 'Herp.Derp')
+		etitle = str(ep.name if not test else 'Some Ep')
 
 		args = [cmd, path, name, eshow, eseason, eep, etitle]
 
