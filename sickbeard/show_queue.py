@@ -115,8 +115,8 @@ class ShowQueue(generic_queue.GenericQueue):
 
         return queueItemObj
 
-    def addShow(self, tvdb_id, showDir, default_status=None, quality=None, flatten_folders=None, lang="en"):
-        queueItemObj = QueueItemAdd(tvdb_id, showDir, default_status, quality, flatten_folders, lang)
+    def addShow(self, tvdb_id, showDir, default_status=None, quality=None, flatten_folders=None, lang="en", dailytvtorrents_show_name=None):
+        queueItemObj = QueueItemAdd(tvdb_id, showDir, default_status, quality, flatten_folders, lang, dailytvtorrents_show_name)
         
         self.add_item(queueItemObj)
 
@@ -165,7 +165,7 @@ class ShowQueueItem(generic_queue.QueueItem):
 
 
 class QueueItemAdd(ShowQueueItem):
-    def __init__(self, tvdb_id, showDir, default_status, quality, flatten_folders, lang):
+    def __init__(self, tvdb_id, showDir, default_status, quality, flatten_folders, lang, dailytvtorrents_show_name):
 
         self.tvdb_id = tvdb_id
         self.showDir = showDir
@@ -173,6 +173,7 @@ class QueueItemAdd(ShowQueueItem):
         self.quality = quality
         self.flatten_folders = flatten_folders
         self.lang = lang
+        self.dailytvtorrents_show_name = dailytvtorrents_show_name
 
         self.show = None
 
@@ -250,6 +251,7 @@ class QueueItemAdd(ShowQueueItem):
             self.show.quality = self.quality if self.quality else sickbeard.QUALITY_DEFAULT
             self.show.flatten_folders = self.flatten_folders if self.flatten_folders != None else sickbeard.FLATTEN_FOLDERS_DEFAULT
             self.show.paused = False
+            self.show.dailytvtorrents_show_name = self.dailytvtorrents_show_name
             
             # be smartish about this
             if self.show.genre and "talk show" in self.show.genre.lower():

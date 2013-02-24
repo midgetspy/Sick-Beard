@@ -65,6 +65,18 @@
     </div>
 </fieldset>
 
+#if $sickbeard.DAILYTVTORRENTS:
+
+<fieldset class="sectionwrap">
+    <legend class="legendStep">DailyTvTorrents Options</legend>
+
+    <div class="stepDiv">
+        #include $os.path.join($sickbeard.PROG_DIR, "data/interfaces/default/inc_addShowDailyTvTorrentsOptions.tmpl")
+    </div>
+</fieldset>
+
+#end if
+
 #for $curNextDir in $other_shows:
 <input type="hidden" name="other_shows" value="$curNextDir" />
 #end for
