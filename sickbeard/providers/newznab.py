@@ -36,7 +36,7 @@ from sickbeard import exceptions
 from sickbeard import logger
 from sickbeard import tvcache
 from sickbeard.exceptions import ex
-
+from sickbeard.name_parser.parser import NameParser, InvalidNameException
 
 class NewznabProvider(generic.NZBProvider):
 
@@ -147,6 +147,19 @@ class NewznabProvider(generic.NZBProvider):
 
         return to_return
 
+    def _get_language(self, title=None, item=None):
+        if not title:
+            return 'en'
+        else:
+            try:
+                myParser = NameParser()
+                parse_result = myParser.parse(title)
+            except InvalidNameException:
+                logger.log(u"Unable to parse the filename "+title+" into a valid episode", logger.WARNING)
+                return 'en'
+
+        return parse_result.series_language	
+
     def _doGeneralSearch(self, search_string):
         return self._doSearch({'q': search_string})
 
@@ -172,11 +185,15 @@ class NewznabProvider(generic.NZBProvider):
         return True
 
     def _doSearch(self, search_params, show=None, max_age=0):
+		
+        cat = '5030,5040'
+        if show and show.audio_lang != u"en":
+            cat = '5020'
 
         params = {"t": "tvsearch",
                   "maxage": sickbeard.USENET_RETENTION,
                   "limit": 100,
-                  "cat": '5030,5040'}
+                  "cat": cat}
 
         # if max_age is set, use it, don't allow it to be missing
         if max_age or not params['maxage']:
@@ -282,9 +299,16 @@ class NewznabCache(tvcache.TVCache):
 
     def _getRSSData(self):
 
+        languages = helpers.getAllLanguages()
+
+        languages = filter(lambda x: not x == u"en", languages)
+        cat = '5030,5040'
+        if len(languages) > 0:
+            cat = '5020'
+
         params = {"t": "tvsearch",
                   "age": sickbeard.USENET_RETENTION,
-                  "cat": '5040,5030'}
+                   "cat": cat}
 
         # hack this in for now
         if self.provider.getID() == 'nzbs_org':

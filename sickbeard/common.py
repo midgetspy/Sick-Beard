@@ -52,14 +52,16 @@ SKIPPED = 5 # episodes we don't want
 ARCHIVED = 6 # episodes that you don't have locally (counts toward download completion stats)
 IGNORED = 7 # episodes that you don't want included in your download stats
 SNATCHED_PROPER = 9 # qualified with quality
-
+fr = 'fr'
 NAMING_REPEAT = 1
 NAMING_EXTEND = 2
 NAMING_DUPLICATE = 4
 NAMING_LIMITED_EXTEND = 8
 NAMING_SEPARATED_REPEAT = 16
 NAMING_LIMITED_EXTEND_E_PREFIXED = 32
-
+en = 'en'
+de = 'de'
+unknown = ''
 multiEpStrings = {}
 multiEpStrings[NAMING_REPEAT] = "Repeat"
 multiEpStrings[NAMING_SEPARATED_REPEAT] = "Repeat (Separated)"
@@ -249,6 +251,16 @@ class Overview:
                        GOOD: "good",
                        UNAIRED: "unaired"}
 
+class audio:
+    fr = 'fr'
+    en = 'en'
+    de = 'de'
+    unknown = ''
+    
+    audioStrings = {'fr': 'french',
+                       'en': 'english',
+                       'de': 'german',
+                       '': 'unknown'}
 # Get our xml namespaces correct for lxml
 XML_NSMAP = {'xsi': 'http://www.w3.org/2001/XMLSchema-instance',
              'xsd': 'http://www.w3.org/2001/XMLSchema'}

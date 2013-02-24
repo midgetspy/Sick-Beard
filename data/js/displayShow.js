@@ -2,6 +2,8 @@ $(document).ready(function(){
 
     $('#sbRoot').ajaxEpSearch({'colorRow': true});
 
+    $("td.status_column:contains('Snatched')").parent().css("background-color", "#EBC1EA");
+
     $('#seasonJump').change(function() {
         var id = $(this).val();
         if (id && id != 'jump') {
@@ -47,6 +49,26 @@ $(document).ready(function(){
             return false
 
         url = sbRoot+'/home/setStatus?show='+$('#showID').attr('value')+'&eps='+epArr.join('|')+'&status='+$('#statusSelect').attr('value')
+        window.location.href = url
+
+    });
+	
+    $('#changeAudio').click(function(){
+        var sbRoot = $('#sbRoot').val()
+        var epArr = new Array()
+
+        $('.epCheck').each(function() {
+      
+            if (this.checked == true) {
+                epArr.push($(this).attr('id'))
+            }
+
+        });  
+
+        if (epArr.length == 0)
+            return false
+
+        url = sbRoot+'/home/setAudio?show='+$('#showID').attr('value')+'&eps='+epArr.join('|')+'&audio_langs='+$('#audioSelect').attr('value')
         window.location.href = url
 
     });

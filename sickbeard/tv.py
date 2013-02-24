@@ -47,7 +47,7 @@ from common import NAMING_DUPLICATE, NAMING_EXTEND, NAMING_LIMITED_EXTEND, NAMIN
 
 class TVShow(object):
 
-    def __init__ (self, tvdbid, lang=""):
+    def __init__ (self, tvdbid, lang="",audio_lang=""):
 
         self.tvdbid = tvdbid
 
@@ -67,7 +67,7 @@ class TVShow(object):
         self.paused = 0
         self.air_by_date = 0
         self.lang = lang
-        self.audio_lang = ""
+        self.audio_lang = audio_lang
         self.custom_search_names = ""
 
         self.lock = threading.Lock()
@@ -958,6 +958,7 @@ class TVEpisode(object):
         self._status = UNKNOWN
         self._tvdbid = 0
         self._file_size = 0
+        self._audio_langs = ''
         self._release_name = ''
 
         # setting any of the above sets the dirty flag
@@ -985,6 +986,7 @@ class TVEpisode(object):
     tvdbid = property(lambda self: self._tvdbid, dirty_setter("_tvdbid"))
     #location = property(lambda self: self._location, dirty_setter("_location"))
     file_size = property(lambda self: self._file_size, dirty_setter("_file_size"))
+    audio_langs = property(lambda self: self._audio_langs, dirty_setter("_audio_langs"))
     release_name = property(lambda self: self._release_name, dirty_setter("_release_name"))
 
     def _set_location(self, new_location):
@@ -1091,6 +1093,9 @@ class TVEpisode(object):
                 self.file_size = 0
 
             self.tvdbid = int(sqlResults[0]["tvdbid"])
+
+            if sqlResults[0]["audio_langs"] != None:
+                self.audio_langs = str(sqlResults[0]["audio_langs"]).split("|")
             
             if sqlResults[0]["release_name"] != None:
                 self.release_name = sqlResults[0]["release_name"]
@@ -1300,6 +1305,7 @@ class TVEpisode(object):
         toReturn += "hasnfo: " + str(self.hasnfo) + "\n"
         toReturn += "hastbn: " + str(self.hastbn) + "\n"
         toReturn += "status: " + str(self.status) + "\n"
+        toReturn += "languages: " + ",".join(self.audio_langs) + "\n"
         return toReturn
 
     def createMetaFiles(self, force=False):
@@ -1374,6 +1380,7 @@ class TVEpisode(object):
                         "hastbn": self.hastbn,
                         "status": self.status,
                         "location": self.location,
+                        "audio_langs": "|".join(self.audio_langs),
                         "file_size": self.file_size,
                         "release_name": self.release_name}
         controlValueDict = {"showid": self.show.tvdbid,
