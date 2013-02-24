@@ -11,7 +11,23 @@ $(document).ready(function(){
                 $(this).hide();
 
         });
-    } 
+    }
+
+    $.fn.showFirstEnabledProvider = function() {
+        var providerList = $("#provider_order").val().split(" ");
+
+        $.each(providerList, function(index, value){
+            var provider = value.split(":");
+            var providerDiv = $('#' + provider[0] + 'Div');
+            var providerEnabled = provider[1];
+
+            if ( "1" == providerEnabled && 0 !== providerDiv.length ) {
+                $('#editAProvider').val(provider);
+                $(this).showHideProviders();
+                return false; // Break the $.each loop
+            }
+        });
+    }
 
     $.fn.addProvider = function (id, name, url, key, isDefault, showProvider) {
 
@@ -195,6 +211,7 @@ $(document).ready(function(){
     // initialization stuff
 
     $(this).showHideProviders();
+    $(this).showFirstEnabledProvider();
 
     $("#providerOrderList").sortable({
         placeholder: 'ui-state-highlight',

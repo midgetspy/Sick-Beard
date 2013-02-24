@@ -51,6 +51,20 @@
 
 <form action="editShow" method="post">
 <input type="hidden" name="show" value="$show.tvdbid" />
+
+#if $sickbeard.DAILYTVTORRENTS:
+DailyTvTorrents Feed Name (optional): <input type="text" name="dailytvtorrents_show_name" id="dailytvtorrents_show_name" value="$show.dailytvtorrents_show_name" size="50" />
+<br />
+
+<em>For some shows, DailyTvTorrents uses a slightly different name for its RSS feed (eg. 'once-upon-a-time' instead of 'once-upon-a-time-2011').
+<br />
+You can manually specify the correct name here.</em>
+
+<br />
+<br />
+<br />
+#end if
+
 Location: <input type="text" name="location" id="location" value="$show._location" size="50" /><br />
 <br />
 Quality:

@@ -1032,7 +1032,8 @@ class ConfigProviders:
     def saveProviders(self, nzbmatrix_username=None, nzbmatrix_apikey=None,
                       nzbs_r_us_uid=None, nzbs_r_us_hash=None, newznab_string=None,
                       tvtorrents_digest=None, tvtorrents_hash=None,
- 					  btn_api_key=None,
+                      btn_api_key=None,
+                      dailytvtorrents_prefer_or_only=None, dailytvtorrents_prefer_type=None, dailytvtorrents_minage=None, dailytvtorrents_wait=None, dailytvtorrents_norar=None, dailytvtorrents_single=None,
                       newzbin_username=None, newzbin_password=None,
                       provider_order=None):
 
@@ -1091,6 +1092,8 @@ class ConfigProviders:
                 sickbeard.BINREQ = curEnabled
             elif curProvider == 'womble_s_index':
                 sickbeard.WOMBLE = curEnabled
+            elif curProvider == 'dailytvtorrents':
+                sickbeard.DAILYTVTORRENTS = curEnabled
             elif curProvider == 'ezrss':
                 sickbeard.EZRSS = curEnabled
             elif curProvider == 'tvtorrents':
@@ -1106,6 +1109,13 @@ class ConfigProviders:
         sickbeard.TVTORRENTS_HASH = tvtorrents_hash.strip()
 
         sickbeard.BTN_API_KEY = btn_api_key.strip()
+
+        sickbeard.DAILYTVTORRENTS_PREFER_OR_ONLY = dailytvtorrents_prefer_or_only.strip()
+        sickbeard.DAILYTVTORRENTS_PREFER_TYPE = dailytvtorrents_prefer_type.strip()
+        sickbeard.DAILYTVTORRENTS_MINAGE = dailytvtorrents_minage.strip()
+        sickbeard.DAILYTVTORRENTS_WAIT = dailytvtorrents_wait.strip()
+        sickbeard.DAILYTVTORRENTS_NORAR = dailytvtorrents_norar
+        sickbeard.DAILYTVTORRENTS_SINGLE = dailytvtorrents_single
 
         sickbeard.NZBSRUS_UID = nzbs_r_us_uid.strip()
         sickbeard.NZBSRUS_HASH = nzbs_r_us_hash.strip()
@@ -1679,7 +1689,7 @@ class NewHomeAddShows:
     @cherrypy.expose
     def addNewShow(self, whichSeries=None, tvdbLang="en", rootDir=None, defaultStatus=None,
                    anyQualities=None, bestQualities=None, flatten_folders=None, fullShowPath=None,
-                   other_shows=None, skipShow=None):
+                   other_shows=None, skipShow=None, dailytvtorrents_show_name=None):
         """
         Receive tvdb id, dir, and other options and create a show from them. If extra show dirs are
         provided then it forwards back to newShow, if not it goes to /home.
@@ -1759,7 +1769,7 @@ class NewHomeAddShows:
         newQuality = Quality.combineQualities(map(int, anyQualities), map(int, bestQualities))
         
         # add the show
-        sickbeard.showQueueScheduler.action.addShow(tvdb_id, show_dir, int(defaultStatus), newQuality, flatten_folders, tvdbLang) #@UndefinedVariable
+        sickbeard.showQueueScheduler.action.addShow(tvdb_id, show_dir, int(defaultStatus), newQuality, flatten_folders, tvdbLang, dailytvtorrents_show_name) #@UndefinedVariable
         ui.notifications.message('Show added', 'Adding the specified show into '+show_dir)
 
         return finishAddShow()
@@ -2267,7 +2277,7 @@ class Home:
         return result['description'] if result else 'Episode not found.'
 
     @cherrypy.expose
-    def editShow(self, show=None, location=None, anyQualities=[], bestQualities=[], flatten_folders=None, paused=None, directCall=False, air_by_date=None, tvdbLang=None):
+    def editShow(self, show=None, location=None, anyQualities=[], bestQualities=[], flatten_folders=None, paused=None, directCall=False, air_by_date=None, tvdbLang=None, dailytvtorrents_show_name=None):
 
         if show == None:
             errString = "Invalid show ID: "+str(show)
@@ -2344,6 +2354,7 @@ class Home:
             showObj.paused = paused
             showObj.air_by_date = air_by_date
             showObj.lang = tvdb_lang
+            showObj.dailytvtorrents_show_name = dailytvtorrents_show_name
 
             # if we change location clear the db of episodes, change it, write to db, and rescan
             if os.path.normpath(showObj._location) != os.path.normpath(location):

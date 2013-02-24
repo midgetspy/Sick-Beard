@@ -136,7 +136,8 @@ class NumericProviders (AddAirdateIndex):
                 4: 'eztv',
                 5: 'nzbmatrix',
                 6: 'tvnzb',
-                7: 'ezrss'}
+                7: 'ezrss',
+                8: 'dailytvtorrents'}
 
     def execute(self):
         self.connection.action("ALTER TABLE history RENAME TO history_old")
@@ -536,3 +537,11 @@ class RenameSeasonFolders(AddSizeAndSceneNameFields):
         self.connection.action("DROP TABLE tmp_tv_shows")
 
         self.incDBVersion()
+
+class AddDailyTvTorrentsFields(RenameSeasonFolders):
+
+    def test(self):
+        return self.hasColumn("tv_shows", "dailytvtorrents_show_name")
+
+    def execute(self):
+        self.addColumn("tv_shows", "dailytvtorrents_show_name", "TEXT", "")
