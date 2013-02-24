@@ -1,6 +1,13 @@
 $(document).ready(function(){
     var loading = '<img src="'+sbRoot+'/images/loading16.gif" height="16" width="16" />';
 
+    $('#testCmdnotify').click(function(){
+        $('#testCmdnotify-result').html(loading);
+        var cmd = $("#cmdnotify_update_cmd").val();
+        var growl_result = $.get(sbRoot+"/home/testCmdnotify", {'cmd': cmd}, 
+        function (data){ $('#testCmdnotify-result').html(data); });
+    });
+
     $('#testGrowl').click(function(){
         $('#testGrowl-result').html(loading);
         var growl_host = $("#growl_host").val();

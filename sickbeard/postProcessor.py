@@ -857,6 +857,9 @@ class PostProcessor(object):
         # do the library update for XBMC
         notifiers.xbmc_notifier.update_library(ep_obj.show.name)
 
+        # do the library update for Cmdnotify
+        notifiers.cmd_notifier.update_library(ep_obj)
+
         # do the library update for Plex
         notifiers.plex_notifier.update_library()
 
