@@ -146,7 +146,7 @@ Change selected episodes to
 
   #set $epStr = str($epResult["season"]) + "x" + str($epResult["episode"])
   #set $epLoc = $epResult["location"]
-#if int($status) == $UNAIRED
+#if int($status) == $UNAIRED and int($epResult["season"]) != 0
   <tr class="$Overview.overviewStrings[UNAIRED]">
 #else
   <tr class="$Overview.overviewStrings[$epCats[$epStr]] season-$curSeason">
