@@ -357,6 +357,57 @@
                 <h2>Devices</h2>
                 <br />
 
+                <div class="component-group clearfix">
+                    <div class="component-group-desc">
+                        <img class="notifier-icon" src="$sbRoot/images/notifiers/cmd.png" alt="" title="Command notify" />
+                        <h3><a href="http://library.gnome.org/devel/libnotify/" onclick="window.open(this.href, '_blank'); return false;">Custom command</a></h3>
+                        <p>Executes a custom command when an event happens (currently only library update events are supported)</p>
+                    </div>
+                    <fieldset class="component-group-list">
+                        <div class="field-pair">
+                            <input type="checkbox" class="enabler" name="use_cmdnotify" id="use_cmdnotify" #if $sickbeard.USE_CMDNOTIFY then "checked=\"checked\"" else ""# /> 
+                            <label class="clearfix" for="use_cmdnotify">
+                                <span class="component-title">Enable</span>
+                                <span class="component-desc">Should Sick Beard use custom command notifications?</span>
+                            </label>
+                        </div>
+
+                        <div id="content_use_cmdnotify">
+                            <div class="field-pair">
+                                <label class="nocheck clearfix">
+                                    <span class="component-title" style="text-align: right;"><img src="$sbRoot/images/warning32.png" alt="" title="Warning" /></span>
+                                    <span class="component-desc">
+                                        <b>Beware:</b> This plugin is a potential security risk. When enabled, anyone able to access either this page or the following url:
+                                        <pre>$sbRoot/home/testCmdnotify</pre> has the ability to <b>execute arbitrary commands on your system as the Sickbeard user</b>.
+                                        If you understand this risk and are absolutely sure it is safe for you to enable this plugin
+                                        you can do so by manually stopping Sickbeard, finding the line in config.ini that says <pre>cmdnotify_I_KNOW_WHAT_I_AM_DOING = 0</pre> and changing the 0 to a 1. Then start Sickbeard and you're good to go.
+                                    </span>
+                                </label>
+                                <label class="nocheck clearfix">
+                                    <span class="component-title">Current status</span>
+                                    <span class="component-desc">
+                                        #if not $sickbeard.CMDNOTIFY_I_KNOW_WHAT_I_AM_DOING then "<b>Not enabled</b>; read above warning" else "<b>Enabled</b>. You swore to know what you are doing." #
+                                    </span>
+                                </label>
+                            </div>
+                            <div class="field-pair">
+                                <label class="nocheck clearfix">
+                                    <span class="component-title">Command to execute</span>
+                                    <input type="text" name="cmdnotify_update_cmd" id="cmdnotify_update_cmd" value="$sickbeard.CMDNOTIFY_UPDATE_CMD" size="35" />
+                                </label>
+                                <label class="nocheck clearfix">
+                                    <span class="component-title">&nbsp;</span>
+                                    <span class="component-desc">Called as: CMD [ep path] [ep #+name] [show] [s#] [e#] [title]</span>
+                                </label>
+                            </div>
+                            <div class="testNotification" id="testCmdnotify-result">Click below to test the command.</div>
+                            <input type="button" class="btn" value="Test command" id="testCmdnotify" />
+                            <input type="submit" class="btn config_submitter" value="Save Changes" />
+                        </div><!-- /content_use_libnotify //-->
+
+                    </fieldset>
+                </div>
+
 
                 <div class="component-group clearfix">
                     <div class="component-group-desc">

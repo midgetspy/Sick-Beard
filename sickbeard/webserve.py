@@ -1032,7 +1032,7 @@ class ConfigProviders:
     def saveProviders(self, nzbmatrix_username=None, nzbmatrix_apikey=None,
                       nzbs_r_us_uid=None, nzbs_r_us_hash=None, newznab_string=None,
                       tvtorrents_digest=None, tvtorrents_hash=None,
- 					  btn_api_key=None,
+                       btn_api_key=None,
                       newzbin_username=None, newzbin_password=None,
                       provider_order=None):
 
@@ -1148,9 +1148,15 @@ class ConfigNotifications:
                           use_trakt=None, trakt_username=None, trakt_password=None, trakt_api=None,
                           use_pytivo=None, pytivo_notify_onsnatch=None, pytivo_notify_ondownload=None, pytivo_update_library=None, 
                           pytivo_host=None, pytivo_share_name=None, pytivo_tivo_name=None,
-                          use_nma=None, nma_notify_onsnatch=None, nma_notify_ondownload=None, nma_api=None, nma_priority=0 ):
+                          use_nma=None, nma_notify_onsnatch=None, nma_notify_ondownload=None, nma_api=None, nma_priority=0, 
+                          use_cmdnotify=None, cmdnotify_update_cmd=None):
 
         results = []
+
+        if use_cmdnotify == "on":
+            use_cmdnotify = 1
+        else:
+            use_cmdnotify = 0
 
         if xbmc_notify_onsnatch == "on":
             xbmc_notify_onsnatch = 1
@@ -1332,6 +1338,9 @@ class ConfigNotifications:
         else:
             nma_notify_ondownload = 0
 
+        sickbeard.USE_CMDNOTIFY = use_cmdnotify
+        sickbeard.CMDNOTIFY_UPDATE_CMD = cmdnotify_update_cmd
+
         sickbeard.USE_XBMC = use_xbmc
         sickbeard.XBMC_NOTIFY_ONSNATCH = xbmc_notify_onsnatch
         sickbeard.XBMC_NOTIFY_ONDOWNLOAD = xbmc_notify_ondownload
@@ -1446,6 +1455,9 @@ class Config:
 
 def haveXBMC():
     return sickbeard.USE_XBMC and sickbeard.XBMC_UPDATE_LIBRARY
+
+def haveCMDNOTIFY():
+    return sickbeard.USE_CMDNOTIFY and sickbeard.CMDNOTIFY_UPDATE_CMD and sickbeard.CMDNOTIFY_I_KNOW_WHAT_I_AM_DOING
 
 def havePLEX():
     return sickbeard.USE_PLEX and sickbeard.PLEX_UPDATE_LIBRARY
@@ -1966,6 +1978,15 @@ class Home:
                 return "Authentication failed. SABnzbd expects '"+accesMsg+"' as authentication method"
         else:
             return "Unable to connect to host"
+
+    @cherrypy.expose
+    def testCmdnotify(self, cmd=None):
+        if not sickbeard.CMDNOTIFY_I_KNOW_WHAT_I_AM_DOING:
+            return "Plugin not enabled. Please read the warning above."
+        if notifiers.cmd_notifier.test_notify(cmd):
+            return "Command ran successfully."
+        else:
+            return "Command failed. Check the log for any output."
 
     @cherrypy.expose
     def testGrowl(self, host=None, password=None):
