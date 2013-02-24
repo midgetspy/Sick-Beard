@@ -269,12 +269,12 @@
 
                     </fieldset>
                 </div><!-- /nmj component-group //-->
-				
-				<div class="component-group clearfix">
+
+                <div class="component-group clearfix">
                     <div class="component-group-desc">
-						<img class="notifier-icon" src="$sbRoot/images/notifiers/nmj.png" alt="" title="Networked Media Jukebox V2" />
+                        <img class="notifier-icon" src="$sbRoot/images/notifiers/nmj.png" alt="" title="Networked Media Jukebox V2" />
                         <h3><a href="http://www.popcornhour.com/" onclick="window.open(this.href, '_blank'); return false;">NMJv2</a></h3>
-                        <p>The Networked Media Jukebox, or NMJv2, is the official media jukebox interface made available for the Popcorn Hour 300 & 400-series.</p>
+                        <p>The Networked Media Jukebox, or NMJv2, is the official media jukebox interface made available for the Popcorn Hour 300 &amp; 400-series.</p>
                     </div>
                     <fieldset class="component-group-list">
                         <div class="field-pair">
@@ -296,35 +296,34 @@
                                     <span class="component-desc">IP of Popcorn 300/400-series (eg. 192.168.1.100)</span>
                                 </label>
                             </div>
-							<div class="field-pair">
+                            <div class="field-pair">
                                 <label class="nocheck clearfix">
                                     <span class="component-title">Database Location</span>
-									<span class="component-desc">
-										<INPUT TYPE="radio" NAME="nmjv2_dbloc" VALUE="local" class="radio" id="NMJV2_DBLOC_A" #if $sickbeard.NMJv2_DBLOC=="local" then "checked=\"checked\"" else ""# />PCH Local Media<br />
-									</span>
+                                    <span class="component-desc">
+                                        <input type="radio" name="nmjv2_dbloc" value="local" class="radio" id="nmjv2_dbloc_a" #if $sickbeard.NMJv2_DBLOC=="local" then "checked=\"checked\"" else ""# />PCH Local Media<br />
+                                    </span>
                                 </label>
-								    <label class="nocheck clearfix">
+                                <label class="nocheck clearfix">
                                     <span class="component-title">&nbsp;</span>
                                     <span class="component-desc">
-										<INPUT TYPE="radio" NAME="nmjv2_dbloc" VALUE="network" class="radio" id="NMJV2_DBLOC_B" #if $sickbeard.NMJv2_DBLOC=="network" then "checked=\"checked\"" else ""#/>PCH Network Media
-									</span>
+                                        <input type="radio" name="nmjv2_dbloc" value="network" class="radio" id="nmjv2_dbloc_b" #if $sickbeard.NMJv2_DBLOC=="network" then "checked=\"checked\"" else ""# />PCH Network Media<br />
+                                    </span>
                                 </label>
-								</label>
-								<label class="nocheck clearfix">
+                                <label class="nocheck clearfix">
                                     <span class="component-title">Database Instance</span>
                                     <span class="component-desc">
-									<select id="NMJv2db_instance">
-										<option value="0">#1 </option>
-										<option value="1">#2 </option>
-										<option value="2">#3 </option>
-										<option value="3">#4 </option>
-										<option value="4">#5 </option>
-										<option value="5">#6 </option>
-										<option value="6">#7 </option>
-									</select>
-									</span>
+                                        <select id="NMJv2db_instance">
+                                            <option value="0">#1 </option>
+                                            <option value="1">#2 </option>
+                                            <option value="2">#3 </option>
+                                            <option value="3">#4 </option>
+                                            <option value="4">#5 </option>
+                                            <option value="5">#6 </option>
+                                            <option value="6">#7 </option>
+                                        </select>
+                                    </span>
                                 </label>
-								<label class="nocheck clearfix">
+                                <label class="nocheck clearfix">
                                     <span class="component-title">&nbsp;</span>
                                     <span class="component-desc">Adjust this value if the wrong database is selected.</span>
                                 </label>
@@ -332,7 +331,7 @@
                             <div class="field-pair">
                                 <label class="nocheck clearfix">
                                     <span class="component-title">Find Database</span>
-									<input type="button" value="Find Database" id="settingsNMJv2" />
+                                    <input type="button" class="btn" value="Find Database" id="settingsNMJv2" />
                                 </label>
                                 <label class="nocheck clearfix">
                                     <span class="component-title">&nbsp;</span>
@@ -348,9 +347,9 @@
                                     <span class="component-desc">Automatically filled via the 'Find Database' buttons.</span>
                                 </label>
                             </div>
-						<div class="testNotification" id="testNMJv2-result">Click below to test.</div>
-						<input type="button" value="Test NMJv2" id="testNMJv2" />
-						<input type="submit" class="config_submitter" value="Save Changes" />
+                        <div class="testNotification" id="testNMJv2-result">Click below to test.</div>
+                        <input type="button" class="btn" value="Test NMJv2" id="testNMJv2" />
+                        <input type="submit" class="btn config_submitter" value="Save Changes" />
                         </div><!-- /content_use_nmjv2 //-->
 
                     </fieldset>

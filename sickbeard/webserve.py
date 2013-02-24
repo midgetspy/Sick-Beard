@@ -1312,7 +1312,7 @@ class ConfigNotifications:
             use_synoindex = 1
         else:
             use_synoindex = 0
-            
+
         if use_nmjv2 == "on":
             use_nmjv2 = 1
         else:
@@ -2143,22 +2143,21 @@ class Home:
     @cherrypy.expose
     def testNMJv2(self, host=None):
         cherrypy.response.headers['Cache-Control'] = "max-age=0,no-cache,no-store"
-        
+
         result = notifiers.nmjv2_notifier.test_notify(urllib.unquote_plus(host))
         if result:
-            return "Test notice sent successfully to "+urllib.unquote_plus(host)
+            return "Test notice sent successfully to " + urllib.unquote_plus(host)
         else:
-            return "Test notice failed to "+urllib.unquote_plus(host)
+            return "Test notice failed to " + urllib.unquote_plus(host)
 
     @cherrypy.expose
-    def settingsNMJv2(self, host=None, dbloc=None,instance=None):
+    def settingsNMJv2(self, host=None, dbloc=None, instance=None):
         cherrypy.response.headers['Cache-Control'] = "max-age=0,no-cache,no-store"
-        result = notifiers.nmjv2_notifier.notify_settings(urllib.unquote_plus(host),dbloc,instance)
+        result = notifiers.nmjv2_notifier.notify_settings(urllib.unquote_plus(host), dbloc, instance)
         if result:
             return '{"message": "NMJ Database found at: %(host)s", "database": "%(database)s"}' % {"host": host, "database": sickbeard.NMJv2_DATABASE}
         else:
             return '{"message": "Unable to find NMJ Database at location: %(dbloc)s. Is the right location selected and PCH running?", "database": ""}' % {"dbloc": dbloc}
-
 
     @cherrypy.expose
     def testTrakt(self, api=None, username=None, password=None):
