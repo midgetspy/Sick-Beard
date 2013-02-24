@@ -45,20 +45,23 @@ class T411Provider(generic.TorrentProvider):
     def isEnabled(self):
         return sickbeard.T411
     
-    def getSearchParams(self, searchString, audio_lang):
+    def getSearchParams(self, searchString, audio_lang, subcat):
         if audio_lang == "en":
-            return urllib.urlencode( {'search': searchString, 'cat' : 210, 'submit' : 'Recherche', 'subcat': 433 } ) + "&term%5B17%5D%5B%5D=540&term%5B17%5D%5B%5D=721"
+            return urllib.urlencode( {'search': searchString, 'cat' : 210, 'submit' : 'Recherche', 'subcat': subcat } ) + "&term%5B17%5D%5B%5D=540&term%5B17%5D%5B%5D=721"
         elif audio_lang == "fr":
-            return urllib.urlencode( {'search': searchString, 'cat' : 210, 'submit' : 'Recherche', 'subcat': 433 } ) + "&term%5B17%5D%5B%5D=541&term%5B17%5D%5B%5D=542"
+            return urllib.urlencode( {'search': searchString, 'cat' : 210, 'submit' : 'Recherche', 'subcat': subcat } ) + "&term%5B17%5D%5B%5D=541&term%5B17%5D%5B%5D=542"
         else:
-            return urllib.urlencode( {'search': searchString, 'cat' : 210, 'submit' : 'Recherche', 'subcat': 433 } )
+            return urllib.urlencode( {'search': searchString, 'cat' : 210, 'submit' : 'Recherche', 'subcat': subcat } )
 
     def _get_season_search_strings(self, show, season):
 
         showNames = show_name_helpers.allPossibleShowNames(show)
         results = []
         for showName in showNames:
-            results.append( self.getSearchParams(showName + " S%02d" % season, show.audio_lang ))
+            results.append( self.getSearchParams(showName + " S%02d" % season, show.audio_lang, 433 ))
+            results.append( self.getSearchParams(showName + " S%02d" % season, show.audio_lang, 637 ))
+            results.append( self.getSearchParams(showName + " saison %02d" % season, show.audio_lang, 433 ))
+            results.append( self.getSearchParams(showName + " saison %02d" % season, show.audio_lang, 637 ))
         return results
 
     def _get_episode_search_strings(self, ep_obj):
@@ -66,8 +69,10 @@ class T411Provider(generic.TorrentProvider):
         showNames = show_name_helpers.allPossibleShowNames(ep_obj.show)
         results = []
         for showName in showNames:
-            results.append( self.getSearchParams( "%s S%02dE%02d" % ( showName, ep_obj.season, ep_obj.episode), ep_obj.show.audio_lang ) )
-            results.append( self.getSearchParams( "%s %dx%d" % ( showName, ep_obj.season, ep_obj.episode ), ep_obj.show.audio_lang ) )
+            results.append( self.getSearchParams( "%s S%02dE%02d" % ( showName, ep_obj.season, ep_obj.episode), ep_obj.show.audio_lang ), 433 )
+            results.append( self.getSearchParams( "%s %dx%d" % ( showName, ep_obj.season, ep_obj.episode ), ep_obj.show.audio_lang ) , 433 )
+            results.append( self.getSearchParams( "%s S%02dE%02d" % ( showName, ep_obj.season, ep_obj.episode), ep_obj.show.audio_lang ), 637 )
+            results.append( self.getSearchParams( "%s %dx%d" % ( showName, ep_obj.season, ep_obj.episode ), ep_obj.show.audio_lang ), 637 )
         return results
     
     def _get_title_and_url(self, item):
