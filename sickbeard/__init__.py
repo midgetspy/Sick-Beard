@@ -165,6 +165,7 @@ DAILYTVTORRENTS_PREFER_TYPE = None
 DAILYTVTORRENTS_MINAGE = None
 DAILYTVTORRENTS_WAIT = None
 DAILYTVTORRENTS_NORAR = None
+DAILYTVTORRENTS_SINGLE = None
 
 BTN = False
 BTN_API_KEY = None
@@ -326,7 +327,7 @@ def initialize(consoleLogging=True):
                 PLEX_SERVER_HOST, PLEX_HOST, PLEX_USERNAME, PLEX_PASSWORD, \
                 showUpdateScheduler, __INITIALIZED__, LAUNCH_BROWSER, showList, loadingShowList, \
                 NZBS, NZBS_UID, NZBS_HASH, EZRSS, TVTORRENTS, TVTORRENTS_DIGEST, TVTORRENTS_HASH, BTN, BTN_API_KEY, TORRENT_DIR, USENET_RETENTION, SOCKET_TIMEOUT, \
-                DAILYTVTORRENTS, DAILYTVTORRENTS_PREFER_OR_ONLY, DAILYTVTORRENTS_PREFER_TYPE, DAILYTVTORRENTS_MINAGE, DAILYTVTORRENTS_WAIT, DAILYTVTORRENTS_NORAR, \
+                DAILYTVTORRENTS, DAILYTVTORRENTS_PREFER_OR_ONLY, DAILYTVTORRENTS_PREFER_TYPE, DAILYTVTORRENTS_MINAGE, DAILYTVTORRENTS_WAIT, DAILYTVTORRENTS_NORAR, DAILYTVTORRENTS_SINGLE, \
                 SEARCH_FREQUENCY, DEFAULT_SEARCH_FREQUENCY, BACKLOG_SEARCH_FREQUENCY, \
                 QUALITY_DEFAULT, FLATTEN_FOLDERS_DEFAULT, STATUS_DEFAULT, \
                 GROWL_NOTIFY_ONSNATCH, GROWL_NOTIFY_ONDOWNLOAD, TWITTER_NOTIFY_ONSNATCH, TWITTER_NOTIFY_ONDOWNLOAD, \
@@ -546,6 +547,7 @@ def initialize(consoleLogging=True):
         DAILYTVTORRENTS_MINAGE = check_setting_str(CFG, 'DailyTvTorrents', 'dailytvtorrents_minage', '')
         DAILYTVTORRENTS_WAIT = check_setting_str(CFG, 'DailyTvTorrents', 'dailytvtorrents_wait', '')
         DAILYTVTORRENTS_NORAR = check_setting_str(CFG, 'DailyTvTorrents', 'dailytvtorrents_norar', '')
+        DAILYTVTORRENTS_SINGLE = check_setting_str(CFG, 'DailyTvTorrents', 'dailytvtorrents_single', '')
 
         CheckSection(CFG, 'BTN')
         BTN = bool(check_setting_int(CFG, 'BTN', 'btn', 0))
@@ -1026,6 +1028,7 @@ def save_config():
     new_config['DailyTvTorrents']['dailytvtorrents_minage'] = DAILYTVTORRENTS_MINAGE
     new_config['DailyTvTorrents']['dailytvtorrents_wait'] = DAILYTVTORRENTS_WAIT
     new_config['DailyTvTorrents']['dailytvtorrents_norar'] = DAILYTVTORRENTS_NORAR
+    new_config['DailyTvTorrents']['dailytvtorrents_single'] = DAILYTVTORRENTS_SINGLE
 
     new_config['BTN'] = {}
     new_config['BTN']['btn'] = int(BTN)

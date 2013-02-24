@@ -63,6 +63,7 @@ class DailyTvTorrentsProvider(generic.TorrentProvider):
         minage = sickbeard.DAILYTVTORRENTS_MINAGE
         wait = sickbeard.DAILYTVTORRENTS_WAIT
         norar = sickbeard.DAILYTVTORRENTS_NORAR
+        single = sickbeard.DAILYTVTORRENTS_SINGLE
 
         if prefer_or_only and prefer_type:
             feed_params[prefer_or_only] = prefer_type
@@ -75,6 +76,9 @@ class DailyTvTorrentsProvider(generic.TorrentProvider):
 
         if norar and "1" == norar:
             feed_params['norar'] = 'yes'
+
+        if single and "1" == single:
+            feed_params['single'] = 'yes'
 
         # DailyTvTorrents currently doesn't support specifying a season for backlog searches.
 

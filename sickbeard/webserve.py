@@ -1033,7 +1033,7 @@ class ConfigProviders:
                       nzbs_r_us_uid=None, nzbs_r_us_hash=None, newznab_string=None,
                       tvtorrents_digest=None, tvtorrents_hash=None,
                       btn_api_key=None,
-                      dailytvtorrents_prefer_or_only=None, dailytvtorrents_prefer_type=None, dailytvtorrents_minage=None, dailytvtorrents_wait=None, dailytvtorrents_norar=None,
+                      dailytvtorrents_prefer_or_only=None, dailytvtorrents_prefer_type=None, dailytvtorrents_minage=None, dailytvtorrents_wait=None, dailytvtorrents_norar=None, dailytvtorrents_single=None,
                       newzbin_username=None, newzbin_password=None,
                       provider_order=None):
 
@@ -1115,6 +1115,7 @@ class ConfigProviders:
         sickbeard.DAILYTVTORRENTS_MINAGE = dailytvtorrents_minage.strip()
         sickbeard.DAILYTVTORRENTS_WAIT = dailytvtorrents_wait.strip()
         sickbeard.DAILYTVTORRENTS_NORAR = dailytvtorrents_norar
+        sickbeard.DAILYTVTORRENTS_SINGLE = dailytvtorrents_single
 
         sickbeard.NZBSRUS_UID = nzbs_r_us_uid.strip()
         sickbeard.NZBSRUS_HASH = nzbs_r_us_hash.strip()

@@ -188,13 +188,25 @@
                         </div>
                         <div class="field-pair">
                             <label class="clearfix" for="dailytvtorrents_norar">
-                                <span class="component-title">No compressed files (<em>norar</em>)</span>
+                                <span class="component-title" style="width: 270px">No compressed files<br />(<em>norar=yes</em>)</span>
                                 <input type="checkbox" name="dailytvtorrents_norar" id="dailytvtorrents_norar" #if $sickbeard.DAILYTVTORRENTS_NORAR == "1" then "checked=\"checked\"" else ""# value="1" />
+                            </label>
+                        </div>
+                        <div class="field-pair">
+                            <label class="clearfix" for="dailytvtorrents_single">
+                                <span class="component-title" style="width: 270px">Folderless single-file torrents only<br />(<em>single=yes</em>)</span>
+                                <input type="checkbox" name="dailytvtorrents_single" id="dailytvtorrents_single" #if $sickbeard.DAILYTVTORRENTS_SINGLE == "1" then "checked=\"checked\"" else ""# value="1" />
                             </label>
                         </div>
 
                         <div>
-                            <p>For more information on the DailyTvTorrents RSS feed parameters, go to <a href="http://www.dailytvtorrents.org/blog/rss-feed-parameters-for-hardcore-geeks--3" target="_blank">http://www.dailytvtorrents.org/blog/rss-feed-parameters-for-hardcore-geeks--3</a></p>
+                            <p>For more information on the DailyTvTorrents RSS feed parameters, go to these pages:
+                                <br />
+                                <a href="http://www.dailytvtorrents.org/blog/rss-feed-parameters-for-hardcore-geeks--3" target="_blank">RSS Feed Parameters for hardcore geeks</a>
+                                <br />
+                                <a href="http://www.dailytvtorrents.org/blog/new-rss-parameters-norar-and-single--g" target="_blank">New RSS Parameters: norar and single</a>
+                            </p>
+
                         </div>
 
                     </div><!-- /dailytvtorrentsDiv //-->
