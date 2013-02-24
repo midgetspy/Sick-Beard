@@ -539,7 +539,7 @@ class AddSizeAndSceneNameFields(AddShowLangsToEpisode):
 class RenameSeasonFolders(AddSizeAndSceneNameFields):
 
     def test(self):
-        return self.checkDBVersion() >= 10
+        return self.checkDBVersion() >= 11
     
     def execute(self):
         
