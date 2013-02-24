@@ -359,7 +359,10 @@ class GenericProvider:
                 logger.log(u"Separating multi-episode result to check for later - result contains episodes: "+str(parse_result.episode_numbers), logger.DEBUG)
             elif len(epObj) == 0:
                 epNum = SEASON_RESULT
-                result.extraInfo = [show]
+                if result.extraInfo:
+                    result.extraInfo.append( show )
+                else:
+                    result.extraInfo = [show]
                 logger.log(u"Separating full season result to check for later", logger.DEBUG)
 
             if epNum in results:
