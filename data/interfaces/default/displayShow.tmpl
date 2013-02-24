@@ -127,11 +127,11 @@ Change selected episodes to
     
 #for $epResult in $sqlResults:
 
-#if int($epResult["airdate"]) == 1
-    #set $status = $UNAIRED
-#else
-    #set $status = $epResult["status"]
-#end if
+	#if int($epResult["airdate"]) == 1
+		#set $status = $UNAIRED
+	#else
+		#set $status = $epResult["status"]
+	#end if
 
     #if int($epResult["season"]) != $curSeason:
   <tr><td colspan="9"><a name="season-$epResult["season"]"></a></td></tr>
