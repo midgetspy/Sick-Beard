@@ -17,8 +17,6 @@
 # along with Sick Beard.  If not, see <http://www.gnu.org/licenses/>.
 
 import urllib
-import re
-import os.path
 from xml.dom.minidom import parseString
 
 import sickbeard
@@ -78,24 +76,27 @@ class DailyTvTorrentsProvider(generic.TorrentProvider):
         if norar and "1" == norar:
             feed_params['norar'] = 'yes'
 
-        # DailyTvTorrents currently doesn't support specifying a season
-        # We either want the default per-show feed (limited number of results)
-        # or if we're looking for an episode older than the newest season,
-        # request the full listing (items=all) from DailyTvTorrents.
+        # DailyTvTorrents currently doesn't support specifying a season for backlog searches.
 
-        # This might need to be improved.
-        # I don't know exactly how many results are returned in the default feed
-
+        # If we're looking for a specific show (backlog search)
         if show:
-            seasons = show.episodes.keys()
-            if len(seasons) and season < max(seasons):
-                feed_params['items'] = 'all'  # Episodes from all seasons
-            else:
-                feed_params['onlynew'] = 'yes'  # Only episodes from the current season
+            # Request all episodes from all seasons of this show...
+            feed_params['items'] = 'all'
         else:
-            feed_params['onlynew'] = 'yes'  # Only episodes from the current season
+            # ... otherwise we're doing a normal scheduled search using the combined RSS feed (allshows)
+            # and we're only interested in new episodes
+            feed_params['onlynew'] = 'yes'
+
+        # This could be improved if DailyTvTorrents would add 'season' and 'episode' feed parameters
 
         return feed_params
+
+    def _get_show_name_for_feeds(self, show):
+
+        if show.dailytvtorrents_show_name:
+            return sanitizeSceneName(show.dailytvtorrents_show_name, ezrss=False).replace('.', '-').encode('utf-8').lower()
+        else:
+            return sanitizeSceneName(show.name, ezrss=False).replace('.', '-').encode('utf-8').lower()
 
     def _get_season_search_strings(self, show, season=None):
 
@@ -104,33 +105,35 @@ class DailyTvTorrentsProvider(generic.TorrentProvider):
         if not show:
             return params
 
-        if not show.dailytvtorrents_show_name == None:
-            params['show_name'] = sanitizeSceneName(show.dailytvtorrents_show_name, ezrss=False).replace('.', '-').encode('utf-8').lower()
-        else:
-            params['show_name'] = sanitizeSceneName(show.name, ezrss=False).replace('.', '-').encode('utf-8').lower()
+        # The show_name parameter is needed because when _doSearch() is called from within GenericProvider.findSeasonResults()
+        # no show object is passed as a parameter (is that a bug?)
+        # but we need to strip this out in _doSearch() before using the parameters in the RSS query string
+        params['show_name'] = self._get_show_name_for_feeds(show)
 
         return [params]
 
     def _get_episode_search_strings(self, ep_obj):
 
         # DailyTvTorrents currently doesn't support searching for a specifc episode
-
         return self._get_season_search_strings(ep_obj.show, ep_obj.season)
 
     def _doSearch(self, search_params, show=None):
 
-        params = {}
+        feed_params = {}
 
-        # The show's name is used to form the path, and not sent in the querystring
+        # The show's name is used to form the path, but not sent in the querystring
         if search_params:
             if search_params['show_name']:
                 show_name = search_params.pop('show_name')
-            params.update(search_params)
+            feed_params.update(search_params)
+
+        if not show_name:
+            show_name = self._get_show_name_for_feeds(show)
 
         searchURL = self.url + 'show/' + show_name
 
-        if params:
-            searchURL += "?" + urllib.urlencode(params)
+        if feed_params:
+            searchURL += "?" + urllib.urlencode(feed_params)
 
         logger.log(u"Search string: " + searchURL, logger.DEBUG)
 
