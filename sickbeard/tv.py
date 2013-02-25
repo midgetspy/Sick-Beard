@@ -928,12 +928,20 @@ class TVShow(object):
                 if sickbeard.SUBTITLES_DIR:
                     for video in subtitles:
                         subs_new_path = ek.ek(os.path.join, os.path.dirname(video.path), sickbeard.SUBTITLES_DIR)
-                        if not ek.ek(os.path.isdir, subs_new_path):
-                            ek.ek(os.mkdir, subs_new_path)
+                        dir_exists = helpers.makeDir(subs_new_path)
+                        if not dir_exists:
+                            logger.log(u"Unable to create subtitles folder "+subs_new_path, logger.ERROR)
+                        else:
+                            helpers.chmodAsParent(subs_new_path)
                         
                         for subtitle in subtitles.get(video):
                             new_file_path = ek.ek(os.path.join, subs_new_path, os.path.basename(subtitle.path))
                             helpers.moveFile(subtitle.path, new_file_path)
+                            helpers.chmodAsParent(new_file_path)
+                else:
+                    for video in subtitles:
+                        for subtitle in subtitles.get(video):
+                            helpers.chmodAsParent(subtitle.path)
                 
         except Exception as e:
             logger.log("Error occurred when downloading subtitles: " + str(e), logger.DEBUG)
@@ -958,7 +966,7 @@ class TVShow(object):
                         "flatten_folders": self.flatten_folders,
                         "paused": self.paused,
                         "air_by_date": self.air_by_date,
-						"subtitles": self.subtitles,
+                        "subtitles": self.subtitles,
                         "startyear": self.startyear,
                         "tvr_name": self.tvrname,
                         "lang": self.lang,
@@ -1152,6 +1160,8 @@ class TVEpisode(object):
             return
         logger.log(str(self.show.tvdbid) + ": Downloading subtitles for episode " + str(self.season) + "x" + str(self.episode), logger.DEBUG)
         
+        previous_subtitles = self.subtitles
+
         try:
             need_languages = set(sickbeard.SUBTITLES_LANGUAGES) - set(self.subtitles)
             subtitles = subliminal.download_subtitles([self.location], languages=need_languages, services=sickbeard.subtitles.getEnabledServiceList(), force=False, multi=True, cache_dir=sickbeard.CACHE_DIR)
@@ -1159,24 +1169,24 @@ class TVEpisode(object):
         except Exception as e:
             logger.log("Error occurred when downloading subtitles: " + str(e), logger.DEBUG)
             return
-        
-        if subtitles:
-            subtitleList = []
-            for video in subtitles:
-                for subtitle in subtitles.get(video):
-                    subtitleList.append(subtitle.language.name)
-                    history.logSubtitle(self.show.tvdbid, self.season, self.episode, self.status, subtitle)
-                    
-            logger.log(str(self.show.tvdbid) + ": Downloaded " + ", ".join(subtitleList) + " subtitles for episode " + str(self.season) + "x" + str(self.episode), logger.DEBUG)
-            
-            notifiers.notify_subtitle_download(self.prettyName(), ", ".join(subtitleList))
-        else:
-            logger.log(str(self.show.tvdbid) + ": No subtitles downloaded for episode " + str(self.season) + "x" + str(self.episode), logger.DEBUG)
-        
+
         self.refreshSubtitles()
         self.subtitles_searchcount = self.subtitles_searchcount + 1
         self.subtitles_lastsearch = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         self.saveToDB()
+        
+        newsubtitles = set(self.subtitles).difference(set(previous_subtitles))
+        
+        if newsubtitles:
+            subtitleList = (subliminal.language.Language(x).name for x in newsubtitles)
+            logger.log(str(self.show.tvdbid) + ": Downloaded " + ", ".join(subtitleList) + " subtitles for episode " + str(self.season) + "x" + str(self.episode), logger.DEBUG)
+            
+            notifiers.notify_subtitle_download(self.prettyName(), ", ".join(subtitleList))
+            
+            for subtitle in newsubtitles:
+                history.logSubtitle(self.show.tvdbid, self.season, self.episode, self.status, subliminal.language.Language(subtitle))
+        else:
+            logger.log(str(self.show.tvdbid) + ": No subtitles downloaded for episode " + str(self.season) + "x" + str(self.episode), logger.DEBUG)
         
         return subtitles
 
@@ -1908,8 +1918,9 @@ class TVEpisode(object):
         proper_path = self.proper_path()
         absolute_proper_path = ek.ek(os.path.join, self.show.location, proper_path)
         absolute_current_path_no_ext, file_ext = os.path.splitext(self.location)
-        related_subs = []
         
+        related_subs = []
+
         current_path = absolute_current_path_no_ext
 
         if absolute_current_path_no_ext.startswith(self.show.location):

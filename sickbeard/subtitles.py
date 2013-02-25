@@ -107,8 +107,10 @@ class SubtitlesFinder():
         today = datetime.date.today().toordinal()
         # you have 5 minutes to understand that one. Good luck
         sqlResults = myDB.select('SELECT s.show_name, e.showid, e.season, e.episode, e.status, e.subtitles, e.subtitles_searchcount AS searchcount, e.subtitles_lastsearch AS lastsearch, e.location, (? - e.airdate) AS airdate_daydiff FROM tv_episodes AS e INNER JOIN tv_shows AS s ON (e.showid = s.tvdb_id) WHERE s.subtitles = 1 AND e.subtitles NOT LIKE (?) AND ((e.subtitles_searchcount <= 2 AND (? - e.airdate) > 7) OR (e.subtitles_searchcount <= 7 AND (? - e.airdate) <= 7)) AND (e.status IN ('+','.join([str(x) for x in Quality.DOWNLOADED + [ARCHIVED]])+') OR (e.status IN ('+','.join([str(x) for x in Quality.SNATCHED + Quality.SNATCHED_PROPER])+') AND e.location != ""))', [today, wantedLanguages(True), today, today])
-        locations = []
-        toRefresh = []
+        if len(sqlResults) == 0:
+            logger.log('No subtitles to download', logger.MESSAGE)
+            return
+        
         rules = self._getRules()
         now = datetime.datetime.now();
         for epToSub in sqlResults:
@@ -117,53 +119,12 @@ class SubtitlesFinder():
                 continue
             
             # Old shows rule
-            if epToSub['airdate_daydiff'] > 7 and epToSub['searchcount'] < 2 and now - datetime.datetime.strptime(epToSub['lastsearch'], '%Y-%m-%d %H:%M:%S') > datetime.timedelta(hours=rules['old'][epToSub['searchcount']]):
+            if ((epToSub['airdate_daydiff'] > 7 and epToSub['searchcount'] < 2 and now - datetime.datetime.strptime(epToSub['lastsearch'], '%Y-%m-%d %H:%M:%S') > datetime.timedelta(hours=rules['old'][epToSub['searchcount']])) or
+                # Recent shows rule 
+                (epToSub['airdate_daydiff'] <= 7 and epToSub['searchcount'] < 7 and now - datetime.datetime.strptime(epToSub['lastsearch'], '%Y-%m-%d %H:%M:%S') > datetime.timedelta(hours=rules['new'][epToSub['searchcount']]))):
                 logger.log('Downloading subtitles for episode %dx%d of show %s' % (epToSub['season'], epToSub['episode'], epToSub['show_name']), logger.DEBUG)
-                locations.append(epToSub['location'])
-                toRefresh.append((epToSub['showid'], epToSub['season'], epToSub['episode']))
-                continue
-            # Recent shows rule
-            if epToSub['airdate_daydiff'] <= 7 and epToSub['searchcount'] < 7 and now - datetime.datetime.strptime(epToSub['lastsearch'], '%Y-%m-%d %H:%M:%S') > datetime.timedelta(hours=rules['new'][epToSub['searchcount']]):
-                logger.log('Downloading subtitles for episode %dx%d of show %s' % (epToSub['season'], epToSub['episode'], epToSub['show_name']), logger.DEBUG)
-                locations.append(epToSub['location'])
-                toRefresh.append((epToSub['showid'], epToSub['season'], epToSub['episode']))
-                continue
-            # Not matching my rules
-            #logger.log('Do not match criteria to get downloaded: %s - %dx%d' % (epToSub['showid'], epToSub['season'], epToSub['episode']), logger.DEBUG)
-
-        # stop here if we don't have subtitles to download
-        if not locations:
-            logger.log('No subtitles to download', logger.MESSAGE)
-            return
-
-        # download subtitles
-        subtitles = subliminal.download_subtitles(locations, cache_dir=sickbeard.CACHE_DIR, multi=True, languages=sickbeard.SUBTITLES_LANGUAGES, services=sickbeard.subtitles.getEnabledServiceList())
-
-        if sickbeard.SUBTITLES_DIR:
-            for video in subtitles:
-                subsDir = ek.ek(os.path.join, os.path.dirname(video.path), sickbeard.SUBTITLES_DIR)
-                if not ek.ek(os.path.isdir, subsDir):
-                    ek.ek(os.mkdir, subsDir)
-                
-                for subtitle in subtitles.get(video):                    
-                    new_file_path = ek.ek(os.path.join,subsDir, os.path.basename(subtitle.path))
-                    helpers.moveFile(subtitle.path, new_file_path)
-
-        if subtitles:
-            logger.log('Downloaded %d subtitles' % len(subtitles), logger.MESSAGE)
+                helpers.findCertainShow(sickbeard.showList, int(epToSub['showid'])).getEpisode(int(epToSub["season"]), int(epToSub["episode"])).downloadSubtitles()
             
-            for video in subtitles:
-                #Find to the correct Shows episode with the unique video path of episode 
-                sql_index = next(index for (index, d) in enumerate(sqlResults) if d["location"] == video.path)
-                epToSub = sqlResults[sql_index]
-                notifiers.notify_subtitle_download(os.path.basename(video.path).rpartition(".")[0], ",".join([subtitle.language.name for subtitle in subtitles.get(video) if subtitle.language.alpha2 not in epToSub['subtitles'].split(',')]))
-                for subtitle in filter(lambda x: x.language.alpha2 not in epToSub['subtitles'].split(','), subtitles.get(video)):
-                    history.logSubtitle(epToSub['showid'], epToSub['season'], epToSub['episode'], epToSub['status'], subtitle)
-        else:
-            logger.log('No subtitles found', logger.MESSAGE)
-
-        # refresh each show
-        self._refreshShows(toRefresh, now)
 
     def _getRules(self):
         """
@@ -172,13 +133,3 @@ class SubtitlesFinder():
         - the number of searches done so far (searchcount), represented by the index of the list
         """
         return {'old': [0, 24], 'new': [0, 4, 8, 4, 16, 24, 24]}
-
-    def _refreshShows(self, toRefresh, now):
-        """Refresh episodes with new subtitles"""
-        for (showid, season, episode) in toRefresh:
-            show = helpers.findCertainShow(sickbeard.showList, showid)
-            episode = show.getEpisode(season, episode)
-            episode.subtitles_searchcount = episode.subtitles_searchcount + 1
-            episode.subtitles_lastsearch = now.strftime("%Y-%m-%d %H:%M:%S")
-            episode.refreshSubtitles()
-            episode.saveToDB()
