@@ -24,8 +24,6 @@ tests/cache.db
 *.bak
 *.tmp
 *.wpr
-*.project
-*.pydevproject
 *.cproject
 *.tmproj
 *.tmproject
