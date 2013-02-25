@@ -140,6 +140,9 @@ $(document).ready(function(){
         
         var selectedProvider = $('#editANewznabProvider :selected').val();
 
+		if (selectedProvider == "addNewznab")
+			return;
+
         var url = $('#newznab_url').val();
         var key = $('#newznab_key').val();
         
