@@ -38,7 +38,7 @@ class OmgwtfnzbsProvider(generic.NZBProvider):
     def __init__(self):
         generic.NZBProvider.__init__(self, "omgwtfnzbs")
         self.cache = OmgwtfnzbsCache(self)
-        self.url = 'https://api.omgwtfnzbs.org/'
+        self.url = 'http://omgwtfnzbs.org/'
         self.supportsBacklog = True
 
     def isEnabled(self):
@@ -47,7 +47,7 @@ class OmgwtfnzbsProvider(generic.NZBProvider):
     def _checkAuth(self):
         if not sickbeard.OMGWTFNZBS_UID or not sickbeard.OMGWTFNZBS_KEY:
             raise exceptions.AuthException("omgwtfnzbs authentication details are empty, check your config")
-        
+
     def _get_season_search_strings(self, show, season):
         return [x for x in show_name_helpers.makeSceneSeasonSearchString(show, season)]
 
@@ -64,11 +64,11 @@ class OmgwtfnzbsProvider(generic.NZBProvider):
                   'catid': '19,20', # SD,HD
                   'retention': sickbeard.USENET_RETENTION,
                   'search': search}
-               
+
         if retention or not params['retention']:
             params['retention'] = retention
-            
-        url = self.url + 'json?' + urllib.urlencode(params)
+
+        url = 'https://api.omgwtfnzbs.org/json?' + urllib.urlencode(params)
         logger.log(u"omgwtfnzbs search url: " + url, logger.DEBUG)
         data = self.getURL(url)
         try:
@@ -76,7 +76,7 @@ class OmgwtfnzbsProvider(generic.NZBProvider):
         except ValueError:
             logger.log(u"Error trying to decode omgwtfnzbs json response", logger.ERROR)
             return []
-            
+
         results = []
         if 'notice' in items:
             if 'api information is incorrect' in items.get('notice'):
@@ -92,14 +92,14 @@ class OmgwtfnzbsProvider(generic.NZBProvider):
     def findPropers(self, date=None):
         search_terms = ['.PROPER.', '.REPACK.']
         results = []
-        
+
         for term in search_terms:
             for item in self._doSearch(term, retention=4):
                 if 'usenetage' in item:
                     name, url = self._get_title_and_url(item)
                     results.append(classes.Proper(name, url, datetime.fromtimestamp(item['usenetage'])))
         return results
-        
+
 
 class OmgwtfnzbsCache(tvcache.TVCache):
 
@@ -118,4 +118,3 @@ class OmgwtfnzbsCache(tvcache.TVCache):
         return self.provider.getURL(url)
 
 provider = OmgwtfnzbsProvider()
-
