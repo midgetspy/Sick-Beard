@@ -13,7 +13,7 @@ $(document).ready(function(){
         });
     } 
 
-    $.fn.addProvider = function (id, name, url, key, isDefault, showProvider) {
+    $.fn.addProvider = function (id, name, url, key, isDefault) {
 
         if (url.match('/$') == null)
             url = url + '/'
@@ -27,7 +27,7 @@ $(document).ready(function(){
             $(this).populateNewznabSection();
         }
 
-        if ($('#providerOrderList > #'+id).length == 0 && showProvider != false) {
+        if ($('#providerOrderList > #'+id).length == 0) {
             var toAdd = '<li class="ui-state-default" id="'+id+'"> <input type="checkbox" id="enable_'+id+'" class="provider_enabler" CHECKED> <a href="'+url+'" class="imgLink" target="_new"><img src="'+sbRoot+'/images/providers/newznab.gif" alt="'+name+'" width="16" height="16"></a> '+name+'</li>'
 
             $('#providerOrderList').append(toAdd);

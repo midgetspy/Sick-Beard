@@ -11,16 +11,17 @@
 
 <script type="text/javascript" src="$sbRoot/js/configProviders.js?$sbPID"></script>
 <script type="text/javascript" src="$sbRoot/js/config.js?$sbPID"></script>
+#if $sickbeard.USE_NZBS
 <script type="text/javascript" charset="utf-8">
 <!--
 \$(document).ready(function(){
-    var show_nzb_providers = #if $sickbeard.USE_NZBS then "true" else "false"#;
 #for $curNewznabProvider in $sickbeard.newznabProviderList:
-    \$(this).addProvider('$curNewznabProvider.getID()', '$curNewznabProvider.name', '$curNewznabProvider.url', '$curNewznabProvider.key', $int($curNewznabProvider.default), show_nzb_providers);
+    \$(this).addProvider('$curNewznabProvider.getID()', '$curNewznabProvider.name', '$curNewznabProvider.url', '$curNewznabProvider.key', $int($curNewznabProvider.default));
 #end for
 });
 //-->
 </script>
+#end if
 
 <div id="config">
 <div id="config-content">
