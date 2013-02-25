@@ -1049,31 +1049,32 @@ class ConfigProviders:
         finishedNames = []
 
         # add all the newznab info we got into our list
-        for curNewznabProviderStr in newznab_string.split('!!!'):
-
-            if not curNewznabProviderStr:
-                continue
-
-            curName, curURL, curKey = curNewznabProviderStr.split('|')
-
-            newProvider = newznab.NewznabProvider(curName, curURL, curKey)
-
-            curID = newProvider.getID()
-
-            # if it already exists then update it
-            if curID in newznabProviderDict:
-                newznabProviderDict[curID].name = curName
-                newznabProviderDict[curID].url = curURL
-                newznabProviderDict[curID].key = curKey
-            else:
-                sickbeard.newznabProviderList.append(newProvider)
-
-            finishedNames.append(curID)
-
-        # delete anything that is missing
-        for curProvider in sickbeard.newznabProviderList:
-            if curProvider.getID() not in finishedNames:
-                sickbeard.newznabProviderList.remove(curProvider)
+        if newznab_string:
+            for curNewznabProviderStr in newznab_string.split('!!!'):
+    
+                if not curNewznabProviderStr:
+                    continue
+    
+                curName, curURL, curKey = curNewznabProviderStr.split('|')
+    
+                newProvider = newznab.NewznabProvider(curName, curURL, curKey)
+    
+                curID = newProvider.getID()
+    
+                # if it already exists then update it
+                if curID in newznabProviderDict:
+                    newznabProviderDict[curID].name = curName
+                    newznabProviderDict[curID].url = curURL
+                    newznabProviderDict[curID].key = curKey
+                else:
+                    sickbeard.newznabProviderList.append(newProvider)
+    
+                finishedNames.append(curID)
+    
+            # delete anything that is missing
+            for curProvider in sickbeard.newznabProviderList:
+                if curProvider.getID() not in finishedNames:
+                    sickbeard.newznabProviderList.remove(curProvider)
 
         # do the enable/disable
         for curProviderStr in provider_str_list:
