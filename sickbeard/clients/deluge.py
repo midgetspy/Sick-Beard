@@ -37,8 +37,9 @@ class DelugeAPI(GenericClient):
                                 "params": [self.password],
                                 "id": 1
                                 })
-        response = self.session.post(self.url, data=post_data.encode('utf-8'))
-        self.auth = response.json['result']
+        self.response = self.session.post(self.url, data=post_data.encode('utf-8'))
+        
+        self.auth = self.response.json["result"]
         
         return self.auth
      
