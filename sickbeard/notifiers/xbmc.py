@@ -42,8 +42,7 @@ except ImportError:
 
 class XBMCNotifier:
 
-    sb_logo_url = 'https://raw.github.com/midgetspy/Sick-Beard/development/data/images/notifiers/xbmc-notify.png'
-    sb_logo_url = 'http://zoggy.net/rsz_head.png' # TODO: temp placeholder, REMOVE once merged
+    sb_logo_url = 'http://www.sickbeard.com/xbmc-notify.png'
 
     def _get_xbmc_version(self, host, username, password):
         """Returns XBMC JSON-RPC API version (odd # = dev, even # = stable)
