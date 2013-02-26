@@ -1035,7 +1035,7 @@ class ConfigProviders:
                       omgwtfnzbs_uid=None, omgwtfnzbs_key=None,
                       tvtorrents_digest=None, tvtorrents_hash=None,
                       torrentleech_key=None,
- 					  btn_api_key=None,
+                      btn_api_key=None,
                       newzbin_username=None, newzbin_password=None,
                       provider_order=None):
 
@@ -1110,7 +1110,7 @@ class ConfigProviders:
             elif curProvider in newznabProviderDict:
                 newznabProviderDict[curProvider].enabled = bool(curEnabled)
             else:
-                logger.log(u"don't know what "+curProvider+" is, skipping")
+                logger.log(u"don't know what " + curProvider + " is, skipping")
 
         sickbeard.TVTORRENTS_DIGEST = tvtorrents_digest.strip()
         sickbeard.TVTORRENTS_HASH = tvtorrents_hash.strip()
@@ -1124,7 +1124,7 @@ class ConfigProviders:
 
         sickbeard.OMGWTFNZBS_UID = omgwtfnzbs_uid.strip()
         sickbeard.OMGWTFNZBS_KEY = omgwtfnzbs_key.strip()
-        
+
         sickbeard.PROVIDER_ORDER = provider_list
 
         sickbeard.save_config()

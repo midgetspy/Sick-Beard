@@ -122,4 +122,3 @@ class NzbXCache(tvcache.TVCache):
             self._parseItem(item)
 
 provider = NzbXProvider()
-
