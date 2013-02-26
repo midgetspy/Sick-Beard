@@ -262,6 +262,92 @@
 
                     </fieldset>
                 </div><!-- /nmj component-group //-->
+				
+				<div class="component-group clearfix">
+                    <div class="component-group-desc">
+						<img class="notifier-icon" src="$sbRoot/images/notifiers/nmj.png" alt="" title="Networked Media Jukebox V2" />
+                        <h3><a href="http://www.popcornhour.com/" onclick="window.open(this.href, '_blank'); return false;">NMJv2</a></h3>
+                        <p>The Networked Media Jukebox, or NMJv2, is the official media jukebox interface made available for the Popcorn Hour 300 & 400-series.</p>
+                    </div>
+                    <fieldset class="component-group-list">
+                        <div class="field-pair">
+                            <input type="checkbox" class="enabler" name="use_nmjv2" id="use_nmjv2" #if $sickbeard.USE_NMJv2 then "checked=\"checked\"" else ""# />
+                            <label class="clearfix" for="use_nmjv2">
+                                <span class="component-title">Enable</span>
+                                <span class="component-desc">Should Sick Beard send update commands to NMJv2?</span>
+                            </label>
+                        </div>
+
+                        <div id="content_use_nmjv2">
+                            <div class="field-pair">
+                                <label class="nocheck clearfix">
+                                    <span class="component-title">Popcorn IP address</span>
+                                    <input type="text" name="nmjv2_host" id="nmjv2_host" value="$sickbeard.NMJv2_HOST" size="35" />
+                                </label>
+                                <label class="nocheck clearfix">
+                                    <span class="component-title">&nbsp;</span>
+                                    <span class="component-desc">IP of Popcorn 300/400-series (eg. 192.168.1.100)</span>
+                                </label>
+                            </div>
+							<div class="field-pair">
+                                <label class="nocheck clearfix">
+                                    <span class="component-title">Database Location</span>
+									<span class="component-desc">
+										<INPUT TYPE="radio" NAME="nmjv2_dbloc" VALUE="local" class="radio" id="NMJV2_DBLOC_A" #if $sickbeard.NMJv2_DBLOC=="local" then "checked=\"checked\"" else ""# />PCH Local Media<br />
+									</span>
+                                </label>
+								    <label class="nocheck clearfix">
+                                    <span class="component-title">&nbsp;</span>
+                                    <span class="component-desc">
+										<INPUT TYPE="radio" NAME="nmjv2_dbloc" VALUE="network" class="radio" id="NMJV2_DBLOC_B" #if $sickbeard.NMJv2_DBLOC=="network" then "checked=\"checked\"" else ""#/>PCH Network Media
+									</span>
+                                </label>
+								</label>
+								<label class="nocheck clearfix">
+                                    <span class="component-title">Database Instance</span>
+                                    <span class="component-desc">
+									<select id="NMJv2db_instance">
+										<option value="0">#1 </option>
+										<option value="1">#2 </option>
+										<option value="2">#3 </option>
+										<option value="3">#4 </option>
+										<option value="4">#5 </option>
+										<option value="5">#6 </option>
+										<option value="6">#7 </option>
+									</select>
+									</span>
+                                </label>
+								<label class="nocheck clearfix">
+                                    <span class="component-title">&nbsp;</span>
+                                    <span class="component-desc">Adjust this value if the wrong database is selected.</span>
+                                </label>
+                            </div>
+                            <div class="field-pair">
+                                <label class="nocheck clearfix">
+                                    <span class="component-title">Find Database</span>
+									<input type="button" value="Find Database" id="settingsNMJv2" />
+                                </label>
+                                <label class="nocheck clearfix">
+                                    <span class="component-title">&nbsp;</span>
+                                    <span class="component-desc">The Popcorn Hour device must be powered on.</span>
+                                </label>
+                            </div>
+                            <div class="field-pair">
+                                <label class="nocheck clearfix">
+                                <span class="component-title">NMJv2 Database</span>
+                                <input type="text" name="nmjv2_database" id="nmjv2_database" value="$sickbeard.NMJv2_DATABASE" size="35" #if $sickbeard.NMJv2_DATABASE then "readonly=\"readonly\"" else ""# /></label>
+                                <label class="nocheck clearfix">
+                                    <span class="component-title">&nbsp;</span>
+                                    <span class="component-desc">Automatically filled via the 'Find Database' buttons.</span>
+                                </label>
+                            </div>
+						<div class="testNotification" id="testNMJv2-result">Click below to test.</div>
+						<input type="button" value="Test NMJv2" id="testNMJv2" />
+						<input type="submit" class="config_submitter" value="Save Changes" />
+                        </div><!-- /content_use_nmjv2 //-->
+
+                    </fieldset>
+                </div><!-- /nmjv2 component-group //-->
 
 
                 <div class="component-group clearfix">
@@ -356,6 +442,57 @@
                 <br />
                 <h2>Devices</h2>
                 <br />
+
+                <div class="component-group clearfix">
+                    <div class="component-group-desc">
+                        <img class="notifier-icon" src="$sbRoot/images/notifiers/cmd.png" alt="" title="Command notify" />
+                        <h3><a href="http://library.gnome.org/devel/libnotify/" onclick="window.open(this.href, '_blank'); return false;">Custom command</a></h3>
+                        <p>Executes a custom command when an event happens (currently only library update events are supported)</p>
+                    </div>
+                    <fieldset class="component-group-list">
+                        <div class="field-pair">
+                            <input type="checkbox" class="enabler" name="use_cmdnotify" id="use_cmdnotify" #if $sickbeard.USE_CMDNOTIFY then "checked=\"checked\"" else ""# /> 
+                            <label class="clearfix" for="use_cmdnotify">
+                                <span class="component-title">Enable</span>
+                                <span class="component-desc">Should Sick Beard use custom command notifications?</span>
+                            </label>
+                        </div>
+
+                        <div id="content_use_cmdnotify">
+                            <div class="field-pair">
+                                <label class="nocheck clearfix">
+                                    <span class="component-title" style="text-align: right;"><img src="$sbRoot/images/warning32.png" alt="" title="Warning" /></span>
+                                    <span class="component-desc">
+                                        <b>Beware:</b> This plugin is a potential security risk. When enabled, anyone able to access either this page or the following url:
+                                        <pre>$sbRoot/home/testCmdnotify</pre> has the ability to <b>execute arbitrary commands on your system as the Sickbeard user</b>.
+                                        If you understand this risk and are absolutely sure it is safe for you to enable this plugin
+                                        you can do so by manually stopping Sickbeard, finding the line in config.ini that says <pre>cmdnotify_I_KNOW_WHAT_I_AM_DOING = 0</pre> and changing the 0 to a 1. Then start Sickbeard and you're good to go.
+                                    </span>
+                                </label>
+                                <label class="nocheck clearfix">
+                                    <span class="component-title">Current status</span>
+                                    <span class="component-desc">
+                                        #if not $sickbeard.CMDNOTIFY_I_KNOW_WHAT_I_AM_DOING then "<b>Not enabled</b>; read above warning" else "<b>Enabled</b>. You swore to know what you are doing." #
+                                    </span>
+                                </label>
+                            </div>
+                            <div class="field-pair">
+                                <label class="nocheck clearfix">
+                                    <span class="component-title">Command to execute</span>
+                                    <input type="text" name="cmdnotify_update_cmd" id="cmdnotify_update_cmd" value="$sickbeard.CMDNOTIFY_UPDATE_CMD" size="35" />
+                                </label>
+                                <label class="nocheck clearfix">
+                                    <span class="component-title">&nbsp;</span>
+                                    <span class="component-desc">Called as: CMD [ep path] [ep #+name] [show] [s#] [e#] [title]</span>
+                                </label>
+                            </div>
+                            <div class="testNotification" id="testCmdnotify-result">Click below to test the command.</div>
+                            <input type="button" class="btn" value="Test command" id="testCmdnotify" />
+                            <input type="submit" class="btn config_submitter" value="Save Changes" />
+                        </div><!-- /content_use_libnotify //-->
+
+                    </fieldset>
+                </div>
 
 
                 <div class="component-group clearfix">

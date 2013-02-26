@@ -767,6 +767,8 @@ class PostProcessor(object):
             self._log(u"Show directory doesn't exist, creating it", logger.DEBUG)
             try:
                 ek.ek(os.mkdir, ep_obj.show._location)
+                # do the library update for synoindex
+                notifiers.synoindex_notifier.addFolder(ep_obj.show._location)
 
             except (OSError, IOError):
                 raise exceptions.PostProcessingFailed("Unable to create the show directory: " + ep_obj.show._location)
@@ -854,6 +856,9 @@ class PostProcessor(object):
 
         # do the library update for XBMC
         notifiers.xbmc_notifier.update_library(ep_obj.show.name)
+
+        # do the library update for Cmdnotify
+        notifiers.cmd_notifier.update_library(ep_obj)
 
         # do the library update for Plex
         notifiers.plex_notifier.update_library()

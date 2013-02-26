@@ -531,7 +531,9 @@ displayShow.tmpl + manage_backlogOverview.tmpl
 .wanted {
   background-color: #ffb0b0;
 }
-
+.snatched {
+  background-color: #ebc1ea;
+}
 /* =======================================================================
 manage_backlogOverview.tmpl
 ========================================================================== */

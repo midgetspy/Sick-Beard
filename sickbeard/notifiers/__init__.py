@@ -21,8 +21,10 @@ import sickbeard
 import xbmc
 import plex
 import nmj
+import nmjv2
 import synoindex
 import pytivo
+import cmdnotify
 
 import growl
 import prowl
@@ -42,6 +44,7 @@ xbmc_notifier = xbmc.XBMCNotifier()
 plex_notifier = plex.PLEXNotifier()
 nmj_notifier = nmj.NMJNotifier()
 synoindex_notifier = synoindex.synoIndexNotifier()
+nmjv2_notifier = nmjv2.NMJv2Notifier()
 pytivo_notifier = pytivo.pyTivoNotifier()
 # devices
 growl_notifier = growl.GrowlNotifier()
@@ -54,12 +57,15 @@ nma_notifier = nma.NMA_Notifier()
 # online
 twitter_notifier = tweet.TwitterNotifier()
 trakt_notifier = trakt.TraktNotifier()
+# misc
+cmd_notifier = cmdnotify.CmdNotifier()
 
 notifiers = [
     libnotify_notifier, # Libnotify notifier goes first because it doesn't involve blocking on network activity.
     xbmc_notifier,
     plex_notifier,
     nmj_notifier,
+    nmjv2_notifier,
     synoindex_notifier,
     pytivo_notifier,
     growl_notifier,
@@ -70,6 +76,7 @@ notifiers = [
     nma_notifier,
     twitter_notifier,
     trakt_notifier,
+    cmd_notifier,
 ]
 
 
