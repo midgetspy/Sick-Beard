@@ -34,28 +34,69 @@ class XBMCMetadata(generic.GenericMetadata):
     
     def __init__(self,
                  show_metadata=False,
+                 show_fanart=False,
+                 show_poster=False,
+                 show_banner=False,
+                 season_all_fanart=False,
+                 season_all_poster=False,
+                 season_all_banner=False,
+                 season_fanarts=False,
+                 season_posters=False,
+                 season_banners=False,
                  episode_metadata=False,
-                 poster=False,
-                 fanart=False,
-                 episode_thumbnails=False,
-                 season_thumbnails=False):
+                 episode_thumbnails=False):
 
         generic.GenericMetadata.__init__(self,
                                          show_metadata,
+                                         show_fanart,
+                                         show_poster,
+                                         show_banner,
+                                         season_all_fanart,
+                                         season_all_poster,
+                                         season_all_banner,
+                                         season_fanarts,
+                                         season_posters,
+                                         season_banners,
                                          episode_metadata,
-                                         poster,
-                                         fanart,
-                                         episode_thumbnails,
-                                         season_thumbnails)
+                                         episode_thumbnails):
         
         self.name = 'XBMC'
 
         self.eg_show_metadata = "tvshow.nfo"
         self.eg_episode_metadata = "Season##\\<i>filename</i>.nfo"
-        self.eg_fanart = "fanart.jpg"
-        self.eg_poster = "folder.jpg"
-        self.eg_episode_thumbnails = "Season##\\<i>filename</i>.tbn"
-        self.eg_season_thumbnails = "season##.tbn"
+        self.eg_episode_thumbnails = "Season##\\<i>filename</i>-thumb.jpg"
+
+        self.eg_show_fanart = "fanart.jpg"
+        self.eg_show_poster = "poster.jpg"
+        self.eg_show_banner = "banner.jpg"
+        self.eg_seasons_all_fanart = "season-all-fanart.jpg"
+        self.eg_seasons_all_poster = "season-all-poster.jpg"
+        self.eg_seasons_all_banner = "season-all-banner.jpg"
+
+        self.eg_season_fanarts = "<i>not supported</i>"
+        self.eg_season_posters = "season##-poster.jpg"
+        self.eg_season_banners = "season##-banner.jpg"
+
+    def get_season_pb_path(self, show_obj, season, img_type):
+        """
+        Returns the full path to the file for a given season poster/banner.
+        
+        show_obj: a TVShow instance for which to generate the path
+        season: a season number to be used for the path. Note that sesaon 0
+                means specials.
+        """
+
+        # Our specials thumbnail is, well, special
+        if season == 0:
+            season_pb_file_path = 'season-specials'
+        else:
+            season_pb_file_path = 'season' + str(season).zfill(2)
+        
+        season_pb_file_ext = '.tbn'
+           
+        return ek.ek(os.path.join, show_obj.location, season_pb_file_path+season_pb_file_ext)            
+    
+    
     
     def _show_data(self, show_obj):
         """
@@ -313,6 +354,10 @@ class XBMCMetadata(generic.GenericMetadata):
         data = etree.ElementTree( rootNode )
 
         return data
+
+    # all of the following are not supported, so do nothing
+    def create_season_fanart(self, show_obj): 
+        pass
 
 # present a standard "interface" from the module
 metadata_class = XBMCMetadata
