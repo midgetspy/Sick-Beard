@@ -87,7 +87,7 @@
                                 <span class="component-title jumbo">Configure Provider:</span>
                                 <span class="component-desc">
                                     #set $provider_config_list = []
-                                    #for $cur_provider in ("nzbs_r_us", "tvtorrents", "btn", "thepiratebay","dailytvtorrents", "torrentz", "torrentleech"):
+                                    #for $cur_provider in ("nzbs_r_us", "tvtorrents", "btn", "thepiratebay","dailytvtorrents", "torrentz", "torrentleech", "torrentday"):
                                         #set $cur_provider_obj = $sickbeard.providers.getProviderClass($cur_provider)
                                         #if $cur_provider_obj.providerType == $GenericProvider.NZB and not $sickbeard.USE_NZBS:
                                             #continue
@@ -225,6 +225,34 @@
                         </div>
 		    </div><!-- /torrentzDiv //-->
                 
+                
+					<div class="providerDiv" id="torrentdayDiv">
+                        <div class="field-pair">
+                            <label class="clearfix">
+                                <span class="component-title">Username:</span>
+                                <input class="component-desc" type="text" name="torrentday_username" value="$sickbeard.TORRENTDAY_USERNAME" size="40" />
+                            </label>
+                        </div>
+                        <div class="field-pair">
+                            <label class="clearfix">
+                                <span class="component-title">Password:</span>
+                                <input class="component-desc" type="password" name="torrentday_password" value="$sickbeard.TORRENTDAY_PASSWORD" size="40" />
+                            </label>
+                        </div>
+                        <div class="field-pair">
+                            <label class="clearfix">
+                                <span class="component-title">UID:</span>
+                                <input class="component-desc" type="text" name="torrentday_uid" value="$sickbeard.TORRENTDAY_UID" size="40" /></b>
+                            </label>
+                        </div>
+                        <div class="field-pair">
+                            <label class="clearfix">
+                                <span class="component-title">RSS Hash:</span>
+                                <input class="component-desc" type="text" name="torrentday_rsshash" value="$sickbeard.TORRENTDAY_RSSHASH" size="40" /></b>
+                            </label>
+                        </div>
+                    </div><!-- /torrentdayDiv //-->
+                
                     <div class="providerDiv" id="torrentleechDiv">
                         <div class="field-pair">
                             <label class="clearfix">
@@ -236,6 +264,7 @@
                             <label class="clearfix">
                                 <span class="component-title">Password:</span>
                                 <input class="component-desc" type="password" name="torrentleech_password" value="$sickbeard.TORRENTLEECH_PASSWORD" size="40" />
+
                             </label>
                         </div>
                     </div><!-- /torrentleechDiv //-->
