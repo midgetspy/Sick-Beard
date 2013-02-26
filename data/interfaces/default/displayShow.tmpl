@@ -114,7 +114,18 @@ Change selected episodes to
 <br />
 <br />
 </div>
-
+<div class="float-right">
+Change Audio of selected episodes to 
+<select id="audioSelect">
+#for $audio in ['fr','en','']:
+<option value="$audio">$showLanguages[$audio]</option>
+#end for
+</select>
+<input type="hidden" id="showID" value="$show.tvdbid" />
+<input type="button" class="btn" id="changeAudio" value="Go" /><br />
+<br />
+<br />
+</div>
 #set $curSeason = -1
 
 <div class="float-right clearfix" id="checkboxControls">
