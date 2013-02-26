@@ -35,8 +35,7 @@ class TIVOMetadata(generic.GenericMetadata):
     Metadata generation class for TIVO
 
     The following file structure is used:
-
-    show_root/Season 01/show - 1x01 - episode.avi.txt       (* existing episode)
+    show_root/Season 01/show - 1x01 - episode.avi           (* example of existing ep of course)
     show_root/Season 01/.meta/show - 1x01 - episode.avi.txt (episode metadata)
     
     This class only generates episode specific metadata files, it does NOT generated a default.txt file.
@@ -44,48 +43,49 @@ class TIVOMetadata(generic.GenericMetadata):
     
     def __init__(self,
                  show_metadata=False,
+                 show_fanart=False,
+                 show_poster=False,
+                 show_banner=False,
+                 season_all_fanart=False,
+                 season_all_poster=False,
+                 season_all_banner=False,
+                 season_fanarts=False,
+                 season_posters=False,
+                 season_banners=False,
                  episode_metadata=False,
-                 poster=False,
-                 fanart=False,
-                 episode_thumbnails=False,
-                 season_thumbnails=False):
+                 episode_thumbnails=False):
 
         generic.GenericMetadata.__init__(self,
                                          show_metadata,
+                                         show_fanart,
+                                         show_poster,
+                                         show_banner,
+                                         season_all_fanart,
+                                         season_all_poster,
+                                         season_all_banner,
+                                         season_fanarts,
+                                         season_posters,
+                                         season_banners,
                                          episode_metadata,
-                                         poster,
-                                         fanart,
-                                         episode_thumbnails,
-                                         season_thumbnails)
-        
-        self._ep_nfo_extension = "txt"
-        
-        self.generate_ep_metadata = True
+                                         episode_thumbnails)
         
         self.name = 'TIVO'
+        self._ep_nfo_extension = "txt"
 
         self.eg_show_metadata = "<i>not supported</i>"
-        self.eg_episode_metadata = "Season##\\.meta\\<i>filename</i>.txt"
-        self.eg_fanart = "<i>not supported</i>"
-        self.eg_poster = "<i>not supported</i>"
-        self.eg_episode_thumbnails = "<i>not supported</i>"
-        self.eg_season_thumbnails = "<i>not supported</i>"
-    
-    # Override with empty methods for unsupported features.
-    def create_show_metadata(self, show_obj):
-        pass
-    
-    def create_fanart(self, show_obj):
-        pass
-    
-    def get_episode_thumb_path(self, ep_obj):
-        pass
-    
-    def get_season_thumb_path(self, show_obj, season):
-        pass
+        self.eg_show_fanart = "<i>not supported</i>"
+        self.eg_show_poster = "<i>not supported</i>"
+        self.eg_show_banner = "<i>not supported</i>"
 
-    def retrieveShowMetadata(self, dir):
-        return (None, None)
+        self.eg_season_all_fanart = "<i>not supported</i>"
+        self.eg_season_all_poster = "<i>not supported</i>"
+        self.eg_season_all_banner = "<i>not supported</i>"
+        self.eg_season_fanarts = "<i>not supported</i>"
+        self.eg_season_posters = "<i>not supported</i>" 
+        self.eg_season_banners = "<i>not supported</i>"
+
+        self.eg_episode_metadata = "Season##\\.meta\\<i>filename</i>.txt"
+        self.eg_episode_thumbnails = "<i>not supported</i>"
         
     # Override and implement features for Tivo.
     def get_episode_file_path(self, ep_obj):
@@ -107,6 +107,11 @@ class TIVOMetadata(generic.GenericMetadata):
             logger.log(u"Episode location doesn't exist: "+str(ep_obj.location), logger.DEBUG)
             return ''
         return metadata_file_path
+
+    # Override with empty methods for unsupported features.
+    def get_episode_thumb_path(self, ep_obj):
+        pass
+
 
     def _ep_data(self, ep_obj):
         """
@@ -271,9 +276,42 @@ class TIVOMetadata(generic.GenericMetadata):
             # vGuestStar, vDirector, vExecProducer, vProducer, vWriter, vHost, vChoreographer
             # partCount
             # partIndex
-            
         
         return data
+
+    # Override with empty methods for unsupported features.
+    def create_show_metadata(self, show_obj):
+        pass
+    
+    def create_show_fanart(self, show_obj):
+        pass
+
+    def create_show_poster(self, show_obj):
+        pass
+
+    def create_show_banner(self, show_obj):
+        pass
+
+    def create_season_all_fanart(self, show_obj):
+        pass
+
+    def create_season_all_poster(self, show_obj):
+        pass
+
+    def create_season_all_banner(self, show_obj):
+        pass
+
+    def create_season_fanart(self, show_obj):
+        pass
+
+    def create_season_thumbs(self, show_obj):
+        pass
+
+    def create_season_banner(self, show_obj):
+        pass
+
+    def create_episode_thumb(self, ep_obj):
+        pass
 
     def write_ep_file(self, ep_obj):
         """
@@ -314,6 +352,9 @@ class TIVOMetadata(generic.GenericMetadata):
             return False
         
         return True
+
+    def retrieveShowMetadata(self, dir):
+        return (None, None)
 
 # present a standard "interface"
 metadata_class = TIVOMetadata
