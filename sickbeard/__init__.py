@@ -214,6 +214,7 @@ XBMC_NOTIFY_ONSNATCH = False
 XBMC_NOTIFY_ONDOWNLOAD = False
 XBMC_UPDATE_LIBRARY = False
 XBMC_UPDATE_FULL = False
+XBMC_UPDATE_ONLYFIRST = False
 XBMC_HOST = ''
 XBMC_USERNAME = None
 XBMC_PASSWORD = None
@@ -326,7 +327,7 @@ def initialize(consoleLogging=True):
                 USE_NZBS, USE_TORRENTS, NZB_METHOD, NZB_DIR, DOWNLOAD_PROPERS, \
                 SAB_USERNAME, SAB_PASSWORD, SAB_APIKEY, SAB_CATEGORY, SAB_HOST, \
                 NZBGET_PASSWORD, NZBGET_CATEGORY, NZBGET_HOST, currentSearchScheduler, backlogSearchScheduler, \
-                USE_XBMC, XBMC_NOTIFY_ONSNATCH, XBMC_NOTIFY_ONDOWNLOAD, XBMC_UPDATE_FULL, \
+                USE_XBMC, XBMC_NOTIFY_ONSNATCH, XBMC_NOTIFY_ONDOWNLOAD, XBMC_UPDATE_FULL, XBMC_UPDATE_ONLYFIRST, \
                 XBMC_UPDATE_LIBRARY, XBMC_HOST, XBMC_USERNAME, XBMC_PASSWORD, \
                 USE_TRAKT, TRAKT_USERNAME, TRAKT_PASSWORD, TRAKT_API, \
                 USE_PLEX, PLEX_NOTIFY_ONSNATCH, PLEX_NOTIFY_ONDOWNLOAD, PLEX_UPDATE_LIBRARY, \
@@ -580,11 +581,12 @@ def initialize(consoleLogging=True):
         CheckSection(CFG, 'nzbX')
         NZBX = bool(check_setting_int(CFG, 'nzbX', 'nzbx', 0))
         NZBX_COMPLETION = check_setting_int(CFG, 'nzbX', 'nzbx_completion', 100)
+
         CheckSection(CFG, 'omgwtfnzbs')
         OMGWTFNZBS = bool(check_setting_int(CFG, 'omgwtfnzbs', 'omgwtfnzbs', 0))
         OMGWTFNZBS_UID = check_setting_str(CFG, 'omgwtfnzbs', 'omgwtfnzbs_uid', '')
         OMGWTFNZBS_KEY = check_setting_str(CFG, 'omgwtfnzbs', 'omgwtfnzbs_key', '')
-        
+
         CheckSection(CFG, 'SABnzbd')
         SAB_USERNAME = check_setting_str(CFG, 'SABnzbd', 'sab_username', '')
         SAB_PASSWORD = check_setting_str(CFG, 'SABnzbd', 'sab_password', '')
@@ -603,6 +605,7 @@ def initialize(consoleLogging=True):
         XBMC_NOTIFY_ONDOWNLOAD = bool(check_setting_int(CFG, 'XBMC', 'xbmc_notify_ondownload', 0))
         XBMC_UPDATE_LIBRARY = bool(check_setting_int(CFG, 'XBMC', 'xbmc_update_library', 0))
         XBMC_UPDATE_FULL = bool(check_setting_int(CFG, 'XBMC', 'xbmc_update_full', 0))
+        XBMC_UPDATE_ONLYFIRST = bool(check_setting_int(CFG, 'XBMC', 'xbmc_update_onlyfirst', 0))
         XBMC_HOST = check_setting_str(CFG, 'XBMC', 'xbmc_host', '')
         XBMC_USERNAME = check_setting_str(CFG, 'XBMC', 'xbmc_username', '')
         XBMC_PASSWORD = check_setting_str(CFG, 'XBMC', 'xbmc_password', '')
@@ -1076,7 +1079,7 @@ def save_config():
     new_config['omgwtfnzbs']['omgwtfnzbs'] = int(OMGWTFNZBS)
     new_config['omgwtfnzbs']['omgwtfnzbs_uid'] = OMGWTFNZBS_UID
     new_config['omgwtfnzbs']['omgwtfnzbs_key'] = OMGWTFNZBS_KEY
-    
+
     new_config['SABnzbd'] = {}
     new_config['SABnzbd']['sab_username'] = SAB_USERNAME
     new_config['SABnzbd']['sab_password'] = SAB_PASSWORD
@@ -1095,6 +1098,7 @@ def save_config():
     new_config['XBMC']['xbmc_notify_ondownload'] = int(XBMC_NOTIFY_ONDOWNLOAD)
     new_config['XBMC']['xbmc_update_library'] = int(XBMC_UPDATE_LIBRARY)
     new_config['XBMC']['xbmc_update_full'] = int(XBMC_UPDATE_FULL)
+    new_config['XBMC']['xbmc_update_onlyfirst'] = int(XBMC_UPDATE_ONLYFIRST)
     new_config['XBMC']['xbmc_host'] = XBMC_HOST
     new_config['XBMC']['xbmc_username'] = XBMC_USERNAME
     new_config['XBMC']['xbmc_password'] = XBMC_PASSWORD
