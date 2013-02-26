@@ -90,7 +90,7 @@ class SBRotatingLogHandler(object):
             logging.getLogger('imdbpy').addHandler(console)
     
         logging.getLogger('sickbeard').setLevel(DB)
-        logging.getLogger('subliminal').setLevel(logging.WARNING)
+        logging.getLogger('subliminal').setLevel(logging.ERROR)
         logging.getLogger('imdbpy').setLevel(logging.WARNING)
 
     def _config_handler(self):
