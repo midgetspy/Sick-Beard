@@ -47,7 +47,7 @@ from common import NAMING_DUPLICATE, NAMING_EXTEND, NAMING_LIMITED_EXTEND, NAMIN
 
 class TVShow(object):
 
-    def __init__ (self, tvdbid, lang=""):
+    def __init__ (self, tvdbid, lang="", audio_lang=None):
 
         self.tvdbid = tvdbid
 
@@ -67,7 +67,7 @@ class TVShow(object):
         self.paused = 0
         self.air_by_date = 0
         self.lang = lang
-        self.audio_lang = ""
+        self.audio_lang = audio_lang
         self.custom_search_names = ""
 
         self.lock = threading.Lock()
