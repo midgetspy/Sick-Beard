@@ -36,62 +36,61 @@ class WDTVMetadata(generic.GenericMetadata):
     Metadata generation class for WDTV
 
     The following file structure is used:
-    
-    show_root/folder.jpg                                     (poster)
-    show_root/Season 01/folder.jpg                           (season thumb)
+    show_root/folder.jpg                                     (show poster)
+    show_root/Season 01/folder.jpg                           (season poster)
     show_root/Season 01/show - 1x01 - episode.metathumb      (episode thumb)
     show_root/Season 01/show - 1x01 - episode.xml            (episode metadata)
     """
     
     def __init__(self,
                  show_metadata=False,
+                 show_fanart=False,
+                 show_poster=False,
+                 show_banner=False,
+                 season_all_fanart=False,
+                 season_all_poster=False,
+                 season_all_banner=False,
+                 season_fanarts=False,
+                 season_posters=False,
+                 season_banners=False,
                  episode_metadata=False,
-                 poster=False,
-                 fanart=False,
-                 episode_thumbnails=False,
-                 season_thumbnails=False):
+                 episode_thumbnails=False):
 
         generic.GenericMetadata.__init__(self,
                                          show_metadata,
+                                         show_fanart,
+                                         show_poster,
+                                         show_banner,
+                                         season_all_fanart,
+                                         season_all_poster,
+                                         season_all_banner,
+                                         season_fanarts,
+                                         season_posters,
+                                         season_banners,
                                          episode_metadata,
-                                         poster,
-                                         fanart,
-                                         episode_thumbnails,
-                                         season_thumbnails)
-        
-        self._ep_nfo_extension = 'xml'
+                                         episode_thumbnails):
 
         self.name = 'WDTV'
+        self._ep_nfo_extension = 'xml'
+
+        self.show_poster_name = "folder.jpg"
 
         self.eg_show_metadata = "<i>not supported</i>"
         self.eg_episode_metadata = "Season##\\<i>filename</i>.xml"
-        self.eg_fanart = "<i>not supported</i>"
-        self.eg_poster = "folder.jpg"
         self.eg_episode_thumbnails = "Season##\\<i>filename</i>.metathumb"
-        self.eg_season_thumbnails = "Season##\\folder.jpg"
-    
-    # all of the following are not supported, so do nothing
-    def create_show_metadata(self, show_obj):
-        pass
-    
-    def create_fanart(self, show_obj):
-        pass
-    
-    def get_episode_thumb_path(self, ep_obj):
-        """
-        Returns the path where the episode thumbnail should be stored. Defaults to
-        the same path as the episode file but with a .metathumb extension.
-        
-        ep_obj: a TVEpisode instance for which to create the thumbnail
-        """
-        if ek.ek(os.path.isfile, ep_obj.location):
-            tbn_filename = helpers.replaceExtension(ep_obj.location, 'metathumb')
-        else:
-            return None
 
-        return tbn_filename
-    
-    def get_season_thumb_path(self, show_obj, season):
+        self.eg_show_fanart = "<i>not supported</i>"
+        self.eg_show_poster = "folder.jpg"
+        self.eg_show_banner = "<i>not supported</i>"
+        self.eg_seasons_all_fanart = "<i>not supported</i>"
+        self.eg_seasons_all_poster = "<i>not supported</i>"
+        self.eg_seasons_all_banner = "<i>not supported</i>"
+
+        self.eg_season_fanarts = "<i>not supported</i>"
+        self.eg_season_thumbnails = "Season##\\folder.jpg"
+        self.eg_season_banners = "<i>not supported</i>"
+
+    def get_season_pb_path(self, show_obj, season, img_type):
         """
         Season thumbs for WDTV go in Show Dir/Season X/folder.jpg
         
@@ -126,6 +125,20 @@ class WDTVMetadata(generic.GenericMetadata):
         logger.log(u"Using "+str(season_dir)+"/folder.jpg as season dir for season "+str(season), logger.DEBUG)
 
         return ek.ek(os.path.join, show_obj.location, season_dir, 'folder.jpg')
+
+    def get_episode_thumb_path(self, ep_obj):
+        """
+        Returns the path where the episode thumbnail should be stored. Defaults to
+        the same path as the episode file but with a .metathumb extension.
+        
+        ep_obj: a TVEpisode instance for which to create the thumbnail
+        """
+        if ek.ek(os.path.isfile, ep_obj.location):
+            tbn_filename = helpers.replaceExtension(ep_obj.location, 'metathumb')
+        else:
+            return None
+
+        return tbn_filename
 
     def _ep_data(self, ep_obj):
         """
@@ -224,6 +237,43 @@ class WDTVMetadata(generic.GenericMetadata):
             data = etree.ElementTree(rootNode)
 
         return data
+
+
+    # all of the following are not supported, so do nothing
+    def create_show_metadata(self, show_obj): 
+        pass
+        
+    def create_show_fanart(self, show_obj): 
+        pass
+
+	def create_show_poster(self, show_obj):
+        if self.show_poster and show_obj and not self._has_show_poster(show_obj):
+            logger.log("Metadata provider "+self.name+" creating show poster for "+show_obj.name, logger.DEBUG)
+            poster_path = self.get_show_poster_path(show_obj)
+            if sickbeard.USE_BANNER:
+                img_type = 'banner'
+            else:
+                img_type = 'poster'
+            return self.save_show_fpb(show_obj, img_type, poster_path)
+        return False
+        
+    def create_show_banner(self, show_obj): 
+        pass
+        
+    def create_season_all_fanart(self, show_obj): 
+        pass
+        
+    def create_season_all_poster(self, show_obj): 
+        pass
+        
+    def create_season_all_banner(self, show_obj): 
+        pass
+        
+    def create_season_fanart(self, show_obj): 
+        pass
+
+    def create_season_banner(self, show_obj):  
+        pass
 
     def retrieveShowMetadata(self, dir):
         return (None, None)
