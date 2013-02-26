@@ -22,7 +22,12 @@ import datetime
 import re
 import os
 
-from xml.dom.minidom import parseString
+try:
+    import xml.etree.cElementTree as etree
+except ImportError:
+    import xml.etree.ElementTree as etree
+
+from io import BytesIO
 
 import sickbeard
 import generic
@@ -67,6 +72,25 @@ class NewznabProvider(generic.NZBProvider):
 
     def isEnabled(self):
         return self.enabled
+    
+    # overwrite method with ElementTree version
+    def _get_title_and_url(self, item):
+        """
+        Retrieves the title and URL data from the item XML node
+
+        item: An ElementTree Node representing the <item> tag of the RSS feed
+
+        Returns: A tuple containing two strings representing title and URL respectively
+        """
+        title = item.findtext('title')
+        try:
+            url = item.findtext('link')
+            if url:
+                url = url.replace('&amp;','&')
+        except IndexError:
+            url = None
+        
+        return (title, url)
 
     def _get_season_search_strings(self, show, season=None):
 
@@ -153,12 +177,12 @@ class NewznabProvider(generic.NZBProvider):
     def _checkAuthFromData(self, data):
 
         try:
-            parsedXML = parseString(data)
+            parsedXML = etree.fromstring(data)
         except Exception:
             return False
 
-        if parsedXML.documentElement.tagName == 'error':
-            code = parsedXML.documentElement.getAttribute('code')
+        if parsedXML.tag == 'error':
+            code = parsedXML.get('code')
             if code == '100':
                 raise exceptions.AuthException("Your API key for " + self.name + " is incorrect, check your config.")
             elif code == '101':
@@ -166,7 +190,7 @@ class NewznabProvider(generic.NZBProvider):
             elif code == '102':
                 raise exceptions.AuthException("Your account isn't allowed to use the API on " + self.name + ", contact the administrator")
             else:
-                logger.log(u"Unknown error given from " + self.name + ": "+parsedXML.documentElement.getAttribute('description'), logger.ERROR)
+                logger.log(u"Unknown error given from " + self.name + ": "+parsedXML.get('description'), logger.ERROR)
                 return False
 
         return True
@@ -176,7 +200,8 @@ class NewznabProvider(generic.NZBProvider):
         params = {"t": "tvsearch",
                   "maxage": sickbeard.USENET_RETENTION,
                   "limit": 100,
-                  "cat": '5030,5040'}
+                  "cat": '5030,5040',
+                  "attrs": "rageid"}
 
         # if max_age is set, use it, don't allow it to be missing
         if max_age or not params['maxage']:
@@ -206,8 +231,8 @@ class NewznabProvider(generic.NZBProvider):
             data = '<?xml version="1.0" encoding="ISO-8859-1" ?>' + data
 
         try:
-            parsedXML = parseString(data)
-            items = parsedXML.getElementsByTagName('item')
+            parsedXML = etree.fromstring(data)
+            items = parsedXML.findall('channel/item')
         except Exception, e:
             logger.log(u"Error trying to load " + self.name + " RSS feed: " + ex(e), logger.ERROR)
             logger.log(u"RSS data: " + data, logger.DEBUG)
@@ -216,7 +241,7 @@ class NewznabProvider(generic.NZBProvider):
         if not self._checkAuthFromData(data):
             return []
 
-        if parsedXML.documentElement.tagName != 'rss':
+        if parsedXML.tag != 'rss':
             logger.log(u"Resulting XML from " + self.name + " isn't RSS, not parsing it", logger.ERROR)
             return []
 
@@ -246,8 +271,7 @@ class NewznabProvider(generic.NZBProvider):
 
                 (title, url) = self._get_title_and_url(curResult)
 
-                description_node = curResult.getElementsByTagName('pubDate')[0]
-                descriptionStr = helpers.get_xml_text(description_node)
+                descriptionStr = curResult.findtext('pubDate')
 
                 try:
                     # we could probably do dateStr = descriptionStr but we want date in this format
@@ -283,7 +307,8 @@ class NewznabCache(tvcache.TVCache):
     def _getRSSData(self):
 
         params = {"t": "tvsearch",
-                  "cat": '5040,5030'}
+                  "cat": '5040,5030',
+                  "attrs": "rageid"}
 
         # hack this in for now
         if self.provider.getID() == 'nzbs_org':
@@ -307,3 +332,82 @@ class NewznabCache(tvcache.TVCache):
     def _checkAuth(self, data):
 
         return self.provider._checkAuthFromData(data)
+
+    # helper method to read the namespaces from xml
+    def parse_and_get_ns(self, data):
+        events = "start", "start-ns"
+        root = None
+        ns = {}
+        for event, elem in etree.iterparse(BytesIO(data.encode('utf-8')), events):
+            if event == "start-ns":
+                ns[elem[0]] = "{%s}" % elem[1]
+            elif event == "start":
+                if root is None:
+                    root = elem
+        return root, ns
+
+    # overwrite method with ElementTree version
+    def updateCache(self):
+
+        if not self.shouldUpdate():
+            return
+
+        data = self._getRSSData()
+
+        # as long as the http request worked we count this as an update
+        if data:
+            self.setLastUpdate()
+        else:
+            return []
+
+        # now that we've loaded the current RSS feed lets delete the old cache
+        logger.log(u"Clearing "+self.provider.name+" cache and updating with new information")
+        self._clearCache()
+
+        if not self._checkAuth(data):
+            raise exceptions.AuthException("Your authentication info for "+self.provider.name+" is incorrect, check your config")
+
+        try:
+            parsedXML, n_spaces = self.parse_and_get_ns(data)
+            items = parsedXML.findall('channel/item')
+        except Exception, e:
+            logger.log(u"Error trying to load "+self.provider.name+" RSS feed: "+ex(e), logger.ERROR)
+            logger.log(u"Feed contents: "+repr(data), logger.DEBUG)
+            return []
+
+        if parsedXML.tag != 'rss':
+            logger.log(u"Resulting XML from "+self.provider.name+" isn't RSS, not parsing it", logger.ERROR)
+            return []
+
+        for item in items:
+
+            self._parseItem(item, n_spaces)
+
+    def tryInt(self, s):
+        try: return int(s)
+        except: return 0
+
+    # overwrite method with a ElementTree version, that also parses the rageid from the newznab feed
+    def _parseItem(self, item, ns):
+
+        title = item.findtext('title')
+        url = item.findtext('link')
+        
+        tvrageid = 0
+        # don't use xpath because of the python 2.5 compatibility
+        for subitem in item.findall(ns['newznab']+'attr'):
+            if subitem.get('name') == "rageid":
+               tvrageid = self.tryInt(subitem.get('value'))
+               break
+
+        self._checkItemAuth(title, url)
+
+        if not title or not url:
+            logger.log(u"The XML returned from the "+self.provider.name+" feed is incomplete, this result is unusable", logger.ERROR)
+            return
+
+        url = self._translateLinkURL(url)
+
+        logger.log(u"Adding item from RSS to cache: "+title, logger.DEBUG)
+
+        self._addCacheEntry(title, url, tvrage_id=tvrageid)
