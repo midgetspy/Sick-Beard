@@ -466,7 +466,7 @@ class Tvdb:
         'hu': 19, 'ja': 25, 'he': 24, 'ko': 32, 'sv': 8, 'sl': 30}
 
         if language is None:
-            self.config['language'] = 'en'
+            self.config['language'] = 'fr'
         else:
             if language not in self.config['valid_languages']:
                 raise ValueError("Invalid language %s, options are: %s" % (

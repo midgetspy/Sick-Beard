@@ -1506,11 +1506,11 @@ class NewHomeAddShows:
     def getTVDBLanguages(self):
         result = tvdb_api.Tvdb().config['valid_languages']
 
-        # Make sure list is sorted alphabetically but 'en' is in front
-        if 'en' in result:
-            del result[result.index('en')]
+        # Make sure list is sorted alphabetically but 'fr' is in front
+        if 'fr' in result:
+            del result[result.index('fr')]
         result.sort()
-        result.insert(0, 'en')
+        result.insert(0, 'fr')
 
         return json.dumps({'results': result})
 
@@ -1519,9 +1519,9 @@ class NewHomeAddShows:
         return helpers.sanitizeFileName(name)
 
     @cherrypy.expose
-    def searchTVDBForShowName(self, name, lang="en"):
+    def searchTVDBForShowName(self, name, lang="fr"):
         if not lang or lang == 'null':
-                lang = "en"
+                lang = "fr"
 
         baseURL = "http://www.thetvdb.com/api/GetSeries.php?"
         nameUTF8 = name.encode('utf-8')
@@ -1687,7 +1687,7 @@ class NewHomeAddShows:
         return _munge(t)
 
     @cherrypy.expose
-    def addNewShow(self, whichSeries=None, tvdbLang="en", rootDir=None, defaultStatus=None,
+    def addNewShow(self, whichSeries=None, tvdbLang="fr", rootDir=None, defaultStatus=None,
                    anyQualities=None, bestQualities=None, flatten_folders=None, fullShowPath=None,
                    other_shows=None, skipShow=None, audio_lang=None):
         """
