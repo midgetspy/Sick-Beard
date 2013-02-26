@@ -47,7 +47,7 @@ from common import NAMING_DUPLICATE, NAMING_EXTEND, NAMING_LIMITED_EXTEND, NAMIN
 
 class TVShow(object):
 
-    def __init__ (self, tvdbid, lang="", audio_lang=None):
+    def __init__ (self, tvdbid, lang="", audio_lang=""):
 
         self.tvdbid = tvdbid
 
