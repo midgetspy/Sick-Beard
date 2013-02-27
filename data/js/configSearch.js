@@ -43,7 +43,10 @@ $(document).ready(function(){
         } else if (selectedProvider == "utorrent"){
             $('#t_blackhole_settings').hide();
             $('#torrent_settings').show();
-            $('#torrent_directory').hide();
+            $('#torrent_directory').show();
+            $('#torrent_directory label').last().hide();
+            $('#torrent_directory .fileBrowser').hide();
+            $('#directory_desc').text('Torrent Label');
             $('#host_desc').text('uTorrent Host');
             $('#username_desc').text('uTorrent Username');
             $('#password_desc').text('uTorrent Password');
@@ -51,6 +54,9 @@ $(document).ready(function(){
             $('#t_blackhole_settings').hide();
             $('#torrent_settings').show();
             $('#torrent_directory').show();
+            $('#torrent_directory label').last().show();
+            $('#torrent_directory .fileBrowser').show();
+            $('#directory_desc').text('Torrent Directory');
             $('#host_desc').html('Transmission Host');
             $('#username_desc').text('Transmission Username');
             $('#password_desc').text('Transmission Password');
@@ -59,6 +65,9 @@ $(document).ready(function(){
 			$('#t_blackhole_settings').hide();
 			$('#torrent_settings').show();
 			$('#torrent_directory').show();
+            $('#torrent_directory label').last().show();
+            $('#torrent_directory .fileBrowser').show();
+            $('#directory_desc').text('Torrent Directory');
 			$('#host_desc').html('Download Station Host');
 			$('#username_desc').text('Synology Username');
 			$('#password_desc').text('Synology Password');
