@@ -212,7 +212,7 @@ class PostProcessor(object):
                 if (not file_attribute & stat.S_IWRITE):
                     # File is read-only, so make it writeable
                     self._log('Read only mode on file ' + cur_file, logger.WARNING )
-                    ek.ek(os.chmod,cur_file,stat.S_IWRITE)
+#                    ek.ek(os.chmod,cur_file,stat.S_IWRITE)
                 ek.ek(os.remove, cur_file)
                 # do the library update for synoindex
                 notifiers.synoindex_notifier.deleteFile(cur_file)
