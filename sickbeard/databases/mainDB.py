@@ -337,7 +337,7 @@ class AddLang (FixSabHostURL):
         return self.hasColumn("tv_shows", "lang")
 
     def execute(self):
-        self.addColumn("tv_shows", "lang", "TEXT", "en")
+        self.addColumn("tv_shows", "lang", "TEXT", "fr")
 
 class AddCustomSearchNames (AddLang):
     def test(self):
@@ -426,7 +426,7 @@ class AddAudioLang (FixAirByDateSetting):
         return self.hasColumn("tv_shows", "audio_lang")
 
     def execute(self):
-        self.addColumn("tv_shows", "audio_lang", "TEXT", "en")
+        self.addColumn("tv_shows", "audio_lang", "TEXT", "fr")
         
 class AddShowLangsToEpisode (AddAudioLang):
     def test(self):
