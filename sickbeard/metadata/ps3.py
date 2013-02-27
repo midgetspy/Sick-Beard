@@ -58,7 +58,7 @@ class PS3Metadata(generic.GenericMetadata):
                                          season_posters,
                                          season_banners,
                                          episode_metadata,
-                                         episode_thumbnails):
+                                         episode_thumbnails)
         
 
         self.name = 'Sony PS3'

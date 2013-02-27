@@ -76,7 +76,7 @@ class MediaBrowserMetadata(generic.GenericMetadata):
                                          season_posters,
                                          season_banners,
                                          episode_metadata,
-                                         episode_thumbnails):
+                                         episode_thumbnails)
         
 
         self.name = 'MediaBrowser'
@@ -423,7 +423,7 @@ class MediaBrowserMetadata(generic.GenericMetadata):
 
         return data
 	
-	def create_show_poster(self, show_obj):
+    def create_show_poster(self, show_obj):
         if self.show_poster and show_obj and not self._has_show_poster(show_obj):
             logger.log("Metadata provider "+self.name+" creating show poster for "+show_obj.name, logger.DEBUG)
             poster_path = self.get_show_poster_path(show_obj)

@@ -67,7 +67,7 @@ class TIVOMetadata(generic.GenericMetadata):
                                          season_posters,
                                          season_banners,
                                          episode_metadata,
-                                         episode_thumbnails):
+                                         episode_thumbnails)
         
         self.name = 'TIVO'
         self._ep_nfo_extension = "txt"
@@ -283,7 +283,7 @@ class TIVOMetadata(generic.GenericMetadata):
     def create_show_metadata(self, show_obj):
         pass
     
-    def def create_show_fanart(self, show_obj):
+    def create_show_fanart(self, show_obj):
         pass
 
     def create_show_poster(self, show_obj):

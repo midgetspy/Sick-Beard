@@ -481,17 +481,18 @@ def initialize(consoleLogging=True):
                 ART_FANART = bool(check_setting_int(CFG, 'General', 'art_fanart', 1))
                 ART_THUMBNAILS = bool(check_setting_int(CFG, 'General', 'art_thumbnails', 1))
                 ART_SEASON_THUMBNAILS = bool(check_setting_int(CFG, 'General', 'art_season_thumbnails', 1))
+                blankvalue = bool(0)
 
                 new_metadata_class = old_metadata_class(METADATA_SHOW,
                                                         ART_FANART,
                                                         ART_POSTER,
-                                                        false,
-                                                        false,
-                                                        false,
-                                                        false,
-                                                        false,               
-                                                        ART_SEASON_THUMBNAILS 	
-                                                        false,
+                                                        blankvalue,
+                                                        blankvalue,
+                                                        blankvalue,
+                                                        blankvalue,
+                                                        blankvalue,              
+                                                        ART_SEASON_THUMBNAILS, 	
+                                                        blankvalue,
                                                         METADATA_EPISODE,
                                                         ART_THUMBNAILS)
 
@@ -503,29 +504,29 @@ def initialize(consoleLogging=True):
             METADATA_XBMC = check_setting_str(CFG, 'General', 'metadata_xbmc', '0|0|0|0|0|0|0|0|0|0|0|0')
             METADATA_XBMCORIG = check_setting_str(CFG, 'General', 'metadata_xbmcorig', '0|0|0|0|0|0|0|0|0|0|0|0')
             #if lenght of METADATA_XBMC = 11 and METADATA_XBMCORIG = '0|0|0|0|0|0|0|0|0|0|0|0'
-            if METADATA_XBMC.__len__() = 11 and METADATA_XBMCORIG = '0|0|0|0|0|0|0|0|0|0|0|0':
-            	METADATA_XBMCORIG = METADATA_XBMC[1:1] + '|' + METADATA_XBMC[7:7] + '|' + METADATA_XBMC[5:5] + '|0|0|0|0|0|' + METADATA_XBMC[11:11] + '|0|' + METADATA_XBMC[3:3] + '|' + METADATA_XBMC[9:9]	            
-	            METADATA_XBMC = '0|0|0|0|0|0|0|0|0|0|0|0'
+            if METADATA_XBMC.__len__() == 11 and METADATA_XBMCORIG == '0|0|0|0|0|0|0|0|0|0|0|0':
+            	METADATA_XBMCORIG = METADATA_XBMC[0:1] + '|' + METADATA_XBMC[6:7] + '|' + METADATA_XBMC[4:5] + '|0|0|0|0|0|' + METADATA_XBMC[10:11] + '|0|' + METADATA_XBMC[2:3] + '|' + METADATA_XBMC[8:9]	            
+                METADATA_XBMC = '0|0|0|0|0|0|0|0|0|0|0|0'
             
             METADATA_MEDIABROWSER = check_setting_str(CFG, 'General', 'metadata_mediabrowser', '0|0|0|0|0|0|0|0|0|0|0|0')
-            if METADATA_MEDIABROWSER.__len__() = 11 
-            	METADATA_MEDIABROWSER = METADATA_MEDIABROWSER[1:1] + '|' + METADATA_MEDIABROWSER[7:7] + '|' + METADATA_MEDIABROWSER[5:5] + '|0|0|0|0|0|' + METADATA_MEDIABROWSER[11:11] + '|0|' + METADATA_MEDIABROWSER[3:3] + '|' + METADATA_MEDIABROWSER[9:9]	            
+            if METADATA_MEDIABROWSER.__len__() == 11: 
+            	METADATA_MEDIABROWSER = METADATA_MEDIABROWSER[0:1] + '|' + METADATA_MEDIABROWSER[6:7] + '|' + METADATA_MEDIABROWSER[4:5] + '|0|0|0|0|0|' + METADATA_MEDIABROWSER[10:11] + '|0|' + METADATA_MEDIABROWSER[2:3] + '|' + METADATA_MEDIABROWSER[8:9]	            
 
             METADATA_PS3 = check_setting_str(CFG, 'General', 'metadata_ps3', '0|0|0|0|0|0|0|0|0|0|0|0')
-            if METADATA_PS3.__len__() = 11 
-            	METADATA_PS3 = METADATA_PS3[1:1] + '|' + METADATA_PS3[7:7] + '|' + METADATA_PS3[5:5] + '|0|0|0|0|0|' + METADATA_PS3[11:11] + '|0|' + METADATA_PS3[3:3] + '|' + METADATA_PS3[9:9]	            
+            if METADATA_PS3.__len__() == 11: 
+            	METADATA_PS3 = METADATA_PS3[0:1] + '|' + METADATA_PS3[6:7] + '|' + METADATA_PS3[4:5] + '|0|0|0|0|0|' + METADATA_PS3[10:11] + '|0|' + METADATA_PS3[2:3] + '|' + METADATA_PS3[8:9]	            
 
             METADATA_WDTV = check_setting_str(CFG, 'General', 'metadata_wdtv', '0|0|0|0|0|0|0|0|0|0|0|0')
-            if METADATA_WDTV.__len__() = 11 
-            	METADATA_WDTV = METADATA_WDTV[1:1] + '|' + METADATA_WDTV[7:7] + '|' + METADATA_WDTV[5:5] + '|0|0|0|0|0|' + METADATA_WDTV[11:11] + '|0|' + METADATA_WDTV[3:3] + '|' + METADATA_WDTV[9:9]	            
+            if METADATA_WDTV.__len__() == 11: 
+            	METADATA_WDTV = METADATA_WDTV[0:1] + '|' + METADATA_WDTV[6:7] + '|' + METADATA_WDTV[4:5] + '|0|0|0|0|0|' + METADATA_WDTV[10:11] + '|0|' + METADATA_WDTV[2:3] + '|' + METADATA_WDTV[8:9]	            
 
             METADATA_TIVO = check_setting_str(CFG, 'General', 'metadata_tivo', '0|0|0|0|0|0|0|0|0|0|0|0')
-            if METADATA_TIVO.__len__() = 11 
-            	METADATA_TIVO = METADATA_TIVO[1:1] + '|' + METADATA_TIVO[7:7] + '|' + METADATA_TIVO[5:5] + '|0|0|0|0|0|' + METADATA_TIVO[11:11] + '|0|' + METADATA_TIVO[3:3] + '|' + METADATA_TIVO[9:9]	            
+            if METADATA_TIVO.__len__() == 11: 
+            	METADATA_TIVO = METADATA_TIVO[0:1] + '|' + METADATA_TIVO[6:7] + '|' + METADATA_TIVO[4:5] + '|0|0|0|0|0|' + METADATA_TIVO[10:11] + '|0|' + METADATA_TIVO[2:3] + '|' + METADATA_TIVO[8:9]	            
 
             METADATA_SYNOLOGY = check_setting_str(CFG, 'General', 'metadata_synology', '0|0|0|0|0|0|0|0|0|0|0|0')
-            if METADATA_SYNOLOGY.__len__() = 11 
-            	METADATA_SYNOLOGY = METADATA_SYNOLOGY[1:1] + '|' + METADATA_SYNOLOGY[7:7] + '|' + METADATA_SYNOLOGY[5:5] + '|0|0|0|0|0|' + METADATA_SYNOLOGY[11:11] + '|0|' + METADATA_SYNOLOGY[3:3] + '|' + METADATA_SYNOLOGY[9:9]	            
+            if METADATA_SYNOLOGY.__len__() == 11: 
+            	METADATA_SYNOLOGY = METADATA_SYNOLOGY[0:1] + '|' + METADATA_SYNOLOGY[6:7] + '|' + METADATA_SYNOLOGY[4:5] + '|0|0|0|0|0|' + METADATA_SYNOLOGY[10:11] + '|0|' + METADATA_SYNOLOGY[2:3] + '|' + METADATA_SYNOLOGY[8:9]	            
 
             for cur_metadata_tuple in [(METADATA_XBMC, metadata.xbmc),
                                        (METADATA_XBMCORIG, metadata.xbmcorig),

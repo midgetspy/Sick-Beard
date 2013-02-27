@@ -77,7 +77,7 @@ class SynologyMetadata(generic.GenericMetadata):
                                          season_posters,
                                          season_banners,
                                          episode_metadata,
-                                         episode_thumbnails):
+                                         episode_thumbnails)
         
         self.name = 'Synology'
         self._ep_nfo_extension = 'xml'

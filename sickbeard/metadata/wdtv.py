@@ -68,7 +68,7 @@ class WDTVMetadata(generic.GenericMetadata):
                                          season_posters,
                                          season_banners,
                                          episode_metadata,
-                                         episode_thumbnails):
+                                         episode_thumbnails)
 
         self.name = 'WDTV'
         self._ep_nfo_extension = 'xml'
@@ -246,7 +246,7 @@ class WDTVMetadata(generic.GenericMetadata):
     def create_show_fanart(self, show_obj): 
         pass
 
-	def create_show_poster(self, show_obj):
+    def create_show_poster(self, show_obj):
         if self.show_poster and show_obj and not self._has_show_poster(show_obj):
             logger.log("Metadata provider "+self.name+" creating show poster for "+show_obj.name, logger.DEBUG)
             poster_path = self.get_show_poster_path(show_obj)
