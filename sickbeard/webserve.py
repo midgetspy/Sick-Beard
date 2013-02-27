@@ -1791,7 +1791,7 @@ class ConfigSubtitles:
         return _munge(t)
 
     @cherrypy.expose
-    def saveSubtitles(self, use_subtitles=None, subtitles_plugins=None, subtitles_languages=None, subtitles_dir=None, service_order=None):
+    def saveSubtitles(self, use_subtitles=None, subtitles_plugins=None, subtitles_languages=None, subtitles_dir=None, service_order=None, subtitles_history=None):
         results = []
 
         if use_subtitles == "on":
@@ -1807,10 +1807,16 @@ class ConfigSubtitles:
             except:
                 pass
 
+        if subtitles_history == "on":
+            subtitles_history = 1
+        else: 
+            subtitles_history = 0    
+
         sickbeard.USE_SUBTITLES = use_subtitles
         sickbeard.SUBTITLES_LANGUAGES = [lang.alpha2 for lang in subtitles.isValidLanguage(subtitles_languages.replace(' ', '').split(','))] if subtitles_languages != ''  else ''
         sickbeard.SUBTITLES_DIR = subtitles_dir
-
+        sickbeard.SUBTITLES_HISTORY = subtitles_history
+        
         # Subtitles services
         services_str_list = service_order.split()
         subtitles_services_list = []
