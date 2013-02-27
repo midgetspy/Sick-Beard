@@ -892,7 +892,7 @@ class ConfigPostProcessing:
         sickbeard.NAMING_CUSTOM_ABD = naming_custom_abd
 
         sickbeard.metadata_provider_dict['XBMC'].set_config(xbmc_data)
-        sickbeard.metadata_provider_dict['XBMCORIG'].set_config(xbmcorig_data)
+        sickbeard.metadata_provider_dict['XBMCOrig'].set_config(xbmcorig_data)
         sickbeard.metadata_provider_dict['MediaBrowser'].set_config(mediabrowser_data)
         sickbeard.metadata_provider_dict['Synology'].set_config(synology_data)
         sickbeard.metadata_provider_dict['Sony PS3'].set_config(sony_ps3_data)

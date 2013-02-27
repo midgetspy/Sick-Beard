@@ -396,21 +396,21 @@ class TVShow(object):
 
     def getImages(self, fanart=None, poster=None):
 
-        show_fanart_result = show_poster_result = show_banner_result = seasons_all_fanart_result = seasons_all_poster_result = seasons_all_banner_result = season_fanarts_result = season_posters_result = season_banners_result = False
+        show_fanart_result = show_poster_result = show_banner_result = season_all_fanart_result = season_all_poster_result = season_all_banner_result = season_fanarts_result = season_posters_result = season_banners_result = False
 
         for cur_provider in sickbeard.metadata_provider_dict.values():
             logger.log("Running season folders for "+cur_provider.name, logger.DEBUG)
             show_fanart_result = cur_provider.create_show_fanart(self) or show_fanart_result
             show_poster_result = cur_provider.create_show_fanart(self) or show_poster_result
             show_banner_result = cur_provider.create_show_fanart(self) or show_banner_result
-            seasons_all_fanart_result = cur_provider.create_seasons_all_fanart(self) or seasons_all_fanart_result
-            seasons_all_poster_result = cur_provider.create_seasons_all_fanart(self) or seasons_all_poster_result
-            seasons_all_banner_result = cur_provider.create_seasons_all_fanart(self) or seasons_all_banner_result
+            season_all_fanart_result = cur_provider.create_season_all_fanart(self) or season_all_fanart_result
+            season_all_poster_result = cur_provider.create_season_all_fanart(self) or season_all_poster_result
+            season_all_banner_result = cur_provider.create_season_all_fanart(self) or season_all_banner_result
             season_fanarts_result = cur_provider.create_season_fanart(self) or season_fanarts_result
             season_posters_result = cur_provider.create_season_poster(self) or season_posters_result
             season_banners_result = cur_provider.create_season_banner(self) or season_banners_result
 
-        return show_fanart_result or show_poster_result or show_banner_result or seasons_all_fanart_result or seasons_all_poster_result or seasons_all_banner_result or season_fanarts_result or season_posters_result or season_banners_result
+        return show_fanart_result or show_poster_result or show_banner_result or season_all_fanart_result or season_all_poster_result or season_all_banner_result or season_fanarts_result or season_posters_result or season_banners_result
 
     def loadLatestFromTVRage(self):
 
