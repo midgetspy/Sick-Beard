@@ -52,6 +52,14 @@
                         </div>
 
                         <div class="field-pair">
+                            <input type="checkbox" name="sort_article" id="sort_article" #if $sickbeard.SORT_ARTICLE then "checked=\"checked\"" else ""#/>
+                            <label class="clearfix" for="sort_article">
+                                <span class="component-title">Sort articles</span>
+                                <span class="component-desc">Include articles (The, A, An) when sorting show lists.</span>
+                            </label>
+                        </div>
+
+                        <div class="field-pair">
                             <label class="nocheck clearfix" for="log_dir">
                                 <span class="component-title">Logging Directory</span>
                                 <input type="text" name="log_dir" id="log_dir" value="$sickbeard.LOG_DIR" size="35" />

@@ -126,10 +126,12 @@ class Api:
         t = webserve.PageTemplate(file="apiBuilder.tmpl")
 
         def titler(x):
-            if not x:
+            if not x or sickbeard.SORT_ARTICLE:
                 return x
             if x.lower().startswith('a '):
                 x = x[2:]
+            elif x.lower().startswith('an '):
+                x = x[3:]
             elif x.lower().startswith('the '):
                 x = x[4:]
             return x
