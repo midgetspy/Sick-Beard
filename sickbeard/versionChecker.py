@@ -461,6 +461,7 @@ class SourceUpdateManager(GitUpdateManager):
             return False
 
         download_name = data.geturl().split('/')[-1]
+        download_name = download_name.split('?')[0]
 
         tar_download_path = os.path.join(sickbeard.PROG_DIR, download_name)
 
