@@ -152,7 +152,15 @@ def change_SEARCH_FREQUENCY(freq):
 
     sickbeard.currentSearchScheduler.cycleTime = datetime.timedelta(minutes=sickbeard.SEARCH_FREQUENCY)
     sickbeard.backlogSearchScheduler.cycleTime = datetime.timedelta(minutes=sickbeard.get_backlog_cycle_time())
+def change_IGNORE_WORDS(words):
 
+    if words == None:
+        words = sickbeard.IGNORE_WORDS
+    else:
+        words = words
+
+    sickbeard.IGNORE_WORDS = words
+   
 def change_VERSION_NOTIFY(version_notify):
    
     oldSetting = sickbeard.VERSION_NOTIFY

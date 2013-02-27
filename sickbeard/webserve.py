@@ -767,7 +767,7 @@ class ConfigSearch:
     @cherrypy.expose
     def saveSearch(self, use_nzbs=None, use_torrents=None, nzb_dir=None, sab_username=None, sab_password=None,
                        sab_apikey=None, sab_category=None, sab_host=None, nzbget_password=None, nzbget_category=None, nzbget_host=None,
-                       torrent_dir=None, nzb_method=None, usenet_retention=None, search_frequency=None, download_propers=None):
+                       torrent_dir=None, nzb_method=None, usenet_retention=None, search_frequency=None, download_propers=None, ignore_words=None):
 
         results = []
 
@@ -778,7 +778,7 @@ class ConfigSearch:
             results += ["Unable to create directory " + os.path.normpath(torrent_dir) + ", dir not changed."]
 
         config.change_SEARCH_FREQUENCY(search_frequency)
-
+        config.change_IGNORE_WORDS(ignore_words)
         if download_propers == "on":
             download_propers = 1
         else:
