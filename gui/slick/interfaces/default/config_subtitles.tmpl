@@ -1,5 +1,5 @@
-#import sickbeard
 #from sickbeard import subtitles
+#import sickbeard
 
 #set global $title="Config - Subtitles"
 #set global $header="Subtitles"
@@ -91,7 +91,7 @@
                         		</div>
                         		
 		                        <div class="field-pair">
-		                            <input type="checkbox" name="subtitles_history" id="subtitles_history" #if $sickbeard.SUBTITLES_HISTORY then "checked=\"checked\"" else ""#/>
+		                            <input type="checkbox" #if $sickbeard.SUBTITLES_HISTORY then "checked=\"checked\"" else ""# name="subtitles_history" id="subtitles_history"/>
 		                            <label class="clearfix" for="subtitles_history">
 		                                <span class="component-title">Subtitles History</span>
 		                                <span class="component-desc">Log downloaded Subtitle on History page?</span>

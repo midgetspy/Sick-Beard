@@ -1182,11 +1182,15 @@ class TVEpisode(object):
             logger.log(str(self.show.tvdbid) + ": Downloaded " + ", ".join(subtitleList) + " subtitles for episode " + str(self.season) + "x" + str(self.episode), logger.DEBUG)
             
             notifiers.notify_subtitle_download(self.prettyName(), ", ".join(subtitleList))
-            
-            for subtitle in newsubtitles:
-                history.logSubtitle(self.show.tvdbid, self.season, self.episode, self.status, subliminal.language.Language(subtitle))
+
         else:
             logger.log(str(self.show.tvdbid) + ": No subtitles downloaded for episode " + str(self.season) + "x" + str(self.episode), logger.DEBUG)
+            
+        if sickbeard.SUBTITLES_HISTORY:
+            for video in subtitles:
+                for subtitle in subtitles.get(video):
+                    history.logSubtitle(self.show.tvdbid, self.season, self.episode, self.status, subtitle)
+
         
         return subtitles
 
