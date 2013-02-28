@@ -16,20 +16,19 @@
 # You should have received a copy of the GNU General Public License
 # along with Sick Beard.  If not, see <http://www.gnu.org/licenses/>.
 
-from sickbeard import helpers, logger, classes, show_name_helpers
-from sickbeard.exceptions import ex
-
+from binsearch_downloader import BinSearch
 from bs4 import BeautifulSoup
-import datetime
+from nzbclub_downloader import NZBClub
+from sickbeard import logger, classes, show_name_helpers
+from sickbeard.common import Quality
+from sickbeard.exceptions import ex
+from sickbeard.providers.nzbclub_downloader import NZBClub
 import generic
 import httplib
-from StringIO import StringIO
-import gzip
 import re
 import sickbeard
 import urllib
-import urllib2
-from sickbeard.common import Quality
+
 
 class BinNewzProvider(generic.NZBProvider):
 
@@ -38,6 +37,9 @@ class BinNewzProvider(generic.NZBProvider):
         generic.NZBProvider.__init__(self, "BinnewZ")
 
         self.supportsBacklog = True
+        
+        # self.nzbDownloaders = [ NZBClub(), BinSearch() ]
+        self.nzbDownloaders = [ NZBClub() ]
         
         self.url = "http://www.binnews.in/"
         
@@ -67,62 +69,6 @@ class BinNewzProvider(generic.NZBProvider):
     
     def getQuality(self, item):
         return item.getQuality()
-
-    def doBinSearch(self, filename, minSize, newsgroup=None):
-        
-        binsearch_results = []
-        
-        # now locate nzb with binsearch
-        if newsgroup != None:
-            binSearchURLs = [  urllib.urlencode({'server' : 1, 'max': '250', 'adv_g' : newsgroup, 'q' : filename}), urllib.urlencode({'server' : 2, 'max': '250', 'adv_g' : newsgroup, 'q' : filename})]
-        else:
-            binSearchURLs = [  urllib.urlencode({'server' : 1, 'max': '250', 'q' : filename}), urllib.urlencode({'server' : 2, 'max': '250', 'q' : filename})]
-
-        for suffixURL in binSearchURLs:
-            binSearchURL = "http://binsearch.info/?adv_age=&" + suffixURL
-
-            binSearchResult = self.getURL(binSearchURL)
-            binSearchSoup = BeautifulSoup( binSearchResult )
-
-            foundName = None
-            sizeInMegs = None
-            for elem in binSearchSoup.findAll(lambda tag: tag.name=='tr' and tag.get('bgcolor') == '#FFFFFF' and 'size:' in tag.text):
-                for checkbox in elem.findAll(lambda tag: tag.name=='input' and tag.get('type') == 'checkbox'):
-                    sizeStr = re.search("size:\s+([^B]*)B", elem.text).group(1).strip()
-                    
-                    if "G" in sizeStr:
-                        sizeInMegs = float( re.search("([0-9\\.]+)", sizeStr).group(1) ) * 1024
-                    elif "K" in sizeStr:
-                        sizeInMegs = 0
-                    else:
-                        sizeInMegs = float( re.search("([0-9\\.]+)", sizeStr).group(1) )
-                    
-                    if sizeInMegs > minSize:
-                        foundName = checkbox.get('name')
-                        break
-                
-            if foundName:
-                params = urllib.urlencode({foundName: 'on', 'action': 'nzb'})
-                headers = {"Referer":binSearchURL, "Content-type": "application/x-www-form-urlencoded","Accept-Encoding" : "gzip,deflate,sdch", "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8","User-Agent":"Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.17 (KHTML, like Gecko) Chrome/24.0.1312.57 Safari/537.17"}
-                conn = httplib.HTTPConnection( "binsearch.info" )
-                conn.request("POST", "/fcgi/nzb.fcgi?adv_age=&" + suffixURL, params, headers)
-                response = conn.getresponse()
-                
-                if response.status == 200:
-                    rawData = response.read()      
-
-                    if response.getheader('Content-Encoding') == 'gzip':
-                        buf = StringIO( rawData )
-                        f = gzip.GzipFile(fileobj=buf)
-                        nzbdata = f.read()
-                    else:
-                        nzbdata = rawData
-
-                    binsearch_results.append( BinSearchResult( nzbdata, sizeInMegs, binSearchURL ) )
-                
-                break
-            
-        return binsearch_results        
     
     def _doSearch(self, searchString, show=None, season=None):
         
@@ -144,6 +90,7 @@ class BinNewzProvider(generic.NZBProvider):
 
         tables = soup.findAll("table", id="tabliste")
         for table in tables:
+
             rows = table.findAll("tr")
             for row in rows:
                 
@@ -212,20 +159,12 @@ class BinNewzProvider(generic.NZBProvider):
                         continue
    
                 filename =  cells[5].contents[0]
-
-                rawName = name
     
                 m =  re.search("^(.+)\s+{(.*)}$", name)
                 qualityStr = ""
                 if m:
                     name = m.group(1)
                     qualityStr = m.group(2)
-    
-                m =  re.search("^(.+)\s+\[(.*)\]$", name)
-                source = None
-                if m:
-                    name = m.group(1)
-                    source = m.group(2)
     
                 m =  re.search("(.+)\(([0-9]{4})\)", name)
                 year = ""
@@ -239,16 +178,19 @@ class BinNewzProvider(generic.NZBProvider):
                     name = m.group(1)
                     dateStr = m.group(2)
     
-                m =  re.search("(.+)\s+S(\d{2})\s+E(\d{2})", name)
+                m =  re.search("(.+)\s+S(\d{2})\s+E(\d{2})(.*)", name)
                 if m:
-                    name = m.group(1) + " S" + m.group(2) + "E" + m.group(3)                
+                    name = m.group(1) + " S" + m.group(2) + "E" + m.group(3) + m.group(4)
     
-                m =  re.search("(.+)\s+S(\d{2})\s+Ep(\d{2})", name)
+                m =  re.search("(.+)\s+S(\d{2})\s+Ep(\d{2})(.*)", name)
                 if m:
-                    name = m.group(1) + " S" + m.group(2) + "E" + m.group(3)                
+                    name = m.group(1) + " S" + m.group(2) + "E" + m.group(3) + m.group(4)        
 
                 if "720p" in qualityStr:
-                    quality = Quality.HDBLURAY
+                    if "HDTV" in name or "HDTV" in filename:
+                        quality = Quality.HDTV
+                    else:
+                        quality = Quality.HDBLURAY
                     minSize = 600
                 elif "1080p" in qualityStr:
                     quality = Quality.FULLHDBLURAY
@@ -257,14 +199,18 @@ class BinNewzProvider(generic.NZBProvider):
                     quality = Quality.SDTV
                     minSize = 150
                 
-                if ( filename.find("*") != -1 ):
-                    print "Range detected"
-                    
-                binsearch_results = self.doBinSearch( filename, minSize, newsgroup )
-                # binsearch_results = self.doNZBClub( filename, minSize, newsgroup )
+                # FIXME
+                if show.quality == 28 and quality == Quality.SDTV:
+                    continue
                 
-                for binsearch_result in binsearch_results:
-                    results.append( BinNewzSearchResult( name, binsearch_result.nzbdata, binsearch_result.url, quality))
+                if ( filename.find("*") != -1 ):
+                    print "TODO: Range detected"
+
+                for downloader in self.nzbDownloaders:
+                    binsearch_result =  downloader.search(filename, minSize, newsgroup )
+                    if binsearch_result:
+                        results.append( BinNewzSearchResult( name, binsearch_result.nzbdata, binsearch_result.url, quality))
+                        break
 
         return results
     
@@ -276,14 +222,7 @@ class BinNewzProvider(generic.NZBProvider):
         result.provider = self
 
         return result    
-    
-class BinSearchResult:
-    
-    def __init__(self, nzbdata, sizeInMegs, url):
-        self.nzbdata = nzbdata
-        self.sizeInMegs = sizeInMegs
-        self.url = url
-    
+
 class BinNewzSearchResult:
     
     def __init__(self, title, nzbdata, url, quality):
