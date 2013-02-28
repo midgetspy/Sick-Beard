@@ -1,8 +1,6 @@
 import re
 import time
 from hashlib import sha1
-from urlparse import urlparse
-import string
 
 import sickbeard
 from sickbeard import logger
@@ -34,17 +32,6 @@ class GenericClient(object):
         
         logger.log(self.name + u': Requested a ' + method.upper() + ' connection to url '+ self.url + ' with Params= ' + str(params) + ' Data=' + str(data), logger.DEBUG)
         
-        try:
-            host_component = urlparse(self.host)
-            if not all([host_component.scheme, host_component.netloc]) \
-            or not set(host_component.netloc) <= set(string.ascii_letters + string.digits + ':.') \
-            or not host_component.scheme in ['http', 'https']:
-                logger.log(self.name + u': Invalid Host ', logger.ERROR)
-                return False
-        except Exception, e:
-            logger.log(self.name + u': Invalid Host ' +ex(e), logger.ERROR)
-            return False
-        
         if not self.auth:
             logger.log(self.name + u': Autenthication Failed' , logger.ERROR)
             return False
@@ -54,8 +41,8 @@ class GenericClient(object):
         except requests.exceptions.ConnectionError, e:
             logger.log(self.name + u': Unable to connect ' +ex(e), logger.ERROR)
             return False
-        except requests.exceptions.MissingSchema, requests.exceptions.InvalidURL:
-            logger.log(self.name + u': Invalid host', logger.ERROR)
+        except (requests.exceptions.MissingSchema, requests.exceptions.InvalidURL):
+            logger.log(self.name + u': Invalid Host', logger.ERROR)
             return False
         except requests.exceptions.HTTPError, e:
             logger.log(self.name + u': Invalid HTTP Request ' + ex(e), logger.ERROR)
@@ -166,32 +153,23 @@ class GenericClient(object):
         return r_code
 
     def testAuthentication(self):
-
-        try:
-            host_component = urlparse(self.host)
-            if not all([host_component.scheme, host_component.netloc]) \
-            or not set(host_component.netloc) <= set(string.ascii_letters + string.digits + ':.') \
-            or not host_component.scheme in ['http', 'https']:
-                return False, 'Invalid ' + self.name + ' Host'                
-        except Exception:
-            return False, 'Invalid ' + self.name + ' Host'
         
         try:
             self.response = self.session.get(self.url)
         except requests.exceptions.ConnectionError:
-            return False, 'Unable to connect to ' + self.name + ': Connection Error'
-        except requests.exceptions.MissingSchema, requests.exceptions.InvalidURL:
+            return False, 'Error: ' + self.name + ' Connection Error'
+        except (requests.exceptions.MissingSchema, requests.exceptions.InvalidURL):
             return False,'Error: Invalid ' + self.name + ' host'    
 
         if self.response.status_code == 401:                                            
-            return False, 'Invalid ' + self.name + ' Username or Password, check your config!'           
+            return False, 'Error: Invalid ' + self.name + ' Username or Password, check your config!'           
                                                     
         try:                                             
             self._get_auth()                                            
             if self.response.status_code == 200 and self.auth:                                          
                 return True, 'Success: Connected and Authenticated'                                     
             else:                                            
-                return False, 'Unable to connect to ' + self.name + ' , check your config!'             
+                return False, 'Error: Unable to get ' + self.name + ' Authentication, check your config!'             
         except Exception:                                                
-            return False, 'Unable to connect to '+ self.name                                            
+            return False, 'Error: Unable to connect to '+ self.name                                            
                                             
