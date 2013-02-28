@@ -29,7 +29,7 @@ class DelugeAPI(GenericClient):
 
         super(DelugeAPI, self).__init__('Deluge', host, username, password)
                 
-        self.url = sickbeard.TORRENT_HOST + 'json' if host is None else host + 'json'
+        self.url = self.host + 'json'
            
     def _get_auth(self):
 

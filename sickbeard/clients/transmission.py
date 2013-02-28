@@ -29,7 +29,7 @@ class TransmissionAPI(GenericClient):
         
         super(TransmissionAPI, self).__init__('Transmission', host, username, password)
       
-        self.url = sickbeard.TORRENT_HOST + 'transmission/rpc' if host is None else host + 'transmission/rpc'
+        self.url = self.host + 'transmission/rpc'
 
     def _get_auth(self):
 

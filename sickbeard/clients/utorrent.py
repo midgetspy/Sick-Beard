@@ -27,7 +27,7 @@ class uTorrentAPI(GenericClient):
         
         super(uTorrentAPI, self).__init__('uTorrent', host, username, password)
       
-        self.url = sickbeard.TORRENT_HOST + 'gui/' if host is None else host + 'gui/'
+        self.url = self.host + 'gui/'
             
     def _request(self, method='get', params={}, files=None):
 

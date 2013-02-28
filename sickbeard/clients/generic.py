@@ -2,6 +2,7 @@ import re
 import time
 from hashlib import sha1
 from urlparse import urlparse
+import string
 
 import sickbeard
 from sickbeard import logger
@@ -11,7 +12,7 @@ from lib import requests
 
 class GenericClient(object):
     
-    def __init__(self, name=None, host=None, username=None, password=None):
+    def __init__(self, name, host=None, username=None, password=None):
 
         self.name = name
         
@@ -19,6 +20,7 @@ class GenericClient(object):
         self.username = sickbeard.TORRENT_USERNAME if username is None else username
         self.password = sickbeard.TORRENT_PASSWORD if password is None else password
         self.host = sickbeard.TORRENT_HOST if host is None else host
+
         self.session = requests.session(auth=(self.username, self.password),timeout=10)
         self.response = None
         self.auth = None
@@ -33,7 +35,12 @@ class GenericClient(object):
         logger.log(self.name + u': Requested a ' + method.upper() + ' connection to url '+ self.url + ' with Params= ' + str(params) + ' Data=' + str(data), logger.DEBUG)
         
         try:
-            urlparse(self.host)
+            host_component = urlparse(self.host)
+            if not all([host_component.scheme, host_component.netloc]) \
+            or not set(host_component.netloc) <= set(string.ascii_letters + string.digits + ':.') \
+            or not host_component.scheme in ['http', 'https']:
+                logger.log(self.name + u': Invalid Host ', logger.ERROR)
+                return False
         except Exception, e:
             logger.log(self.name + u': Invalid Host ' +ex(e), logger.ERROR)
             return False
@@ -161,9 +168,13 @@ class GenericClient(object):
     def testAuthentication(self):
 
         try:
-            urlparse(self.url)
-        except Exception, e:
-            return False, 'Invalid ' + self.name + ' Host: ' +ex(e)
+            host_component = urlparse(self.host)
+            if not all([host_component.scheme, host_component.netloc]) \
+            or not set(host_component.netloc) <= set(string.ascii_letters + string.digits + ':.') \
+            or not host_component.scheme in ['http', 'https']:
+                return False, 'Invalid ' + self.name + ' Host'                
+        except Exception:
+            return False, 'Invalid ' + self.name + ' Host'
         
         try:
             self.response = self.session.get(self.url)
