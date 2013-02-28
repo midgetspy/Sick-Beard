@@ -186,7 +186,7 @@ class NewznabProvider(generic.NZBProvider):
 
         return True
 
-    def _doSearch(self, search_params, show=None, max_age=0):
+    def _doSearch(self, search_params, show=None, max_age=0, season=None):
         
         cat = '5030,5040'
         if show and show.audio_lang != u"en":
