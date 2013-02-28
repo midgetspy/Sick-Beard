@@ -344,7 +344,7 @@ class GenericProvider:
                 epObj.append(show.getEpisode(actual_season, curEp))
 
             result = self.getResult(epObj)
-            if item.extraInfo:
+            if hasattr(item , 'extraInfo'):
                 result.extraInfo = item.extraInfo
             result.url = url
             result.name = title
