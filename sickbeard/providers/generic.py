@@ -268,7 +268,7 @@ class GenericProvider:
             logger.log(u"Found result " + title + " at " + url, logger.DEBUG)
 
             result = self.getResult([episode])
-            if item.extraInfo:
+            if hasattr(item , 'extraInfo'):
                 result.extraInfo = item.extraInfo
             result.url = url
             result.name = title
