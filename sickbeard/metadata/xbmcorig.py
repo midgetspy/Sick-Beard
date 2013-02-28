@@ -79,19 +79,37 @@ class XBMCOrigMetadata(generic.GenericMetadata):
         self.show_poster_name = "folder.jpg"
 
         self.eg_show_metadata = "tvshow.nfo"
-        self.eg_episode_metadata = "Season##\\<i>filename</i>.nfo"
-        self.eg_episode_thumbnails = "Season##\\<i>filename</i>.tbn"
-
         self.eg_show_fanart = "fanart.jpg"
         self.eg_show_poster = "folder.jpg"
         self.eg_show_banner = "<i>not supported</i>"
-        self.eg_seasons_all_fanart = "<i>not supported</i>"
-        self.eg_seasons_all_poster = "<i>not supported</i>"
-        self.eg_seasons_all_banner = "<i>not supported</i>"
 
-        self.eg_banner = "<i>not supported</i>"
-        self.eg_season_thumbnails = "season##.tbn"
-        self.eg_banner = "<i>not supported</i>"
+        self.eg_season_all_fanart = "<i>not supported</i>"
+        self.eg_season_all_poster = "<i>not supported</i>"
+        self.eg_season_all_banner = "<i>not supported</i>"
+        self.eg_season_fanarts = "<i>not supported</i>"
+        self.eg_season_posters = "season##.tbn"
+        self.eg_season_banners = "<i>not supported</i>"
+
+        self.eg_episode_metadata = "Season##\\<i>filename</i>.nfo"
+        self.eg_episode_thumbnails = "Season##\\<i>filename</i>.tbn"
+
+    def get_season_pb_path(self, show_obj, season, img_type):
+        """
+        Returns the full path to the file for a given season poster/banner.
+
+        show_obj: a TVShow instance for which to generate the path
+        season: a season number to be used for the path. Note that sesaon 0
+                means specials.
+        """
+        # Our specials thumbnail is, well, special
+        if season == 0:
+            season_pb_file_path = 'season-specials'
+        else:
+            season_pb_file_path = 'season' + str(season).zfill(2)
+        
+        season_pb_file_ext = '.tbn'
+        season_pb_file_path = season_pb_file_path + season_pb_file_ext
+        return ek.ek(os.path.join, show_obj.location, season_pb_file_path)
 
     def get_episode_thumb_path(self, ep_obj):
         """

@@ -73,19 +73,19 @@ class TIVOMetadata(generic.GenericMetadata):
         self._ep_nfo_extension = "txt"
 
         self.eg_show_metadata = "<i>not supported</i>"
-        self.eg_episode_metadata = "Season##\\.meta\\<i>filename</i>.txt"
-        self.eg_episode_thumbnails = "<i>not supported</i>"
-
         self.eg_show_fanart = "<i>not supported</i>"
         self.eg_show_poster = "<i>not supported</i>"
         self.eg_show_banner = "<i>not supported</i>"
-        self.eg_seasons_all_fanart = "<i>not supported</i>"
-        self.eg_seasons_all_poster = "<i>not supported</i>"
-        self.eg_seasons_all_banner = "<i>not supported</i>"
 
+        self.eg_season_all_fanart = "<i>not supported</i>"
+        self.eg_season_all_poster = "<i>not supported</i>"
+        self.eg_season_all_banner = "<i>not supported</i>"
         self.eg_season_fanarts = "<i>not supported</i>"
-        self.eg_season_thumbnails = "<i>not supported</i>" 
+        self.eg_season_posters = "<i>not supported</i>" 
         self.eg_season_banners = "<i>not supported</i>"
+
+        self.eg_episode_metadata = "Season##\\.meta\\<i>filename</i>.txt"
+        self.eg_episode_thumbnails = "<i>not supported</i>"
         
     # Override and implement features for Tivo.
     def get_episode_file_path(self, ep_obj):

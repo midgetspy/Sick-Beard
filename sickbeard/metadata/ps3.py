@@ -66,19 +66,19 @@ class PS3Metadata(generic.GenericMetadata):
         self.show_poster_name = 'cover.jpg'
 
         self.eg_show_metadata = "<i>not supported</i>"
-        self.eg_episode_metadata = "<i>not supported</i>"
-        self.eg_episode_thumbnails = "Season##\\<i>filename</i>.ext.cover.jpg"
-
         self.eg_show_fanart = "<i>not supported</i>"
         self.eg_show_poster = "cover.jpg"
         self.eg_show_banner = "<i>not supported</i>"
-        self.eg_seasons_all_fanart = "<i>not supported</i>"
-        self.eg_seasons_all_poster = "<i>not supported</i>"
-        self.eg_seasons_all_banner = "<i>not supported</i>"
 
+        self.eg_season_all_fanart = "<i>not supported</i>"
+        self.eg_season_all_poster = "<i>not supported</i>"
+        self.eg_season_all_banner = "<i>not supported</i>"
         self.eg_season_fanarts = "<i>not supported</i>"
-        self.eg_season_thumbnails = "<i>not supported</i>" 
+        self.eg_season_posters = "<i>not supported</i>" 
         self.eg_season_banners = "<i>not supported</i>"
+
+        self.eg_episode_metadata = "<i>not supported</i>"
+        self.eg_episode_thumbnails = "Season##\\<i>filename</i>.ext.cover.jpg"
 
     def get_episode_thumb_path(self, ep_obj):
         """

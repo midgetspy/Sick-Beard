@@ -124,70 +124,70 @@ class GenericMetadata():
     
     def _has_show_metadata(self, show_obj):
         result = ek.ek(os.path.isfile, self.get_show_metadata_path(show_obj))
-        logger.log("Checking if "+self.get_show_file_path(show_obj)+" exists: "+str(result), logger.DEBUG)
+        logger.log("Checking if "+self.get_show_metadata_path(show_obj)+" (Show Metadata) exists: "+str(result), logger.DEBUG)
         return result
     
     def _has_show_fanart(self, show_obj):
         result = ek.ek(os.path.isfile, self.get_show_fanart_path(show_obj))
-        logger.log("Checking if "+self.get_show_fanart_path(show_obj)+" exists: "+str(result), logger.DEBUG)
+        logger.log("Checking if "+self.get_show_fanart_path(show_obj)+" (Show Fanart) exists: "+str(result), logger.DEBUG)
         return result
     
     def _has_show_poster(self, show_obj):
         result = ek.ek(os.path.isfile, self.get_show_poster_path(show_obj))
-        logger.log("Checking if "+self.get_show_poster_path(show_obj)+" exists: "+str(result), logger.DEBUG)
+        logger.log("Checking if "+self.get_show_poster_path(show_obj)+" (Show Poster) exists: "+str(result), logger.DEBUG)
         return result
 
     def _has_show_banner(self, show_obj):
         result = ek.ek(os.path.isfile, self.get_show_banner_path(show_obj))
-        logger.log("Checking if "+self.get_show_banner_path(show_obj)+" exists: "+str(result), logger.DEBUG)
+        logger.log("Checking if "+self.get_show_banner_path(show_obj)+" (Show Banner) exists: "+str(result), logger.DEBUG)
         return result
 
     def _has_season_all_fanart(self, show_obj):
         result = ek.ek(os.path.isfile, self.get_season_all_fanart_path(show_obj))
-        logger.log("Checking if "+self.get_season_all_fanart_path(show_obj)+" exists: "+str(result), logger.DEBUG)
+        logger.log("Checking if "+self.get_season_all_fanart_path(show_obj)+" (Season All Fanart) exists: "+str(result), logger.DEBUG)
         return result
     
     def _has_season_all_poster(self, show_obj):
         result = ek.ek(os.path.isfile, self.get_season_all_poster_path(show_obj))
-        logger.log("Checking if "+self.get_season_all_poster_path(show_obj)+" exists: "+str(result), logger.DEBUG)
+        logger.log("Checking if "+self.get_season_all_poster_path(show_obj)+" (Season All Poster) exists: "+str(result), logger.DEBUG)
         return result
 
     def _has_season_all_banner(self, show_obj):
         result = ek.ek(os.path.isfile, self.get_season_all_banner_path(show_obj))
-        logger.log("Checking if "+self.get_season_all_banner_path(show_obj)+" exists: "+str(result), logger.DEBUG)
+        logger.log("Checking if "+self.get_season_all_banner_path(show_obj)+" (Season All Banner) exists: "+str(result), logger.DEBUG)
         return result
 
     def _has_season_fanart(self, show_obj, season):
         location = self.season_fanart_path(show_obj, season)
         result = location != None and ek.ek(os.path.isfile, location)
         if location:
-            logger.log("Checking if "+location+" exists: "+str(result), logger.DEBUG)
+            logger.log("Checking if "+location+" (Season Fanart) exists: "+str(result), logger.DEBUG)
         return result
 
     def _has_season_poster(self, show_obj, season):
         location = self.season_poster_path(show_obj, season)
         result = location != None and ek.ek(os.path.isfile, location)
         if location:
-            logger.log("Checking if "+location+" exists: "+str(result), logger.DEBUG)
+            logger.log("Checking if "+location+" (Season Poster) exists: "+str(result), logger.DEBUG)
         return result
 
     def _has_season_banner(self, show_obj, season):
         location = self.season_banner_path(show_obj, season)
         result = location != None and ek.ek(os.path.isfile, location)
         if location:
-            logger.log("Checking if "+location+" exists: "+str(result), logger.DEBUG)
+            logger.log("Checking if "+location+" (Season Banner) exists: "+str(result), logger.DEBUG)
         return result
 
     def _has_episode_metadata(self, ep_obj):
         result = ek.ek(os.path.isfile, self.get_episode_file_path(ep_obj))
-        logger.log("Checking if "+self.get_episode_file_path(ep_obj)+" exists: "+str(result), logger.DEBUG)
+        logger.log("Checking if "+self.get_episode_file_path(ep_obj)+" (Episode Metadata) exists: "+str(result), logger.DEBUG)
         return result
     
     def _has_episode_thumb(self, ep_obj):
         location = self.get_episode_thumb_path(ep_obj)
         result = location != None and ek.ek(os.path.isfile, location)
         if location:
-            logger.log("Checking if "+location+" exists: "+str(result), logger.DEBUG)
+            logger.log("Checking if "+location+" (Episode Thumbnail) exists: "+str(result), logger.DEBUG)
         return result
     
     def get_show_metadata_path(self, show_obj):
@@ -203,7 +203,7 @@ class GenericMetadata():
         return ek.ek(os.path.join, show_obj.location, self.show_poster_name)
 
     def get_show_banner_path(self, show_obj):
-        return ek.ek(os.path.join, show_obj.location, self.show_poster_name)
+        return ek.ek(os.path.join, show_obj.location, self.show_banner_name)
 
     def get_season_all_fanart_path(self, show_obj):
         return ek.ek(os.path.join, show_obj.location, self.season_all_fanart_name)
@@ -225,11 +225,11 @@ class GenericMetadata():
 
         # Our specials thumbnail is, well, special
         if season == 0:
-            season_thumb_file_path = 'season-specials'
+            season_pb_file_path = 'season-specials'
         else:
-            season_thumb_file_path = 'season' + str(season).zfill(2)
+            season_pb_file_path = 'season' + str(season).zfill(2)
         
-        return ek.ek(os.path.join, show_obj.location, season_thumb_file_path+'-fanart.jpg')
+        return ek.ek(os.path.join, show_obj.location, season_pb_file_path+'-fanart.jpg')
 
     def get_season_pb_path(self, show_obj, season, img_type):
         """
@@ -239,19 +239,19 @@ class GenericMetadata():
         season: a season number to be used for the path. Note that sesaon 0
                 means specials.
         """
-
         # Our specials thumbnail is, well, special
         if season == 0:
             season_pb_file_path = 'season-specials'
         else:
-            season_pb_file_path = 'season' + str(season).zfill(2)
+            season_pb_file_path = 'season' + str(season).zfill(2)        
         
         if img_type == 'season':
            season_pb_file_ext = '-poster.jpg'
         else:
            season_pb_file_ext = '-banner.jpg'
-           
-        return ek.ek(os.path.join, show_obj.location, season_pb_file_path+season_pb_file_ext)            
+        
+        season_pb_file_path = season_pb_file_path + season_pb_file_ext
+        return ek.ek(os.path.join, show_obj.location, season_pb_file_path)            
             
     def get_episode_thumb_path(self, ep_obj):
         """
@@ -330,19 +330,19 @@ class GenericMetadata():
         return False
 
     def create_season_fanart(self, show_obj):
-        if self.season_fanart and show_obj:
+        if self.season_fanarts and show_obj:
             logger.log("Metadata provider "+self.name+" creating season fanart for "+show_obj.name, logger.DEBUG)
             return self.save_season_fanart(show_obj)
         return False
 
     def create_season_poster(self, show_obj):
-        if self.season_poster and show_obj:
+        if self.season_posters and show_obj:
             logger.log("Metadata provider "+self.name+" creating season poster for "+show_obj.name, logger.DEBUG)
             return self.save_season_pb(show_obj,'season')
         return False
 
     def create_season_banner(self, show_obj):
-        if self.season_banner and show_obj:
+        if self.season_banners and show_obj:
             logger.log("Metadata provider "+self.name+" creating season banner for "+show_obj.name, logger.DEBUG)
             return self.save_season_pb(show_obj,'seasonwide')
         return False
@@ -379,7 +379,7 @@ class GenericMetadata():
         if not data:
             return False
         
-        nfo_file_path = self.get_show_file_path(show_obj)
+        nfo_file_path = self.get_show_metadata_path(show_obj)
         nfo_file_dir = ek.ek(os.path.dirname, nfo_file_path)
 
         try:
@@ -422,9 +422,9 @@ class GenericMetadata():
     	need to write query for this    	
     	"""
     	# IRC: TO BE DONE
-		pass
+	return result	
 
-    def _season_pb_dict(self, show_obj):
+    def _season_pb_dict(self, show_obj, img_type):
         """
         Should return a dict like:
         
@@ -453,18 +453,26 @@ class GenericMetadata():
     
         #  How many seasons?
         num_seasons = len(tvdb_show_obj)
+        logger.log(u"TV Show has " + str(num_seasons) + " season(s)", logger.DEBUG)
     
         # if we have no season banners then just finish
-        if 'season' not in tvdb_show_obj['_banners'] or 'season' not in tvdb_show_obj['_banners']['season']:
+        if 'season' not in tvdb_show_obj['_banners'] or img_type not in tvdb_show_obj['_banners']['season']:
             return result
     
         # Give us just the normal poster-style season graphics
-        seasonsArtObj = tvdb_show_obj['_banners']['season']['season']
-    
+        seasonsArtObj = tvdb_show_obj['_banners']['season'][img_type]
+
+        #for seasonArtID in seasonsArtObj.keys():
+        #    if int(seasonsArtObj[seasonArtID]['season']) == 2 and seasonsArtObj[seasonArtID]['language'] == 'en':
+        #        logger.log(u" " + seasonsArtObj[seasonArtID]['season'], logger.DEBUG)
+        #        logger.log(u" " + seasonsArtObj[seasonArtID]['language'], logger.DEBUG)
+        #        logger.log(u" " + seasonsArtObj[seasonArtID]['_bannerpath'], logger.DEBUG)
+
         # Returns a nested dictionary of season art with the season
         # number as primary key. It's really overkill but gives the option
         # to present to user via ui to pick down the road.
-        for cur_season in range(num_seasons):
+        # edited the range as not always getting last season
+        for cur_season in range(num_seasons+1):
 
             result[cur_season] = {}
             
@@ -472,6 +480,8 @@ class GenericMetadata():
             for seasonArtID in seasonsArtObj.keys():
                 if int(seasonsArtObj[seasonArtID]['season']) == cur_season and seasonsArtObj[seasonArtID]['language'] == 'en':
                     result[cur_season][seasonArtID] = seasonsArtObj[seasonArtID]['_bannerpath']
+
+            #logger.log(u"Season " + str(cur_season) + " artwork found", logger.DEBUG)
             
             if len(result[cur_season]) == 0:
                 continue
@@ -490,7 +500,8 @@ class GenericMetadata():
         """
     
         season_dict = self._season_pb_dict(show_obj, img_type)
-    
+        logger.log(u"Season image list filled", logger.DEBUG)
+   
         # Returns a nested dictionary of season art with the season
         # number as primary key. It's really overkill but gives the option
         # to present to user via ui to pick down the road.
@@ -500,24 +511,28 @@ class GenericMetadata():
             
             if len(cur_season_art) == 0:
                 continue
-    
+
             # Just grab whatever's there for now
             art_id, season_url = cur_season_art.popitem() #@UnusedVariable
-
-            season_thumb_file_path = self.get_season_pb_path(show_obj, cur_season, img_type)
+            #logger.log(u"Season " + str(cur_season) + " artwork url: " + season_url, logger.DEBUG)
+            season_image_path = self.get_season_pb_path(show_obj, cur_season, img_type)
+            #logger.log(u"Season " + str(cur_season) + " artwork path: " + season_image_path, logger.DEBUG)
             
-            if not season_thumb_file_path:
+            if not season_image_path:
                 logger.log(u"Path for season "+str(cur_season)+" came back blank, skipping this season", logger.DEBUG)
                 continue
-    
+            
             seasonData = metadata_helpers.getShowImage(season_url)
             
             if not seasonData:
-                logger.log(u"No season thumb data available, skipping this season", logger.DEBUG)
+                logger.log(u"No season image data available, skipping this season", logger.DEBUG)
                 continue
             
-            self._write_image(seasonData, img_path)
-    
+            #logger.log(u"Season " + str(cur_season) + " image data recieved", logger.DEBUG)            
+            result = self._write_image(seasonData, season_image_path)
+            #logger.log(u"Season " + str(cur_season) + " image data saved", logger.DEBUG)
+            
+        #logger.log(u"Season artwork Finished: " + img_type, logger.DEBUG)    
         return True
     
     def _get_episode_thumb_url(self, ep_obj):
@@ -650,6 +665,7 @@ class GenericMetadata():
         image_data: binary image data to write to file
         image_path: file location to save the image to
         """
+        #logger.log(u"Creating Image from data:" + image_path, logger.DEBUG)
         
         # don't bother overwriting it
         if ek.ek(os.path.isfile, image_path):
@@ -659,7 +675,7 @@ class GenericMetadata():
         if not image_data:
             logger.log(u"Unable to retrieve image, skipping", logger.WARNING)
             return False
-
+        
         image_dir = ek.ek(os.path.dirname, image_path)
         
         try:
@@ -667,7 +683,7 @@ class GenericMetadata():
                 logger.log("Metadata dir didn't exist, creating it at "+image_dir, logger.DEBUG)
                 ek.ek(os.makedirs, image_dir)
                 helpers.chmodAsParent(image_dir)
-
+            
             outFile = ek.ek(open, image_path, 'wb')
             outFile.write(image_data)
             outFile.close()
@@ -675,7 +691,7 @@ class GenericMetadata():
         except IOError, e:
             logger.log(u"Unable to write image to "+image_path+" - are you sure the show folder is writable? "+ex(e), logger.ERROR)
             return False
-    
+        
         return True
     
     def _retrieve_show_image(self, image_type, show_obj, which=None):
