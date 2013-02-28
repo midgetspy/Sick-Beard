@@ -96,6 +96,17 @@ ep_regexes = [
                -(?P<release_group>[^- ]+))?)?$              # Group
                '''),
               
+              ('stupid-mix',
+               # tpz-show102Source_Quality_Etc
+               '''
+               [a-zA-Z0-9]{2,6}[. _-]+           # tpz-abc
+               (?P<series_name>.+?)[. _-]+                # Show Name and separator
+               (?!264)                                     # don't count x264
+               (?P<season_num>\d{1,2})                     # 1
+               (?P<ep_num>\d{2})[. _-]+                          # 02
+               (?P<extra_info>.+)$                         # Source_Quality_Etc-
+               '''),
+              
               ('stupid',
                # tpz-abc102
                '''
@@ -109,7 +120,7 @@ ep_regexes = [
                # Show Name Season 1 Episode 2 Ep Name
                '''
                ^(?P<series_name>.+?)[. _-]+                # Show Name and separator
-               season[. _-]+                               # season and separator
+               (sea|sai)son[. _-]+                               # season and separator
                (?P<season_num>\d+)[. _-]+                  # 1
                episode[. _-]+                              # episode and separator
                (?P<ep_num>\d+)[. _-]+                      # 02 and separator
