@@ -233,7 +233,9 @@ def allPossibleShowNames(show):
     """
 
     showNames = [show.name]
-    showNames += [name for name in get_scene_exceptions(show.tvdbid)]
+    for name in get_scene_exceptions(show.tvdbid):
+        if not name in showNames:
+            showNames.append( name )
 
     # if we have a tvrage name then use it
     if show.tvrname != "" and show.tvrname != None:
