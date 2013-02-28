@@ -257,9 +257,10 @@ class TVRage:
         info = {}
 
         for x in urlData:
-            key, value = x.split("@")
-            key = key.replace('<pre>','')
-            info[key] = value.strip()
+            if "@" in x:
+                key, value = x.split("@")
+                key = key.replace('<pre>','')
+                info[key] = value.strip()
 
         # save it for later in case somebody is curious
         if info.has_key('Show ID'):
