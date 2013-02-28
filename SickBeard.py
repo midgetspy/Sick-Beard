@@ -17,7 +17,7 @@
 # You should have received a copy of the GNU General Public License
 # along with Sick Beard.  If not, see <http://www.gnu.org/licenses/>.
 
-# Check needed software dependencies to nudge users to fix their setup
+# Check needed software  dependencies to nudge users to fix their setup
 import sys
 if sys.version_info < (2, 5):
     print "Sorry, requires Python 2.5, 2.6 or 2.7."
