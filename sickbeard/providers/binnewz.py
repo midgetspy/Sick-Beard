@@ -72,6 +72,8 @@ class BinNewzProvider(generic.NZBProvider):
     
     def _doSearch(self, searchString, show=None, season=None):
         
+        logger.log("BinNewz : Searching for " + searchString)
+        
         data = urllib.urlencode({'b_submit': 'BinnewZ', 'cats[]' : all, 'edSearchAll' : searchString, 'sections[]': 'all'})
         headers = {"Content-type": "application/x-www-form-urlencoded", "Accept": "text/plain"}
         h = httplib.HTTPConnection('www.binnews.in:80')
@@ -154,6 +156,10 @@ class BinNewzProvider(generic.NZBProvider):
                         newsgroup = "alt.binaries.cartoons.french.animes-fansub"
                     elif newsgroup == "abcfrench":
                         newsgroup = "alt.binaries.cartoons.french"
+                    elif newsgroup == "abgougouland":
+                        newsgroup = "alt.binaries.gougouland"
+                    elif newsgroup == "abroger":
+                        newsgroup = "alt.binaries.roger"
                     else:
                         logger.log(u"Unknown binnewz newsgroup: " + newsgroup, logger.ERROR)
                         continue
@@ -163,6 +169,8 @@ class BinNewzProvider(generic.NZBProvider):
                         continue
    
                 filename =  cells[5].contents[0]
+                
+                logger.log("Searching for %s : %s" % (name, filename))
     
                 m =  re.search("^(.+)\s+{(.*)}$", name)
                 qualityStr = ""
@@ -170,6 +178,12 @@ class BinNewzProvider(generic.NZBProvider):
                     name = m.group(1)
                     qualityStr = m.group(2)
     
+                m =  re.search("^(.+)\s+\[(.*)\]$", name)
+                source = None
+                if m:
+                    name = m.group(1)
+                    source = m.group(2)
+
                 m =  re.search("(.+)\(([0-9]{4})\)", name)
                 year = ""
                 if m:
@@ -207,14 +221,25 @@ class BinNewzProvider(generic.NZBProvider):
                 if show.quality == 28 and quality == Quality.SDTV:
                     continue
                 
-                if ( filename.find("*") != -1 ):
-                    print "TODO: Range detected"
+                searchItems = []
+                
+                rangeMatcher = re.search(".*S\d{2}\s*E(\d{2})\s+.\s+E(\d{2}).*", name)
+                if rangeMatcher:
+                    rangeStart = int( rangeMatcher.group(1))
+                    rangeEnd = int( rangeMatcher.group(2))
+                    if ( filename.find("*") != -1 ):
+                        for i in range(rangeStart, rangeEnd):
+                            searchItems.append( filename.replace("*", str(i) ) )
+                else:
+                    searchItems.append( filename )
 
-                for downloader in self.nzbDownloaders:
-                    binsearch_result =  downloader.search(filename, minSize, newsgroup )
-                    if binsearch_result:
-                        results.append( BinNewzSearchResult( name, binsearch_result.nzbdata, binsearch_result.url, quality))
-                        break
+                for searchItem in searchItems:
+                    for downloader in self.nzbDownloaders:
+                        logger.log("Searching for download : " + searchItem )
+                        binsearch_result =  downloader.search(searchItem, minSize, newsgroup )
+                        if binsearch_result:
+                            results.append( BinNewzSearchResult( name, binsearch_result.nzbdata, binsearch_result.url, quality))
+                            break
 
         return results
     

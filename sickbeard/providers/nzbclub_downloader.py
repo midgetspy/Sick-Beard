@@ -53,8 +53,8 @@ class NZBClub(NZBDownloader):
 
             nzbClubURL = "http://www.nzbclub.com/search.aspx?" + suffixURL
             
-            if self.lastRequestTime and self.lastRequestTime > ( time.mktime(time.localtime()) - 5):
-                time.sleep( 5 )
+            if self.lastRequestTime and self.lastRequestTime > ( time.mktime(time.localtime()) - 10):
+                time.sleep( 10 )
             self.lastRequestTime = time.gmtime()
             
             nzbClubSoup = BeautifulSoup(urllib2.urlopen(nzbClubURL))
