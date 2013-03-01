@@ -88,6 +88,9 @@ class SearchResult:
 
         # release name
         self.name = ""
+        
+        # audio languages
+        self.audio_langs = ""
 
     def __str__(self):
 
@@ -114,6 +117,12 @@ class NZBDataSearchResult(SearchResult):
     NZB result where the actual NZB XML data is stored in the extraInfo
     """
     resultType = "nzbdata"
+
+class TorrentDataSearchResult(SearchResult):
+    """
+    Torrent result where the actual torrent data is stored in the extraInfo
+    """
+    resultType = "torrentdata"
 
 class TorrentSearchResult(SearchResult):
     """

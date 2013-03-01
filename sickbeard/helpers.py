@@ -32,7 +32,7 @@ from xml.dom.minidom import Node
 import sickbeard
 
 from sickbeard.exceptions import MultipleShowObjectsException, ex
-from sickbeard import logger, classes
+from sickbeard import logger, classes, common
 from sickbeard.common import USER_AGENT, mediaExtensions, XML_NSMAP
 
 from sickbeard import db
@@ -667,6 +667,21 @@ def create_https_certificates(ssl_cert, ssl_key):
 if __name__ == '__main__':
     import doctest
     doctest.testmod()
+    
+def getAllLanguages ():
+    """
+    Returns all show languages where an episode is wanted or unaired
+    
+    Returns: A list of all language codes
+    """
+    myDB = db.DBConnection()
+    
+    sqlLanguages = myDB.select("SELECT DISTINCT(t.audio_lang) FROM tv_shows t, tv_episodes e WHERE t.tvdb_id = e.showid AND (e.status = ? OR e.status = ?)", [common.UNAIRED,common.WANTED])
+    
+    languages = map(lambda x: str(x["audio_lang"]), sqlLanguages)
+    
+    return languages
+
 
 def get_xml_text(node):
     text = ""

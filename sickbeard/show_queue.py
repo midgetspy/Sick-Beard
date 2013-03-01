@@ -115,8 +115,8 @@ class ShowQueue(generic_queue.GenericQueue):
 
         return queueItemObj
 
-    def addShow(self, tvdb_id, showDir, default_status=None, quality=None, flatten_folders=None, lang="en"):
-        queueItemObj = QueueItemAdd(tvdb_id, showDir, default_status, quality, flatten_folders, lang)
+    def addShow(self, tvdb_id, showDir, default_status=None, quality=None, flatten_folders=None, lang="fr", audio_lang=None):
+        queueItemObj = QueueItemAdd(tvdb_id, showDir, default_status, quality, flatten_folders, lang, audio_lang)
         
         self.add_item(queueItemObj)
 
@@ -165,7 +165,7 @@ class ShowQueueItem(generic_queue.QueueItem):
 
 
 class QueueItemAdd(ShowQueueItem):
-    def __init__(self, tvdb_id, showDir, default_status, quality, flatten_folders, lang):
+    def __init__(self, tvdb_id, showDir, default_status, quality, flatten_folders, lang, audio_lang):
 
         self.tvdb_id = tvdb_id
         self.showDir = showDir
@@ -173,6 +173,7 @@ class QueueItemAdd(ShowQueueItem):
         self.quality = quality
         self.flatten_folders = flatten_folders
         self.lang = lang
+        self.audio_lang = audio_lang
 
         self.show = None
 
@@ -240,7 +241,7 @@ class QueueItemAdd(ShowQueueItem):
             # clear the name cache
             name_cache.clearCache()
 
-            newShow = TVShow(self.tvdb_id, self.lang)
+            newShow = TVShow(self.tvdb_id, self.lang, self.audio_lang)
             newShow.loadFromTVDB()
 
             self.show = newShow

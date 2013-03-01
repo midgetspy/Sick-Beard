@@ -106,8 +106,6 @@ class GenericProvider:
         if not headers:
             headers = []
 
-        result = None
-
         result = helpers.getURL(url, headers)
 
         if result is None:
@@ -191,7 +189,7 @@ class GenericProvider:
         quality = Quality.nameQuality(title)
         return quality
 
-    def _doSearch(self):
+    def _doSearch(self, show=None, season=None):
         return []
 
     def _get_season_search_strings(self, show, season, episode=None):
@@ -268,12 +266,12 @@ class GenericProvider:
             logger.log(u"Found result " + title + " at " + url, logger.DEBUG)
 
             result = self.getResult([episode])
-            if item.extraInfo:
+            if hasattr(item , 'extraInfo'):
                 result.extraInfo = item.extraInfo
             result.url = url
             result.name = title
             result.quality = quality
-
+            result.audio_lang=''.join(item.audio_langs)
             results.append(result)
 
         return results
@@ -286,7 +284,7 @@ class GenericProvider:
         results = {}
 
         for curString in self._get_season_search_strings(show, season):
-            itemList += self._doSearch(curString)
+            itemList += self._doSearch(curString, show=show, season=season)
 
         for item in itemList:
 
@@ -346,11 +344,12 @@ class GenericProvider:
                 epObj.append(show.getEpisode(actual_season, curEp))
 
             result = self.getResult(epObj)
-            if item.extraInfo:
+            if hasattr(item , 'extraInfo'):
                 result.extraInfo = item.extraInfo
             result.url = url
             result.name = title
             result.quality = quality
+            result.audio_lang=show.audio_lang
 
             if len(epObj) == 1:
                 epNum = epObj[0].episode
@@ -359,7 +358,10 @@ class GenericProvider:
                 logger.log(u"Separating multi-episode result to check for later - result contains episodes: "+str(parse_result.episode_numbers), logger.DEBUG)
             elif len(epObj) == 0:
                 epNum = SEASON_RESULT
-                result.extraInfo = [show]
+                if result.extraInfo:
+                    result.extraInfo.append( show )
+                else:
+                    result.extraInfo = [show]
                 logger.log(u"Separating full season result to check for later", logger.DEBUG)
 
             if epNum in results:

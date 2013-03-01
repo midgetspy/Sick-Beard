@@ -59,11 +59,23 @@ Quality:
 #set global $bestQualities = $qualities[1]
 #include $os.path.join($sickbeard.PROG_DIR, "data/interfaces/default/inc_qualityChooser.tmpl")
 <br />
-<br />
-Language: <select name="tvdbLang" id="tvdbLangSelect"></select><br />
+Metadata Language: <select name="tvdbLang" id="tvdbLangSelect"></select><br />
 Note: This will only affect the language of the retrieved metadata file contents and episode filenames.<br />
-This <b>DOES NOT</b> allow Sick Beard to download non-english TV episodes!<br />
 <br />
+<br />
+Desired Audio language: <select name="audio_lang" id="showLangSelect">
+#for $k,$v in $common.showLanguages.iteritems():
+	<option value="$k"
+	#if $show.audio_lang == $k:
+		selected
+	#end if
+	>$v</option>
+#end for
+</select>
+<br />
+<br />
+Custom Search Names: <input type="text" name="custom_search_names" id="custom_search_names" value="$show.custom_search_names" size="50" /><br />
+<strong>Note:</strong> Custom names used to find show. Define some custom names if show can't be found. Custom names should be separated by ",". Keep empty to use default show name (based on metadata language)<br />
 <br />
 Flatten files (no folders): <input type="checkbox" name="flatten_folders" #if $show.flatten_folders == 1 and not $sickbeard.NAMING_FORCE_FOLDERS then "checked=\"checked\"" else ""# #if $sickbeard.NAMING_FORCE_FOLDERS then "disabled=\"disabled\"" else ""#/><br /><br />
 Paused: <input type="checkbox" name="paused" #if $show.paused == 1 then "checked=\"checked\"" else ""# /><br /><br />

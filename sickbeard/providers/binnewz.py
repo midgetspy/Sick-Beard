@@ -16,19 +16,19 @@
 # You should have received a copy of the GNU General Public License
 # along with Sick Beard.  If not, see <http://www.gnu.org/licenses/>.
 
-from sickbeard import helpers, logger, classes, show_name_helpers
-from sickbeard.exceptions import ex
-
+from binsearch_downloader import BinSearch
 from bs4 import BeautifulSoup
-import datetime
+from nzbclub_downloader import NZBClub
+from sickbeard import logger, classes, show_name_helpers
+from sickbeard.common import Quality
+from sickbeard.exceptions import ex
+from sickbeard.providers.nzbclub_downloader import NZBClub
 import generic
 import httplib
-from StringIO import StringIO
-import gzip
 import re
 import sickbeard
 import urllib
-from sickbeard.common import Quality
+
 
 class BinNewzProvider(generic.NZBProvider):
 
@@ -37,6 +37,9 @@ class BinNewzProvider(generic.NZBProvider):
         generic.NZBProvider.__init__(self, "BinnewZ")
 
         self.supportsBacklog = True
+        
+        self.nzbDownloaders = [ NZBClub(), BinSearch() ]
+        # self.nzbDownloaders = [ NZBClub() ]
         
         self.url = "http://www.binnews.in/"
         
@@ -53,10 +56,12 @@ class BinNewzProvider(generic.NZBProvider):
 
     def _get_episode_search_strings(self, ep_obj):
         strings = []
-        
-        strings.append("%s S%02dE%2d" % ( ep_obj.show.name, ep_obj.season, ep_obj.episode) )
-        strings.append("%s %dx%d" % ( ep_obj.show.name, ep_obj.season, ep_obj.episode ) )
-        
+
+        showNames = show_name_helpers.allPossibleShowNames(ep_obj.show)
+        for showName in showNames:
+            strings.append("%s S%02dE%02d" % ( showName, ep_obj.season, ep_obj.episode) )
+            strings.append("%s %dx%d" % ( showName, ep_obj.season, ep_obj.episode ) )
+
         return strings
     
     def _get_title_and_url(self, item):
@@ -65,63 +70,9 @@ class BinNewzProvider(generic.NZBProvider):
     def getQuality(self, item):
         return item.getQuality()
     
-    def doBinSearch(self, filename, minSize, newsgroup=None):
+    def _doSearch(self, searchString, show=None, season=None):
         
-        binsearch_results = []
-        
-        # now locate nzb with binsearch
-        if newsgroup != None:
-            binSearchURLs = [  urllib.urlencode({'server' : 1, 'max': '250', 'adv_g' : newsgroup, 'q' : filename}), urllib.urlencode({'server' : 2, 'max': '250', 'adv_g' : newsgroup, 'q' : filename})]
-        else:
-            binSearchURLs = [  urllib.urlencode({'server' : 1, 'max': '250', 'q' : filename}), urllib.urlencode({'server' : 2, 'max': '250', 'q' : filename})]
-
-        for suffixURL in binSearchURLs:
-            binSearchURL = "http://binsearch.info/?adv_age=&" + suffixURL
-
-            binSearchResult = self.getURL(binSearchURL)
-            binSearchSoup = BeautifulSoup( binSearchResult )
-
-            foundName = None
-            sizeInMegs = None
-            for elem in binSearchSoup.findAll(lambda tag: tag.name=='tr' and tag.get('bgcolor') == '#FFFFFF' and 'size:' in tag.text):
-                for checkbox in elem.findAll(lambda tag: tag.name=='input' and tag.get('type') == 'checkbox'):
-                    sizeStr = re.search("size:\s+([^B]*)B", elem.text).group(1).strip()
-                    
-                    if "G" in sizeStr:
-                        sizeInMegs = float( re.search("([0-9\\.]+)", sizeStr).group(1) ) * 1024
-                    elif "K" in sizeStr:
-                        sizeInMegs = 0
-                    else:
-                        sizeInMegs = float( re.search("([0-9\\.]+)", sizeStr).group(1) )
-                    
-                    if sizeInMegs > minSize:
-                        foundName = checkbox.get('name')
-                        break
-                
-            if foundName:
-                params = urllib.urlencode({foundName: 'on', 'action': 'nzb'})
-                headers = {"Referer":binSearchURL, "Content-type": "application/x-www-form-urlencoded","Accept-Encoding" : "gzip,deflate,sdch", "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8","User-Agent":"Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.17 (KHTML, like Gecko) Chrome/24.0.1312.57 Safari/537.17"}
-                conn = httplib.HTTPConnection( "binsearch.info" )
-                conn.request("POST", "/fcgi/nzb.fcgi?adv_age=&" + suffixURL, params, headers)
-                response = conn.getresponse()
-                
-                if response.status == 200:
-                    rawData = response.read()      
-
-                    if response.getheader('Content-Encoding') == 'gzip':
-                        buf = StringIO( rawData )
-                        f = gzip.GzipFile(fileobj=buf)
-                        nzbdata = f.read()
-                    else:
-                        nzbdata = rawData
-
-                    binsearch_results.append( BinSearchResult( nzbdata, sizeInMegs, binSearchURL ) )
-                
-                break
-            
-        return binsearch_results        
-    
-    def _doSearch(self, searchString, quotes=False, show=None):
+        logger.log("BinNewz : Searching for " + searchString)
         
         data = urllib.urlencode({'b_submit': 'BinnewZ', 'cats[]' : all, 'edSearchAll' : searchString, 'sections[]': 'all'})
         headers = {"Content-type": "application/x-www-form-urlencoded", "Accept": "text/plain"}
@@ -141,6 +92,7 @@ class BinNewzProvider(generic.NZBProvider):
 
         tables = soup.findAll("table", id="tabliste")
         for table in tables:
+
             rows = table.findAll("tr")
             for row in rows:
                 
@@ -153,18 +105,14 @@ class BinNewzProvider(generic.NZBProvider):
                     encoder = encoderSpan.contents[0]
                 name = cells[2].text.strip()
                 language = cells[3].find("img").get("src")
-                
-                if "_stfr" in language:
-                    language = "vostfr"
-                elif "_fr" in language:
-                    language = "vf"
-                else:
-                    language = "vo"
-    
-                if language != sickbeard.BINNEWZ_LANGUAGE:
-                    print "Skipping download, language found: %s wanted: %s" % (language, sickbeard.BINNEWZ_LANGUAGE)
-                    continue
-                
+
+                if show.audio_lang == "fr":
+                    if not "_fr" in language:
+                        continue
+                elif show.audio_lang == "en":
+                    if "_fr" in language:
+                        continue                
+  
                 # blacklist_groups = [ "alt.binaries.multimedia" ]
                 blacklist_groups = []                
                 
@@ -204,6 +152,14 @@ class BinNewzProvider(generic.NZBProvider):
                         newsgroup = "alt.binaries.dvdr"
                     elif newsgroup == "abmzeromov":
                         newsgroup = "alt.binaries.movies.zeromovies"
+                    elif newsgroup == "abcfaf":
+                        newsgroup = "alt.binaries.cartoons.french.animes-fansub"
+                    elif newsgroup == "abcfrench":
+                        newsgroup = "alt.binaries.cartoons.french"
+                    elif newsgroup == "abgougouland":
+                        newsgroup = "alt.binaries.gougouland"
+                    elif newsgroup == "abroger":
+                        newsgroup = "alt.binaries.roger"
                     else:
                         logger.log(u"Unknown binnewz newsgroup: " + newsgroup, logger.ERROR)
                         continue
@@ -213,8 +169,8 @@ class BinNewzProvider(generic.NZBProvider):
                         continue
    
                 filename =  cells[5].contents[0]
-
-                rawName = name
+                
+                logger.log("Searching for %s : %s" % (name, filename))
     
                 m =  re.search("^(.+)\s+{(.*)}$", name)
                 qualityStr = ""
@@ -227,7 +183,7 @@ class BinNewzProvider(generic.NZBProvider):
                 if m:
                     name = m.group(1)
                     source = m.group(2)
-    
+
                 m =  re.search("(.+)\(([0-9]{4})\)", name)
                 year = ""
                 if m:
@@ -240,16 +196,19 @@ class BinNewzProvider(generic.NZBProvider):
                     name = m.group(1)
                     dateStr = m.group(2)
     
-                m =  re.search("(.+)\s+S(\d{2})\s+E(\d{2})", name)
+                m =  re.search("(.+)\s+S(\d{2})\s+E(\d{2})(.*)", name)
                 if m:
-                    name = m.group(1) + " S" + m.group(2) + "E" + m.group(3)                
+                    name = m.group(1) + " S" + m.group(2) + "E" + m.group(3) + m.group(4)
     
-                m =  re.search("(.+)\s+S(\d{2})\s+Ep(\d{2})", name)
+                m =  re.search("(.+)\s+S(\d{2})\s+Ep(\d{2})(.*)", name)
                 if m:
-                    name = m.group(1) + " S" + m.group(2) + "E" + m.group(3)                
+                    name = m.group(1) + " S" + m.group(2) + "E" + m.group(3) + m.group(4)        
 
                 if "720p" in qualityStr:
-                    quality = Quality.HDBLURAY
+                    if "HDTV" in name or "HDTV" in filename:
+                        quality = Quality.HDTV
+                    else:
+                        quality = Quality.HDBLURAY
                     minSize = 600
                 elif "1080p" in qualityStr:
                     quality = Quality.FULLHDBLURAY
@@ -258,33 +217,41 @@ class BinNewzProvider(generic.NZBProvider):
                     quality = Quality.SDTV
                     minSize = 150
                 
-                if ( filename.find("*") != -1 ):
-                    print "Range detected"
-                    
-                binsearch_results = self.doBinSearch( filename, minSize, newsgroup )
+                # FIXME
+                if show.quality == 28 and quality == Quality.SDTV:
+                    continue
                 
-                for binsearch_result in binsearch_results:
-                    print "adding result from %s, quality: %s, size: %8.2f MB" % (binsearch_result.url, qualityStr, binsearch_result.sizeInMegs)
-                    results.append( BinNewzSearchResult( name, binsearch_result.nzbdata, binsearch_result.url, quality))
+                searchItems = []
+                
+                rangeMatcher = re.search(".*S\d{2}\s*E(\d{2})\s+.\s+E(\d{2}).*", name)
+                if rangeMatcher:
+                    rangeStart = int( rangeMatcher.group(1))
+                    rangeEnd = int( rangeMatcher.group(2))
+                    if ( filename.find("*") != -1 ):
+                        for i in range(rangeStart, rangeEnd):
+                            searchItems.append( filename.replace("*", str(i) ) )
+                else:
+                    searchItems.append( filename )
+
+                for searchItem in searchItems:
+                    for downloader in self.nzbDownloaders:
+                        logger.log("Searching for download : " + searchItem )
+                        binsearch_result =  downloader.search(searchItem, minSize, newsgroup )
+                        if binsearch_result:
+                            results.append( BinNewzSearchResult( name, binsearch_result.nzbdata, binsearch_result.url, quality))
+                            break
 
         return results
     
     def getResult(self, episodes):
         """
-        Returnshttp://binsearch.info/?adv_age=&adv_g=alt.binaries.multimedia&max=250&q=Breaking.Bad.S03E13.Full.Measure.HDTV.XviD-FQM+&server=1http://binsearch.info/?adv_age=&adv_g=alt.binaries.multimedia&max=250&q=Breaking.Bad.S03E13.Full.Measure.HDTV.XviD-FQM+&server=1http://binsearch.info/?adv_age=&adv_g=alt.binaries.multimedia&max=250&q=Breaking.Bad.S03E13.Full.Measure.HDTV.XviD-FQM+&server=1http://binsearch.info/?adv_age=&adv_g=alt.binaries.multimedia&max=250&q=Breaking.Bad.S03E13.Full.Measure.HDTV.XviD-FQM+&server=1http://binsearch.info/?adv_age=&adv_g=alt.binaries.multimedia&max=250&q=Breaking.Bad.S03E13.Full.Measure.HDTV.XviD-FQM+&server=1 a result of the correct type for this provider
+        Returns a result of the correct type for this provider
         """
         result = classes.NZBDataSearchResult(episodes)
         result.provider = self
 
         return result    
-    
-class BinSearchResult:
-    
-    def __init__(self, nzbdata, sizeInMegs, url):
-        self.nzbdata = nzbdata
-        self.sizeInMegs = sizeInMegs
-        self.url = url
-    
+
 class BinNewzSearchResult:
     
     def __init__(self, title, nzbdata, url, quality):

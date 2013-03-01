@@ -767,7 +767,7 @@ class ConfigSearch:
     @cherrypy.expose
     def saveSearch(self, use_nzbs=None, use_torrents=None, nzb_dir=None, sab_username=None, sab_password=None,
                        sab_apikey=None, sab_category=None, sab_host=None, nzbget_password=None, nzbget_category=None, nzbget_host=None,
-                       torrent_dir=None, nzb_method=None, usenet_retention=None, search_frequency=None, download_propers=None):
+                       torrent_dir=None, nzb_method=None, usenet_retention=None, search_frequency=None, download_propers=None, ignore_words=None):
 
         results = []
 
@@ -778,7 +778,7 @@ class ConfigSearch:
             results += ["Unable to create directory " + os.path.normpath(torrent_dir) + ", dir not changed."]
 
         config.change_SEARCH_FREQUENCY(search_frequency)
-
+        config.change_IGNORE_WORDS(ignore_words)
         if download_propers == "on":
             download_propers = 1
         else:
@@ -1033,7 +1033,7 @@ class ConfigProviders:
                       nzbs_r_us_uid=None, nzbs_r_us_hash=None, newznab_string=None,
                       tvtorrents_digest=None, tvtorrents_hash=None,
  					  btn_api_key=None, binnewz_language=None,
-                      newzbin_username=None, newzbin_password=None,
+                      newzbin_username=None, newzbin_password=None,t411_language=None,t411_username=None,t411_password=None,
                       provider_order=None):
 
         results = []
@@ -1099,6 +1099,8 @@ class ConfigProviders:
                 sickbeard.BTN = curEnabled
             elif curProvider == 'binnewz':
                 sickbeard.BINNEWZ = curEnabled
+            elif curProvider == 't411':
+                sickbeard.T411 = curEnabled
             elif curProvider in newznabProviderDict:
                 newznabProviderDict[curProvider].enabled = bool(curEnabled)
             else:
@@ -1110,6 +1112,10 @@ class ConfigProviders:
         sickbeard.BTN_API_KEY = btn_api_key.strip()
         
         sickbeard.BINNEWZ_LANGUAGE = binnewz_language
+
+        sickbeard.T411_LANGUAGE = t411_language
+        sickbeard.T411_USERNAME = t411_username
+        sickbeard.T411_PASSWORD = t411_password
 
         sickbeard.NZBSRUS_UID = nzbs_r_us_uid.strip()
         sickbeard.NZBSRUS_HASH = nzbs_r_us_hash.strip()
@@ -1500,11 +1506,11 @@ class NewHomeAddShows:
     def getTVDBLanguages(self):
         result = tvdb_api.Tvdb().config['valid_languages']
 
-        # Make sure list is sorted alphabetically but 'en' is in front
-        if 'en' in result:
-            del result[result.index('en')]
+        # Make sure list is sorted alphabetically but 'fr' is in front
+        if 'fr' in result:
+            del result[result.index('fr')]
         result.sort()
-        result.insert(0, 'en')
+        result.insert(0, 'fr')
 
         return json.dumps({'results': result})
 
@@ -1513,9 +1519,9 @@ class NewHomeAddShows:
         return helpers.sanitizeFileName(name)
 
     @cherrypy.expose
-    def searchTVDBForShowName(self, name, lang="en"):
+    def searchTVDBForShowName(self, name, lang="fr"):
         if not lang or lang == 'null':
-                lang = "en"
+                lang = "fr"
 
         baseURL = "http://www.thetvdb.com/api/GetSeries.php?"
         nameUTF8 = name.encode('utf-8')
@@ -1681,9 +1687,9 @@ class NewHomeAddShows:
         return _munge(t)
 
     @cherrypy.expose
-    def addNewShow(self, whichSeries=None, tvdbLang="en", rootDir=None, defaultStatus=None,
+    def addNewShow(self, whichSeries=None, tvdbLang="fr", rootDir=None, defaultStatus=None,
                    anyQualities=None, bestQualities=None, flatten_folders=None, fullShowPath=None,
-                   other_shows=None, skipShow=None):
+                   other_shows=None, skipShow=None, audio_lang=None):
         """
         Receive tvdb id, dir, and other options and create a show from them. If extra show dirs are
         provided then it forwards back to newShow, if not it goes to /home.
@@ -1763,7 +1769,7 @@ class NewHomeAddShows:
         newQuality = Quality.combineQualities(map(int, anyQualities), map(int, bestQualities))
         
         # add the show
-        sickbeard.showQueueScheduler.action.addShow(tvdb_id, show_dir, int(defaultStatus), newQuality, flatten_folders, tvdbLang) #@UndefinedVariable
+        sickbeard.showQueueScheduler.action.addShow(tvdb_id, show_dir, int(defaultStatus), newQuality, flatten_folders, tvdbLang, audio_lang) #@UndefinedVariable
         ui.notifications.message('Show added', 'Adding the specified show into '+show_dir)
 
         return finishAddShow()
@@ -2271,7 +2277,7 @@ class Home:
         return result['description'] if result else 'Episode not found.'
 
     @cherrypy.expose
-    def editShow(self, show=None, location=None, anyQualities=[], bestQualities=[], flatten_folders=None, paused=None, directCall=False, air_by_date=None, tvdbLang=None):
+    def editShow(self, show=None, location=None, anyQualities=[], bestQualities=[], flatten_folders=None, paused=None, directCall=False, air_by_date=None, tvdbLang=None, audio_lang=None, custom_search_names=None):
 
         if show == None:
             errString = "Invalid show ID: "+str(show)
@@ -2348,6 +2354,8 @@ class Home:
             showObj.paused = paused
             showObj.air_by_date = air_by_date
             showObj.lang = tvdb_lang
+            showObj.audio_lang = audio_lang
+            showObj.custom_search_names = custom_search_names
 
             # if we change location clear the db of episodes, change it, write to db, and rescan
             if os.path.normpath(showObj._location) != os.path.normpath(location):
@@ -2551,6 +2559,45 @@ class Home:
         if segment_list:
             ui.notifications.message("Backlog started", msg)
 
+        if direct:
+            return json.dumps({'result': 'success'})
+        else:
+            redirect("/home/displayShow?show=" + show)
+
+    @cherrypy.expose
+    def setAudio(self, show=None, eps=None, audio_langs=None, direct=False):
+    
+        if show == None or eps == None or audio_langs == None:
+            errMsg = "You must specify a show and at least one episode"
+            if direct:
+                ui.notifications.error('Error', errMsg)
+                return json.dumps({'result': 'error'})
+            else:
+                return _genericMessage("Error", errMsg)
+
+        showObj = sickbeard.helpers.findCertainShow(sickbeard.showList, int(show))
+
+        if showObj == None:
+            return _genericMessage("Error", "Show not in show list")
+
+        try:
+            show_loc = showObj.location #@UnusedVariable
+        except exceptions.ShowDirNotFoundException:
+            return _genericMessage("Error", "Can't rename episodes when the show dir is missing.")
+
+        ep_obj_rename_list = []
+
+        for curEp in eps.split('|'):
+
+                logger.log(u"Attempting to set audio on episode "+curEp+" to "+audio_langs, logger.DEBUG)
+
+                epInfo = curEp.split('x')
+
+                epObj = showObj.getEpisode(int(epInfo[0]), int(epInfo[1]))
+
+                epObj.audio_langs = [audio_langs]
+                epObj.saveToDB()
+        
         if direct:
             return json.dumps({'result': 'success'})
         else:

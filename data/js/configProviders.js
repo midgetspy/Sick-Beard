@@ -139,9 +139,13 @@ $(document).ready(function(){
     $('#newznab_key').change(function(){
         
         var selectedProvider = $('#editANewznabProvider :selected').val();
-
+        
+            	if (selectedProvider == "addNewznab")
+                    		return;
+                            
         var url = $('#newznab_url').val();
         var key = $('#newznab_key').val();
+                                                    
         
         $(this).updateProvider(selectedProvider, url, key);
         
