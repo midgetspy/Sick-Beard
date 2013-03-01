@@ -126,7 +126,7 @@ class T411Provider(generic.TorrentProvider):
                     else:
                         quality = Quality.SDTV
 
-                    results.append( T411SearchResult( link['title'], torrentdata, downloadURL, quality ) )
+                    results.append( T411SearchResult( link['title'], torrentdata, downloadURL, quality, str(show.audio_lang) ) )
 
         return results
     
@@ -141,11 +141,12 @@ class T411Provider(generic.TorrentProvider):
     
 class T411SearchResult:
     
-    def __init__(self, title, torrentdata, url, quality):
+    def __init__(self, title, torrentdata, url, quality, audio_langs):
         self.title = title
         self.url = url
         self.extraInfo = [torrentdata] 
         self.quality = quality
+        self.audio_langs=[audio_langs]
         
     def getQuality(self):
         return self.quality

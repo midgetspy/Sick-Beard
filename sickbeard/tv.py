@@ -1094,7 +1094,7 @@ class TVEpisode(object):
             self.tvdbid = int(sqlResults[0]["tvdbid"])
 
             if sqlResults[0]["audio_langs"] != None:
-                self.audio_langs = str(sqlResults[0]["audio_langs"]).split("|")
+                self.audio_langs = sqlResults[0]["audio_langs"]
             
             if sqlResults[0]["release_name"] != None:
                 self.release_name = sqlResults[0]["release_name"]
@@ -1304,7 +1304,7 @@ class TVEpisode(object):
         toReturn += "hasnfo: " + str(self.hasnfo) + "\n"
         toReturn += "hastbn: " + str(self.hastbn) + "\n"
         toReturn += "status: " + str(self.status) + "\n"
-        toReturn += "languages: " + ",".join(self.audio_langs) + "\n"
+        toReturn += "languages: " + str(self.audio_langs) + "\n"
         return toReturn
 
     def createMetaFiles(self, force=False):
@@ -1379,7 +1379,7 @@ class TVEpisode(object):
                         "hastbn": self.hastbn,
                         "status": self.status,
                         "location": self.location,
-                        "audio_langs": "|".join(self.audio_langs),
+                        "audio_langs": self.audio_langs,
                         "file_size": self.file_size,
                         "release_name": self.release_name}
         controlValueDict = {"showid": self.show.tvdbid,
