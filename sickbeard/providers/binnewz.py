@@ -238,7 +238,7 @@ class BinNewzProvider(generic.NZBProvider):
                         logger.log("Searching for download : " + searchItem )
                         binsearch_result =  downloader.search(searchItem, minSize, newsgroup )
                         if binsearch_result:
-                            results.append( BinNewzSearchResult( name, binsearch_result.nzbdata, binsearch_result.url, quality))
+                            results.append( BinNewzSearchResult( name, binsearch_result.nzbdata, binsearch_result.url, quality,str(show.audio_lang)))
                             break
 
         return results
@@ -254,11 +254,12 @@ class BinNewzProvider(generic.NZBProvider):
 
 class BinNewzSearchResult:
     
-    def __init__(self, title, nzbdata, url, quality):
+    def __init__(self, title, nzbdata, url, quality, audio_langs):
         self.title = title
         self.url = url
         self.extraInfo = [nzbdata] 
         self.quality = quality
+        self.audio_langs=[audio_langs]
         
     def getQuality(self):
         return self.quality
