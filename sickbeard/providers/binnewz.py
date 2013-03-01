@@ -150,6 +150,10 @@ class BinNewzProvider(generic.NZBProvider):
                         newsgroup = "alt.binaries.dvdr"
                     elif newsgroup == "abmzeromov":
                         newsgroup = "alt.binaries.movies.zeromovies"
+                    elif newsgroup == "abcfaf":
+                        newsgroup = "alt.binaries.cartoons.french.animes-fansub"
+                    elif newsgroup == "abcfrench":
+                        newsgroup = "alt.binaries.cartoons.french"
                     else:
                         logger.log(u"Unknown binnewz newsgroup: " + newsgroup, logger.ERROR)
                         continue
