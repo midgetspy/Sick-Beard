@@ -19,7 +19,8 @@
 import db
 import datetime
 
-from sickbeard.common import SNATCHED, Quality, SUBTITLED
+from sickbeard.common import SNATCHED, SUBTITLED, Quality 
+
 
 dateFormat = "%Y%m%d%H%M%S"
 
@@ -72,10 +73,10 @@ def logDownload(episode, filename, new_ep_quality, release_group=None):
     _logHistoryItem(action, showid, season, epNum, quality, filename, provider)
 
 def logSubtitle(showid, season, episode, status, subtitleResult):
-
+    
     resource = subtitleResult.path
     provider = subtitleResult.service
     status, quality  = Quality.splitCompositeStatus(status) 
     action = Quality.compositeStatus(SUBTITLED, quality)
-    
+       
     _logHistoryItem(action, showid, season, episode, quality, resource, provider)

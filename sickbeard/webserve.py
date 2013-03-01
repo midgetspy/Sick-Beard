@@ -1232,7 +1232,7 @@ class ConfigProviders:
                       dtt_norar = None, dtt_single = None,
                       thepiratebay_trusted=None, thepiratebay_proxy=None, thepiratebay_proxy_url=None,
                       torrentleech_username=None, torrentleech_password=None,
-                      iptorrents_username=None, iptorrents_password=None, iptorrents_freeleech=None,
+                      iptorrents_uid=None, iptorrents_passkey=None,
                       newzbin_username=None, newzbin_password=None,
                       provider_order=None):
 
@@ -1351,15 +1351,8 @@ class ConfigProviders:
         sickbeard.TORRENTLEECH_USERNAME = torrentleech_username
         sickbeard.TORRENTLEECH_PASSWORD = torrentleech_password    
 
-        sickbeard.IPTORRENTS_USERNAME = iptorrents_username.strip()
-        sickbeard.IPTORRENTS_PASSWORD = iptorrents_password.strip()
-
-        if iptorrents_freeleech == "on":
-            iptorrents_freeleech = 1
-        else:
-            iptorrents_freeleech = 0
-
-        sickbeard.IPTORRENTS_FREELEECH = iptorrents_freeleech
+        sickbeard.IPTORRENTS_UID = iptorrents_uid.strip()
+        sickbeard.IPTORRENTS_PASSKEY = iptorrents_passkey.strip()
 
         sickbeard.NZBSRUS_UID = nzbs_r_us_uid.strip()
         sickbeard.NZBSRUS_HASH = nzbs_r_us_hash.strip()
@@ -1798,7 +1791,7 @@ class ConfigSubtitles:
         return _munge(t)
 
     @cherrypy.expose
-    def saveSubtitles(self, use_subtitles=None, subtitles_plugins=None, subtitles_languages=None, subtitles_dir=None, service_order=None):
+    def saveSubtitles(self, use_subtitles=None, subtitles_plugins=None, subtitles_languages=None, subtitles_dir=None, service_order=None, subtitles_history=None):
         results = []
 
         if use_subtitles == "on":
@@ -1814,10 +1807,16 @@ class ConfigSubtitles:
             except:
                 pass
 
+        if subtitles_history == "on":
+            subtitles_history = 1
+        else: 
+            subtitles_history = 0    
+
         sickbeard.USE_SUBTITLES = use_subtitles
         sickbeard.SUBTITLES_LANGUAGES = [lang.alpha2 for lang in subtitles.isValidLanguage(subtitles_languages.replace(' ', '').split(','))] if subtitles_languages != ''  else ''
         sickbeard.SUBTITLES_DIR = subtitles_dir
-
+        sickbeard.SUBTITLES_HISTORY = subtitles_history
+        
         # Subtitles services
         services_str_list = service_order.split()
         subtitles_services_list = []
@@ -3206,12 +3205,20 @@ class Home:
             if sickbeard.SUBTITLES_DIR:
                 for video in subtitles:
                     subs_new_path = ek.ek(os.path.join, os.path.dirname(video.path), sickbeard.SUBTITLES_DIR)
-                    if not ek.ek(os.path.isdir, subs_new_path):
-                        ek.ek(os.mkdir, subs_new_path)
+                    dir_exists = helpers.makeDir(subs_new_path)
+                    if not dir_exists:
+                        logger.log(u"Unable to create subtitles folder "+subs_new_path, logger.ERROR)
+                    else:
+                        helpers.chmodAsParent(subs_new_path)    
                     
                     for subtitle in subtitles.get(video):
                         new_file_path = ek.ek(os.path.join, subs_new_path, os.path.basename(subtitle.path))
                         helpers.moveFile(subtitle.path, new_file_path)
+                        helpers.chmodAsParent(new_file_path)
+            else:
+                for video in subtitles:
+                    for subtitle in subtitles.get(video):
+                        helpers.chmodAsParent(subtitle.path)            
         except:
             return json.dumps({'result': 'failure'})
 

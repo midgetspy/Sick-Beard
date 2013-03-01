@@ -122,8 +122,8 @@ def snatchEpisode(result, endStatus=SNATCHED):
         if sickbeard.TORRENT_METHOD == "blackhole": 
             dlResult = _downloadResult(result)
         else:
-            client =  clients.getClientModule(sickbeard.TORRENT_METHOD)  
-            dlResult = client.api.sendTORRENT(result)
+            client = clients.getClientIstance(sickbeard.TORRENT_METHOD)()
+            dlResult = client.sendTORRENT(result)
     else:
         logger.log(u"Unknown result type, unable to download it", logger.ERROR)
         dlResult = False

@@ -211,7 +211,8 @@ class PostProcessor(object):
                 file_attribute = ek.ek(os.stat, cur_file)[0]
                 if (not file_attribute & stat.S_IWRITE):
                     # File is read-only, so make it writeable
-                    ek.ek(os.chmod,cur_file,stat.S_IWRITE)
+                    self._log('Read only mode on file ' + cur_file, logger.WARNING )
+#                    ek.ek(os.chmod,cur_file,stat.S_IWRITE)
                 ek.ek(os.remove, cur_file)
                 # do the library update for synoindex
                 notifiers.synoindex_notifier.deleteFile(cur_file)
@@ -236,8 +237,8 @@ class PostProcessor(object):
         if associated_files:
             file_list = file_list + self._list_associated_files(file_path)
         elif subtitles:
-            file_list = file_list + self._list_associated_files(file_path, True)    
-            
+            file_list = file_list + self._list_associated_files(file_path, True)
+
         if not file_list:
             self._log(u"There were no files associated with " + file_path + ", not moving anything", logger.DEBUG)
             return
@@ -269,8 +270,11 @@ class PostProcessor(object):
             
             if sickbeard.SUBTITLES_DIR and cur_extension in common.subtitleExtensions:
                 subs_new_path = ek.ek(os.path.join, new_path, sickbeard.SUBTITLES_DIR)
-                if not ek.ek(os.path.isdir, subs_new_path):
-                    ek.ek(os.mkdir, subs_new_path)
+                dir_exists = helpers.makeDir(subs_new_path)
+                if not dir_exists:
+                    logger.log(u"Unable to create subtitles folder "+subs_new_path, logger.ERROR)
+                else:
+                    helpers.chmodAsParent(subs_new_path)
                 new_file_path = ek.ek(os.path.join, subs_new_path, new_file_name)
             else:
                 new_file_path = ek.ek(os.path.join, new_path, new_file_name)
@@ -716,7 +720,7 @@ class PostProcessor(object):
         old_ep_status, old_ep_quality = common.Quality.splitCompositeStatus(ep_obj.status) #@UnusedVariable
         if self.is_proper and new_ep_quality >= old_ep_quality:
             self._log(u"This was manually downloaded but it appears to be a proper so I'm marking it as priority", logger.DEBUG)
-            return True 
+            return True
         
         return False
 
@@ -826,7 +830,7 @@ class PostProcessor(object):
                     logger.log("good results: " + repr(self.good_results), logger.DEBUG)
 
                 cur_ep.status = common.Quality.compositeStatus(common.DOWNLOADED, new_ep_quality)
-
+                
                 cur_ep.is_proper = self.is_proper
                 
                 cur_ep.saveToDB()

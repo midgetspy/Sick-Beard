@@ -1,5 +1,5 @@
-#import sickbeard
 #from sickbeard import subtitles
+#import sickbeard
 
 #set global $title="Config - Subtitles"
 #set global $header="Subtitles"
@@ -89,6 +89,13 @@
 			                                <span class="component-desc"><b>NOTE:</b> Leave empty if you want store subtitle in episode path.</span>
 	          	                	</label>
                         		</div>
+		                        <div class="field-pair">
+		                            <input type="checkbox" name="subtitles_history" id="subtitles_history" #if $sickbeard.SUBTITLES_HISTORY then " checked=\"checked\"" else ""#/>
+		                            <label class="clearfix" for="subtitles_history">
+		                                <span class="component-title">Subtitles History</span>
+		                                <span class="component-desc">Log downloaded Subtitle on History page?</span>
+		                            </label>
+		                        </div>                        		
 	                    <br/><input type="submit" class="btn config_submitter" value="Save Changes" /><br/>
                         </div>
                     </fieldset>

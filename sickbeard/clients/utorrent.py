@@ -27,7 +27,7 @@ class uTorrentAPI(GenericClient):
         
         super(uTorrentAPI, self).__init__('uTorrent', host, username, password)
       
-        self.url = sickbeard.TORRENT_HOST + 'gui/' if host is None else host + 'gui/'
+        self.url = self.host + 'gui/'
             
     def _request(self, method='get', params={}, files=None):
 
@@ -39,7 +39,12 @@ class uTorrentAPI(GenericClient):
         response = self.session.get(self.url + 'token.html')
         if response.status_code == 404:
             return None
-        self.auth = re.findall("<div.*?>(.*?)</", response.text)[0]
+        
+        try: 
+            self.auth = re.findall("<div.*?>(.*?)</", response.text)[0]
+        except:    
+            return None
+            
         return self.auth
       
     def _add_torrent_uri(self, result):

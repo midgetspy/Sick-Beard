@@ -10,14 +10,15 @@ from lib import requests
 
 class GenericClient(object):
     
-    def __init__(self, name=None, host=None, username=None, password=None):
+    def __init__(self, name, host=None, username=None, password=None):
 
         self.name = name
         
         self.url = ''
         self.username = sickbeard.TORRENT_USERNAME if username is None else username
         self.password = sickbeard.TORRENT_PASSWORD if password is None else password
-        
+        self.host = sickbeard.TORRENT_HOST if host is None else host
+
         self.session = requests.session(auth=(self.username, self.password),timeout=10)
         self.response = None
         self.auth = None
@@ -31,13 +32,17 @@ class GenericClient(object):
         
         logger.log(self.name + u': Requested a ' + method.upper() + ' connection to url '+ self.url + ' with Params= ' + str(params) + ' Data=' + str(data), logger.DEBUG)
         
+        if not self.auth:
+            logger.log(self.name + u': Autenthication Failed' , logger.ERROR)
+            return False
+        
         try:
             self.response = self.session.__getattribute__(method)(self.url, params=params, data=data, files=files)
         except requests.exceptions.ConnectionError, e:
             logger.log(self.name + u': Unable to connect ' +ex(e), logger.ERROR)
             return False
-        except requests.exceptions.MissingSchema, requests.exceptions.InvalidURL:
-            logger.log(self.name + u': Invalid host', logger.ERROR)
+        except (requests.exceptions.MissingSchema, requests.exceptions.InvalidURL):
+            logger.log(self.name + u': Invalid Host', logger.ERROR)
             return False
         except requests.exceptions.HTTPError, e:
             logger.log(self.name + u': Invalid HTTP Request ' + ex(e), logger.ERROR)
@@ -62,7 +67,7 @@ class GenericClient(object):
         """
         This should be overridden and should return the auth_id needed for the client
         """
-        return False
+        return None
     
     def _add_torrent_uri(self, result):
         """
@@ -112,9 +117,13 @@ class GenericClient(object):
         
     def sendTORRENT(self, result):
         
-        logger.log(u'Calling ' + self.name + ' Client', logger.DEBUG)
-        
         r_code = False
+
+        logger.log(u'Calling ' + self.name + ' Client', logger.DEBUG)
+
+        if not self._get_auth():
+            logger.log(self.name + u': Autenthication Failed' , logger.ERROR)
+            return r_code
         
         result.hash = self._get_torrent_hash(result)
         
@@ -137,7 +146,8 @@ class GenericClient(object):
                 logger.log(self.name + u': Unable to set the path for Torrent', logger.ERROR)
 
         except Exception, e:
-            logger.log(self.name + u': Unknown exception raised when sending torrent ' + ex(e), logger.ERROR)
+            logger.log(self.name + u': Failed Sending Torrent ', logger.ERROR)
+            logger.log(self.name + u': Exception raised when sending torrent: ' + ex(e), logger.DEBUG)
             return r_code
         
         return r_code
@@ -147,20 +157,19 @@ class GenericClient(object):
         try:
             self.response = self.session.get(self.url)
         except requests.exceptions.ConnectionError:
-            return False, 'Unable to connect to '+ self.name
-        except requests.exceptions.MissingSchema, requests.exceptions.InvalidURL:
+            return False, 'Error: ' + self.name + ' Connection Error'
+        except (requests.exceptions.MissingSchema, requests.exceptions.InvalidURL):
             return False,'Error: Invalid ' + self.name + ' host'    
 
-        if self.response.status_code == 401:
-            return False, 'Invalid ' + self.name + 'Username or Password, check your config'        
-        
-        logger.log(u'Response to ' + self.name + ' Authentication request is ' + self.response.text, logger.DEBUG)
-        
-        try: 
-            self._get_auth()
-            if self.auth:
-                return True, 'Success: Connected and Authenticated'
-            else:
-                return False, 'Unable to connect to ' + self.name
-        except Exception:    
-            return False, 'Unable to connect to '+ self.name
+        if self.response.status_code == 401:                                            
+            return False, 'Error: Invalid ' + self.name + ' Username or Password, check your config!'           
+                                                    
+        try:                                             
+            self._get_auth()                                            
+            if self.response.status_code == 200 and self.auth:                                          
+                return True, 'Success: Connected and Authenticated'                                     
+            else:                                            
+                return False, 'Error: Unable to get ' + self.name + ' Authentication, check your config!'             
+        except Exception:                                                
+            return False, 'Error: Unable to connect to '+ self.name                                            
+                                            

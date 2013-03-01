@@ -29,14 +29,25 @@ class TransmissionAPI(GenericClient):
         
         super(TransmissionAPI, self).__init__('Transmission', host, username, password)
       
-        self.url = sickbeard.TORRENT_HOST + 'transmission/rpc' if host is None else host + 'transmission/rpc'
+        self.url = self.host + 'transmission/rpc'
 
     def _get_auth(self):
 
         post_data = json.dumps({'method': 'session-get',})
         self.response = self.session.post(self.url, data=post_data.encode('utf-8'))
-        self.auth = re.search('X-Transmission-Session-Id:\s*(\w+)', self.response.text).group(1)
+
+        try: 
+            self.auth = re.search('X-Transmission-Session-Id:\s*(\w+)', self.response.text).group(1)
+        except:
+            return None     
+        
         self.session.headers.update({'x-transmission-session-id': self.auth})
+        
+        #Validating Transmission authorization
+        post_data = json.dumps({'arguments': {},
+                                'method': 'session-get',
+                                })       
+        self._request(method='post', data=post_data)            
         
         return self.auth     
 
@@ -55,8 +66,8 @@ class TransmissionAPI(GenericClient):
 
     def _add_torrent_file(self, result):
 
-        arguments = { 'metainfo': b64encode(result.content),
-                      'paused': 1 if sickbeard.TORRENT_PAUSED else 0,
+        arguments = { 'arguments': b64encode(result.content),
+                      'method': 'session-get',
                       'download-dir': sickbeard.TORRENT_PATH
                       }        
         post_data = json.dumps({'arguments': arguments,
