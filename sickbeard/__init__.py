@@ -458,8 +458,6 @@ def initialize(consoleLogging=True):
         METADATA_TYPE = check_setting_str(CFG, 'General', 'metadata_type', '')
 
         metadata_provider_dict = metadata.get_metadata_generator_dict()
-    	# do be edited more first run?
-		# IRC: TO BE DONE
         # if this exists it's legacy, use the info to upgrade metadata to the new settings
         if METADATA_TYPE:
 
@@ -473,7 +471,7 @@ def initialize(consoleLogging=True):
                 old_metadata_class = metadata.ps3.metadata_class
 
             if old_metadata_class:
-				#fix to new options
+                # fix to new options
                 METADATA_SHOW = bool(check_setting_int(CFG, 'General', 'metadata_show', 1))
                 METADATA_EPISODE = bool(check_setting_int(CFG, 'General', 'metadata_episode', 1))
 
@@ -503,7 +501,6 @@ def initialize(consoleLogging=True):
         else:
             METADATA_XBMC = check_setting_str(CFG, 'General', 'metadata_xbmc', '0|0|0|0|0|0|0|0|0|0|0|0')
             METADATA_XBMCORIG = check_setting_str(CFG, 'General', 'metadata_xbmcorig', '0|0|0|0|0|0|0|0|0|0|0|0')
-            #if lenght of METADATA_XBMC = 11 and METADATA_XBMCORIG = '0|0|0|0|0|0|0|0|0|0|0|0'
             if METADATA_XBMC.__len__() == 11 and METADATA_XBMCORIG == '0|0|0|0|0|0|0|0|0|0|0|0':
             	METADATA_XBMCORIG = METADATA_XBMC[0:1] + '|' + METADATA_XBMC[6:7] + '|' + METADATA_XBMC[4:5] + '|0|0|0|0|0|' + METADATA_XBMC[10:11] + '|0|' + METADATA_XBMC[2:3] + '|' + METADATA_XBMC[8:9]	            
                 METADATA_XBMC = '0|0|0|0|0|0|0|0|0|0|0|0'
