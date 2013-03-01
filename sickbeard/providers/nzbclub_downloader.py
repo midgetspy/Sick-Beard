@@ -57,7 +57,7 @@ class NZBClub(NZBDownloader):
                 time.sleep( 10 )
             self.lastRequestTime = time.gmtime()
             
-            nzbClubSoup = BeautifulSoup(urllib2.urlopen(nzbClubURL))
+            nzbClubSoup = BeautifulSoup(urllib2.urlopen(nzbClubURL).read().decode('utf-8','ignore'))
             
             if nzbClubSoup:
                 sizeInMegs = None
