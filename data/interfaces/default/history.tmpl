@@ -70,11 +70,13 @@
         #set $provider = $providers.getProviderClass($generic.GenericProvider.makeID($hItem["provider"]))
         #if $provider != None: 
         <img src="$sbRoot/images/providers/<%=provider.imageName()%>" width="16" height="16" alt="$provider.name" title="$provider.name"/>
+        #else:
+        <img src="$sbRoot/images/providers/missing.png" width="16" height="16" alt="missing provider" title="missing provider"/>
         #end if
       #end if
     #end if
     </td>
-    <td align="center"><span class="quality $Quality.qualityStrings[$curQuality]">$Quality.qualityStrings[$curQuality]</span></td>
+    <td align="center"><span class="quality $Quality.qualityStrings[$curQuality].replace("720p","HD720p").replace("1080p","HD1080p").replace("RawHD TV", "RawHD").replace("HD TV", "HD720p")">$Quality.qualityStrings[$curQuality]</span></td>
   </tr>
 #end for
   </tbody>
