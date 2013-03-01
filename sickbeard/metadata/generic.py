@@ -536,12 +536,15 @@ class GenericMetadata():
             logger.log(u"Invalid image type "+str(image_type)+", couldn't find it in the TVDB object", logger.ERROR)
             return None
 
-        if tvdb_show_obj['poster'] and image_type == 'poster_thumb':
-            image_url = re.sub('posters', '_cache/posters', tvdb_show_obj['poster'])
-        elif tvdb_show_obj['banner'] and  image_type == 'banner_thumb':
-            image_url = re.sub('graphical', '_cache/graphical', tvdb_show_obj['banner'])
-        else:
-            image_url = tvdb_show_obj[image_type]
+        try:
+            if image_type == 'poster_thumb':
+                image_url = re.sub('posters', '_cache/posters', tvdb_show_obj['poster'])
+            elif image_type == 'banner_thumb':
+                image_url = re.sub('graphical', '_cache/graphical', tvdb_show_obj['banner'])
+            else:
+                image_url = tvdb_show_obj[image_type]
+        except:
+            return None        
     
         image_data = metadata_helpers.getShowImage(image_url, which)
 
