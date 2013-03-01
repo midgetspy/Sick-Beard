@@ -38,8 +38,8 @@ class BinNewzProvider(generic.NZBProvider):
 
         self.supportsBacklog = True
         
-        # self.nzbDownloaders = [ NZBClub(), BinSearch() ]
-        self.nzbDownloaders = [ NZBClub() ]
+        self.nzbDownloaders = [ NZBClub(), BinSearch() ]
+        # self.nzbDownloaders = [ NZBClub() ]
         
         self.url = "http://www.binnews.in/"
         
