@@ -18,6 +18,7 @@
 
 import urllib
 import urllib2
+import socket
 import base64
 
 import sickbeard
@@ -144,6 +145,20 @@ class PLEXNotifier:
 
     def test_notify(self, host, username, password):
         return self._notify_pmc("Testing Plex notifications from Sick Beard", "Test Notification", host, username, password, force=True)
+
+    def test_server_connection(self, host):
+        logger.log(u"Testing connection to the Plex Media Server host: " + host, logger.MESSAGE)
+        url = "http://%s/library/sections" % host
+        try:
+            xml_sections = minidom.parse(urllib2.urlopen(url))
+        except (urllib2.URLError, urllib2.HTTPError, socket.timeout, socket.error, IOError), e:
+            logger.log(u"Error while trying to contact Plex Media Server: " + str(e).decode('utf-8'), logger.ERROR)
+            return False
+        sections = xml_sections.getElementsByTagName('Directory')
+        if not sections:
+            logger.log(u"Plex Media Server not running on: " + host, logger.MESSAGE)
+            return False
+        return True
 
     def update_library(self):
         """Handles updating the Plex Media Server host via HTTP API
