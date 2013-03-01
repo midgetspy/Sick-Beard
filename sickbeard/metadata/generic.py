@@ -451,9 +451,9 @@ class GenericMetadata():
             logger.log(u"Unable to look up show on TVDB, not downloading images: "+ex(e), logger.ERROR)
             return result
     
-        #  How many seasons?
-        num_seasons = len(tvdb_show_obj)
-        logger.log(u"TV Show has " + str(num_seasons) + " season(s)", logger.DEBUG)
+        # How many seasons?
+        # num_seasons = len(tvdb_show_obj)
+        # logger.log(u"TV Show has " + str(num_seasons) + " season(s)", logger.DEBUG)
     
         # if we have no season banners then just finish
         if 'season' not in tvdb_show_obj['_banners'] or img_type not in tvdb_show_obj['_banners']['season']:
@@ -472,7 +472,8 @@ class GenericMetadata():
         # number as primary key. It's really overkill but gives the option
         # to present to user via ui to pick down the road.
         # edited the range as not always getting last season
-        for cur_season in range(num_seasons+1):
+        #for cur_season in range(num_seasons+1):
+        for cur_season in tvdb_show_obj:
 
             result[cur_season] = {}
             
@@ -500,7 +501,7 @@ class GenericMetadata():
         """
     
         season_dict = self._season_pb_dict(show_obj, img_type)
-        logger.log(u"Season image list filled", logger.DEBUG)
+        # logger.log(u"Season image list filled", logger.DEBUG)
    
         # Returns a nested dictionary of season art with the season
         # number as primary key. It's really overkill but gives the option

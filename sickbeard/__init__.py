@@ -1001,8 +1001,9 @@ def save_config():
 
     new_config['General']['use_banner'] = int(USE_BANNER)
     new_config['General']['use_listview'] = int(USE_LISTVIEW)
-    #to be edited
+
     new_config['General']['metadata_xbmc'] = metadata_provider_dict['XBMC'].get_config()
+    new_config['General']['metadata_xbmcorig'] = metadata_provider_dict['XBMCOrig'].get_config()
     new_config['General']['metadata_mediabrowser'] = metadata_provider_dict['MediaBrowser'].get_config()
     new_config['General']['metadata_ps3'] = metadata_provider_dict['Sony PS3'].get_config()
     new_config['General']['metadata_wdtv'] = metadata_provider_dict['WDTV'].get_config()

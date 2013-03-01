@@ -17,6 +17,7 @@
 # along with Sick Beard.  If not, see <http://www.gnu.org/licenses/>.
 
 import datetime
+import os
 
 import sickbeard
 
@@ -24,9 +25,9 @@ import generic
 
 from sickbeard.common import XML_NSMAP
 from sickbeard import logger, exceptions, helpers
-from sickbeard.exceptions import ex
-
+from sickbeard import encodingKludge as ek
 from lib.tvdb_api import tvdb_api, tvdb_exceptions
+from sickbeard.exceptions import ex
 
 import xml.etree.cElementTree as etree
 
@@ -108,7 +109,7 @@ class XBMCOrigMetadata(generic.GenericMetadata):
             season_pb_file_path = 'season' + str(season).zfill(2)
         
         season_pb_file_ext = '.tbn'
-        season_pb_file_path = season_pb_file_path + season_pb_file_ext
+        season_pb_file_path = season_pb_file_path + season_pb_file_ext        
         return ek.ek(os.path.join, show_obj.location, season_pb_file_path)
 
     def get_episode_thumb_path(self, ep_obj):
