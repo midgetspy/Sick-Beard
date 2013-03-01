@@ -39,7 +39,7 @@ class TransmissionAPI(GenericClient):
         try: 
             self.auth = re.search('X-Transmission-Session-Id:\s*(\w+)', self.response.text).group(1)
         except:
-            raise Exception("No Authorization")    
+            return None     
         
         self.session.headers.update({'x-transmission-session-id': self.auth})
         

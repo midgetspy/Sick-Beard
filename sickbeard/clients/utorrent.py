@@ -43,7 +43,7 @@ class uTorrentAPI(GenericClient):
         try: 
             self.auth = re.findall("<div.*?>(.*?)</", response.text)[0]
         except:    
-            raise Exception("No Authorization")
+            return None
             
         return self.auth
       

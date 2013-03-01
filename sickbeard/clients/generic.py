@@ -67,7 +67,7 @@ class GenericClient(object):
         """
         This should be overridden and should return the auth_id needed for the client
         """
-        return False
+        return None
     
     def _add_torrent_uri(self, result):
         """
