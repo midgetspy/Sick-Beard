@@ -19,7 +19,7 @@
 import db
 import datetime
 
-from sickbeard.common import SNATCHED, Quality, SUBTITLED
+from sickbeard.common import SNATCHED, SUBTITLED, Quality 
 
 
 dateFormat = "%Y%m%d%H%M%S"

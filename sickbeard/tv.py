@@ -1185,7 +1185,7 @@ class TVEpisode(object):
 
         else:
             logger.log(str(self.show.tvdbid) + ": No subtitles downloaded for episode " + str(self.season) + "x" + str(self.episode), logger.DEBUG)
-            
+
         if sickbeard.SUBTITLES_HISTORY:
             for video in subtitles:
                 for subtitle in subtitles.get(video):
