@@ -271,7 +271,10 @@ class GenericProvider:
             result.url = url
             result.name = title
             result.quality = quality
-            result.audio_lang=''.join(item.audio_langs)
+            if hasattr(item , 'audio_langs'):
+                result.audio_lang=''.join(item.audio_langs)
+            else:
+                result.audio_lang=''
             results.append(result)
 
         return results
