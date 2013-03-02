@@ -35,7 +35,7 @@ from sickbeard.exceptions import ex
 from sickbeard import encodingKludge as ek
 from sickbeard import search_queue
 from sickbeard.common import SNATCHED, SNATCHED_PROPER, DOWNLOADED, SKIPPED, UNAIRED, IGNORED, ARCHIVED, WANTED, UNKNOWN
-from common import ANY, Quality, qualityPresetStrings, statusStrings
+from common import Quality, qualityPresetStrings, statusStrings
 from sickbeard import image_cache
 from lib.tvdb_api import tvdb_api, tvdb_exceptions
 try:
@@ -611,8 +611,7 @@ def _getQualityMap():
             Quality.FULLHDWEBDL: 'fullhdwebdl',
             Quality.HDBLURAY: 'hdbluray',
             Quality.FULLHDBLURAY: 'fullhdbluray',
-            Quality.UNKNOWN: 'unknown',
-            ANY: 'any'}
+            Quality.UNKNOWN: 'unknown'}
 
 
 def _getRootDirs():
@@ -1470,7 +1469,7 @@ class CMD_SickBeardSearchTVDB(ApiCall):
     def run(self):
         """ search for show at tvdb with a given string and language """
         if self.name and not self.tvdbid: # only name was given
-            baseURL = "http://www.thetvdb.com/api/GetSeries.php?"
+            baseURL = "http://thetvdb.com/api/GetSeries.php?"
             params = {"seriesname": str(self.name).encode('utf-8'), 'language': self.lang}
             finalURL = baseURL + urllib.urlencode(params)
             urlData = sickbeard.helpers.getURL(finalURL)
@@ -1536,8 +1535,8 @@ class CMD_SickBeardSetDefaults(ApiCall):
     def __init__(self, args, kwargs):
         # required
         # optional
-        self.initial, args = self.check_params(args, kwargs, "initial", None, False, "list", ["sdtv", "sddvd", "hdtv", "rawhdtv", "fullhdtv", "hdwebdl", "fullhdwebdl", "hdbluray", "fullhdbluray", "unknown", "any"])
-        self.archive, args = self.check_params(args, kwargs, "archive", None, False, "list", ["sddvd", "hdtv", "rawhdtv", "fullhdtv", "hdwebdl", "fullhdwebdl", "hdbluray", "fullhdbluray", "any"])
+        self.initial, args = self.check_params(args, kwargs, "initial", None, False, "list", ["sdtv", "sddvd", "hdtv", "rawhdtv", "fullhdtv", "hdwebdl", "fullhdwebdl", "hdbluray", "fullhdbluray", "unknown"])
+        self.archive, args = self.check_params(args, kwargs, "archive", None, False, "list", ["sddvd", "hdtv", "rawhdtv", "fullhdtv", "hdwebdl", "fullhdwebdl", "hdbluray", "fullhdbluray"])
         self.future_show_paused, args = self.check_params(args, kwargs, "future_show_paused", None, False, "bool", [])
         self.flatten_folders, args = self.check_params(args, kwargs, "flatten_folders", None, False, "bool", [])
         self.status, args = self.check_params(args, kwargs, "status", None, False, "string", ["wanted", "skipped", "archived", "ignored"])
@@ -1556,8 +1555,7 @@ class CMD_SickBeardSetDefaults(ApiCall):
                        'fullhdwebdl': Quality.FULLHDWEBDL,
                        'hdbluray': Quality.HDBLURAY,
                        'fullhdbluray': Quality.FULLHDBLURAY,
-                       'unknown': Quality.UNKNOWN,
-                       'any': ANY }
+                       'unknown': Quality.UNKNOWN}
 
         iqualityID = []
         aqualityID = []
@@ -1689,8 +1687,8 @@ class CMD_ShowAddExisting(ApiCall):
         self.location, args = self.check_params(args, kwargs, "location", None, True, "string", [])
         self.tvdbid, args = self.check_params(args, kwargs, "tvdbid", None, True, "int", [])
         # optional
-        self.initial, args = self.check_params(args, kwargs, "initial", None, False, "list", ["sdtv", "sddvd", "hdtv", "rawhdtv", "fullhdtv", "hdwebdl", "fullhdwebdl", "hdbluray", "fullhdbluray", "unknown", "any"])
-        self.archive, args = self.check_params(args, kwargs, "archive", None, False, "list", ["sddvd", "hdtv", "rawhdtv", "fullhdtv", "hdwebdl", "fullhdwebdl", "hdbluray", "fullhdbluray", "any"])
+        self.initial, args = self.check_params(args, kwargs, "initial", None, False, "list", ["sdtv", "sddvd", "hdtv", "rawhdtv", "fullhdtv", "hdwebdl", "fullhdwebdl", "hdbluray", "fullhdbluray", "unknown"])
+        self.archive, args = self.check_params(args, kwargs, "archive", None, False, "list", ["sddvd", "hdtv", "rawhdtv", "fullhdtv", "hdwebdl", "fullhdwebdl", "hdbluray", "fullhdbluray"])
         self.flatten_folders, args = self.check_params(args, kwargs, "flatten_folders", str(sickbeard.FLATTEN_FOLDERS_DEFAULT), False, "bool", [])
         # super, missing, help
         ApiCall.__init__(self, args, kwargs)
@@ -1725,8 +1723,7 @@ class CMD_ShowAddExisting(ApiCall):
                        'fullhdwebdl': Quality.FULLHDWEBDL,
                        'hdbluray': Quality.HDBLURAY,
                        'fullhdbluray': Quality.FULLHDBLURAY,
-                       'unknown': Quality.UNKNOWN,
-                       'any': ANY }
+                       'unknown': Quality.UNKNOWN}
 
         #use default quality as a failsafe
         newQuality = int(sickbeard.QUALITY_DEFAULT)
@@ -1771,8 +1768,8 @@ class CMD_ShowAddNew(ApiCall):
         self.tvdbid, args = self.check_params(args, kwargs, "tvdbid", None, True, "int", [])
         # optional
         self.location, args = self.check_params(args, kwargs, "location", None, False, "string", [])
-        self.initial, args = self.check_params(args, kwargs, "initial", None, False, "list", ["sdtv", "sddvd", "hdtv", "rawhdtv", "fullhdtv", "hdwebdl", "fullhdwebdl", "hdbluray", "fullhdbluray", "unknown", "any"])
-        self.archive, args = self.check_params(args, kwargs, "archive", None, False, "list", ["sddvd", "hdtv", "rawhdtv", "fullhdtv", "hdwebdl", "fullhdwebdl", "hdbluray", "fullhdbluray", "any"])
+        self.initial, args = self.check_params(args, kwargs, "initial", None, False, "list", ["sdtv", "sddvd", "hdtv", "rawhdtv", "fullhdtv", "hdwebdl", "fullhdwebdl", "hdbluray", "fullhdbluray", "unknown"])
+        self.archive, args = self.check_params(args, kwargs, "archive", None, False, "list", ["sddvd", "hdtv", "rawhdtv", "fullhdtv", "hdwebdl", "fullhdwebdl", "hdbluray", "fullhdbluray"])
         self.flatten_folders, args = self.check_params(args, kwargs, "flatten_folders", str(sickbeard.FLATTEN_FOLDERS_DEFAULT), False, "bool", [])
         self.status, args = self.check_params(args, kwargs, "status", None, False, "string", ["wanted", "skipped", "archived", "ignored"])
         self.lang, args = self.check_params(args, kwargs, "lang", "en", False, "string", self.valid_languages.keys())
@@ -1806,8 +1803,7 @@ class CMD_ShowAddNew(ApiCall):
                        'fullhdwebdl': Quality.FULLHDWEBDL,
                        'hdbluray': Quality.HDBLURAY,
                        'fullhdbluray': Quality.FULLHDBLURAY,
-                       'unknown': Quality.UNKNOWN,
-                       'any': ANY }
+                       'unknown': Quality.UNKNOWN}
 
         # use default quality as a failsafe
         newQuality = int(sickbeard.QUALITY_DEFAULT)
@@ -2160,15 +2156,15 @@ class CMD_ShowSetQuality(ApiCall):
         # optional
         # this for whatever reason removes hdbluray not sdtv... which is just wrong. reverting to previous code.. plus we didnt use the new code everywhere.
         # self.archive, args = self.check_params(args, kwargs, "archive", None, False, "list", _getQualityMap().values()[1:])
-        self.initial, args = self.check_params(args, kwargs, "initial", None, False, "list", ["sdtv", "sddvd", "hdtv", "rawhdtv", "fullhdtv", "hdwebdl", "fullhdwebdl", "hdbluray", "fullhdbluray", "unknown", "any"])
-        self.archive, args = self.check_params(args, kwargs, "archive", None, False, "list", ["sddvd", "hdtv", "rawhdtv", "fullhdtv", "hdwebdl", "fullhdwebdl", "hdbluray", "fullhdbluray", "any"])
+        self.initial, args = self.check_params(args, kwargs, "initial", None, False, "list", ["sdtv", "sddvd", "hdtv", "rawhdtv", "fullhdtv", "hdwebdl", "fullhdwebdl", "hdbluray", "fullhdbluray", "unknown"])
+        self.archive, args = self.check_params(args, kwargs, "archive", None, False, "list", ["sddvd", "hdtv", "rawhdtv", "fullhdtv", "hdwebdl", "fullhdwebdl", "hdbluray", "fullhdbluray"])
         # super, missing, help
         ApiCall.__init__(self, args, kwargs)
 
     def run(self):
         """ set the quality for a show in sickbeard by taking in a deliminated
             string of qualities, map to their value and combine for new values
-        """    
+        """
         showObj = sickbeard.helpers.findCertainShow(sickbeard.showList, int(self.tvdbid))
         if not showObj:
             return _responds(RESULT_FAILURE, msg="Show not found")
@@ -2182,8 +2178,7 @@ class CMD_ShowSetQuality(ApiCall):
                        'fullhdwebdl': Quality.FULLHDWEBDL,
                        'hdbluray': Quality.HDBLURAY,
                        'fullhdbluray': Quality.FULLHDBLURAY,
-                       'unknown': Quality.UNKNOWN,
-                       'any': ANY }
+                       'unknown': Quality.UNKNOWN}
 
         #use default quality as a failsafe
         newQuality = int(sickbeard.QUALITY_DEFAULT)
