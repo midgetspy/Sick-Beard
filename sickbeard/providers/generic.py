@@ -290,7 +290,7 @@ class GenericProvider:
                 result.audio_lang=''.join(item.audio_langs)
 
             else:
-                result.audio_lang=''
+                result.audio_lang=language
             results.append(result)
 
         return results
@@ -319,7 +319,7 @@ class GenericProvider:
                 logger.log(u"Unable to parse the filename "+title+" into a valid episode", logger.WARNING)
                 continue
 
-
+            language = self._get_language(title,item)
 
             if not show.air_by_date:
                 # this check is meaningless for non-season searches
@@ -358,7 +358,7 @@ class GenericProvider:
                 continue
             
             if not language == show.audio_lang:
-                logger.log(u"Ignoring result "+title+" because the language: " + showLanguages[parse_result.series_language] + " does not match the desired language: " + showLanguages[show.audio_lang])
+                logger.log(u"Ignoring result "+title+" because the language: " + showLanguages[parse_result.audio_langs] + " does not match the desired language: " + showLanguages[show.audio_lang])
                 continue
 
             logger.log(u"Found result " + title + " at " + url, logger.DEBUG)
@@ -375,7 +375,11 @@ class GenericProvider:
             result.name = title
             result.quality = quality
 
-            result.audio_lang=show.audio_lang
+            if hasattr(item , 'audio_langs'):
+                result.audio_lang=''.join(item.audio_langs)
+
+            else:
+                result.audio_lang=language
 
             if len(epObj) == 1:
                 epNum = epObj[0].episode
