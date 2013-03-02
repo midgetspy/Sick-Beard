@@ -13,16 +13,15 @@ class GenericClient(object):
     def __init__(self, name, host=None, username=None, password=None):
 
         self.name = name
-        
-        self.url = ''
         self.username = sickbeard.TORRENT_USERNAME if username is None else username
         self.password = sickbeard.TORRENT_PASSWORD if password is None else password
         self.host = sickbeard.TORRENT_HOST if host is None else host
-
-        self.session = requests.session(auth=(self.username, self.password),timeout=10)
+        
+        self.url = None
         self.response = None
         self.auth = None
         self.last_time = time.time()
+        self.session = requests.session(auth=(self.username, self.password),timeout=10)
 
     def _request(self, method='get', params={}, data=None, files=None):
 
@@ -98,11 +97,17 @@ class GenericClient(object):
         return True
 
     def _set_torrent_path(self, torrent_path):
-        
+        """
+        This should be overridden should return the True/False from the client 
+        when a torrent is set with path
+        """        
         return True
     
     def _set_torrent_pause(self, result):
-
+        """
+        This should be overridden should return the True/False from the client 
+        when a torrent is set with pause
+        """
         return True
     
     def _get_torrent_hash(self, result):
