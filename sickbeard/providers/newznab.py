@@ -160,7 +160,7 @@ class NewznabProvider(generic.NZBProvider):
                 logger.log(u"Unable to parse the filename "+title+" into a valid episode", logger.WARNING)
                 return 'en'
 
-        return parse_result.series_language    
+        return parse_result.audio_langs    
 
     def _doGeneralSearch(self, search_string):
         return self._doSearch({'q': search_string})

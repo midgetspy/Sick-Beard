@@ -28,7 +28,8 @@ import sickbeard
 
 from sickbeard import helpers, classes, logger, db
 
-from sickbeard.common import Quality, MULTI_EP_RESULT, SEASON_RESULT
+from sickbeard.common import Quality, MULTI_EP_RESULT, SEASON_RESULT,\
+    showLanguages
 from sickbeard import tvcache
 from sickbeard import encodingKludge as ek
 from sickbeard.exceptions import ex
@@ -105,6 +106,8 @@ class GenericProvider:
 
         if not headers:
             headers = []
+
+
 
         result = helpers.getURL(url, headers)
 
@@ -216,6 +219,12 @@ class GenericProvider:
         
         return (title, url)
     
+    def _get_language(self,title=None,item=None):
+        if hasattr(item , 'audio_langs'):
+                return ''.join(item.audio_langs)
+        else:
+                return 'en'
+    
     def findEpisode (self, episode, manualSearch=False):
 
         self._checkAuth()
@@ -248,6 +257,8 @@ class GenericProvider:
             except InvalidNameException:
                 logger.log(u"Unable to parse the filename "+title+" into a valid episode", logger.WARNING)
                 continue
+            
+            language = self._get_language(title,item)
 
             if episode.show.air_by_date:
                 if parse_result.air_date != episode.airdate:
@@ -262,6 +273,10 @@ class GenericProvider:
             if not episode.show.wantEpisode(episode.season, episode.episode, quality, manualSearch):
                 logger.log(u"Ignoring result "+title+" because we don't want an episode that is "+Quality.qualityStrings[quality], logger.DEBUG)
                 continue
+            
+            if not language == episode.show.audio_lang:
+                logger.log(u"Ignoring result "+title+" because the language: " + showLanguages[language] + " does not match the desired language: " + showLanguages[episode.show.audio_lang])
+                continue
 
             logger.log(u"Found result " + title + " at " + url, logger.DEBUG)
 
@@ -273,6 +288,7 @@ class GenericProvider:
             result.quality = quality
             if hasattr(item , 'audio_langs'):
                 result.audio_lang=''.join(item.audio_langs)
+
             else:
                 result.audio_lang=''
             results.append(result)
@@ -302,6 +318,8 @@ class GenericProvider:
             except InvalidNameException:
                 logger.log(u"Unable to parse the filename "+title+" into a valid episode", logger.WARNING)
                 continue
+
+
 
             if not show.air_by_date:
                 # this check is meaningless for non-season searches
@@ -338,6 +356,10 @@ class GenericProvider:
             if not wantEp:
                 logger.log(u"Ignoring result "+title+" because we don't want an episode that is "+Quality.qualityStrings[quality], logger.DEBUG)
                 continue
+            
+            if not language == show.audio_lang:
+                logger.log(u"Ignoring result "+title+" because the language: " + showLanguages[parse_result.series_language] + " does not match the desired language: " + showLanguages[show.audio_lang])
+                continue
 
             logger.log(u"Found result " + title + " at " + url, logger.DEBUG)
 
@@ -352,6 +374,7 @@ class GenericProvider:
             result.url = url
             result.name = title
             result.quality = quality
+
             result.audio_lang=show.audio_lang
 
             if len(epObj) == 1:
