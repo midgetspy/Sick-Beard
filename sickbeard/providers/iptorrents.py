@@ -32,11 +32,9 @@ from bs4 import BeautifulSoup
 
 class IPTorrentsProvider(generic.TorrentProvider):
 
-    urls = {'base_url' : 'http://www.iptorrents.com/',
+    urls = {'base_url' : 'http://www.iptorrents.com',
             'login' : 'http://www.iptorrents.com/torrents/',
-            'detail' : 'http://www.iptorrents.com/details.php?id=%s',
             'search' : 'http://www.iptorrents.com/torrents/?l%d=1%s&q=%s&qf=ti',
-            'download' : 'http://www.iptorrents.com/download.php/%s/%s.torrent',
             }
 
     def __init__(self):
@@ -174,11 +172,12 @@ class IPTorrentsProvider(generic.TorrentProvider):
                     for result in entries[1:]:
 
                         torrent = result.find_all('td')[1].find('a')
-                        
+                        torrent_download = result.find_all('td')[3].find('a')
+
                         torrent_id = int(torrent['href'].replace('/details.php?id=', ''))
                         torrent_name = torrent.string
-                        torrent_download_url = self.urls['download'] % (torrent_id, torrent_name.replace(' ', '.'))
-                        torrent_details_url = self.urls['detail'] % (torrent_id)
+                        torrent_download_url = self.urls['base_url'] + torrent_download['href']
+                        torrent_details_url = self.urls['base_url'] + torrent['href']
                         torrent_seeders = int(result.find('td', attrs = {'class' : 'ac t_seeders'}).string)
                         torrent_leechers = int(result.find('td', attrs = {'class' : 'ac t_leechers'}).string)
 
@@ -259,10 +258,11 @@ class IPTorrentsCache(tvcache.TVCache):
         for result in entries[1:]:
 
             torrent = result.find_all('td')[1].find('a')
-                        
+            torrent_download = result.find_all('td')[3].find('a')
+
             torrent_id = int(torrent['href'].replace('/details.php?id=', ''))
             torrent_name = torrent.string
-            torrent_download_url = self.provider.urls['download'] % (torrent_id, torrent_name.replace(' ', '.'))
+            torrent_download_url = self.provider.urls['base_url'] + torrent_download['href']
            
             item = (torrent_name,torrent_download_url)
 
