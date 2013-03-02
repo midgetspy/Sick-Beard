@@ -92,7 +92,7 @@ class T411Provider(generic.TorrentProvider):
             self._doLogin( sickbeard.T411_USERNAME, sickbeard.T411_PASSWORD )
 
         results = []
-        searchUrl = self.url + '/torrents/search/?' + urllib.urlencode({'search':searchString})
+        searchUrl = self.url + '/torrents/search/?' + searchString
         
         r = self.opener.open( searchUrl )
         soup = BeautifulSoup( r )
@@ -128,7 +128,10 @@ class T411Provider(generic.TorrentProvider):
                     else:
                         quality = Quality.SDTV
 
-                    results.append( T411SearchResult( self.opener, link['title'], downloadURL, quality, str(show.audio_lang) ) )
+                    if show:
+                        results.append( T411SearchResult( self.opener, link['title'], downloadURL, quality, str(show.audio_lang) ) )
+                    else:
+                        results.append( T411SearchResult( self.opener, link['title'], downloadURL, quality ) )
 
         return results
     
@@ -143,7 +146,7 @@ class T411Provider(generic.TorrentProvider):
     
 class T411SearchResult:
     
-    def __init__(self, opener, title, url, quality, audio_langs):
+    def __init__(self, opener, title, url, quality, audio_langs=None):
         self.opener = opener
         self.title = title
         self.url = url
