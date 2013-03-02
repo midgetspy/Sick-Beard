@@ -2595,7 +2595,7 @@ class Home:
 
                 epObj = showObj.getEpisode(int(epInfo[0]), int(epInfo[1]))
 
-                epObj.audio_langs = [audio_langs]
+                epObj.audio_langs = str(audio_langs)
                 epObj.saveToDB()
         
         if direct:
