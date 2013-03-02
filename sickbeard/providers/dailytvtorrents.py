@@ -137,6 +137,9 @@ class DailyTvTorrentsProvider(generic.TorrentProvider):
 
         data = self._getRSSData(search_params, show)
 
+        if not data:
+            return []
+
         try:
             parsedXML = parseString(data)
             items = parsedXML.getElementsByTagName('item')
