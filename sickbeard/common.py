@@ -108,7 +108,7 @@ class Quality:
                       SDDVD: "SD DVD",
                       HDTV: "HD TV",
                       RAWHDTV: "RawHD TV",
-                      FULLHDTV: "1080p HDTV",
+                      FULLHDTV: "1080p HD TV",
                       HDWEBDL: "720p WEB-DL",
                       FULLHDWEBDL: "1080p WEB-DL",
                       HDBLURAY: "720p BluRay",
