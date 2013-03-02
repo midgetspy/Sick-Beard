@@ -21,7 +21,7 @@ import urllib2
 import re
 from bs4 import BeautifulSoup
 from nzbdownloader import NZBDownloader
-from nzbdownloader import NZBSearchResult
+from nzbdownloader import NZBGetURLSearchResult
 import time
 
 def isResultRow(tag):
@@ -84,8 +84,4 @@ class NZBClub(NZBDownloader):
                     downloadNZBImg = row.find("img", alt="Get NZB")
                     if downloadNZBImg:
                         downloadNZBLink = downloadNZBImg.parent
-                        
-                        nzbURL = "http://www.nzbclub.com" + downloadNZBLink["href"]
-                        nzbData = urllib2.urlopen(nzbURL).read()
-                        
-                        return NZBSearchResult(nzbData, sizeInMegs, nzbClubURL)
+                        return NZBGetURLSearchResult( "http://www.nzbclub.com" + downloadNZBLink["href"], sizeInMegs, nzbClubURL)

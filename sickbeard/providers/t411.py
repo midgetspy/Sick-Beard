@@ -92,7 +92,7 @@ class T411Provider(generic.TorrentProvider):
             self._doLogin( sickbeard.T411_USERNAME, sickbeard.T411_PASSWORD )
 
         results = []
-        searchUrl = self.url + '/torrents/search/?' + searchString
+        searchUrl = self.url + '/torrents/search/?' + urllib.urlencode({'search':searchString})
         
         r = self.opener.open( searchUrl )
         soup = BeautifulSoup( r )
@@ -115,8 +115,6 @@ class T411Provider(generic.TorrentProvider):
                 if downloadTorrentLink:
                     
                     downloadURL = self.url + downloadTorrentLink['href']
-
-                    torrentdata = self.opener.open( downloadURL , 'wb').read()
                     
                     if "720p" in title:
                         if "bluray" in title:
@@ -130,7 +128,7 @@ class T411Provider(generic.TorrentProvider):
                     else:
                         quality = Quality.SDTV
 
-                    results.append( T411SearchResult( link['title'], torrentdata, downloadURL, quality, str(show.audio_lang) ) )
+                    results.append( T411SearchResult( self.opener, link['title'], downloadURL, quality, str(show.audio_lang) ) )
 
         return results
     
@@ -145,13 +143,16 @@ class T411Provider(generic.TorrentProvider):
     
 class T411SearchResult:
     
-    def __init__(self, title, torrentdata, url, quality, audio_langs):
+    def __init__(self, opener, title, url, quality, audio_langs):
+        self.opener = opener
         self.title = title
         self.url = url
-        self.extraInfo = [torrentdata] 
         self.quality = quality
         self.audio_langs=[audio_langs]
         
+    def getNZB(self):
+        return self.opener.open( self.url , 'wb').read()
+
     def getQuality(self):
         return self.quality
 

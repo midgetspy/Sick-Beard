@@ -22,13 +22,11 @@ from nzbclub_downloader import NZBClub
 from sickbeard import logger, classes, show_name_helpers
 from sickbeard.common import Quality
 from sickbeard.exceptions import ex
-from sickbeard.providers.nzbclub_downloader import NZBClub
 import generic
-import httplib
 import re
 import sickbeard
 import urllib
-
+import urllib2
 
 class BinNewzProvider(generic.NZBProvider):
 
@@ -65,10 +63,10 @@ class BinNewzProvider(generic.NZBProvider):
         return strings
     
     def _get_title_and_url(self, item):
-        return (item.title, item.url)
+        return (item.title, item.refererURL)
     
     def getQuality(self, item):
-        return item.getQuality()
+        return item.quality
     
     def _doSearch(self, searchString, show=None, season=None):
         
@@ -76,14 +74,9 @@ class BinNewzProvider(generic.NZBProvider):
         
         data = urllib.urlencode({'b_submit': 'BinnewZ', 'cats[]' : all, 'edSearchAll' : searchString, 'sections[]': 'all'})
         headers = {"Content-type": "application/x-www-form-urlencoded", "Accept": "text/plain"}
-        h = httplib.HTTPConnection('www.binnews.in:80')
-        h.request('POST', '/_bin/search2.php', data, headers)
-
-        r = h.getresponse()
-        contents = r.read()
         
         try:
-            soup = BeautifulSoup( contents )
+            soup = BeautifulSoup( urllib2.urlopen("http://www.binnews.in/_bin/search2.php", data) )
         except Exception, e:
             logger.log(u"Error trying to load BinNewz response: "+ex(e), logger.ERROR)
             return []
@@ -99,10 +92,7 @@ class BinNewzProvider(generic.NZBProvider):
                 cells = row.select("> td")
                 if (len(cells) < 11):
                     continue
-    
-                encoderSpan = cells[1].find("span")
-                if encoderSpan:
-                    encoder = encoderSpan.contents[0]
+
                 name = cells[2].text.strip()
                 language = cells[3].find("img").get("src")
 
@@ -236,10 +226,16 @@ class BinNewzProvider(generic.NZBProvider):
                 for searchItem in searchItems:
                     for downloader in self.nzbDownloaders:
                         logger.log("Searching for download : " + searchItem )
-                        binsearch_result =  downloader.search(searchItem, minSize, newsgroup )
-                        if binsearch_result:
-                            results.append( BinNewzSearchResult( name, binsearch_result.nzbdata, binsearch_result.url, quality,str(show.audio_lang)))
-                            break
+                        try:
+                            binsearch_result =  downloader.search(searchItem, minSize, newsgroup )
+                            if binsearch_result:
+                                binsearch_result.audio_lang = show.audio_lang
+                                binsearch_result.title = name
+                                binsearch_result.quality = quality
+                                results.append( binsearch_result )
+                                break
+                        except Exception, e:
+                            logger.log("Searching from downloader failed : " + ex(e), logger.ERROR)
 
         return results
     
@@ -251,17 +247,5 @@ class BinNewzProvider(generic.NZBProvider):
         result.provider = self
 
         return result    
-
-class BinNewzSearchResult:
-    
-    def __init__(self, title, nzbdata, url, quality, audio_langs):
-        self.title = title
-        self.url = url
-        self.extraInfo = [nzbdata] 
-        self.quality = quality
-        self.audio_langs=[audio_langs]
-        
-    def getQuality(self):
-        return self.quality
 
 provider = BinNewzProvider()   
