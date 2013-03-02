@@ -104,7 +104,11 @@ class T411Provider(generic.TorrentProvider):
                 link = row.find("a", title=True)
                 title = link['title']
                 
-                torrentPage = self.opener.open( link['href'] )
+                pageURL = link['href']
+                if pageURL.startswith("//"):
+                    pageURL = "http:" + pageURL
+                
+                torrentPage = self.opener.open( pageURL )
                 torrentSoup = BeautifulSoup( torrentPage )
                
                 downloadTorrentLink = torrentSoup.find("a", text=u"Télécharger")
