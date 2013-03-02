@@ -266,7 +266,10 @@ class GenericProvider:
             logger.log(u"Found result " + title + " at " + url, logger.DEBUG)
 
             result = self.getResult([episode])
-            if hasattr(item , 'extraInfo'):
+            result.item = item
+            if hasattr(item , 'getNZB'):
+                result.extraInfo = [item.getNZB() ]
+            elif hasattr(item , 'extraInfo'):
                 result.extraInfo = item.extraInfo
             result.url = url
             result.name = title
@@ -347,7 +350,9 @@ class GenericProvider:
                 epObj.append(show.getEpisode(actual_season, curEp))
 
             result = self.getResult(epObj)
-            if hasattr(item , 'extraInfo'):
+            if hasattr(item, 'getNZB'):
+                result.extraInfo = [item.getNZB()]
+            elif hasattr(item , 'extraInfo'):
                 result.extraInfo = item.extraInfo
             result.url = url
             result.name = title

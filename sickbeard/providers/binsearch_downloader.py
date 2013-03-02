@@ -20,11 +20,8 @@ import urllib
 import urllib2
 from bs4 import BeautifulSoup
 import re
-import httplib
-import gzip
-from StringIO import StringIO
 from nzbdownloader import NZBDownloader
-from nzbdownloader import NZBSearchResult
+from nzbdownloader import NZBPostURLSearchResult
 import time
 
 class BinSearch(NZBDownloader):
@@ -63,20 +60,7 @@ class BinSearch(NZBDownloader):
                         break
                 
             if foundName:
-                params = urllib.urlencode({foundName: 'on', 'action': 'nzb'})
-                headers = {"Referer":binSearchURL, "Content-type": "application/x-www-form-urlencoded","Accept-Encoding" : "gzip,deflate,sdch", "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8","User-Agent":"Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.17 (KHTML, like Gecko) Chrome/24.0.1312.57 Safari/537.17"}
-                conn = httplib.HTTPConnection( "binsearch.info" )
-                conn.request("POST", "/fcgi/nzb.fcgi?adv_age=&" + suffixURL, params, headers)
-                response = conn.getresponse()
-                
-                if response.status == 200:
-                    rawData = response.read()      
-
-                    if response.getheader('Content-Encoding') == 'gzip':
-                        buf = StringIO( rawData )
-                        f = gzip.GzipFile(fileobj=buf)
-                        nzbdata = f.read()
-                    else:
-                        nzbdata = rawData
-
-                    return NZBSearchResult( nzbdata, sizeInMegs, binSearchURL )
+                postData = urllib.urlencode({foundName: 'on', 'action': 'nzb'})
+                nzbURL = "http://binsearch.info/fcgi/nzb.fcgi?adv_age=&" + suffixURL
+                return NZBPostURLSearchResult( self, nzbURL, postData, sizeInMegs, binSearchURL )
+                    
