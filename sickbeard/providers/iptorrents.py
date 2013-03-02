@@ -242,22 +242,17 @@ class IPTorrentsCache(tvcache.TVCache):
 
         data = self._getData()
 
-        # as long as the http request worked we count this as an update
-        if data:
-            self.setLastUpdate()
-        else:
-            return []
-
-        # now that we've loaded the current feed lets delete the old cache
-        logger.log(u"Clearing " + self.provider.name + " cache and updating with new information")
-        self._clearCache()
-
         html = BeautifulSoup(data)
         result_table = html.find('table', attrs = {'class' : 'torrents'})
 
         if not result_table:
             logger.log(u"The Data returned from " + self.provider.name + " is incomplete, this result is unusable", logger.ERROR)
             return []
+
+        # now that we've loaded the current feed lets delete the old cache
+        logger.log(u"Clearing " + self.provider.name + " cache and updating with new information")
+        self.setLastUpdate()
+        self._clearCache()
                 
         entries = result_table.find_all('tr')
 
