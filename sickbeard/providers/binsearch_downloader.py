@@ -62,5 +62,5 @@ class BinSearch(NZBDownloader):
             if foundName:
                 postData = urllib.urlencode({foundName: 'on', 'action': 'nzb'})
                 nzbURL = "http://binsearch.info/fcgi/nzb.fcgi?adv_age=&" + suffixURL
-                return NZBPostURLSearchResult( self, nzbURL, postData, sizeInMegs, binSearchURL )
+                return NZBPostURLSearchResult( nzbURL, postData, sizeInMegs, binSearchURL )
                     
