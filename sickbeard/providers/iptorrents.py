@@ -153,10 +153,10 @@ class IPTorrentsProvider(generic.TorrentProvider):
                 data = self.getURL(searchURL)
                 if not data:
                     return []
-
-                html = BeautifulSoup(data)
                 
                 try:
+                    html = BeautifulSoup(data)
+
                     if html.find(text='Nothing found!'):
                         logger.log(u"No results found for: " + search_string + "(" + searchURL + ")", logger.DEBUG)
                         return []
@@ -241,33 +241,37 @@ class IPTorrentsCache(tvcache.TVCache):
 
         data = self._getData()
 
-        html = BeautifulSoup(data)
-        result_table = html.find('table', attrs = {'class' : 'torrents'})
+        try:
+            html = BeautifulSoup(data)
+            result_table = html.find('table', attrs = {'class' : 'torrents'})
+    
+            if not result_table:
+                logger.log(u"The Data returned from " + self.provider.name + " is incomplete, this result is unusable", logger.ERROR)
+                return []
 
-        if not result_table:
-            logger.log(u"The Data returned from " + self.provider.name + " is incomplete, this result is unusable", logger.ERROR)
-            return []
+            logger.log(u"Clearing " + self.provider.name + " cache and updating with new information")
+            self.setLastUpdate()
+            self._clearCache()
+    
+            entries = result_table.find_all('tr')
+    
+            for result in entries[1:]:
+    
+                torrent = result.find_all('td')[1].find('a')
+                torrent_download = result.find_all('td')[3].find('a')
+    
+                torrent_id = int(torrent['href'].replace('/details.php?id=', ''))
+                torrent_name = torrent.string
+                torrent_download_url = self.provider.urls['base_url'] + torrent_download['href']
+               
+                item = (torrent_name,torrent_download_url)
+    
+                self._parseItem(item)
 
-        # now that we've loaded the current feed lets delete the old cache
-        logger.log(u"Clearing " + self.provider.name + " cache and updating with new information")
-        self.setLastUpdate()
-        self._clearCache()
-                
-        entries = result_table.find_all('tr')
-
-        for result in entries[1:]:
-
-            torrent = result.find_all('td')[1].find('a')
-            torrent_download = result.find_all('td')[3].find('a')
-
-            torrent_id = int(torrent['href'].replace('/details.php?id=', ''))
-            torrent_name = torrent.string
-            torrent_download_url = self.provider.urls['base_url'] + torrent_download['href']
-           
-            item = (torrent_name,torrent_download_url)
-
-            self._parseItem(item)
-
+        except Exception, e:
+            logger.log(u"Failed to parsing " + self.name + " RSS: " + ex(e), logger.ERROR)
+            return
+            
     def _getData(self):
 
         if not self.provider._doLogin():

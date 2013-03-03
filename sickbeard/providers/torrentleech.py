@@ -155,9 +155,9 @@ class TorrentLeechProvider(generic.TorrentProvider):
                 if not data:
                     return []
 
-                html = BeautifulSoup(data)
-                
                 try:
+                    html = BeautifulSoup(data)
+                    
                     torrent_table = html.find('table', attrs = {'id' : 'torrenttable'})
                     
                     if not torrent_table:
@@ -228,6 +228,48 @@ class TorrentLeechCache(tvcache.TVCache):
 
         # only poll TorrentLeech every 20 minutes max
         self.minTime = 20
+
+    def updateCache(self):
+
+        if not self.shouldUpdate():
+            return
+
+        data = self._getData()
+
+        try: 
+            html = BeautifulSoup(data)
+            torrent_table = html.find('table', attrs = {'id' : 'torrenttable'})
+
+            if not torrent_table:
+                logger.log(u"The Data returned from " + self.provider.name + " is incomplete, this result is unusable", logger.ERROR)
+                return []
+
+            # now that we've loaded the current feed lets delete the old cache
+            logger.log(u"Clearing " + self.provider.name + " cache and updating with new information")
+            self.setLastUpdate()
+            self._clearCache()
+        
+            for result in torrent_table.find_all('tr')[1:]:
+
+                link = result.find('td', attrs = {'class' : 'name'}).find('a')
+                url = result.find('td', attrs = {'class' : 'quickdownload'}).find('a')
+                title = link.string
+                download_url = self.urls['download'] % url['href']
+                id = int(link['href'].replace('/torrent/', ''))
+                seeders = int(result.find('td', attrs = {'class' : 'seeders'}).string)
+                leechers = int(result.find('td', attrs = {'class' : 'leechers'}).string)
+
+                #Filter torrent
+                if not title or not show_name_helpers.filterBadReleases(title):
+                    continue 
+
+                item = (title, download_url)
+                
+                self._parseItem(item)
+
+        except Exception, e:
+            logger.log(u"Failed to parsing " + self.name + " RSS: " + ex(e), logger.ERROR)
+            return []
 
     def _getData(self):
        
