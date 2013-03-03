@@ -202,7 +202,7 @@ class NewznabProvider(generic.NZBProvider):
             return []
 
         # hack this in until it's fixed server side
-        if not data.strip().startswith('<?xml'):
+        if not data.startswith('<?xml'):
             data = '<?xml version="1.0" encoding="ISO-8859-1" ?>' + data
 
         try:
