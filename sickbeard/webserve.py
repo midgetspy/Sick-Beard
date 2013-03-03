@@ -1269,6 +1269,11 @@ class ConfigProviders:
                     sickbeard.newznabProviderList.append(newProvider)
     
                 finishedNames.append(curID)
+    
+            # delete anything that is missing
+            for curProvider in sickbeard.newznabProviderList:
+                if curProvider.getID() not in finishedNames:
+                    sickbeard.newznabProviderList.remove(curProvider)
 
         # delete anything that is missing
         for curProvider in sickbeard.newznabProviderList:

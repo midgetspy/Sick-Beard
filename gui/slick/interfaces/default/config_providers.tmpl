@@ -108,11 +108,6 @@ var show_nzb_providers = #if $sickbeard.USE_NZBS then "true" else "false"#;
                                     #if $provider_config_list:                                        
                                     <select id="editAProvider">
                                         #for $cur_provider in $provider_config_list + [$curProvider for $curProvider in $sickbeard.newznabProviderList if $curProvider.default and $curProvider.needs_auth and $sickbeard.USE_NZBS]:
-                                          #if $cur_provider.providerType == $GenericProvider.NZB and not $sickbeard.USE_NZBS:
-                                          	#continue
-                                          #elif $cur_provider.providerType == $GenericProvider.TORRENT and not $sickbeard.USE_TORRENTS:
-                                          	#continue
-                                          #end if		
                                             <option value="$cur_provider.getID()">$cur_provider.name</option>
                                         #end for
                                     </select>
