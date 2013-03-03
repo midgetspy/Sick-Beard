@@ -633,7 +633,7 @@ class ConfigGeneral:
         sickbeard.ROOT_DIRS = rootDirString
     
     @cherrypy.expose
-    def saveAddShowDefaults(self, defaultFlattenFolders, defaultStatus, anyQualities, bestQualities):
+    def saveAddShowDefaults(self, defaultFlattenFolders, defaultStatus, anyQualities, bestQualities, audio_langs ):
 
         if anyQualities:
             anyQualities = anyQualities.split(',')
@@ -649,6 +649,7 @@ class ConfigGeneral:
         
         sickbeard.STATUS_DEFAULT = int(defaultStatus)
         sickbeard.QUALITY_DEFAULT = int(newQuality)
+        sickbeard.AUDIO_SHOW_DEFAULT = audio_langs
 
         if defaultFlattenFolders == "true":
             defaultFlattenFolders = 1

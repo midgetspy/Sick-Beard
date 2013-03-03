@@ -1,4 +1,5 @@
 #import sickbeard
+#from sickbeard import common
 #from sickbeard.common import *
         <div class="field-pair">
             <label for="statusSelect" class="nocheck clearfix">
@@ -25,8 +26,24 @@
         #set global $anyQualities = $qualities[0]
         #set global $bestQualities = $qualities[1]
         #include $os.path.join($sickbeard.PROG_DIR, "data/interfaces/default/inc_qualityChooser.tmpl")
-
-        <div class="field-pair alt">
+		 <div class="field-pair">
+            <label for="showLangSelect" class="nocheck clearfix">
+                <span class="component-title">
+                    <select name="audio_langs" id="showLangSelect">
+                   #for $k,$v in $common.showLanguages.iteritems():
+					<option value="$k"
+					#if $k == 'fr':
+						selected 
+					#end if
+					>$v</option>
+				#end for
+                    </select>
+                </span>
+                <span class="component-desc">Set the desired audio language of the show (this can be changed later)</span>
+            </label>
+        </div>
+		
+	    <div class="field-pair alt">
             <label for="saveDefaultsButton" class="nocheck clearfix">
                 <span class="component-title"><input class="btn" type="button" id="saveDefaultsButton" value="Save Defaults" disabled="disabled" /></span>
                 <span class="component-desc">Persist current values as the defaults</span>
