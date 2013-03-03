@@ -76,7 +76,7 @@ var show_nzb_providers = #if $sickbeard.USE_NZBS then "true" else "false"#;
                             <a href="$curProvider.url" class="imgLink" target="_new"><img src="$sbRoot/images/providers/$curProvider.imageName()" alt="$curProvider.name" title="$curProvider.name" width="16" height="16" /></a>
                             $curProvider.name
                             #if not $curProvider.supportsBacklog then "*" else ""#
-                            #if $curProvider.name == "EZRSS" or $curProvider.name == "ThePirateBay" or $curProvider.name == "DailyTvTorrents" or $curProvider.name == "TorrentLeech" then "**" else ""#
+                            #if $curProvider.name == "EZRSS" or $curProvider.name == "ThePirateBay" or $curProvider.name == "DailyTvTorrents" or $curProvider.name == "TorrentLeech" or $curProvider.name == "IPTorrents" then "**" else ""#
                             #if $curProvider.name == "TorrentLeech" then "?" else ""#
                             <span class="ui-icon ui-icon-arrowthick-2-n-s pull-right"></span>
                           </li>
@@ -257,14 +257,21 @@ var show_nzb_providers = #if $sickbeard.USE_NZBS then "true" else "false"#;
 <div class="providerDiv" id="iptorrentsDiv">
                         <div class="field-pair">
                             <label class="clearfix">
-                                <span class="component-title">UID:</span>
-                                <input class="component-desc" type="text" name="iptorrents_uid" value="$sickbeard.IPTORRENTS_UID" size="40" />
+                                <span class="component-title">Username:</span>
+                                <input class="component-desc" type="text" name="iptorrents_username" value="$sickbeard.IPTORRENTS_USERNAME" size="40" />
                             </label>
                         </div>
                         <div class="field-pair">
                             <label class="clearfix">
-                                <span class="component-title">PassKey:</span>
-                                <input class="component-desc" type="text" name="iptorrents_passkey" value="$sickbeard.IPTORRENTS_PASSKEY" size="40" />
+                                <span class="component-title">Password:</span>
+                                <input class="component-desc" type="password" name="iptorrents_password" value="$sickbeard.IPTORRENTS_PASSWORD" size="40" />
+                            </label>
+                        </div>
+                        <div class="field-pair">
+                            <input type="checkbox" name="iptorrents_freeleech" id="iptorrents_freeleech" #if $sickbeard.IPTORRENTS_FREELEECH then "checked=\"checked\"" else ""#/>
+                            <label class="clearfix" for="iptorrents_freeleech">
+                                <span class="component-title">FreeLeech</span>
+                                <span class="component-desc">This will only download <b>[FreeLeech]</b> torrents.</span>
                             </label>
                         </div>
 </div><!-- /iptorrentsDiv //-->

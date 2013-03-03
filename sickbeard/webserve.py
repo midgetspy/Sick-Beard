@@ -1234,7 +1234,7 @@ class ConfigProviders:
                       dtt_norar = None, dtt_single = None,
                       thepiratebay_trusted=None, thepiratebay_proxy=None, thepiratebay_proxy_url=None,
                       torrentleech_username=None, torrentleech_password=None,
-                      iptorrents_uid=None, iptorrents_passkey=None,
+                      iptorrents_username=None, iptorrents_password=None, iptorrents_freeleech=None,
                       newzbin_username=None, newzbin_password=None,
                       provider_order=None):
 
@@ -1360,8 +1360,15 @@ class ConfigProviders:
         sickbeard.TORRENTLEECH_USERNAME = torrentleech_username
         sickbeard.TORRENTLEECH_PASSWORD = torrentleech_password    
 
-        sickbeard.IPTORRENTS_UID = iptorrents_uid.strip()
-        sickbeard.IPTORRENTS_PASSKEY = iptorrents_passkey.strip()
+        sickbeard.IPTORRENTS_USERNAME = iptorrents_username.strip()
+        sickbeard.IPTORRENTS_PASSWORD = iptorrents_password.strip()
+
+        if iptorrents_freeleech == "on":
+            iptorrents_freeleech = 1
+        else:
+            iptorrents_freeleech = 0
+
+        sickbeard.IPTORRENTS_FREELEECH = iptorrents_freeleech
 
         sickbeard.NZBSRUS_UID = nzbs_r_us_uid.strip()
         sickbeard.NZBSRUS_HASH = nzbs_r_us_hash.strip()
