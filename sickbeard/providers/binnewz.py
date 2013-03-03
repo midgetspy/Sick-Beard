@@ -96,12 +96,13 @@ class BinNewzProvider(generic.NZBProvider):
                 name = cells[2].text.strip()
                 language = cells[3].find("img").get("src")
 
-                if show.audio_lang == "fr":
-                    if not "_fr" in language:
-                        continue
-                elif show.audio_lang == "en":
-                    if "_fr" in language:
-                        continue                
+                if show:
+                    if show.audio_lang == "fr":
+                        if not "_fr" in language:
+                            continue
+                    elif show.audio_lang == "en":
+                        if "_fr" in language:
+                            continue                
   
                 # blacklist_groups = [ "alt.binaries.multimedia" ]
                 blacklist_groups = []                
@@ -210,19 +211,24 @@ class BinNewzProvider(generic.NZBProvider):
                     minSize = 150
                 
                 # FIXME
-                if show.quality == 28 and quality == Quality.SDTV:
+                if show and show.quality == 28 and quality == Quality.SDTV:
                     continue
                 
                 searchItems = []
                 
-                rangeMatcher = re.search(".*S\d{2}\s*E(\d{2})\s+.\s+E(\d{2}).*", name)
+                rangeMatcher = re.search(".*S\d{2}\s*E(\d{2})\s+[.|Et]\s+E(\d{2}).*", name)
+                if not rangeMatcher:
+                    rangeMatcher = re.search(".*S\d{2}\s*E(\d{2}),(\d{2}).*", name)
                 if rangeMatcher:
                     rangeStart = int( rangeMatcher.group(1))
                     rangeEnd = int( rangeMatcher.group(2))
                     if ( filename.find("*") != -1 ):
-                        for i in range(rangeStart, rangeEnd):
-                            searchItems.append( filename.replace("*", str(i) ) )
-                else:
+                        for i in range(rangeStart, rangeEnd + 1):
+                            searchItem = filename.replace("**", str(i) )
+                            searchItem = searchItem.replace("*", str(i) )
+                            searchItems.append( searchItem )
+
+                if len(searchItems) == 0:
                     searchItems.append( filename )
 
                 for searchItem in searchItems:
@@ -250,4 +256,5 @@ class BinNewzProvider(generic.NZBProvider):
 
         return result    
 
-provider = BinNewzProvider()   
+provider = BinNewzProvider()
+provider._doSearch("Unforgettable")   
