@@ -1228,6 +1228,7 @@ class ConfigProviders:
     @cherrypy.expose
     def saveProviders(self, nzbmatrix_username=None, nzbmatrix_apikey=None,
                       nzbs_r_us_uid=None, nzbs_r_us_hash=None, newznab_string='',
+                      omgwtfnzbs_uid=None, omgwtfnzbs_key=None,
                       tvtorrents_digest=None, tvtorrents_hash=None,
                       btn_api_key=None,
                       dtt_norar = None, dtt_single = None,
@@ -1310,7 +1311,9 @@ class ConfigProviders:
             elif curProvider == 'nzbx':
                 sickbeard.NZBX = curEnabled
             elif curProvider == 'iptorrents':
-                sickbeard.IPTORRENTS = curEnabled    
+                sickbeard.IPTORRENTS = curEnabled
+            elif curProvider == 'omgwtfnzbs':
+                sickbeard.OMGWTFNZBS = curEnabled                
             else:
                 logger.log(u"don't know what "+curProvider+" is, skipping")
 
@@ -1357,6 +1360,9 @@ class ConfigProviders:
 
         sickbeard.NZBSRUS_UID = nzbs_r_us_uid.strip()
         sickbeard.NZBSRUS_HASH = nzbs_r_us_hash.strip()
+        
+        sickbeard.OMGWTFNZBS_UID = omgwtfnzbs_uid.strip()
+        sickbeard.OMGWTFNZBS_KEY = omgwtfnzbs_key.strip()
 
         sickbeard.PROVIDER_ORDER = provider_list
 

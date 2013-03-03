@@ -25,7 +25,8 @@ __all__ = ['ezrss',
            'dtt',
            'torrentleech',
            'nzbx',
-           'iptorrents'
+           'iptorrents',
+           'omgwtfnzbs'
            ]
 
 import sickbeard
