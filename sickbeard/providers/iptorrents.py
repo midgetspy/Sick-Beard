@@ -181,7 +181,7 @@ class IPTorrentsProvider(generic.TorrentProvider):
                         torrent_seeders = int(result.find('td', attrs = {'class' : 'ac t_seeders'}).string)
                         torrent_leechers = int(result.find('td', attrs = {'class' : 'ac t_leechers'}).string)
 
-                        #Filter unseeded torrent
+                        #Filter unseeded torrent and bad releases
                         if torrent_seeders == 0 or not torrent_name \
                         or not show_name_helpers.filterBadReleases(torrent_name):
                             continue 
@@ -263,13 +263,21 @@ class IPTorrentsCache(tvcache.TVCache):
                 torrent_id = int(torrent['href'].replace('/details.php?id=', ''))
                 torrent_name = torrent.string
                 torrent_download_url = self.provider.urls['base_url'] + torrent_download['href']
+                torrent_details_url = self.provider.urls['base_url'] + torrent['href']
+                torrent_seeders = int(result.find('td', attrs = {'class' : 'ac t_seeders'}).string)
+                torrent_leechers = int(result.find('td', attrs = {'class' : 'ac t_leechers'}).string)
+
+                #Filter unseeded torrent and bad releases
+                if torrent_seeders == 0 or not torrent_name \
+                or not show_name_helpers.filterBadReleases(torrent_name):
+                    continue 
                
                 item = (torrent_name,torrent_download_url)
     
                 self._parseItem(item)
 
         except Exception, e:
-            logger.log(u"Failed to parsing " + self.name + " RSS: " + ex(e), logger.ERROR)
+            logger.log(u"Failed to parsing " + self.provider.name + " feed: " + ex(e), logger.ERROR)
             return
             
     def _getData(self):
