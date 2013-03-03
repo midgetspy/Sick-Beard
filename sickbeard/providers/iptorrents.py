@@ -181,9 +181,8 @@ class IPTorrentsProvider(generic.TorrentProvider):
                         torrent_seeders = int(result.find('td', attrs = {'class' : 'ac t_seeders'}).string)
                         torrent_leechers = int(result.find('td', attrs = {'class' : 'ac t_leechers'}).string)
 
-                        #Filter unseeded torrent and bad releases
-                        if torrent_seeders == 0 or not torrent_name \
-                        or not show_name_helpers.filterBadReleases(torrent_name):
+                        #Filter unseeded torrent
+                        if torrent_seeders == 0 or not torrent_name:
                             continue 
 
                         item = torrent_name, torrent_download_url, torrent_id, torrent_seeders, torrent_leechers
@@ -267,9 +266,8 @@ class IPTorrentsCache(tvcache.TVCache):
                 torrent_seeders = int(result.find('td', attrs = {'class' : 'ac t_seeders'}).string)
                 torrent_leechers = int(result.find('td', attrs = {'class' : 'ac t_leechers'}).string)
 
-                #Filter unseeded torrent and bad releases
-                if torrent_seeders == 0 or not torrent_name \
-                or not show_name_helpers.filterBadReleases(torrent_name):
+                #Filter unseeded torrent
+                if torrent_seeders == 0 or not torrent_name:
                     continue 
                
                 item = (torrent_name,torrent_download_url)
