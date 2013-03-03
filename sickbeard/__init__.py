@@ -247,6 +247,7 @@ XBMC_NOTIFY_ONDOWNLOAD = False
 XBMC_NOTIFY_ONSUBTITLEDOWNLOAD = False
 XBMC_UPDATE_LIBRARY = False
 XBMC_UPDATE_FULL = False
+XBMC_UPDATE_ONLYFIRST = False
 XBMC_HOST = ''
 XBMC_USERNAME = None
 XBMC_PASSWORD = None
@@ -388,7 +389,7 @@ def initialize(consoleLogging=True):
                 SAB_USERNAME, SAB_PASSWORD, SAB_APIKEY, SAB_CATEGORY, SAB_HOST, \
                 NZBGET_PASSWORD, NZBGET_CATEGORY, NZBGET_HOST, currentSearchScheduler, backlogSearchScheduler, \
                 TORRENT_USERNAME, TORRENT_PASSWORD, TORRENT_HOST, TORRENT_PATH, TORRENT_RATIO, TORRENT_PAUSED, TORRENT_LABEL, \
-                USE_XBMC, XBMC_NOTIFY_ONSNATCH, XBMC_NOTIFY_ONDOWNLOAD, XBMC_NOTIFY_ONSUBTITLEDOWNLOAD, XBMC_UPDATE_FULL, \
+                USE_XBMC, XBMC_NOTIFY_ONSNATCH, XBMC_NOTIFY_ONDOWNLOAD, XBMC_NOTIFY_ONSUBTITLEDOWNLOAD, XBMC_UPDATE_FULL, XBMC_UPDATE_ONLYFIRST, \
                 XBMC_UPDATE_LIBRARY, XBMC_HOST, XBMC_USERNAME, XBMC_PASSWORD, \
                 USE_TRAKT, TRAKT_USERNAME, TRAKT_PASSWORD, TRAKT_API, TRAKT_REMOVE_WATCHLIST, TRAKT_USE_WATCHLIST, TRAKT_METHOD_ADD, TRAKT_START_PAUSED, traktWatchListCheckerSchedular, \
                 USE_PLEX, PLEX_NOTIFY_ONSNATCH, PLEX_NOTIFY_ONDOWNLOAD, PLEX_NOTIFY_ONSUBTITLEDOWNLOAD, PLEX_UPDATE_LIBRARY, \
@@ -630,6 +631,7 @@ def initialize(consoleLogging=True):
         XBMC_NOTIFY_ONSUBTITLEDOWNLOAD = bool(check_setting_int(CFG, 'XBMC', 'xbmc_notify_onsubtitledownload', 0))
         XBMC_UPDATE_LIBRARY = bool(check_setting_int(CFG, 'XBMC', 'xbmc_update_library', 0))
         XBMC_UPDATE_FULL = bool(check_setting_int(CFG, 'XBMC', 'xbmc_update_full', 0))
+        XBMC_UPDATE_ONLYFIRST = bool(check_setting_int(CFG, 'XBMC', 'xbmc_update_onlyfirst', 0))
         XBMC_HOST = check_setting_str(CFG, 'XBMC', 'xbmc_host', '')
         XBMC_USERNAME = check_setting_str(CFG, 'XBMC', 'xbmc_username', '')
         XBMC_PASSWORD = check_setting_str(CFG, 'XBMC', 'xbmc_password', '')

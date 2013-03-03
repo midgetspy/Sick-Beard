@@ -77,6 +77,13 @@
                                 </label>
                             </div>
                             <div class="field-pair">
+                                <input type="checkbox" name="xbmc_update_onlyfirst" id="xbmc_update_onlyfirst" #if $sickbeard.XBMC_UPDATE_ONLYFIRST then "checked=\"checked\"" else ""# />
+                                <label class="clearfix" for="xbmc_update_onlyfirst">
+                                    <span class="component-title">Only Update First Host</span>
+                                    <span class="component-desc">Only send library update to the first host?</span>
+                                </label>
+                            </div>                            
+                            <div class="field-pair">
                                 <label class="nocheck clearfix">
                                     <span class="component-title">XBMC IP:Port</span>
                                     <input type="text" name="xbmc_host" id="xbmc_host" value="$sickbeard.XBMC_HOST" size="35" />
