@@ -37,6 +37,7 @@ from sickbeard.common import USER_AGENT, mediaExtensions, subtitleExtensions, XM
 
 from sickbeard import db
 from sickbeard import encodingKludge as ek
+from sickbeard import notifiers
 
 from lib.tvdb_api import tvdb_api, tvdb_exceptions
 
