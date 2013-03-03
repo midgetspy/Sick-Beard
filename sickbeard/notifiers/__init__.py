@@ -21,6 +21,7 @@ import sickbeard
 import xbmc
 import plex
 import nmj
+import nmjv2
 import synoindex
 import synologynotifier
 import pytivo
@@ -42,6 +43,7 @@ from sickbeard.common import *
 xbmc_notifier = xbmc.XBMCNotifier()
 plex_notifier = plex.PLEXNotifier()
 nmj_notifier = nmj.NMJNotifier()
+nmjv2_notifier = nmjv2.NMJv2Notifier()
 synoindex_notifier = synoindex.synoIndexNotifier()
 synology_notifier = synologynotifier.synologyNotifier()
 pytivo_notifier = pytivo.pyTivoNotifier()
@@ -62,6 +64,7 @@ notifiers = [
     xbmc_notifier,
     plex_notifier,
     nmj_notifier,
+    nmjv2_notifier,
     synoindex_notifier,
     synology_notifier,
     pytivo_notifier,

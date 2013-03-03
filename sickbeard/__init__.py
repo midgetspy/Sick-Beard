@@ -312,6 +312,11 @@ NMJ_MOUNT = None
 
 USE_SYNOINDEX = False
 
+USE_NMJv2 = False
+NMJv2_HOST = None
+NMJv2_DATABASE = None
+NMJv2_DBLOC = None
+
 USE_SYNOLOGYNOTIFIER = False
 SYNOLOGYNOTIFIER_NOTIFY_ONSNATCH = False
 SYNOLOGYNOTIFIER_NOTIFY_ONDOWNLOAD = False
@@ -402,7 +407,7 @@ def initialize(consoleLogging=True):
                 USE_NOTIFO, NOTIFO_USERNAME, NOTIFO_APISECRET, NOTIFO_NOTIFY_ONDOWNLOAD, NOTIFO_NOTIFY_ONSUBTITLEDOWNLOAD, NOTIFO_NOTIFY_ONSNATCH, \
                 USE_BOXCAR, BOXCAR_USERNAME, BOXCAR_PASSWORD, BOXCAR_NOTIFY_ONDOWNLOAD, BOXCAR_NOTIFY_ONSUBTITLEDOWNLOAD, BOXCAR_NOTIFY_ONSNATCH, \
                 USE_PUSHOVER, PUSHOVER_USERKEY, PUSHOVER_NOTIFY_ONDOWNLOAD, PUSHOVER_NOTIFY_ONSUBTITLEDOWNLOAD, PUSHOVER_NOTIFY_ONSNATCH, \
-                USE_LIBNOTIFY, LIBNOTIFY_NOTIFY_ONSNATCH, LIBNOTIFY_NOTIFY_ONDOWNLOAD, LIBNOTIFY_NOTIFY_ONSUBTITLEDOWNLOAD, USE_NMJ, NMJ_HOST, NMJ_DATABASE, NMJ_MOUNT, USE_SYNOINDEX, \
+                USE_LIBNOTIFY, LIBNOTIFY_NOTIFY_ONSNATCH, LIBNOTIFY_NOTIFY_ONDOWNLOAD, LIBNOTIFY_NOTIFY_ONSUBTITLEDOWNLOAD, USE_NMJ, NMJ_HOST, NMJ_DATABASE, NMJ_MOUNT, USE_NMJv2, NMJv2_HOST, NMJv2_DATABASE, NMJv2_DBLOC, USE_SYNOINDEX, \
                 USE_SYNOLOGYNOTIFIER, SYNOLOGYNOTIFIER_NOTIFY_ONSNATCH, SYNOLOGYNOTIFIER_NOTIFY_ONDOWNLOAD, SYNOLOGYNOTIFIER_NOTIFY_ONSUBTITLEDOWNLOAD, \
                 USE_BANNER, USE_LISTVIEW, METADATA_XBMC, METADATA_MEDIABROWSER, METADATA_PS3, METADATA_SYNOLOGY, METADATA_MEDE8ER, metadata_provider_dict, \
                 NEWZBIN, NEWZBIN_USERNAME, NEWZBIN_PASSWORD, GIT_PATH, MOVE_ASSOCIATED_FILES, \
@@ -425,6 +430,7 @@ def initialize(consoleLogging=True):
         CheckSection(CFG, 'Prowl')
         CheckSection(CFG, 'Twitter')
         CheckSection(CFG, 'NMJ')
+        CheckSection(CFG, 'NMJv2')
         CheckSection(CFG, 'Synology')
         CheckSection(CFG, 'SynologyNotifier')
         CheckSection(CFG, 'pyTivo')
@@ -679,6 +685,11 @@ def initialize(consoleLogging=True):
         NMJ_HOST = check_setting_str(CFG, 'NMJ', 'nmj_host', '')
         NMJ_DATABASE = check_setting_str(CFG, 'NMJ', 'nmj_database', '')
         NMJ_MOUNT = check_setting_str(CFG, 'NMJ', 'nmj_mount', '')
+
+        USE_NMJv2 = bool(check_setting_int(CFG, 'NMJv2', 'use_nmjv2', 0))
+        NMJv2_HOST = check_setting_str(CFG, 'NMJv2', 'nmjv2_host', '')
+        NMJv2_DATABASE = check_setting_str(CFG, 'NMJv2', 'nmjv2_database', '')
+        NMJ_DBLOC = check_setting_str(CFG, 'NMJv2', 'nmjv2_dbloc', '')
 
         USE_SYNOINDEX = bool(check_setting_int(CFG, 'Synology', 'use_synoindex', 0))
         
@@ -1332,6 +1343,12 @@ def save_config():
     new_config['NMJ']['nmj_host'] = NMJ_HOST
     new_config['NMJ']['nmj_database'] = NMJ_DATABASE
     new_config['NMJ']['nmj_mount'] = NMJ_MOUNT
+
+    new_config['NMJv2'] = {}
+    new_config['NMJv2']['use_nmjv2'] = int(USE_NMJv2)
+    new_config['NMJv2']['nmjv2_host'] = NMJv2_HOST
+    new_config['NMJv2']['nmjv2_database'] = NMJv2_DATABASE
+    new_config['NMJv2']['nmjv2_dbloc'] = NMJv2_DBLOC
 
     new_config['Synology'] = {}
     new_config['Synology']['use_synoindex'] = int(USE_SYNOINDEX)

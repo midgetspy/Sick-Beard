@@ -125,6 +125,48 @@ $(document).ready(function(){
         function (data){ $('#testNMJ-result').html(data); });
     });
 
+	$('#settingsNMJv2').click(function(){
+        if (!$('#nmjv2_host').val()) {
+            alert('Please fill in the Popcorn IP address');
+            $('#nmjv2_host').focus();
+            return;
+        }
+        $('#testNMJv2-result').html(loading);
+        var nmjv2_host = $('#nmjv2_host').val();
+		var nmjv2_dbloc;
+		var radios = document.getElementsByName("nmjv2_dbloc");
+		for (var i = 0; i < radios.length; i++){
+			if (radios[i].checked) {
+			nmjv2_dbloc=radios[i].value;
+			break;
+			}
+		}
+
+        var nmjv2_dbinstance=$('#NMJv2db_instance').val();
+        $.get(sbRoot+"/home/settingsNMJv2", {'host': nmjv2_host,'dbloc': nmjv2_dbloc,'instance': nmjv2_dbinstance},
+        function (data){
+            if (data == null) {
+                $('#nmjv2_database').removeAttr('readonly');
+            }
+            var JSONData = $.parseJSON(data);
+            $('#testNMJv2-result').html(JSONData.message);
+            $('#nmjv2_database').val(JSONData.database);
+            
+            if (JSONData.database)
+                $('#nmjv2_database').attr('readonly', true);
+            else
+                $('#nmjv2_database').removeAttr('readonly');
+        });
+    });
+
+    $('#testNMJv2').click(function(){
+        $('#testNMJv2-result').html(loading);
+        var nmjv2_host = $("#nmjv2_host").val();
+        
+        $.get(sbRoot+"/home/testNMJv2", {'host': nmjv2_host},
+        function (data){ $('#testNMJv2-result').html(data); });
+    });
+
     $('#testTrakt').click(function(){
         $('#testTrakt-result').html(loading);
         var trakt_api = $("#trakt_api").val();
