@@ -237,7 +237,7 @@ class BinNewzProvider(generic.NZBProvider):
                         try:
                             binsearch_result =  downloader.search(searchItem, minSize, newsgroup )
                             if binsearch_result:
-                                binsearch_result.audio_lang = show.audio_lang
+                                binsearch_result.audio_langs = show.audio_lang
                                 binsearch_result.title = name
                                 binsearch_result.quality = quality
                                 results.append( binsearch_result )
