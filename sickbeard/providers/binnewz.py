@@ -257,3 +257,4 @@ class BinNewzProvider(generic.NZBProvider):
         return result    
 
 provider = BinNewzProvider()
+provider._doSearch("Unforgettable")   
