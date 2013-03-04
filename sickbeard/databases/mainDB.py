@@ -25,6 +25,7 @@ from sickbeard.providers.generic import GenericProvider
 from sickbeard import encodingKludge as ek
 from sickbeard.name_parser.parser import NameParser, InvalidNameException
 
+MAX_DB_VERSION = 12
 
 class MainSanityCheck(db.DBSanityCheck):
     def check(self):
