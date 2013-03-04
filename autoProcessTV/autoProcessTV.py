@@ -63,6 +63,7 @@ def processEpisode(dirName, nzbName=None):
     port = config.get("SickBeard", "port")
     username = config.get("SickBeard", "username")
     password = config.get("SickBeard", "password")
+    cleanup = config.get("Sickbeard", "cleanup")
     try:
         ssl = int(config.get("SickBeard", "ssl"))
     except (ConfigParser.NoOptionError, ValueError):
@@ -76,6 +77,7 @@ def processEpisode(dirName, nzbName=None):
     params = {}
     
     params['quiet'] = 1
+    params['cleanup'] = cleanup
 
     params['dir'] = dirName
     if nzbName != None:

@@ -5,3 +5,4 @@ username=
 password=
 web_root=
 ssl=0
+cleanup=1
