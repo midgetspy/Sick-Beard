@@ -544,7 +544,6 @@ class RenameSeasonFolders(AddSizeAndSceneNameFields):
 
         self.incDBVersion()
 
-
 class Add1080pAndRawHDQualities(RenameSeasonFolders):
     """Add support for 1080p related qualities along with RawHD
 
@@ -650,5 +649,17 @@ class Add1080pAndRawHDQualities(RenameSeasonFolders):
         historyQuality = self.connection.select("SELECT * FROM history WHERE quality < 32768 AND quality >= 8")
         for cur_entry in historyQuality:
             self.connection.action("UPDATE history SET quality = ? WHERE showid = ? AND date = ?", [self._update_quality(cur_entry["quality"]), cur_entry["showid"], cur_entry["date"]])
+
+class AddSubtitleColumns(Add1080pAndRawHDQualities):
+
+    def test(self):
+        return self.checkDBVersion() >= 13
+    
+    def execute(self):
+        backupDatabase(13)
+
+        if not self.hasColumn("tv_episodes", "hassrt"):
+            self.addColumn("tv_episodes", "hassrt")
+            logger.log(u"Adding subtitle column to episodes")
 
         self.incDBVersion()
