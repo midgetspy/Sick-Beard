@@ -101,7 +101,7 @@ def processDir (dirName, nzbName=None, recurse=False, cleanup=False):
 
         try:
             processor = postProcessor.PostProcessor(cur_video_file_path, nzbName)
-            process_result = processor.process(cleanup)
+            process_result = processor.process(cleanup=cleanup)
             process_fail_message = ""
         except exceptions.PostProcessingFailed, e:
             process_result = False
