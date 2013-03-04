@@ -829,9 +829,12 @@ class PostProcessor(object):
 
         try:
             # move the episode and associated files to the show dir
+            self._log("doing cleanup maybe")
             if not cleanup and sickbeard.KEEP_PROCESSED_DIR:
+                self._log("copy only")
                 self._copy(self.file_path, dest_path, new_base_name, sickbeard.MOVE_ASSOCIATED_FILES)
             else:
+                self._log("move only")
                 self._move(self.file_path, dest_path, new_base_name, sickbeard.MOVE_ASSOCIATED_FILES)
         except (OSError, IOError):
             raise exceptions.PostProcessingFailed("Unable to move the files to their new home")
