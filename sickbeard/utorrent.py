@@ -20,7 +20,7 @@ import urllib, urllib2
 import cookielib
 import httplib
 import re
-import sys
+import sys, traceback
 import time
 from lib import simplejson as json
 
@@ -98,11 +98,14 @@ def sendTORRENT(result):
                 elapsed_time = time.time() - start_time
                 open_request = urllib2.urlopen(list_url)
                 new_torrent_list = json.loads(open_request.read())["torrents"]
-                for item in new_torrent_list:
-                    if item[19] == result.url: 
+                for torrent_items in new_torrent_list:
+                    for item in torrent_items:
                         #19 is the current order of the json result of the current version of utorrent.
-                        #cannot figure out how to get it by name
-                        new_torrent_hash = item[0]
+                        #cannot figure out how to get it by name, so, lets loop
+                        if item == result.url: 
+                            new_torrent_hash = torrent_items[0]
+                            break
+                    if new_torrent_hash:
                         break
                     
                 if new_torrent_hash:
@@ -114,7 +117,7 @@ def sendTORRENT(result):
                     break;
                 
                 if (elapsed_time > 20): #20 seconds to wait?
-                    raise Exception("Error")
+                    raise Exception("Torrent sent to uTorrent, but cannot find it on uTorrent list. Maybe it was already downloaded. Please remove old .torrent files on uTorrent.")
             torrent_label = sickbeard.TORRENT_PATH.replace("/", "_").replace("\\", "_")
             if torrent_label:
                 set_label_url = "%s?action=setprops&token=%s&hash=%s&s=label&v=%s" % (host, token, new_torrent_hash, torrent_label)
@@ -128,6 +131,7 @@ def sendTORRENT(result):
         return True
     except Exception, e:
         logger.log(u"Unknown failure sending Torrent to uTorrent", logger.ERROR)
+        traceback.print_exc()
         return False 
     
 def testAuthentication(host, username, password):
