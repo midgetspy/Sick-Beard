@@ -536,3 +536,17 @@ class RenameSeasonFolders(AddSizeAndSceneNameFields):
         self.connection.action("DROP TABLE tmp_tv_shows")
 
         self.incDBVersion()
+
+class AddSubtitleColumns(RenameSeasonFolders):
+
+    def test(self):
+        return self.checkDBVersion() >= 13
+    
+    def execute(self):
+        backupDatabase(13)
+
+        if not self.hasColumn("tv_episodes", "hassrt"):
+            self.addColumn("tv_episodes", "hassrt")
+            logger.log(u"Adding subtitle column to episodes")
+
+        self.incDBVersion()
