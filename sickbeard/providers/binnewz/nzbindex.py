@@ -18,7 +18,6 @@
 
 from bs4 import BeautifulSoup
 from nzbdownloader import NZBDownloader, NZBGetURLSearchResult
-import time
 import urllib
 
 class NZBIndex(NZBDownloader):
@@ -38,12 +37,8 @@ class NZBIndex(NZBDownloader):
 
         suffixURL = urllib.urlencode({'hidespam' : 1, 'more' : 0, 'max': '25', 'minsize' : minSize, 'q' : filename})
         refererURL = "http://www.nzbindex.nl/search/?" + suffixURL
-    
-        if self.lastRequestTime and self.lastRequestTime > ( time.mktime(time.localtime()) - 10):
-            time.sleep( 10 )
-        self.lastRequestTime = time.gmtime()
 
-        nzbIndexSoup = BeautifulSoup( self.opener.open(refererURL) )
+        nzbIndexSoup = BeautifulSoup( self.open(refererURL) )
 
         results = nzbIndexSoup.findAll("tr", {"class" : "odd"}) + nzbIndexSoup.findAll("tr", {"class" : "even"})
                              
