@@ -78,7 +78,7 @@ class PageTemplate (Template):
 
         if sickbeard.NZBS and sickbeard.NZBS_UID and sickbeard.NZBS_HASH:
             logger.log(u"NZBs.org has been replaced, please check the config to configure the new provider!", logger.ERROR)
-            ui.notifications.error("NZBs.org Config Update", "NZBs.org has a new site. Please <a href=\""+sickbeard.WEB_ROOT+"/config/providers\">update your config</a> with the api key from <a href=\"http://beta.nzbs.org/login\">http://beta.nzbs.org</a> and then disable the old NZBs.org provider.")
+            ui.notifications.error("NZBs.org Config Update", "NZBs.org has a new site. Please <a href=\""+sickbeard.WEB_ROOT+"/config/providers\">update your config</a> with the api key from <a href=\"http://nzbs.org/login\">http://nzbs.org</a> and then disable the old NZBs.org provider.")
 
         if "X-Forwarded-Host" in cherrypy.request.headers:
             self.sbHost = cherrypy.request.headers['X-Forwarded-Host']
@@ -339,6 +339,7 @@ class Manage:
             epCounts[Overview.QUAL] = 0
             epCounts[Overview.GOOD] = 0
             epCounts[Overview.UNAIRED] = 0
+            epCounts[Overview.SNATCHED] = 0
 
             sqlResults = myDB.select("SELECT * FROM tv_episodes WHERE showid = ? ORDER BY season DESC, episode DESC", [curShow.tvdbid])
 
@@ -1063,9 +1064,10 @@ class ConfigProviders:
     @cherrypy.expose
     def saveProviders(self, nzbmatrix_username=None, nzbmatrix_apikey=None,
                       nzbs_r_us_uid=None, nzbs_r_us_hash=None, newznab_string='',
+                      omgwtfnzbs_uid=None, omgwtfnzbs_key=None,
                       tvtorrents_digest=None, tvtorrents_hash=None,
                       torrentleech_key=None,
- 					  btn_api_key=None,
+                      btn_api_key=None,
                       newzbin_username=None, newzbin_password=None,
                       provider_order=None):
 
@@ -1079,31 +1081,32 @@ class ConfigProviders:
         finishedNames = []
 
         # add all the newznab info we got into our list
-        for curNewznabProviderStr in newznab_string.split('!!!'):
-
-            if not curNewznabProviderStr:
-                continue
-
-            curName, curURL, curKey = curNewznabProviderStr.split('|')
-
-            newProvider = newznab.NewznabProvider(curName, curURL, curKey)
-
-            curID = newProvider.getID()
-
-            # if it already exists then update it
-            if curID in newznabProviderDict:
-                newznabProviderDict[curID].name = curName
-                newznabProviderDict[curID].url = curURL
-                newznabProviderDict[curID].key = curKey
-            else:
-                sickbeard.newznabProviderList.append(newProvider)
-
-            finishedNames.append(curID)
-
-        # delete anything that is missing
-        for curProvider in sickbeard.newznabProviderList:
-            if curProvider.getID() not in finishedNames:
-                sickbeard.newznabProviderList.remove(curProvider)
+        if newznab_string:
+            for curNewznabProviderStr in newznab_string.split('!!!'):
+    
+                if not curNewznabProviderStr:
+                    continue
+    
+                curName, curURL, curKey = curNewznabProviderStr.split('|')
+    
+                newProvider = newznab.NewznabProvider(curName, curURL, curKey)
+    
+                curID = newProvider.getID()
+    
+                # if it already exists then update it
+                if curID in newznabProviderDict:
+                    newznabProviderDict[curID].name = curName
+                    newznabProviderDict[curID].url = curURL
+                    newznabProviderDict[curID].key = curKey
+                else:
+                    sickbeard.newznabProviderList.append(newProvider)
+    
+                finishedNames.append(curID)
+    
+            # delete anything that is missing
+            for curProvider in sickbeard.newznabProviderList:
+                if curProvider.getID() not in finishedNames:
+                    sickbeard.newznabProviderList.remove(curProvider)
 
         # do the enable/disable
         for curProviderStr in provider_str_list:
@@ -1124,6 +1127,10 @@ class ConfigProviders:
                 sickbeard.BINREQ = curEnabled
             elif curProvider == 'womble_s_index':
                 sickbeard.WOMBLE = curEnabled
+            elif curProvider == 'nzbx':
+                sickbeard.NZBX = curEnabled
+            elif curProvider == 'omgwtfnzbs':
+                sickbeard.OMGWTFNZBS = curEnabled
             elif curProvider == 'ezrss':
                 sickbeard.EZRSS = curEnabled
             elif curProvider == 'tvtorrents':
@@ -1135,7 +1142,7 @@ class ConfigProviders:
             elif curProvider in newznabProviderDict:
                 newznabProviderDict[curProvider].enabled = bool(curEnabled)
             else:
-                logger.log(u"don't know what "+curProvider+" is, skipping")
+                logger.log(u"don't know what " + curProvider + " is, skipping")
 
         sickbeard.TVTORRENTS_DIGEST = tvtorrents_digest.strip()
         sickbeard.TVTORRENTS_HASH = tvtorrents_hash.strip()
@@ -1146,6 +1153,9 @@ class ConfigProviders:
 
         sickbeard.NZBSRUS_UID = nzbs_r_us_uid.strip()
         sickbeard.NZBSRUS_HASH = nzbs_r_us_hash.strip()
+
+        sickbeard.OMGWTFNZBS_UID = omgwtfnzbs_uid.strip()
+        sickbeard.OMGWTFNZBS_KEY = omgwtfnzbs_key.strip()
 
         sickbeard.PROVIDER_ORDER = provider_list
 
@@ -1161,6 +1171,7 @@ class ConfigProviders:
 
         redirect("/config/providers/")
 
+
 class ConfigNotifications:
 
     @cherrypy.expose
@@ -1170,7 +1181,7 @@ class ConfigNotifications:
         return _munge(t)
 
     @cherrypy.expose
-    def saveNotifications(self, use_xbmc=None, xbmc_notify_onsnatch=None, xbmc_notify_ondownload=None,
+    def saveNotifications(self, use_xbmc=None, xbmc_notify_onsnatch=None, xbmc_notify_ondownload=None, xbmc_update_onlyfirst=None,
                           xbmc_update_library=None, xbmc_update_full=None, xbmc_host=None, xbmc_username=None, xbmc_password=None,
                           use_plex=None, plex_notify_onsnatch=None, plex_notify_ondownload=None, plex_update_library=None,
                           plex_server_host=None, plex_host=None, plex_username=None, plex_password=None,
@@ -1182,6 +1193,7 @@ class ConfigNotifications:
                           use_pushover=None, pushover_notify_onsnatch=None, pushover_notify_ondownload=None, pushover_userkey=None,
                           use_libnotify=None, libnotify_notify_onsnatch=None, libnotify_notify_ondownload=None,
                           use_nmj=None, nmj_host=None, nmj_database=None, nmj_mount=None, use_synoindex=None,
+                          use_nmjv2=None, nmjv2_host=None, nmjv2_dbloc=None, nmjv2_database=None,
                           use_trakt=None, trakt_username=None, trakt_password=None, trakt_api=None,
                           use_pytivo=None, pytivo_notify_onsnatch=None, pytivo_notify_ondownload=None, pytivo_update_library=None,
                           pytivo_host=None, pytivo_share_name=None, pytivo_tivo_name=None,
@@ -1208,6 +1220,11 @@ class ConfigNotifications:
             xbmc_update_full = 1
         else:
             xbmc_update_full = 0
+
+        if xbmc_update_onlyfirst == "on":
+            xbmc_update_onlyfirst = 1
+        else:
+            xbmc_update_onlyfirst = 0
 
         if use_xbmc == "on":
             use_xbmc = 1
@@ -1329,6 +1346,11 @@ class ConfigNotifications:
         else:
             use_synoindex = 0
 
+        if use_nmjv2 == "on":
+            use_nmjv2 = 1
+        else:
+            use_nmjv2 = 0
+
         if use_trakt == "on":
             use_trakt = 1
         else:
@@ -1374,6 +1396,7 @@ class ConfigNotifications:
         sickbeard.XBMC_NOTIFY_ONDOWNLOAD = xbmc_notify_ondownload
         sickbeard.XBMC_UPDATE_LIBRARY = xbmc_update_library
         sickbeard.XBMC_UPDATE_FULL = xbmc_update_full
+        sickbeard.XBMC_UPDATE_ONLYFIRST = xbmc_update_onlyfirst
         sickbeard.XBMC_HOST = xbmc_host
         sickbeard.XBMC_USERNAME = xbmc_username
         sickbeard.XBMC_PASSWORD = xbmc_password
@@ -1430,6 +1453,11 @@ class ConfigNotifications:
 
         sickbeard.USE_SYNOINDEX = use_synoindex
 
+        sickbeard.USE_NMJv2 = use_nmjv2
+        sickbeard.NMJv2_HOST = nmjv2_host
+        sickbeard.NMJv2_DATABASE = nmjv2_database
+        sickbeard.NMJv2_DBLOC = nmjv2_dbloc
+
         sickbeard.USE_TRAKT = use_trakt
         sickbeard.TRAKT_USERNAME = trakt_username
         sickbeard.TRAKT_PASSWORD = trakt_password
@@ -1437,7 +1465,7 @@ class ConfigNotifications:
 
         sickbeard.USE_PYTIVO = use_pytivo
         sickbeard.PYTIVO_NOTIFY_ONSNATCH = pytivo_notify_onsnatch == "off"
-        sickbeard.PYTIVO_NOTIFY_ONDOWNLOAD = pytivo_notify_ondownload ==  "off"
+        sickbeard.PYTIVO_NOTIFY_ONDOWNLOAD = pytivo_notify_ondownload == "off"
         sickbeard.PYTIVO_UPDATE_LIBRARY = pytivo_update_library
         sickbeard.PYTIVO_HOST = pytivo_host
         sickbeard.PYTIVO_SHARE_NAME = pytivo_share_name
@@ -2151,6 +2179,25 @@ class Home:
             return '{"message": "Failed! Make sure your Popcorn is on and NMJ is running. (see Log & Errors -> Debug for detailed info)", "database": "", "mount": ""}'
 
     @cherrypy.expose
+    def testNMJv2(self, host=None):
+        cherrypy.response.headers['Cache-Control'] = "max-age=0,no-cache,no-store"
+
+        result = notifiers.nmjv2_notifier.test_notify(urllib.unquote_plus(host))
+        if result:
+            return "Test notice sent successfully to " + urllib.unquote_plus(host)
+        else:
+            return "Test notice failed to " + urllib.unquote_plus(host)
+
+    @cherrypy.expose
+    def settingsNMJv2(self, host=None, dbloc=None, instance=None):
+        cherrypy.response.headers['Cache-Control'] = "max-age=0,no-cache,no-store"
+        result = notifiers.nmjv2_notifier.notify_settings(urllib.unquote_plus(host), dbloc, instance)
+        if result:
+            return '{"message": "NMJ Database found at: %(host)s", "database": "%(database)s"}' % {"host": host, "database": sickbeard.NMJv2_DATABASE}
+        else:
+            return '{"message": "Unable to find NMJ Database at location: %(dbloc)s. Is the right location selected and PCH running?", "database": ""}' % {"dbloc": dbloc}
+
+    @cherrypy.expose
     def testTrakt(self, api=None, username=None, password=None):
         cherrypy.response.headers['Cache-Control'] = "max-age=0,no-cache,no-store"
 
@@ -2281,6 +2328,7 @@ class Home:
         epCounts[Overview.QUAL] = 0
         epCounts[Overview.GOOD] = 0
         epCounts[Overview.UNAIRED] = 0
+        epCounts[Overview.SNATCHED] = 0
 
         for curResult in sqlResults:
 
@@ -2490,17 +2538,20 @@ class Home:
         # just give it some time
         time.sleep(3)
 
-        redirect("/home/displayShow?show="+str(showObj.tvdbid))
+        redirect("/home/displayShow?show=" + str(showObj.tvdbid))
 
     @cherrypy.expose
     def updateXBMC(self, showName=None):
-        # TODO: configure that each host can have different options / username / pw
-        # only send update to first host in the list -- workaround for xbmc sql backend users
-        firstHost = sickbeard.XBMC_HOST.split(",")[0].strip()
-        if notifiers.xbmc_notifier.update_library(showName=showName):
-            ui.notifications.message("Library update command sent to XBMC host: " + firstHost)
+        if sickbeard.XBMC_UPDATE_ONLYFIRST:
+            # only send update to first host in the list -- workaround for xbmc sql backend users
+            host = sickbeard.XBMC_HOST.split(",")[0].strip()
         else:
-            ui.notifications.error("Unable to contact XBMC host: " + firstHost)
+            host = sickbeard.XBMC_HOST
+
+        if notifiers.xbmc_notifier.update_library(showName=showName):
+            ui.notifications.message("Library update command sent to XBMC host(s): " + host)
+        else:
+            ui.notifications.error("Unable to contact one or more XBMC host(s): " + host)
         redirect('/home')
 
     @cherrypy.expose

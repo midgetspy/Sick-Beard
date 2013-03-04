@@ -120,4 +120,3 @@ class NZBsRUSCache(tvcache.TVCache):
         return data != 'Invalid Link'
 
 provider = NZBsRUSProvider()
-
