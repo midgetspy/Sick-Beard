@@ -177,8 +177,8 @@ class TorrentLeechProvider(generic.TorrentProvider):
 
                         #Filter unseeded torrent
                         if seeders == 0 or not title \
-                        or not show_name_helpers.filterBadReleases(title):
-                            continue 
+                        or not download_url:
+                            continue
 
                         item = title, download_url, id, seeders, leechers
                         logger.log(u"Found result: " + title + "(" + searchURL + ")", logger.DEBUG)
@@ -260,7 +260,7 @@ class TorrentLeechCache(tvcache.TVCache):
                 leechers = int(result.find('td', attrs = {'class' : 'leechers'}).string)
 
                 #Filter torrent
-                if not title or not show_name_helpers.filterBadReleases(title):
+                if not title or not download_url:
                     continue 
 
                 item = (title, download_url)

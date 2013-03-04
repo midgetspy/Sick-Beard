@@ -227,8 +227,7 @@ class ThePirateBayProvider(generic.TorrentProvider):
                     leechers = int(torrent.group('leechers'))
 
                     #Filter unseeded torrent
-                    if seeders == 0 or not title \
-                    or not show_name_helpers.filterBadReleases(title):
+                    if seeders == 0 or not title:
                         continue 
                    
                     #Accept Torrent only from Good People for every Episode Search
@@ -338,6 +337,9 @@ class ThePirateBayCache(tvcache.TVCache):
 
             title = torrent.group('title').replace('_','.')#Do not know why but SickBeard skip release with '_' in name
             url = torrent.group('url')
+           
+            if not title or not url:
+                continue
            
             #accept torrent only from Trusted people
             if sickbeard.THEPIRATEBAY_TRUSTED and re.search('(VIP|Trusted|Helper)',torrent.group(0))== None:
