@@ -17,12 +17,10 @@
 # along with Sick Beard.  If not, see <http://www.gnu.org/licenses/>.
 
 import urllib
-import urllib2
 from bs4 import BeautifulSoup
 import re
 from nzbdownloader import NZBDownloader
 from nzbdownloader import NZBPostURLSearchResult
-import time
 
 class BinSearch(NZBDownloader):
     
@@ -35,12 +33,8 @@ class BinSearch(NZBDownloader):
 
         for suffixURL in binSearchURLs:
             binSearchURL = "http://binsearch.info/?adv_age=&" + suffixURL
-        
-            if self.lastRequestTime and self.lastRequestTime > ( time.mktime(time.localtime()) - 10):
-                time.sleep( 10 )
-            self.lastRequestTime = time.gmtime()            
-
-            binSearchSoup =BeautifulSoup(urllib2.urlopen(binSearchURL))
+                    
+            binSearchSoup = BeautifulSoup( self.open(binSearchURL) )
 
             foundName = None
             sizeInMegs = None
@@ -62,5 +56,5 @@ class BinSearch(NZBDownloader):
             if foundName:
                 postData = urllib.urlencode({foundName: 'on', 'action': 'nzb'})
                 nzbURL = "http://binsearch.info/fcgi/nzb.fcgi?adv_age=&" + suffixURL
-                return NZBPostURLSearchResult( nzbURL, postData, sizeInMegs, binSearchURL )
+                return NZBPostURLSearchResult( self, nzbURL, postData, sizeInMegs, binSearchURL )
                     

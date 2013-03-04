@@ -17,7 +17,6 @@
 # along with Sick Beard.  If not, see <http://www.gnu.org/licenses/>.
 
 import urllib
-import urllib2
 import re
 from bs4 import BeautifulSoup
 from nzbdownloader import NZBDownloader
@@ -40,7 +39,6 @@ class NZBClub(NZBDownloader):
     
     def __init__(self):
         NZBDownloader.__init__(self)
-        
 
     def search(self, filename, minSize, newsgroup=None):
 
@@ -53,11 +51,7 @@ class NZBClub(NZBDownloader):
 
             nzbClubURL = "http://www.nzbclub.com/search.aspx?" + suffixURL
             
-            if self.lastRequestTime and self.lastRequestTime > ( time.mktime(time.localtime()) - 10):
-                time.sleep( 10 )
-            self.lastRequestTime = time.gmtime()
-            
-            nzbClubSoup = BeautifulSoup(urllib2.urlopen(nzbClubURL).read().decode('utf-8','ignore'))
+            nzbClubSoup = BeautifulSoup( self.open(nzbClubURL).read().decode('utf-8','ignore'))
             
             if nzbClubSoup:
                 sizeInMegs = None
@@ -84,4 +78,4 @@ class NZBClub(NZBDownloader):
                     downloadNZBImg = row.find("img", alt="Get NZB")
                     if downloadNZBImg:
                         downloadNZBLink = downloadNZBImg.parent
-                        return NZBGetURLSearchResult( "http://www.nzbclub.com" + downloadNZBLink["href"], sizeInMegs, nzbClubURL)
+                        return NZBGetURLSearchResult( self, "http://www.nzbclub.com" + downloadNZBLink["href"], sizeInMegs, nzbClubURL)

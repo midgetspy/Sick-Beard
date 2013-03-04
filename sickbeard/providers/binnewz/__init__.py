@@ -16,15 +16,18 @@
 # You should have received a copy of the GNU General Public License
 # along with Sick Beard.  If not, see <http://www.gnu.org/licenses/>.
 
-from binsearch_downloader import BinSearch
+from binsearch import BinSearch
+from nzbclub import NZBClub
+from nzbindex import NZBIndex
+
 from bs4 import BeautifulSoup
-from nzbclub_downloader import NZBClub
 from sickbeard import logger, classes, show_name_helpers
+from sickbeard.providers import generic
 from sickbeard.common import Quality
 from sickbeard.exceptions import ex
-import generic
-import re
+
 import sickbeard
+import re
 import urllib
 import urllib2
 
@@ -36,8 +39,7 @@ class BinNewzProvider(generic.NZBProvider):
 
         self.supportsBacklog = True
         
-        self.nzbDownloaders = [ NZBClub(), BinSearch() ]
-        # self.nzbDownloaders = [ NZBClub() ]
+        self.nzbDownloaders = [ NZBIndex(), NZBClub(), BinSearch() ]
         
         self.url = "http://www.binnews.in/"
         
@@ -73,7 +75,6 @@ class BinNewzProvider(generic.NZBProvider):
         logger.log("BinNewz : Searching for " + searchString)
         
         data = urllib.urlencode({'b_submit': 'BinnewZ', 'cats[]' : all, 'edSearchAll' : searchString, 'sections[]': 'all'})
-        headers = {"Content-type": "application/x-www-form-urlencoded", "Accept": "text/plain"}
         
         try:
             soup = BeautifulSoup( urllib2.urlopen("http://www.binnews.in/_bin/search2.php", data) )
@@ -162,8 +163,6 @@ class BinNewzProvider(generic.NZBProvider):
                         continue
    
                 filename =  cells[5].contents[0]
-                
-                logger.log("Searching for %s : %s" % (name, filename))
     
                 m =  re.search("^(.+)\s+{(.*)}$", name)
                 qualityStr = ""
@@ -241,6 +240,7 @@ class BinNewzProvider(generic.NZBProvider):
                                 binsearch_result.title = name
                                 binsearch_result.quality = quality
                                 results.append( binsearch_result )
+                                logger.log("Found" )
                                 break
                         except Exception, e:
                             logger.log("Searching from downloader failed : " + ex(e), logger.ERROR)

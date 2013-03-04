@@ -19,25 +19,38 @@
 import urllib2
 from StringIO import StringIO
 import gzip
+import cookielib
+import time
 
 class NZBDownloader(object):
 
     def __init__( self ):
+        self.cj = cookielib.CookieJar()
+        self.opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(self.cj))        
         self.lastRequestTime = None
+        
+    def waitBeforeNextRequest(self):
+        if self.lastRequestTime and self.lastRequestTime > ( time.mktime(time.localtime()) - 10):
+            time.sleep( 10 )
+        self.lastRequestTime = time.gmtime()
+        
+    def open(self, request):
+        self.waitBeforeNextRequest()
+        return self.opener.open(request)
         
 class NZBSearchResult(object):
     
-    def __init__(self, sizeInMegs, refererURL):
-        self.sizeInMegs = sizeInMegs
+    def __init__(self, downloader, refererURL):
+        self.downloader = downloader
         self.refererURL = refererURL
         
     def readRequest(self, request):
         request.add_header('Accept-encoding', 'gzip')
         request.add_header('Referer', self.refererURL)
-        request.add_header('Accept-Encoding', 'gzip,deflate,sdch')
+        request.add_header('Accept-Encoding', 'gzip')
         request.add_header('User-Agent', 'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.17 (KHTML, like Gecko) Chrome/24.0.1312.57 Safari/537.17')
-        # headers = {"Content-type": "application/x-www-form-urlencoded", "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8"}
-        response = urllib2.urlopen(request)
+
+        response = self.downloader.open(request)
         if response.info().get('Content-Encoding') == 'gzip':
             buf = StringIO( response.read())
             f = gzip.GzipFile(fileobj=buf)
@@ -50,8 +63,8 @@ class NZBSearchResult(object):
         
 class NZBGetURLSearchResult( NZBSearchResult ):
 
-    def __init__(self, nzburl, sizeInMegs, refererURL):
-        NZBSearchResult.__init__(self, sizeInMegs, refererURL)
+    def __init__(self, downloader, nzburl, refererURL):
+        NZBSearchResult.__init__(self, downloader, refererURL)
         self.nzburl = nzburl
         
     def getNZB(self):
@@ -61,8 +74,8 @@ class NZBGetURLSearchResult( NZBSearchResult ):
 
 class NZBPostURLSearchResult( NZBSearchResult ):
 
-    def __init__(self, nzburl, postData, sizeInMegs, refererURL):
-        NZBSearchResult.__init__(self, sizeInMegs, refererURL)
+    def __init__(self, downloader, nzburl, postData, refererURL):
+        NZBSearchResult.__init__(self, downloader, refererURL)
         self.nzburl = nzburl
         self.postData = postData
         
@@ -73,8 +86,8 @@ class NZBPostURLSearchResult( NZBSearchResult ):
 
 class NZBDataSearchResult( NZBSearchResult ):
 
-    def __init__(self, nzbdata, sizeInMegs, refererURL):
-        NZBSearchResult.__init__(self, sizeInMegs, refererURL)
+    def __init__(self, nzbdata, refererURL):
+        NZBSearchResult.__init__(self, None, refererURL)
         self.nzbdata = nzbdata
 
     def getNZB(self):
