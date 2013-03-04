@@ -146,7 +146,7 @@ class IPTorrentsProvider(generic.TorrentProvider):
                 # URL with 50 tv-show results, or max 150 if adjusted in IPTorrents profile
                 searchURL = self.urls['search'] % (self.categorie, freeleech, search_string)
 
-                logger.log(u"Search page URL: " + searchURL, logger.DEBUG)
+                logger.log(u"" + self.name + " search page URL: " + searchURL, logger.DEBUG)
         
                 data = self.getURL(searchURL)
                 if not data:
@@ -189,7 +189,7 @@ class IPTorrentsProvider(generic.TorrentProvider):
                         items[mode].append(item)
 
                 except:
-                    logger.log(u"Failed to parse " + self.name + " page url: " + searchURL, logger.ERROR)
+                    logger.log(u"Failed to parse " + self.name + " search page URL: " + searchURL, logger.ERROR)
 
             results += items[mode]  
                 
@@ -280,7 +280,7 @@ class IPTorrentsCache(tvcache.TVCache):
                 self._addCacheEntry(torrent_name, torrent_download_url)
 
         except:
-            logger.log(u"Failed to parse " + self.provider.name + " cache page: " + cacheURL, logger.ERROR)
+            logger.log(u"Failed to parse " + self.provider.name + " cache page URL: " + cacheURL, logger.ERROR)
             return
 
 provider = IPTorrentsProvider()
