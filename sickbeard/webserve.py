@@ -1470,12 +1470,13 @@ class HomePostProcess:
         return _munge(t)
 
     @cherrypy.expose
-    def processEpisode(self, dir=None, nzbName=None, jobName=None, quiet=None, cleanup=False):
+    def processEpisode(self, dir=None, nzbName=None, jobName=None, quiet=None, cleanup="False"):
 
         if not dir:
             redirect("/home/postprocess")
         else:
-            result = processTV.processDir(dir, nzbName, cleanup=cleanup)
+            doCleanup = cleanup.lower() == "true" or cleanup == "1"
+            result = processTV.processDir(dir, nzbName, cleanup=doCleanup)
             if quiet != None and int(quiet) == 1:
                 return result
 
