@@ -125,7 +125,7 @@ class NewznabProvider(generic.NZBProvider):
         # if we can't then fall back on a very basic name search
             else:
                 if ep_obj.show.audio_lang=="fr":
-                    params['q'] = helpers.sanitizeSceneName(ep_obj.show.name) + " fench"
+                    params['q'] = helpers.sanitizeSceneName(ep_obj.show.name) + " french"
                 else:
                     params['q'] = helpers.sanitizeSceneName(ep_obj.show.name)
 
