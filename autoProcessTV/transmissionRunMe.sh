@@ -1,0 +1,2 @@
+
+TR_TORRENT_DIR=$TR_TORRENT_DIR TR_TORRENT_NAME=$TR_TORRENT_NAME TR_TORRENT_HASH=$TR_TORRENT_HASH python /opt/sickbeard/autoProcessTV/transmissionToSickBeard.py

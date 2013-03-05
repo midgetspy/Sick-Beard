@@ -131,16 +131,16 @@ class TorrentDayProvider(generic.TorrentProvider):
                 if 'Expires' in header:
                     for cookies in cookie:
                         if cookies.name == 'uid':
-                            uid = 'UID={}; '.format(cookies.value)
+                            uid = 'UID={0}; '.format(cookies.value)
                         elif cookies.name == 'pass':
-                            passwd = 'PASS={}; '.format(cookies.value)
+                            passwd = 'PASS={0}; '.format(cookies.value)
                     self.cj = cookie
-                    self.token = ('{}{}'.format(uid,passwd))
+                    self.token = ('{0}{1}'.format(uid,passwd))
                     success = True
-                    logger.log("TorrentDay session: {}".format(self.token))
-                    logger.log("TorrentDay successfully logged user '{}' in.".format(sickbeard.TORRENTDAY_USERNAME))
+                    logger.log("TorrentDay session: {0}".format(self.token))
+                    logger.log("TorrentDay successfully logged user '{0}' in.".format(sickbeard.TORRENTDAY_USERNAME))
             if not success:
-                logger.log("TorrentDay failed to log user '{}' in. Incorrect Password?".format(sickbeard.TORRENTDAY_USERNAME), logger.ERROR)
+                logger.log("TorrentDay failed to log user '{0}' in. Incorrect Password?".format(sickbeard.TORRENTDAY_USERNAME), logger.ERROR)
                     
             res.close()
             
@@ -186,7 +186,7 @@ class TorrentDayProvider(generic.TorrentProvider):
     
     def _doSearch(self, search_params, show=None):
         
-        logger.log('Performing Search: {}'.format(search_params))
+        logger.log('Performing Search: {0}'.format(search_params))
         
         results = []
         
@@ -195,7 +195,7 @@ class TorrentDayProvider(generic.TorrentProvider):
         data = {'/browse.php?' : None,'cata':'yes','jxt':8,'jxw':'b','search':searchTerm, 'c7':1, 'c26':1,'c2':1, 'c24':1}
         search_data = urllib.urlencode(data)
         html = self.getURL('http://www.torrentday.com/V3/API/API.php', data=search_data)
-        logger.log('Post Data: {}'.format(data), logger.DEBUG)
+        logger.log('Post Data: {0}'.format(data), logger.DEBUG)
         res, pages = self.parseResults(html)
         
         results = results + res
@@ -205,7 +205,7 @@ class TorrentDayProvider(generic.TorrentProvider):
                 data = {'/browse.php?' : None,'cata':'yes','page':page, 'jxt':8,'jxw':'b','search':searchTerm, 'c7':1, 'c26':1,'c2':1, 'c24':1}
                 search_data = urllib.urlencode(data)
                 html = self.getURL('http://www.torrentday.com/V3/API/API.php', search_data)
-                logger.log('Post Data: {}'.format(data), logger.DEBUG)
+                logger.log('Post Data: {0}'.format(data), logger.DEBUG)
                 res = self.parseResults(html)[0]
                 results = results + res
         return results
@@ -230,8 +230,8 @@ class TorrentDayProvider(generic.TorrentProvider):
                 pass
             
             for tor in torrents:
-                results.append(([tor['name'],self.downloadUrl + '{}/{}?torrent_pass={}'.format(tor['id'],tor['fname'],sickbeard.TORRENTDAY_RSSHASH)]))
-                logger.log('Parser found: {}'.format(tor['name']))   
+                results.append(([tor['name'],self.downloadUrl + '{0}/{1}?torrent_pass={2}'.format(tor['id'],tor['fname'],sickbeard.TORRENTDAY_RSSHASH)]))
+                logger.log('Parser found: {0}'.format(tor['name']))   
         except AttributeError, e: 
             logger.log("No results found", logger.DEBUG)
             return [],0
@@ -250,8 +250,8 @@ class TorrentDayCache(tvcache.TVCache):
 
         
     def _getRSSData(self):
-        self.url = 'http://www.torrentday.com/torrents/rss?download;l26;l7;l24;l2;u={};tp={}'.format(sickbeard.TORRENTDAY_UID, sickbeard.TORRENTDAY_RSSHASH)
-        logger.log(u'RSS url:{}'.format(self.url))
+        self.url = 'http://www.torrentday.com/torrents/rss?download;l26;l7;l24;l2;u={0};tp={1}'.format(sickbeard.TORRENTDAY_UID, sickbeard.TORRENTDAY_RSSHASH)
+        logger.log(u'RSS url:{0}'.format(self.url))
         xml = helpers.getURL(self.url)
         return xml
     
