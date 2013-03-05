@@ -102,7 +102,7 @@ class SubtitleQueueItem(generic_queue.QueueItem):
                                                       order=None)
         except Exception, e:
             logger.log("Error while downloading subtitles for %s: %s" % (ep_obj.prettyName(), str(e)), logger.ERROR)
-            logger.log(traceback.print_exc(), logger.DEBUG)
+            traceback.print_exc()
             return False
         subCount = 0
         for subEpisode in subEpisodes:
