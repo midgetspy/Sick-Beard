@@ -154,6 +154,10 @@ class BinNewzProvider(generic.NZBProvider):
                         newsgroup = "alt.binaries.roger"
                     elif newsgroup == "abtatu":
                         newsgroup = "alt.binaries.tatu"
+                    elif newsgroup =="abstvf":
+                        newsgroup = "alt.binaries.series.tv.french"
+                    elif newsgroup =="abmdfreposts":
+                        newsgroup="alt.binaries.movies.divx.french.reposts"
                     else:
                         logger.log(u"Unknown binnewz newsgroup: " + newsgroup, logger.ERROR)
                         continue
