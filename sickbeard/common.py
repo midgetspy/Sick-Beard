@@ -212,7 +212,7 @@ class Quality:
             if status > x * 100:
                 return (status - x * 100, x)
 
-        return (Quality.NONE, status)
+        return (status, Quality.NONE)
 
     @staticmethod
     def statusFromName(name, assume=True):
