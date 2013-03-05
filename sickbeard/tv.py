@@ -927,8 +927,10 @@ class TVShow(object):
 
             epStatus, curQuality = Quality.splitCompositeStatus(epStatus)
 
+            if epStatus in (SNATCHED, SNATCHED_PROPER):
+                return Overview.SNATCHED
             # if they don't want re-downloads then we call it good if they have anything
-            if maxBestQuality == None:
+            elif maxBestQuality == None:
                 return Overview.GOOD
             # if they have one but it's not the best they want then mark it as qual
             elif curQuality < maxBestQuality:
@@ -960,6 +962,7 @@ class TVEpisode(object):
         self._file_size = 0
         self._audio_langs = ''
         self._release_name = ''
+
         # setting any of the above sets the dirty flag
         self.dirty = True
 

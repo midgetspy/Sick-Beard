@@ -189,7 +189,6 @@ class NameParser(object):
         if type(number) == int:
             return number
 
-
         # good lord I'm lazy
         if number.lower() == 'i': return 1
         if number.lower() == 'ii': return 2

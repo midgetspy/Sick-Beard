@@ -318,7 +318,6 @@ class NewznabCache(tvcache.TVCache):
             cat = '5020'
 
         params = {"t": "tvsearch",
-                  "age": sickbeard.USENET_RETENTION,
                   "cat": cat}
 
         # hack this in for now
