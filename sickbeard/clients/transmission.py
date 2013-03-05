@@ -66,8 +66,8 @@ class TransmissionAPI(GenericClient):
 
     def _add_torrent_file(self, result):
 
-        arguments = { 'arguments': b64encode(result.content),
-                      'method': 'session-get',
+        arguments = { 'metainfo': b64encode(result.content),
+                      'paused': 1 if sickbeard.TORRENT_PAUSED else 0,
                       'download-dir': sickbeard.TORRENT_PATH
                       }        
         post_data = json.dumps({'arguments': arguments,
