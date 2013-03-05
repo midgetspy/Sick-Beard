@@ -84,4 +84,4 @@ class XSpeedsCache(tvcache.TVCache):
 
         self._addCacheEntry(title, url)
 
-provider = TvTorrentsProvider()
+provider = XSpeedsProvider()
