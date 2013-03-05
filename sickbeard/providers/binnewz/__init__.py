@@ -74,7 +74,7 @@ class BinNewzProvider(generic.NZBProvider):
         
         logger.log("BinNewz : Searching for " + searchString)
         
-        data = urllib.urlencode({'b_submit': 'BinnewZ', 'cats[]' : all, 'edSearchAll' : searchString, 'sections[]': 'all'})
+        data = urllib.urlencode({'b_submit': 'BinnewZ', 'cats[]' : 'all', 'edSearchAll' : searchString, 'sections[]': 'all'})
         
         try:
             soup = BeautifulSoup( urllib2.urlopen("http://www.binnews.in/_bin/search2.php", data) )
