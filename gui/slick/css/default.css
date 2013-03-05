@@ -616,6 +616,7 @@ span.qual {
   -webkit-border-radius: 5px;
   border-radius: 5px;
 }
+
 tr.qual b,
 span.qual b {
   color: #343434;
@@ -631,15 +632,35 @@ span.wanted {
   -webkit-border-radius: 5px;
   border-radius: 5px;
 }
+
 tr.wanted b,
 span.wanted b {
   color: #343434;
 }
+
+tr.snatched,
+span.snatched {
+  background-color: #efefef;
+  padding: 5px;
+  font-size: 13px;
+  font-weight: bold;
+  color: #F49AC1;
+  -moz-border-radius: 5px;
+  -webkit-border-radius: 5px;
+  border-radius: 5px;
+}
+
+tr.snatched b,
+span.snatched b {
+  color: #343434;
+}
+
 tr.wanted,
 tr.qual,
 tr.good,
 tr.skipped,
-tr.unaired {
+tr.unaired,
+tr.snatched {
   font-size: 14px;
   font-weight: normal;
   color: #343434;
