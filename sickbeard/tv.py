@@ -1192,10 +1192,8 @@ class TVEpisode(object):
             for video in subtitles:
                 for subtitle in subtitles.get(video):
                     history.logSubtitle(self.show.tvdbid, self.season, self.episode, self.status, subtitle)
-
         
         return subtitles
-
 
     def checkForMetaFiles(self):
 
