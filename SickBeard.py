@@ -262,11 +262,6 @@ def main():
 
     sickbeard.CFG = ConfigObj(sickbeard.CONFIG_FILE)
 
-    if db.DBConnection().checkDBVersion() > MAX_DB_VERSION:
-        print 'Your database version has been incremented past what this version of Sick Beard supports.'
-        print 'Have you used other forks of Sick Beard with this same database file?'
-        sys.exit(1)
-
     # Initialize the config and our threads
     sickbeard.initialize(consoleLogging=consoleLogging)
 
@@ -322,6 +317,10 @@ def main():
     # Build from the DB to start with
     logger.log(u"Loading initial show list")
     loadShowsFromDB()
+    if db.DBConnection().checkDBVersion() > MAX_DB_VERSION:
+        print 'Your database version has been incremented past what this version of Sick Beard supports.'
+        print 'Have you used other forks of Sick Beard with this same database file?'
+        sys.exit(1)
 
     # Fire up all our threads
     sickbeard.start()
