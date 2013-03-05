@@ -268,7 +268,7 @@ class TorrentLeechCache(tvcache.TVCache):
                 self._parseItem(item)
 
         except Exception, e:
-            logger.log(u"Failed to parsing " + self.name + " RSS: " + ex(e), logger.ERROR)
+            logger.log(u"Failed to parsing " + self.provider.name + " RSS: " + ex(e), logger.ERROR)
             return []
 
     def _getData(self):
