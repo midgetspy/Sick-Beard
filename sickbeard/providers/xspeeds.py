@@ -56,7 +56,7 @@ class XSpeedsCache(tvcache.TVCache):
     def _getRSSData(self):
         # These will be ignored on the serverside.
     
-        url = 'http://xspeeds.eu/rss.php?secret_key='+ sickbeard.TVTORRENTS_DIGEST +'&showrows=50&feedtype=download&timezone=-12&categories='+ sickbeard.TVTORRENTS_HASH
+        url = 'http://xspeeds.eu/rss.php?secret_key='+ sickbeard.XSPEEDS_KEY +'&showrows=50&feedtype=download&timezone='+sickbeard.XSPEEDS_TIMEZONE +'&categories='+ sickbeard.XSPEEDS_CATEGORIES
         logger.log(u"XSpeeds cache update URL: "+ url, logger.DEBUG)
 
         data = self.provider.getURL(url)

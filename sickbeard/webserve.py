@@ -1034,6 +1034,7 @@ class ConfigProviders:
                       tvtorrents_digest=None, tvtorrents_hash=None,
  					  btn_api_key=None,
                       newzbin_username=None, newzbin_password=None,
+                      xspeeds_key=None, xspeeds_categories=None, xspeeds_timezone=None,
                       provider_order=None):
 
         results = []
@@ -1095,12 +1096,18 @@ class ConfigProviders:
                 sickbeard.EZRSS = curEnabled
             elif curProvider == 'tvtorrents':
                 sickbeard.TVTORRENTS = curEnabled
+            elif curProvider == 'xspeeds':
+                sickbeard.XSPEEDS = curEnabled
             elif curProvider == 'btn':
                 sickbeard.BTN = curEnabled
             elif curProvider in newznabProviderDict:
                 newznabProviderDict[curProvider].enabled = bool(curEnabled)
             else:
                 logger.log(u"don't know what "+curProvider+" is, skipping")
+
+        sickbeard.XSPEEDS_KEY = xspeeds_key.strip()
+        sickbeard.XSPEEDS_CATEGORIES = xspeeds_categories.strip()
+        sickbeard.XSPEEDS_TIMEZONE = xspeeds_timezone.strip()
 
         sickbeard.TVTORRENTS_DIGEST = tvtorrents_digest.strip()
         sickbeard.TVTORRENTS_HASH = tvtorrents_hash.strip()
