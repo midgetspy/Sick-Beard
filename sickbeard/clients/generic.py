@@ -49,7 +49,7 @@ class GenericClient(object):
         except Exception, e:
             logger.log(self.name + u': Unknown exception raised when send torrent to ' + self.name + ': ' + ex(e), logger.ERROR)
             return False
-        
+
         if self.response.status_code == 401:
             logger.log(self.name + u': Invalid Username or Password, check your config', logger.ERROR)    
             return False
@@ -57,7 +57,11 @@ class GenericClient(object):
         if self.response.status_code == 301:
             logger.log(self.name + u': HTTP Timeout ', logger.DEBUG)        
             return False
-        
+
+        if self.response.status_code != 200:
+            logger.log(self.name + u': Response to '+ method.upper() + ' request is ' + self.response.text, logger.DEBUG)
+            return False
+            
         logger.log(self.name + u': Response to '+ method.upper() + ' request is ' + self.response.text, logger.DEBUG)
         
         return True
