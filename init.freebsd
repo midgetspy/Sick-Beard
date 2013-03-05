@@ -61,7 +61,7 @@ fi
 verify_sickbeard_pid() {
     # Make sure the pid corresponds to the Sick Beard process.
     pid=`cat ${sickbeard_pid} 2>/dev/null`
-    ps -p ${pid} | grep -q "python ${sickbeard_dir}/SickBeard.py"
+    ps -p ${pid} | grep -q "python ${sickbeard_dir}/SickBeard.py --quiet --nolaunch"
     return $?
 }
 
@@ -69,7 +69,7 @@ verify_sickbeard_pid() {
 sickbeard_stop() {
     echo "Stopping $name"
     verify_sickbeard_pid
-    ${WGET} -O - -q --user=${SBUSR} --password=${SBPWD} "http://${HOST}:${PORT}/home/shutdown/" >/dev/null
+    ${WGET} -O - -q --user=${SBUSR} --password=${SBPWD} "http://${HOST}:${PORT}/home/shutdown/?pid=${pid}" >/dev/null
     if [ -n "${pid}" ]; then
       wait_for_pids ${pid}
       echo "Stopped"
