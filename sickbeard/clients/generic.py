@@ -5,6 +5,7 @@ from hashlib import sha1
 import sickbeard
 from sickbeard import logger
 from sickbeard.exceptions import ex
+from sickbeard.clients import http_error_code
 from lib.bencode import bencode, bdecode
 from lib import requests
 
@@ -53,15 +54,11 @@ class GenericClient(object):
         if self.response.status_code == 401:
             logger.log(self.name + u': Invalid Username or Password, check your config', logger.ERROR)    
             return False
-
-        if self.response.status_code == 301:
-            logger.log(self.name + u': HTTP Timeout ', logger.DEBUG)        
+        
+        if self.response.status_code in http_error_code.keys():
+            logger.log(self.name + u': ' + http_error_code[self.response.status_code], logger.DEBUG)
             return False
-
-        if self.response.status_code != 200:
-            logger.log(self.name + u': Response to '+ method.upper() + ' request is ' + self.response.text, logger.DEBUG)
-            return False
-            
+        
         logger.log(self.name + u': Response to '+ method.upper() + ' request is ' + self.response.text, logger.DEBUG)
         
         return True
