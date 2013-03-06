@@ -173,7 +173,13 @@ $myShowList.sort(lambda x, y: cmp(x.name, y.name))
     <img alt="" height="75" src="$sbRoot/showPoster/?show=$curShow.tvdbid&amp;which=poster"/></a>
     </td>
     <td class="tvShow"><a href="$sbRoot/home/displayShow?show=$curShow.tvdbid">$curShow.name</a></td>
-    <td>$curShow.network</td>
+    <td align="center">
+    #if $curShow.network:
+        	<img id="network" width="60" height="30" src="$sbRoot/images/network/${curShow.network.lower()}.png" alt="$curShow.network" title="$curShow.network" />
+    	#else:
+    		<img id="network" width="60" height="30" src="$sbRoot/images/network/nonetwork.png" alt="No Network" title="No Network" />
+		#end if
+		</td>
 #if $curShow.quality in $qualityPresets:
     <td align="center"><span class="quality $qualityPresetStrings[$curShow.quality]">$qualityPresetStrings[$curShow.quality]</span></td>
 #else:
