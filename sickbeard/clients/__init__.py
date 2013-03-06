@@ -19,6 +19,7 @@
 __all__ = ['utorrent',
            'transmission',
            'deluge',
+           'download_station'
            ]
 
 import sickbeard
@@ -62,7 +63,8 @@ http_error_code = {
 
 default_host = {'utorrent':'http://localhost:8000', 
                 'transmission' :'http://localhost:9091', 
-                'deluge':'http://localhost:8112'
+                'deluge':'http://localhost:8112',
+                'download_station': 'http://localhost:5000',
                 }
 
 def getClientModule(name):
