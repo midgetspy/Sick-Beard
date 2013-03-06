@@ -654,6 +654,9 @@ class TVShow(object):
         if myEp["status"] != None:
             self.status = myEp["status"]
 
+        if myEp["runtime"] != None:
+            self.runtime = int(myEp["runtime"])
+
         if self.status == None:
             self.status = ""
 
