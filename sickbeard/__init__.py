@@ -30,7 +30,7 @@ from threading import Lock
 
 # apparently py2exe won't build these unless they're imported somewhere
 from sickbeard import providers, metadata
-from providers import ezrss, tvtorrents, btn, nzbsrus, newznab, womble, xspeeds, torrent
+from providers import ezrss, tvtorrents, btn, nzbsrus, newznab, womble, torrent
 from sickbeard.config import CheckSection, check_setting_int, check_setting_str, ConfigMigrator
 
 from sickbeard import searchCurrent, searchBacklog, showUpdater, versionChecker, properFinder, autoPostProcesser
@@ -158,11 +158,6 @@ EZRSS = False
 TVTORRENTS = False
 TVTORRENTS_DIGEST = None
 TVTORRENTS_HASH = None
-
-XSPEEDS = False
-XSPEEDS_KEY = None
-XSPEEDS_CATEGORIES = None
-XSPEEDS_TIMEZONE = None
 
 BTN = False
 BTN_API_KEY = None
@@ -540,12 +535,6 @@ def initialize(consoleLogging=True):
         TVTORRENTS = bool(check_setting_int(CFG, 'TVTORRENTS', 'tvtorrents', 0))
         TVTORRENTS_DIGEST = check_setting_str(CFG, 'TVTORRENTS', 'tvtorrents_digest', '')
         TVTORRENTS_HASH = check_setting_str(CFG, 'TVTORRENTS', 'tvtorrents_hash', '')
-
-        CheckSection(CFG, 'XSPEEDS')
-        XSPEEDS = bool(check_setting_int(CFG, 'XSPEEDS', 'xspeeds', 0))
-        XSPEEDS_KEY = check_setting_str(CFG, 'XSPEEDS', 'xspeeds_key', '')
-        XSPEEDS_CATEGORIES = check_setting_str(CFG, 'XSPEEDS', 'xspeeds_categories', '')
-        XSPEEDS_TIMEZONE = check_setting_str(CFG, 'XSPEEDS', 'xspeeds_timezone', '')
 
         CheckSection(CFG, 'BTN')
         BTN = bool(check_setting_int(CFG, 'BTN', 'btn', 0))
@@ -1019,12 +1008,6 @@ def save_config():
     new_config['TVTORRENTS']['tvtorrents'] = int(TVTORRENTS)
     new_config['TVTORRENTS']['tvtorrents_digest'] = TVTORRENTS_DIGEST
     new_config['TVTORRENTS']['tvtorrents_hash'] = TVTORRENTS_HASH
-
-    new_config['XSPEEDS'] = {}
-    new_config['XSPEEDS']['xspeeds'] = int(XSPEEDS)
-    new_config['XSPEEDS']['xspeeds_key'] = XSPEEDS_KEY
-    new_config['XSPEEDS']['xspeeds_categories'] = XSPEEDS_CATEGORIES
-    new_config['XSPEEDS']['xspeeds_timezone'] = XSPEEDS_TIMEZONE
 
     new_config['BTN'] = {}
     new_config['BTN']['btn'] = int(BTN)
