@@ -77,7 +77,7 @@
 #set $anyQualities, $bestQualities = $Quality.splitQuality(int($show.quality))
     <tr><td class="showLegend">Quality: </td><td>
 #if $show.quality in $qualityPresets:
-$qualityPresetStrings[$show.quality]
+<span class="quality $qualityPresetStrings[$show.quality]">$qualityPresetStrings[$show.quality]</span>
 #else:
 #if $anyQualities:
 initially download: <b><%=", ".join([Quality.qualityStrings[x] for x in sorted(anyQualities)])%></b> #if $bestQualities then " + " else ""#
