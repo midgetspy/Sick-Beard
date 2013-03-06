@@ -169,7 +169,7 @@ $myShowList.sort(lambda x, y: cmp(x.name, y.name))
 
   <tr>
     <td align="center" class="nowrap">#if len($curEp) != 0 then $curEp[0].airdate else ""#</td>
-    <td align="center">
+    <td align="center"><a href="$sbRoot/home/displayShow?show=$curShow.tvdbid">
     <img alt="" height="75" src="$sbRoot/showPoster/?show=$curShow.tvdbid&amp;which=poster"/></a>
     </td>
     <td class="tvShow"><a href="$sbRoot/home/displayShow?show=$curShow.tvdbid">$curShow.name</a></td>
