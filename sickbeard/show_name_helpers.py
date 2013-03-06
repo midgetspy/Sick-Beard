@@ -44,9 +44,9 @@ def filterBadReleases(name, show):
     """
     Filters out non-english and just all-around stupid releases by comparing them
     to the resultFilters contents.
-    
+
     name: the release name to check
-    
+
     Returns: True if the release name is OK, False if it's bad.
     """
 
@@ -78,7 +78,7 @@ def filterBadReleases(name, show):
         if check_string:
             check_string = check_string + '-' + parse_result.release_group
         else:
-            check_string = parse_result.release_group 
+            check_string = parse_result.release_group
 
     # if there's no info after the season info then assume it's fine
     if not check_string:
@@ -103,9 +103,9 @@ def filterBadReleases(name, show):
 def sceneToNormalShowNames(name):
     """
     Takes a show name from a scene dirname and converts it to a more "human-readable" format.
-    
+
     name: The show name to convert
-    
+
     Returns: a list of all the possible "normal" names
     """
 
@@ -113,7 +113,7 @@ def sceneToNormalShowNames(name):
         return []
 
     name_list = [name]
-    
+
     # use both and and &
     new_name = re.sub('(?i)([\. ])and([\. ])', '\\1&\\2', name, re.I)
     if new_name not in name_list:
@@ -124,7 +124,7 @@ def sceneToNormalShowNames(name):
     for cur_name in name_list:
         # add brackets around the year
         results.append(re.sub('(\D)(\d{4})$', '\\1(\\2)', cur_name))
-    
+
         # add brackets around the country
         country_match_str = '|'.join(countryList.values())
         results.append(re.sub('(?i)([. _-])('+country_match_str+')$', '\\1(\\2)', cur_name))
@@ -147,10 +147,10 @@ def makeSceneSeasonSearchString (show, segment, extraSearchType=None):
 
     if show.air_by_date:
         numseasons = 0
-        
-        # the search string for air by date shows is just 
+
+        # the search string for air by date shows is just
         seasonStrings = [segment]
-    
+
     else:
         numseasonsSQlResult = myDB.select("SELECT COUNT(DISTINCT season) as numseasons FROM tv_episodes WHERE showid = ? and season != 0", [show.tvdbid])
         numseasons = int(numseasonsSQlResult[0][0])
@@ -181,7 +181,7 @@ def makeSceneSeasonSearchString (show, segment, extraSearchType=None):
                     else:
                         toReturn.append(curShow + "." + cur_season + " " + langCodes[show.lang]);
                     # toReturn.append(curShow + "." + cur_season)
-        
+
         # nzbmatrix is special, we build a search string just for them
         elif extraSearchType == "nzbmatrix":
             if numseasons == 1:
@@ -194,8 +194,8 @@ def makeSceneSeasonSearchString (show, segment, extraSearchType=None):
                     term_list = ['"'+x+'"' for x in term_list]
 
                 toReturn.append('"'+curShow+'"')
-    
-    if extraSearchType == "nzbmatrix":     
+
+    if extraSearchType == "nzbmatrix":
         toReturn = ['+('+','.join(toReturn)+')']
         if term_list:
             toReturn.append('+('+','.join(term_list)+')')
@@ -216,7 +216,7 @@ def makeSceneSearchString (episode):
                     "%ix%02i" % (int(episode.season), int(episode.episode))]
 
     # for single-season shows just search for the show name
-    # deactivated the following lines to always use the Season Number to get a more accurate search result 
+    # deactivated the following lines to always use the Season Number to get a more accurate search result
     # if numseasons == 1:
     #     epStrings = ['']
 
@@ -227,7 +227,7 @@ def makeSceneSearchString (episode):
     for curShow in showNames:
         for curEpString in epStrings:
             #toReturn.append(curShow + '.' + curEpString)
-            # Adds the target language to the search string if it is not an 'English' title                
+            # Adds the target language to the search string if it is not an 'English' title
             if episode.show.lang == "en":
                 toReturn.append(curShow + "." + curEpString)
             else:
@@ -249,11 +249,11 @@ def isGoodResult(name, show, log=True):
 
         #releasetrim = '^<?.* \d{9,} ?-? '
         #use regex and sub to replace common spam
-        releasetrim = ['^<?.* \d{9,} ?-? ','^\.zZz\. "?','^(.*) >','^\[\d{5,}.*\[ ','^\.: ','^-?\s?\[.+ presents\s?','^\s+?\[\d{2}\/\d{2}]\s?-?\s?"?','^>.*<<\s']
+        releasetrim = ['^<?.* \d{9,} ?-? ','^\.zZz\. "?','^(.*) >','^\[\d{5,}.*\[ ','^\.: ','^\s?-?\s?\[.+ presents\s?','^\s+?\[\d{2}\/\d{2}]\s?-?\s?"?','^>.*<<\s','^\[.*\[\d{2}/\d{2}\]\s?-\s?"']
         realname = name
         for regex in releasetrim:
             name = re.sub(regex, "", name)
-        
+
         if realname != name:
             logger.log(u"REGEX - Releasename: "+realname, logger.DEBUG)
             logger.log(u"REGEX - Cleaned Releasename: "+name, logger.DEBUG)
@@ -276,9 +276,9 @@ def allPossibleShowNames(show):
     """
     Figures out every possible variation of the name for a particular show. Includes TVDB name, TVRage name,
     country codes on the end, eg. "Show Name (AU)", and any scene exception names.
-    
+
     show: a TVShow object that we should get the names of
-    
+
     Returns: a list of all the possible show names
     """
 
