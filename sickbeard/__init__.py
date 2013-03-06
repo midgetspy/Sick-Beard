@@ -30,7 +30,7 @@ from threading import Lock
 
 # apparently py2exe won't build these unless they're imported somewhere
 from sickbeard import providers, metadata
-from providers import ezrss, tvtorrents, btn, nzbsrus, newznab, womble
+from providers import ezrss, tvtorrents, btn, nzbsrus, newznab, womble, torrent
 from sickbeard.config import CheckSection, check_setting_int, check_setting_str, ConfigMigrator
 
 from sickbeard import searchCurrent, searchBacklog, showUpdater, versionChecker, properFinder, autoPostProcesser
@@ -82,6 +82,7 @@ loadingShowList = None
 
 providerList = []
 newznabProviderList = []
+torrentProviderList = []
 metadata_provider_dict = {}
 
 NEWEST_VERSION = None
@@ -329,7 +330,7 @@ def initialize(consoleLogging=True):
                 showQueueScheduler, searchQueueScheduler, ROOT_DIRS, CACHE_DIR, ACTUAL_CACHE_DIR, TVDB_API_PARMS, \
                 NAMING_PATTERN, NAMING_MULTI_EP, NAMING_FORCE_FOLDERS, NAMING_ABD_PATTERN, NAMING_CUSTOM_ABD, \
                 RENAME_EPISODES, properFinderScheduler, PROVIDER_ORDER, autoPostProcesserScheduler, \
-                NZBSRUS, NZBSRUS_UID, NZBSRUS_HASH, WOMBLE, providerList, newznabProviderList, \
+                NZBSRUS, NZBSRUS_UID, NZBSRUS_HASH, WOMBLE, providerList, newznabProviderList, torrentProviderList, \
                 EXTRA_SCRIPTS, USE_TWITTER, TWITTER_USERNAME, TWITTER_PASSWORD, TWITTER_PREFIX, \
                 USE_NOTIFO, NOTIFO_USERNAME, NOTIFO_APISECRET, NOTIFO_NOTIFY_ONDOWNLOAD, NOTIFO_NOTIFY_ONSNATCH, \
                 USE_BOXCAR, BOXCAR_USERNAME, BOXCAR_PASSWORD, BOXCAR_NOTIFY_ONDOWNLOAD, BOXCAR_NOTIFY_ONSNATCH, \
@@ -521,6 +522,11 @@ def initialize(consoleLogging=True):
         newznabProviderList = providers.getNewznabProviderList(newznabData)
         providerList = providers.makeProviderList()
 
+        CheckSection(CFG, 'Torrent')
+        torrentData = check_setting_str(CFG, 'Torrent', 'torrent_data', '')
+        torrentProviderList = providers.getTorrentProviderList(torrentData)
+        providerList = providers.makeProviderList()
+        
         CheckSection(CFG, 'Blackhole')
         NZB_DIR = check_setting_str(CFG, 'Blackhole', 'nzb_dir', '')
         TORRENT_DIR = check_setting_str(CFG, 'Blackhole', 'torrent_dir', '')
@@ -1142,6 +1148,9 @@ def save_config():
     new_config['Newznab'] = {}
     new_config['Newznab']['newznab_data'] = '!!!'.join([x.configStr() for x in newznabProviderList])
 
+    new_config['Torrent'] = {}
+    new_config['Torrent']['torrent_data'] = '!!!'.join([x.configStr() for x in torrentProviderList])
+    
     new_config['GUI'] = {}
     new_config['GUI']['coming_eps_layout'] = COMING_EPS_LAYOUT
     new_config['GUI']['coming_eps_display_paused'] = int(COMING_EPS_DISPLAY_PAUSED)

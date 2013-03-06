@@ -41,7 +41,7 @@ from sickbeard import search_queue
 from sickbeard import image_cache
 from sickbeard import naming
 
-from sickbeard.providers import newznab
+from sickbeard.providers import newznab, torrent
 from sickbeard.common import Quality, Overview, statusStrings
 from sickbeard.common import SNATCHED, SKIPPED, UNAIRED, IGNORED, ARCHIVED, WANTED
 from sickbeard.exceptions import ex
@@ -985,6 +985,21 @@ class ConfigProviders:
             return json.dumps({'success': tempProvider.getID()})
 
     @cherrypy.expose
+    def canAddTorrentProvider(self, name):
+
+        if not name:
+            return json.dumps({'error': 'Invalid name specified'})
+
+        providerDict = dict(zip([x.getID() for x in sickbeard.torrentProviderList], sickbeard.torrentProviderList))
+
+        tempProvider = torrent.TorrentProvider(name, '')
+
+        if tempProvider.getID() in providerDict:
+            return json.dumps({'error': 'Exists as '+providerDict[tempProvider.getID()].name})
+        else:
+            return json.dumps({'success': tempProvider.getID()})
+            
+    @cherrypy.expose
     def saveNewznabProvider(self, name, url, key=''):
 
         if not name or not url:
@@ -1009,6 +1024,27 @@ class ConfigProviders:
             sickbeard.newznabProviderList.append(newProvider)
             return newProvider.getID() + '|' + newProvider.configStr()
 
+    @cherrypy.expose
+    def saveTorrentProvider(self, name, url):
+
+        if not name or not url:
+            return '0'
+
+        providerDict = dict(zip([x.name for x in sickbeard.torrentProviderList], sickbeard.torrentProviderList))
+
+        if name in providerDict:
+            if not providerDict[name].default:
+                providerDict[name].name = name
+                providerDict[name].url = url
+
+            return providerDict[name].getID() + '|' + providerDict[name].configStr()
+
+        else:
+
+            newProvider = torrent.TorrentProvider(name, url)
+            sickbeard.torrentProviderList.append(newProvider)
+            return newProvider.getID() + '|' + newProvider.configStr()
+
 
 
     @cherrypy.expose
@@ -1027,10 +1063,26 @@ class ConfigProviders:
 
         return '1'
 
+    @cherrypy.expose
+    def deleteTorrentProvider(self, id):
+
+        providerDict = dict(zip([x.getID() for x in sickbeard.torrentProviderList], sickbeard.torrentProviderList))
+
+        if id not in providerDict or providerDict[id].default:
+            return '0'
+
+        # delete it from the list
+        sickbeard.torrentProviderList.remove(providerDict[id])
+
+        if id in sickbeard.PROVIDER_ORDER:
+            sickbeard.PROVIDER_ORDER.remove(id)
+
+        return '1'
 
     @cherrypy.expose
     def saveProviders(self, nzbmatrix_username=None, nzbmatrix_apikey=None,
                       nzbs_r_us_uid=None, nzbs_r_us_hash=None, newznab_string=None,
+                      torrent_string=None,
                       tvtorrents_digest=None, tvtorrents_hash=None,
  					  btn_api_key=None,
                       newzbin_username=None, newzbin_password=None,
@@ -1042,6 +1094,7 @@ class ConfigProviders:
         provider_list = []
 
         newznabProviderDict = dict(zip([x.getID() for x in sickbeard.newznabProviderList], sickbeard.newznabProviderList))
+        torrentProviderDict = dict(zip([x.getID() for x in sickbeard.torrentProviderList], sickbeard.torrentProviderList))
 
         finishedNames = []
 
@@ -1071,6 +1124,32 @@ class ConfigProviders:
         for curProvider in sickbeard.newznabProviderList:
             if curProvider.getID() not in finishedNames:
                 sickbeard.newznabProviderList.remove(curProvider)
+                
+        # add all the torrent info we got into our list
+        for curTorrentProviderStr in torrent_string.split('!!!'):
+
+            if not curTorrentProviderStr:
+                continue
+
+            curName, curURL = curTorrentProviderStr.split('|')
+
+            newProvider = torrent.TorrentProvider(curName, curURL)
+
+            curID = newProvider.getID()
+
+            # if it already exists then update it
+            if curID in newznabProviderDict:
+                torrentProviderDict[curID].name = curName
+                torrentProviderDict[curID].url = curURL
+            else:
+                sickbeard.torrentProviderList.append(newProvider)
+
+            finishedNames.append(curID)
+
+        # delete anything that is missing
+        for curProvider in sickbeard.torrentProviderList:
+            if curProvider.getID() not in finishedNames:
+                sickbeard.torrentProviderList.remove(curProvider)
 
         # do the enable/disable
         for curProviderStr in provider_str_list:
@@ -1099,6 +1178,8 @@ class ConfigProviders:
                 sickbeard.BTN = curEnabled
             elif curProvider in newznabProviderDict:
                 newznabProviderDict[curProvider].enabled = bool(curEnabled)
+            elif curProvider in torrentProviderDict:
+                torrentProviderDict[curProvider].enabled = bool(curEnabled)
             else:
                 logger.log(u"don't know what "+curProvider+" is, skipping")
 
@@ -1470,12 +1551,13 @@ class HomePostProcess:
         return _munge(t)
 
     @cherrypy.expose
-    def processEpisode(self, dir=None, nzbName=None, jobName=None, quiet=None):
+    def processEpisode(self, dir=None, nzbName=None, jobName=None, quiet=None, cleanup="False"):
 
         if not dir:
             redirect("/home/postprocess")
         else:
-            result = processTV.processDir(dir, nzbName)
+            doCleanup = cleanup.lower() == "true" or cleanup == "1"
+            result = processTV.processDir(dir, nzbName, cleanup=doCleanup)
             if quiet != None and int(quiet) == 1:
                 return result
 

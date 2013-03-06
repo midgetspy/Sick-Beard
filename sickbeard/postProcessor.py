@@ -693,7 +693,7 @@ class PostProcessor(object):
         
         return False
 
-    def process(self):
+    def process(self, cleanup=False):
         """
         Post-process a given file
         """
@@ -829,7 +829,7 @@ class PostProcessor(object):
 
         try:
             # move the episode and associated files to the show dir
-            if sickbeard.KEEP_PROCESSED_DIR:
+            if not cleanup and sickbeard.KEEP_PROCESSED_DIR:
                 self._copy(self.file_path, dest_path, new_base_name, sickbeard.MOVE_ASSOCIATED_FILES)
             else:
                 self._move(self.file_path, dest_path, new_base_name, sickbeard.MOVE_ASSOCIATED_FILES)

@@ -34,7 +34,7 @@ def logHelper (logMessage, logLevel=logger.MESSAGE):
     logger.log(logMessage, logLevel)
     return logMessage + u"\n"
 
-def processDir (dirName, nzbName=None, recurse=False):
+def processDir (dirName, nzbName=None, recurse=False, cleanup=False):
     """
     Scans through the files in dirName and processes whatever media files it finds
     
@@ -101,7 +101,7 @@ def processDir (dirName, nzbName=None, recurse=False):
 
         try:
             processor = postProcessor.PostProcessor(cur_video_file_path, nzbName)
-            process_result = processor.process()
+            process_result = processor.process(cleanup=cleanup)
             process_fail_message = ""
         except exceptions.PostProcessingFailed, e:
             process_result = False
@@ -112,7 +112,7 @@ def processDir (dirName, nzbName=None, recurse=False):
         # as long as the postprocessing was successful delete the old folder unless the config wants us not to
         if process_result:
 
-            if len(videoFiles) == 1 and not sickbeard.KEEP_PROCESSED_DIR and \
+            if len(videoFiles) == 1 and (cleanup or not sickbeard.KEEP_PROCESSED_DIR) and \
                 ek.ek(os.path.normpath, dirName) != ek.ek(os.path.normpath, sickbeard.TV_DOWNLOAD_DIR) and \
                 len(remainingFolders) == 0:
 
