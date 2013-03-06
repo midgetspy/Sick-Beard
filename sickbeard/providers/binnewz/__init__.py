@@ -236,7 +236,8 @@ class BinNewzProvider(generic.NZBProvider):
 
                 for searchItem in searchItems:
                     for downloader in self.nzbDownloaders:
-                        logger.log("Searching for download : " + searchItem )
+                        dname = str(downloader)[str(downloader).find(".",35)+1:-30]
+                        logger.log("Searching for download : " + searchItem + " on " + dname)
                         try:
                             binsearch_result =  downloader.search(searchItem, minSize, newsgroup )
                             if binsearch_result:
@@ -244,10 +245,10 @@ class BinNewzProvider(generic.NZBProvider):
                                 binsearch_result.title = name
                                 binsearch_result.quality = quality
                                 results.append( binsearch_result )
-                                logger.log("Found" )
+                                logger.log("Found : " + searchItem + " on " + dname)
                                 break
                         except Exception, e:
-                            logger.log("Searching from downloader failed : " + ex(e), logger.ERROR)
+                            logger.log("Searching from " + dname + " failed : " + ex(e), logger.ERROR)
 
         return results
     
