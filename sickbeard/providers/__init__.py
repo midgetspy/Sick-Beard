@@ -30,7 +30,7 @@ from os import sys
 
 def sortedProviderList():
 
-    initialList = sickbeard.providerList + sickbeard.newznabProviderList
+    initialList = sickbeard.providerList + sickbeard.newznabProviderList + sickbeard.torrentProviderList
     providerDict = dict(zip([x.getID() for x in initialList], initialList))
 
     newList = []
@@ -44,7 +44,7 @@ def sortedProviderList():
     for curModule in providerDict:
         if providerDict[curModule] not in newList:
             newList.append(providerDict[curModule])
-
+    
     return newList
 
 def makeProviderList():
@@ -78,6 +78,26 @@ def getNewznabProviderList(data):
         
     return filter(lambda x: x, providerList)
 
+def getTorrentProviderList(data):
+
+    defaultList = [makeTorrentProvider(x) for x in getDefaultTorrentProviders().split('!!!')]
+    providerList = filter(lambda x: x, [makeTorrentProvider(x) for x in data.split('!!!')])
+
+    providerDict = dict(zip([x.name for x in providerList], providerList))
+
+    for curDefault in defaultList:
+        if not curDefault:
+            continue
+
+        if curDefault.name not in providerDict:
+            curDefault.default = True
+            providerList.append(curDefault)
+        else:
+            providerDict[curDefault.name].default = True
+            providerDict[curDefault.name].name = curDefault.name
+            providerDict[curDefault.name].url = curDefault.url
+        
+    return filter(lambda x: x, providerList)
 
 def makeNewznabProvider(configString):
 
@@ -94,9 +114,25 @@ def makeNewznabProvider(configString):
 
     return newProvider
 
+def makeTorrentProvider(configString):
+    
+    if not configString:
+        return None
+
+    name, url, enabled = configString.split('|')
+
+    torrent = sys.modules['sickbeard.providers.torrent']
+
+    newTorrent = torrent.TorrentProvider(name, url)
+    newTorrent.enabled = enabled == '1'
+
+    return newTorrent
+    
 def getDefaultNewznabProviders():
     return 'Sick Beard Index|http://lolo.sickbeard.com/|0|0!!!NZBs.org|http://beta.nzbs.org/||0!!!NZBGeek|https://index.nzbgeek.info/||0!!!NZBFinder|http://www.nzbfinder.ws/||0!!!Usenet-Crawler|http://www.usenet-crawler.com/||0'
 
+def getDefaultTorrentProviders():
+    return ''
 
 def getProviderModule(name):
     name = name.lower()
@@ -109,6 +145,15 @@ def getProviderModule(name):
 def getProviderClass(id):
 
     providerMatch = [x for x in sickbeard.providerList+sickbeard.newznabProviderList if x.getID() == id]
+
+    if len(providerMatch) != 1:
+        return None
+    else:
+        return providerMatch[0]
+
+def getTorrentProviderClass(id):
+
+    providerMatch = [x for x in sickbeard.providerList+sickbeard.torrentProviderList if x.getID() == id]
 
     if len(providerMatch) != 1:
         return None
