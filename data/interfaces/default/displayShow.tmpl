@@ -187,7 +187,12 @@ $epLoc
     <td align="center" class="audio_langs_column">
                 <img src="$sbRoot/images/flags/${epResult["audio_langs"]}.png" alt="$epResult["audio_langs"]" width="16" />
     </td>
-    <td class="status_column">$statusStrings[int($epResult["status"])]</td>
+    #set $curStatus, $curQuality = $Quality.splitCompositeStatus(int($epResult["status"]))
+    #if $curQuality != Quality.NONE:   
+    <td class="status_column">$statusStrings[$curStatus] <span class="quality $Quality.qualityStrings[$curQuality].replace("720p","HD720p").replace("1080p","HD1080p").replace("RawHD TV", "RawHD").replace("HD TV", "HD720p")">$Quality.qualityStrings[$curQuality]</span></td>
+#else:    
+    <td class="status_column">$statusStrings[$curStatus]</td>
+#end if
     <td align="center">
     #if int($epResult["season"]) != 0:
       <a class="epSearch" href="searchEpisode?show=$show.tvdbid&amp;season=$epResult["season"]&amp;episode=$epResult["episode"]"><img src="$sbRoot/images/search16.png" height="16" alt="search" title="Manual Search" /></a>
