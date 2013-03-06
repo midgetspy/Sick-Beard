@@ -33,6 +33,7 @@ import cherrypy.lib
 import sickbeard
 
 from sickbeard import config, sab
+from sickbeard import clients
 from sickbeard import history, notifiers, processTV
 from sickbeard import ui
 from sickbeard import logger, helpers, exceptions, classes, db
@@ -769,7 +770,8 @@ class ConfigSearch:
     @cherrypy.expose
     def saveSearch(self, use_nzbs=None, use_torrents=None, nzb_dir=None, sab_username=None, sab_password=None,
                        sab_apikey=None, sab_category=None, sab_host=None, nzbget_password=None, nzbget_category=None, nzbget_host=None,
-                       torrent_dir=None, nzb_method=None, usenet_retention=None, search_frequency=None, download_propers=None, ignore_words=None):
+                       torrent_dir=None,torrent_method=None, nzb_method=None, usenet_retention=None, search_frequency=None, download_propers=None, torrent_username=None, torrent_password=None, torrent_host=None, torrent_label=None, torrent_path=None, 
+                       torrent_ratio=None, torrent_paused=None, ignore_words=None):
 
         results = []
 
@@ -780,7 +782,7 @@ class ConfigSearch:
             results += ["Unable to create directory " + os.path.normpath(torrent_dir) + ", dir not changed."]
 
         config.change_SEARCH_FREQUENCY(search_frequency)
-        config.change_IGNORE_WORDS(ignore_words)
+
         if download_propers == "on":
             download_propers = 1
         else:
@@ -799,12 +801,18 @@ class ConfigSearch:
         if usenet_retention == None:
             usenet_retention = 200
 
+        if ignore_words == None:
+            ignore_words = ""
+
         sickbeard.USE_NZBS = use_nzbs
         sickbeard.USE_TORRENTS = use_torrents
 
         sickbeard.NZB_METHOD = nzb_method
+        sickbeard.TORRENT_METHOD = torrent_method
         sickbeard.USENET_RETENTION = int(usenet_retention)
-
+        
+        sickbeard.IGNORE_WORDS = ignore_words
+        
         sickbeard.DOWNLOAD_PROPERS = download_propers
 
         sickbeard.SAB_USERNAME = sab_username
@@ -824,6 +832,24 @@ class ConfigSearch:
         sickbeard.NZBGET_CATEGORY = nzbget_category
         sickbeard.NZBGET_HOST = nzbget_host
 
+        sickbeard.TORRENT_USERNAME = torrent_username
+        sickbeard.TORRENT_PASSWORD = torrent_password
+        sickbeard.TORRENT_LABEL = torrent_label
+        sickbeard.TORRENT_PATH = torrent_path
+        sickbeard.TORRENT_RATIO = torrent_ratio
+        if torrent_paused == "on":
+            torrent_paused = 1
+        else:
+            torrent_paused = 0
+        sickbeard.TORRENT_PAUSED = torrent_paused
+
+        if torrent_host and not re.match('https?://.*', torrent_host):
+            torrent_host = 'http://' + torrent_host
+
+        if not torrent_host.endswith('/'):
+            torrent_host = torrent_host + '/'
+
+        sickbeard.TORRENT_HOST = torrent_host
 
         sickbeard.save_config()
 
@@ -2009,6 +2035,17 @@ class Home:
                 return "Authentication failed. SABnzbd expects '"+accesMsg+"' as authentication method"
         else:
             return "Unable to connect to host"
+
+    @cherrypy.expose
+    def testTorrent(self, torrent_method=None, host=None, username=None, password=None):
+        if not host.endswith("/"):
+            host = host + "/"
+        
+        client = clients.getClientIstance(torrent_method)
+        
+        connection, accesMsg = client(host, username, password).testAuthentication()
+
+        return accesMsg     
 
     @cherrypy.expose
     def testGrowl(self, host=None, password=None):

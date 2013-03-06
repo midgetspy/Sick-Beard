@@ -145,6 +145,8 @@ USE_TORRENTS = None
 NZB_METHOD = None
 NZB_DIR = None
 USENET_RETENTION = None
+TORRENT_METHOD = None
+TORRENT_DIR = None
 DOWNLOAD_PROPERS = None
 
 SEARCH_FREQUENCY = None
@@ -215,6 +217,14 @@ SAB_HOST = ''
 NZBGET_PASSWORD = None
 NZBGET_CATEGORY = None
 NZBGET_HOST = None
+
+TORRENT_USERNAME = None
+TORRENT_PASSWORD = None
+TORRENT_HOST = ''
+TORRENT_PATH = ''
+TORRENT_RATIO = ''
+TORRENT_PAUSED = False
+TORRENT_LABEL = ''
 
 USE_XBMC = False
 XBMC_NOTIFY_ONSNATCH = False
@@ -331,9 +341,10 @@ def initialize(consoleLogging=True):
     with INIT_LOCK:
 
         global LOG_DIR, WEB_PORT, WEB_LOG, WEB_ROOT, WEB_USERNAME, WEB_PASSWORD, WEB_HOST, WEB_IPV6, USE_API, API_KEY, ENABLE_HTTPS, HTTPS_CERT, HTTPS_KEY, \
-                USE_NZBS, USE_TORRENTS, NZB_METHOD, NZB_DIR, DOWNLOAD_PROPERS, \
+                USE_NZBS, USE_TORRENTS, NZB_METHOD, NZB_DIR, DOWNLOAD_PROPERS, TORRENT_METHOD, \
                 SAB_USERNAME, SAB_PASSWORD, SAB_APIKEY, SAB_CATEGORY, SAB_HOST, \
                 NZBGET_PASSWORD, NZBGET_CATEGORY, NZBGET_HOST, currentSearchScheduler, backlogSearchScheduler, \
+                TORRENT_USERNAME, TORRENT_PASSWORD, TORRENT_HOST, TORRENT_PATH, TORRENT_RATIO, TORRENT_PAUSED, TORRENT_LABEL, \
                 USE_XBMC, XBMC_NOTIFY_ONSNATCH, XBMC_NOTIFY_ONDOWNLOAD, XBMC_UPDATE_FULL, XBMC_UPDATE_ONLYFIRST, \
                 XBMC_UPDATE_LIBRARY, XBMC_HOST, XBMC_USERNAME, XBMC_PASSWORD, \
                 USE_TRAKT, TRAKT_USERNAME, TRAKT_PASSWORD, TRAKT_API, \
@@ -455,11 +466,17 @@ def initialize(consoleLogging=True):
         if NZB_METHOD not in ('blackhole', 'sabnzbd', 'nzbget'):
             NZB_METHOD = 'blackhole'
 
+        TORRENT_METHOD = check_setting_str(CFG, 'General', 'torrent_method', 'blackhole')
+        if TORRENT_METHOD not in ('blackhole', 'utorrent','transmission','deluge'):
+            TORRENT_METHOD = 'blackhole'
+
         DOWNLOAD_PROPERS = bool(check_setting_int(CFG, 'General', 'download_propers', 1))
         USENET_RETENTION = check_setting_int(CFG, 'General', 'usenet_retention', 500)
         SEARCH_FREQUENCY = check_setting_int(CFG, 'General', 'search_frequency', DEFAULT_SEARCH_FREQUENCY)
         if SEARCH_FREQUENCY < MIN_SEARCH_FREQUENCY:
             SEARCH_FREQUENCY = MIN_SEARCH_FREQUENCY
+
+        TORRENT_DIR = check_setting_str(CFG, 'Blackhole', 'torrent_dir', '')
 
         TV_DOWNLOAD_DIR = check_setting_str(CFG, 'General', 'tv_download_dir', '')
         PROCESS_AUTOMATICALLY = check_setting_int(CFG, 'General', 'process_automatically', 0)
@@ -617,6 +634,14 @@ def initialize(consoleLogging=True):
         NZBGET_HOST = check_setting_str(CFG, 'NZBget', 'nzbget_host', '')
 
         CheckSection(CFG, 'XBMC')
+        TORRENT_USERNAME = check_setting_str(CFG, 'TORRENT', 'torrent_username', '')
+        TORRENT_PASSWORD = check_setting_str(CFG, 'TORRENT', 'torrent_password', '')
+        TORRENT_HOST = check_setting_str(CFG, 'TORRENT', 'torrent_host', '')
+        TORRENT_PATH = check_setting_str(CFG, 'TORRENT', 'torrent_path', '')
+        TORRENT_RATIO = check_setting_str(CFG, 'TORRENT', 'torrent_ratio', '')
+        TORRENT_PAUSED = bool(check_setting_int(CFG, 'TORRENT', 'torrent_paused', 0)) 
+        TORRENT_LABEL = check_setting_str(CFG, 'TORRENT', 'torrent_label', '')
+        
         USE_XBMC = bool(check_setting_int(CFG, 'XBMC', 'use_xbmc', 0))
         XBMC_NOTIFY_ONSNATCH = bool(check_setting_int(CFG, 'XBMC', 'xbmc_notify_onsnatch', 0))
         XBMC_NOTIFY_ONDOWNLOAD = bool(check_setting_int(CFG, 'XBMC', 'xbmc_notify_ondownload', 0))
@@ -1008,6 +1033,7 @@ def save_config():
     new_config['General']['use_nzbs'] = int(USE_NZBS)
     new_config['General']['use_torrents'] = int(USE_TORRENTS)
     new_config['General']['nzb_method'] = NZB_METHOD
+    new_config['General']['torrent_method'] = TORRENT_METHOD    
     new_config['General']['usenet_retention'] = int(USENET_RETENTION)
     new_config['General']['search_frequency'] = int(SEARCH_FREQUENCY)
     new_config['General']['download_propers'] = int(DOWNLOAD_PROPERS)
@@ -1117,6 +1143,15 @@ def save_config():
     new_config['NZBget']['nzbget_password'] = NZBGET_PASSWORD
     new_config['NZBget']['nzbget_category'] = NZBGET_CATEGORY
     new_config['NZBget']['nzbget_host'] = NZBGET_HOST
+
+    new_config['TORRENT'] = {}
+    new_config['TORRENT']['torrent_username'] = TORRENT_USERNAME
+    new_config['TORRENT']['torrent_password'] = TORRENT_PASSWORD
+    new_config['TORRENT']['torrent_host'] = TORRENT_HOST
+    new_config['TORRENT']['torrent_path'] = TORRENT_PATH
+    new_config['TORRENT']['torrent_ratio'] = TORRENT_RATIO
+    new_config['TORRENT']['torrent_paused'] = int(TORRENT_PAUSED)
+    new_config['TORRENT']['torrent_label'] = TORRENT_LABEL
 
     new_config['XBMC'] = {}
     new_config['XBMC']['use_xbmc'] = int(USE_XBMC)

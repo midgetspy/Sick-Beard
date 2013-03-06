@@ -34,6 +34,50 @@ $(document).ready(function(){
 
     }
 
+    $.fn.torrent_method_handler = function() {
+        
+        var selectedProvider = $('#torrent_method :selected').val();
+		
+        if (selectedProvider == "blackhole") {
+            $('#t_blackhole_settings').show();
+            $('#torrent_settings').hide();
+        } else if (selectedProvider == "utorrent") {
+            $('#t_blackhole_settings').hide();
+            $('#torrent_settings').show();
+            $('#Torrent_username').show()
+            $('#Torrent_Path').hide();
+            $('#Torrent_Ratio').hide();
+            $('#Torrent_Label').show()
+            $('#host_desc').text('uTorrent Host');
+            $('#username_desc').text('uTorrent Username');
+            $('#password_desc').text('uTorrent Password');
+            $('#label_desc').text('uTorrent Label');
+        } else if (selectedProvider == "transmission"){
+            $('#t_blackhole_settings').hide();
+            $('#torrent_settings').show();
+            $('#Torrent_username').show();
+            $('#Torrent_Path').show();
+            $('#Torrent_Ratio').show();
+            $('#Torrent_Label').hide();
+            $('#host_desc').html('Transmission Host');
+            $('#username_desc').text('Transmission Username');
+            $('#password_desc').text('Transmission Password');
+            $('#directory_desc').text('Transmission Directory');
+        } else if (selectedProvider == "deluge"){
+            $('#t_blackhole_settings').hide();
+            $('#torrent_settings').show();
+            $('#Torrent_Label').show();            
+            $('#Torrent_username').hide();
+            $('#Torrent_Path').show();
+            $('#Torrent_Ratio').show();
+            $('#host_desc').text('Deluge Host');
+            $('#username_desc').text('Deluge Username');
+            $('#password_desc').text('Deluge Password');
+            $('#label_desc').text('Deluge Label');
+            $('#directory_desc').text('Deluge Directory');
+        }
+    }
+
     $('#nzb_method').change($(this).nzb_method_handler);
 
     $(this).nzb_method_handler();
@@ -49,10 +93,24 @@ $(document).ready(function(){
         function (data){ $('#testSABnzbd-result').html(data); });
     });
     
+
+    $('#torrent_method').change($(this).torrent_method_handler);
+	
+	$(this).torrent_method_handler();
+    
     $('#use_torrents').click(function(){
     	toggle_torrent_title();
     });
-    
-    toggle_torrent_title();
-    
+
+    $('#testTorrent').click(function(){
+        $('#testTorrent-result').html(loading);
+        var torrent_method = $('#torrent_method :selected').val();        
+        var torrent_host = $('#torrent_host').val();
+        var torrent_username = $('#torrent_username').val();
+        var torrent_password = $('#torrent_password').val();
+        
+        $.get(sbRoot+"/home/testTorrent", {'torrent_method': torrent_method, 'host': torrent_host, 'username': torrent_username, 'password': torrent_password}, 
+        function (data){ $('#testTorrent-result').html(data); });
+    });
+
 });
