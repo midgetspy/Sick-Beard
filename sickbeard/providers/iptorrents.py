@@ -273,7 +273,7 @@ class IPTorrentsCache(tvcache.TVCache):
                 #torrent_leechers = int(result.find('td', attrs = {'class' : 'ac t_leechers'}).string)
 
                 # Filter unseeded torrent and torrents with no name/url
-                if torrent_seeders == 0 or not torrent_name or not torrent_download_url:
+                if not torrent_name or not torrent_download_url:
                     continue 
 
                 logger.log(u"Adding item to cache: " + torrent_name + " (" + torrent_details_url + ")", logger.DEBUG)
