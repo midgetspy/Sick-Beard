@@ -41,7 +41,7 @@ class uTorrentAPI(GenericClient):
             return None
         
         try: 
-            self.auth = re.findall("<div.*?>(.*?)</", response.text)[0]
+            self.auth = re.findall("<div.*?>(.*?)</", self.response.text)[0]
         except:    
             return None
             
