@@ -34,6 +34,15 @@ ep_regexes = [
                -(?P<release_group>[^- ]+))?)?$              # Group
                '''),
               
+              ('scene_date_format_bis',
+               # Show.Name.2010.S01E01.Source.Quality.Etc-Group
+               '''
+               ^(?P<series_name>.+?)[. _-]+            # Show_Name and separator
+               (?P<air_year>\d{4})[. _-]+                  # 2010 and separator
+               s(?P<season_num>\d+)[. _-]*                 # S01 and optional separator
+               e(?P<ep_num>\d+)
+               '''),
+              
               ('fov_repeat',
                # Show.Name.1x02.1x03.Source.Quality.Etc-Group
                # Show Name - 1x02 - 1x03 - 1x04 - Ep Name
@@ -205,6 +214,7 @@ ep_regexes = [
                (?P<ep_num>\d+)                            # 02 and separator
                '''
                ),
+                                        
               ]
 
 language_regexes = {}
