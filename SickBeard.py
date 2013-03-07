@@ -156,11 +156,6 @@ def main():
         print 'or find another way to force Python to use ' + sickbeard.SYS_ENCODING + ' for string encoding.'
         sys.exit(1)
 
-    if db.DBConnection().checkDBVersion() > MAX_DB_VERSION:
-        print 'Your database version has been incremented past what this version of Sick Beard supports.'
-        print 'Have you used other forks of Sick Beard with this same database file?'
-        sys.exit(1)
-
     # Need console logging for SickBeard.py and SickBeard-console.exe
     consoleLogging = (not hasattr(sys, "frozen")) or (sickbeard.MY_NAME.lower().find('-console') > 0)
 
@@ -266,6 +261,11 @@ def main():
         logger.log(u"Unable to find '" + sickbeard.CONFIG_FILE + "' , all settings will be default!", logger.ERROR)
 
     sickbeard.CFG = ConfigObj(sickbeard.CONFIG_FILE)
+
+    if db.DBConnection().checkDBVersion() > MAX_DB_VERSION:
+        print 'Your database version has been incremented past what this version of Sick Beard supports.'
+        print 'Have you used other forks of Sick Beard with this same database file?'
+        sys.exit(1)
 
     # Initialize the config and our threads
     sickbeard.initialize(consoleLogging=consoleLogging)
