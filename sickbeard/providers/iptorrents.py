@@ -162,7 +162,7 @@ class IPTorrentsProvider(generic.TorrentProvider):
                     torrent_table = html.find('table', attrs = {'class' : 'torrents'})
                     
                     if not torrent_table:
-                        logger.log(u"No results found for: " + search_string + " (" + searchURL + ")", logger.DEBUG)
+                        logger.log(u"The data returned from " + self.name + " is incomplete, this result is unusable", logger.DEBUG)
                         return []
                     
                     torrents = torrent_table.find_all('tr')
@@ -250,8 +250,8 @@ class IPTorrentsCache(tvcache.TVCache):
             torrent_table = html.find('table', attrs = {'class' : 'torrents'})
     
             if not torrent_table:
-                logger.log(u"The Data returned from " + self.provider.name + " is incomplete, this result is unusable", logger.ERROR)
-                return []
+                logger.log(u"The data returned from " + self.provider.name + " is incomplete, this result is unusable", logger.DEBUG)
+                return
 
             logger.log(u"Clearing " + self.provider.name + " cache and updating with new information")
             self.setLastUpdate()
@@ -266,13 +266,13 @@ class IPTorrentsCache(tvcache.TVCache):
                 torrent_name = torrent.string
                 torrent_download_url = self.provider.urls['base_url'] + (result.find_all('td')[3].find('a'))['href']
                 torrent_details_url = self.provider.urls['base_url'] + torrent['href']
-                torrent_seeders = int(result.find('td', attrs = {'class' : 'ac t_seeders'}).string)
 
                 ## Not used, perhaps in the future ##
                 #torrent_id = int(torrent['href'].replace('/details.php?id=', ''))
+                #torrent_seeders = int(result.find('td', attrs = {'class' : 'ac t_seeders'}).string)
                 #torrent_leechers = int(result.find('td', attrs = {'class' : 'ac t_leechers'}).string)
 
-                # Filter unseeded torrent and torrents with no name/url
+                # Filter torrents with no name/url
                 if not torrent_name or not torrent_download_url:
                     continue 
 
