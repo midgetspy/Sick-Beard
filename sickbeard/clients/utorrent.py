@@ -36,8 +36,8 @@ class uTorrentAPI(GenericClient):
 
     def _get_auth(self):
 
-        response = self.session.get(self.url + 'token.html')
-        if response.status_code == 404:
+        self.response = self.session.get(self.url + 'token.html')
+        if self.response.status_code == 404:
             return None
         
         try: 
