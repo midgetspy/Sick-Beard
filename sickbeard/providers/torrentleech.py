@@ -61,7 +61,7 @@ class TorrentLeechProvider(generic.TorrentProvider):
     
     def getQuality(self, item):
         
-        quality = Quality.nameQuality(item[0])
+        quality = Quality.sceneQuality(item[0])
         return quality    
 
     def _doLogin(self):

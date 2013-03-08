@@ -374,7 +374,7 @@ def findSeason(show, season):
     if bestSeasonNZB:
 
         # get the quality of the season nzb
-        seasonQual = Quality.nameQuality(bestSeasonNZB.name)
+        seasonQual = Quality.sceneQuality(bestSeasonNZB.name)
         seasonQual = bestSeasonNZB.quality
         logger.log(u"The quality of the season "+bestSeasonNZB.provider.providerType+" is "+Quality.qualityStrings[seasonQual], logger.DEBUG)
 

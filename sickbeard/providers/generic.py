@@ -185,7 +185,7 @@ class GenericProvider:
         Returns a Quality value obtained from the node's data 
         """
         (title, url) = self._get_title_and_url(item) #@UnusedVariable
-        quality = Quality.nameQuality(title)
+        quality = Quality.sceneQuality(title)
         return quality
 
     def _doSearch(self):

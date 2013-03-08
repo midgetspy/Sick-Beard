@@ -59,7 +59,7 @@ class NyaaProvider(generic.TorrentProvider):
     def getQuality(self, item, anime=False):
         self.debug()
         title = helpers.get_xml_text(item.getElementsByTagName('title')[0]).replace("/"," ")    
-        quality = Quality.nameQuality(title, anime)
+        quality = Quality.sceneQuality(title, anime)
         return quality        
         
     def findSeasonResults(self, show, season):

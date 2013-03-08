@@ -47,7 +47,7 @@ class DTTProvider(generic.TorrentProvider):
       
     def getQuality(self, item):
         url = item.getElementsByTagName('enclosure')[0].getAttribute('url')
-        quality = Quality.nameQuality(url)
+        quality = Quality.sceneQuality(url)
         return quality
 
     def findSeasonResults(self, show, season):

@@ -110,7 +110,7 @@ class ProperFinder():
             else:
                 curProper.season = parse_result.season_number if parse_result.season_number != None else 1
                 curProper.episode = parse_result.episode_numbers[0]
-            curProper.quality = Quality.nameQuality(curProper.name)
+            curProper.quality = Quality.sceneQuality(curProper.name)
 
             # for each show in our list
             for curShow in sickbeard.showList:

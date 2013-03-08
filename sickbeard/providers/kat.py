@@ -59,7 +59,7 @@ class KATProvider(generic.TorrentProvider):
     
     def getQuality(self, item):
         
-        quality = Quality.nameQuality(item[0])
+        quality = Quality.sceneQuality(item[0])
         return quality    
 
     def _reverseQuality(self,quality):
@@ -109,7 +109,7 @@ class KATProvider(generic.TorrentProvider):
             files = file_table.find_all('td',attrs = {'class':'torFileName'}, recursive = False)
             
             for fileName in filter(lambda x: x.rpartition(".")[2].lower() in mediaExtensions, files.string):
-                quality = Quality.nameQuality(os.path.basename(fileName))
+                quality = Quality.sceneQuality(os.path.basename(fileName))
                 if quality != Quality.UNKNOWN: break
     
             if fileName!=None and quality == Quality.UNKNOWN:
@@ -239,7 +239,7 @@ class KATProvider(generic.TorrentProvider):
                             logger.log(u"KAT Provider found result "+title+" but that doesn't seem like a verified result so I'm ignoring it",logger.DEBUG)
                             continue
 
-                        if mode == 'Season' and Quality.nameQuality(title) == Quality.UNKNOWN:
+                        if mode == 'Season' and Quality.sceneQuality(title) == Quality.UNKNOWN:
                             if not self._find_season_quality(title,link): continue
 
                         item = title, url, id, seeders, leechers

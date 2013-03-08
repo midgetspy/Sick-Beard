@@ -53,7 +53,7 @@ class EZRSSProvider(generic.TorrentProvider):
         filename_node = torrent_node.getElementsByTagName('fileName')[0]
         filename = get_xml_text(filename_node)
 
-        quality = Quality.nameQuality(filename)
+        quality = Quality.sceneQuality(filename)
         
         return quality
 
