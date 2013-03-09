@@ -25,7 +25,7 @@ from sickbeard.providers.generic import GenericProvider
 from sickbeard import encodingKludge as ek
 from sickbeard.name_parser.parser import NameParser, InvalidNameException
 
-MAX_DB_VERSION = 12
+MAX_DB_VERSION = 13
 
 class MainSanityCheck(db.DBSanityCheck):
     def check(self):
@@ -560,20 +560,7 @@ class RenameSeasonFolders(AddSizeAndSceneNameFields):
 
         self.incDBVersion()
 
-class AddSubtitlesSupport(RenameSeasonFolders):    
-    def test(self):
-        return self.checkDBVersion() >= 12
-
-    def execute(self):
-        
-        self.addColumn("tv_shows", "subtitles")
-        self.addColumn("tv_episodes", "subtitles", "TEXT", "")
-        self.addColumn("tv_episodes", "subtitles_searchcount")
-        self.addColumn("tv_episodes", "subtitles_lastsearch", "TIMESTAMP", str(datetime.datetime.min))
-        self.incDBVersion()
-   
-
-class Add1080pAndRawHDQualities(AddSubtitlesSupport):
+class Add1080pAndRawHDQualities(RenameSeasonFolders):
     """Add support for 1080p related qualities along with RawHD
 
     Quick overview of what the upgrade needs to do:
@@ -679,4 +666,16 @@ class Add1080pAndRawHDQualities(AddSubtitlesSupport):
         for cur_entry in historyQuality:
             self.connection.action("UPDATE history SET quality = ? WHERE showid = ? AND date = ?", [self._update_quality(cur_entry["quality"]), cur_entry["showid"], cur_entry["date"]])
 
+        self.incDBVersion()
+        
+class AddSubtitlesSupport(Add1080pAndRawHDQualities):    
+    def test(self):
+        return self.checkDBVersion() >= 13
+
+    def execute(self):
+        
+        self.addColumn("tv_shows", "subtitles")
+        self.addColumn("tv_episodes", "subtitles", "TEXT", "")
+        self.addColumn("tv_episodes", "subtitles_searchcount")
+        self.addColumn("tv_episodes", "subtitles_lastsearch", "TIMESTAMP", str(datetime.datetime.min))
         self.incDBVersion()
