@@ -236,7 +236,7 @@ class BinNewzProvider(generic.NZBProvider):
 
                 for searchItem in searchItems:
                     for downloader in self.nzbDownloaders:
-                        dname = str(downloader)[str(downloader).find(".",35)+1:-30]
+                        dname = str(downloader)[str(downloader).find(".",35)+1:str(downloader).find("object",35)-1]
                         logger.log("Searching for download : " + searchItem + " on " + dname)
                         try:
                             binsearch_result =  downloader.search(searchItem, minSize, newsgroup )
