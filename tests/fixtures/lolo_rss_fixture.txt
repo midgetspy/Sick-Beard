@@ -1,0 +1,257 @@
+<?xml version="1.0" encoding="UTF-8" ?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:newznab="http://www.newznab.com/DTD/2010/feeds/attributes/" encoding="utf-8">
+<channel>
+<atom:link href="http://lolo.sickbeard.com/api" rel="self" type="application/rss+xml" />
+<title>Sick Beard Index</title>
+<description>Sick Beard Index API Results</description>
+<link>http://lolo.sickbeard.com/</link>
+<language>en-gb</language>
+<webMaster>midgetspy@sickbeard.com (Sick Beard Index)</webMaster>
+<category></category>
+<image>
+	<url>http://lolo.sickbeard.com/theme/nzbsu/images/banner.jpg</url>
+	<title>Sick Beard Index</title>
+	<link>http://lolo.sickbeard.com/</link>
+	<description>Visit Sick Beard Index - API TV Index</description>
+</image>
+<newznab:response offset="0" total="17" />
+<item>
+	<title>Justified.S04E05.PROPER.HDTV.x264-2HD</title>
+	<guid isPermaLink="true">http://lolo.sickbeard.com/details/174b0bbec90ea54a239e210f03042ee1</guid>
+	<link>http://lolo.sickbeard.com/getnzb/174b0bbec90ea54a239e210f03042ee1.nzb&amp;i=0&amp;r=</link>
+	<comments>http://lolo.sickbeard.com/details/174b0bbec90ea54a239e210f03042ee1#comments</comments> 	
+	<pubDate>Thu, 07 Feb 2013 16:43:27 +0100</pubDate> 
+	<category>TV &gt; HD</category> 	
+	<description>Justified.S04E05.PROPER.HDTV.x264-2HD</description>
+	<enclosure url="http://lolo.sickbeard.com/getnzb/174b0bbec90ea54a239e210f03042ee1.nzb&amp;i=0&amp;r=" length="443846458" type="application/x-nzb" />
+
+	<newznab:attr name="category" value="5000" />
+	<newznab:attr name="category" value="5040" />
+	<newznab:attr name="size" value="443846458" />
+</item>
+<item>
+	<title>Justified.S04E05.PROPER.720p.HDTV.x264-EVOLVE</title>
+	<guid isPermaLink="true">http://lolo.sickbeard.com/details/6327f1d7ec9331bb9b897d84c5bde44e</guid>
+	<link>http://lolo.sickbeard.com/getnzb/6327f1d7ec9331bb9b897d84c5bde44e.nzb&amp;i=0&amp;r=</link>
+	<comments>http://lolo.sickbeard.com/details/6327f1d7ec9331bb9b897d84c5bde44e#comments</comments> 	
+	<pubDate>Thu, 07 Feb 2013 16:31:03 +0100</pubDate> 
+	<category>TV &gt; HD</category> 	
+	<description>Justified.S04E05.PROPER.720p.HDTV.x264-EVOLVE</description>
+	<enclosure url="http://lolo.sickbeard.com/getnzb/6327f1d7ec9331bb9b897d84c5bde44e.nzb&amp;i=0&amp;r=" length="1494677514" type="application/x-nzb" />
+
+	<newznab:attr name="category" value="5000" />
+	<newznab:attr name="category" value="5040" />
+	<newznab:attr name="size" value="1494677514" />
+</item>
+<item>
+	<title>Kroll.Show.S01E04.PROPER.720p.HDTV.x264-EVOLVE</title>
+	<guid isPermaLink="true">http://lolo.sickbeard.com/details/5017882477804a8c45d23cb1dbdb4970</guid>
+	<link>http://lolo.sickbeard.com/getnzb/5017882477804a8c45d23cb1dbdb4970.nzb&amp;i=0&amp;r=</link>
+	<comments>http://lolo.sickbeard.com/details/5017882477804a8c45d23cb1dbdb4970#comments</comments> 	
+	<pubDate>Thu, 07 Feb 2013 06:28:17 +0100</pubDate> 
+	<category>TV &gt; HD</category> 	
+	<description>Kroll.Show.S01E04.PROPER.720p.HDTV.x264-EVOLVE</description>
+	<enclosure url="http://lolo.sickbeard.com/getnzb/5017882477804a8c45d23cb1dbdb4970.nzb&amp;i=0&amp;r=" length="1287465478" type="application/x-nzb" />
+
+	<newznab:attr name="category" value="5000" />
+	<newznab:attr name="category" value="5040" />
+	<newznab:attr name="size" value="1287465478" />
+</item>
+<item>
+	<title>Kroll.Show.S01E04.PROPER.HDTV.x264-EVOLVE</title>
+	<guid isPermaLink="true">http://lolo.sickbeard.com/details/6e168cb3583edc6b1a0c97d361dd09a3</guid>
+	<link>http://lolo.sickbeard.com/getnzb/6e168cb3583edc6b1a0c97d361dd09a3.nzb&amp;i=0&amp;r=</link>
+	<comments>http://lolo.sickbeard.com/details/6e168cb3583edc6b1a0c97d361dd09a3#comments</comments> 	
+	<pubDate>Thu, 07 Feb 2013 06:28:24 +0100</pubDate> 
+	<category>TV &gt; HD</category> 	
+	<description>Kroll.Show.S01E04.PROPER.HDTV.x264-EVOLVE</description>
+	<enclosure url="http://lolo.sickbeard.com/getnzb/6e168cb3583edc6b1a0c97d361dd09a3.nzb&amp;i=0&amp;r=" length="384938884" type="application/x-nzb" />
+
+	<newznab:attr name="category" value="5000" />
+	<newznab:attr name="category" value="5040" />
+	<newznab:attr name="size" value="384938884" />
+</item>
+<item>
+	<title>Justified.S04E05.PROPER.720p.HDTV.x264-EVOLVE</title>
+	<guid isPermaLink="true">http://lolo.sickbeard.com/details/01de67113151cc1db1282c45beb5ab98</guid>
+	<link>http://lolo.sickbeard.com/getnzb/01de67113151cc1db1282c45beb5ab98.nzb&amp;i=0&amp;r=</link>
+	<comments>http://lolo.sickbeard.com/details/01de67113151cc1db1282c45beb5ab98#comments</comments> 	
+	<pubDate>Wed, 06 Feb 2013 06:13:50 +0100</pubDate> 
+	<category>TV &gt; HD</category> 	
+	<description>Justified.S04E05.PROPER.720p.HDTV.x264-EVOLVE</description>
+	<enclosure url="http://lolo.sickbeard.com/getnzb/01de67113151cc1db1282c45beb5ab98.nzb&amp;i=0&amp;r=" length="1557400362" type="application/x-nzb" />
+
+	<newznab:attr name="category" value="5000" />
+	<newznab:attr name="category" value="5040" />
+	<newznab:attr name="size" value="1557400362" />
+</item>
+<item>
+	<title>Justified.S04E05.PROPER.HDTV.x264-2HD</title>
+	<guid isPermaLink="true">http://lolo.sickbeard.com/details/646c4fb0188f61520a6289da12c3b7cf</guid>
+	<link>http://lolo.sickbeard.com/getnzb/646c4fb0188f61520a6289da12c3b7cf.nzb&amp;i=0&amp;r=</link>
+	<comments>http://lolo.sickbeard.com/details/646c4fb0188f61520a6289da12c3b7cf#comments</comments> 	
+	<pubDate>Wed, 06 Feb 2013 06:14:20 +0100</pubDate> 
+	<category>TV &gt; HD</category> 	
+	<description>Justified.S04E05.PROPER.HDTV.x264-2HD</description>
+	<enclosure url="http://lolo.sickbeard.com/getnzb/646c4fb0188f61520a6289da12c3b7cf.nzb&amp;i=0&amp;r=" length="427936065" type="application/x-nzb" />
+
+	<newznab:attr name="category" value="5000" />
+	<newznab:attr name="category" value="5040" />
+	<newznab:attr name="size" value="427936065" />
+</item>
+<item>
+	<title>Craig.Ferguson.2013.02.04.Zooey.Deschanel.PROPER.HDTV.x264-2HD</title>
+	<guid isPermaLink="true">http://lolo.sickbeard.com/details/95bdfe44f3a3cb101b1d231a21be45e1</guid>
+	<link>http://lolo.sickbeard.com/getnzb/95bdfe44f3a3cb101b1d231a21be45e1.nzb&amp;i=0&amp;r=</link>
+	<comments>http://lolo.sickbeard.com/details/95bdfe44f3a3cb101b1d231a21be45e1#comments</comments> 	
+	<pubDate>Tue, 05 Feb 2013 10:37:12 +0100</pubDate> 
+	<category>TV &gt; HD</category> 	
+	<description>Craig.Ferguson.2013.02.04.Zooey.Deschanel.PROPER.HDTV.x264-2HD</description>
+	<enclosure url="http://lolo.sickbeard.com/getnzb/95bdfe44f3a3cb101b1d231a21be45e1.nzb&amp;i=0&amp;r=" length="395951506" type="application/x-nzb" />
+
+	<newznab:attr name="category" value="5000" />
+	<newznab:attr name="category" value="5040" />
+	<newznab:attr name="size" value="395951506" />
+</item>
+<item>
+	<title>The.Pacific.E10.PROPER.BDRiP.XviD-QCF</title>
+	<guid isPermaLink="true">http://lolo.sickbeard.com/details/9ef390be2ab66609a84d9ab8b2002602</guid>
+	<link>http://lolo.sickbeard.com/getnzb/9ef390be2ab66609a84d9ab8b2002602.nzb&amp;i=0&amp;r=</link>
+	<comments>http://lolo.sickbeard.com/details/9ef390be2ab66609a84d9ab8b2002602#comments</comments> 	
+	<pubDate>Mon, 04 Feb 2013 13:13:43 +0100</pubDate> 
+	<category>TV &gt; SD</category> 	
+	<description>The.Pacific.E10.PROPER.BDRiP.XviD-QCF</description>
+	<enclosure url="http://lolo.sickbeard.com/getnzb/9ef390be2ab66609a84d9ab8b2002602.nzb&amp;i=0&amp;r=" length="702305076" type="application/x-nzb" />
+
+	<newznab:attr name="category" value="5000" />
+	<newznab:attr name="category" value="5030" />
+	<newznab:attr name="size" value="702305076" />
+</item>
+<item>
+	<title>The.Pacific.E09.PROPER.BDRiP.XviD-QCF</title>
+	<guid isPermaLink="true">http://lolo.sickbeard.com/details/778c58c4e068a2fb520dcdf1f858cf02</guid>
+	<link>http://lolo.sickbeard.com/getnzb/778c58c4e068a2fb520dcdf1f858cf02.nzb&amp;i=0&amp;r=</link>
+	<comments>http://lolo.sickbeard.com/details/778c58c4e068a2fb520dcdf1f858cf02#comments</comments> 	
+	<pubDate>Mon, 04 Feb 2013 13:14:01 +0100</pubDate> 
+	<category>TV &gt; SD</category> 	
+	<description>The.Pacific.E09.PROPER.BDRiP.XviD-QCF</description>
+	<enclosure url="http://lolo.sickbeard.com/getnzb/778c58c4e068a2fb520dcdf1f858cf02.nzb&amp;i=0&amp;r=" length="699474944" type="application/x-nzb" />
+
+	<newznab:attr name="category" value="5000" />
+	<newznab:attr name="category" value="5030" />
+	<newznab:attr name="size" value="699474944" />
+</item>
+<item>
+	<title>The.Pacific.E08.PROPER.BDRiP.XviD-QCF</title>
+	<guid isPermaLink="true">http://lolo.sickbeard.com/details/ff76e854ac54e89e10a3cd1bd5f20318</guid>
+	<link>http://lolo.sickbeard.com/getnzb/ff76e854ac54e89e10a3cd1bd5f20318.nzb&amp;i=0&amp;r=</link>
+	<comments>http://lolo.sickbeard.com/details/ff76e854ac54e89e10a3cd1bd5f20318#comments</comments> 	
+	<pubDate>Mon, 04 Feb 2013 13:14:28 +0100</pubDate> 
+	<category>TV &gt; SD</category> 	
+	<description>The.Pacific.E08.PROPER.BDRiP.XviD-QCF</description>
+	<enclosure url="http://lolo.sickbeard.com/getnzb/ff76e854ac54e89e10a3cd1bd5f20318.nzb&amp;i=0&amp;r=" length="675269891" type="application/x-nzb" />
+
+	<newznab:attr name="category" value="5000" />
+	<newznab:attr name="category" value="5030" />
+	<newznab:attr name="size" value="675269891" />
+</item>
+<item>
+	<title>The.Pacific.E07.PROPER.BDRiP.XviD-QCF</title>
+	<guid isPermaLink="true">http://lolo.sickbeard.com/details/4a14879e1f43669db65fe4543072180a</guid>
+	<link>http://lolo.sickbeard.com/getnzb/4a14879e1f43669db65fe4543072180a.nzb&amp;i=0&amp;r=</link>
+	<comments>http://lolo.sickbeard.com/details/4a14879e1f43669db65fe4543072180a#comments</comments> 	
+	<pubDate>Mon, 04 Feb 2013 13:14:22 +0100</pubDate> 
+	<category>TV &gt; SD</category> 	
+	<description>The.Pacific.E07.PROPER.BDRiP.XviD-QCF</description>
+	<enclosure url="http://lolo.sickbeard.com/getnzb/4a14879e1f43669db65fe4543072180a.nzb&amp;i=0&amp;r=" length="678207359" type="application/x-nzb" />
+
+	<newznab:attr name="category" value="5000" />
+	<newznab:attr name="category" value="5030" />
+	<newznab:attr name="size" value="678207359" />
+</item>
+<item>
+	<title>The.Pacific.E06.PROPER.BDRiP.XviD-QCF</title>
+	<guid isPermaLink="true">http://lolo.sickbeard.com/details/c5b052253360a09d6df44d90e54ff0ea</guid>
+	<link>http://lolo.sickbeard.com/getnzb/c5b052253360a09d6df44d90e54ff0ea.nzb&amp;i=0&amp;r=</link>
+	<comments>http://lolo.sickbeard.com/details/c5b052253360a09d6df44d90e54ff0ea#comments</comments> 	
+	<pubDate>Mon, 04 Feb 2013 13:14:35 +0100</pubDate> 
+	<category>TV &gt; SD</category> 	
+	<description>The.Pacific.E06.PROPER.BDRiP.XviD-QCF</description>
+	<enclosure url="http://lolo.sickbeard.com/getnzb/c5b052253360a09d6df44d90e54ff0ea.nzb&amp;i=0&amp;r=" length="673740594" type="application/x-nzb" />
+
+	<newznab:attr name="category" value="5000" />
+	<newznab:attr name="category" value="5030" />
+	<newznab:attr name="size" value="673740594" />
+</item>
+<item>
+	<title>The.Pacific.E05.PROPER.BDRiP.XviD-QCF</title>
+	<guid isPermaLink="true">http://lolo.sickbeard.com/details/95388fdf68579e8de8c473bb70fa1502</guid>
+	<link>http://lolo.sickbeard.com/getnzb/95388fdf68579e8de8c473bb70fa1502.nzb&amp;i=0&amp;r=</link>
+	<comments>http://lolo.sickbeard.com/details/95388fdf68579e8de8c473bb70fa1502#comments</comments> 	
+	<pubDate>Mon, 04 Feb 2013 13:14:13 +0100</pubDate> 
+	<category>TV &gt; SD</category> 	
+	<description>The.Pacific.E05.PROPER.BDRiP.XviD-QCF</description>
+	<enclosure url="http://lolo.sickbeard.com/getnzb/95388fdf68579e8de8c473bb70fa1502.nzb&amp;i=0&amp;r=" length="673780021" type="application/x-nzb" />
+
+	<newznab:attr name="category" value="5000" />
+	<newznab:attr name="category" value="5030" />
+	<newznab:attr name="size" value="673780021" />
+</item>
+<item>
+	<title>The.Pacific.E04.PROPER.BDRiP.XviD-QCF</title>
+	<guid isPermaLink="true">http://lolo.sickbeard.com/details/794c2bdc7c75505a589e160dc7b280e7</guid>
+	<link>http://lolo.sickbeard.com/getnzb/794c2bdc7c75505a589e160dc7b280e7.nzb&amp;i=0&amp;r=</link>
+	<comments>http://lolo.sickbeard.com/details/794c2bdc7c75505a589e160dc7b280e7#comments</comments> 	
+	<pubDate>Mon, 04 Feb 2013 13:13:49 +0100</pubDate> 
+	<category>TV &gt; SD</category> 	
+	<description>The.Pacific.E04.PROPER.BDRiP.XviD-QCF</description>
+	<enclosure url="http://lolo.sickbeard.com/getnzb/794c2bdc7c75505a589e160dc7b280e7.nzb&amp;i=0&amp;r=" length="683621115" type="application/x-nzb" />
+
+	<newznab:attr name="category" value="5000" />
+	<newznab:attr name="category" value="5030" />
+	<newznab:attr name="size" value="683621115" />
+</item>
+<item>
+	<title>The.Pacific.E03.PROPER.BDRiP.XviD-QCF</title>
+	<guid isPermaLink="true">http://lolo.sickbeard.com/details/f7959f69242dbd49ba6f792e16a5aafa</guid>
+	<link>http://lolo.sickbeard.com/getnzb/f7959f69242dbd49ba6f792e16a5aafa.nzb&amp;i=0&amp;r=</link>
+	<comments>http://lolo.sickbeard.com/details/f7959f69242dbd49ba6f792e16a5aafa#comments</comments> 	
+	<pubDate>Mon, 04 Feb 2013 13:13:55 +0100</pubDate> 
+	<category>TV &gt; SD</category> 	
+	<description>The.Pacific.E03.PROPER.BDRiP.XviD-QCF</description>
+	<enclosure url="http://lolo.sickbeard.com/getnzb/f7959f69242dbd49ba6f792e16a5aafa.nzb&amp;i=0&amp;r=" length="685454709" type="application/x-nzb" />
+
+	<newznab:attr name="category" value="5000" />
+	<newznab:attr name="category" value="5030" />
+	<newznab:attr name="size" value="685454709" />
+</item>
+<item>
+	<title>The.Pacific.E02.PROPER.BDRiP.XviD-QCF</title>
+	<guid isPermaLink="true">http://lolo.sickbeard.com/details/47ead73e3e7376b4630f505e7ec8fe66</guid>
+	<link>http://lolo.sickbeard.com/getnzb/47ead73e3e7376b4630f505e7ec8fe66.nzb&amp;i=0&amp;r=</link>
+	<comments>http://lolo.sickbeard.com/details/47ead73e3e7376b4630f505e7ec8fe66#comments</comments> 	
+	<pubDate>Mon, 04 Feb 2013 13:14:07 +0100</pubDate> 
+	<category>TV &gt; SD</category> 	
+	<description>The.Pacific.E02.PROPER.BDRiP.XviD-QCF</description>
+	<enclosure url="http://lolo.sickbeard.com/getnzb/47ead73e3e7376b4630f505e7ec8fe66.nzb&amp;i=0&amp;r=" length="684795356" type="application/x-nzb" />
+
+	<newznab:attr name="category" value="5000" />
+	<newznab:attr name="category" value="5030" />
+	<newznab:attr name="size" value="684795356" />
+</item>
+<item>
+	<title>The.Pacific.E01.PROPER.BDRiP.XviD-QCF</title>
+	<guid isPermaLink="true">http://lolo.sickbeard.com/details/b679b8fcc09de869f1fe036efb53f7d3</guid>
+	<link>http://lolo.sickbeard.com/getnzb/b679b8fcc09de869f1fe036efb53f7d3.nzb&amp;i=0&amp;r=</link>
+	<comments>http://lolo.sickbeard.com/details/b679b8fcc09de869f1fe036efb53f7d3#comments</comments> 	
+	<pubDate>Mon, 04 Feb 2013 13:14:36 +0100</pubDate> 
+	<category>TV &gt; SD</category> 	
+	<description>The.Pacific.E01.PROPER.BDRiP.XviD-QCF</description>
+	<enclosure url="http://lolo.sickbeard.com/getnzb/b679b8fcc09de869f1fe036efb53f7d3.nzb&amp;i=0&amp;r=" length="675399341" type="application/x-nzb" />
+
+	<newznab:attr name="category" value="5000" />
+	<newznab:attr name="category" value="5030" />
+	<newznab:attr name="size" value="675399341" />
+</item>
+
+</channel>
+</rss>

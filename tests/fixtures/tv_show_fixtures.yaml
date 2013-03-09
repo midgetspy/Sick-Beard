@@ -1,0 +1,13 @@
+show_one:
+  show_id: 82066
+  show_name: Fringe
+  tvdb_id: 82066
+  genre: Drama,Science-Fiction
+  runtime: 40
+  airs: Monday 9:00 PM
+  flatten_folders: False
+  paused: False
+  startyear: '2008-08-26'
+  quality: 29
+  tvr_id: 18388
+  location: ''
