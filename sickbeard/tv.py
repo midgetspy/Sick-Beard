@@ -859,9 +859,23 @@ class TVShow(object):
                             helpers.moveFile(subtitle.path, new_file_path)
                             helpers.chmodAsParent(new_file_path)
                 else:
-                    for video in subtitles:
+                    if sickbeard.SUBTITLES_DIR_SUB:
+                        for video in subtitles:
+                            subs_new_path = ek.ek(os.path.join, os.path.dirname(video.path), self._location+"/subs")
+                            dir_exists = helpers.makeDir(subs_new_path)
+                            if not dir_exists:
+                                logger.log(u"Unable to create subtitles folder "+subs_new_path, logger.ERROR)
+                            else:
+                                helpers.chmodAsParent(subs_new_path)
+                        
                         for subtitle in subtitles.get(video):
-                            helpers.chmodAsParent(subtitle.path)
+                            new_file_path = ek.ek(os.path.join, subs_new_path, os.path.basename(subtitle.path))
+                            helpers.moveFile(subtitle.path, new_file_path)
+                            helpers.chmodAsParent(new_file_path)
+                    else :
+                        for video in subtitles:
+                            for subtitle in subtitles.get(video):
+                                helpers.chmodAsParent(subtitle.path)
                 
         except Exception as e:
             logger.log("Error occurred when downloading subtitles: " + str(e), logger.DEBUG)
@@ -1081,6 +1095,7 @@ class TVEpisode(object):
         previous_subtitles = self.subtitles
 
         try:
+                                    
             need_languages = set(sickbeard.SUBTITLES_LANGUAGES) - set(self.subtitles)
             subtitles = subliminal.download_subtitles([self.location], languages=need_languages, services=sickbeard.subtitles.getEnabledServiceList(), force=False, multi=True, cache_dir=sickbeard.CACHE_DIR)
             
@@ -1108,7 +1123,25 @@ class TVEpisode(object):
             for video in subtitles:
                 for subtitle in subtitles.get(video):
                     history.logSubtitle(self.show.tvdbid, self.season, self.episode, self.status, subtitle)
-
+        if sickbeard.SUBTITLES_DIR:
+            for video in subtitles:
+                subs_new_path = ek.ek(os.path.join, os.path.dirname(video.path), sickbeard.SUBTITLES_DIR)
+                if not ek.ek(os.path.isdir, subs_new_path):
+                    ek.ek(os.mkdir, subs_new_path)
+                        
+                for subtitle in subtitles.get(video):
+                    new_file_path = ek.ek(os.path.join, subs_new_path, os.path.basename(subtitle.path))
+                    helpers.moveFile(subtitle.path, new_file_path)
+                       
+        if sickbeard.SUBTITLES_DIR_SUB:
+            for video in subtitles:
+                subs_new_path = ek.ek(os.path.join, os.path.dirname(video.path), os.path.dirname(video.path)+"\Subs")
+                if not ek.ek(os.path.isdir, subs_new_path):
+                    ek.ek(os.mkdir, subs_new_path)
+                        
+                for subtitle in subtitles.get(video):
+                    new_file_path = ek.ek(os.path.join, subs_new_path, os.path.basename(subtitle.path))
+                    helpers.moveFile(subtitle.path, new_file_path)
         
         return subtitles
 
@@ -1860,6 +1893,10 @@ class TVEpisode(object):
         if self.show.subtitles and sickbeard.SUBTITLES_DIR != '':
             related_subs = postProcessor.PostProcessor(self.location)._list_associated_files(sickbeard.SUBTITLES_DIR, subtitles_only=True)
             absolute_proper_subs_path = ek.ek(os.path.join, sickbeard.SUBTITLES_DIR, self.formatted_filename())
+            
+        if self.show.subtitles and sickbeard.SUBTITLES_DIR_SUB:
+            related_subs = postProcessor.PostProcessor(self.location)._list_associated_files(os.path.dirname(self.location)+"\Subs", subtitles_only=True)
+            absolute_proper_subs_path = ek.ek(os.path.join, os.path.dirname(self.location)+"\Subs", self.formatted_filename())
             
         logger.log(u"Files associated to " + self.location + ": " + str(related_files), logger.DEBUG)
 

@@ -421,6 +421,16 @@ class Manage:
                         for subtitle in subtitles.get(video):
                             new_file_path = ek.ek(os.path.join, subs_new_path, os.path.basename(subtitle.path))
                             helpers.moveFile(subtitle.path, new_file_path)
+                       
+                if sickbeard.SUBTITLES_DIR_SUB:
+                    for video in subtitles:
+                        subs_new_path = ek.ek(os.path.join, os.path.dirname(video.path), os.path.dirname(video.path)+"\Subs")
+                        if not ek.ek(os.path.isdir, subs_new_path):
+                            ek.ek(os.mkdir, subs_new_path)
+                        
+                        for subtitle in subtitles.get(video):
+                            new_file_path = ek.ek(os.path.join, subs_new_path, os.path.basename(subtitle.path))
+                            helpers.moveFile(subtitle.path, new_file_path)
                         
         redirect('/manage/subtitleMissed')
 
@@ -1725,7 +1735,7 @@ class ConfigSubtitles:
         return _munge(t)
 
     @cherrypy.expose
-    def saveSubtitles(self, use_subtitles=None, subtitles_plugins=None, subtitles_languages=None, subtitles_dir=None, service_order=None, subtitles_history=None):
+    def saveSubtitles(self, use_subtitles=None, subtitles_plugins=None, subtitles_languages=None, subtitles_dir=None, subtitles_dir_sub=None, service_order=None, subtitles_history=None):
         results = []
 
         if use_subtitles == "on":
@@ -1744,11 +1754,17 @@ class ConfigSubtitles:
         if subtitles_history == "on":
             subtitles_history = 1
         else: 
-            subtitles_history = 0    
+            subtitles_history = 0   
+            
+        if subtitles_dir_sub == "on":
+            subtitles_dir_sub = 1
+        else: 
+            subtitles_dir_sub = 0   
 
         sickbeard.USE_SUBTITLES = use_subtitles
         sickbeard.SUBTITLES_LANGUAGES = [lang.alpha2 for lang in subtitles.isValidLanguage(subtitles_languages.replace(' ', '').split(','))] if subtitles_languages != ''  else ''
         sickbeard.SUBTITLES_DIR = subtitles_dir
+        sickbeard.SUBTITLES_DIR_SUB = subtitles_dir_sub
         sickbeard.SUBTITLES_HISTORY = subtitles_history
         
         # Subtitles services
@@ -3158,9 +3174,23 @@ class Home:
                         helpers.moveFile(subtitle.path, new_file_path)
                         helpers.chmodAsParent(new_file_path)
             else:
-                for video in subtitles:
-                    for subtitle in subtitles.get(video):
-                        helpers.chmodAsParent(subtitle.path)            
+                    if sickbeard.SUBTITLES_DIR_SUB:
+                        for video in subtitles:
+                            subs_new_path = ek.ek(os.path.join, os.path.dirname(video.path), os.path.dirname(video.path)+"\Subs")
+                            dir_exists = helpers.makeDir(subs_new_path)
+                            if not dir_exists:
+                                logger.log(u"Unable to create subtitles folder "+subs_new_path, logger.ERROR)
+                            else:
+                                helpers.chmodAsParent(subs_new_path)
+                        
+                        for subtitle in subtitles.get(video):
+                            new_file_path = ek.ek(os.path.join, subs_new_path, os.path.basename(subtitle.path))
+                            helpers.moveFile(subtitle.path, new_file_path)
+                            helpers.chmodAsParent(new_file_path)
+                    else:
+                        for video in subtitles:
+                            for subtitle in subtitles.get(video):
+                                helpers.chmodAsParent(subtitle.path)            
         except:
             return json.dumps({'result': 'failure'})
 

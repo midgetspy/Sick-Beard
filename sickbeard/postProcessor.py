@@ -266,7 +266,16 @@ class PostProcessor(object):
                     helpers.chmodAsParent(subs_new_path)
                 new_file_path = ek.ek(os.path.join, subs_new_path, new_file_name)
             else:
-                new_file_path = ek.ek(os.path.join, new_path, new_file_name)
+                if sickbeard.SUBTITLES_DIR_SUB and cur_extension in common.subtitleExtensions:
+                    subs_new_path = ek.ek(os.path.join, new_path, os.path.dirname(file.path)+"\Subs")
+                    dir_exists = helpers.makeDir(subs_new_path)
+                    if not dir_exists:
+                        logger.log(u"Unable to create subtitles folder "+subs_new_path, logger.ERROR)
+                    else:
+                        helpers.chmodAsParent(subs_new_path)
+                    new_file_path = ek.ek(os.path.join, subs_new_path, new_file_name)
+                else :
+                    new_file_path = ek.ek(os.path.join, new_path, new_file_name)
             
             action(cur_file_path, new_file_path)
                 
