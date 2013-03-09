@@ -40,6 +40,9 @@ class TraktNotifier:
 
     def notify_download(self, ep_name):
         pass
+    
+    def notify_subtitle_download(self, ep_name, lang):
+        pass
 
     def update_library(self, ep_obj):
         """

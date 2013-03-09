@@ -18,7 +18,7 @@
 
 import sickbeard
 import os.path
-
+import datetime
 from sickbeard import db, common, helpers, logger
 from sickbeard.providers.generic import GenericProvider
 
@@ -560,8 +560,20 @@ class RenameSeasonFolders(AddSizeAndSceneNameFields):
 
         self.incDBVersion()
 
+class AddSubtitlesSupport(RenameSeasonFolders):    
+    def test(self):
+        return self.checkDBVersion() >= 12
 
-class Add1080pAndRawHDQualities(RenameSeasonFolders):
+    def execute(self):
+        
+        self.addColumn("tv_shows", "subtitles")
+        self.addColumn("tv_episodes", "subtitles", "TEXT", "")
+        self.addColumn("tv_episodes", "subtitles_searchcount")
+        self.addColumn("tv_episodes", "subtitles_lastsearch", "TIMESTAMP", str(datetime.datetime.min))
+        self.incDBVersion()
+   
+
+class Add1080pAndRawHDQualities(AddSubtitlesSupport):
     """Add support for 1080p related qualities along with RawHD
 
     Quick overview of what the upgrade needs to do:

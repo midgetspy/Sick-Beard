@@ -1,6 +1,8 @@
 #import sickbeard
+#from sickbeard import subtitles
 #import sickbeard.helpers
 #from sickbeard.common import *
+#import subliminal
 #import os.path, os
 #import datetime
 #set global $title=$show.name
@@ -46,6 +48,7 @@
 <script type="text/javascript" src="$sbRoot/js/displayShow.js?$sbPID"></script>
 <script type="text/javascript" src="$sbRoot/js/plotTooltip.js?$sbPID"></script>
 <script type="text/javascript" src="$sbRoot/js/ajaxEpSearch.js?$sbPID"></script>
+<script type="text/javascript" src="$sbRoot/js/ajaxEpSubtitles.js?$sbPID"></script>
 
 <div class="align-left"><b>Change Show:</b>
 <div class="navShow"><img id="prevShow" width="16" height="18" src="$sbRoot/images/prev.gif" alt="&lt;&lt;" title="Prev Show" /></div>
@@ -95,6 +98,9 @@ replace with: <b><%=", ".join([Quality.qualityStrings[x] for x in sorted(bestQua
         </td>
     </tr>
 	<tr><td class="showLegend">Custom Search Names:</td><td>$show.custom_search_names</td></tr>
+    #if $sickbeard.USE_SUBTITLES
+    <tr><td class="showLegend">Subtitles: </td><td><img src="$sbRoot/images/#if int($show.subtitles) == 1 then "yes16.png\" alt=\"Y" else "no16.png\" alt=\"N"#" width="16" height="16" /></td></tr>
+#end if
     <tr><td class="showLegend">Flatten Folders: </td><td><img src="$sbRoot/images/#if $show.flatten_folders == 1 or $sickbeard.NAMING_FORCE_FOLDERS then "yes16.png\" alt=\"Y" else "no16.png\" alt=\"N"#" width="16" height="16" /></td></tr>
     <tr><td class="showLegend">Paused: </td><td><img src="$sbRoot/images/#if int($show.paused) == 1 then "yes16.png\" alt=\"Y" else "no16.png\" alt=\"N"#" width="16" height="16" /></td></tr>
     <tr><td class="showLegend">Air-by-Date: </td><td><img src="$sbRoot/images/#if int($show.air_by_date) == 1 then "yes16.png\" alt=\"Y" else "no16.png\" alt=\"N"#" width="16" height="16" /></td></tr>
@@ -148,13 +154,13 @@ Change Audio of selected episodes to
 #for $epResult in $sqlResults:
 
     #if int($epResult["season"]) != $curSeason:
-  <tr><td colspan="9"><a name="season-$epResult["season"]"></a></td></tr>
+  <tr><td colspan="10"><a name="season-$epResult["season"]"></a></td></tr>
   <tr class="seasonheader" id="season-$epResult["season"]">
     <td colspan="9">
         <h2>#if int($epResult["season"]) == 0 then "Specials" else "Season "+str($epResult["season"])#</h2>
     </td>
   </tr>
-  <tr id="season-$epResult["season"]-cols"><th width="1%"><input type="checkbox" class="seasonCheck" id="$epResult["season"]" /></th><th>NFO</th><th>TBN</th><th>Episode</th><th>Name</th><th class="nowrap">Airdate</th><th>Filename</th><th>Audio</th><th>Status</th><th>Search</th></tr>
+  <tr id="season-$epResult["season"]-cols"><th width="1%"><input type="checkbox" class="seasonCheck" id="$epResult["season"]" /></th><th>NFO</th><th>TBN</th><th>Episode</th><th>Name</th><th class="nowrap">Airdate</th><th>Filename</th><th>Audio</th>#if $sickbeard.USE_SUBTITLES and $show.subtitles then "<th>Subs</th>" else ""#<th>Status</th><th>Search</th></tr>
         #set $curSeason = int($epResult["season"])
     #end if    
 
@@ -187,15 +193,31 @@ $epLoc
     <td align="center" class="audio_langs_column">
                 <img src="$sbRoot/images/flags/${epResult["audio_langs"]}.png" alt="$epResult["audio_langs"]" width="16" />
     </td>
+</small>
+    </td>
+#if $sickbeard.USE_SUBTITLES and $show.subtitles:
+    <td id="subtitles_column" class="subtitles_column" align="center">
+    #if $epResult["subtitles"]:
+        #for $sub_lang in subliminal.language.language_list($epResult["subtitles"].split(',')):
+            #if sub_lang.alpha2 != ""
+            	<img src="$sbRoot/images/flags/${sub_lang.alpha2}.png" width="16" height="11" alt="${sub_lang}" />
+			#end if
+        #end for
+    #end if
+    </td>
+#end if
     #set $curStatus, $curQuality = $Quality.splitCompositeStatus(int($epResult["status"]))
     #if $curQuality != Quality.NONE:   
-    <td class="status_column">$statusStrings[$curStatus] <span class="quality $Quality.qualityStrings[$curQuality].replace("720p","HD720p").replace("1080p","HD1080p").replace("RawHD TV", "RawHD").replace("HD TV", "HD720p")">$Quality.qualityStrings[$curQuality]</span></td>
+    <td class="status_column" align="center">$statusStrings[$curStatus] <span class="quality $Quality.qualityStrings[$curQuality].replace("720p","HD720p").replace("1080p","HD1080p").replace("RawHD TV", "RawHD").replace("HD TV", "HD720p")">$Quality.qualityStrings[$curQuality]</span></td>
 #else:    
-    <td class="status_column">$statusStrings[$curStatus]</td>
+    <td class="status_column" align="center">$statusStrings[$curStatus]</td>
 #end if
     <td align="center">
     #if int($epResult["season"]) != 0:
       <a class="epSearch" href="searchEpisode?show=$show.tvdbid&amp;season=$epResult["season"]&amp;episode=$epResult["episode"]"><img src="$sbRoot/images/search16.png" height="16" alt="search" title="Manual Search" /></a>
+    #end if
+	#if $sickbeard.USE_SUBTITLES and $show.subtitles and len(set(str($epResult["subtitles"]).split(',')).intersection(set($subtitles.wantedLanguages()))) < len($subtitles.wantedLanguages()) and $epResult["location"]
+      <a class="epSubtitlesSearch" href="searchEpisodeSubtitles?show=$show.tvdbid&amp;season=$epResult["season"]&amp;episode=$epResult["episode"]"><img src="$sbRoot/images/closed_captioning.png" height="16" alt="search subtitles" title="Search Subtitles" /></a>
     #end if
     </td>
    </tr>

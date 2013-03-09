@@ -827,24 +827,24 @@ config_providers.tmpl
 #config-components > h2 {
   border-bottom: 4px solid #ddd;
 }
-#providerOrderList {
+#providerOrderList, #service_order_list {
   width: 250px;
   padding-left: 20px;
   list-style-type: none;
 }
-#providerOrderList li {
+#providerOrderList li, #service_order_list li {
   padding: 5px;
   margin: 5px 0;
   font-size: 14px;
 }
-#providerOrderList input {
+#providerOrderList input, #service_order_list input {
   margin: 0 2px;
 }
 .imgLink img {
   padding: 0 2px 2px;
 }
 /* fix drop target height */
-#providerOrderList .ui-state-highlight {
+#providerOrderList.ui-state-highlight, #service_order_list .ui-state-highlight {
   height: 20px;
   line-height: 18px;
 }

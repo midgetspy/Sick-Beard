@@ -80,6 +80,9 @@ def notify_download(ep_name):
     for n in notifiers:
         n.notify_download(ep_name)
 
+def notify_subtitle_download(ep_name, lang):
+    for n in notifiers:
+        n.notify_subtitle_download(ep_name, lang)
 
 def notify_snatch(ep_name):
     for n in notifiers:

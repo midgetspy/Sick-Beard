@@ -85,6 +85,10 @@ class NMJv2Notifier:
             logger.log(u"Warning: Couldn't contact popcorn hour on host %s: %s" % (host, e))
             return False
         return False
+    def notify_subtitle_download(self, ep_name, lang):
+        if sickbeard.USE_NMJv2:
+            self._sendNMJ()
+        
 
     def _sendNMJ(self, host):
         """

@@ -43,6 +43,9 @@ from lib.tvdb_api import tvdb_api, tvdb_exceptions
 
 import xml.etree.cElementTree as etree
 
+from lib import subliminal
+#from sickbeard.subtitles import EXTENSIONS
+
 urllib._urlopener = classes.SickBeardURLopener()
 
 def indentXML(elem, level=0):
@@ -487,6 +490,17 @@ def rename_ep_file(cur_path, new_path):
     new_dest_dir, new_dest_name = os.path.split(new_path) #@UnusedVariable
     cur_file_name, cur_file_ext = os.path.splitext(cur_path) #@UnusedVariable
 
+    if cur_file_ext[1:] in subtitleExtensions:
+        #Extract subtitle language from filename
+        sublang = os.path.splitext(cur_file_name)[1][1:]
+        
+        #Check if the language extracted from filename is a valid language
+        try:
+            language = subliminal.language.Language(sublang, strict=True)
+            cur_file_ext = '.'+sublang+cur_file_ext 
+        except ValueError:
+            pass
+        
     # put the extension on the incoming file
     new_path += cur_file_ext
 

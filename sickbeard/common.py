@@ -31,6 +31,8 @@ mediaExtensions = ['avi', 'mkv', 'mpg', 'mpeg', 'wmv',
                    'mov', 'rmvb', 'vob', 'dvr-ms', 'wtv',
                    'ogv', '3gp']
 
+subtitleExtensions = ['srt', 'sub', 'ass', 'idx', 'ssa']
+
 ### Other constants
 MULTI_EP_RESULT = -1
 SEASON_RESULT = -2
@@ -38,10 +40,12 @@ SEASON_RESULT = -2
 ### Notification Types
 NOTIFY_SNATCH = 1
 NOTIFY_DOWNLOAD = 2
+NOTIFY_SUBTITLE_DOWNLOAD = 3
 
 notifyStrings = {}
 notifyStrings[NOTIFY_SNATCH] = "Started Download"
 notifyStrings[NOTIFY_DOWNLOAD] = "Download Finished"
+notifyStrings[NOTIFY_SUBTITLE_DOWNLOAD] = "Subtitle Download Finished"
 
 ### Episode statuses
 UNKNOWN = -1 # should never happen
@@ -53,6 +57,7 @@ SKIPPED = 5 # episodes we don't want
 ARCHIVED = 6 # episodes that you don't have locally (counts toward download completion stats)
 IGNORED = 7 # episodes that you don't want included in your download stats
 SNATCHED_PROPER = 9 # qualified with quality
+SUBTITLED = 10 # qualified with quality
 
 NAMING_REPEAT = 1
 NAMING_EXTEND = 2
@@ -239,7 +244,8 @@ class StatusStrings:
                               SNATCHED_PROPER: "Snatched (Proper)",
                               WANTED: "Wanted",
                               ARCHIVED: "Archived",
-                              IGNORED: "Ignored"}
+                              IGNORED: "Ignored",
+                              SUBTITLED: "Subtitled"}
 
     def __getitem__(self, name):
         if name in Quality.DOWNLOADED + Quality.SNATCHED + Quality.SNATCHED_PROPER:
@@ -255,7 +261,6 @@ class StatusStrings:
         return name in self.statusStrings or name in Quality.DOWNLOADED or name in Quality.SNATCHED or name in Quality.SNATCHED_PROPER
 
 statusStrings = StatusStrings()
-
 
 class Overview:
     UNAIRED = UNAIRED # 1
