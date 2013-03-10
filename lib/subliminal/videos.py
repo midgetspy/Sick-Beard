@@ -146,7 +146,7 @@ class Video(object):
             if ek.ek(os.path.isdir, subsDir):
                 existing.extend([f for f in os.listdir(subsDir) if f.startswith(basename)])
         if sickbeard.SUBTITLES_DIR_SUB:
-            subsDir = ek.ek(os.path.join, folder, os.path.dirname(self._path)+"\Subs")
+            subsDir = ek.ek(os.path.join, folder, os.path.dirname(self._path)+"\\Subs")
             if ek.ek(os.path.isdir, subsDir):
                 existing.extend([f for f in os.listdir(subsDir) if f.startswith(basename)])
         for path in existing:
