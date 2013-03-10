@@ -161,8 +161,7 @@ class TorrentLeechProvider(generic.TorrentProvider):
                     torrent_table = html.find('table', attrs = {'id' : 'torrenttable'})
                     
                     if not torrent_table:
-                        logger.log(u"No results found for: " + search_string + "(" + searchURL + ")", logger.DEBUG)
-                        return []
+                        continue
 
                     for result in torrent_table.find_all('tr')[1:]:
 
