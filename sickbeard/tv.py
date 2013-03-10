@@ -1142,7 +1142,7 @@ class TVEpisode(object):
                 for subtitle in subtitles.get(video):
                     new_file_path = ek.ek(os.path.join, subs_new_path, os.path.basename(subtitle.path))
                     helpers.moveFile(subtitle.path, new_file_path)
-        subtitle.path=new_file_path
+                    subtitle.path=new_file_path
         return subtitles
 
 
