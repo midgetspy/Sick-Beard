@@ -116,17 +116,7 @@ class T411Provider(generic.TorrentProvider):
                     
                     downloadURL = self.url + downloadTorrentLink['href']
                     
-                    if "720p" in title:
-                        if "bluray" in title:
-                            quality = Quality.HDBLURAY
-                        elif "web-dl" in title.lower() or "web.dl" in title.lower():
-                            quality = Quality.HDWEBDL
-                        else:
-                            quality = Quality.HDTV
-                    elif "1080p" in title:
-                        quality = Quality.FULLHDBLURAY
-                    else:
-                        quality = Quality.SDTV
+                    quality = Quality.nameQuality( title )
 
                     if show:
                         results.append( T411SearchResult( self.opener, link['title'], downloadURL, quality, str(show.audio_lang) ) )
