@@ -426,7 +426,7 @@ class Manage:
                     for video in subtitles:
                         subs_new_path = ek.ek(os.path.join, os.path.dirname(video.path), os.path.dirname(video.path)+"\Subs")
                         if not ek.ek(os.path.isdir, subs_new_path):
-                            ek.ek(os.mkdir, subs_new_path)
+                            ek.ek(os.mkdir, subs_new_path.encode('utf-8'))
                         
                         for subtitle in subtitles.get(video):
                             new_file_path = ek.ek(os.path.join, subs_new_path, os.path.basename(subtitle.path))
