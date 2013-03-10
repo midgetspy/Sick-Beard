@@ -28,14 +28,17 @@ import sickbeard
 from sickbeard import tv
 from sickbeard import webserve, scheduler, searchBacklog
 
+
 def setUpModule():
     cherrypy.tree.mount(webserve.WebInterface(), '/')
     cherrypy.engine.start()
 setup_module = setUpModule
 
+
 def tearDownModule():
     cherrypy.engine.exit()
 teardown_module = tearDownModule
+
 
 class WebserveTests(test.SickbeardTestDBCase, cptestcase.BaseCherryPyTestCase):
     def setUp(self):
@@ -46,10 +49,11 @@ class WebserveTests(test.SickbeardTestDBCase, cptestcase.BaseCherryPyTestCase):
         self.mox = mox.Mox()
         mock_sched = self.mox.CreateMock(scheduler.Scheduler)
         mock_sched.timeLeft().AndReturn('')
-        mock_backlog_sched = self.mox.CreateMock(searchBacklog.BacklogSearchScheduler)
+        mock_backlog_sched = self.mox.CreateMock(
+            searchBacklog.BacklogSearchScheduler)
         mock_backlog_sched.nextRun().AndReturn(datetime.datetime.today())
-        sickbeard.currentSearchScheduler=mock_sched
-        sickbeard.backlogSearchScheduler=mock_backlog_sched
+        sickbeard.currentSearchScheduler = mock_sched
+        sickbeard.backlogSearchScheduler = mock_backlog_sched
 
     def tearDown(self):
         test.SickbeardTestDBCase.tearDown(self)
@@ -144,5 +148,5 @@ if __name__ == '__main__':
     print "=================="
     print "STARTING - Webserve TESTS"
     print "=================="
-    print "######################################################################"
+    print "###################################################################"
     unittest.main()
