@@ -3176,7 +3176,7 @@ class Home:
             else:
                     if sickbeard.SUBTITLES_DIR_SUB:
                         for video in subtitles:
-                            subs_new_path = ek.ek(os.path.join, os.path.dirname(video.path), os.path.dirname(video.path)+"\\Subs")
+                            subs_new_path = os.path.join(os.path.dirname(video.path),"Subs")
                             dir_exists = helpers.makeDir(subs_new_path)
                             if not dir_exists:
                                 logger.log(u"Unable to create subtitles folder "+subs_new_path, logger.ERROR)
