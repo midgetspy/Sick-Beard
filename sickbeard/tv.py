@@ -1136,7 +1136,7 @@ class TVEpisode(object):
         if sickbeard.SUBTITLES_DIR_SUB:
             for video in subtitles:
                 subs_new_path = ek.ek(os.path.join, os.path.dirname(video.path), os.path.dirname(video.path)+"\Subs")
-                if not ek.ek(os.path.isdir, subs_new_path):
+                if not ek.ek(os.path.isdir, subs_new_path.encode('utf-8')):
                     ek.ek(os.mkdir, subs_new_path.encode('utf-8'))
                         
                 for subtitle in subtitles.get(video):
