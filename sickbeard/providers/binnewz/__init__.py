@@ -200,16 +200,23 @@ class BinNewzProvider(generic.NZBProvider):
     
                 m =  re.search("(.+)\s+S(\d{2})\s+Ep(\d{2})(.*)", name)
                 if m:
-                    name = m.group(1) + " S" + m.group(2) + "E" + m.group(3) + m.group(4)        
-
+                    name = m.group(1) + " S" + m.group(2) + "E" + m.group(3) + m.group(4)
+                    
+                        
+                filenameLower = filename.lower()
                 if "720p" in qualityStr:
-                    if "HDTV" in name or "HDTV" in filename:
+                    if "HDTV" in name or "hdtv" in filenameLower:
                         quality = Quality.HDTV
                     else:
                         quality = Quality.HDBLURAY
                     minSize = 600
                 elif "1080p" in qualityStr:
-                    quality = Quality.FULLHDBLURAY
+                    if "web-dl" in name or "web-dl" in filenameLower:
+                        quality = Quality.FULLHDWEBDL
+                    elif "bluray" in filenameLower or "blu-ray" in filenameLower:
+                        quality = Quality.FULLHDBLURAY
+                    else:
+                        quality = Quality.FULLHDTV
                     minSize = 600
                 else:
                     quality = Quality.SDTV
@@ -241,8 +248,7 @@ class BinNewzProvider(generic.NZBProvider):
 
                 for searchItem in searchItems:
                     for downloader in self.nzbDownloaders:
-                        dname = str(downloader)[str(downloader).find(".",35)+1:str(downloader).find("object",35)-1]
-                        logger.log("Searching for download : " + name + ", search string = "+ searchItem + " on " + dname)
+                        logger.log("Searching for download : " + name + ", search string = "+ searchItem + " on " + downloader.__class__.__name__)
                         try:
                             binsearch_result =  downloader.search(searchItem, minSize, newsgroup )
                             if binsearch_result:
@@ -250,10 +256,10 @@ class BinNewzProvider(generic.NZBProvider):
                                 binsearch_result.title = name
                                 binsearch_result.quality = quality
                                 results.append( binsearch_result )
-                                logger.log("Found : " + searchItem + " on " + dname)
+                                logger.log("Found : " + searchItem + " on " + downloader.__class__.__name__)
                                 break
                         except Exception, e:
-                            logger.log("Searching from " + dname + " failed : " + ex(e), logger.ERROR)
+                            logger.log("Searching from " + downloader.__class__.__name__ + " failed : " + ex(e), logger.ERROR)
 
         return results
     
