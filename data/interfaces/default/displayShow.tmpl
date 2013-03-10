@@ -191,7 +191,12 @@ $epLoc
 
     </td>
     <td align="center" class="audio_langs_column">
+    #set $curStatus, $curQuality = $Quality.splitCompositeStatus(int($epResult["status"]))
+                #if $epResult["audio_langs"] == "" and $curStatus in [$DOWNLOADED, $SNATCHED, $ARCHIVED]
+                <img src="$sbRoot/images/flags/unknown.png" alt="" width="20" />
+                #else
                 <img src="$sbRoot/images/flags/${epResult["audio_langs"]}.png" alt="$epResult["audio_langs"]" width="16" />
+    			#end if
     </td>
 </small>
     </td>
