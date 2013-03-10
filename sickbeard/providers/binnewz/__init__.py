@@ -220,6 +220,7 @@ class BinNewzProvider(generic.NZBProvider):
                     continue
                 
                 searchItems = []
+                multiEpisodes = False
                 
                 rangeMatcher = re.search(".*S\d{2}\s*E(\d{2})\s+[.|Et]\s+E(\d{2}).*", name)
                 if not rangeMatcher:
@@ -232,6 +233,8 @@ class BinNewzProvider(generic.NZBProvider):
                             searchItem = filename.replace("**", str(i) )
                             searchItem = searchItem.replace("*", str(i) )
                             searchItems.append( searchItem )
+                    else:
+                        multiEpisodes = True
 
                 if len(searchItems) == 0:
                     searchItems.append( filename )
@@ -239,7 +242,7 @@ class BinNewzProvider(generic.NZBProvider):
                 for searchItem in searchItems:
                     for downloader in self.nzbDownloaders:
                         dname = str(downloader)[str(downloader).find(".",35)+1:str(downloader).find("object",35)-1]
-                        logger.log("Searching for download : " + searchItem + " on " + dname)
+                        logger.log("Searching for download : " + name + ", search string = "+ searchItem + " on " + dname)
                         try:
                             binsearch_result =  downloader.search(searchItem, minSize, newsgroup )
                             if binsearch_result:
