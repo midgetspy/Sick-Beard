@@ -25,12 +25,14 @@ import regexes
 import sickbeard
 
 from sickbeard import logger
+from sickbeard.common import showLanguages
 
 class NameParser(object):
     def __init__(self, file_name=True):
 
         self.file_name = file_name
         self.compiled_regexes = []
+        self.compiled_language_regexes =[]
         self._compile_regexes()
 
     def clean_series_name(self, series_name):
@@ -64,6 +66,14 @@ class NameParser(object):
                 logger.log(u"WARNING: Invalid episode_pattern, %s. %s" % (errormsg, cur_pattern))
             else:
                 self.compiled_regexes.append((cur_pattern_name, cur_regex))
+                
+        for (cur_pattern_name, cur_pattern) in regexes.language_regexes.iteritems():
+            try:
+                cur_regex = re.compile(cur_pattern, re.VERBOSE | re.IGNORECASE)
+            except re.error, errormsg:
+                logger.log(u"WARNING: Invalid language_pattern, %s. %s" % (errormsg, cur_regex.pattern))
+            else:
+                self.compiled_language_regexes.append((cur_pattern_name, cur_regex))                
 
     def _parse_string(self, name):
         
@@ -117,6 +127,23 @@ class NameParser(object):
 
             if 'extra_info' in named_groups:
                 tmp_extra_info = match.group('extra_info')
+                
+                result.audio_langs = 'en'
+                
+                if tmp_extra_info:
+                    for (cur_lang_regex_name, cur_lang_regex) in self.compiled_language_regexes:
+                        lang_match = cur_lang_regex.match(name)
+        
+                        if not lang_match:
+                            continue
+                        else:
+                            logger.log(u"Found " + showLanguages.get(cur_lang_regex_name) + " episode",logger.DEBUG) 
+                            result.audio_langs = cur_lang_regex_name
+                
+                #if tmp_extra_info and re.search(r'(^|\w|[. _-])*(german)(([. _-])(dubbed))?\w*([. _-]|$)', tmp_extra_info, re.I):
+                #   logger.log(u"Found german episode")
+                #result.series_language = 'de'
+                
                 
                 # Show.S04.Special is almost certainly not every episode in the season
                 if tmp_extra_info and cur_regex_name == 'season_only' and re.match(r'([. _-]|^)(special|extra)\w*([. _-]|$)', tmp_extra_info, re.I):
@@ -225,6 +252,7 @@ class NameParser(object):
 
         # build the ParseResult object
         final_result.air_date = self._combine_results(file_name_result, dir_name_result, 'air_date')
+        final_result.audio_langs = self._combine_results(file_name_result, dir_name_result, 'audio_langs')
 
         if not final_result.air_date:
             final_result.season_number = self._combine_results(file_name_result, dir_name_result, 'season_number')
@@ -262,7 +290,8 @@ class ParseResult(object):
                  episode_numbers=None,
                  extra_info=None,
                  release_group=None,
-                 air_date=None
+                 air_date=None,
+                 audio_langs = 'en'
                  ):
 
         self.original_name = original_name
@@ -281,6 +310,8 @@ class ParseResult(object):
         
         self.which_regex = None
         
+        self.audio_langs = audio_langs
+        
     def __eq__(self, other):
         if not other:
             return False
@@ -296,6 +327,8 @@ class ParseResult(object):
         if self.release_group != other.release_group:
             return False
         if self.air_date != other.air_date:
+            return False
+        if self.audio_langs != other.audio_langs:
             return False
         
         return True

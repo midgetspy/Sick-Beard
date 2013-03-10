@@ -21,6 +21,7 @@ import sickbeard
 import xbmc
 import plex
 import nmj
+import nmjv2
 import synoindex
 import pytivo
 
@@ -42,6 +43,7 @@ xbmc_notifier = xbmc.XBMCNotifier()
 plex_notifier = plex.PLEXNotifier()
 nmj_notifier = nmj.NMJNotifier()
 synoindex_notifier = synoindex.synoIndexNotifier()
+nmjv2_notifier = nmjv2.NMJv2Notifier()
 pytivo_notifier = pytivo.pyTivoNotifier()
 # devices
 growl_notifier = growl.GrowlNotifier()
@@ -60,6 +62,7 @@ notifiers = [
     xbmc_notifier,
     plex_notifier,
     nmj_notifier,
+    nmjv2_notifier,
     synoindex_notifier,
     pytivo_notifier,
     growl_notifier,
@@ -77,6 +80,9 @@ def notify_download(ep_name):
     for n in notifiers:
         n.notify_download(ep_name)
 
+def notify_subtitle_download(ep_name, lang):
+    for n in notifiers:
+        n.notify_subtitle_download(ep_name, lang)
 
 def notify_snatch(ep_name):
     for n in notifiers:

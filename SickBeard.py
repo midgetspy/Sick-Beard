@@ -17,7 +17,7 @@
 # You should have received a copy of the GNU General Public License
 # along with Sick Beard.  If not, see <http://www.gnu.org/licenses/>.
 
-# Check needed software  dependencies to nudge users to fix their setup
+# Check needed software dependencies to nudge users to fix their setup
 import sys
 if sys.version_info < (2, 5):
     print "Sorry, requires Python 2.5, 2.6 or 2.7."
@@ -34,6 +34,8 @@ except:
     print "The Python module Cheetah is required"
     sys.exit(1)
 
+import os
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), 'lib')))
 # We only need this for compiling an EXE and I will just always do that on 2.6+
 if sys.hexversion >= 0x020600F0:
     from multiprocessing import freeze_support
@@ -52,6 +54,7 @@ from sickbeard import db
 from sickbeard.tv import TVShow
 from sickbeard import logger
 from sickbeard.version import SICKBEARD_VERSION
+from sickbeard.databases.mainDB import MAX_DB_VERSION
 
 from sickbeard.webserveInit import initWebServer
 
@@ -316,6 +319,10 @@ def main():
     # Build from the DB to start with
     logger.log(u"Loading initial show list")
     loadShowsFromDB()
+    if db.DBConnection().checkDBVersion() > MAX_DB_VERSION:
+        print 'Your database version has been incremented past what this version of Sick Beard supports.'
+        print 'Have you used other forks of Sick Beard with this same database file?'
+        sys.exit(1)
 
     # Fire up all our threads
     sickbeard.start()

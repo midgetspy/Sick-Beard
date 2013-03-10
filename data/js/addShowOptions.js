@@ -9,6 +9,8 @@ $(document).ready(function () {
         $.get(sbRoot + '/config/general/saveAddShowDefaults', {defaultStatus: $('#statusSelect').val(),
                                                              anyQualities: anyQualArray.join(','),
                                                              bestQualities: bestQualArray.join(','),
+                                                             audio_lang: $('#showLangSelect').val(),
+															 subtitles: $('#subtitles').prop('checked'),
                                                              defaultFlattenFolders: $('#flatten_folders').prop('checked')});
         $(this).attr('disabled', true);
         $.pnotify({
@@ -18,7 +20,7 @@ $(document).ready(function () {
         });
     });
 
-    $('#statusSelect, #qualityPreset, #flatten_folders, #anyQualities, #bestQualities').change(function () {
+    $('#statusSelect, #qualityPreset, #flatten_folders, #anyQualities, #bestQualities ,#showLangSelect, #subtitles').change(function () {
         $('#saveDefaultsButton').attr('disabled', false);
     });
 

@@ -7,7 +7,6 @@
 #set global $statpath="../.."#
 #set global $topmenu="home"#
 #import os.path
-#from sickbeard import common
 
 #include $os.path.join($sickbeard.PROG_DIR, "data/interfaces/default/inc_top.tmpl")
 
@@ -35,15 +34,6 @@
             <select name="tvdbLang" id="tvdbLangSelect">
                 <option value="fr" selected="selected">fr</option>
             </select><b>*</b>
-            Desired audio language:
-            <select name="audio_lang" id="showLangSelect">
-            	#for $k,$v in $common.showLanguages.iteritems():
-					<option value="$k"
-					#if $k == 'fr':
-						selected 
-					#end if
-					>$v</option>
-				#end for
             <input type="button" id="searchName" value="Search" class="btn" /><br /><br />
 
             <b>*</b> This will only affect the language of the retrieved metadata file contents and episode filenames.<br />

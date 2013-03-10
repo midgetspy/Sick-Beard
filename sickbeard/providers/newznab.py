@@ -27,7 +27,7 @@ from xml.dom.minidom import parseString
 import sickbeard
 import generic
 
-from sickbeard import classes
+from sickbeard import classes, show_name_helpers
 from sickbeard import helpers
 from sickbeard import scene_exceptions
 from sickbeard import encodingKludge as ek
@@ -88,7 +88,10 @@ class NewznabProvider(generic.NZBProvider):
                 cur_params['rid'] = show.tvrid
             # if we can't then fall back on a very basic name search
             else:
-                cur_params['q'] = helpers.sanitizeSceneName(cur_exception)
+                if show.audio_lang=="fr":
+                    cur_params['q'] = helpers.sanitizeSceneName(cur_exception)+ " french"
+                else:
+                    cur_params['q'] = helpers.sanitizeSceneName(cur_exception)
 
             if season != None:
                 # air-by-date means &season=2010&q=2010.03, no other way to do it atm
@@ -108,44 +111,50 @@ class NewznabProvider(generic.NZBProvider):
         return to_return
 
     def _get_episode_search_strings(self, ep_obj):
+        showNames = show_name_helpers.allPossibleShowNames(ep_obj.show)
+        for show_name in showNames:
+            ep_obj.show.name=show_name
+            params = {}
 
-        params = {}
-
-        if not ep_obj:
-            return [params]
-
+            if not ep_obj:
+                return [params]
+        
         # search directly by tvrage id
-        if ep_obj.show.tvrid:
-            params['rid'] = ep_obj.show.tvrid
+            if ep_obj.show.tvrid:
+                params['rid'] = ep_obj.show.tvrid
         # if we can't then fall back on a very basic name search
-        else:
-            params['q'] = helpers.sanitizeSceneName(ep_obj.show.name)
+            else:
+                if ep_obj.show.audio_lang=="fr":
+                    params['q'] = helpers.sanitizeSceneName(ep_obj.show.name) + " french"
+                else:
+                    params['q'] = helpers.sanitizeSceneName(ep_obj.show.name)
 
-        if ep_obj.show.air_by_date:
-            date_str = str(ep_obj.airdate)
+            if ep_obj.show.air_by_date:
+                date_str = str(ep_obj.airdate)
 
-            params['season'] = date_str.partition('-')[0]
-            params['ep'] = date_str.partition('-')[2].replace('-', '/')
-        else:
-            params['season'] = ep_obj.season
-            params['ep'] = ep_obj.episode
+                params['season'] = date_str.partition('-')[0]
+                params['ep'] = date_str.partition('-')[2].replace('-', '/')
+                
+            else:
+                params['season'] = ep_obj.season
+                params['ep'] = ep_obj.episode
 
-        to_return = [params]
+                to_return = [params]
 
         # only do exceptions if we are searching by name
-        if 'q' in params:
+            if 'q' in params:
 
             # add new query strings for exceptions
-            name_exceptions = scene_exceptions.get_scene_exceptions(ep_obj.show.tvdbid)
-            for cur_exception in name_exceptions:
+                name_exceptions = scene_exceptions.get_scene_exceptions(ep_obj.show.tvdbid)
+                for cur_exception in name_exceptions:
 
                 # don't add duplicates
-                if cur_exception == ep_obj.show.name:
-                    continue
+                    if cur_exception == ep_obj.show.name:
+                        continue
 
-                cur_return = params.copy()
-                cur_return['q'] = helpers.sanitizeSceneName(cur_exception)
-                to_return.append(cur_return)
+                    cur_return = params.copy()
+                    cur_return['q'] = helpers.sanitizeSceneName(cur_exception)
+                    to_return.append(cur_return)
 
         return to_return
 
@@ -160,7 +169,7 @@ class NewznabProvider(generic.NZBProvider):
                 logger.log(u"Unable to parse the filename "+title+" into a valid episode", logger.WARNING)
                 return 'en'
 
-        return parse_result.series_language    
+        return parse_result.audio_langs    
 
     def _doGeneralSearch(self, search_string):
         return self._doSearch({'q': search_string})
@@ -309,7 +318,6 @@ class NewznabCache(tvcache.TVCache):
             cat = '5020'
 
         params = {"t": "tvsearch",
-                  "age": sickbeard.USENET_RETENTION,
                   "cat": cat}
 
         # hack this in for now

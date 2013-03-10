@@ -40,7 +40,7 @@
         return false;
     },
     format: function(s) { 
-        return s.replace('hd',3).replace('sd',1).replace('any',0).replace('best',2).replace('custom',4);
+        return s.replace('hd1080p',5).replace('hd720p',4).replace('hd',3).replace('sd',2).replace('any',1).replace('best',0).replace('custom',7);
     },
     type: 'numeric'
 });
@@ -73,19 +73,19 @@
 \$(document).ready(function(){ 
 
     \$("#showListTable:has(tbody tr)").tablesorter({
-        sortList: [[6,1],[1,0]],
+        sortList: [[7,1],[1,0]],
         textExtraction: {
-            3: function(node) { return \$(node).find("span").text().toLowerCase(); },
-            4: function(node) { return \$(node).find("span").text(); },
-            6: function(node) { return \$(node).find("img").attr("alt"); }
+            4: function(node) { return \$(node).find("span").text().toLowerCase(); },
+            5: function(node) { return \$(node).find("span").text(); },
+            7: function(node) { return \$(node).find("img").attr("alt"); }
         },
         widgets: ['saveSort', 'zebra', 'stickyHeaders'],
         headers: {
             0: { sorter: 'isoDate' },
-            1: { sorter: 'loadingNames' },
-            3: { sorter: 'quality' },
-            4: { sorter: 'eps' },
-            5: { sorter: 'eps' }
+            2: { sorter: 'loadingNames' },
+            4: { sorter: 'quality' },
+            5: { sorter: 'eps' },
+            6: { sorter: 'eps' }
         }
     });
 
@@ -95,11 +95,11 @@
 
 <table id="showListTable" class="tablesorter" cellspacing="1" border="0" cellpadding="0">
 
-  <thead><tr><th class="nowrap">Next Ep</th><th>Show</th><th>Network</th><th>Quality</th><th>Downloads</th><th>French</th><th>Active</th><th>Audio</th><th>Status</th></tr></thead>
+  <thead><tr><th class="nowrap">Next Ep</th><th>Poster</th><th>Show</th><th>Network</th><th>Quality</th><th>Downloads</th><th>French</th><th>Active</th><th>Audio</th><th>Status</th></tr></thead>
   <tfoot>
     <tr>
       <th rowspan="1" colspan="1" align="center"><a href="$sbRoot/home/addShows/">Add Show</a></th>
-      <th rowspan="1" colspan="8"></th>
+      <th rowspan="1" colspan="9"></th>
     </tr>
   </tfoot>
   <tbody>
@@ -169,8 +169,17 @@ $myShowList.sort(lambda x, y: cmp(x.name, y.name))
 
   <tr>
     <td align="center" class="nowrap">#if len($curEp) != 0 then $curEp[0].airdate else ""#</td>
+    <td align="center"><a href="$sbRoot/home/displayShow?show=$curShow.tvdbid">
+    <img alt="" height="75" src="$sbRoot/showPoster/?show=$curShow.tvdbid&amp;which=poster"/></a>
+    </td>
     <td class="tvShow"><a href="$sbRoot/home/displayShow?show=$curShow.tvdbid">$curShow.name</a></td>
-    <td>$curShow.network</td>
+    <td align="center">
+    #if $curShow.network:
+        	<img id="network" width="60" height="30" src="$sbRoot/images/network/${curShow.network.lower()}.png" alt="$curShow.network" title="$curShow.network" />
+    	#else:
+    		<img id="network" width="60" height="30" src="$sbRoot/images/network/nonetwork.png" alt="No Network" title="No Network" />
+		#end if
+		</td>
 #if $curShow.quality in $qualityPresets:
     <td align="center"><span class="quality $qualityPresetStrings[$curShow.quality]">$qualityPresetStrings[$curShow.quality]</span></td>
 #else:

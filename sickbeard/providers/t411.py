@@ -104,15 +104,17 @@ class T411Provider(generic.TorrentProvider):
                 link = row.find("a", title=True)
                 title = link['title']
                 
-                torrentPage = self.opener.open( link['href'] )
+                pageURL = link['href']
+                if pageURL.startswith("//"):
+                    pageURL = "http:" + pageURL
+                
+                torrentPage = self.opener.open( pageURL )
                 torrentSoup = BeautifulSoup( torrentPage )
                
                 downloadTorrentLink = torrentSoup.find("a", text=u"Télécharger")
                 if downloadTorrentLink:
                     
                     downloadURL = self.url + downloadTorrentLink['href']
-
-                    torrentdata = self.opener.open( downloadURL , 'wb').read()
                     
                     if "720p" in title:
                         if "bluray" in title:
@@ -126,7 +128,10 @@ class T411Provider(generic.TorrentProvider):
                     else:
                         quality = Quality.SDTV
 
-                    results.append( T411SearchResult( link['title'], torrentdata, downloadURL, quality, str(show.audio_lang) ) )
+                    if show:
+                        results.append( T411SearchResult( self.opener, link['title'], downloadURL, quality, str(show.audio_lang) ) )
+                    else:
+                        results.append( T411SearchResult( self.opener, link['title'], downloadURL, quality ) )
 
         return results
     
@@ -141,13 +146,16 @@ class T411Provider(generic.TorrentProvider):
     
 class T411SearchResult:
     
-    def __init__(self, title, torrentdata, url, quality, audio_langs):
+    def __init__(self, opener, title, url, quality, audio_langs=None):
+        self.opener = opener
         self.title = title
         self.url = url
-        self.extraInfo = [torrentdata] 
         self.quality = quality
         self.audio_langs=[audio_langs]
         
+    def getNZB(self):
+        return self.opener.open( self.url , 'wb').read()
+
     def getQuality(self):
         return self.quality
 

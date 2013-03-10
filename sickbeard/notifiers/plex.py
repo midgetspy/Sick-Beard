@@ -35,6 +35,10 @@ class PLEXNotifier:
 
     def _send_to_plex(self, command, host, username=None, password=None):
         """Handles communication to Plex hosts via HTTP API
+            
+    def notify_subtitle_download(self, ep_name, lang):
+        if sickbeard.PLEX_NOTIFY_ONSUBTITLEDOWNLOAD:
+            self._notifyXBMC(ep_name + ": " + lang, common.notifyStrings[common.NOTIFY_SUBTITLE_DOWNLOAD])
 
         Args:
             command: Dictionary of field/data pairs, encoded via urllib and passed to the legacy xbmcCmds HTTP API
@@ -142,6 +146,10 @@ class PLEXNotifier:
         if sickbeard.PLEX_NOTIFY_ONDOWNLOAD:
             self._notify_pmc(ep_name, common.notifyStrings[common.NOTIFY_DOWNLOAD])
 
+    def notify_subtitle_download(self, ep_name, lang):
+        if sickbeard.PLEX_NOTIFY_ONSUBTITLEDOWNLOAD:
+            self._notify_pmc(ep_name + ": " + lang, common.notifyStrings[common.NOTIFY_SUBTITLE_DOWNLOAD])
+    
     def test_notify(self, host, username, password):
         return self._notify_pmc("Testing Plex notifications from Sick Beard", "Test Notification", host, username, password, force=True)
 

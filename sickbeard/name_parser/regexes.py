@@ -17,6 +17,7 @@
 # along with Sick Beard.  If not, see <http://www.gnu.org/licenses/>.
 
 # all regexes are case insensitive
+from sickbeard.common import showLanguages
 
 ep_regexes = [
               ('standard_repeat',
@@ -31,6 +32,15 @@ ep_regexes = [
                [. _-]*((?P<extra_info>.+?)                 # Source_Quality_Etc-
                ((?<![. _-])(?<!WEB)                        # Make sure this is really the release group
                -(?P<release_group>[^- ]+))?)?$              # Group
+               '''),
+              
+              ('scene_date_format_bis',
+               # Show.Name.2010.S01E01.Source.Quality.Etc-Group
+               '''
+               ^(?P<series_name>.+?)[. _-]+            # Show_Name and separator
+               (?P<air_year>\d{4})[. _-]+                  # 2010 and separator
+               s(?P<season_num>\d+)[. _-]*                 # S01 and optional separator
+               e(?P<ep_num>\d+)
                '''),
               
               ('fov_repeat',
@@ -204,5 +214,16 @@ ep_regexes = [
                (?P<ep_num>\d+)                            # 02 and separator
                '''
                ),
+                                        
               ]
+
+language_regexes = {}
+
+for k,v in showLanguages.iteritems():
+    language_regexes[k] = '(^|\w|[. _-])*('+v+')(([. _-])(dubbed))?\w*([. _-]|$)'
+    
+
+
+
+
 

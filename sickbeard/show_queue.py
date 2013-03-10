@@ -32,12 +32,12 @@ from sickbeard import generic_queue
 from sickbeard import name_cache
 from sickbeard.exceptions import ex
 
+
 class ShowQueue(generic_queue.GenericQueue):
 
     def __init__(self):
         generic_queue.GenericQueue.__init__(self)
         self.queue_name = "SHOWQUEUE"
-
 
     def _isInQueue(self, show, actions):
         return show in [x.show for x in self.queue if x.action_id in actions]
@@ -54,6 +54,9 @@ class ShowQueue(generic_queue.GenericQueue):
 
     def isInRenameQueue(self, show):
         return self._isInQueue(show, (ShowQueueActions.RENAME,))
+    
+    def isInSubtitleQueue(self, show):
+        return self._isInQueue(show, (ShowQueueActions.SUBTITLE,))
 
     def isBeingAdded(self, show):
         return self._isBeingSomethinged(show, (ShowQueueActions.ADD,))
@@ -66,9 +69,12 @@ class ShowQueue(generic_queue.GenericQueue):
 
     def isBeingRenamed(self, show):
         return self._isBeingSomethinged(show, (ShowQueueActions.RENAME,))
+    
+    def isBeingSubtitled(self, show):
+        return self._isBeingSomethinged(show, (ShowQueueActions.SUBTITLE,))
 
     def _getLoadingShowList(self):
-        return [x for x in self.queue+[self.currentItem] if x != None and x.isLoading]
+        return [x for x in self.queue + [self.currentItem] if x != None and x.isLoading]
 
     loadingShowList = property(_getLoadingShowList)
 
@@ -102,7 +108,7 @@ class ShowQueue(generic_queue.GenericQueue):
             return
 
         queueItemObj = QueueItemRefresh(show)
-        
+
         self.add_item(queueItemObj)
 
         return queueItemObj
@@ -114,27 +120,39 @@ class ShowQueue(generic_queue.GenericQueue):
         self.add_item(queueItemObj)
 
         return queueItemObj
+    
+    def downloadSubtitles(self, show, force=False):
 
-    def addShow(self, tvdb_id, showDir, default_status=None, quality=None, flatten_folders=None, lang="fr", audio_lang=None):
-        queueItemObj = QueueItemAdd(tvdb_id, showDir, default_status, quality, flatten_folders, lang, audio_lang)
+        queueItemObj = QueueItemSubtitle(show)
         
         self.add_item(queueItemObj)
 
         return queueItemObj
 
+    def addShow(self, tvdb_id, showDir, default_status=None, quality=None, flatten_folders=None, lang="fr", subtitles=None, audio_lang=None):
+        queueItemObj = QueueItemAdd(tvdb_id, showDir, default_status, quality, flatten_folders, lang, subtitles, audio_lang)
+        
+        self.add_item(queueItemObj)
+
+        return queueItemObj
+
+
 class ShowQueueActions:
-    REFRESH=1
-    ADD=2
-    UPDATE=3
-    FORCEUPDATE=4
-    RENAME=5
-    
+    REFRESH = 1
+    ADD = 2
+    UPDATE = 3
+    FORCEUPDATE = 4
+    RENAME = 5
+    SUBTITLE=6
+
     names = {REFRESH: 'Refresh',
                     ADD: 'Add',
                     UPDATE: 'Update',
                     FORCEUPDATE: 'Force Update',
                     RENAME: 'Rename',
+                    SUBTITLE: 'Subtitle',
                     }
+
 
 class ShowQueueItem(generic_queue.QueueItem):
     """
@@ -145,13 +163,14 @@ class ShowQueueItem(generic_queue.QueueItem):
     - show being refreshed
     - show being updated
     - show being force updated
+    - show being subtitled
     """
     def __init__(self, action_id, show):
         generic_queue.QueueItem.__init__(self, ShowQueueActions.names[action_id], action_id)
         self.show = show
-    
+
     def isInQueue(self):
-        return self in sickbeard.showQueueScheduler.action.queue+[sickbeard.showQueueScheduler.action.currentItem] #@UndefinedVariable
+        return self in sickbeard.showQueueScheduler.action.queue + [sickbeard.showQueueScheduler.action.currentItem] #@UndefinedVariable
 
     def _getName(self):
         return str(self.show.tvdbid)
@@ -165,7 +184,7 @@ class ShowQueueItem(generic_queue.QueueItem):
 
 
 class QueueItemAdd(ShowQueueItem):
-    def __init__(self, tvdb_id, showDir, default_status, quality, flatten_folders, lang, audio_lang):
+    def __init__(self, tvdb_id, showDir, default_status, quality, flatten_folders, subtitles, lang, audio_lang):
 
         self.tvdb_id = tvdb_id
         self.showDir = showDir
@@ -174,12 +193,13 @@ class QueueItemAdd(ShowQueueItem):
         self.flatten_folders = flatten_folders
         self.lang = lang
         self.audio_lang = audio_lang
+        self.subtitles = subtitles
 
         self.show = None
 
         # this will initialize self.show to None
         ShowQueueItem.__init__(self, ShowQueueActions.ADD, self.show)
-        
+
     def _getName(self):
         """
         Returns the show name if there is a show object created, if not returns
@@ -206,7 +226,7 @@ class QueueItemAdd(ShowQueueItem):
 
         ShowQueueItem.execute(self)
 
-        logger.log(u"Starting to add show "+self.showDir)
+        logger.log(u"Starting to add show " + self.showDir)
 
         try:
             # make sure the tvdb ids are valid
@@ -214,9 +234,9 @@ class QueueItemAdd(ShowQueueItem):
                 ltvdb_api_parms = sickbeard.TVDB_API_PARMS.copy()
                 if self.lang:
                     ltvdb_api_parms['language'] = self.lang
-        
-                logger.log(u"TVDB: "+repr(ltvdb_api_parms))
-        
+
+                logger.log(u"TVDB: " + repr(ltvdb_api_parms))
+
                 t = tvdb_api.Tvdb(**ltvdb_api_parms)
                 s = t[self.tvdb_id]
 
@@ -233,8 +253,8 @@ class QueueItemAdd(ShowQueueItem):
                     self._finishEarly()
                     return
             except tvdb_exceptions.tvdb_exception, e:
-                logger.log(u"Error contacting TVDB: "+ex(e), logger.ERROR)
-                ui.notifications.error("Unable to add show", "Unable to look up the show in "+self.showDir+" on TVDB, not using the NFO. Delete .nfo and add manually in the correct language.")
+                logger.log(u"Error contacting TVDB: " + ex(e), logger.ERROR)
+                ui.notifications.error("Unable to add show", "Unable to look up the show in " + self.showDir + " on TVDB, not using the NFO. Delete .nfo and add manually in the correct language.")
                 self._finishEarly()
                 return
 
@@ -248,18 +268,19 @@ class QueueItemAdd(ShowQueueItem):
 
             # set up initial values
             self.show.location = self.showDir
+            self.show.subtitles = self.subtitles if self.subtitles != None else sickbeard.SUBTITLES_DEFAULT
             self.show.quality = self.quality if self.quality else sickbeard.QUALITY_DEFAULT
             self.show.flatten_folders = self.flatten_folders if self.flatten_folders != None else sickbeard.FLATTEN_FOLDERS_DEFAULT
-            self.show.paused = False
-            
+            self.show.paused = 0
+
             # be smartish about this
             if self.show.genre and "talk show" in self.show.genre.lower():
                 self.show.air_by_date = 1
 
         except tvdb_exceptions.tvdb_exception, e:
-            logger.log(u"Unable to add show due to an error with TVDB: "+ex(e), logger.ERROR)
+            logger.log(u"Unable to add show due to an error with TVDB: " + ex(e), logger.ERROR)
             if self.show:
-                ui.notifications.error("Unable to add "+str(self.show.name)+" due to an error with TVDB")
+                ui.notifications.error("Unable to add " + str(self.show.name) + " due to an error with TVDB")
             else:
                 ui.notifications.error("Unable to add show due to an error with TVDB")
             self._finishEarly()
@@ -272,7 +293,7 @@ class QueueItemAdd(ShowQueueItem):
             return
 
         except Exception, e:
-            logger.log(u"Error trying to add show: "+ex(e), logger.ERROR)
+            logger.log(u"Error trying to add show: " + ex(e), logger.ERROR)
             logger.log(traceback.format_exc(), logger.DEBUG)
             self._finishEarly()
             raise
@@ -292,7 +313,7 @@ class QueueItemAdd(ShowQueueItem):
 
             self.show.writeMetadata()
             self.show.populateCache()
-            
+
         except Exception, e:
             logger.log(u"Error with TVDB, not creating episode list: " + ex(e), logger.ERROR)
             logger.log(traceback.format_exc(), logger.DEBUG)
@@ -305,8 +326,8 @@ class QueueItemAdd(ShowQueueItem):
 
         # if they gave a custom status then change all the eps to it
         if self.default_status != SKIPPED:
-            logger.log(u"Setting all episodes to the specified default status: "+str(self.default_status))
-            myDB = db.DBConnection();
+            logger.log(u"Setting all episodes to the specified default status: " + str(self.default_status))
+            myDB = db.DBConnection()
             myDB.action("UPDATE tv_episodes SET status = ? WHERE status = ? AND showid = ? AND season != 0", [self.default_status, SKIPPED, self.show.tvdbid])
 
         # if they started with WANTED eps then run the backlog
@@ -336,7 +357,7 @@ class QueueItemRefresh(ShowQueueItem):
 
         ShowQueueItem.execute(self)
 
-        logger.log(u"Performing refresh on "+self.show.name)
+        logger.log(u"Performing refresh on " + self.show.name)
 
         self.show.refreshDir()
         self.show.writeMetadata()
@@ -385,6 +406,20 @@ class QueueItemRename(ShowQueueItem):
 
         self.inProgress = False
 
+class QueueItemSubtitle(ShowQueueItem):
+    def __init__(self, show=None):
+        ShowQueueItem.__init__(self, ShowQueueActions.SUBTITLE, show)
+
+    def execute(self):
+
+        ShowQueueItem.execute(self)
+
+        logger.log(u"Downloading subtitles for "+self.show.name)
+
+        self.show.downloadSubtitles()
+
+        self.inProgress = False
+
 
 class QueueItemUpdate(ShowQueueItem):
     def __init__(self, show=None):
@@ -395,13 +430,13 @@ class QueueItemUpdate(ShowQueueItem):
 
         ShowQueueItem.execute(self)
 
-        logger.log(u"Beginning update of "+self.show.name)
+        logger.log(u"Beginning update of " + self.show.name)
 
         logger.log(u"Retrieving show info from TVDB", logger.DEBUG)
         try:
             self.show.loadFromTVDB(cache=not self.force)
         except tvdb_exceptions.tvdb_error, e:
-            logger.log(u"Unable to contact TVDB, aborting: "+ex(e), logger.WARNING)
+            logger.log(u"Unable to contact TVDB, aborting: " + ex(e), logger.WARNING)
             return
 
         # get episode list from DB
@@ -413,7 +448,7 @@ class QueueItemUpdate(ShowQueueItem):
         try:
             TVDBEpList = self.show.loadEpisodesFromTVDB(cache=not self.force)
         except tvdb_exceptions.tvdb_exception, e:
-            logger.log(u"Unable to get info from TVDB, the show info will not be refreshed: "+ex(e), logger.ERROR)
+            logger.log(u"Unable to get info from TVDB, the show info will not be refreshed: " + ex(e), logger.ERROR)
             TVDBEpList = None
 
         if TVDBEpList == None:
@@ -424,14 +459,14 @@ class QueueItemUpdate(ShowQueueItem):
             # for each ep we found on TVDB delete it from the DB list
             for curSeason in TVDBEpList:
                 for curEpisode in TVDBEpList[curSeason]:
-                    logger.log(u"Removing "+str(curSeason)+"x"+str(curEpisode)+" from the DB list", logger.DEBUG)
+                    logger.log(u"Removing " + str(curSeason) + "x" + str(curEpisode) + " from the DB list", logger.DEBUG)
                     if curSeason in DBEpList and curEpisode in DBEpList[curSeason]:
                         del DBEpList[curSeason][curEpisode]
 
             # for the remaining episodes in the DB list just delete them from the DB
             for curSeason in DBEpList:
                 for curEpisode in DBEpList[curSeason]:
-                    logger.log(u"Permanently deleting episode "+str(curSeason)+"x"+str(curEpisode)+" from the database", logger.MESSAGE)
+                    logger.log(u"Permanently deleting episode " + str(curSeason) + "x" + str(curEpisode) + " from the database", logger.MESSAGE)
                     curEp = self.show.getEpisode(curSeason, curEpisode)
                     try:
                         curEp.deleteEpisode()
@@ -446,6 +481,7 @@ class QueueItemUpdate(ShowQueueItem):
                 self.show.setTVRID()
 
         sickbeard.showQueueScheduler.action.refreshShow(self.show, True) #@UndefinedVariable
+
 
 class QueueItemForceUpdate(QueueItemUpdate):
     def __init__(self, show=None):

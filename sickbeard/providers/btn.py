@@ -1,5 +1,5 @@
 # coding=utf-8
-# Author: Daniël Heimans
+# Author: Daniï¿½l Heimans
 # URL: http://code.google.com/p/sickbeard
 #
 # This file is part of Sick Beard.
@@ -59,7 +59,7 @@ class BTNProvider(generic.TorrentProvider):
 
         return result
 
-    def _doSearch(self, search_params, show=None):
+    def _doSearch(self, search_params, show=None, season=None):
         params = {}
         apikey = sickbeard.BTN_API_KEY
 
