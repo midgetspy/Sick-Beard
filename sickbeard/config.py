@@ -137,6 +137,20 @@ def change_TV_DOWNLOAD_DIR(tv_download_dir):
 
     return True
 
+def change_TORRENT_DOWNLOAD_DIR(torrent_download_dir):
+
+    if torrent_download_dir == '':
+        sickbeard.TORRENT_DOWNLOAD_DIR = ''
+        return True
+
+    if os.path.normpath(sickbeard.TORRENT_DOWNLOAD_DIR) != os.path.normpath(torrent_download_dir):
+        if helpers.makeDir(torrent_download_dir):
+            sickbeard.TORRENT_DOWNLOAD_DIR = os.path.normpath(torrent_download_dir)
+            logger.log(u"Changed Torrent download folder to " + torrent_download_dir)
+        else:
+            return False
+
+    return True
 
 def change_SEARCH_FREQUENCY(freq):
 
