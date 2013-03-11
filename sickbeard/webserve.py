@@ -2754,15 +2754,6 @@ class Home:
         if type(exceptions_list) != list:
             exceptions_list = [exceptions_list]            
 
-        #If directCall from mass_edit_update no scene exceptions handling
-        if directCall:            
-            do_update_exceptions = False
-        else:
-            if set(exceptions_list) == set(showObj.exceptions):
-                do_update_exceptions = False
-            else:
-                do_update_exceptions = True
-
         errors = []
         with showObj.lock:
             newQuality = Quality.combineQualities(map(int, anyQualities), map(int, bestQualities))
@@ -2814,13 +2805,7 @@ class Home:
                 time.sleep(1)
             except exceptions.CantUpdateException, e:
                 errors.append("Unable to force an update on the show.")
-        if do_update_exceptions:
-            try:
-                scene_exceptions.update_scene_exceptions(showObj.tvdbid, exceptions_list) #@UndefinedVariable
-                time.sleep(1)
-            except exceptions.CantUpdateException, e:
-                errors.append("Unable to force an update on scene exceptions of the show.")
-
+        
         if directCall:
             return errors
 
