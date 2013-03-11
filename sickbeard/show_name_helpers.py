@@ -18,7 +18,7 @@
 
 import sickbeard
 
-from sickbeard.common import countryList
+from sickbeard.common import countryList, showLanguages
 from sickbeard.helpers import sanitizeSceneName
 from sickbeard.scene_exceptions import get_scene_exceptions
 from sickbeard import logger
@@ -26,14 +26,14 @@ from sickbeard import db
 
 import re
 import datetime
+import string
 
 from name_parser.parser import NameParser, InvalidNameException
 
 resultFilters = ["sub(pack|s|bed)", "nlsub(bed|s)?", "swesub(bed)?",
-                 "(dir|sample|nfo)fix", "sample", "(dvd)?extras", 
-                 "dub(bed)?"]
+                 "(dir|sample|nfo)fix", "sample", "(dvd)?extras"]
 
-def filterBadReleases(name):
+def filterBadReleases(name,showLang=u"en"):
     """
     Filters out non-english and just all-around stupid releases by comparing them
     to the resultFilters contents.
@@ -42,6 +42,10 @@ def filterBadReleases(name):
     
     Returns: True if the release name is OK, False if it's bad.
     """
+    
+    additionalFilters = []
+    if showLang == u"en":
+        additionalFilters.append("dub(bed)?")
 
     try:
         fp = NameParser()
@@ -65,7 +69,9 @@ def filterBadReleases(name):
         return True
 
     # if any of the bad strings are in the name then say no
-    for x in resultFilters + sickbeard.IGNORE_WORDS.split(','):
+    for x in resultFilters + sickbeard.IGNORE_WORDS.split(',') + additionalFilters:
+        if x == showLanguages.get(showLang):
+            continue
         if re.search('(^|[\W_])'+x+'($|[\W_])', check_string, re.I):
             logger.log(u"Invalid scene release: "+name+" contains "+x+", ignoring it", logger.DEBUG)
             return False
