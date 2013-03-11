@@ -211,7 +211,7 @@ def pickBestResult(results, quality_list=None):
             myDB = db.DBConnection('failed.db')
             sql_results = myDB.select("SELECT * FROM failed WHERE release like ?", [re.sub("[\.\-\ ]", "_", cur_result.name)])
             if len(sql_results) > 0:
-                logger.log(cur_result.name+" has previously failed, rejecting it")
+                logger.log(cur_result.name + u" has previously failed, rejecting it")
                 continue
         
         if not bestResult or bestResult.quality < cur_result.quality and cur_result.quality != Quality.UNKNOWN:
