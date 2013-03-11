@@ -610,7 +610,7 @@ class Manage:
 
             exceptions_list = []
             
-            curErrors += Home().editShow(curShow, new_show_dir, anyQualities, bestQualities, exceptions_list, new_flatten_folders, new_paused, subtitles=new_subtitles, directCall=True)
+            curErrors += Home().editShow(curShow, new_show_dir, anyQualities, bestQualities, exceptions_list, new_flatten_folders, new_paused, subtitles=new_subtitles, audio_lang=showObj.audio_lang, custom_search_names=showObj.custom_search_names, directCall=True)
 
             if curErrors:
                 logger.log(u"Errors: "+str(curErrors), logger.ERROR)
@@ -1324,8 +1324,6 @@ class ConfigProviders:
 
         sickbeard.T411_USERNAME = t411_username
         sickbeard.T411_PASSWORD = t411_password
-        
-        sickbeard.Cpasbien_LANGUAGE = cpasbien_language
 
         sickbeard.NZBSRUS_UID = nzbs_r_us_uid.strip()
         sickbeard.NZBSRUS_HASH = nzbs_r_us_hash.strip()

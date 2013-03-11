@@ -21,12 +21,11 @@ from bs4 import BeautifulSoup
 from sickbeard import logger, classes, show_name_helpers
 from sickbeard.common import Quality
 from sickbeard.exceptions import ex
-import generic
 import cookielib
+import generic
 import sickbeard
 import urllib
 import urllib2
-import re
 
 
 class CpasbienProvider(generic.TorrentProvider):
@@ -72,12 +71,12 @@ class CpasbienProvider(generic.TorrentProvider):
         return item.getQuality()
         
     def _doSearch(self, searchString, show=None, season=None):
-        
+
         results = []
         searchUrl = self.url + '/recherche/'
 
         data = urllib.urlencode({'champ_recherche': searchString})
-        
+
         try:
             soup = BeautifulSoup( urllib2.urlopen(searchUrl, data) )
         except Exception, e:
@@ -85,40 +84,24 @@ class CpasbienProvider(generic.TorrentProvider):
             return []
 
         rows = soup.findAll(attrs = {'class' : ["color0", "color1"]})
-        
+
         for row in rows:
             link = row.find("a", title=True)
             title = str(link.text).lower().strip()  
             pageURL = link['href']
-            if "vostfr" in title:
+
+            if "vostfr" in title and (not show.subtitles) and show.audio_lang == "fr":
                 continue
-                
+
             torrentPage = self.opener.open( pageURL )
             torrentSoup = BeautifulSoup( torrentPage )
-               
+
             downloadTorrentLink = torrentSoup.find("a", title=u"Cliquer ici pour télécharger ce torrent")
             if downloadTorrentLink:
                 
                 downloadURL = downloadTorrentLink['href']
-                
-                if "720p" in title:
-                    if "bluray" in title:
-                        quality = Quality.HDBLURAY
-                    elif "web-dl" in title.lower() or "web.dl" in title.lower():
-                        quality = Quality.HDWEBDL
-                    else:
-                        quality = Quality.HDTV
-                elif "1080p" in title:
-                    quality = Quality.FULLHDBLURAY
-                elif "hdtv" in title:
-                    if "720p" in title:
-                        quality = Quality.HDTV
-                    elif "1080p" in title:
-                        quality = Quality.FULLHDTV
-                    else:
-                        quality = Quality.SDTV
-                else:
-                    quality = Quality.SDTV
+
+                quality = Quality.nameQuality( title )
 
                 if show:
                     results.append( CpasbienSearchResult( self.opener, title, downloadURL, quality, str(show.audio_lang) ) )
