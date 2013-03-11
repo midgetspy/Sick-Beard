@@ -50,7 +50,7 @@ class CpasbienProvider(generic.TorrentProvider):
         showNames = show_name_helpers.allPossibleShowNames(show)
         result = []
         for showName in showNames:
-            result.append( showName + ".S%02d" % season )
+            result.append( showName + " S%02d" % season )
         return result
 
     def _get_episode_search_strings(self, ep_obj):
