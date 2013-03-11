@@ -1044,12 +1044,15 @@ class ConfigPostProcessing:
     def savePostProcessing(self, naming_pattern=None, naming_multi_ep=None,
                     xbmc_data=None, mediabrowser_data=None, synology_data=None, sony_ps3_data=None, wdtv_data=None, tivo_data=None,
                     use_banner=None, keep_processed_dir=None, process_automatically=None, rename_episodes=None,
-                    move_associated_files=None, tv_download_dir=None, naming_custom_abd=None, naming_abd_pattern=None):
+                    move_associated_files=None, tv_download_dir=None, torrent_download_dir=None, naming_custom_abd=None, naming_abd_pattern=None):
 
         results = []
 
         if not config.change_TV_DOWNLOAD_DIR(tv_download_dir):
             results += ["Unable to create directory " + os.path.normpath(tv_download_dir) + ", dir not changed."]
+
+        if not config.change_TORRENT_DOWNLOAD_DIR(torrent_download_dir):
+            results += ["Unable to create directory " + os.path.normpath(torrent_download_dir) + ", dir not changed."]
 
         if use_banner == "on":
             use_banner = 1
@@ -1230,8 +1233,8 @@ class ConfigProviders:
                       omgwtfnzbs_uid=None, omgwtfnzbs_key=None,
                       tvtorrents_digest=None, tvtorrents_hash=None,
                       torrentleech_key=None,
-                      btn_api_key=None, binnewz_language=None,
-                      newzbin_username=None, newzbin_password=None,t411_language=None,t411_username=None,t411_password=None, cpasbien_language=None,
+                      btn_api_key=None,
+                      newzbin_username=None, newzbin_password=None,t411_username=None,t411_password=None,
                       provider_order=None):
 
         results = []
@@ -1318,10 +1321,7 @@ class ConfigProviders:
         sickbeard.TORRENTLEECH_KEY = torrentleech_key.strip()
 
         sickbeard.BTN_API_KEY = btn_api_key.strip()
-        
-        sickbeard.BINNEWZ_LANGUAGE = binnewz_language
 
-        sickbeard.T411_LANGUAGE = t411_language
         sickbeard.T411_USERNAME = t411_username
         sickbeard.T411_PASSWORD = t411_password
         

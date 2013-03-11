@@ -43,6 +43,5 @@ class NZBIndex(NZBDownloader):
         results = nzbIndexSoup.findAll("tr", {"class" : "odd"}) + nzbIndexSoup.findAll("tr", {"class" : "even"})
                              
         for tr in results:
-            sizeInMegs = None
             nzblink = tr.find("a", text="Download")
-            return NZBGetURLSearchResult(self, nzblink.get("href"), sizeInMegs, refererURL)
+            return NZBGetURLSearchResult(self, nzblink.get("href"), None, refererURL)

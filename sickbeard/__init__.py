@@ -76,6 +76,7 @@ showQueueScheduler = None
 searchQueueScheduler = None
 properFinderScheduler = None
 autoPostProcesserScheduler = None
+autoTorrentPostProcesserScheduler = None
 subtitlesFinderScheduler = None
 showList = None
 loadingShowList = None
@@ -177,6 +178,7 @@ PROCESS_AUTOMATICALLY = False
 KEEP_PROCESSED_DIR = False
 MOVE_ASSOCIATED_FILES = False
 TV_DOWNLOAD_DIR = None
+TORRENT_DOWNLOAD_DIR = None
 
 NZBS = False
 NZBS_UID = None
@@ -385,10 +387,10 @@ def initialize(consoleLogging=True):
                 USE_PYTIVO, PYTIVO_NOTIFY_ONSNATCH, PYTIVO_NOTIFY_ONDOWNLOAD, PYTIVO_NOTIFY_ONSUBTITLEDOWNLOAD, PYTIVO_UPDATE_LIBRARY, PYTIVO_HOST, PYTIVO_SHARE_NAME, PYTIVO_TIVO_NAME, \
                 USE_NMA, NMA_NOTIFY_ONSNATCH, NMA_NOTIFY_ONDOWNLOAD, NMA_NOTIFY_ONSUBTITLEDOWNLOAD, NMA_API, NMA_PRIORITY, \
                 NZBMATRIX_APIKEY, versionCheckScheduler, VERSION_NOTIFY, PROCESS_AUTOMATICALLY, \
-                KEEP_PROCESSED_DIR, TV_DOWNLOAD_DIR, TVDB_BASE_URL, MIN_SEARCH_FREQUENCY, \
+                KEEP_PROCESSED_DIR, TV_DOWNLOAD_DIR, TORRENT_DOWNLOAD_DIR, TVDB_BASE_URL, MIN_SEARCH_FREQUENCY, \
                 showQueueScheduler, searchQueueScheduler, ROOT_DIRS, CACHE_DIR, ACTUAL_CACHE_DIR, TVDB_API_PARMS, \
                 NAMING_PATTERN, NAMING_MULTI_EP, NAMING_FORCE_FOLDERS, NAMING_ABD_PATTERN, NAMING_CUSTOM_ABD, \
-                RENAME_EPISODES, properFinderScheduler, PROVIDER_ORDER, autoPostProcesserScheduler, \
+                RENAME_EPISODES, properFinderScheduler, PROVIDER_ORDER, autoPostProcesserScheduler, autoTorrentPostProcesserScheduler, \
                 NZBSRUS, NZBSRUS_UID, NZBSRUS_HASH, WOMBLE, NZBX, NZBX_COMPLETION, OMGWTFNZBS, OMGWTFNZBS_UID, OMGWTFNZBS_KEY, providerList, newznabProviderList, \
                 EXTRA_SCRIPTS, USE_TWITTER, TWITTER_USERNAME, TWITTER_PASSWORD, TWITTER_PREFIX, \
                 USE_NOTIFO, NOTIFO_USERNAME, NOTIFO_APISECRET, NOTIFO_NOTIFY_ONDOWNLOAD, NOTIFO_NOTIFY_ONSUBTITLEDOWNLOAD, NOTIFO_NOTIFY_ONSNATCH, \
@@ -503,6 +505,7 @@ def initialize(consoleLogging=True):
         TORRENT_DIR = check_setting_str(CFG, 'Blackhole', 'torrent_dir', '')
 
         TV_DOWNLOAD_DIR = check_setting_str(CFG, 'General', 'tv_download_dir', '')
+        TORRENT_DOWNLOAD_DIR = check_setting_str(CFG, 'General', 'torrent_download_dir', '')
         PROCESS_AUTOMATICALLY = check_setting_int(CFG, 'General', 'process_automatically', 0)
         RENAME_EPISODES = check_setting_int(CFG, 'General', 'rename_episodes', 1)
         KEEP_PROCESSED_DIR = check_setting_int(CFG, 'General', 'keep_processed_dir', 1)
@@ -842,9 +845,15 @@ def initialize(consoleLogging=True):
                                                      threadName="FINDPROPERS",
                                                      runImmediately=False)
 
-        autoPostProcesserScheduler = scheduler.Scheduler(autoPostProcesser.PostProcesser(),
+        if PROCESS_AUTOMATICALLY:
+            autoPostProcesserScheduler = scheduler.Scheduler(autoPostProcesser.PostProcesser( TV_DOWNLOAD_DIR ),
+                                                         cycleTime=datetime.timedelta(minutes=10),
+                                                         threadName="NZB_POSTPROCESSER",
+                                                         runImmediately=True)
+
+        autoTorrentPostProcesserScheduler = scheduler.Scheduler(autoPostProcesser.PostProcesser( TORRENT_DOWNLOAD_DIR ),
                                                      cycleTime=datetime.timedelta(minutes=10),
-                                                     threadName="POSTPROCESSER",
+                                                     threadName="TORRENT_POSTPROCESSER",
                                                      runImmediately=True)
 
         backlogSearchScheduler = searchBacklog.BacklogSearchScheduler(searchBacklog.BacklogSearcher(),
@@ -870,7 +879,7 @@ def start():
 
     global __INITIALIZED__, currentSearchScheduler, backlogSearchScheduler, \
             showUpdateScheduler, versionCheckScheduler, showQueueScheduler, \
-            properFinderScheduler, autoPostProcesserScheduler, searchQueueScheduler, \
+            properFinderScheduler, autoPostProcesserScheduler, autoTorrentPostProcesserScheduler, searchQueueScheduler, \
             subtitlesFinderScheduler, started, USE_SUBTITLES, \
             started
 
@@ -899,8 +908,11 @@ def start():
             # start the queue checker
             properFinderScheduler.thread.start()
 
-            # start the proper finder
-            autoPostProcesserScheduler.thread.start()
+            if autoPostProcesserScheduler:
+                autoPostProcesserScheduler.thread.start()
+            
+            if autoTorrentPostProcesserScheduler:
+                autoTorrentPostProcesserScheduler.thread.start()
 
             # start the subtitles finder
             if USE_SUBTITLES:
@@ -912,7 +924,7 @@ def start():
 def halt():
 
     global __INITIALIZED__, currentSearchScheduler, backlogSearchScheduler, showUpdateScheduler, \
-            showQueueScheduler, properFinderScheduler, autoPostProcesserScheduler, searchQueueScheduler, \
+            showQueueScheduler, properFinderScheduler, autoPostProcesserScheduler, autoTorrentPostProcesserScheduler, searchQueueScheduler, \
             subtitlesFinderScheduler, started, \
             started
 
@@ -966,12 +978,21 @@ def halt():
             except:
                 pass
 
-            autoPostProcesserScheduler.abort = True
-            logger.log(u"Waiting for the POSTPROCESSER thread to exit")
-            try:
-                autoPostProcesserScheduler.thread.join(10)
-            except:
-                pass
+            if autoPostProcesserScheduler:
+                autoPostProcesserScheduler.abort = True
+                logger.log(u"Waiting for the NZB_POSTPROCESSER thread to exit")
+                try:
+                    autoPostProcesserScheduler.thread.join(10)
+                except:
+                    pass
+
+            if autoTorrentPostProcesserScheduler:
+                autoTorrentPostProcesserScheduler.abort = True
+                logger.log(u"Waiting for the TORRENT_POSTPROCESSER thread to exit")
+                try:
+                    autoTorrentPostProcesserScheduler.thread.join(10)
+                except:
+                    pass
 
             properFinderScheduler.abort = True
             logger.log(u"Waiting for the PROPERFINDER thread to exit")
@@ -1129,6 +1150,7 @@ def save_config():
     new_config['General']['cache_dir'] = ACTUAL_CACHE_DIR if ACTUAL_CACHE_DIR else 'cache'
     new_config['General']['root_dirs'] = ROOT_DIRS if ROOT_DIRS else ''
     new_config['General']['tv_download_dir'] = TV_DOWNLOAD_DIR
+    new_config['General']['torrent_download_dir'] = TORRENT_DOWNLOAD_DIR
     new_config['General']['keep_processed_dir'] = int(KEEP_PROCESSED_DIR)
     new_config['General']['move_associated_files'] = int(MOVE_ASSOCIATED_FILES)
     new_config['General']['process_automatically'] = int(PROCESS_AUTOMATICALLY)
