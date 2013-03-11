@@ -610,7 +610,7 @@ class Manage:
 
             exceptions_list = []
             
-            curErrors += Home().editShow(curShow, new_show_dir, anyQualities, bestQualities, exceptions_list, new_flatten_folders, new_paused, subtitles=new_subtitles, directCall=True)
+            curErrors += Home().editShow(curShow, new_show_dir, anyQualities, bestQualities, exceptions_list, new_flatten_folders, new_paused, subtitles=new_subtitles, audio_lang=showObj.audio_lang, custom_search_names=showObj.custom_search_names, directCall=True)
 
             if curErrors:
                 logger.log(u"Errors: "+str(curErrors), logger.ERROR)
