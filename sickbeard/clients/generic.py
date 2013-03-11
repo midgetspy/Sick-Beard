@@ -30,7 +30,7 @@ class GenericClient(object):
             self.last_time = time.time()
             self._get_auth()
         
-        logger.log(self.name + u': Requested a ' + method.upper() + ' connection to url '+ self.url + ' with Params= ' + str(params) + ' Data=' + str(data)[0:100] + ('...' if len(data) > 100 else ''), logger.DEBUG)
+        logger.log(self.name + u': Requested a ' + method.upper() + ' connection to url '+ self.url + ' with Params= ' + str(params) + ' Data=' + str(data if data else 'None')[0:99] + ('...' if len(data if data else 'None') > 100 else ''), logger.DEBUG)
         
         if not self.auth:
             logger.log(self.name + u': Autenthication Failed' , logger.ERROR)
