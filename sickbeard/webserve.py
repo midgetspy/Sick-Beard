@@ -40,6 +40,7 @@ from sickbeard import logger, helpers, exceptions, classes, db
 from sickbeard import encodingKludge as ek
 from sickbeard import search_queue
 from sickbeard import image_cache
+from sickbeard import scene_exceptions
 from sickbeard import naming
 from sickbeard import subtitles
 
@@ -2683,7 +2684,7 @@ class Home:
         return result['description'] if result else 'Episode not found.'
 
     @cherrypy.expose
-    def editShow(self, show=None, location=None, anyQualities=[], bestQualities=[], flatten_folders=None, paused=None, directCall=False, air_by_date=None, tvdbLang=None, audio_lang=None, custom_search_names=None, subtitles=None):
+    def editShow(self, show=None, location=None, anyQualities=[], bestQualities=[], exceptions_list=[], flatten_folders=None, paused=None, directCall=False, air_by_date=None, tvdbLang=None, audio_lang=None, custom_search_names=None, subtitles=None):
 
         if show == None:
             errString = "Invalid show ID: "+str(show)
@@ -2700,6 +2701,8 @@ class Home:
                 return [errString]
             else:
                 return _genericMessage("Error", errString)
+            
+        showObj.exceptions = scene_exceptions.get_scene_exceptions(showObj.tvdbid)
 
         if not location and not anyQualities and not bestQualities and not flatten_folders:
 
@@ -2749,6 +2752,18 @@ class Home:
 
         if type(bestQualities) != list:
             bestQualities = [bestQualities]
+            
+        if type(exceptions_list) != list:
+            exceptions_list = [exceptions_list]            
+
+        #If directCall from mass_edit_update no scene exceptions handling
+        if directCall:            
+            do_update_exceptions = False
+        else:
+            if set(exceptions_list) == set(showObj.exceptions):
+                do_update_exceptions = False
+            else:
+                do_update_exceptions = True
 
         errors = []
         with showObj.lock:
@@ -2801,6 +2816,12 @@ class Home:
                 time.sleep(1)
             except exceptions.CantUpdateException, e:
                 errors.append("Unable to force an update on the show.")
+        if do_update_exceptions:
+            try:
+                scene_exceptions.update_scene_exceptions(showObj.tvdbid, exceptions_list) #@UndefinedVariable
+                time.sleep(1)
+            except exceptions.CantUpdateException, e:
+                errors.append("Unable to force an update on scene exceptions of the show.")
 
         if directCall:
             return errors
