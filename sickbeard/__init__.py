@@ -30,7 +30,7 @@ from threading import Lock
 
 # apparently py2exe won't build these unless they're imported somewhere
 from sickbeard import providers, metadata
-from providers import ezrss, tvtorrents, torrentleech, btn, nzbsrus, newznab, womble, nzbx, omgwtfnzbs, binnewz, t411
+from providers import ezrss, tvtorrents, torrentleech, btn, nzbsrus, newznab, womble, nzbx, omgwtfnzbs, binnewz, t411, cpasbien
 from sickbeard.config import CheckSection, check_setting_int, check_setting_str, ConfigMigrator
 
 from sickbeard import searchCurrent, searchBacklog, showUpdater, versionChecker, properFinder, autoPostProcesser, subtitles
@@ -200,6 +200,8 @@ BINNEWZ = False
 T411 = False
 T411_USERNAME = None
 T411_PASSWORD = None
+
+Cpasbien = False
 
 NZBMATRIX = False
 NZBMATRIX_USERNAME = None
@@ -375,6 +377,7 @@ def initialize(consoleLogging=True):
                 NZBS, NZBS_UID, NZBS_HASH, EZRSS, TVTORRENTS, TVTORRENTS_DIGEST, TVTORRENTS_HASH, BTN, BTN_API_KEY, TORRENTLEECH, TORRENTLEECH_KEY, TORRENT_DIR, USENET_RETENTION, SOCKET_TIMEOUT, \
 				BINNEWZ, \
                 T411, T411_USERNAME, T411_PASSWORD, \
+                Cpasbien, \
                 SEARCH_FREQUENCY, DEFAULT_SEARCH_FREQUENCY, BACKLOG_SEARCH_FREQUENCY, \
                 QUALITY_DEFAULT, FLATTEN_FOLDERS_DEFAULT, SUBTITLES_DEFAULT, STATUS_DEFAULT, AUDIO_SHOW_DEFAULT, \
                 GROWL_NOTIFY_ONSNATCH, GROWL_NOTIFY_ONDOWNLOAD, GROWL_NOTIFY_ONSUBTITLEDOWNLOAD, TWITTER_NOTIFY_ONSNATCH, TWITTER_NOTIFY_ONDOWNLOAD, TWITTER_NOTIFY_ONSUBTITLEDOWNLOAD, \
@@ -624,6 +627,9 @@ def initialize(consoleLogging=True):
         T411 = bool(check_setting_int(CFG, 'T411', 't411', 0))
         T411_USERNAME = check_setting_str(CFG, 'T411', 'username', '')
         T411_PASSWORD = check_setting_str(CFG, 'T411', 'password', '')
+        
+        CheckSection(CFG, 'Cpasbien')
+        Cpasbien = bool(check_setting_int(CFG, 'Cpasbien', 'cpasbien', 0))
 
         CheckSection(CFG, 'Newzbin')
         NEWZBIN = bool(check_setting_int(CFG, 'Newzbin', 'newzbin', 0))
@@ -1181,6 +1187,9 @@ def save_config():
     new_config['T411']['t411'] = int(T411)
     new_config['T411']['username'] = T411_USERNAME
     new_config['T411']['password'] = T411_PASSWORD
+    
+    new_config['Cpasbien'] = {}
+    new_config['Cpasbien']['cpasbien'] = int(Cpasbien)
 
     new_config['Womble'] = {}
     new_config['Womble']['womble'] = int(WOMBLE)

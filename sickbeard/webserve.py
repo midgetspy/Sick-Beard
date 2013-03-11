@@ -1230,7 +1230,7 @@ class ConfigProviders:
                       tvtorrents_digest=None, tvtorrents_hash=None,
                       torrentleech_key=None,
                       btn_api_key=None, binnewz_language=None,
-                      newzbin_username=None, newzbin_password=None,t411_language=None,t411_username=None,t411_password=None,
+                      newzbin_username=None, newzbin_password=None,t411_language=None,t411_username=None,t411_password=None, cpasbien_language=None,
                       provider_order=None):
 
         results = []
@@ -1304,6 +1304,8 @@ class ConfigProviders:
                 sickbeard.BINNEWZ = curEnabled
             elif curProvider == 't411':
                 sickbeard.T411 = curEnabled
+            elif curProvider == 'cpasbien':
+                sickbeard.Cpasbien = curEnabled
             elif curProvider in newznabProviderDict:
                 newznabProviderDict[curProvider].enabled = bool(curEnabled)
             else:
@@ -1321,6 +1323,8 @@ class ConfigProviders:
         sickbeard.T411_LANGUAGE = t411_language
         sickbeard.T411_USERNAME = t411_username
         sickbeard.T411_PASSWORD = t411_password
+        
+        sickbeard.Cpasbien_LANGUAGE = cpasbien_language
 
         sickbeard.NZBSRUS_UID = nzbs_r_us_uid.strip()
         sickbeard.NZBSRUS_HASH = nzbs_r_us_hash.strip()
