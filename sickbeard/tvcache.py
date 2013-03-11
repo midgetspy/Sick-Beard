@@ -344,14 +344,23 @@ class TVCache():
 
         # for each cache entry
         for curResult in sqlResults:
-
-            # skip non-tv crap (but allow them for Newzbin cause we assume it's filtered well)
-            if self.providerID != 'newzbin' and not show_name_helpers.filterBadReleases(curResult["name"]):
-                continue
-
+            
             # get the show object, or if it's not one of our shows then ignore it
             showObj = helpers.findCertainShow(sickbeard.showList, int(curResult["tvdbid"]))
             if not showObj:
+                continue
+            
+            try:
+                fp = NameParser()
+                parse_result = fp.parse(curResult["name"])
+            except InvalidNameException:
+                logger.log(u"Unable to parse the filename "+curResult["name"]+" into a valid episode", logger.WARNING)
+                
+            if not parse_result.audio_langs == showObj.audio_lang:
+                continue
+
+            # skip non-tv crap (but allow them for Newzbin cause we assume it's filtered well)
+            if self.providerID != 'newzbin' and not show_name_helpers.filterBadReleases(curResult["name"],showObj.audio_lang):
                 continue
 
             # get season and ep data (ignoring multi-eps for now)
@@ -385,7 +394,7 @@ class TVCache():
                 result.url = url
                 result.name = title
                 result.quality = curQuality
-
+                result.audio_lang = str(showObj.audio_lang)
                 # add it to the list
                 if epObj not in neededEps:
                     neededEps[epObj] = [result]
