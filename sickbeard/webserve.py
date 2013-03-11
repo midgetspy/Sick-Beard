@@ -1234,9 +1234,7 @@ class ConfigProviders:
                       tvtorrents_digest=None, tvtorrents_hash=None,
                       torrentleech_key=None,
                       btn_api_key=None,
-                      t411_username=None,t411_password=None,
-                      btn_api_key=None, binnewz_language=None,
-                      newzbin_username=None, newzbin_password=None,t411_language=None,t411_username=None,t411_password=None, cpasbien_language=None,
+                      newzbin_username=None, newzbin_password=None,t411_username=None,t411_password=None,
                       provider_order=None):
 
         results = []
