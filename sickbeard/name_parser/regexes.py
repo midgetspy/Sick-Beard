@@ -20,6 +20,7 @@
 from sickbeard.common import showLanguages
 
 ep_regexes = [
+                                   
               ('standard_repeat',
                # Show.Name.S01E02.S01E03.Source.Quality.Etc-Group
                # Show Name - S01E02 - S01E03 - S01E04 - Ep Name
@@ -34,6 +35,7 @@ ep_regexes = [
                -(?P<release_group>[^- ]+))?)?$              # Group
                '''),
               
+                                                       
               ('scene_date_format_bis',
                # Show.Name.2010.S01E01.Source.Quality.Etc-Group
                '''
@@ -57,6 +59,18 @@ ep_regexes = [
                -(?P<release_group>[^- ]+))?)?$              # Group
                '''),
               
+              ('standard_cpas_bien',
+               # [www.Cpasbien.me] Dexter.S07E04.FRENCH.LD.HDTV.XviD-MiNDe
+               '''
+               \[[a-zA-Z0-9\.]{2,20}\][. _-]+
+               (?P<series_name>.+?)[. _-]+                # Show_Name and separator
+               s(?P<season_num>\d+)[. _-]*                 # S01 and optional separator
+               e(?P<ep_num>\d+)                            # E02 and separator
+               [. _-]*((?P<extra_info>.+?)                 # Source_Quality_Etc-
+               ((?<![. _-])(?<!WEB)                        # Make sure this is really the release group
+               -(?P<release_group>[^- ]+))?)?$              # Group
+               '''),
+                                        
               ('standard',
                # Show.Name.S01E02.Source.Quality.Etc-Group
                # Show Name - S01E02 - My Ep Name
@@ -74,8 +88,8 @@ ep_regexes = [
                ((?<![. _-])(?<!WEB)                        # Make sure this is really the release group
                -(?P<release_group>[^- ]+))?)?$              # Group
                '''),
-
-              ('fov',
+              
+               ('fov',
                # Show_Name.1x02.Source_Quality_Etc-Group
                # Show Name - 1x02 - My Ep Name
                # Show_Name.1x02x03x04.Source_Quality_Etc-Group
@@ -148,7 +162,8 @@ ep_regexes = [
                -(?P<release_group>[^- ]+))?)?$              # Group
                '''
                ),
-
+              
+              
               ('no_season_multi_ep',
                # Show.Name.E02-03
                # Show.Name.E02.2010
@@ -214,7 +229,8 @@ ep_regexes = [
                (?P<ep_num>\d+)                            # 02 and separator
                '''
                ),
-                                        
+              
+                                                     
               ]
 
 language_regexes = {}
