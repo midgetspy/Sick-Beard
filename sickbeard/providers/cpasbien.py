@@ -101,7 +101,24 @@ class CpasbienProvider(generic.TorrentProvider):
                 
                 downloadURL = downloadTorrentLink['href']
 
-                quality = Quality.nameQuality( title )
+                if "720p" in title:
+                    if "bluray" in title:
+                        quality = Quality.HDBLURAY
+                    elif "web-dl" in title.lower() or "web.dl" in title.lower():
+                        quality = Quality.HDWEBDL
+                    else:
+                        quality = Quality.HDTV
+                elif "1080p" in title:
+                    quality = Quality.FULLHDBLURAY
+                elif "hdtv" in title:
+                    if "720p" in title:
+                        quality = Quality.HDTV
+                    elif "1080p" in title:
+                        quality = Quality.FULLHDTV
+                    else:
+                        quality = Quality.SDTV
+                else:
+                    quality = Quality.SDTV
 
                 if show:
                     results.append( CpasbienSearchResult( self.opener, title, downloadURL, quality, str(show.audio_lang) ) )
