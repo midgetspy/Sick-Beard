@@ -88,6 +88,17 @@
                                 <span class="component-desc">The folder where your torrent client puts finished downloads.</span>
                             </label>
                         </div>
+                         <div class="field-pair">
+                            <input type="checkbox" name="process_automatically_torrent" id="process_automatically_torrent" #if $sickbeard.PROCESS_AUTOMATICALLY_TORRENT == True then "checked=\"checked\"" else ""# />
+                            <label class="clearfix" for="process_automatically">
+                                <span class="component-title">Scan and Process</span>
+                                <span class="component-desc">Scan and post-process any files in your <i>Torrent Download Dir</i>?</span>
+                            </label>
+                            <label class="nocheck clearfix" for="process_automatically">
+                                <span class="component-title">&nbsp;</span>
+                                <span class="component-desc"><b>NOTE:</b> Do not use if your Torrent Download Dir is the same as TV Download Dir</span>
+                            </label>
+                        </div>
 
                         <div class="clearfix"></div>
                         <input type="submit" class="btn config_submitter" value="Save Changes" /><br/>

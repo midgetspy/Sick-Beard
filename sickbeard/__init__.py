@@ -175,6 +175,7 @@ ADD_SHOWS_WO_DIR = None
 CREATE_MISSING_SHOW_DIRS = None
 RENAME_EPISODES = False
 PROCESS_AUTOMATICALLY = False
+PROCESS_AUTOMATICALLY_TORRENT = False
 KEEP_PROCESSED_DIR = False
 MOVE_ASSOCIATED_FILES = False
 TV_DOWNLOAD_DIR = None
@@ -386,7 +387,7 @@ def initialize(consoleLogging=True):
                 USE_GROWL, GROWL_HOST, GROWL_PASSWORD, USE_PROWL, PROWL_NOTIFY_ONSNATCH, PROWL_NOTIFY_ONDOWNLOAD, PROWL_NOTIFY_ONSUBTITLEDOWNLOAD, PROWL_API, PROWL_PRIORITY, PROG_DIR, NZBMATRIX, NZBMATRIX_USERNAME, \
                 USE_PYTIVO, PYTIVO_NOTIFY_ONSNATCH, PYTIVO_NOTIFY_ONDOWNLOAD, PYTIVO_NOTIFY_ONSUBTITLEDOWNLOAD, PYTIVO_UPDATE_LIBRARY, PYTIVO_HOST, PYTIVO_SHARE_NAME, PYTIVO_TIVO_NAME, \
                 USE_NMA, NMA_NOTIFY_ONSNATCH, NMA_NOTIFY_ONDOWNLOAD, NMA_NOTIFY_ONSUBTITLEDOWNLOAD, NMA_API, NMA_PRIORITY, \
-                NZBMATRIX_APIKEY, versionCheckScheduler, VERSION_NOTIFY, PROCESS_AUTOMATICALLY, \
+                NZBMATRIX_APIKEY, versionCheckScheduler, VERSION_NOTIFY, PROCESS_AUTOMATICALLY, PROCESS_AUTOMATICALLY_TORRENT, \
                 KEEP_PROCESSED_DIR, TV_DOWNLOAD_DIR, TORRENT_DOWNLOAD_DIR, TVDB_BASE_URL, MIN_SEARCH_FREQUENCY, \
                 showQueueScheduler, searchQueueScheduler, ROOT_DIRS, CACHE_DIR, ACTUAL_CACHE_DIR, TVDB_API_PARMS, \
                 NAMING_PATTERN, NAMING_MULTI_EP, NAMING_FORCE_FOLDERS, NAMING_ABD_PATTERN, NAMING_CUSTOM_ABD, \
@@ -473,7 +474,7 @@ def initialize(consoleLogging=True):
 
         QUALITY_DEFAULT = check_setting_int(CFG, 'General', 'quality_default', SD)
         STATUS_DEFAULT = check_setting_int(CFG, 'General', 'status_default', SKIPPED)
-        AUDIO_SHOW_DEFAULT = check_setting_int(CFG, 'General', 'audio_show_default', '' )
+        AUDIO_SHOW_DEFAULT = check_setting_str(CFG, 'General', 'audio_show_default', 'fr' )
         VERSION_NOTIFY = check_setting_int(CFG, 'General', 'version_notify', 1)
         FLATTEN_FOLDERS_DEFAULT = bool(check_setting_int(CFG, 'General', 'flatten_folders_default', 0))
 
@@ -507,6 +508,7 @@ def initialize(consoleLogging=True):
         TV_DOWNLOAD_DIR = check_setting_str(CFG, 'General', 'tv_download_dir', '')
         TORRENT_DOWNLOAD_DIR = check_setting_str(CFG, 'General', 'torrent_download_dir', '')
         PROCESS_AUTOMATICALLY = check_setting_int(CFG, 'General', 'process_automatically', 0)
+        PROCESS_AUTOMATICALLY_TORRENT = check_setting_int(CFG, 'General', 'process_automatically_torrent', 0)
         RENAME_EPISODES = check_setting_int(CFG, 'General', 'rename_episodes', 1)
         KEEP_PROCESSED_DIR = check_setting_int(CFG, 'General', 'keep_processed_dir', 1)
         MOVE_ASSOCIATED_FILES = check_setting_int(CFG, 'General', 'move_associated_files', 0)
@@ -519,7 +521,7 @@ def initialize(consoleLogging=True):
             EZRSS = bool(check_setting_int(CFG, 'EZRSS', 'ezrss', 0))
 
         GIT_PATH = check_setting_str(CFG, 'General', 'git_path', '')
-        IGNORE_WORDS = check_setting_str(CFG, 'General', 'ignore_words', IGNORE_WORDS)
+        IGNORE_WORDS = check_setting_str(CFG, 'General', 'ignore_words', '')
         EXTRA_SCRIPTS = [x for x in check_setting_str(CFG, 'General', 'extra_scripts', '').split('|') if x]
 
         USE_BANNER = bool(check_setting_int(CFG, 'General', 'use_banner', 0))
@@ -851,7 +853,8 @@ def initialize(consoleLogging=True):
                                                          threadName="NZB_POSTPROCESSER",
                                                          runImmediately=True)
 
-        autoTorrentPostProcesserScheduler = scheduler.Scheduler(autoPostProcesser.PostProcesser( TORRENT_DOWNLOAD_DIR ),
+        if PROCESS_AUTOMATICALLY_TORRENT:
+            autoTorrentPostProcesserScheduler = scheduler.Scheduler(autoPostProcesser.PostProcesser( TORRENT_DOWNLOAD_DIR ),
                                                      cycleTime=datetime.timedelta(minutes=10),
                                                      threadName="TORRENT_POSTPROCESSER",
                                                      runImmediately=True)
@@ -1154,6 +1157,7 @@ def save_config():
     new_config['General']['keep_processed_dir'] = int(KEEP_PROCESSED_DIR)
     new_config['General']['move_associated_files'] = int(MOVE_ASSOCIATED_FILES)
     new_config['General']['process_automatically'] = int(PROCESS_AUTOMATICALLY)
+    new_config['General']['process_automatically_torrent'] = int(PROCESS_AUTOMATICALLY_TORRENT)
     new_config['General']['rename_episodes'] = int(RENAME_EPISODES)
     new_config['General']['create_missing_show_dirs'] = CREATE_MISSING_SHOW_DIRS
     new_config['General']['add_shows_wo_dir'] = ADD_SHOWS_WO_DIR
