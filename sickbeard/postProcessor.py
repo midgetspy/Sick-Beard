@@ -833,6 +833,10 @@ class PostProcessor(object):
             # move the episode and associated files to the show dir
             if sickbeard.KEEP_PROCESSED_DIR:
                 self._copy(self.file_path, dest_path, new_base_name, sickbeard.MOVE_ASSOCIATED_FILES)
+
+                # create an empty helper file to indicate that this video has been processed
+                helper_file = helpers.replaceExtension(self.file_path, "processed")
+                open(helper_file, 'w')
             else:
                 self._move(self.file_path, dest_path, new_base_name, sickbeard.MOVE_ASSOCIATED_FILES)
         except (OSError, IOError):
