@@ -653,7 +653,7 @@ comingEpisodes.tmpl
   color: #333;
 }
 .posterThumb {
-  height: 320px;
+  height: 200px;
   vertical-align: top;
   -ms-interpolation-mode: bicubic;
 }
