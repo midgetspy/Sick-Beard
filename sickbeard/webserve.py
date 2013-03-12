@@ -3270,7 +3270,8 @@ class WebInterface:
     @cherrypy.expose
     def showPoster(self, show=None, which=None):
 
-        if which == 'poster':
+        #Redirect initial poster/banner thumb to default images       
+        if which[0:6] == 'poster':
             default_image_name = 'poster.png'
         else:
             default_image_name = 'banner.png'
@@ -3285,40 +3286,20 @@ class WebInterface:
             return cherrypy.lib.static.serve_file(default_image_path, content_type="image/png")
 
         cache_obj = image_cache.ImageCache()
-
+        
         if which == 'poster':
             image_file_name = cache_obj.poster_path(showObj.tvdbid)
-        # this is for 'banner' but also the default case
-        else:
+        if which == 'poster_thumb':
+            image_file_name = cache_obj.poster_thumb_path(showObj.tvdbid)
+        if which == 'banner':
             image_file_name = cache_obj.banner_path(showObj.tvdbid)
+        if which == 'banner_thumb':     
+            image_file_name = cache_obj.banner_thumb_path(showObj.tvdbid)
 
         if ek.ek(os.path.isfile, image_file_name):
-            # use startup argument to prevent using PIL even if installed
-            if sickbeard.NO_RESIZE:
-                return cherrypy.lib.static.serve_file(image_file_name, content_type="image/jpeg")
-            try:
-                from PIL import Image
-                from cStringIO import StringIO
-            except ImportError: # PIL isn't installed
-                return cherrypy.lib.static.serve_file(image_file_name, content_type="image/jpeg")
-            else:
-                im = Image.open(image_file_name)
-                if im.mode == 'P': # Convert GIFs to RGB
-                    im = im.convert('RGB')
-                if which == 'banner':
-                    size = 606, 112
-                elif which == 'poster':
-                    size = 136, 200
-                else:
-                    return cherrypy.lib.static.serve_file(image_file_name, content_type="image/jpeg")
-                im = im.resize(size, Image.ANTIALIAS)
-                imgbuffer = StringIO()
-                im.save(imgbuffer, 'JPEG', quality=85)
-                cherrypy.response.headers['Content-Type'] = 'image/jpeg'
-                return imgbuffer.getvalue()
+            return cherrypy.lib.static.serve_file(image_file_name, content_type="image/jpeg")
         else:
             return cherrypy.lib.static.serve_file(default_image_path, content_type="image/png")
-
     @cherrypy.expose
     def setComingEpsLayout(self, layout):
         if layout not in ('poster', 'banner', 'list'):
