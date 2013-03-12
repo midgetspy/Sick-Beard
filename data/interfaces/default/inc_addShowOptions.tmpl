@@ -44,10 +44,12 @@
                 <span class="component-title">
                     <select name="audio_lang" id="showLangSelect">
                    #for $k,$v in $common.showLanguages.iteritems():
+					#if k!="":
 					<option value="$k"
 					#if $sickbeard.AUDIO_SHOW_DEFAULT == $k  then 'selected="selected"' else ''#>$v</option>
+					#end if
 					#end for
-                    </select>
+					</select>
                 </span>
                 <span class="component-desc">Set the desired audio language of the show (this can be changed later)</span>
             </label>

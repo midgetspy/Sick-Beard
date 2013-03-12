@@ -1,6 +1,7 @@
 #import sickbeard
 #from sickbeard import subtitles
 #import sickbeard.helpers
+#from sickbeard import common
 #from sickbeard.common import *
 #from sickbeard import db
 #import subliminal
@@ -173,8 +174,14 @@ Change selected episodes to
 <div class="float-right">
 Change Audio of selected episodes to 
 <select id="audioSelect">
-#for $audio in ['fr','en','']:
-<option value="$audio">$showLanguages[$audio]</option>
+#for $k,$v in $common.showLanguages.iteritems():
+	#if $k!="":
+	<option value="$k"
+	#if $show.audio_lang == $k:
+		selected
+	#end if
+	#end if
+	>$v</option>
 #end for
 </select>
 <input type="hidden" id="showID" value="$show.tvdbid" />
