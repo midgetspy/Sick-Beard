@@ -73,11 +73,14 @@
 \$(document).ready(function(){ 
 
     \$("#showListTable:has(tbody tr)").tablesorter({
-        sortList: [[7,1],[1,0]],
+        sortList: [[8,1],[1,0]],
         textExtraction: {
+        	1: function(node) { return \$(node).find("img").attr("alt"); },
+        	3: function(node) { return \$(node).find("img").attr("alt"); },
             4: function(node) { return \$(node).find("span").text().toLowerCase(); },
             5: function(node) { return \$(node).find("span").text(); },
-            7: function(node) { return \$(node).find("img").attr("alt"); }
+            7: function(node) { return \$(node).find("img").attr("alt"); },
+            8: function(node) { return \$(node).find("img").attr("alt"); }
         },
         widgets: ['saveSort', 'zebra', 'stickyHeaders'],
         headers: {
@@ -173,7 +176,7 @@ $myShowList.sort(lambda x, y: cmp(x.name, y.name))
   <tr>
     <td align="center" class="nowrap">#if len($curEp) != 0 then $curEp[0].airdate else ""#</td>
     <td align="center"><a href="$sbRoot/home/displayShow?show=$curShow.tvdbid">
-    <img alt="" height="75" src="$sbRoot/showPoster/?show=$curShow.tvdbid&amp;which=poster"/></a>
+    <img height="75" src="$sbRoot/showPoster/?show=$curShow.tvdbid&amp;which=poster" alt="$curShow.name"/></a>
     </td>
     <td class="tvShow"><a href="$sbRoot/home/displayShow?show=$curShow.tvdbid">$curShow.name</a></td>
     <td align="center">
