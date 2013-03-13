@@ -65,9 +65,11 @@ Note: This will only affect the language of the retrieved metadata file contents
 <br />
 Desired Audio language: <select name="audio_lang" id="showLangSelect">
 #for $k,$v in $common.showLanguages.iteritems():
+	#if $k!="":
 	<option value="$k"
 	#if $show.audio_lang == $k:
 		selected
+	#end if
 	#end if
 	>$v</option>
 #end for

@@ -40,6 +40,7 @@ from sickbeard import logger, helpers, exceptions, classes, db
 from sickbeard import encodingKludge as ek
 from sickbeard import search_queue
 from sickbeard import image_cache
+from sickbeard import scene_exceptions
 from sickbeard import naming
 from sickbeard import subtitles
 
@@ -609,7 +610,7 @@ class Manage:
 
             exceptions_list = []
             
-            curErrors += Home().editShow(curShow, new_show_dir, anyQualities, bestQualities, exceptions_list, new_flatten_folders, new_paused, subtitles=new_subtitles, directCall=True)
+            curErrors += Home().editShow(curShow, new_show_dir, anyQualities, bestQualities, exceptions_list, new_flatten_folders, new_paused, subtitles=new_subtitles, audio_lang=showObj.audio_lang, custom_search_names=showObj.custom_search_names, directCall=True)
 
             if curErrors:
                 logger.log(u"Errors: "+str(curErrors), logger.ERROR)
@@ -794,9 +795,9 @@ class ConfigGeneral:
     @cherrypy.expose
     def saveRootDirs(self, rootDirString=None):
         sickbeard.ROOT_DIRS = rootDirString
-
+        sickbeard.save_config()
     @cherrypy.expose
-    def saveAddShowDefaults(self, defaultFlattenFolders, defaultStatus, anyQualities, bestQualities, audio_langs, subtitles):
+    def saveAddShowDefaults(self, defaultFlattenFolders, defaultStatus, anyQualities, bestQualities, audio_lang, subtitles):
 
         if anyQualities:
             anyQualities = anyQualities.split(',')
@@ -812,7 +813,7 @@ class ConfigGeneral:
 
         sickbeard.STATUS_DEFAULT = int(defaultStatus)
         sickbeard.QUALITY_DEFAULT = int(newQuality)
-        sickbeard.AUDIO_SHOW_DEFAULT = audio_langs
+        sickbeard.AUDIO_SHOW_DEFAULT = str(audio_lang)
 
         if defaultFlattenFolders == "true":
             defaultFlattenFolders = 1
@@ -826,6 +827,8 @@ class ConfigGeneral:
         else:
             subtitles = 0
         sickbeard.SUBTITLES_DEFAULT = int(subtitles)
+        
+        sickbeard.save_config()
 
     @cherrypy.expose
     def generateKey(self):
@@ -1042,13 +1045,16 @@ class ConfigPostProcessing:
     @cherrypy.expose
     def savePostProcessing(self, naming_pattern=None, naming_multi_ep=None,
                     xbmc_data=None, mediabrowser_data=None, synology_data=None, sony_ps3_data=None, wdtv_data=None, tivo_data=None,
-                    use_banner=None, keep_processed_dir=None, process_automatically=None, rename_episodes=None,
-                    move_associated_files=None, tv_download_dir=None, naming_custom_abd=None, naming_abd_pattern=None):
+                    use_banner=None, keep_processed_dir=None, process_automatically=None, process_automatically_torrent=None, rename_episodes=None,
+                    move_associated_files=None, tv_download_dir=None, torrent_download_dir=None, naming_custom_abd=None, naming_abd_pattern=None):
 
         results = []
 
         if not config.change_TV_DOWNLOAD_DIR(tv_download_dir):
             results += ["Unable to create directory " + os.path.normpath(tv_download_dir) + ", dir not changed."]
+
+        if not config.change_TORRENT_DOWNLOAD_DIR(torrent_download_dir):
+            results += ["Unable to create directory " + os.path.normpath(torrent_download_dir) + ", dir not changed."]
 
         if use_banner == "on":
             use_banner = 1
@@ -1059,6 +1065,11 @@ class ConfigPostProcessing:
             process_automatically = 1
         else:
             process_automatically = 0
+            
+        if process_automatically_torrent == "on":
+            process_automatically_torrent = 1
+        else:
+            process_automatically_torrent = 0
 
         if rename_episodes == "on":
             rename_episodes = 1
@@ -1081,6 +1092,7 @@ class ConfigPostProcessing:
             naming_custom_abd = 0
 
         sickbeard.PROCESS_AUTOMATICALLY = process_automatically
+        sickbeard.PROCESS_AUTOMATICALLY_TORRENT = process_automatically_torrent
         sickbeard.KEEP_PROCESSED_DIR = keep_processed_dir
         sickbeard.RENAME_EPISODES = rename_episodes
         sickbeard.MOVE_ASSOCIATED_FILES = move_associated_files
@@ -1229,8 +1241,8 @@ class ConfigProviders:
                       omgwtfnzbs_uid=None, omgwtfnzbs_key=None,
                       tvtorrents_digest=None, tvtorrents_hash=None,
                       torrentleech_key=None,
-                      btn_api_key=None, binnewz_language=None,
-                      newzbin_username=None, newzbin_password=None,t411_language=None,t411_username=None,t411_password=None,
+                      btn_api_key=None,
+                      newzbin_username=None, newzbin_password=None,t411_username=None,t411_password=None,
                       provider_order=None):
 
         results = []
@@ -1304,6 +1316,8 @@ class ConfigProviders:
                 sickbeard.BINNEWZ = curEnabled
             elif curProvider == 't411':
                 sickbeard.T411 = curEnabled
+            elif curProvider == 'cpasbien':
+                sickbeard.Cpasbien = curEnabled
             elif curProvider in newznabProviderDict:
                 newznabProviderDict[curProvider].enabled = bool(curEnabled)
             else:
@@ -1315,10 +1329,7 @@ class ConfigProviders:
         sickbeard.TORRENTLEECH_KEY = torrentleech_key.strip()
 
         sickbeard.BTN_API_KEY = btn_api_key.strip()
-        
-        sickbeard.BINNEWZ_LANGUAGE = binnewz_language
 
-        sickbeard.T411_LANGUAGE = t411_language
         sickbeard.T411_USERNAME = t411_username
         sickbeard.T411_PASSWORD = t411_password
 
@@ -2679,7 +2690,7 @@ class Home:
         return result['description'] if result else 'Episode not found.'
 
     @cherrypy.expose
-    def editShow(self, show=None, location=None, anyQualities=[], bestQualities=[], flatten_folders=None, paused=None, directCall=False, air_by_date=None, tvdbLang=None, audio_lang=None, custom_search_names=None, subtitles=None):
+    def editShow(self, show=None, location=None, anyQualities=[], bestQualities=[], exceptions_list=[], flatten_folders=None, paused=None, directCall=False, air_by_date=None, tvdbLang=None, audio_lang=None, custom_search_names=None, subtitles=None):
 
         if show == None:
             errString = "Invalid show ID: "+str(show)
@@ -2696,6 +2707,8 @@ class Home:
                 return [errString]
             else:
                 return _genericMessage("Error", errString)
+            
+        showObj.exceptions = scene_exceptions.get_scene_exceptions(showObj.tvdbid)
 
         if not location and not anyQualities and not bestQualities and not flatten_folders:
 
@@ -2745,6 +2758,9 @@ class Home:
 
         if type(bestQualities) != list:
             bestQualities = [bestQualities]
+            
+        if type(exceptions_list) != list:
+            exceptions_list = [exceptions_list]            
 
         errors = []
         with showObj.lock:
@@ -2797,7 +2813,7 @@ class Home:
                 time.sleep(1)
             except exceptions.CantUpdateException, e:
                 errors.append("Unable to force an update on the show.")
-
+        
         if directCall:
             return errors
 
@@ -3254,7 +3270,8 @@ class WebInterface:
     @cherrypy.expose
     def showPoster(self, show=None, which=None):
 
-        if which == 'poster':
+        #Redirect initial poster/banner thumb to default images       
+        if which[0:6] == 'poster':
             default_image_name = 'poster.png'
         else:
             default_image_name = 'banner.png'
@@ -3269,40 +3286,20 @@ class WebInterface:
             return cherrypy.lib.static.serve_file(default_image_path, content_type="image/png")
 
         cache_obj = image_cache.ImageCache()
-
+        
         if which == 'poster':
             image_file_name = cache_obj.poster_path(showObj.tvdbid)
-        # this is for 'banner' but also the default case
-        else:
+        if which == 'poster_thumb':
+            image_file_name = cache_obj.poster_thumb_path(showObj.tvdbid)
+        if which == 'banner':
             image_file_name = cache_obj.banner_path(showObj.tvdbid)
+        if which == 'banner_thumb':     
+            image_file_name = cache_obj.banner_thumb_path(showObj.tvdbid)
 
         if ek.ek(os.path.isfile, image_file_name):
-            # use startup argument to prevent using PIL even if installed
-            if sickbeard.NO_RESIZE:
-                return cherrypy.lib.static.serve_file(image_file_name, content_type="image/jpeg")
-            try:
-                from PIL import Image
-                from cStringIO import StringIO
-            except ImportError: # PIL isn't installed
-                return cherrypy.lib.static.serve_file(image_file_name, content_type="image/jpeg")
-            else:
-                im = Image.open(image_file_name)
-                if im.mode == 'P': # Convert GIFs to RGB
-                    im = im.convert('RGB')
-                if which == 'banner':
-                    size = 606, 112
-                elif which == 'poster':
-                    size = 136, 200
-                else:
-                    return cherrypy.lib.static.serve_file(image_file_name, content_type="image/jpeg")
-                im = im.resize(size, Image.ANTIALIAS)
-                imgbuffer = StringIO()
-                im.save(imgbuffer, 'JPEG', quality=85)
-                cherrypy.response.headers['Content-Type'] = 'image/jpeg'
-                return imgbuffer.getvalue()
+            return cherrypy.lib.static.serve_file(image_file_name, content_type="image/jpeg")
         else:
             return cherrypy.lib.static.serve_file(default_image_path, content_type="image/png")
-
     @cherrypy.expose
     def setComingEpsLayout(self, layout):
         if layout not in ('poster', 'banner', 'list'):

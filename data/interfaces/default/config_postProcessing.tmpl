@@ -28,8 +28,8 @@
                 <div class="component-group clearfix">
 
                     <div class="component-group-desc">
-                        <h3>Post-Processing</h3>
-                        <p>Settings that dictate how Sick Beard should process completed downloads.</p>
+                        <h3>NZB Post-Processing</h3>
+                        <p>Settings that dictate how Sick Beard should process completed NZB downloads.</p>
                     </div>
 
                     <fieldset class="component-group-list">
@@ -51,6 +51,69 @@
                                 <span class="component-desc">Or if SABnzbd+ and Sick Beard are on different PCs.</span>
                             </label>
                         </div>
+
+                        <div class="field-pair">
+                            <input type="checkbox" name="process_automatically" id="process_automatically" #if $sickbeard.PROCESS_AUTOMATICALLY == True then "checked=\"checked\"" else ""# />
+                            <label class="clearfix" for="process_automatically">
+                                <span class="component-title">Scan and Process</span>
+                                <span class="component-desc">Scan and post-process any files in your <i>TV Download Dir</i>?</span>
+                            </label>
+                            <label class="nocheck clearfix" for="process_automatically">
+                                <span class="component-title">&nbsp;</span>
+                                <span class="component-desc"><b>NOTE:</b> Do not use if you use sabToSickbeard w/ SABnzbd+!</span>
+                            </label>
+                        </div>
+
+                        <div class="clearfix"></div>
+                        <input type="submit" class="btn config_submitter" value="Save Changes" /><br/>
+
+                    </fieldset>
+                </div><!-- /component-pp //-->
+
+                <div class="component-group clearfix">
+
+                    <div class="component-group-desc">
+                        <h3>Torrent Post-Processing</h3>
+                        <p>Settings that dictate how Sick Beard should process completed torrent downloads.</p>
+                    </div>
+
+                    <fieldset class="component-group-list">
+                        <div class="field-pair">
+                            <label class="nocheck clearfix" for="torrent_download_dir">
+                                <span class="component-title">Torrent Download Dir</span>
+                                <input type="text" name="torrent_download_dir" id="torrent_download_dir" value="$sickbeard.TORRENT_DOWNLOAD_DIR" size="35" />
+                            </label>
+                            <label class="nocheck clearfix">
+                                <span class="component-title">&nbsp;</span>
+                                <span class="component-desc">The folder where your torrent client puts finished downloads.</span>
+                            </label>
+                        </div>
+                         <div class="field-pair">
+                            <input type="checkbox" name="process_automatically_torrent" id="process_automatically_torrent" #if $sickbeard.PROCESS_AUTOMATICALLY_TORRENT == True then "checked=\"checked\"" else ""# />
+                            <label class="clearfix" for="process_automatically">
+                                <span class="component-title">Scan and Process</span>
+                                <span class="component-desc">Scan and post-process any files in your <i>Torrent Download Dir</i>?</span>
+                            </label>
+                            <label class="nocheck clearfix" for="process_automatically">
+                                <span class="component-title">&nbsp;</span>
+                                <span class="component-desc"><b>NOTE:</b> Do not use if your Torrent Download Dir is the same as TV Download Dir</span>
+                            </label>
+                        </div>
+
+                        <div class="clearfix"></div>
+                        <input type="submit" class="btn config_submitter" value="Save Changes" /><br/>
+
+                    </fieldset>
+                </div><!-- /component-pp //-->
+
+                <div class="component-group clearfix">
+
+                    <div class="component-group-desc">
+                        <h3>Common Post-Processing options</h3>
+                        <p>Settings that dictate how Sick Beard should process completed downloads.</p>
+                    </div>
+
+                    <fieldset class="component-group-list">
 
                         <div class="field-pair">
                             <input type="checkbox" name="keep_processed_dir" id="keep_processed_dir" #if $sickbeard.KEEP_PROCESSED_DIR == True then "checked=\"checked\"" else ""# />
@@ -80,24 +143,12 @@
                             </label>
                         </div>
 
-                        <div class="field-pair">
-                            <input type="checkbox" name="process_automatically" id="process_automatically" #if $sickbeard.PROCESS_AUTOMATICALLY == True then "checked=\"checked\"" else ""# />
-                            <label class="clearfix" for="process_automatically">
-                                <span class="component-title">Scan and Process</span>
-                                <span class="component-desc">Scan and post-process any files in your <i>TV Download Dir</i>?</span>
-                            </label>
-                            <label class="nocheck clearfix" for="process_automatically">
-                                <span class="component-title">&nbsp;</span>
-                                <span class="component-desc"><b>NOTE:</b> Do not use if you use sabToSickbeard w/ SABnzbd+!</span>
-                            </label>
-                        </div>
-
                         <div class="clearfix"></div>
                         <input type="submit" class="btn config_submitter" value="Save Changes" /><br/>
 
                     </fieldset>
                 </div><!-- /component-pp //-->
-
+                
                 <div class="component-group clearfix">
                     <div class="component-group-desc">
                         <h3>Naming</h3>
@@ -517,6 +568,7 @@
 <script type="text/javascript" charset="utf-8">
 <!--
     jQuery('#tv_download_dir').fileBrowser({ title: 'Select TV Download Directory' });
+    jQuery('#torrent_download_dir').fileBrowser({ title: 'Select Torrent finished downloads Directory' });
 //-->
 </script>
 

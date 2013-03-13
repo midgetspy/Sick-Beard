@@ -1,11 +1,51 @@
 #import sickbeard
 #from sickbeard import subtitles
 #import sickbeard.helpers
+#from sickbeard import common
 #from sickbeard.common import *
+#from sickbeard import db
 #import subliminal
 #import os.path, os
 #import datetime
 #set global $title=$show.name
+#set $myDB = $db.DBConnection()
+#set $today = str($datetime.date.today().toordinal())
+#set $tvid =str($show.tvdbid) 
+#set $fr = $myDB.select("SELECT showid, COUNT(*) FROM tv_episodes WHERE audio_langs = 'fr' AND location != '' AND season != 0 and episode != 0 AND airdate <= "+$today+" and showid="+$tvid+" GROUP BY showid")
+#set $curfr = [x[1] for x in $fr if int(x[0]) == $show.tvdbid]
+#if len($curfr) != 0:
+   #set $lfr = $curfr[0]
+#else 
+   #set $lfr = 0
+#end if
+#set $en = $myDB.select("SELECT showid, COUNT(*) FROM tv_episodes WHERE audio_langs = 'en' AND location != '' AND season != 0 and episode != 0 AND airdate <= "+$today+" and showid="+$tvid+" GROUP BY showid")
+#set $curen = [x[1] for x in $en if int(x[0]) == $show.tvdbid]
+#if len($curen) != 0:
+   #set $leng = $curen[0]
+#else
+   #set $leng = 0
+#end if
+#set $no = $myDB.select("SELECT showid, COUNT(*) FROM tv_episodes WHERE audio_langs = '' AND location != '' AND season != 0 and episode != 0 AND airdate <= "+$today+" and showid="+$tvid+" GROUP BY showid")
+#set $curno = [x[1] for x in $no if int(x[0]) == $show.tvdbid]
+#if len($curno) != 0:
+   #set $lno = $curno[0]
+#else 
+   #set $lno = 0
+#end if
+#set $manq = $myDB.select("SELECT showid, COUNT(*) FROM tv_episodes WHERE location = '' AND season != 0 and episode != 0 AND (airdate <= "+$today+" and airdate != 1) and showid="+$tvid+" GROUP BY showid")
+#set $curmanq = [x[1] for x in $manq if int(x[0]) == $show.tvdbid]
+#if len($curmanq) != 0:
+   #set $lmanq = $curmanq[0]
+#else 
+   #set $lmanq = 0
+#end if
+#set $subs= $myDB.select("SELECT showid, COUNT(*) FROM tv_episodes WHERE subtitles <> '' and showid="+$tvid+" GROUP BY showid")
+#set $cursubs = [x[1] for x in $subs if int(x[0]) == $show.tvdbid]
+#if len($cursubs) != 0:
+   #set $lsubs = $cursubs[0]
+#else 
+   #set $lsubs = 0
+#end if
 #set global $header = '<a href="http://thetvdb.com/?tab=series&amp;id=%d" target="_new">%s</a>' % ($show.tvdbid, $show.name)
 
 #set global $topmenu="manageShows"#
@@ -62,7 +102,8 @@
 
 <div id="summary" class="align-left">
 <table>
-<div class="float-left" style="margin-right: 20px"><a href="$sbRoot/showPoster/?show=$show.tvdbid&amp;which=poster" rel="dialog" title="$show.name"><img src="$sbRoot/showPoster/?show=$show.tvdbid&amp;which=poster" class="posterThumb" alt=""/></a>
+<div class="float-left" style="margin-right: 20px">
+<a href="$sbRoot/showPoster/?show=$show.tvdbid&amp;which=poster" rel="dialog" title="$show.name"><img src="$sbRoot/showPoster/?show=$show.tvdbid&amp;which=poster" height="320" alt=""/></a>
 </div>
 #if $show.network and $show.airs:
     <tr><td class="showLegend">Airs: </td><td>$show.airs on $show.network</td></tr>
@@ -104,6 +145,14 @@ replace with: <b><%=", ".join([Quality.qualityStrings[x] for x in sorted(bestQua
     <tr><td class="showLegend">Flatten Folders: </td><td><img src="$sbRoot/images/#if $show.flatten_folders == 1 or $sickbeard.NAMING_FORCE_FOLDERS then "yes16.png\" alt=\"Y" else "no16.png\" alt=\"N"#" width="16" height="16" /></td></tr>
     <tr><td class="showLegend">Paused: </td><td><img src="$sbRoot/images/#if int($show.paused) == 1 then "yes16.png\" alt=\"Y" else "no16.png\" alt=\"N"#" width="16" height="16" /></td></tr>
     <tr><td class="showLegend">Air-by-Date: </td><td><img src="$sbRoot/images/#if int($show.air_by_date) == 1 then "yes16.png\" alt=\"Y" else "no16.png\" alt=\"N"#" width="16" height="16" /></td></tr>
+<div class="float-left">
+
+	<tr><td class="showLegend">French Episodes : </td><td>$lfr</td></tr>
+    <tr><td class="showLegend">English Episodes : </td><td>$leng</td></tr>
+    <tr><td class="showLegend">Unknown Episodes : </td><td>$lno</td></tr>
+	<tr><td class="showLegend">Missing Episodes : </td><td>$lmanq</td></tr>
+	<tr><td class="showLegend">Downloaded Subtitles : </td><td>$lsubs</td></tr>
+	</div>
 </table>
 </div>
 
@@ -125,8 +174,14 @@ Change selected episodes to
 <div class="float-right">
 Change Audio of selected episodes to 
 <select id="audioSelect">
-#for $audio in ['fr','en','']:
-<option value="$audio">$showLanguages[$audio]</option>
+#for $k,$v in $common.showLanguages.iteritems():
+	#if $k!="":
+	<option value="$k"
+	#if $show.audio_lang == $k:
+		selected
+	#end if
+	#end if
+	>$v</option>
 #end for
 </select>
 <input type="hidden" id="showID" value="$show.tvdbid" />
@@ -191,7 +246,12 @@ $epLoc
 
     </td>
     <td align="center" class="audio_langs_column">
+    #set $curStatus, $curQuality = $Quality.splitCompositeStatus(int($epResult["status"]))
+                #if $epResult["audio_langs"] == "" and $curStatus in [$DOWNLOADED, $SNATCHED, $ARCHIVED]
+                <img src="$sbRoot/images/flags/unknown.png" alt="" width="20" />
+                #else
                 <img src="$sbRoot/images/flags/${epResult["audio_langs"]}.png" alt="$epResult["audio_langs"]" width="16" />
+    			#end if
     </td>
 </small>
     </td>

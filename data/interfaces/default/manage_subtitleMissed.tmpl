@@ -10,11 +10,7 @@
 #set global $topmenu="manage"#
 #import os.path
 #include $os.path.join($sickbeard.PROG_DIR, "data/interfaces/default/inc_top.tmpl")
-#if $varExists('header') 
-    <h1 class="header">$header</h1>
-#else 
-    <h1 class="title">$title</h1>
-#end if
+
 #if $whichSubs:
 #set subsLanguage = $subliminal.language.Language($whichSubs) if not $whichSubs == 'all' else 'All'
 #end if
