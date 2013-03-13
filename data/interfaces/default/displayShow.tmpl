@@ -103,7 +103,7 @@
 <div id="summary" class="align-left">
 <table>
 <div class="float-left" style="margin-right: 20px">
-<a href="$sbRoot/showPoster/?show=$show.tvdbid&amp;which=poster" rel="dialog" title="$show.name"><img src="$sbRoot/showPoster/?show=$show.tvdbid&amp;which=poster" height="320" alt=""/></a>
+<a href="$sbRoot/showPoster/?show=$show.tvdbid&amp;which=poster" rel="dialog" title="$show.name"><img src="$sbRoot/showPoster/?show=$show.tvdbid&amp;which=poster"#if $sickbeard.USE_SUBTITLES then 'height="320"' else 'height="300"' # alt=""/></a>
 </div>
 #if $show.network and $show.airs:
     <tr><td class="showLegend">Airs: </td><td>$show.airs on $show.network</td></tr>
