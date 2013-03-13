@@ -263,8 +263,11 @@ def main():
     sickbeard.CFG = ConfigObj(sickbeard.CONFIG_FILE)
 
     if db.DBConnection().checkDBVersion() > MAX_DB_VERSION:
-        print 'Your database version has been incremented past what this version of Sick Beard supports.'
-        print 'Have you used other forks of Sick Beard with this same database file?'
+        print 'Your database version has been incremented'
+        print 'past what this version of Sick Beard supports.'
+        print
+        print 'If you have used other forks of SB which have'
+        print 'modified your database it may now be unusable.'
         sys.exit(1)
 
     # Initialize the config and our threads
