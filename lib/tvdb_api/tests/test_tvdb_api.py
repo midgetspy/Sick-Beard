@@ -229,7 +229,7 @@ class test_tvdb_misc(unittest.TestCase):
         """Check valid_languages is up-to-date (compared to languages.xml)
         """
         et = self.t._getetsrc(
-            "http://www.thetvdb.com/api/%s/languages.xml" % (
+            "http://thetvdb.com/api/%s/languages.xml" % (
                 self.t.config['apikey']
             )
         )
