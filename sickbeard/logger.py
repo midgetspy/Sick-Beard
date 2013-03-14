@@ -23,6 +23,8 @@ import threading
 
 import logging
 
+import gzip
+
 import sickbeard
 
 from sickbeard import classes
@@ -96,7 +98,7 @@ class SBRotatingLogHandler(object):
         
         i: Log number to ues
         """
-        return self.log_file + ('.' + str(i) if i else '')
+        return self.log_file + ('.' + str(i) + '.gz' if i else '')
     
     def _num_logs(self):
         """
@@ -119,14 +121,27 @@ class SBRotatingLogHandler(object):
             self.cur_handler.close()
             sb_logger.removeHandler(self.cur_handler)
     
+        # Do we rotate or append to latest archived log
+        if NUM_LOGS >= 1 and os.path.isfile(self._log_file_name(1)) and not os.path.getsize(self._log_file_name(1)) >= LOG_SIZE:
+            log_append = True
+        else:
+            log_append = False
+
         # rename or delete all the old log files
         for i in range(self._num_logs(), -1, -1):
             cur_file_name = self._log_file_name(i)
             try:
-                if i >= NUM_LOGS:
+                if i > NUM_LOGS or (i == NUM_LOGS and not log_append) or NUM_LOGS == 0:
                     os.remove(cur_file_name)
-                else:
+                elif i >= 1 and not log_append:
                     os.rename(cur_file_name, self._log_file_name(i+1))
+                elif i == 0:
+                    fi = open(cur_file_name, 'rb')
+                    fo = gzip.open(self._log_file_name(i+1), 'ab')
+                    fo.writelines(fi)
+                    fo.close()
+                    fi.close()
+                    os.remove(cur_file_name)
             except OSError:
                 pass
         
