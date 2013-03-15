@@ -113,7 +113,7 @@ def processDir (dirName, nzbName=None, recurse=False):
                 try:
                     shutil.rmtree(processPath)
                 except (OSError, IOError), e:
-                    returnStr += logHelper(u"Warning: unable to remove the folder " + dirName + ": " + ex(e.message), logger.WARNING)
+                    returnStr += logHelper(u"Warning: unable to remove the folder " + dirName + ": " + ex(e), logger.WARNING)
 
     return returnStr
 
