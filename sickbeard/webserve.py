@@ -1774,6 +1774,8 @@ class NewHomeAddShows:
                 redirect("/home")
             else:
                 helpers.chmodAsParent(show_dir)
+                # add the new directory to the Synology index.
+                notifiers.synoindex_notifier.addFolder(show_dir)
 
         # prepare the inputs for passing along
         if flatten_folders == "on":
