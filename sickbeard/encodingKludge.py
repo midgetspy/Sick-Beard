@@ -53,13 +53,13 @@ def callPeopleStupid(x):
         logger.log(u"YOUR COMPUTER SUCKS! Your data is being corrupted by a bad locale/encoding setting. Report this error on the forums or IRC please: "+repr(x)+", "+sickbeard.SYS_ENCODING, logger.ERROR)
         return x.encode(sickbeard.SYS_ENCODING, 'ignore')
 
-def ek(func, *args):
+def ek(func, *args, **kwargs):
     result = None
 
     if os.name == 'nt':
-        result = func(*args)
+        result = func(*args, **kwargs)
     else:
-        result = func(*[callPeopleStupid(x) if type(x) in (str, unicode) else x for x in args])
+        result = func(*[callPeopleStupid(x) if type(x) in (str, unicode) else x for x in args], **kwargs)
 
     if type(result) in (list, tuple):
         return fixListEncodings(result)
