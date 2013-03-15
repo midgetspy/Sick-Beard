@@ -180,7 +180,7 @@ class PostProcessor(object):
                 continue
 
             file_path_list.append(associated_file_path)
-        
+            
         return file_path_list
 
     def _delete(self, file_path, associated_files=False):
@@ -205,14 +205,18 @@ class PostProcessor(object):
 
         # delete the file and any other files which we want to delete
         for cur_file in file_list:
-            self._log(u"Deleting file "+cur_file, logger.DEBUG)
+            self._log(u"Deleting file " + cur_file, logger.DEBUG)
             if ek.ek(os.path.isfile, cur_file):
                 #check first the read-only attribute
                 file_attribute = ek.ek(os.stat, cur_file)[0]
                 if (not file_attribute & stat.S_IWRITE):
                     # File is read-only, so make it writeable
-                    self._log('Read only mode on file ' + cur_file, logger.WARNING )
-#                    ek.ek(os.chmod,cur_file,stat.S_IWRITE)
+                    self._log('Read only mode on file ' + cur_file + ' Will try to make it writeable', logger.DEBUG)
+                    try:
+                        ek.ek(os.chmod,cur_file,stat.S_IWRITE)
+                    except:
+                        self._log(u'Cannot change permissions of ' + cur_file, logger.WARNING)
+                        
                 ek.ek(os.remove, cur_file)
                 # do the library update for synoindex
                 notifiers.synoindex_notifier.deleteFile(cur_file)
