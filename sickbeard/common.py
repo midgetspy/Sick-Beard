@@ -169,7 +169,7 @@ class Quality:
         elif checkName(["1080p", "bluray|hddvd", "x264"], all):
             return Quality.FULLHDBLURAY
         else:
-            return Quality.UNKNOWN
+            return Quality.SDTV
 
     @staticmethod
     def assumeQuality(name):
