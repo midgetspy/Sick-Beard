@@ -1378,7 +1378,7 @@ def save_config():
     new_config['Subtitles']['SUBTITLES_SERVICES_LIST'] = ','.join(SUBTITLES_SERVICES_LIST)
     new_config['Subtitles']['SUBTITLES_SERVICES_ENABLED'] = '|'.join([str(x) for x in SUBTITLES_SERVICES_ENABLED])
     new_config['Subtitles']['subtitles_dir'] = SUBTITLES_DIR
-    new_config['Subtitles']['subtitles_dir_sub'] = SUBTITLES_DIR_SUB
+    new_config['Subtitles']['subtitles_dir_sub'] = int(SUBTITLES_DIR_SUB)
     new_config['Subtitles']['subtitles_default'] = int(SUBTITLES_DEFAULT)
     new_config['Subtitles']['subtitles_history'] = int(SUBTITLES_HISTORY)
 
