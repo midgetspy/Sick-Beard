@@ -121,6 +121,7 @@ class KICKASSProvider(generic.TorrentProvider):
                 try:
                     data = self.getURL(searchURL + "&page=%(page)d" % {'page': index })
                     if data and data.startswith("<?xml"):
+                        data = self.sanitiseXml(data)
                         responseSoup = etree.ElementTree(etree.XML(data))
                         newItems = responseSoup.getiterator('item')
                         oldCount = len(items)
@@ -163,7 +164,9 @@ class KICKASSProvider(generic.TorrentProvider):
         if match:
             return match.group(1)
         return None
-    
+    def sanitiseXml(self, data):
+        regex = re.compile('<content\:encoded>.*?<\/content\:encoded>', flags = re.S)
+        return regex.sub("", data)
 
         
 class KICKASSCache(tvcache.TVCache):
@@ -181,6 +184,7 @@ class KICKASSCache(tvcache.TVCache):
         #logger.log(u"KICKASS cache update URL: " + url)
 
         data = self.provider.getURL(url)
+        data = self.provider.sanitiseXml(data)
         return data
     
     def _parseItem(self, item):
