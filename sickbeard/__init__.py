@@ -348,7 +348,7 @@ def initialize(consoleLogging=True):
                 NEWZBIN, NEWZBIN_USERNAME, NEWZBIN_PASSWORD, KEREWS, KEREWS_URL, KEREWS_APIKEY, KEREWS_CATIDS, NZBCLUB, GIT_PATH, MOVE_ASSOCIATED_FILES, \
                 COMING_EPS_LAYOUT, COMING_EPS_SORT, COMING_EPS_DISPLAY_PAUSED, METADATA_WDTV, METADATA_TIVO, IGNORE_WORDS, CREATE_MISSING_SHOW_DIRS, \
                 ADD_SHOWS_WO_DIR
-        
+
         if __INITIALIZED__:
             return False
 
@@ -370,7 +370,7 @@ def initialize(consoleLogging=True):
         CheckSection(CFG, 'pyTivo')
         CheckSection(CFG, 'NMA')
 
-        GERMANDATES = bool(check_setting_int(CFG, 'General', 'germandates', 1))
+        GERMANDATES = bool(check_setting_int(CFG, 'General', 'germandates', 0))
 
         LOG_DIR = check_setting_str(CFG, 'General', 'log_dir', 'Logs')
         if not helpers.makeDir(LOG_DIR):
