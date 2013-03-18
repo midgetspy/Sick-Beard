@@ -32,6 +32,7 @@ from sickbeard import show_name_helpers
 from sickbeard.common import Overview 
 from sickbeard.exceptions import ex
 from sickbeard import encodingKludge as ek
+from lib import requests
 
 proxy_dict = {
               'Getprivate.eu (NL)' : 'http://getprivate.eu/',
@@ -284,21 +285,35 @@ class ThePirateBayProvider(generic.TorrentProvider):
         Save the result to disk.
         """
         
-        #Hack for rtorrent user (it will not work for other torrent client)
-        if sickbeard.TORRENT_METHOD == "blackhole" and result.url.startswith('magnet'): 
-            magnetFileName = ek.ek(os.path.join, sickbeard.TORRENT_DIR, helpers.sanitizeFileName(result.name) + '.' + self.providerType)
-            magnetFileContent = 'd10:magnet-uri' + `len(result.url)` + ':' + result.url + 'e'
+        torrent_hash = re.findall('urn:btih:([\w]{32,40})', result.url)[0].upper()
+        
+        if not torrent_hash:
+           logger.log("Unable to extract torrent hash from link: " + ex(result.url), logger.ERROR) 
+           return False
+           
+        try:
+            r = requests.get('http://torcache.net/torrent/' + torrent_hash + '.torrent')
+        except Exception, e:
+            logger.log("Unable to connect to Torcache: " + ex(e), logger.ERROR)
+            return False
+                         
+        if not r.status_code == 200:
+            return False
+            
+        magnetFileName = ek.ek(os.path.join, sickbeard.TORRENT_DIR, helpers.sanitizeFileName(result.name) + '.' + self.providerType)
+        magnetFileContent = r.content
 
-            try:
-                fileOut = open(magnetFileName, 'wb')
-                fileOut.write(magnetFileContent)
-                fileOut.close()
-                helpers.chmodAsParent(magnetFileName)
-            except IOError, e:
-                logger.log("Unable to save the file: " + ex(e), logger.ERROR)
-                return False
-            logger.log(u"Saved magnet link to " + magnetFileName + " ", logger.MESSAGE)
-            return True
+        try:    
+            fileOut = open(magnetFileName, 'wb')
+            fileOut.write(magnetFileContent)
+            fileOut.close()
+            helpers.chmodAsParent(magnetFileName)
+        except IOError, e:
+            logger.log("Unable to save the file: " + ex(e), logger.ERROR)
+            return False
+        logger.log(u"Saved magnet link to " + magnetFileName + " ", logger.MESSAGE)
+        return True
+
 
 class ThePirateBayCache(tvcache.TVCache):
 
