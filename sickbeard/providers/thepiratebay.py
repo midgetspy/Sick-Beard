@@ -58,7 +58,7 @@ class ThePirateBayProvider(generic.TorrentProvider):
         
         self.url = 'http://thepiratebay.se/'
 
-        self.searchurl = self.url+'search/%s/0/7/200'  # order by seed       
+        self.searchurl = self.url + 'search/%s/0/7/200'  # order by seed       
 
         self.re_title_url =  '/torrent/(?P<id>\d+)/(?P<title>.*?)//1".+?(?P<url>magnet.*?)//1".+?(?P<seeders>\d+)</td>.+?(?P<leechers>\d+)</td>'
 
@@ -109,7 +109,7 @@ class ThePirateBayProvider(generic.TorrentProvider):
         
         fileName = None
         
-        fileURL = self.proxy._buildURL(self.url+'ajax_details_filelist.php?id='+str(torrent_id))
+        fileURL = self.proxy._buildURL(self.url + 'ajax_details_filelist.php?id=' + str(torrent_id))
       
         data = self.getURL(fileURL)
         
@@ -119,7 +119,7 @@ class ThePirateBayProvider(generic.TorrentProvider):
         filesList = re.findall('<td.+>(.*?)</td>',data) 
         
         if not filesList: 
-            logger.log(u"Unable to get the torrent file list for "+title, logger.ERROR)
+            logger.log(u"Unable to get the torrent file list for " + title, logger.ERROR)
             
         for fileName in filter(lambda x: x.rpartition(".")[2].lower() in mediaExtensions, filesList):
             quality = Quality.sceneQuality(os.path.basename(fileName))
@@ -129,7 +129,7 @@ class ThePirateBayProvider(generic.TorrentProvider):
             quality = Quality.assumeQuality(os.path.basename(fileName))            
 
         if quality == Quality.UNKNOWN:
-            logger.log(u"No Season quality for "+title, logger.DEBUG)
+            logger.log(u"No Season quality for " + title, logger.DEBUG)
             return None
 
         try:
@@ -138,10 +138,10 @@ class ThePirateBayProvider(generic.TorrentProvider):
         except InvalidNameException:
             return None
         
-        logger.log(u"Season quality for "+title+" is "+Quality.qualityStrings[quality], logger.DEBUG)
+        logger.log(u"Season quality for " + title + " is " + Quality.qualityStrings[quality], logger.DEBUG)
         
         if parse_result.series_name and parse_result.season_number: 
-            title = parse_result.series_name+' S%02d' % int(parse_result.season_number)+' '+self._reverseQuality(quality)
+            title = parse_result.series_name + ' S%02d' % int(parse_result.season_number) + ' ' + self._reverseQuality(quality)
         
         return title
 
@@ -160,10 +160,10 @@ class ThePirateBayProvider(generic.TorrentProvider):
         if wantedEp == seasonEp and not show.air_by_date:
             search_string = {'Season': [], 'Episode': []}
             for show_name in set(show_name_helpers.allPossibleShowNames(show)):
-                ep_string = show_name +' S%02d' % int(season) #1) ShowName SXX   
+                ep_string = show_name + ' S%02d' % int(season) #1) ShowName SXX   
                 search_string['Season'].append(ep_string)
                       
-                ep_string = show_name+' Season '+str(season)+' -Ep*' #2) ShowName Season X  
+                ep_string = show_name + ' Season ' + str(season) + ' -Ep*' #2) ShowName Season X  
                 search_string['Season'].append(ep_string)
 
         #Building the search string with the episodes we need         
@@ -185,14 +185,14 @@ class ThePirateBayProvider(generic.TorrentProvider):
                 
         if ep_obj.show.air_by_date:
             for show_name in set(show_name_helpers.allPossibleShowNames(ep_obj.show)):
-                ep_string = show_name_helpers.sanitizeSceneName(show_name) +' '+ str(ep_obj.airdate)
+                ep_string = show_name_helpers.sanitizeSceneName(show_name) + ' ' + str(ep_obj.airdate)
                 search_string['Episode'].append(ep_string)
         else:
             for show_name in set(show_name_helpers.allPossibleShowNames(ep_obj.show)):
-                ep_string = show_name_helpers.sanitizeSceneName(show_name) +' '+ \
-                sickbeard.config.naming_ep_type[2] % {'seasonnumber': ep_obj.season, 'episodenumber': ep_obj.episode} +'|'+\
-                sickbeard.config.naming_ep_type[0] % {'seasonnumber': ep_obj.season, 'episodenumber': ep_obj.episode} +'|'+\
-                sickbeard.config.naming_ep_type[3] % {'seasonnumber': ep_obj.season, 'episodenumber': ep_obj.episode} \
+                ep_string = show_name_helpers.sanitizeSceneName(show_name) + ' ' + \
+                sickbeard.config.naming_ep_type[2] % {'seasonnumber': ep_obj.season, 'episodenumber': ep_obj.episode} + '*|' + \
+                sickbeard.config.naming_ep_type[0] % {'seasonnumber': ep_obj.season, 'episodenumber': ep_obj.episode} + '*|' + \
+                sickbeard.config.naming_ep_type[3] % {'seasonnumber': ep_obj.season, 'episodenumber': ep_obj.episode} + '*' \
 
                 search_string['Episode'].append(ep_string)
     
@@ -232,7 +232,7 @@ class ThePirateBayProvider(generic.TorrentProvider):
                    
                     #Accept Torrent only from Good People for every Episode Search
                     if sickbeard.THEPIRATEBAY_TRUSTED and re.search('(VIP|Trusted|Helper)',torrent.group(0))== None:
-                        logger.log(u"ThePirateBay Provider found result "+torrent.group('title')+" but that doesn't seem like a trusted result so I'm ignoring it",logger.DEBUG)
+                        logger.log(u"ThePirateBay Provider found result " + torrent.group('title') + " but that doesn't seem like a trusted result so I'm ignoring it", logger.DEBUG)
                         continue
 
                     #Try to find the real Quality for full season torrent analyzing files in torrent 
@@ -274,7 +274,7 @@ class ThePirateBayProvider(generic.TorrentProvider):
         try:
             result = helpers.getURL(url, headers)
         except (urllib2.HTTPError, IOError), e:
-            logger.log(u"Error loading "+self.name+" URL: " + str(sys.exc_info()) + " - " + ex(e), logger.ERROR)
+            logger.log(u"Error loading " + self.name + " URL: " + str(sys.exc_info()) + " - " + ex(e), logger.ERROR)
             return None
 
         return result
@@ -295,9 +295,9 @@ class ThePirateBayProvider(generic.TorrentProvider):
                 fileOut.close()
                 helpers.chmodAsParent(magnetFileName)
             except IOError, e:
-                logger.log("Unable to save the file: "+ex(e), logger.ERROR)
+                logger.log("Unable to save the file: " + ex(e), logger.ERROR)
                 return False
-            logger.log(u"Saved magnet link to "+magnetFileName+" ", logger.MESSAGE)
+            logger.log(u"Saved magnet link to " + magnetFileName + " ", logger.MESSAGE)
             return True
 
 class ThePirateBayCache(tvcache.TVCache):
@@ -325,7 +325,7 @@ class ThePirateBayCache(tvcache.TVCache):
             return []
 
         # now that we've loaded the current RSS feed lets delete the old cache
-        logger.log(u"Clearing "+self.provider.name+" cache and updating with new information")
+        logger.log(u"Clearing " + self.provider.name + " cache and updating with new information")
         self._clearCache()
 
         match = re.compile(re_title_url, re.DOTALL).finditer(urllib.unquote(data))
@@ -343,7 +343,7 @@ class ThePirateBayCache(tvcache.TVCache):
            
             #accept torrent only from Trusted people
             if sickbeard.THEPIRATEBAY_TRUSTED and re.search('(VIP|Trusted|Helper)',torrent.group(0))== None:
-                logger.log(u"ThePirateBay Provider found result "+torrent.group('title')+" but that doesn't seem like a trusted result so I'm ignoring it",logger.DEBUG)
+                logger.log(u"ThePirateBay Provider found result " + torrent.group('title') + " but that doesn't seem like a trusted result so I'm ignoring it",logger.DEBUG)
                 continue
            
             item = (title,url)
@@ -353,9 +353,9 @@ class ThePirateBayCache(tvcache.TVCache):
     def _getData(self):
        
         #url for the last 50 tv-show
-        url = self.provider.proxy._buildURL(self.provider.url+'tv/latest/')
+        url = self.provider.proxy._buildURL(self.provider.url + 'tv/latest/')
 
-        logger.log(u"ThePirateBay cache update URL: "+ url, logger.DEBUG)
+        logger.log(u"ThePirateBay cache update URL: " + url, logger.DEBUG)
 
         data = self.provider.getURL(url)
 
@@ -368,7 +368,7 @@ class ThePirateBayCache(tvcache.TVCache):
         if not title or not url:
             return
 
-        logger.log(u"Adding item to cache: "+title, logger.DEBUG)
+        logger.log(u"Adding item to cache: " + title, logger.DEBUG)
 
         self._addCacheEntry(title, url)
 
