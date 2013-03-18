@@ -51,13 +51,40 @@ def processDir (dirName, nzbName=None, recurse=False):
         for path, dirs, files in ek.ek(os.walk, dirName):
             break
     else:
-        path, dirs = ek.ek(os.path.split, dirName) 
+        path, dirs = ek.ek(os.path.split, dirName)
+        files = ek.ek(os.listdir, dirName)
         dirs = [dirs]
 
-    #Filter out dir we do not want process
+    process_result = False
+    videoFiles = filter(helpers.isMediaFile, files)
+
+    # If nzbName is set and there's more than one videofile in the folder, files will be lost (overwritten).
+    if nzbName != None and len(videoFiles) >= 2:
+        nzbName = None
+
+    #Process Video File in the current Path
+    for cur_video_file in videoFiles:
+
+        cur_video_file_path = ek.ek(os.path.join, dirName, cur_video_file)
+            
+        try:
+            processor = postProcessor.PostProcessor(cur_video_file_path, nzbName)
+            process_result = processor.process()
+            process_fail_message = ""
+        except exceptions.PostProcessingFailed, e:
+            process_result = False
+            process_fail_message = ex(e)
+            
+        returnStr += processor.log
+
+        if process_result:
+                returnStr += logHelper(u"Processing succeeded for "+cur_video_file_path)
+        else:
+            returnStr += logHelper(u"Processing failed for "+cur_video_file_path+": "+process_fail_message, logger.WARNING)
+
+    #Process Video File in all TV Subdir
     for dir in [x for x in dirs if validateDir(x, returnStr)]:
 
-#        for processPath, processDir, fileList in os.walk(os.path.join(path, dir), topdown=False):
         for processPath, processDir, fileList in ek.ek(os.walk, ek.ek(os.path.join, path, dir), topdown=False):
 
             videoFiles = filter(helpers.isMediaFile, fileList)
@@ -85,9 +112,13 @@ def processDir (dirName, nzbName=None, recurse=False):
                     returnStr += logHelper(u"Processing succeeded for "+cur_video_file_path)
                 else:
                     returnStr += logHelper(u"Processing failed for "+cur_video_file_path+": "+process_fail_message, logger.WARNING)
-
+                
+                if not process_result:
+                    break
+                    
+            #Delete all file not needed
             for cur_file in notwantedFiles:
-                if sickbeard.KEEP_PROCESSED_DIR:
+                if sickbeard.KEEP_PROCESSED_DIR or not process_result:
                     break
 
                 cur_file_path = ek.ek(os.path.join, processPath, cur_file)
@@ -105,7 +136,7 @@ def processDir (dirName, nzbName=None, recurse=False):
             ek.ek(os.path.normpath, processPath) != ek.ek(os.path.normpath, sickbeard.TV_DOWNLOAD_DIR):
             
                 if not ek.ek(os.listdir, processPath) == []:
-                    returnStr += logHelper(u"Skipping Deleting folder " + processPath + ' because some files was not process deleted/processed', logger.DEBUG)
+                    returnStr += logHelper(u"Skipping Deleting folder " + processPath + ' because some files was not deleted/processed', logger.DEBUG)
                     continue
                     
                 returnStr += logHelper(u"Deleting folder " + processPath, logger.DEBUG)
