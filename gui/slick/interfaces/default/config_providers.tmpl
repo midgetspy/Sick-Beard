@@ -58,7 +58,7 @@ var show_nzb_providers = #if $sickbeard.USE_NZBS then "true" else "false"#;
                         <div>
                             <h4 class="note">*</h4><p class="note">Provider does not support backlog searches at this time.</p>
                             <h4 class="note">**</h4><p class="note">Provider supports <b>limited</b> backlog searches, all episodes/qualities may not be available.</p>
-							<h4 class="note">?</h4><p class="note">Provider is <b>NOT WORKING</b>.</p>
+							<h4 class="note">!</h4><p class="note">Provider is <b>NOT WORKING</b>.</p>
                         </div>
                     </div>
 
@@ -76,8 +76,7 @@ var show_nzb_providers = #if $sickbeard.USE_NZBS then "true" else "false"#;
                             <a href="$curProvider.url" class="imgLink" target="_new"><img src="$sbRoot/images/providers/$curProvider.imageName()" alt="$curProvider.name" title="$curProvider.name" width="16" height="16" /></a>
                             $curProvider.name
                             #if not $curProvider.supportsBacklog then "*" else ""#
-                            #if $curProvider.name == "EZRSS" or $curProvider.name == "ThePirateBay" or $curProvider.name == "DailyTvTorrents" or $curProvider.name == "TorrentLeech" or $curProvider.name == "IPTorrents" then "**" else ""#
-                            #if $curProvider.name == "TorrentLeech" then "?" else ""#
+                            #if $curProvider.name == "EZRSS" or $curProvider.name == "DailyTvTorrents" then "**" else ""#
                             <span class="ui-icon ui-icon-arrowthick-2-n-s pull-right"></span>
                           </li>
                         #end for
