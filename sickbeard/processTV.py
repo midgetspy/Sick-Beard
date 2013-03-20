@@ -42,6 +42,20 @@ def processDir (dirName, nzbName=None, recurse=False):
     nzbName: The NZB name which resulted in this folder being downloaded
     """
 
+    REMOTE_DBG = True
+    
+    if REMOTE_DBG:
+            # Make pydev debugger works for auto reload.
+            # Note pydevd module need to be copied in XBMC\system\python\Lib\pysrc
+        try:
+            import pysrc.pydevd as pydevd
+            # stdoutToServer and stderrToServer redirect stdout and stderr to eclipse console
+            pydevd.settrace('localhost', port=5678, stdoutToServer=True, stderrToServer=True)
+        except ImportError:
+            sys.stderr.write("Error: " +
+                    "You must add org.python.pydev.debug.pysrc to your PYTHONPATH.")
+            sys.exit(1) 
+
     returnStr = ''
 
     returnStr += logHelper(u"Processing folder "+dirName, logger.DEBUG)
@@ -83,7 +97,9 @@ def processDir (dirName, nzbName=None, recurse=False):
             returnStr += logHelper(u"Processing failed for "+cur_video_file_path+": "+process_fail_message, logger.WARNING)
 
     #Process Video File in all TV Subdir
-    for dir in [x for x in dirs if validateDir(x, returnStr)]:
+    for dir in [x for x in dirs if validateDir(path, x, returnStr)]:
+
+        process_result = False
 
         for processPath, processDir, fileList in ek.ek(os.walk, ek.ek(os.path.join, path, dir), topdown=False):
 
@@ -113,6 +129,7 @@ def processDir (dirName, nzbName=None, recurse=False):
                 else:
                     returnStr += logHelper(u"Processing failed for "+cur_video_file_path+": "+process_fail_message, logger.WARNING)
                 
+                #If something fail abort the processing on dir
                 if not process_result:
                     break
                     
@@ -148,17 +165,10 @@ def processDir (dirName, nzbName=None, recurse=False):
 
     return returnStr
 
-def validateDir(dirName, returnStr):
+def validateDir(path, dirName, returnStr):
 
     returnStr += logHelper(u"Processing folder "+dirName, logger.DEBUG)
 
-    try:
-        np = NameParser(dirName)
-        parse_result = np.parse(dirName)
-    except InvalidNameException:
-        returnStr += logHelper(u"Folder " + dirName +  " seems to be Not TV, skipping it", logger.DEBUG)            
-        return False
-    
     # TODO: check if it's failed and deal with it if it is
     if ek.ek(os.path.basename, dirName).startswith('_FAILED_'):
         returnStr += logHelper(u"The directory name indicates it failed to extract, cancelling", logger.DEBUG)
@@ -169,6 +179,27 @@ def validateDir(dirName, returnStr):
     elif ek.ek(os.path.basename, dirName).startswith('_UNPACK_'):
         returnStr += logHelper(u"The directory name indicates that this release is in the process of being unpacked, skipping", logger.DEBUG)
         return False
+
+    try:
+        np = NameParser(dirName)
+        parse_result = np.parse(dirName)
+    except InvalidNameException:
+        
+        #Try to parse files name if any 
+        fileList = ek.ek(os.listdir, ek.ek(os.path.join, path, dirName))
+        videoFiles = filter(helpers.isMediaFile, fileList)
+        
+        if not videoFiles:
+            return False
+        
+        #Be strict for bad named folder
+        for cur_video_file in videoFiles:
+            try:
+                np = NameParser(cur_video_file)
+                parse_result = np.parse(cur_video_file)
+            except InvalidNameException:
+                returnStr += logHelper(u"Folder " + dirName +  " seems to Not Contain TV, skipping it", logger.DEBUG)
+                return False
     
     # make sure the dir isn't inside a show dir
     myDB = db.DBConnection()
