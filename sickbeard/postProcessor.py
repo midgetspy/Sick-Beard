@@ -402,10 +402,10 @@ class PostProcessor(object):
                     logger.log(u"Nothing was good, found "+repr(test_name)+" and wanted either "+repr(self.nzb_name)+", "+repr(self.folder_name)+", or "+repr(self.file_name))
             else:
                 logger.log("Parse result not suficent(all folowing have to be set). will not save release name", logger.DEBUG)
-                logger.log("Parse result(series_name): " + str(parse_result.series_name), logger.DEBUG)
-                logger.log("Parse result(season_number): " + str(parse_result.season_number), logger.DEBUG)
-                logger.log("Parse result(episode_numbers): " + str(parse_result.episode_numbers), logger.DEBUG)
-                logger.log("Parse result(release_group): " + str(parse_result.release_group), logger.DEBUG)
+                logger.log("Parse result(series_name): " + repr(parse_result.series_name), logger.DEBUG)
+                logger.log("Parse result(season_number): " + repr(parse_result.season_number), logger.DEBUG)
+                logger.log("Parse result(episode_numbers): " + repr(parse_result.episode_numbers), logger.DEBUG)
+                logger.log("Parse result(release_group): " + repr(parse_result.release_group), logger.DEBUG)
                 
         # for each possible interpretation of that scene name
         for cur_name in name_list:
@@ -744,7 +744,10 @@ class PostProcessor(object):
                 myDB = db.DBConnection('failed.db')
                 myDB.select("INSERT INTO failed (release) VALUES (?)", [re.sub("[\.\-\ ]", "_", release_name)])
             else:
-                self._log(u"Release name not found. Can't mark as invalid. REPORT THIS", logger.ERROR)
+                self._log(u"Release name not found. Can't mark as invalid. REPORT THIS, along with:", logger.ERROR)
+                self._log(u" - nzb_name: " + str(self.nzb_name))
+                self._log(u" - folder_name: " + str(self.folder_name))
+                self._log(u" - file_name: " + str(self.file_name))
                 return False
 
             logger.log(u"Setting episode(s) back to Wanted", logger.DEBUG)
