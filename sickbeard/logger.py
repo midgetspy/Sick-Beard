@@ -97,7 +97,7 @@ class SBRotatingLogHandler(object):
         """
         file_handler = logging.FileHandler(self.log_file_path, encoding='utf-8')
         file_handler.setLevel(logging.DEBUG)
-        file_handler.setFormatter(logging.Formatter('%(asctime)s %(levelname)-8s %(message)s', '%b-%d %H:%M:%S'))
+        file_handler.setFormatter(logging.Formatter('%(asctime)s %(levelname)-8s %(message)s', '%Y-%m-%d %H:%M:%S'))
         return file_handler
 
     def _log_file_name(self, i):
