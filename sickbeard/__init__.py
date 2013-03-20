@@ -93,6 +93,7 @@ INIT_LOCK = Lock()
 __INITIALIZED__ = False
 started = False
 
+ACTUAL_LOG_DIR = None
 LOG_DIR = None
 
 WEB_PORT = None
@@ -327,7 +328,7 @@ def initialize(consoleLogging=True):
 
     with INIT_LOCK:
 
-        global LOG_DIR, WEB_PORT, WEB_LOG, WEB_ROOT, WEB_USERNAME, WEB_PASSWORD, WEB_HOST, WEB_IPV6, USE_API, API_KEY, ENABLE_HTTPS, HTTPS_CERT, HTTPS_KEY, \
+        global ACTUAL_LOG_DIR, LOG_DIR, WEB_PORT, WEB_LOG, WEB_ROOT, WEB_USERNAME, WEB_PASSWORD, WEB_HOST, WEB_IPV6, USE_API, API_KEY, ENABLE_HTTPS, HTTPS_CERT, HTTPS_KEY, \
                 USE_NZBS, USE_TORRENTS, NZB_METHOD, NZB_DIR, DOWNLOAD_PROPERS, \
                 SAB_USERNAME, SAB_PASSWORD, SAB_APIKEY, SAB_CATEGORY, SAB_HOST, \
                 NZBGET_PASSWORD, NZBGET_CATEGORY, NZBGET_HOST, currentSearchScheduler, backlogSearchScheduler, \
@@ -367,7 +368,11 @@ def initialize(consoleLogging=True):
         socket.setdefaulttimeout(SOCKET_TIMEOUT)
 
         CheckSection(CFG, 'General')
-        LOG_DIR = check_setting_str(CFG, 'General', 'log_dir', 'Logs')
+
+        ACTUAL_LOG_DIR = check_setting_str(CFG, 'General', 'log_dir', 'Logs')
+        # put the log dir inside the data dir, unless an absolute path
+        LOG_DIR = os.path.normpath(os.path.join(DATA_DIR, ACTUAL_LOG_DIR))
+
         if not helpers.makeDir(LOG_DIR):
             logger.log(u"!!! No log folder, logging to screen only!", logger.ERROR)
 
@@ -996,7 +1001,7 @@ def save_config():
 
     new_config['General'] = {}
     new_config['General']['config_version'] = CONFIG_VERSION
-    new_config['General']['log_dir'] = LOG_DIR
+    new_config['General']['log_dir'] = ACTUAL_LOG_DIR if ACTUAL_LOG_DIR else 'Logs'
     new_config['General']['web_port'] = WEB_PORT
     new_config['General']['web_host'] = WEB_HOST
     new_config['General']['web_ipv6'] = int(WEB_IPV6)

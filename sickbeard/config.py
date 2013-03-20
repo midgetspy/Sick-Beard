@@ -77,11 +77,15 @@ def change_HTTPS_KEY(https_key):
 
 def change_LOG_DIR(log_dir):
 
-    if os.path.normpath(sickbeard.LOG_DIR) != os.path.normpath(log_dir):
-        if helpers.makeDir(log_dir):
-            sickbeard.LOG_DIR = os.path.normpath(log_dir)
+    abs_log_dir = os.path.normpath(os.path.join(sickbeard.DATA_DIR, log_dir))
+
+    if os.path.normpath(sickbeard.LOG_DIR) != abs_log_dir:
+        if helpers.makeDir(abs_log_dir):
+            sickbeard.ACTUAL_LOG_DIR = os.path.normpath(log_dir)
+            sickbeard.LOG_DIR = abs_log_dir
+
             logger.sb_log_instance.initLogging()
-            logger.log(u"Initialized new log file in " + log_dir)
+            logger.log(u"Initialized new log file in " + sickbeard.LOG_DIR)
 
             cherry_log = os.path.join(sickbeard.LOG_DIR, "cherrypy.log")
             cherrypy.config.update({'log.access_file': cherry_log})
