@@ -70,7 +70,7 @@ def processDir (dirName, nzbName=None, recurse=False, failed=False):
     if failed:
         returnStr += logHelper(u"Failed download detected: (" + str(nzbName) + ", " + dirName + ")")
         try:
-            processor = postProcessor.PostProcessor(dirName, nzbName, failed=failed)
+            processor = postProcessor.PostProcessor(dirName, nzbName, failed=failed, folder=True)
             process_result = processor.process()
             process_fail_message = ""
         except exceptions.PostProcessingFailed, e:
