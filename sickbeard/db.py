@@ -101,6 +101,48 @@ class DBConnection:
     
             return sqlResult
 
+    def mass_action(self, querylist):
+    
+        with db_lock:
+    
+            if querylist == None:
+                return
+    
+            sqlResult = []
+            attempt = 0
+    
+            while attempt < 5:
+                try:
+                    for qu in querylist:
+                        query = qu[0]
+                        args = qu[1]
+                        if args == None:
+                            logger.log(query, logger.DEBUG)
+                            sqlResult = self.connection.execute(query)
+                        else:
+                            logger.log(query+" with args "+str(args), logger.DEBUG)
+                            sqlResult.append(self.connection.execute(query, args))
+                    self.connection.commit()
+                    return sqlResult
+                except sqlite3.OperationalError, e:
+                    sqlResult = []
+                    if self.connection:
+                        self.connection.rollback()
+                    if "unable to open database file" in e.message or "database is locked" in e.message:
+                        logger.log(u"DB error: "+ex(e), logger.WARNING)
+                        attempt += 1
+                        time.sleep(1)
+                    else:
+                        logger.log(u"DB error: "+ex(e), logger.ERROR)
+                        raise
+                except sqlite3.DatabaseError, e:
+                    sqlResult = []
+                    if self.connection:
+                        self.connection.rollback()
+                    logger.log(u"Fatal error executing query: " + ex(e), logger.ERROR)
+                    raise
+    
+            return sqlResult
 
     def select(self, query, args=None):
 

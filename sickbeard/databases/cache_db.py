@@ -49,3 +49,10 @@ class AddSceneNameCache(AddSceneExceptions):
 
     def execute(self):
         self.connection.action("CREATE TABLE scene_names (tvdb_id INTEGER, name TEXT)")
+
+class AddNetworkTimezones(InitialSchema):
+    def test(self):
+        return self.hasTable("network_timezones")
+
+    def execute(self):
+        self.connection.action("CREATE TABLE network_timezones (network_name TEXT PRIMARY KEY, timezone TEXT)")
