@@ -70,9 +70,6 @@ class PostProcessor(object):
         folder: False = item_path is a file, True = item_path is a folder
         """
 
-        # TODO: Prevent everything from exploding when failed = False and folder = True
-        # Though, when would that be the case? - Famous last words.
-
         if not folder:
             # absolute path to the folder that is being processed
             self.folder_path = ek.ek(os.path.dirname, ek.ek(os.path.abspath, item_path))
@@ -88,6 +85,8 @@ class PostProcessor(object):
             self.file_name = None
             self.folder_name = ek.ek(os.path.basename, self.folder_path)
     
+        self.is_folder = folder
+
         # name of the NZB that resulted in this folder
         self.nzb_name = nzb_name
 
@@ -727,6 +726,11 @@ class PostProcessor(object):
             self._log(u"Processing " + self.file_path + " (" + str(self.nzb_name) + ")")
         else:
             self._log(u"Processing " + self.folder_path + " (" + str(self.nzb_name) + ")")
+
+        if self.is_folder and not self.failed:
+            self._log(u"Error: failed = False and folder = True not currently")
+            self._log(u"If you think this should be supported, open a ticket")
+            return False
 
         if os.path.isdir(self.file_path):
             self._log(u"File " + self.file_path + " seems to be a directory")
