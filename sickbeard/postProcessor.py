@@ -732,7 +732,7 @@ class PostProcessor(object):
             self._log(u"If you think this should be supported, open a ticket")
             return False
 
-        if os.path.isdir(self.file_path):
+        if self.file_path and os.path.isdir(self.file_path):
             self._log(u"File " + self.file_path + " seems to be a directory")
             return False
         for ignore_file in self.IGNORED_FILESTRINGS:
