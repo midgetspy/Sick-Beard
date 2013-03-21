@@ -299,7 +299,6 @@ class NewznabCache(tvcache.TVCache):
         params = {"t": "tvsearch",
                   "age": sickbeard.USENET_RETENTION,
                   "cat": self.provider.catIDs}
-                  }
 
         # hack this in for now
         # if self.provider.getID() == 'nzbs_org':

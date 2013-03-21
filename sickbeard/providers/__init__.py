@@ -24,7 +24,7 @@ __all__ = ['ezrss',
            'nzbindex',
            'kere_ws',
            'btn',
-           'nzbclub'
+           'nzbclub',
            'nzbx',
            'omgwtfnzbs',
            ]
