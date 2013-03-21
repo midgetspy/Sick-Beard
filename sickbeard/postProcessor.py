@@ -46,7 +46,7 @@ from lib.tvdb_api import tvdb_api, tvdb_exceptions
 
 class PostProcessor(object):
     """
-    A class which will process a media file according to the post processing settings in the config.
+    A class which will process a file/folder according to the post processing settings in the config.
     """
 
     EXISTS_LARGER = 1
@@ -60,25 +60,33 @@ class PostProcessor(object):
     FOLDER_NAME = 2
     FILE_NAME = 3
 
-    def __init__(self, file_path, nzb_name = None, failed = False):
+    def __init__(self, item_path, nzb_name = None, failed = False, folder = False):
         """
         Creates a new post processor with the given file path and optionally an NZB name.
         
-        file_path: The path to the file to be processed
+        item_path: The path to the file/folder to be processed
         nzb_name: The name of the NZB which resulted in this file being downloaded (optional)
-        failed: Boolean indicating a failed download (bad NZB)
+        failed: Boolean indicating a failed download
+        folder: False = item_path is a file, True = item_path is a folder
         """
-        # absolute path to the folder that is being processed
-        self.folder_path = ek.ek(os.path.dirname, ek.ek(os.path.abspath, file_path))
-        
-        # full path to file
-        self.file_path = file_path
-        
-        # file name only
-        self.file_name = ek.ek(os.path.basename, file_path)
-    
-        # the name of the folder only
-        self.folder_name = ek.ek(os.path.basename, self.folder_path)
+
+        # TODO: Prevent everything from exploding when failed = False and folder = True
+        # Though, when would that be the case? - Famous last words.
+
+        if not folder:
+            # absolute path to the folder that is being processed
+            self.folder_path = ek.ek(os.path.dirname, ek.ek(os.path.abspath, item_path))
+            # full path to file
+            self.file_path = item_path
+            # file name only
+            self.file_name = ek.ek(os.path.basename, item_path)
+            # the name of the folder only
+            self.folder_name = ek.ek(os.path.basename, self.folder_path)
+        else:
+            self.folder_path = item_path
+            self.file_path = None
+            self.file_name = None
+            self.folder_name = ek.ek(os.path.basename, self.folder_path)
     
         # name of the NZB that resulted in this folder
         self.nzb_name = nzb_name
@@ -483,7 +491,7 @@ class PostProcessor(object):
                         lambda: self._analyze_name(self.file_path),
 
                         # try to analyze the dir + file name together as one name
-                        lambda: self._analyze_name(self.folder_name + u' ' + self.file_name)
+                        lambda: self._analyze_name(self.folder_name + u' ' + str(self.file_name))
 
                         ]
     
@@ -639,11 +647,12 @@ class PostProcessor(object):
                 return ep_quality
 
         # if we didn't get a quality from one of the names above, try assuming from each of the names
-        ep_quality = common.Quality.assumeQuality(self.file_name)
-        self._log(u"Guessing quality for name "+self.file_name+u", got "+common.Quality.qualityStrings[ep_quality], logger.DEBUG)
-        if ep_quality != common.Quality.UNKNOWN:
-            logger.log(self.file_name+u" looks like it has quality "+common.Quality.qualityStrings[ep_quality]+", using that", logger.DEBUG)
-            return ep_quality
+        if self.file_name:
+            ep_quality = common.Quality.assumeQuality(self.file_name)
+            self._log(u"Guessing quality for name "+self.file_name+u", got "+common.Quality.qualityStrings[ep_quality], logger.DEBUG)
+            if ep_quality != common.Quality.UNKNOWN:
+                logger.log(self.file_name+u" looks like it has quality "+common.Quality.qualityStrings[ep_quality]+", using that", logger.DEBUG)
+                return ep_quality
         
         return ep_quality
     
@@ -714,9 +723,12 @@ class PostProcessor(object):
         Post-process a given file or (if failed) dir/nzb
         """
 
-        self._log(u"Processing " + self.file_path + " (" + str(self.nzb_name) + ")")
+        if self.file_path:
+            self._log(u"Processing " + self.file_path + " (" + str(self.nzb_name) + ")")
+        else:
+            self._log(u"Processing " + self.folder_path + " (" + str(self.nzb_name) + ")")
 
-        if os.path.isdir(self.file_path) and not self.failed:
+        if os.path.isdir(self.file_path):
             self._log(u"File " + self.file_path + " seems to be a directory")
             return False
         for ignore_file in self.IGNORED_FILESTRINGS:
