@@ -226,6 +226,7 @@
                 #elif $cur_ep_enddate >= $today and $cur_ep_airdate < $next_week.date():
                     #if $cur_ep_airdate == $today.date():
                     <br /><h2 class="day">$datetime.date.fromordinal($cur_ep_airdate.toordinal).strftime("%A").decode($sickbeard.SYS_ENCODING) <span style="font-size: 12px;">[today]</span></h2>
+                    #set $today_header = True
                     #else:
                     <br /><h2 class="day">$datetime.date.fromordinal($cur_ep_airdate.toordinal).strftime("%A").decode($sickbeard.SYS_ENCODING)</h2>
                     #end if
