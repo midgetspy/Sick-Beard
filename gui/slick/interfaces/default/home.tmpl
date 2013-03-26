@@ -221,9 +221,10 @@ $myShowList.sort(lambda x, y: cmp(x.name, y.name))
         <!--
             \$(function() {
                \$("\#progressbar$curShow.tvdbid").progressbar({
-                   value: parseInt($nom) * 100 / parseInt($den)
-               });
+       			value : parseInt($nom) * 100 / parseInt($den) / 1000 });
                \$("\#progressbar$curShow.tvdbid").append( "<div class='progressbarText'>$dlStat</div>" )
+				var progressBarWidth = parseInt($nom) * 100 / parseInt($den) * \$("\#progressbar$curShow.tvdbid > .progressbarText").width() / 100 + "%"
+               \$("\#progressbar$curShow.tvdbid > .ui-progressbar-value").animate({ width: progressBarWidth }, 1500);
             });
         //-->
         </script>
