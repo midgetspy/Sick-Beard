@@ -13,16 +13,17 @@
 
 <script type="text/javascript" src="$sbRoot/js/configProviders.js?$sbPID"></script>
 <script type="text/javascript" src="$sbRoot/js/config.js?$sbPID"></script>
+#if $sickbeard.USE_NZBS
 <script type="text/javascript" charset="utf-8">
 <!--
 \$(document).ready(function(){
-    var show_nzb_providers = #if $sickbeard.USE_NZBS then "true" else "false"#;
 #for $curNewznabProvider in $sickbeard.newznabProviderList:
-    \$(this).addProvider('$curNewznabProvider.getID()', '$curNewznabProvider.name', '$curNewznabProvider.url', '$curNewznabProvider.key', $int($curNewznabProvider.default), show_nzb_providers);
+    \$(this).addProvider('$curNewznabProvider.getID()', '$curNewznabProvider.name', '$curNewznabProvider.url', '$curNewznabProvider.key', $int($curNewznabProvider.default));
 #end for
 });
 //-->
 </script>
+#end if
 
 <div id="config">
 <div id="config-content">
@@ -30,7 +31,7 @@
 <form id="configForm" action="saveProviders" method="post">
 
             <div id="config-components">
-                
+
                 <div id="core-component-group1" class="component-group clearfix">
 
                     <div class="component-group-desc">
@@ -80,7 +81,7 @@
                         <h3>Configure Built-In Providers</h3>
                         <p>Check with provider's website on how to obtain an API key if needed.</p>
                     </div>
-                    
+
                     <fieldset class="component-group-list">
                         <div class="field-pair">
                             <label class="clearfix" for="editAProvider">
@@ -97,9 +98,9 @@
                                         $provider_config_list.append($cur_provider_obj)
                                     #end for
 
-                                    #if $provider_config_list:                                        
+                                    #if $provider_config_list:
                                     <select id="editAProvider" class="input-medium" >
-                                        #for $cur_provider in $provider_config_list + [$curProvider for $curProvider in $sickbeard.newznabProviderList if $curProvider.default and $curProvider.needs_auth]:
+                                        #for $cur_provider in $provider_config_list + [$curProvider for $curProvider in $sickbeard.newznabProviderList if $curProvider.default and $curProvider.needs_auth and $sickbeard.USE_NZBS]:
                                             <option value="$cur_provider.getID()">$cur_provider.name</option>
                                         #end for
                                     </select>
@@ -132,17 +133,32 @@
                     <div class="providerDiv" id="nzbs_r_usDiv">
                         <div class="field-pair">
                             <label class="clearfix">
-                                <span class="component-title">NZBs'R'US UID</span>
+                                <span class="component-title">NZBs'R'US User ID</span>
                                 <input class="component-desc" type="text" name="nzbs_r_us_uid" value="$sickbeard.NZBSRUS_UID" size="10" />
                             </label>
                         </div>
                         <div class="field-pair">
                             <label class="clearfix">
-                                <span class="component-title">NZBs'R'US Hash</span>
+                                <span class="component-title">NZBs'R'US API Key</span>
                                 <input class="component-desc" type="text" name="nzbs_r_us_hash" value="$sickbeard.NZBSRUS_HASH" size="40" />
                             </label>
                         </div>
                     </div><!-- /nzbs_r_usDiv //-->
+                    
+                    <div class="providerDiv" id="omgwtfnzbsDiv">
+                        <div class="field-pair">
+                            <label class="clearfix">
+                                <span class="component-title">omgwtfnzbs User ID</span>
+                                <input class="component-desc" type="text" name="omgwtfnzbs_uid" value="$sickbeard.OMGWTFNZBS_UID" size="10" />
+                            </label>
+                        </div>
+                        <div class="field-pair">
+                            <label class="clearfix">
+                                <span class="component-title">omgwtfnzbs API Key</span>
+                                <input class="component-desc" type="text" name="omgwtfnzbs_key" value="$sickbeard.OMGWTFNZBS_KEY" size="40" />
+                            </label>
+                        </div>
+                    </div><!-- /omgwtfnzbsDiv //-->
 
                     <div class="providerDiv" id="tvtorrentsDiv">
                         <div class="field-pair">
@@ -157,7 +173,7 @@
                                 <input class="component-desc" type="text" name="tvtorrents_hash" value="$sickbeard.TVTORRENTS_HASH" size="40" />
                             </label>
                         </div>
-                    </div><!-- /tvtorrentsDiv //-->
+                    </div><!-- /torrentleechDiv //-->
                     
 		    <div class="providerDiv" id="thepiratebayDiv">
                         <div class="field-pair">
@@ -270,9 +286,10 @@
                     </div><!-- /torrentleechDiv //-->
 <!-- end div for editing providers -->
 
-                    <input type="submit" class="btn config_submitter" value="Save Changes" /><br/>
+
             
                     </fieldset>
+#if $sickbeard.USE_NZBS:
                 </div><!-- /component-group2 //-->
 
                 <div id="core-component-group3" class="component-group clearfix">
@@ -323,12 +340,12 @@
                 <input type="button" class="btn newznab_save" id="newznab_add" value="Add" />
             </div>
             <div id="newznab_update_div" style="display: none;">
-                <input type="button" class="btn btn-danger newznab_delete" id="newznab_delete" value="Delete" />
+            </div>
             </div> 
 </div>
 
                     </fieldset>
-                </div><!-- /component-group3 //-->
+#end if
 
                 <div class="component-group-save">
                     <input type="submit" class="btn config_submitter" value="Save Changes" />
@@ -339,4 +356,3 @@
 </form>
 </div></div>
 
-#include $os.path.join($sickbeard.PROG_DIR, "data/interfaces/default/inc_bottom.tmpl")
