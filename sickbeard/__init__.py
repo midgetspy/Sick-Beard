@@ -424,7 +424,7 @@ def initialize(consoleLogging=True):
         if CACHE_DIR:
             TVDB_API_PARMS['cache'] = os.path.join(CACHE_DIR, 'tvdb')
 
-        TVDB_BASE_URL = 'http://www.thetvdb.com/api/' + TVDB_API_KEY
+        TVDB_BASE_URL = 'http://thetvdb.com/api/' + TVDB_API_KEY
 
         QUALITY_DEFAULT = check_setting_int(CFG, 'General', 'quality_default', SD)
         STATUS_DEFAULT = check_setting_int(CFG, 'General', 'status_default', SKIPPED)
