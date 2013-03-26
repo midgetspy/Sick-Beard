@@ -17,12 +17,13 @@
 # along with Sick Beard.  If not, see <http://www.gnu.org/licenses/>.
 
 import os.path
-import operator, platform
+import operator
+import platform
 import re
 
 from sickbeard import version
 
-USER_AGENT = 'Sick Beard/alpha2-'+version.SICKBEARD_VERSION.replace(' ','-')+' ('+platform.system()+' '+platform.release()+')'
+USER_AGENT = 'Sick Beard/alpha2-' + version.SICKBEARD_VERSION.replace(' ', '-') + ' (' + platform.system() + ' ' + platform.release() + ')'
 
 mediaExtensions = ['avi', 'mkv', 'mpg', 'mpeg', 'wmv',
                    'ogm', 'mp4', 'iso', 'img', 'divx',
@@ -68,25 +69,31 @@ multiEpStrings[NAMING_EXTEND] = "Extend"
 multiEpStrings[NAMING_LIMITED_EXTEND] = "Extend (Limited)"
 multiEpStrings[NAMING_LIMITED_EXTEND_E_PREFIXED] = "Extend (Limited, E-prefixed)"
 
-class Quality:
 
-    NONE = 0
-    SDTV = 1
-    SDDVD = 1<<1 # 2
-    HDTV = 1<<2 # 4
-    HDWEBDL = 1<<3 # 8
-    HDBLURAY = 1<<4 # 16
-    FULLHDBLURAY = 1<<5 # 32
+class Quality:
+    NONE = 0              # 0
+    SDTV = 1              # 1
+    SDDVD = 1 << 1        # 2
+    HDTV = 1 << 2         # 4
+    RAWHDTV = 1 << 3      # 8  -- 720p/1080i mpeg2 (trollhd releases)
+    FULLHDTV = 1 << 4     # 16 -- 1080p HDTV (QCF releases)
+    HDWEBDL = 1 << 5      # 32
+    FULLHDWEBDL = 1 << 6  # 64 -- 1080p web-dl
+    HDBLURAY = 1 << 7     # 128
+    FULLHDBLURAY = 1 << 8 # 256
 
     # put these bits at the other end of the spectrum, far enough out that they shouldn't interfere
-    UNKNOWN = 1<<15
+    UNKNOWN = 1 << 15     # 32768
 
     qualityStrings = {NONE: "N/A",
                       UNKNOWN: "Unknown",
                       SDTV: "SD TV",
                       SDDVD: "SD DVD",
                       HDTV: "HD TV",
+                      RAWHDTV: "RawHD TV",
+                      FULLHDTV: "1080p HD TV",
                       HDWEBDL: "720p WEB-DL",
+                      FULLHDWEBDL: "1080p WEB-DL",
                       HDBLURAY: "720p BluRay",
                       FULLHDBLURAY: "1080p BluRay"}
 
@@ -97,7 +104,7 @@ class Quality:
     def _getStatusStrings(status):
         toReturn = {}
         for x in Quality.qualityStrings.keys():
-            toReturn[Quality.compositeStatus(status, x)] = Quality.statusPrefixes[status]+" ("+Quality.qualityStrings[x]+")"
+            toReturn[Quality.compositeStatus(status, x)] = Quality.statusPrefixes[status] + " (" + Quality.qualityStrings[x] + ")"
         return toReturn
 
     @staticmethod
@@ -108,7 +115,7 @@ class Quality:
             anyQuality = reduce(operator.or_, anyQualities)
         if bestQualities:
             bestQuality = reduce(operator.or_, bestQualities)
-        return anyQuality | (bestQuality<<16)
+        return anyQuality | (bestQuality << 16)
 
     @staticmethod
     def splitQuality(quality):
@@ -117,50 +124,56 @@ class Quality:
         for curQual in Quality.qualityStrings.keys():
             if curQual & quality:
                 anyQualities.append(curQual)
-            if curQual<<16 & quality:
+            if curQual << 16 & quality:
                 bestQualities.append(curQual)
 
         return (sorted(anyQualities), sorted(bestQualities))
 
     @staticmethod
     def nameQuality(name):
-
         name = os.path.basename(name)
 
         # if we have our exact text then assume we put it there
-        for x in Quality.qualityStrings:
+        for x in sorted(Quality.qualityStrings, reverse=True):
             if x == Quality.UNKNOWN:
                 continue
 
-            regex = '\W'+Quality.qualityStrings[x].replace(' ','\W')+'\W'
+            regex = '\W' + Quality.qualityStrings[x].replace(' ', '\W') + '\W'
             regex_match = re.search(regex, name, re.I)
             if regex_match:
                 return x
 
         checkName = lambda list, func: func([re.search(x, name, re.I) for x in list])
 
-        if checkName(["(pdtv|hdtv|dsr|tvrip).(xvid|x264)"], all) and not checkName(["(720|1080)[pi]"], all):
+        if checkName(["(pdtv|hdtv|dsr|tvrip|webrip).(xvid|x264)"], all) and not checkName(["(720|1080)[pi]"], all):
             return Quality.SDTV
         elif checkName(["(dvdrip|bdrip)(.ws)?.(xvid|divx|x264)"], any) and not checkName(["(720|1080)[pi]"], all):
             return Quality.SDDVD
-        elif checkName(["720p", "hdtv", "x264"], all) or checkName(["hr.ws.pdtv.x264"], any):
+        elif checkName(["720p", "hdtv", "x264"], all) or checkName(["hr.ws.pdtv.x264"], any) and not checkName(["(1080)[pi]"], all):
             return Quality.HDTV
-        elif checkName(["720p", "web.dl"], all) or checkName(["720p", "itunes", "h.?264"], all):
+        elif checkName(["720p|1080i", "hdtv", "mpeg2"], all):
+            return Quality.RAWHDTV
+        elif checkName(["1080p", "hdtv", "x264"], all):
+            return Quality.FULLHDTV
+        elif checkName(["720p", "web.dl|webrip"], all) or checkName(["720p", "itunes", "h.?264"], all):
             return Quality.HDWEBDL
-        elif checkName(["720p", "bluray", "x264"], all) or checkName(["720p", "hddvd", "x264"], all):
+        elif checkName(["1080p", "web.dl|webrip"], all) or checkName(["1080p", "itunes", "h.?264"], all):
+            return Quality.FULLHDWEBDL
+        elif checkName(["720p", "bluray|hddvd", "x264"], all):
             return Quality.HDBLURAY
-        elif checkName(["1080p", "bluray", "x264"], all) or checkName(["1080p", "hddvd", "x264"], all):
+        elif checkName(["1080p", "bluray|hddvd", "x264"], all):
             return Quality.FULLHDBLURAY
         else:
             return Quality.UNKNOWN
 
     @staticmethod
     def assumeQuality(name):
-
         if name.lower().endswith((".avi", ".mp4")):
             return Quality.SDTV
         elif name.lower().endswith(".mkv"):
             return Quality.HDTV
+        elif name.lower().endswith(".ts"):
+            return Quality.RAWHDTV
         else:
             return Quality.UNKNOWN
 
@@ -174,15 +187,15 @@ class Quality:
 
     @staticmethod
     def splitCompositeStatus(status):
+        """Returns a tuple containing (status, quality)"""
         if status == UNKNOWN:
             return (UNKNOWN, Quality.UNKNOWN)
-        
-        """Returns a tuple containing (status, quality)"""
-        for x in sorted(Quality.qualityStrings.keys(), reverse=True):
-            if status > x*100:
-                return (status-x*100, x)
 
-        return (Quality.NONE, status)
+        for x in sorted(Quality.qualityStrings.keys(), reverse=True):
+            if status > x * 100:
+                return (status - x * 100, x)
+
+        return (status, Quality.NONE)
 
     @staticmethod
     def statusFromName(name, assume=True):
@@ -199,22 +212,29 @@ Quality.DOWNLOADED = [Quality.compositeStatus(DOWNLOADED, x) for x in Quality.qu
 Quality.SNATCHED = [Quality.compositeStatus(SNATCHED, x) for x in Quality.qualityStrings.keys()]
 Quality.SNATCHED_PROPER = [Quality.compositeStatus(SNATCHED_PROPER, x) for x in Quality.qualityStrings.keys()]
 
-HD = Quality.combineQualities([Quality.HDTV, Quality.HDWEBDL, Quality.HDBLURAY], [])
 SD = Quality.combineQualities([Quality.SDTV, Quality.SDDVD], [])
-ANY = Quality.combineQualities([Quality.SDTV, Quality.SDDVD, Quality.HDTV, Quality.HDWEBDL, Quality.HDBLURAY, Quality.UNKNOWN], [])
+HD = Quality.combineQualities([Quality.HDTV, Quality.FULLHDTV, Quality.HDWEBDL, Quality.FULLHDWEBDL, Quality.HDBLURAY, Quality.FULLHDBLURAY], []) # HD720p + HD1080p
+HD720p = Quality.combineQualities([Quality.HDTV, Quality.HDWEBDL, Quality.HDBLURAY], [])
+HD1080p = Quality.combineQualities([Quality.FULLHDTV, Quality.FULLHDWEBDL, Quality.FULLHDBLURAY], [])
+ANY = Quality.combineQualities([Quality.SDTV, Quality.SDDVD, Quality.HDTV, Quality.FULLHDTV, Quality.HDWEBDL, Quality.FULLHDWEBDL, Quality.HDBLURAY, Quality.FULLHDBLURAY, Quality.UNKNOWN], []) # SD + HD
+
+# legacy template, cant remove due to reference in mainDB upgrade?
 BEST = Quality.combineQualities([Quality.SDTV, Quality.HDTV, Quality.HDWEBDL], [Quality.HDTV])
 
-qualityPresets = (SD, HD, ANY)
+qualityPresets = (SD, HD, HD720p, HD1080p, ANY)
 qualityPresetStrings = {SD: "SD",
                         HD: "HD",
+                        HD720p: "HD720p",
+                        HD1080p: "HD1080p",
                         ANY: "Any"}
+
 
 class StatusStrings:
     def __init__(self):
         self.statusStrings = {UNKNOWN: "Unknown",
                               UNAIRED: "Unaired",
                               SNATCHED: "Snatched",
-                              DOWNLOADED:  "Downloaded",
+                              DOWNLOADED: "Downloaded",
                               SKIPPED: "Skipped",
                               SNATCHED_PROPER: "Snatched (Proper)",
                               WANTED: "Wanted",
@@ -227,7 +247,7 @@ class StatusStrings:
             if quality == Quality.NONE:
                 return self.statusStrings[status]
             else:
-                return self.statusStrings[status]+" ("+Quality.qualityStrings[quality]+")"
+                return self.statusStrings[status] + " (" + Quality.qualityStrings[quality] + ")"
         else:
             return self.statusStrings[name]
 
@@ -236,6 +256,7 @@ class StatusStrings:
 
 statusStrings = StatusStrings()
 
+
 class Overview:
     UNAIRED = UNAIRED # 1
     QUAL = 2
@@ -243,11 +264,15 @@ class Overview:
     GOOD = 4
     SKIPPED = SKIPPED # 5
 
+    # For both snatched statuses. Note: SNATCHED/QUAL have same value and break dict.
+    SNATCHED = SNATCHED_PROPER # 9
+
     overviewStrings = {SKIPPED: "skipped",
                        WANTED: "wanted",
                        QUAL: "qual",
                        GOOD: "good",
-                       UNAIRED: "unaired"}
+                       UNAIRED: "unaired",
+                       SNATCHED: "snatched"}
 
 # Get our xml namespaces correct for lxml
 XML_NSMAP = {'xsi': 'http://www.w3.org/2001/XMLSchema-instance',
@@ -258,4 +283,3 @@ countryList = {'Australia': 'AU',
                'Canada': 'CA',
                'USA': 'US'
                }
-

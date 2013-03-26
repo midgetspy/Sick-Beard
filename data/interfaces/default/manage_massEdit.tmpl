@@ -60,7 +60,7 @@
         </div>
         <div style="width: 50%; text-align: center;" class="float-left">
         <h4>Archive</h4>
-            #set $bestQualityList = filter(lambda x: x > $common.Quality.SDTV, $common.Quality.qualityStrings)
+            #set $bestQualityList = filter(lambda x: x > $common.Quality.SDTV and x < $common.Quality.UNKNOWN, $common.Quality.qualityStrings)
             <select id="bestQualities" name="bestQualities" multiple="multiple" size="len($bestQualityList)">
             #for $curQuality in sorted($bestQualityList):
             <option value="$curQuality" #if $curQuality in $bestQualities then "selected=\"selected\"" else ""#>$common.Quality.qualityStrings[$curQuality]</option>
