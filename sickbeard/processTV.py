@@ -46,7 +46,7 @@ def processDir (dirName, nzbName=None, recurse=False):
 
     returnStr += logHelper(u"Processing folder "+dirName, logger.DEBUG)
 
-    if dirName == sickbeard.TV_DOWNLOAD_DIR: #Automatic Post Processing Active
+    if dirName == sickbeard.TV_DOWNLOAD_DIR and not nzbName: #Automatic Post Processing Active
         #Get at first all the subdir in the dirName
         for path, dirs, files in ek.ek(os.walk, dirName):
             break
@@ -175,8 +175,8 @@ def validateDir(path, dirName, returnStr):
         fileList = ek.ek(os.listdir, ek.ek(os.path.join, path, dirName))
         videoFiles = filter(helpers.isMediaFile, fileList)
         
-        if not videoFiles:
-            return False
+#        if not videoFiles:
+#            return False
         
         #Be strict for bad named folder
         for cur_video_file in videoFiles:
