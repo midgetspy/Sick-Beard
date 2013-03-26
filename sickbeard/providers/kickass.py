@@ -1,8 +1,5 @@
-# Modified by: Marcos Almeida Jr. <junalmeida@gmail.com>
+# Author: Marcos Almeida Jr. <junalmeida@gmail.com>
 # URL: https://github.com/junalmeida/Sick-Beard
-#
-# Author: Nic Wolfe <nic@wolfeden.ca>
-# URL: http://code.google.com/p/sickbeard/
 #
 # This file is part of Sick Beard.
 #
@@ -45,7 +42,7 @@ class KICKASSProvider(generic.TorrentProvider):
 
         self.cache = KICKASSCache(self)
 
-        self.url = 'http://www.kat.ph/'
+        self.url = 'http://kat.ph/'
 
     def isEnabled(self):
         return sickbeard.KICKASS
