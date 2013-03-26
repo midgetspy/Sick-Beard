@@ -26,6 +26,7 @@ import re
 import threading
 import datetime
 import random
+import subprocess
 
 from Cheetah.Template import Template
 import cherrypy.lib
@@ -685,7 +686,8 @@ class ConfigGeneral:
     @cherrypy.expose
     def saveGeneral(self, log_dir=None, web_port=None, web_log=None, web_ipv6=None,
                     launch_browser=None, web_username=None, use_api=None, api_key=None,
-                    web_password=None, version_notify=None, enable_https=None, https_cert=None, https_key=None):
+                    web_password=None, version_notify=None, enable_https=None, https_cert=None,
+                    https_key=None, web_play_path=None, web_play=None):
 
         results = []
 
@@ -709,8 +711,16 @@ class ConfigGeneral:
         else:
             version_notify = 0
 
+        if web_play == "on":
+            web_play = 1
+        else:
+            web_play = 0
+
         if not config.change_LOG_DIR(log_dir):
             results += ["Unable to create directory " + os.path.normpath(log_dir) + ", log dir not changed."]
+
+        if not config.change_WEB_PLAY_PATH(web_play_path):
+            results += ["Unable to open file " + web_play_path + ", mediaplayer not changed."]
 
         sickbeard.LAUNCH_BROWSER = launch_browser
 
@@ -719,6 +729,8 @@ class ConfigGeneral:
         sickbeard.WEB_LOG = web_log
         sickbeard.WEB_USERNAME = web_username
         sickbeard.WEB_PASSWORD = web_password
+
+        sickbeard.WEB_PLAY = web_play
 
         if use_api == "on":
             use_api = 1
@@ -2720,6 +2732,19 @@ class Home:
             return json.dumps({'result': statusStrings[ep_obj.status]})
 
         return json.dumps({'result': 'failure'})
+
+    @cherrypy.expose
+    def openFile(self, show=None, path=None):
+        # Opens a file in the executable set in WEB_PLAY_PATH
+        if sickbeard.WEB_PLAY == 1 and path != None:
+            try:
+                subprocess.Popen("%s %s" % (sickbeard.WEB_PLAY_PATH, path))
+            except WindowsError:
+                logger.log('Error in opening the media player, be sure its set in settings/general', logger.ERROR)
+                redirect("/home/displayShow?show=" + show)
+        if show != None:
+            redirect("/home/displayShow?show=" + show)
+
 
 class UI:
 

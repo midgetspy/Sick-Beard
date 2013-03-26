@@ -94,6 +94,9 @@ started = False
 
 LOG_DIR = None
 
+WEB_PLAY = None
+WEB_PLAY_PATH = None
+
 WEB_PORT = None
 WEB_LOG = None
 WEB_ROOT = None
@@ -355,7 +358,7 @@ def initialize(consoleLogging=True):
                 USE_BANNER, USE_LISTVIEW, METADATA_XBMC, METADATA_MEDIABROWSER, METADATA_PS3, METADATA_SYNOLOGY, metadata_provider_dict, \
                 NEWZBIN, NEWZBIN_USERNAME, NEWZBIN_PASSWORD, GIT_PATH, MOVE_ASSOCIATED_FILES, \
                 COMING_EPS_LAYOUT, COMING_EPS_SORT, COMING_EPS_DISPLAY_PAUSED, METADATA_WDTV, METADATA_TIVO, IGNORE_WORDS, CREATE_MISSING_SHOW_DIRS, \
-                ADD_SHOWS_WO_DIR
+                ADD_SHOWS_WO_DIR, WEB_PLAY_PATH, WEB_PLAY
 
         if __INITIALIZED__:
             return False
@@ -389,6 +392,9 @@ def initialize(consoleLogging=True):
         ENABLE_HTTPS = bool(check_setting_int(CFG, 'General', 'enable_https', 0))
         HTTPS_CERT = check_setting_str(CFG, 'General', 'https_cert', 'server.crt')
         HTTPS_KEY = check_setting_str(CFG, 'General', 'https_key', 'server.key')
+
+        WEB_PLAY = bool(check_setting_int(CFG, 'General', 'web_play', 0))
+        WEB_PLAY_PATH = check_setting_str(CFG, 'General', 'web_play_path', '')
 
         ACTUAL_CACHE_DIR = check_setting_str(CFG, 'General', 'cache_dir', 'cache')
         # fix bad configs due to buggy code
@@ -983,6 +989,8 @@ def save_config():
     new_config['General']['web_root'] = WEB_ROOT
     new_config['General']['web_username'] = WEB_USERNAME
     new_config['General']['web_password'] = WEB_PASSWORD
+    new_config['General']['web_play'] = int(WEB_PLAY)
+    new_config['General']['web_play_path'] = WEB_PLAY_PATH
     new_config['General']['use_api'] = int(USE_API)
     new_config['General']['api_key'] = API_KEY
     new_config['General']['enable_https'] = int(ENABLE_HTTPS)

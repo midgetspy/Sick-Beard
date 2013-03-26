@@ -158,6 +158,32 @@
                     </fieldset>
                 </div><!-- /component-group2 //-->
 
+                <div id="core-component-group3" class="component-group clearfix">
+
+                    <div class="component-group-desc">
+                        <h3>Playback</h3>
+                        <p>Click on a path to open the file with your mediaplayer</p>
+                        <p><b>Be sure to enter an executable under location</b></p>
+                    </div>
+
+                    <fieldset class="component-group-list">
+
+                        <div class="field-pair">
+                            <input type="checkbox" name="web_play" id="web_play" #if $sickbeard.WEB_PLAY then "checked=\"checked\"" else ""#/>
+                            <label class="nocheck clearfix">
+                                <span class="component-title">&nbsp;</span>
+                                <span class="component-desc">Enable open player from web.</span>
+                            </label>
+                            <label class="nocheck clearfix" for="web_play_path">
+                                <span class="component-title">Mediaplayer location</span>
+                                <input type="text" name="web_play_path" id="web_play_path" value="$sickbeard.WEB_PLAY_PATH" size="35" />
+                            </label>
+                        </div>
+
+                        <input type="submit" class="btn config_submitter" value="Save Changes" />
+                    </fieldset>
+                </div><!-- /component-group3 //-->
+
                 <div id="core-component-group4" class="component-group clearfix">
 
                     <div class="component-group-desc">
@@ -204,6 +230,7 @@
 <script type="text/javascript" charset="utf-8">
 <!--
     jQuery('#log_dir').fileBrowser({ title: 'Select Log Directory' });
+    jQuery('#web_play_path').fileBrowser({ title: 'Select Mediaplayer Executable' });
 //-->
 </script>
 

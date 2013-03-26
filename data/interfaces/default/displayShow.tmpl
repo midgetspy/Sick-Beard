@@ -3,6 +3,7 @@
 #from sickbeard.common import *
 #import os.path, os
 #import datetime
+#import urllib
 #set global $title=$show.name
 #set global $header = '<a href="http://thetvdb.com/?tab=series&amp;id=%d" target="_new">%s</a>' % ($show.tvdbid, $show.name)
 
@@ -158,7 +159,12 @@ Change selected episodes to
     <td align="center" class="nowrap">#if int($epResult["airdate"]) == 1 then "never" else $datetime.date.fromordinal(int($epResult["airdate"]))#</td>
     <td>
 #if $epLoc and $show._location and $epLoc.lower().startswith($show._location.lower()):
+#if $sickbeard.WEB_PLAY
+#set $fileLoc = urllib.quote_plus($showLoc[0] + '\\' + $epLoc[len($show._location)+1:])
+<a href="openFile?show=$show.tvdbid&amp;path=&quot;$fileLoc&quot;"> $epLoc[len($show._location)+1:]</a>
+#else
 $epLoc[len($show._location)+1:]
+#end if
 #elif $epLoc and (not $epLoc.lower().startswith($show._location.lower()) or not $show._location):
 $epLoc
 #end if

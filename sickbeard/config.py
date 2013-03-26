@@ -90,6 +90,14 @@ def change_LOG_DIR(log_dir):
 
     return True
 
+def change_WEB_PLAY_PATH(web_play_path):
+    
+    # Should include a check on whether the file exists and is executable
+    sickbeard.WEB_PLAY_PATH = web_play_path
+    logger.log(u"Changed mediaplayer to" + web_play_path)
+
+    return True
+
 def change_NZB_DIR(nzb_dir):
 
     if nzb_dir == '':
