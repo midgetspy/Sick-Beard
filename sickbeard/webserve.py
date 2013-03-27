@@ -1996,7 +1996,7 @@ class NewHomeAddShows:
         if not lang or lang == 'null':
                 lang = "en"
 
-        baseURL = "http://www.thetvdb.com/api/GetSeries.php?"
+        baseURL = "http://thetvdb.com/api/GetSeries.php?"
         nameUTF8 = name.encode('utf-8')
 
         logger.log(u"Trying to find Show on thetvdb.com with: " + nameUTF8.decode('utf-8'), logger.DEBUG)

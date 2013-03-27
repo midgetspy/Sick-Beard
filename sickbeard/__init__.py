@@ -522,7 +522,7 @@ def initialize(consoleLogging=True):
         NAMING_FORCE_FOLDERS = naming.check_force_season_folders()
         NAMING_STRIP_YEAR = bool(check_setting_int(CFG, 'General', 'naming_strip_year', 0))
 
-        TVDB_BASE_URL = 'http://www.thetvdb.com/api/' + TVDB_API_KEY
+        TVDB_BASE_URL = 'http://thetvdb.com/api/' + TVDB_API_KEY
 
         USE_NZBS = bool(check_setting_int(CFG, 'General', 'use_nzbs', 1))
         USE_TORRENTS = bool(check_setting_int(CFG, 'General', 'use_torrents', 0))
