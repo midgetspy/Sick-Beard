@@ -29,7 +29,7 @@ import datetime
 
 from name_parser.parser import NameParser, InvalidNameException
 
-resultFilters = ["sub(pack|s|bed)", "nlsub(bed|s)?", "swesub(bed)?",
+resultFilters = ["sub(pack|s|bed|\.)", "nlsub(bed|s)?", "swesub(bed)?",
                  "(dir|sample|nfo)fix", "sample", "(dvd)?extras"]
 
 mandatory = []

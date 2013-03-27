@@ -74,9 +74,6 @@ class TVRage:
 
     def confirmShow(self, force=False):
 
-        #temp fix for german airdates... force return true
-        return True
-
         if self.show.tvrid != 0 and not force:
             logger.log(u"We already have a TVRage ID, skipping confirmation", logger.DEBUG)
             return True
