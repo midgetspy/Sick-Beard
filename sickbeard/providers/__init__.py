@@ -112,7 +112,7 @@ def makeNewznabProvider(configString):
 
 
 def getDefaultNewznabProviders():
-    return 'Sick Beard Index|http://lolo.sickbeard.com/|0|5000|0!!!NZBs.org|http://beta.nzbs.org/|0|5000|0'
+    return 'Sick Beard Index|http://lolo.sickbeard.com/|0|5000|0!!!NZBs.org|http://nzbs.org/|0|5000|0'
 
 
 
