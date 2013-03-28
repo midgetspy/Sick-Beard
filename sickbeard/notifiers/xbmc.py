@@ -414,7 +414,7 @@ class XBMCNotifier:
                 return False
 
             logger.log(u"XBMC Updating " + showName + " on " + host + " at " + path, logger.DEBUG)
-            updateCommand = '{"jsonrpc":"2.0","method":"VideoLibrary.Scan","params":{"directory":%s},"id":1}' % (json.dumps("\"" + path + "\"")) # yes we really have to wrap the path in escaped "
+            updateCommand = '{"jsonrpc":"2.0","method":"VideoLibrary.Scan","params":{"directory":%s},"id":1}' % (json.dumps(path))
             request = self._send_to_xbmc_json(updateCommand, host)
             if not request:
                 logger.log(u"Update of show directory failed on " + showName + " on " + host + " at " + path, logger.ERROR)
