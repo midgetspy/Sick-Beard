@@ -118,7 +118,7 @@ class DBConnection:
                         args = qu[1]
                         if args == None:
                             logger.log(query, logger.DEBUG)
-                            sqlResult = self.connection.execute(query)
+                            sqlResult.append(self.connection.execute(query))
                         else:
                             logger.log(query+" with args "+str(args), logger.DEBUG)
                             sqlResult.append(self.connection.execute(query, args))
