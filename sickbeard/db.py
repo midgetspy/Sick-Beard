@@ -115,7 +115,10 @@ class DBConnection:
                 try:
                     for qu in querylist:
                         query = qu[0]
-                        args = qu[1]
+                        if len(qu) > 1:
+                            args = qu[1]
+                        else:
+                            args = None
                         if args == None:
                             logger.log(query, logger.DEBUG)
                             sqlResult.append(self.connection.execute(query))
