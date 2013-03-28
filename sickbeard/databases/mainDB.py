@@ -685,3 +685,11 @@ class AddProperNamingSupport(AddIMDbInfo):
     def execute(self):
         self.addColumn("tv_episodes", "is_proper")
         self.incDBVersion()
+
+class AddEmailSubscriptionTable(FixAirByDateSetting):
+    def test(self):
+        return self.hasColumn("tv_shows", "notify_list")
+    
+    def execute(self):
+        self.addColumn('tv_shows', 'notify_list', 'TEXT', None)
+        self.incDBVersion()

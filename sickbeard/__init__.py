@@ -326,6 +326,17 @@ TRAKT_USE_WATCHLIST = False
 TRAKT_METHOD_ADD = 0
 TRAKT_START_PAUSED = False
 
+USE_EMAIL = False
+EMAIL_NOTIFY_ONSNATCH = False
+EMAIL_NOTIFY_ONDOWNLOAD = False
+EMAIL_HOST = None
+EMAIL_PORT = 25
+EMAIL_TLS = False
+EMAIL_USER = None
+EMAIL_PASSWORD = None
+EMAIL_FROM = None
+EMAIL_LIST = None
+
 USE_PYTIVO = False
 PYTIVO_NOTIFY_ONSNATCH = False
 PYTIVO_NOTIFY_ONDOWNLOAD = False
@@ -398,6 +409,7 @@ def initialize(consoleLogging=True):
                 NAMING_PATTERN, NAMING_MULTI_EP, NAMING_FORCE_FOLDERS, NAMING_ABD_PATTERN, NAMING_CUSTOM_ABD, NAMING_STRIP_YEAR, \
                 RENAME_EPISODES, properFinderScheduler, PROVIDER_ORDER, autoPostProcesserScheduler, \
                 NZBSRUS, NZBSRUS_UID, NZBSRUS_HASH, WOMBLE, NZBX, NZBX_COMPLETION, providerList, newznabProviderList, \
+                USE_EMAIL, EMAIL_HOST, EMAIL_PORT, EMAIL_TLS, EMAIL_USER, EMAIL_PASSWORD, EMAIL_FROM, EMAIL_NOTIFY_ONSNATCH, EMAIL_NOTIFY_ONDOWNLOAD, EMAIL_LIST, \ 
                 EXTRA_SCRIPTS, USE_TWITTER, TWITTER_USERNAME, TWITTER_PASSWORD, TWITTER_PREFIX, \
                 USE_NOTIFO, NOTIFO_USERNAME, NOTIFO_APISECRET, NOTIFO_NOTIFY_ONDOWNLOAD, NOTIFO_NOTIFY_ONSUBTITLEDOWNLOAD, NOTIFO_NOTIFY_ONSNATCH, \
                 USE_BOXCAR, BOXCAR_USERNAME, BOXCAR_PASSWORD, BOXCAR_NOTIFY_ONDOWNLOAD, BOXCAR_NOTIFY_ONSUBTITLEDOWNLOAD, BOXCAR_NOTIFY_ONSNATCH, \
@@ -695,6 +707,17 @@ def initialize(consoleLogging=True):
         TRAKT_USE_WATCHLIST = bool(check_setting_int(CFG, 'Trakt', 'trakt_use_watchlist', 0))
         TRAKT_METHOD_ADD = check_setting_str(CFG, 'Trakt', 'trakt_method_add', "0")
         TRAKT_START_PAUSED = bool(check_setting_int(CFG, 'Trakt', 'trakt_start_paused', 0))
+
+        USE_EMAIL = bool(check_setting_int(CFG, 'Email', 'use_email', 0))
+        EMAIL_NOTIFY_ONSNATCH = bool(check_setting_int(CFG, 'Email', 'email_notify_onsnatch', 0))
+        EMAIL_NOTIFY_ONDOWNLOAD = bool(check_setting_int(CFG, 'Email', 'email_notify_ondownload', 0)) 
+        EMAIL_HOST = check_setting_str(CFG, 'Email', 'email_host', '')
+        EMAIL_PORT = check_setting_int(CFG, 'Email', 'email_port', 25)
+        EMAIL_TLS = bool(check_setting_int(CFG, 'Email', 'email_tls', 0))
+        EMAIL_USER = check_setting_str(CFG, 'Email', 'email_user', '')
+        EMAIL_PASSWORD = check_setting_str(CFG, 'Email', 'email_password', '')
+        EMAIL_FROM = check_setting_str(CFG, 'Email', 'email_from', '')
+        EMAIL_LIST = check_setting_str(CFG, 'Email', 'email_list', '')
 
         CheckSection(CFG, 'pyTivo')
         USE_PYTIVO = bool(check_setting_int(CFG, 'pyTivo', 'use_pytivo', 0))
@@ -1351,6 +1374,18 @@ def save_config():
     new_config['Trakt']['trakt_use_watchlist'] = int(TRAKT_USE_WATCHLIST)
     new_config['Trakt']['trakt_method_add'] = TRAKT_METHOD_ADD
     new_config['Trakt']['trakt_start_paused'] = int(TRAKT_START_PAUSED)
+
+    new_config['Email'] = {}
+    new_config['Email']['use_email'] = int(USE_EMAIL)
+    new_config['Email']['email_notify_onsnatch'] = int(EMAIL_NOTIFY_ONSNATCH)
+    new_config['Email']['email_notify_ondownload'] = int(EMAIL_NOTIFY_ONDOWNLOAD)
+    new_config['Email']['email_host'] = EMAIL_HOST
+    new_config['Email']['email_port'] = int(EMAIL_PORT)
+    new_config['Email']['email_tls'] = int(EMAIL_TLS)
+    new_config['Email']['email_user'] = EMAIL_USER
+    new_config['Email']['email_password'] = EMAIL_PASSWORD
+    new_config['Email']['email_from'] = EMAIL_FROM
+    new_config['Email']['email_list'] = EMAIL_LIST
 
     new_config['pyTivo'] = {}
     new_config['pyTivo']['use_pytivo'] = int(USE_PYTIVO)

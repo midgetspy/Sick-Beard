@@ -1,5 +1,6 @@
 $(document).ready(function(){
     var loading = '<img src="'+sbRoot+'/images/loading16.gif" height="16" width="16" />';
+    var notify_data = null;
 
     $('#testGrowl').click(function(){
         $('#testGrowl-result').html(loading);
@@ -135,6 +136,43 @@ $(document).ready(function(){
         function (data){ $('#testTrakt-result').html(data); });
     });
 
+
+    $('#testEmail').click(function () {
+        var status, host, port, tls, from, user, pwd, err, to;
+        status = $('#testEmail-result');
+        status.html(loading);
+        host = $("#email_host").val();
+        host = host.length > 0 ? host : null;
+        port = $("#email_port").val();
+        port = port.length > 0 ? port : null;
+        tls = $("#email_tls").attr('checked') !== undefined ? 1 : 0;
+        from = $("#email_from").val();
+        from = from.length > 0 ? from : 'root@localhost';
+        user = $("#email_user").val().trim();
+        pwd = $("#email_password").val();
+        err = '';
+        if (host === null) {
+            err += '<li style="color: red;">You must specify an SMTP hostname!</li>';
+        }
+        if (port === null) {
+            err += '<li style="color: red;">You must specify an SMTP port!</li>';
+        } else if (port.match(/^\d+$/) === null || parseInt(port, 10) > 65535) {
+            err += '<li style="color: red;">SMTP port must be between 0 and 65535!</li>';
+        }
+        if (err.length > 0) {
+            err = '<ol>' + err + '</ol>';
+            status.html(err);
+        } else {
+            to = prompt('Enter an email address to send the test to:', null);
+            if (to === null || to.length === 0 || to.match(/.*@.*/) === null) {
+                status.html('<p style="color: red;">You must provide a recipient email address!</p>');
+            } else {
+                $.get(sbRoot + "/home/testEmail", {host: host, port: port, smtp_from: from, use_tls: tls, user: user, pwd: pwd, to: to},
+                    function (msg) { $('#testEmail-result').html(msg); });
+            }
+        }
+    });
+
     $('#testNMA').click(function(){
         $('#testNMA-result').html(loading);
         var nma_api = $("#nma_api").val();
@@ -142,4 +180,34 @@ $(document).ready(function(){
         var nma_result = $.get(sbRoot+"/home/testNMA", {'nma_api': nma_api, 'nma_priority': nma_priority}, 
         function (data){ $('#testNMA-result').html(data); });
     });
+
+
+    $('#email_show').change(function () {
+        var key = parseInt($('#email_show').val(), 10);
+        $('#email_show_list').val(key >= 0 ? notify_data[key.toString()].list : '');
+    });
+
+    // Update the internal data struct anytime settings are saved to the server
+    $('#email_show').bind('notify', function () { load_show_notify_lists(); });
+
+    function load_show_notify_lists() {
+        $.get(sbRoot + "/home/loadShowNotifyLists", function (data) {
+            var list, html, s;
+            list = $.parseJSON(data);
+            notify_data = list;
+            if (list._size === 0) {
+                return;
+            }
+            html = '<option value="-1">-- Select --</option>';
+            for (s in list) {
+                if (s.charAt(0) !== '_') {
+                    html += '<option value="' + list[s].id + '">' + $('<div/>').text(list[s].name).html() + '</option>';
+                }
+            }
+            $('#email_show').html(html);
+            $('#email_show_list').val('');
+        });
+    }
+    // Load the per show notify lists everytime this page is loaded
+    load_show_notify_lists();
 });
