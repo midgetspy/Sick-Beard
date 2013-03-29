@@ -42,25 +42,25 @@ DESC=SickBeard
 
 ## The defaults
 # Run as username 
-RUN_AS=${SB_USER-sickbeard}
+RUN_AS=${SB_USER:-sickbeard}
 
 # Path to app SB_HOME=path_to_app_SickBeard.py
-APP_PATH=${SB_HOME-/opt/sickbeard}
+APP_PATH=${SB_HOME:-/opt/sickbeard}
 
 # Data directory where sickbeard.db, cache and logs are stored
-DATA_DIR=${SB_DATA-/opt/sickbeard}
+DATA_DIR=${SB_DATA:-/opt/sickbeard}
 
 # Path to store PID file
-PID_FILE=${SB_PIDFILE-/var/run/sickbeard/sickbeard.pid}
+PID_FILE=${SB_PIDFILE:-/var/run/sickbeard/sickbeard.pid}
 
 # path to python bin
-DAEMON=${PYTHON_BIN-/usr/bin/python}
+DAEMON=${PYTHON_BIN:-/usr/bin/python}
 
 # Extra daemon option like: SB_OPTS=" --config=/home/sickbeard/config.ini"
-EXTRA_DAEMON_OPTS=${SB_OPTS-}
+EXTRA_DAEMON_OPTS=${SB_OPTS:-}
 
 # Extra start-stop-daemon option like START_OPTS=" --group=users"
-EXTRA_SSD_OPTS=${SSD_OPTS-}
+EXTRA_SSD_OPTS=${SSD_OPTS:-}
 ##
 
 PID_PATH=`dirname $PID_FILE`
