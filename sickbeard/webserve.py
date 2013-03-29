@@ -2624,7 +2624,7 @@ class Home:
             size += 1
         data['_size'] = size
         return json.dumps(data)
-        
+
     @cherrypy.expose
     def testEmail(self, host=None, port=None, smtp_from=None, use_tls=None, user=None, pwd=None, to=None):
         cherrypy.response.headers['Cache-Control'] = "max-age=0,no-cache,no-store"

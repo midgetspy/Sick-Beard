@@ -710,7 +710,7 @@ def initialize(consoleLogging=True):
 
         USE_EMAIL = bool(check_setting_int(CFG, 'Email', 'use_email', 0))
         EMAIL_NOTIFY_ONSNATCH = bool(check_setting_int(CFG, 'Email', 'email_notify_onsnatch', 0))
-        EMAIL_NOTIFY_ONDOWNLOAD = bool(check_setting_int(CFG, 'Email', 'email_notify_ondownload', 0)) 
+        EMAIL_NOTIFY_ONDOWNLOAD = bool(check_setting_int(CFG, 'Email', 'email_notify_ondownload', 0))
         EMAIL_HOST = check_setting_str(CFG, 'Email', 'email_host', '')
         EMAIL_PORT = check_setting_int(CFG, 'Email', 'email_port', 25)
         EMAIL_TLS = bool(check_setting_int(CFG, 'Email', 'email_tls', 0))
