@@ -93,7 +93,7 @@ class EmailNotifier:
             if len(to) == 0:
                 logger.log('Skipping email notify because there are no configured recepients!', logger.WARN)
             else:
-                msg = MIMEText("'%s' downloaded!" % ep_name)
+                msg = MIMEText("'%s' downloaded!" % ep_name + ": " + lang)
                 msg['Subject'] = 'Sick Beard has downloaded a new subtitle!'
                 msg['From'] = sickbeard.EMAIL_FROM
                 msg['To'] = ','.join(to)
