@@ -101,7 +101,7 @@ class DBConnection:
     
             return sqlResult
 
-    def mass_action(self, querylist):
+    def mass_action(self, querylist, logTransaction=False):
     
         with db_lock:
     
@@ -115,10 +115,12 @@ class DBConnection:
                 try:
                     for qu in querylist:
                         if len(qu) == 1:
-                            #logger.log(qu[0], logger.DEBUG)
+                            if logTransaction:
+                                logger.log(qu[0], logger.DEBUG)
                             sqlResult.append(self.connection.execute(qu[0]))
                         elif len(qu) > 1:
-                            #logger.log(qu[0]+" with args "+str(qu[1]), logger.DEBUG)
+                            if logTransaction:
+                                logger.log(qu[0]+" with args "+str(qu[1]), logger.DEBUG)
                             sqlResult.append(self.connection.execute(qu[0], qu[1]))
                     self.connection.commit()
                     logger.log(u"Transaction with "+str(len(querylist)) + u" query's executed", logger.DEBUG)
