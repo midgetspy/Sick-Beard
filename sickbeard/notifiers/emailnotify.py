@@ -80,6 +80,28 @@ class EmailNotifier:
                 else:
                     logger.log("Download notification ERROR: %s" % self.last_err, logger.ERROR)
 
+    def notify_subtitle_download(self, ep_name, lang):
+        """
+        Send a notification that an subtitle was downloaded
+        
+        ep_name: The name of the episode that was downloaded
+        lang: Subtitle language wanted
+        """
+        if sickbeard.EMAIL_NOTIFY_ONSUBSDOWNLOAD:
+            show = self._parseEp(ep_name)
+            to = self._generate_recepients(show)
+            if len(to) == 0:
+                logger.log('Skipping email notify because there are no configured recepients!', logger.WARN)
+            else:
+                msg = MIMEText("'%s' downloaded!" % ep_name)
+                msg['Subject'] = 'Sick Beard has downloaded a new subtitle!'
+                msg['From'] = sickbeard.EMAIL_FROM
+                msg['To'] = ','.join(to)
+                if self._sendmail(sickbeard.EMAIL_HOST, sickbeard.EMAIL_PORT, sickbeard.EMAIL_FROM, sickbeard.EMAIL_TLS, sickbeard.EMAIL_USER, sickbeard.EMAIL_PASSWORD, to, msg):
+                    logger.log("Download notification sent to [%s] for '%s'" % (to, ep_name), logger.DEBUG)
+                else:
+                    logger.log("Download notification ERROR: %s" % self.last_err, logger.ERROR)
+
     def _generate_recepients(self, show):
         addrs = []
 

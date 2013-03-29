@@ -329,6 +329,7 @@ TRAKT_START_PAUSED = False
 USE_EMAIL = False
 EMAIL_NOTIFY_ONSNATCH = False
 EMAIL_NOTIFY_ONDOWNLOAD = False
+EMAIL_NOTIFY_ONSUBSDOWNLOAD = False
 EMAIL_HOST = None
 EMAIL_PORT = 25
 EMAIL_TLS = False
@@ -409,7 +410,7 @@ def initialize(consoleLogging=True):
                 NAMING_PATTERN, NAMING_MULTI_EP, NAMING_FORCE_FOLDERS, NAMING_ABD_PATTERN, NAMING_CUSTOM_ABD, NAMING_STRIP_YEAR, \
                 RENAME_EPISODES, properFinderScheduler, PROVIDER_ORDER, autoPostProcesserScheduler, \
                 NZBSRUS, NZBSRUS_UID, NZBSRUS_HASH, WOMBLE, NZBX, NZBX_COMPLETION, providerList, newznabProviderList, \
-                USE_EMAIL, EMAIL_HOST, EMAIL_PORT, EMAIL_TLS, EMAIL_USER, EMAIL_PASSWORD, EMAIL_FROM, EMAIL_NOTIFY_ONSNATCH, EMAIL_NOTIFY_ONDOWNLOAD, EMAIL_LIST, \
+                USE_EMAIL, EMAIL_HOST, EMAIL_PORT, EMAIL_TLS, EMAIL_USER, EMAIL_PASSWORD, EMAIL_FROM, EMAIL_NOTIFY_ONSNATCH, EMAIL_NOTIFY_ONDOWNLOAD, EMAIL_NOTIFY_ONSUBSDOWNLOAD, EMAIL_LIST, \
                 EXTRA_SCRIPTS, USE_TWITTER, TWITTER_USERNAME, TWITTER_PASSWORD, TWITTER_PREFIX, \
                 USE_NOTIFO, NOTIFO_USERNAME, NOTIFO_APISECRET, NOTIFO_NOTIFY_ONDOWNLOAD, NOTIFO_NOTIFY_ONSUBTITLEDOWNLOAD, NOTIFO_NOTIFY_ONSNATCH, \
                 USE_BOXCAR, BOXCAR_USERNAME, BOXCAR_PASSWORD, BOXCAR_NOTIFY_ONDOWNLOAD, BOXCAR_NOTIFY_ONSUBTITLEDOWNLOAD, BOXCAR_NOTIFY_ONSNATCH, \
@@ -711,6 +712,7 @@ def initialize(consoleLogging=True):
         USE_EMAIL = bool(check_setting_int(CFG, 'Email', 'use_email', 0))
         EMAIL_NOTIFY_ONSNATCH = bool(check_setting_int(CFG, 'Email', 'email_notify_onsnatch', 0))
         EMAIL_NOTIFY_ONDOWNLOAD = bool(check_setting_int(CFG, 'Email', 'email_notify_ondownload', 0))
+        EMAIL_NOTIFY_ONSUBSDOWNLOAD = bool(check_setting_int(CFG, 'Email', 'email_notify_onsubsdownload', 0))
         EMAIL_HOST = check_setting_str(CFG, 'Email', 'email_host', '')
         EMAIL_PORT = check_setting_int(CFG, 'Email', 'email_port', 25)
         EMAIL_TLS = bool(check_setting_int(CFG, 'Email', 'email_tls', 0))
@@ -1379,6 +1381,7 @@ def save_config():
     new_config['Email']['use_email'] = int(USE_EMAIL)
     new_config['Email']['email_notify_onsnatch'] = int(EMAIL_NOTIFY_ONSNATCH)
     new_config['Email']['email_notify_ondownload'] = int(EMAIL_NOTIFY_ONDOWNLOAD)
+    new_config['Email']['email_notify_onsubsdownload'] = int(EMAIL_NOTIFY_ONSUBSDOWNLOAD)
     new_config['Email']['email_host'] = EMAIL_HOST
     new_config['Email']['email_port'] = int(EMAIL_PORT)
     new_config['Email']['email_tls'] = int(EMAIL_TLS)

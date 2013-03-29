@@ -1397,7 +1397,7 @@ class ConfigNotifications:
                           use_pytivo=None, pytivo_notify_onsnatch=None, pytivo_notify_ondownload=None, pytivo_notify_onsubtitledownload=None, pytivo_update_library=None, 
                           pytivo_host=None, pytivo_share_name=None, pytivo_tivo_name=None,
                           use_nma=None, nma_notify_onsnatch=None, nma_notify_ondownload=None, nma_notify_onsubtitledownload=None, nma_api=None, nma_priority=0,
-                          use_email=None, email_notify_onsnatch=None, email_notify_ondownload=None, email_host=None, email_port=25, email_from=None,
+                          use_email=None, email_notify_onsnatch=None, email_notify_ondownload=None, email_notify_onsubsdownload=None, email_host=None, email_port=25, email_from=None,
                           email_tls=None, email_user=None, email_password=None, email_list=None, email_show_list=None, email_show=None ):
 
         results = []
@@ -1636,6 +1636,11 @@ class ConfigNotifications:
             email_notify_ondownload = 1
         else:
             email_notify_ondownload = 0
+
+        if email_notify_onsubsdownload == "on":
+            email_notify_onsubsdownload = 1
+        else:
+            email_notify_onsubsdownload = 0
 
         if use_email == "on":
             use_email = 1
