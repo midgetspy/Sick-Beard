@@ -114,18 +114,16 @@ class DBConnection:
             while attempt < 5:
                 try:
                     for qu in querylist:
-                        query = qu[0]
-                        if len(qu) > 1:
-                            args = qu[1]
+                        if len(qu) == 1:
+                            #logger.log(qu[0], logger.DEBUG)
+                            sqlResult.append(self.connection.execute(qu[0]))
+                        elif len(qu) > 1:
+                            #logger.log(qu[0]+" with args "+str(qu[1]), logger.DEBUG)
+                            sqlResult.append(self.connection.execute(qu[0], qu[1]))
                         else:
-                            args = None
-                        if args == None:
-                            logger.log(query, logger.DEBUG)
-                            sqlResult.append(self.connection.execute(query))
-                        else:
-                            logger.log(query+" with args "+str(args), logger.DEBUG)
-                            sqlResult.append(self.connection.execute(query, args))
+                            return sqlResults
                     self.connection.commit()
+                    logger.log(u"Transaction with "+str(len(querylist)) + u" query's executed", logger.DEBUG)
                     return sqlResult
                 except sqlite3.OperationalError, e:
                     sqlResult = []
