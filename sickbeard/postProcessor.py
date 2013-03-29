@@ -762,12 +762,13 @@ class PostProcessor(object):
                 myDB.select("INSERT INTO failed (release) VALUES (?)", [re.sub("[\.\-\ ]", "_", release_name)])
             else:
                 self._log(u"Release name not found. Can't mark as invalid. REPORT THIS, along with:", logger.ERROR)
-                self._log(u" - nzb_name: " + str(self.nzb_name))
-                self._log(u" - folder_name: " + str(self.folder_name))
-                self._log(u" - file_name: " + str(self.file_name))
+                self._log(u" - nzb_name: " + str(self.nzb_name), logger.ERROR)
+                self._log(u" - folder_name: " + str(self.folder_name), logger.ERROR)
+                self._log(u" - file_name: " + str(self.file_name), logger.ERROR)
+                self._log(u" - good_results: " + str(self.good_results), logger.ERROR)
                 return False
 
-            logger.log(u"Setting episode(s) back to Wanted", logger.DEBUG)
+            self._log(u"Setting episode(s) back to Wanted", logger.DEBUG)
             for curEp in [ep_obj] + ep_obj.relatedEps:
                 self._log(u"Setting episode back to wanted: "+curEp.name)
                 with curEp.lock:
