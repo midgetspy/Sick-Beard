@@ -80,14 +80,14 @@ class EmailNotifier:
                 else:
                     logger.log("Download notification ERROR: %s" % self.last_err, logger.ERROR)
 
-    def notify_subtitle_download(self, ep_name, lang):
+    def notify_subtitle_download(self, ep_name, lang, title="Downloaded subtitle:"):
         """
         Send a notification that an subtitle was downloaded
         
         ep_name: The name of the episode that was downloaded
         lang: Subtitle language wanted
         """
-        if sickbeard.EMAIL_NOTIFY_ONSUBSDOWNLOAD:
+        if sickbeard.EMAIL_NOTIFY_ONSUBTITLEDOWNLOAD:
             show = self._parseEp(ep_name)
             to = self._generate_recepients(show)
             if len(to) == 0:
@@ -153,4 +153,3 @@ class EmailNotifier:
         return titles
         
 notifier = EmailNotifier
-

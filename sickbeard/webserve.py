@@ -1397,7 +1397,7 @@ class ConfigNotifications:
                           use_pytivo=None, pytivo_notify_onsnatch=None, pytivo_notify_ondownload=None, pytivo_notify_onsubtitledownload=None, pytivo_update_library=None, 
                           pytivo_host=None, pytivo_share_name=None, pytivo_tivo_name=None,
                           use_nma=None, nma_notify_onsnatch=None, nma_notify_ondownload=None, nma_notify_onsubtitledownload=None, nma_api=None, nma_priority=0,
-                          use_email=None, email_notify_onsnatch=None, email_notify_ondownload=None, email_notify_onsubsdownload=None, email_host=None, email_port=25, email_from=None,
+                          use_email=None, email_notify_onsnatch=None, email_notify_ondownload=None, email_notify_onsubtitledownload=None, email_host=None, email_port=25, email_from=None,
                           email_tls=None, email_user=None, email_password=None, email_list=None, email_show_list=None, email_show=None ):
 
         results = []
@@ -1637,10 +1637,10 @@ class ConfigNotifications:
         else:
             email_notify_ondownload = 0
 
-        if email_notify_onsubsdownload == "on":
-            email_notify_onsubsdownload = 1
+        if email_notify_onsubtitledownload == "on":
+            email_notify_onsubtitledownload = 1
         else:
-            email_notify_onsubsdownload = 0
+            email_notify_onsubtitledownload = 0
 
         if use_email == "on":
             use_email = 1
@@ -1789,6 +1789,7 @@ class ConfigNotifications:
         sickbeard.USE_EMAIL = use_email
         sickbeard.EMAIL_NOTIFY_ONSNATCH = email_notify_onsnatch
         sickbeard.EMAIL_NOTIFY_ONDOWNLOAD = email_notify_ondownload
+        sickbeard.EMAIL_NOTIFY_ONSUBTITLEDOWNLOAD = email_notify_ondownload
         sickbeard.EMAIL_HOST = email_host
         sickbeard.EMAIL_PORT = email_port
         sickbeard.EMAIL_FROM = email_from
