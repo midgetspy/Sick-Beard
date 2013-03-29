@@ -120,8 +120,6 @@ class DBConnection:
                         elif len(qu) > 1:
                             #logger.log(qu[0]+" with args "+str(qu[1]), logger.DEBUG)
                             sqlResult.append(self.connection.execute(qu[0], qu[1]))
-                        else:
-                            return sqlResults
                     self.connection.commit()
                     logger.log(u"Transaction with "+str(len(querylist)) + u" query's executed", logger.DEBUG)
                     return sqlResult
