@@ -601,7 +601,7 @@ class PostProcessor(object):
 
         # if we can't find the show then there's nothing we can really do
         if not show_obj:
-            self._log(u"This show isn't in your list, you need to add it to SB before post-processing an episode", logger.ERROR)
+            self._log(("This show (tvdb_id=%d) isn't in your list, you need to add it to SB before post-processing an episode" % tvdb_id), logger.ERROR)
             raise exceptions.PostProcessingFailed()
 
         root_ep = None
