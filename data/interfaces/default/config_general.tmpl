@@ -26,7 +26,6 @@
 
                     <div class="component-group-desc">
                         <h3>Misc</h3>
-                        <p>Startup options.</p>
                         <p><b>Some options may require a manual restart to take effect.</b></p>
                     </div>
 
@@ -48,6 +47,14 @@
                             <label class="nocheck clearfix">
                                 <span class="component-title">&nbsp;</span>
                                 <span class="component-desc">Checking for updates runs on startup and every 12 hours.</span>
+                            </label>
+                        </div>
+
+                        <div class="field-pair">
+                            <input type="checkbox" name="display_posters" id="display_posters" #if $sickbeard.DISPLAY_POSTERS then "checked=\"checked\"" else ""#/>
+                            <label class="clearfix" for="display_posters">
+                                <span class="component-title">Display Posters</span>
+                                <span class="component-desc">Display Posters in main view.</span>
                             </label>
                         </div>
 
