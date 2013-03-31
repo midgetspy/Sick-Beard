@@ -2876,7 +2876,7 @@ class WebInterface:
         sql_results = [dict(row) for row in sql_results1]
         
         # regex to parse time (12/24 hour format)
-        time_regex = re.compile(r"(\d{1,2}):(\d{2,2})( [PA]M)?$", flags=re.IGNORECASE)
+        time_regex = re.compile(r"(\d{1,2}):(\d{2,2})( [PA]M)?\b", flags=re.IGNORECASE)
         
         # add localtime to the dict
         for index, item in enumerate(sql_results1):
