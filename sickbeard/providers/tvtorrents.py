@@ -61,6 +61,8 @@ class TvTorrentsCache(tvcache.TVCache):
         logger.log(u"TvTorrents cache update URL: "+ url, logger.DEBUG)
 
         data = self.provider.getURL(url)
+        if not data:
+            return None
         
         parsedXML = parseString(data)
         channel = parsedXML.getElementsByTagName('channel')[0]
