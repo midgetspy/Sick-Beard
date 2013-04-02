@@ -7,19 +7,24 @@ import ConfigParser
 import logging
 
 #Needed for importing logging & requests module
-sickbeardPath = os.path.split(os.path.split(__file__)[0])[0]
+sickbeardPath = os.path.split(os.path.split(sys.argv[0])[0])[0]
 sys.path.append(os.path.join( sickbeardPath, 'lib'))
 sys.path.append(sickbeardPath)
 configFilename = os.path.join(sickbeardPath, "config.ini")
 
 import requests
-from sickbeard import logger
-from sickbeard import encodingKludge as ek
-from sickbeard import db
 
 scriptlogger = logging.getLogger('mediaToSickbeard')
 formatter = logging.Formatter('%(asctime)s %(levelname)-8s MEDIATOSICKBEARD :: %(message)s', '%b-%d %H:%M:%S')
-handler = logging.FileHandler(os.path.join(sickbeardPath, 'Logs', 'sickbeard.log'))
+
+try:
+    handler = logging.FileHandler(os.path.join(sickbeardPath, 'Logs', 'sickbeard.log'))
+except:
+    scriptlogger.error('Wrong MediaToSickbeard Location, the file need to be in autoProcessTV subdir of your Sickbeard installation')
+    print 'Wrong MediaToSickbeard Location, the file need to be in autoProcessTV subdir of your Sickbeard installation'
+    time.sleep(3)
+    sys.exit()
+    
 handler.setFormatter(formatter)
 scriptlogger.addHandler(handler)
 scriptlogger.setLevel(logging.DEBUG)
@@ -50,6 +55,7 @@ def deluge():
     if len(sys.argv) < 4:
         scriptlogger.error('No folder supplied - is this being called from Deluge?')
         print "No folder supplied - is this being called from Deluge?"
+        time.sleep(3)
         sys.exit()
     
     dirName = sys.argv[3]
@@ -62,6 +68,7 @@ def blackhole():
     if len(sys.argv) < 2:
         scriptlogger.error('No folder supplied - Your client should invoke the script with a Dir and a Relese Name')
         print "No folder supplied - Your client should invoke the script with a Dir and a Relese Name"
+        time.sleep(3)
         sys.exit()
 
     dirName = sys.argv[1]
@@ -104,8 +111,8 @@ def main():
         config.readfp(fp)
         fp.close()
     except IOError, e:
-        scriptlogger.debug(u'Could not read Sickbeard config.ini: ' + str(e))
-        print "Could not read Sickbeard config.ini: " + str(e)
+        scriptlogger.debug(u'Could not find/read Sickbeard config.ini: ' + str(e))
+        print "Could not find/read Sickbeard config.ini: " + str(e)
         time.sleep(3)
         sys.exit(1)
     
@@ -147,12 +154,15 @@ def main():
         print u'MediaToSickbeard script need a dir to be run. Aborting!'
         time.sleep(3)
         sys.exit()
-  
-    if not ek.ek(os.path.isdir, dirName):
+
+    if not os.path.isdir(dirName):
         scriptlogger.error(u'Folder ' + dirName + ' does not exist. Aborting AutoPostProcess.')
         print u'Folder ' + dirName + ' does not exist. Aborting AutoPostProcess.'
         time.sleep(3)
         sys.exit()
+
+    if nzbName and os.path.isdir(os.path.join(dirName, nzbName)):
+        dirName = os.path.join(dirName, nzbName)
         
     params = {}
         
@@ -172,11 +182,10 @@ def main():
     
     url = protocol + host + ":" + port + web_root + "/home/postprocess/processEpisode"
     
-    scriptlogger.debug("Opening URL: " + url)    
-    print "Opening URL:", url
+    scriptlogger.debug("Opening URL: " + url + ' with params=' + str(params))   
+    print "Opening URL: " + url + ' with params=' + str(params)
     
     try:
-    #    import requests
         response = requests.get(url, auth=(username, password), params=params)
     except Exception, e:
         scriptlogger.error(u': Unknown exception raised when opening url: ' + ex(e))
@@ -196,4 +205,4 @@ def main():
         sys.exit()
         
 if __name__ == '__main__':
-    main()        
+    main()
