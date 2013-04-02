@@ -254,7 +254,7 @@ class TorrentLeechCache(tvcache.TVCache):
                 link = result.find('td', attrs = {'class' : 'name'}).find('a')
                 url = result.find('td', attrs = {'class' : 'quickdownload'}).find('a')
                 title = link.string
-                download_url = self.urls['download'] % url['href']
+                download_url = self.provider.urls['download'] % url['href']
                 id = int(link['href'].replace('/torrent/', ''))
                 seeders = int(result.find('td', attrs = {'class' : 'seeders'}).string)
                 leechers = int(result.find('td', attrs = {'class' : 'leechers'}).string)
