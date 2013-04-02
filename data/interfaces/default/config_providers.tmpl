@@ -86,7 +86,7 @@
                                 <span class="component-title jumbo">Configure Provider:</span>
                                 <span class="component-desc">
                                     #set $provider_config_list = []
-                                    #for $cur_provider in ("nzbs_r_us", "omgwtfnzbs", "tvtorrents", "torrentleech", "btn"):
+                                    #for $cur_provider in ("nzbs_r_us", "omgwtfnzbs", "tvtorrents", "torrentleech", "btn", "thepiratebay"):
                                         #set $cur_provider_obj = $sickbeard.providers.getProviderClass($cur_provider)
                                         #if $cur_provider_obj.providerType == $GenericProvider.NZB and not $sickbeard.USE_NZBS:
                                             #continue
@@ -191,6 +191,45 @@
                         </div>
                     </div><!-- /btnDiv //-->
 
+                    <div class="providerDiv" id="thepiratebayDiv">
+                                            <div class="field-pair">
+                                                <label class="clearfix">
+                                                    <span class="component-title">The PirateBay URL:</span>
+                                                    <input class="component-desc" type="text" name="thepiratebay_url" value="$sickbeard.THEPIRATEBAY_URL" size="40" /><br />
+                                                </label>
+                                                <span class="component-desc" style="margin-left:182px">For example: http://thepiratebay.se/ or http://pirateproxy.net/</span>
+
+                                            </div>
+                                           <div class="field-pair">
+                                                <input type="checkbox" class="enabler" name="thepiratebay_proxy" id="thepiratebay_proxy" #if $sickbeard.THEPIRATEBAY_PROXY then "checked=\"checked\"" else ""#/>
+                                                <label class="clearfix" for="thepiratebay_proxy">
+                                                    <span class="component-title">Acces TPB via Proxy</span>
+                                                    <span class="component-desc">Check it if you want to bypass Country Blocking Mechanism</span>
+                                                </label>
+                                            </div>
+
+                                            <div class="field-pair" id="content_thepiratebay_proxy">
+                                  #from sickbeard.providers import thepiratebay
+                                                <label class="nocheck clearfix">
+                                                    <span class="component-title">Proxy url:</span>
+                              <span class="component-desc">
+                                <select name="thepiratebay_proxy_url" id="thepiratebay_proxy_url">
+                                        #for $i in $thepiratebay.proxy_dict.keys():
+                                        <option value="$thepiratebay.proxy_dict[$i]" #if $thepiratebay.proxy_dict[$i] == $sickbeard.THEPIRATEBAY_PROXY_URL then "selected=\"selected\"" else ""#>$i</option>
+                                                          #end for
+                                                      </select>
+                                                    </span>
+                                                </label>
+                                            </div>
+
+                                            <div class="field-pair">
+                                                <input type="checkbox" name="thepiratebay_trusted" id="thepiratebay_trusted" #if $sickbeard.THEPIRATEBAY_TRUSTED then "checked=\"checked\"" else ""#/>
+                                                <label class="clearfix" for="thepiratebay_trusted">
+                                                    <span class="component-title">Trusted Download</span>
+                                                    <span class="component-desc">Do you want download torrent only from trusted uploaders?</span>
+                                                </label>
+                                            </div>
+                    </div>
 <!-- end div for editing providers -->
 
                     <input type="submit" class="btn config_submitter" value="Save Changes" /><br/>
