@@ -27,6 +27,7 @@ from common import SNATCHED, Quality, SEASON_RESULT, MULTI_EP_RESULT
 
 from sickbeard import logger, db, show_name_helpers, exceptions, helpers
 from sickbeard import sab
+from sickbeard import utorrent
 from sickbeard import nzbget
 from sickbeard import history
 from sickbeard import notifiers
@@ -115,8 +116,18 @@ def snatchEpisode(result, endStatus=SNATCHED):
             dlResult = False
 
     # torrents are always saved to disk
-    elif result.resultType == "torrent":
-        dlResult = _downloadResult(result)
+    elif result.resultType in ("torrent"):
+        if sickbeard.TORRENT_METHOD == "blackhole":
+            if result.url.startswith('magnet'):
+                logger.log(u"Torrent Blackhole doesn't support magnet links", logger.ERROR)
+                dlResult = False
+            else:
+                dlResult = _downloadResult(result)
+        elif sickbeard.TORRENT_METHOD == "utorrent":
+            dlResult = utorrent.sendTorrent(result)
+        else:
+            logger.log(u"Unknown Torrent action specified in config: " + sickbeard.TORRENT_METHOD, logger.ERROR)
+            dlResult = False
     else:
         logger.log(u"Unknown result type, unable to download it", logger.ERROR)
         dlResult = False

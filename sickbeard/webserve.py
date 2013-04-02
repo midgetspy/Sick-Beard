@@ -32,7 +32,7 @@ import cherrypy.lib
 
 import sickbeard
 
-from sickbeard import config, sab
+from sickbeard import config, sab, utorrent
 from sickbeard import history, notifiers, processTV
 from sickbeard import ui
 from sickbeard import logger, helpers, exceptions, classes, db
@@ -768,7 +768,8 @@ class ConfigSearch:
     @cherrypy.expose
     def saveSearch(self, use_nzbs=None, use_torrents=None, nzb_dir=None, sab_username=None, sab_password=None,
                        sab_apikey=None, sab_category=None, sab_host=None, nzbget_password=None, nzbget_category=None, nzbget_host=None,
-                       torrent_dir=None, nzb_method=None, usenet_retention=None, search_frequency=None, download_propers=None):
+                       torrent_dir=None, nzb_method=None, usenet_retention=None, search_frequency=None, download_propers=None, utorrent_username=None, utorrent_password=None,
+                       utorrent_label=None, utorrent_host=None, torrent_method=None):
 
         results = []
 
@@ -804,6 +805,8 @@ class ConfigSearch:
         sickbeard.NZB_METHOD = nzb_method
         sickbeard.USENET_RETENTION = int(usenet_retention)
 
+        sickbeard.TORRENT_METHOD = torrent_method
+
         sickbeard.DOWNLOAD_PROPERS = download_propers
 
         sickbeard.SAB_USERNAME = sab_username
@@ -818,6 +821,18 @@ class ConfigSearch:
             sab_host = sab_host + '/'
 
         sickbeard.SAB_HOST = sab_host
+
+        sickbeard.UTORRENT_USERNAME = utorrent_username
+        sickbeard.UTORRENT_PASSWORD = utorrent_password
+        sickbeard.UTORRENT_LABEL = utorrent_label
+
+        if utorrent_host and not re.match('https?://.*', utorrent_host):
+            utorrent_host = 'http://' + utorrent_host
+
+        if not utorrent_host.endswith('/'):
+            utorrent_host = utorrent_host + '/'
+
+        sickbeard.UTORRENT_HOST = utorrent_host
 
         sickbeard.NZBGET_PASSWORD = nzbget_password
         sickbeard.NZBGET_CATEGORY = nzbget_category
@@ -1037,6 +1052,7 @@ class ConfigProviders:
                       torrentleech_key=None,
                       btn_api_key=None,
                       newzbin_username=None, newzbin_password=None,
+                      thepiratebay_trusted=None, thepiratebay_proxy=None, thepiratebay_proxy_url=None, thepiratebay_url=None,
                       provider_order=None):
 
         results = []
@@ -1107,10 +1123,36 @@ class ConfigProviders:
                 sickbeard.TORRENTLEECH = curEnabled
             elif curProvider == 'btn':
                 sickbeard.BTN = curEnabled
+            elif curProvider == 'thepiratebay':
+                sickbeard.THEPIRATEBAY = curEnabled
             elif curProvider in newznabProviderDict:
                 newznabProviderDict[curProvider].enabled = bool(curEnabled)
             else:
                 logger.log(u"don't know what " + curProvider + " is, skipping")
+
+            if thepiratebay_trusted == "on":
+                thepiratebay_trusted = 1
+            else:
+                thepiratebay_trusted = 0
+
+            sickbeard.THEPIRATEBAY_TRUSTED = thepiratebay_trusted
+
+            if thepiratebay_url and not re.match('https?://.*', thepiratebay_url):
+                thepiratebay_url = 'http://' + thepiratebay_url
+
+            if not thepiratebay_url.endswith('/'):
+                thepiratebay_url = thepiratebay_url + '/'
+
+            sickbeard.THEPIRATEBAY_URL = thepiratebay_url
+
+            if thepiratebay_proxy == "on":
+                thepiratebay_proxy = 1
+                sickbeard.THEPIRATEBAY_PROXY_URL = thepiratebay_proxy_url.strip()
+            else:
+                thepiratebay_proxy = 0
+                sickbeard.THEPIRATEBAY_PROXY_URL = ""
+
+            sickbeard.THEPIRATEBAY_PROXY = thepiratebay_proxy
 
         sickbeard.TVTORRENTS_DIGEST = tvtorrents_digest.strip()
         sickbeard.TVTORRENTS_HASH = tvtorrents_hash.strip()
@@ -1997,6 +2039,17 @@ class Home:
                 return "Success. Connected and authenticated"
             else:
                 return "Authentication failed. SABnzbd expects '"+accesMsg+"' as authentication method"
+        else:
+            return "Unable to connect to host"
+
+    @cherrypy.expose
+    def testUTorrent(self, host=None, username=None, password=None):
+        if not host.endswith("/"):
+            host = host + "/"
+
+        authed, authMsg = utorrent.testAuthentication(host, username, password) #@UnusedVariable
+        if authed:
+            return "Success. Connected and authenticated"
         else:
             return "Unable to connect to host"
 
