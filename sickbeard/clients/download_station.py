@@ -35,34 +35,36 @@ class DownloadStationAPI(GenericClient):
 
         # Only for Auth
         self.url = self.host + 'webapi/auth.cgi'
-        # -------------
 
         post_data = json.dumps({'api': 'SYNO.API.Auth',
-                            'version': '2',
-                            "method": "login",
-                            "account": self.username,
-                            "passwd": self.password,
-                            "session": "DownloadStation",
-                            'format': 'sid',
-                            })
+                                'version': '2',
+                                "method": "login",
+                                "account": self.username,
+                                "passwd": self.password,
+                                "session": "DownloadStation",
+                                'format': 'sid',
+                                })
         self._request(method='get', data=post_data)
-        self.auth = self.response.json['data']['sid']
+
+        try:
+            self.auth = self.response.json['data']['sid']
+        except:
+            return None    
        
-        return self.response.json['success']
+        return self.auth
 
     def _add_torrent_uri(self, result):
 
         # Only for Tasks
         self.url = self.host + 'webapi/DownloadStation/task.cgi'
-        # -----------------
 
         post_data = json.dumps({'api': 'SYNO.DownloadStation.Task',
-                            'version': '1',
-                            "method": "create",
-                            "_sid": self.auth,
-                            "uri": result.url,
-                            "session": "DownloadStation",
-                            })
+                                'version': '1',
+                                "method": "create",
+                                "_sid": self.auth,
+                                "uri": result.url,
+                                "session": "DownloadStation",
+                                })
         self._request(method='post', data=post_data)
         
         return self.response.json['success']
@@ -71,14 +73,13 @@ class DownloadStationAPI(GenericClient):
 
         self.url = self.host + 'webapi/DownloadStation/task.cgi'
 
-
         post_data = json.dumps({'api': 'SYNO.DownloadStation.Task',
-                  'version': '1',
-                  'method': 'create',
-                  '_sid': self.auth,
-                  'file': 'tv.torrent',
-                  'session': 'DownloadStation',
-                  })
+                                'version': '1',
+                                'method': 'create',
+                                '_sid': self.auth,
+                                'file': 'tv.torrent',
+                                'session': 'DownloadStation',
+                                })
         self._request(method='post', data=post_data, files={'file': result.content})
     
         return self.response.json["success"]    
