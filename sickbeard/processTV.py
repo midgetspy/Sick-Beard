@@ -46,14 +46,18 @@ def processDir (dirName, nzbName=None, recurse=False):
 
     returnStr += logHelper(u"Processing folder "+dirName, logger.DEBUG)
 
-    if dirName == sickbeard.TV_DOWNLOAD_DIR and not nzbName: #Automatic Post Processing Active
+    if dirName == sickbeard.TV_DOWNLOAD_DIR and not nzbName: #Scheduled Post Processing Active
         #Get at first all the subdir in the dirName
         for path, dirs, files in ek.ek(os.walk, dirName):
             break
     else:
-        path, dirs = ek.ek(os.path.split, dirName)
-        files = ek.ek(os.listdir, dirName)
-        dirs = [dirs]
+        path, dirs = ek.ek(os.path.split, dirName) #Script Post Processing
+        if os.path.isfile(os.path.join(dirName, nzbName)): #For single file without Subdir
+            files = [os.path.join(dirName, nzbName)]
+            dirs = []
+        else:    
+            files = ek.ek(os.listdir, dirName)
+            dirs = [dirs]
 
     process_result = False
     videoFiles = filter(helpers.isMediaFile, files)
@@ -166,26 +170,26 @@ def validateDir(path, dirName, returnStr):
         returnStr += logHelper(u"The directory name indicates that this release is in the process of being unpacked, skipping", logger.DEBUG)
         return False
 
-    try:
-        np = NameParser(dirName)
-        parse_result = np.parse(dirName)
-    except InvalidNameException:
-        
-        #Try to parse files name if any 
-        fileList = ek.ek(os.listdir, ek.ek(os.path.join, path, dirName))
-        videoFiles = filter(helpers.isMediaFile, fileList)
-        
-#        if not videoFiles:
-#            return False
-        
-        #Be strict for bad named folder
-        for cur_video_file in videoFiles:
-            try:
-                np = NameParser(cur_video_file)
-                parse_result = np.parse(cur_video_file)
-            except InvalidNameException:
-                returnStr += logHelper(u"Folder " + dirName +  " seems to Not Contain TV, skipping it", logger.DEBUG)
-                return False
+#    try:
+#        np = NameParser(dirName)
+#        parse_result = np.parse(dirName)
+#    except InvalidNameException:
+#        
+#        #Try to parse files name if any 
+#        fileList = ek.ek(os.listdir, ek.ek(os.path.join, path, dirName))
+#        videoFiles = filter(helpers.isMediaFile, fileList)
+#        
+##        if not videoFiles:
+##            return False
+#        
+#        #Be strict for bad named folder
+#        for cur_video_file in videoFiles:
+#            try:
+#                np = NameParser(cur_video_file)
+#                parse_result = np.parse(cur_video_file)
+#            except InvalidNameException:
+#                returnStr += logHelper(u"Folder " + dirName +  " seems to Not Contain TV, skipping it", logger.DEBUG)
+#                return False
     
     # make sure the dir isn't inside a show dir
     myDB = db.DBConnection()
