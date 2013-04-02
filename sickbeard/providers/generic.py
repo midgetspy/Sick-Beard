@@ -269,9 +269,7 @@ class GenericProvider:
             result.name = title
             result.quality = quality
             result.provider = self
-            result.content = self.getURL(result.url) \
-                            if self.providerType == GenericProvider.TORRENT \
-                            and not result.url.startswith('magnet') else None 
+            result.content = None 
             
             results.append(result)
 
@@ -347,9 +345,7 @@ class GenericProvider:
             result.name = title
             result.quality = quality
             result.provider = self
-            result.content = self.getURL(result.url) \
-                            if self.providerType == GenericProvider.TORRENT \
-                            and not result.url.startswith('magnet') else None 
+            result.content = None 
 
             if len(epObj) == 1:
                 epNum = epObj[0].episode
