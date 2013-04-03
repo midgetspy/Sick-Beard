@@ -728,7 +728,7 @@ class PostProcessor(object):
             self._log(u"Processing " + self.folder_path + " (" + str(self.nzb_name) + ")")
 
         if self.is_folder and not self.failed:
-            self._log(u"Error: failed = False and folder = True not currently")
+            self._log(u"Error: failed = False and folder = True not currently implemented")
             self._log(u"If you think this should be supported, open a ticket")
             return False
 
@@ -755,19 +755,6 @@ class PostProcessor(object):
         ep_obj = self._get_ep_obj(tvdb_id, season, episodes)
 
         if self.failed:
-            release_name = self._get_release_name()
-            if release_name is not None:
-                self._log(u"Marking release as bad: " + release_name, logger.DEBUG)
-                myDB = db.DBConnection('failed.db')
-                myDB.select("INSERT INTO failed (release) VALUES (?)", [re.sub("[\.\-\ ]", "_", release_name)])
-            else:
-                self._log(u"Release name not found. Can't mark as invalid. REPORT THIS, along with:", logger.ERROR)
-                self._log(u" - nzb_name: " + str(self.nzb_name), logger.ERROR)
-                self._log(u" - folder_name: " + str(self.folder_name), logger.ERROR)
-                self._log(u" - file_name: " + str(self.file_name), logger.ERROR)
-                self._log(u" - good_results: " + str(self.good_results), logger.ERROR)
-                return False
-
             self._log(u"Setting episode(s) back to Wanted", logger.DEBUG)
             for curEp in [ep_obj] + ep_obj.relatedEps:
                 self._log(u"Setting episode back to wanted: "+curEp.name)
