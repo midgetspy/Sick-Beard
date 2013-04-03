@@ -229,7 +229,7 @@ def makeSceneSearchString (episode):
     for curShow in showNames:
         for curEpString in epStrings:
             #toReturn.append(curShow + '.' + curEpString)
-            # Adds the target language to the search string if it is not an 'English' title
+            # Adds the target language to the search string if it is not an 'English' title (mostly needed for nzbindex)
             if episode.show.lang == "en":
                 toReturn.append(curShow + "." + curEpString)
             else:
