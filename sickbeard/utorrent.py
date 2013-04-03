@@ -37,7 +37,7 @@ from urllib import quote
 import cookielib
 import re
 import time
-
+import socket
 
 
 def _makeOpener(username, password):
@@ -55,24 +55,83 @@ def _makeOpener(username, password):
     handlers = [auth_handler, cookie_handler]
     return urllib2.build_opener(*handlers)
 
+def _utorrent_api(host):
+    try:
+        response=urllib2.urlopen(host,timeout=1)
+
+        return True
+    except urllib2.HTTPError, e:
+        if e.code == 400:
+            return True
+    except urllib2.URLError, e:
+        return False
+    return False
+
+def _utorrent_credentials(host, username, password):
+    try:
+        auth = urllib2.HTTPBasicAuthHandler()
+        auth.add_password(
+            realm='uTorrent',
+            uri=host,
+            user='%s'%username,
+            passwd=password
+        )
+        opener = urllib2.build_opener(auth)
+        urllib2.install_opener(opener)
+
+        urllib2.urlopen(host + 'gui/token.html')
+        return True
+    except urllib2.HTTPError, e:
+        return False
+
 def _get_token(opener):
     url = sickbeard.UTORRENT_HOST + 'gui/token.html'
-    response = opener.open(url)
-    token_re = "<div id='token' style='display:none;'>([^<>]+)</div>"
-    match = re.search(token_re, response.read())
-    return match.group(1)
+    try:
+        response = opener.open(url, timeout=5)
+
+        token_re = "<div id='token' style='display:none;'>([^<>]+)</div>"
+        match = re.search(token_re, response.read())
+        return True, match.group(1)
+    except urllib2.HTTPError, e:
+        if e.code == 401:
+            logger.log("uTorrent username & password are invalid.", logger.ERROR)
+            return False, "uTorrent username & password are invalid."
+        elif e.code == 404:
+            logger.log("uTorrent is not running or the uTorrent API is not enabled.", logger.ERROR)
+            return False, "uTorrent is not running or uTorrent API is not enabled."
+
+        logger.log("An error occured while connecting to uTorrent.", logger.ERROR)
+        return False, "An error occured while connecting to uTorrent."
 
 def _action(url, host, username, password):
-    opener = _makeOpener(username, password)
-    url = host + 'gui/?token=' + _get_token(opener) + url
+    if _utorrent_api(host):
+        opener = _makeOpener(username, password)
+        success, token = _get_token(opener)
 
-    request = urllib2.Request(url)
+        if success:
+            url = host + 'gui/?token=' + token + url
 
-    try:
-        response = opener.open(request)
-        return True, json.loads(response.read())
-    except Exception as e:
-        return False, e
+            try:
+                response = opener.open(url)
+
+                return True, json.loads(response.read())
+            except urllib2.HTTPError, e:
+                if e.code == 401:
+                    logger.log("uTorrent username & password are invalid.", logger.ERROR)
+                    return False, "uTorrent username & password are invalid."
+                elif e.code == 404:
+                    logger.log("uTorrent is not running or the uTorrent API is not enabled.", logger.ERROR)
+                    return False, "uTorrent is not running or uTorrent API is not enabled."
+
+                logger.log("An error occured while connecting to uTorrent.", logger.ERROR)
+                return False, "An error occured while connecting to uTorrent."
+            except Exception as e:
+                return False, e
+        else:
+            return False, token
+
+    logger.log("uTorrent is not running or the uTorrent API is not enabled.", logger.ERROR)
+    return False, "uTorrent is not running or the uTorrent API is not enabled."
 
 def _findTorrentHash(list, new_list):
     for torrent in new_list['torrents']:
@@ -91,9 +150,9 @@ def testAuthentication(host=None, username=None, password=None):
     success, result = _action('&list=1', host, username, password)
 
     if not success:
-        return False, "Unable to connect"
+        return False, result
 
-    return True, "Success"
+    return True, result
 
 def sendTorrent(result):
     success, list = _action('&list=1', sickbeard.UTORRENT_HOST, sickbeard.UTORRENT_USERNAME, sickbeard.UTORRENT_PASSWORD)

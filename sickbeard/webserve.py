@@ -2049,9 +2049,9 @@ class Home:
 
         authed, authMsg = utorrent.testAuthentication(host, username, password) #@UnusedVariable
         if authed:
-            return "Success. Connected and authenticated"
+            return "Successfully connected to uTorrent."
         else:
-            return "Unable to connect to host"
+            return authMsg
 
     @cherrypy.expose
     def testGrowl(self, host=None, password=None):

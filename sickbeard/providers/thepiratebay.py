@@ -329,7 +329,7 @@ class ThePirateBayCache(tvcache.TVCache):
     def _getData(self):
 
         #url for the last 50 tv-show
-        url = self.provider.proxy._buildURL(self.provider.url+'tv/latest/')
+        url = self.provider.proxy._buildURL(sickbeard.THEPIRATEBAY_URL+'tv/latest/')
 
         logger.log(u"ThePirateBay cache update URL: "+ url, logger.DEBUG)
 
