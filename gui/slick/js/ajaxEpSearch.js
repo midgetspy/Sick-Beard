@@ -32,7 +32,7 @@
 	                img_result = 'success';
 	                // color the row
 	                if (options.colorRow)
-	                	parent.parent().removeClass('skipped wanted qual good unaired').addClass('good');
+	                	parent.parent().removeClass('skipped wanted qual good unaired').addClass('snatched');
 	                // applying the quality class
                     var rSearchTerm = /(\w+)\s\((.+?)\)/;
 	                    HtmlContent = data.result.replace(rSearchTerm,"$1"+' <span class="quality '+data.quality+'">'+"$2"+'</span>');
