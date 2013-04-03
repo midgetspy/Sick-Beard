@@ -728,17 +728,18 @@ class PostProcessor(object):
             self._log(u"Processing " + self.folder_path + " (" + str(self.nzb_name) + ")")
 
         if self.is_folder and not self.failed:
-            self._log(u"Error: failed = False and folder = True not currently")
+            self._log(u"Error: failed = False and folder = True not currently implemented")
             self._log(u"If you think this should be supported, open a ticket")
             return False
 
-        if self.file_path and os.path.isdir(self.file_path):
-            self._log(u"File " + self.file_path + " seems to be a directory")
-            return False
-        for ignore_file in self.IGNORED_FILESTRINGS:
-            if ignore_file in self.file_path:
-                self._log(u"File " + self.file_path + " is ignored type, skipping")
+        if self.file_path:
+            if os.path.isdir(self.file_path):
+                self._log(u"File " + self.file_path + " seems to be a directory")
                 return False
+            for ignore_file in self.IGNORED_FILESTRINGS:
+                if ignore_file in self.file_path:
+                    self._log(u"File " + self.file_path + " is ignored type, skipping")
+                    return False
         
         # reset per-file stuff
         self.in_history = False
@@ -754,19 +755,7 @@ class PostProcessor(object):
         ep_obj = self._get_ep_obj(tvdb_id, season, episodes)
 
         if self.failed:
-            release_name = self._get_release_name()
-            if release_name is not None:
-                self._log(u"Marking release as bad: " + release_name, logger.DEBUG)
-                myDB = db.DBConnection('failed.db')
-                myDB.select("INSERT INTO failed (release) VALUES (?)", [re.sub("[\.\-\ ]", "_", release_name)])
-            else:
-                self._log(u"Release name not found. Can't mark as invalid. REPORT THIS, along with:", logger.ERROR)
-                self._log(u" - nzb_name: " + str(self.nzb_name))
-                self._log(u" - folder_name: " + str(self.folder_name))
-                self._log(u" - file_name: " + str(self.file_name))
-                return False
-
-            logger.log(u"Setting episode(s) back to Wanted", logger.DEBUG)
+            self._log(u"Setting episode(s) back to Wanted", logger.DEBUG)
             for curEp in [ep_obj] + ep_obj.relatedEps:
                 self._log(u"Setting episode back to wanted: "+curEp.name)
                 with curEp.lock:
