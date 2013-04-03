@@ -40,7 +40,7 @@ from sickbeard import naming
 
 from common import SD, SKIPPED, NAMING_REPEAT
 
-from sickbeard.databases import mainDB, cache_db
+from sickbeard.databases import mainDB, cache_db, failed_db
 
 from lib.configobj import ConfigObj
 
@@ -170,6 +170,7 @@ ADD_SHOWS_WO_DIR = None
 CREATE_MISSING_SHOW_DIRS = None
 RENAME_EPISODES = False
 PROCESS_AUTOMATICALLY = False
+DELETE_FAILED = False
 KEEP_PROCESSED_DIR = False
 MOVE_ASSOCIATED_FILES = False
 TV_DOWNLOAD_DIR = None
@@ -341,7 +342,7 @@ def initialize(consoleLogging=True):
                 USE_GROWL, GROWL_HOST, GROWL_PASSWORD, USE_PROWL, PROWL_NOTIFY_ONSNATCH, PROWL_NOTIFY_ONDOWNLOAD, PROWL_API, PROWL_PRIORITY, PROG_DIR, NZBMATRIX, NZBMATRIX_USERNAME, \
                 USE_PYTIVO, PYTIVO_NOTIFY_ONSNATCH, PYTIVO_NOTIFY_ONDOWNLOAD, PYTIVO_UPDATE_LIBRARY, PYTIVO_HOST, PYTIVO_SHARE_NAME, PYTIVO_TIVO_NAME, \
                 USE_NMA, NMA_NOTIFY_ONSNATCH, NMA_NOTIFY_ONDOWNLOAD, NMA_API, NMA_PRIORITY, \
-                NZBMATRIX_APIKEY, versionCheckScheduler, VERSION_NOTIFY, PROCESS_AUTOMATICALLY, \
+                NZBMATRIX_APIKEY, versionCheckScheduler, VERSION_NOTIFY, PROCESS_AUTOMATICALLY, DELETE_FAILED, \
                 KEEP_PROCESSED_DIR, TV_DOWNLOAD_DIR, TVDB_BASE_URL, MIN_SEARCH_FREQUENCY, \
                 showQueueScheduler, searchQueueScheduler, ROOT_DIRS, CACHE_DIR, ACTUAL_CACHE_DIR, TVDB_API_PARMS, \
                 NAMING_PATTERN, NAMING_MULTI_EP, NAMING_FORCE_FOLDERS, NAMING_ABD_PATTERN, NAMING_CUSTOM_ABD, \
@@ -454,6 +455,7 @@ def initialize(consoleLogging=True):
 
         TV_DOWNLOAD_DIR = check_setting_str(CFG, 'General', 'tv_download_dir', '')
         PROCESS_AUTOMATICALLY = check_setting_int(CFG, 'General', 'process_automatically', 0)
+        DELETE_FAILED = check_setting_int(CFG, 'General', 'delete_failed', 0)
         RENAME_EPISODES = check_setting_int(CFG, 'General', 'rename_episodes', 1)
         KEEP_PROCESSED_DIR = check_setting_int(CFG, 'General', 'keep_processed_dir', 1)
         MOVE_ASSOCIATED_FILES = check_setting_int(CFG, 'General', 'move_associated_files', 0)
@@ -711,6 +713,9 @@ def initialize(consoleLogging=True):
 
         # initialize the cache database
         db.upgradeDatabase(db.DBConnection("cache.db"), cache_db.InitialSchema)
+
+        # initialized the failed downloads database
+        db.upgradeDatabase(db.DBConnection("failed.db"), failed_db.InitialSchema)
 
         # fix up any db problems
         db.sanityCheckDatabase(db.DBConnection(), mainDB.MainSanityCheck)
@@ -1020,6 +1025,7 @@ def save_config():
     new_config['General']['keep_processed_dir'] = int(KEEP_PROCESSED_DIR)
     new_config['General']['move_associated_files'] = int(MOVE_ASSOCIATED_FILES)
     new_config['General']['process_automatically'] = int(PROCESS_AUTOMATICALLY)
+    new_config['General']['delete_failed'] = int(DELETE_FAILED)
     new_config['General']['rename_episodes'] = int(RENAME_EPISODES)
     new_config['General']['create_missing_show_dirs'] = CREATE_MISSING_SHOW_DIRS
     new_config['General']['add_shows_wo_dir'] = ADD_SHOWS_WO_DIR

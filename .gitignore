@@ -8,6 +8,7 @@ sickbeard.db*
 autoProcessTV/autoProcessTV.cfg
 server.crt
 server.key
+failed.db*
 
 #  SB Test Related   #
 ######################
