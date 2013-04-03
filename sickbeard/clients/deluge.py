@@ -80,7 +80,7 @@ class DelugeAPI(GenericClient):
                 
             if labels != None:
                 if label not in labels:
-                    logger.log(self.name + ': ' + label +u" label does not exist in Deluge we must add it", logger.MESSAGE)
+                    logger.log(self.name + ': ' + label +u" label does not exist in Deluge we must add it", logger.DEBUG)
                     post_data = json.dumps({"method": 'label.add',
                                             "params": [label],
                                             "id": 4
