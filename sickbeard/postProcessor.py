@@ -45,7 +45,9 @@ from sickbeard.name_parser.parser import NameParser, InvalidNameException
 
 from lib.tvdb_api import tvdb_api, tvdb_exceptions
 
+
 class PostProcessor(object):
+
     """
     A class which will process a file/folder according to the post processing settings in the config.
     """
@@ -55,13 +57,13 @@ class PostProcessor(object):
     EXISTS_SMALLER = 3
     DOESNT_EXIST = 4
 
-    IGNORED_FILESTRINGS = [ "/.AppleDouble/", ".DS_Store" ]
+    IGNORED_FILESTRINGS = ["/.AppleDouble/", ".DS_Store"]
 
     NZB_NAME = 1
     FOLDER_NAME = 2
     FILE_NAME = 3
 
-    def __init__(self, item_path, nzb_name = None, failed = False, folder = False):
+    def __init__(self, item_path, nzb_name=None, failed=False, folder=False):
         """
         Creates a new post processor with the given file path and optionally an NZB name.
 
@@ -215,7 +217,7 @@ class PostProcessor(object):
                 # do the library update for synoindex
                 notifiers.synoindex_notifier.deleteFile(cur_file)
 
-    def _combined_file_operation (self, file_path, new_path, new_base_name, associated_files=False, action=None):
+    def _combined_file_operation(self, file_path, new_path, new_base_name, associated_files=False, action=None):
         """
         Performs a generic operation (move or copy) on a file. Can rename the file as well as change its location,
         and optionally move associated files too.
@@ -253,7 +255,7 @@ class PostProcessor(object):
 
             # If new base name then convert name
             if new_base_name:
-                new_file_name = new_base_name +'.' + cur_extension
+                new_file_name = new_base_name + '.' + cur_extension
             # if we're not renaming we still want to change extensions sometimes
             else:
                 new_file_name = helpers.replaceExtension(cur_file_name, cur_extension)
@@ -290,7 +292,7 @@ class PostProcessor(object):
         associated_files: Boolean, whether we should copy similarly-named files too
         """
 
-        def _int_copy (cur_file_path, new_file_path):
+        def _int_copy(cur_file_path, new_file_path):
 
             self._log(u"Copying file from "+cur_file_path+" to "+new_file_path, logger.DEBUG)
             try:
@@ -370,10 +372,11 @@ class PostProcessor(object):
         if not name:
             return to_return
 
-        trimprefix = ['^sof-', '^euhd-', '^amb-', '^itg-', '^idtv-', '^zzgtv-', '^itn-', '^tcpa-', '^tvp-']
+        trimprefix = ['^sof-', '^euhd-', '^amb-', '^itg-', '^idtv-', '^zzgtv-', '^itn-', '^tcpa-', '^tvp-',
+                      '^<?.* \d{9,} ?-? ', '^\.zZz\. "?', '^(.*) >', '^\[\d{5,}.*\[ ', '^\.: ', '^\s?-?\s?\[.+ presents\s?',
+                      '^\s+?\[\d{2}\/\d{2}]\s?-?\s?"?', '^>.*<<\s', '^\[.*\[\d{2}/\d{2}\]\s?-\s?"']
         for regex in trimprefix:
             name = re.sub(regex, "", name)
-
 
         # parse the name to break it into show name, season, and episode
         np = NameParser(file)
@@ -412,7 +415,8 @@ class PostProcessor(object):
                 elif test_name == self.file_name:
                     self.good_results[self.FILE_NAME] = True
                 else:
-                    logger.log(u"Nothing was good, found "+repr(test_name)+" and wanted either "+repr(self.nzb_name)+", "+repr(self.folder_name)+", or "+repr(self.file_name))
+                    logger.log(u"Nothing was good, found "+repr(test_name)+" and wanted either "+repr(
+                        self.nzb_name)+", "+repr(self.folder_name)+", or "+repr(self.file_name))
             else:
                 logger.log("Parse result not suficent(all folowing have to be set). will not save release name", logger.DEBUG)
                 logger.log("Parse result(series_name): " + repr(parse_result.series_name), logger.DEBUG)
@@ -471,7 +475,6 @@ class PostProcessor(object):
         _finalize(parse_result)
         return to_return
 
-
     def _find_info(self):
         """
         For a given file try to find the showid, season, and episode.
@@ -519,7 +522,8 @@ class PostProcessor(object):
 
             # for air-by-date shows we need to look up the season/episode from tvdb
             if season == -1 and tvdb_id and episodes:
-                self._log(u"Looks like this is an air-by-date show, attempting to convert the date to season/episode", logger.DEBUG)
+                self._log(
+                    u"Looks like this is an air-by-date show, attempting to convert the date to season/episode", logger.DEBUG)
 
                 # try to get language set for this show
                 tvdb_lang = None
@@ -528,7 +532,7 @@ class PostProcessor(object):
                     if(showObj != None):
                         tvdb_lang = showObj.lang
                 except exceptions.MultipleShowObjectsException:
-                    raise #TODO: later I'll just log this, for now I want to know about it ASAP
+                    raise  # TODO: later I'll just log this, for now I want to know about it ASAP
 
                 try:
                     # There's gotta be a better way of doing this but we don't wanna
@@ -544,7 +548,8 @@ class PostProcessor(object):
                     episodes = [int(epObj["episodenumber"])]
                     self._log(u"Got season " + str(season) + " episodes " + str(episodes), logger.DEBUG)
                 except tvdb_exceptions.tvdb_episodenotfound, e:
-                    self._log(u"Unable to find episode with date " + str(episodes[0]) + u" for show " + str(tvdb_id) + u", skipping", logger.DEBUG)
+                    self._log(u"Unable to find episode with date " + str(episodes[
+                              0]) + u" for show " + str(tvdb_id) + u", skipping", logger.DEBUG)
                     # we don't want to leave dates in the episode list if we couldn't convert them to real episode numbers
                     episodes = []
                     continue
@@ -556,9 +561,11 @@ class PostProcessor(object):
             # if there's no season then we can hopefully just use 1 automatically
             elif season == None and tvdb_id:
                 myDB = db.DBConnection()
-                numseasonsSQlResult = myDB.select("SELECT COUNT(DISTINCT season) as numseasons FROM tv_episodes WHERE showid = ? and season != 0", [tvdb_id])
+                numseasonsSQlResult = myDB.select(
+                    "SELECT COUNT(DISTINCT season) as numseasons FROM tv_episodes WHERE showid = ? and season != 0", [tvdb_id])
                 if int(numseasonsSQlResult[0][0]) == 1 and season == None:
-                    self._log(u"Don't have a season number, but this show appears to only have 1 season, setting seasonnumber to 1...", logger.DEBUG)
+                    self._log(
+                        u"Don't have a season number, but this show appears to only have 1 season, setting seasonnumber to 1...", logger.DEBUG)
                     season = 1
 
             if tvdb_id and season != None and episodes:
@@ -585,7 +592,7 @@ class PostProcessor(object):
         try:
             show_obj = helpers.findCertainShow(sickbeard.showList, tvdb_id)
         except exceptions.MultipleShowObjectsException:
-            raise #TODO: later I'll just log this, for now I want to know about it ASAP
+            raise  # TODO: later I'll just log this, for now I want to know about it ASAP
 
         # if we can't find the show then there's nothing we can really do
         if not show_obj:
@@ -628,9 +635,10 @@ class PostProcessor(object):
 
         # if there is a quality available in the status then we don't need to bother guessing from the filename
         if ep_obj.status in common.Quality.SNATCHED + common.Quality.SNATCHED_PROPER:
-            oldStatus, ep_quality = common.Quality.splitCompositeStatus(ep_obj.status) #@UnusedVariable
+            oldStatus, ep_quality = common.Quality.splitCompositeStatus(ep_obj.status)  # @UnusedVariable
             if ep_quality != common.Quality.UNKNOWN:
-                self._log(u"The old status had a quality in it, using that: "+common.Quality.qualityStrings[ep_quality], logger.DEBUG)
+                self._log(u"The old status had a quality in it, using that: " +
+                          common.Quality.qualityStrings[ep_quality], logger.DEBUG)
                 return ep_quality
 
         # nzb name is the most reliable if it exists, followed by folder name and lastly file name
@@ -644,19 +652,23 @@ class PostProcessor(object):
                 continue
 
             ep_quality = common.Quality.nameQuality(cur_name)
-            self._log(u"Looking up quality for name "+cur_name+u", got "+common.Quality.qualityStrings[ep_quality], logger.DEBUG)
+            self._log(u"Looking up quality for name "+cur_name+u", got " +
+                      common.Quality.qualityStrings[ep_quality], logger.DEBUG)
 
             # if we find a good one then use it
             if ep_quality != common.Quality.UNKNOWN:
-                logger.log(cur_name+u" looks like it has quality "+common.Quality.qualityStrings[ep_quality]+", using that", logger.DEBUG)
+                logger.log(cur_name+u" looks like it has quality "+common.Quality.qualityStrings[
+                           ep_quality]+", using that", logger.DEBUG)
                 return ep_quality
 
         # if we didn't get a quality from one of the names above, try assuming from each of the names
         if self.file_name:
             ep_quality = common.Quality.assumeQuality(self.file_name)
-            self._log(u"Guessing quality for name "+self.file_name+u", got "+common.Quality.qualityStrings[ep_quality], logger.DEBUG)
+            self._log(u"Guessing quality for name "+self.file_name +
+                      u", got "+common.Quality.qualityStrings[ep_quality], logger.DEBUG)
             if ep_quality != common.Quality.UNKNOWN:
-                logger.log(self.file_name+u" looks like it has quality "+common.Quality.qualityStrings[ep_quality]+", using that", logger.DEBUG)
+                logger.log(self.file_name+u" looks like it has quality "+common.Quality.qualityStrings[
+                           ep_quality]+", using that", logger.DEBUG)
                 return ep_quality
 
         return ep_quality
@@ -670,14 +682,15 @@ class PostProcessor(object):
         for curScriptName in sickbeard.EXTRA_SCRIPTS:
 
             # generate a safe command line string to execute the script and provide all the parameters
-            script_cmd = shlex.split(curScriptName) + [ep_obj.location, self.file_path, str(ep_obj.show.tvdbid), str(ep_obj.season), str(ep_obj.episode), str(ep_obj.airdate)]
+            script_cmd = shlex.split(curScriptName) + [ep_obj.location, self.file_path, str(
+                ep_obj.show.tvdbid), str(ep_obj.season), str(ep_obj.episode), str(ep_obj.airdate)]
 
             # use subprocess to run the command and capture output
             self._log(u"Executing command "+str(script_cmd))
             self._log(u"Absolute path to script: "+ek.ek(os.path.abspath, script_cmd[0]), logger.DEBUG)
             try:
                 p = subprocess.Popen(script_cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, cwd=sickbeard.PROG_DIR)
-                out, err = p.communicate() #@UnusedVariable
+                out, err = p.communicate()  # @UnusedVariable
                 self._log(u"Script result: "+str(out), logger.DEBUG)
             except OSError, e:
                 self._log(u"Unable to run extra_script: "+ex(e))
@@ -700,11 +713,12 @@ class PostProcessor(object):
 
         # if the user downloaded it manually and it's higher quality than the existing episode then it's priority
         if new_ep_quality > ep_obj and new_ep_quality != common.Quality.UNKNOWN:
-            self._log(u"This was manually downloaded but it appears to be better quality than what we have so I'm marking it as priority", logger.DEBUG)
+            self._log(
+                u"This was manually downloaded but it appears to be better quality than what we have so I'm marking it as priority", logger.DEBUG)
             return True
 
         # if the user downloaded it manually and it appears to be a PROPER/REPACK then it's priority
-        old_ep_status, old_ep_quality = common.Quality.splitCompositeStatus(ep_obj.status) #@UnusedVariable
+        old_ep_status, old_ep_quality = common.Quality.splitCompositeStatus(ep_obj.status)  # @UnusedVariable
         if self.is_proper and new_ep_quality >= old_ep_quality:
             self._log(u"This was manually downloaded but it appears to be a proper so I'm marking it as priority", logger.DEBUG)
             return True
@@ -721,6 +735,8 @@ class PostProcessor(object):
             cur_release_name = self.folder_name
         elif self.good_results[self.FILE_NAME]:
             cur_release_name = self.file_name
+        else:
+            cur_release_name = self.nzb_name
         return cur_release_name
 
     def process(self):
@@ -807,7 +823,8 @@ class PostProcessor(object):
 
             # if there's an existing file that we don't want to replace stop here
             if existing_file_status in (PostProcessor.EXISTS_LARGER, PostProcessor.EXISTS_SAME):
-                self._log(u"File exists and we are not going to replace it because it's not smaller, quitting post-processing", logger.DEBUG)
+                self._log(
+                    u"File exists and we are not going to replace it because it's not smaller, quitting post-processing", logger.DEBUG)
                 return False
             elif existing_file_status == PostProcessor.EXISTS_SMALLER:
                 self._log(u"File exists and is smaller than the new file so I'm going to replace it", logger.DEBUG)
@@ -817,7 +834,8 @@ class PostProcessor(object):
 
         # if the file is priority then we're going to replace it even if it exists
         else:
-            self._log(u"This download is marked a priority download so I'm going to replace an existing file if I find one", logger.DEBUG)
+            self._log(
+                u"This download is marked a priority download so I'm going to replace an existing file if I find one", logger.DEBUG)
 
         # delete the existing file (and company)
         for cur_ep in [ep_obj] + ep_obj.relatedEps:
