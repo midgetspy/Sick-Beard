@@ -82,6 +82,14 @@
                             </label>
                         </div>
 
+                        <div class="field-pair">
+                            <input type="checkbox" name="allow_high_priority" id="allow_high_priority" #if $sickbeard.ALLOW_HIGH_PRIORITY == True then "checked=\"checked\"" else ""# />
+                            <label class="clearfix" for="allow_high_priority">
+                                <span class="component-title">Allow high priority</span>
+                                <span class="component-desc">Set high priority for downloads of recently aired episodes?</span>
+                            </label>
+                        </div>
+
                         <div class="clearfix"></div>
                         <input type="submit" class="btn config_submitter" value="Save Changes" /><br/>
                         

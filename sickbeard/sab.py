@@ -52,10 +52,9 @@ def sendNZB(nzb):
     if sickbeard.SAB_CATEGORY != None:
         params['cat'] = sickbeard.SAB_CATEGORY
 
-    # if it aired recently make it high priority
-    for curEp in nzb.episodes:
-        if datetime.date.today() - curEp.airdate <= datetime.timedelta(days=7):
-            params['priority'] = 1
+    # use high priority if specified (recently aired episode)
+    if nzb.priority == 1:
+        params['priority'] = 1
 
     # if it's a normal result we just pass SAB the URL
     if nzb.resultType == "nzb":

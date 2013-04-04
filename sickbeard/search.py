@@ -104,6 +104,12 @@ def snatchEpisode(result, endStatus=SNATCHED):
     result: SearchResult instance to be snatched.
     endStatus: the episode status that should be used for the episode object once it's snatched.
     """
+    result.priority = 0 # -1 = low, 0 = normal, 1 = high
+    if sickbeard.ALLOW_HIGH_PRIORITY:
+        # if it aired recently make it high priority
+        for curEp in result.episodes:
+            if datetime.date.today() - curEp.airdate <= datetime.timedelta(days=7):
+                result.priority = 1
 
     # NZBs can be sent straight to SAB or saved to disk
     if result.resultType in ("nzb", "nzbdata"):
@@ -123,15 +129,10 @@ def snatchEpisode(result, endStatus=SNATCHED):
         if sickbeard.TORRENT_METHOD == "blackhole": 
             dlResult = _downloadResult(result)
         else:
-            torrentPriority = 0 # -1 = low, 0 = normal, 1 = high
-            # if it aired recently make it high priority
-            for curEp in result.episodes:
-                if datetime.date.today() - curEp.airdate <= datetime.timedelta(days=7):
-                    torrentPriority = 1
 
             result.content = result.provider.getURL(result.url) if not result.url.startswith('magnet') else None 
             client = clients.getClientIstance(sickbeard.TORRENT_METHOD)()
-            dlResult = client.sendTORRENT(result, torrentPriority)
+            dlResult = client.sendTORRENT(result)
     else:
         logger.log(u"Unknown result type, unable to download it", logger.ERROR)
         dlResult = False

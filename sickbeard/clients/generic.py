@@ -97,10 +97,10 @@ class GenericClient(object):
         """
         return True
 
-    def _set_torrent_priority(self, result, priority):
+    def _set_torrent_priority(self, result):
         """
         This should be overriden should return the True/False from the client
-        when a torrent is set with priority (-1 = low, 0 = normal, 1 = high)
+        when a torrent is set with result.priority (-1 = low, 0 = normal, 1 = high)
         """
         return True
 
@@ -128,7 +128,7 @@ class GenericClient(object):
         
         return torrent_hash
         
-    def sendTORRENT(self, result, priority = 0):
+    def sendTORRENT(self, result):
         
         r_code = False
 
@@ -158,7 +158,7 @@ class GenericClient(object):
             if not self._set_torrent_path(result):
                 logger.log(self.name + u': Unable to set the path for Torrent', logger.ERROR)
 
-            if priority != 0 and not self._set_torrent_priority(result, priority):
+            if result.priority != 0 and not self._set_torrent_priority(result):
                 logger.log(self.name + u': Unable to set priority for Torrent', logger.ERROR)
 
         except Exception, e:

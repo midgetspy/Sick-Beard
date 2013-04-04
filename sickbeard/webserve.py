@@ -939,7 +939,7 @@ class ConfigSearch:
     @cherrypy.expose
     def saveSearch(self, use_nzbs=None, use_torrents=None, nzb_dir=None, sab_username=None, sab_password=None,
                        sab_apikey=None, sab_category=None, sab_host=None, nzbget_password=None, nzbget_category=None, nzbget_host=None,
-                       nzb_method=None, torrent_method=None, usenet_retention=None, search_frequency=None, download_propers=None,
+                       nzb_method=None, torrent_method=None, usenet_retention=None, search_frequency=None, download_propers=None, allow_high_priority=None,
                        torrent_dir=None, torrent_username=None, torrent_password=None, torrent_host=None, torrent_label=None, torrent_path=None, 
                        torrent_ratio=None, torrent_paused=None, ignore_words=None):
 
@@ -957,6 +957,11 @@ class ConfigSearch:
             download_propers = 1
         else:
             download_propers = 0
+
+        if allow_high_priority == "on":
+            allow_high_priority = 1
+        else:
+            allow_high_priority = 0
 
         if use_nzbs == "on":
             use_nzbs = 1
@@ -984,6 +989,7 @@ class ConfigSearch:
         sickbeard.IGNORE_WORDS = ignore_words
         
         sickbeard.DOWNLOAD_PROPERS = download_propers
+        sickbeard.ALLOW_HIGH_PRIORITY = allow_high_priority
 
         sickbeard.SAB_USERNAME = sab_username
         sickbeard.SAB_PASSWORD = sab_password

@@ -103,15 +103,15 @@ class TransmissionAPI(GenericClient):
         
         return self.response.json['result'] == "success"    
 
-    def _set_torrent_priority(self, result, priority):
+    def _set_torrent_priority(self, result):
 
         torrent_id = self._get_torrent_hash(result)
 
         arguments = { 'ids': [torrent_id]}
 
-        if priority == -1:
+        if result.priority == -1:
             arguments['priority-low'] = []
-        elif priority == 1:
+        elif result.priority == 1:
             # set high priority for all files in torrent
             arguments['priority-high'] = []
             # move torrent to the top if the queue
