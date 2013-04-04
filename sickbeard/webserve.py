@@ -1036,6 +1036,7 @@ class ConfigProviders:
                       tvtorrents_digest=None, tvtorrents_hash=None,
                       torrentleech_key=None,
                       btn_api_key=None,
+                      scc_username=None, scc_password=None, 
                       newzbin_username=None, newzbin_password=None,
                       provider_order=None):
 
@@ -1107,6 +1108,8 @@ class ConfigProviders:
                 sickbeard.TORRENTLEECH = curEnabled
             elif curProvider == 'btn':
                 sickbeard.BTN = curEnabled
+            elif curProvider == 'scc':
+                sickbeard.SCC = curEnabled
             elif curProvider in newznabProviderDict:
                 newznabProviderDict[curProvider].enabled = bool(curEnabled)
             else:
@@ -1118,6 +1121,9 @@ class ConfigProviders:
         sickbeard.TORRENTLEECH_KEY = torrentleech_key.strip()
 
         sickbeard.BTN_API_KEY = btn_api_key.strip()
+
+        sickbeard.SCC_USERNAME = scc_username
+        sickbeard.SCC_PASSWORD = scc_password 
 
         sickbeard.NZBSRUS_UID = nzbs_r_us_uid.strip()
         sickbeard.NZBSRUS_HASH = nzbs_r_us_hash.strip()
