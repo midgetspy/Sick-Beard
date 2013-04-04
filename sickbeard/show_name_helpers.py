@@ -57,15 +57,19 @@ def filterBadReleases(name, show):
         logger.log(u"Unable to parse the filename "+name+" into a valid episode", logger.WARNING)
         return False
 
-    #if language not english, search for mandatory, else add german to ignore list
+    #if language not english, search for mandatory
     if show.lang != "en":
         mandatory = [(langCodes[show.lang])]
         if langCodes[show.lang] in resultFilters:
             resultFilters.remove(langCodes[show.lang])
         logger.log(u"Language for \""+show.name+"\" is "+show.lang+" so im looking for \""+langCodes[show.lang]+"\" in release names", logger.DEBUG)
+    #if show is in english append all languages to the ignore list
     elif show.lang == "en":
-        if not "german" in resultFilters:
-            resultFilters.append("german")
+        for language in langCodes.values():
+            if not language in resultFilters:
+                resultFilters.append(language)
+        # if not "german" in resultFilters:
+        #     resultFilters.append("german")
         mandatory = []
         logger.log(u"Language for \""+show.name+"\" is "+show.lang, logger.DEBUG)
 
