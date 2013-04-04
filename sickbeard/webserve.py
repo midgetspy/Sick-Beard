@@ -941,7 +941,7 @@ class ConfigSearch:
                        sab_apikey=None, sab_category=None, sab_host=None, nzbget_password=None, nzbget_category=None, nzbget_host=None,
                        nzb_method=None, torrent_method=None, usenet_retention=None, search_frequency=None, download_propers=None, allow_high_priority=None,
                        torrent_dir=None, torrent_username=None, torrent_password=None, torrent_host=None, torrent_label=None, torrent_path=None, 
-                       torrent_ratio=None, torrent_paused=None, ignore_words=None):
+                       torrent_ratio=None, torrent_paused=None, torrent_high_bandwidth=None, ignore_words=None):
 
         results = []
 
@@ -1018,6 +1018,11 @@ class ConfigSearch:
         else:
             torrent_paused = 0
         sickbeard.TORRENT_PAUSED = torrent_paused
+        if torrent_high_bandwidth == "on":
+            torrent_high_bandwidth = 1
+        else:
+            torrent_high_bandwidth = 0
+        sickbeard.TORRENT_HIGH_BANDWIDTH = torrent_high_bandwidth
 
         if torrent_host and not re.match('https?://.*', torrent_host):
             torrent_host = 'http://' + torrent_host
@@ -1243,7 +1248,7 @@ class ConfigProviders:
     def saveProviders(self, nzbmatrix_username=None, nzbmatrix_apikey=None,
                       nzbs_r_us_uid=None, nzbs_r_us_hash=None, newznab_string='',
                       omgwtfnzbs_uid=None, omgwtfnzbs_key=None,
-                      tvtorrents_digest=None, tvtorrents_hash=None,tvtorrents_username=None,tvtorrents_password=None,
+                      tvtorrents_digest=None, tvtorrents_hash=None,tvtorrents_username=None,tvtorrents_password=None, 
                       btn_api_key=None,
                       dtt_norar = None, dtt_single = None,
                       thepiratebay_trusted=None, thepiratebay_proxy=None, thepiratebay_proxy_url=None,

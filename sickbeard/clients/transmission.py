@@ -116,7 +116,8 @@ class TransmissionAPI(GenericClient):
             arguments['priority-high'] = []
             # move torrent to the top if the queue
             arguments['queuePosition'] = 0
-            #arguments['bandwidthPriority'] = priority
+            if sickbeard.TORRENT_HIGH_BANDWIDTH:
+                arguments['bandwidthPriority'] = 1
         else:
             arguments['priority-normal'] = []
         
