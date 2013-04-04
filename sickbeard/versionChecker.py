@@ -20,6 +20,7 @@ import sickbeard
 from sickbeard import version, ui
 from sickbeard import logger
 from sickbeard import scene_exceptions
+from sickbeard import network_timezones
 from sickbeard.exceptions import ex
 
 import os, platform, shutil
@@ -52,6 +53,9 @@ class CheckVersion():
         
         # refresh scene exceptions too
         scene_exceptions.retrieve_exceptions()
+
+        # refresh network timezones
+        network_timezones.update_network_dict()
 
     def find_install_type(self):
         """
@@ -115,7 +119,6 @@ class WindowsUpdateManager(UpdateManager):
         self.version_url = 'https://raw.github.com/midgetspy/Sick-Beard/windows_binaries/updates.txt'
 
     def _find_installed_version(self):
-        return int(sickbeard.version.SICKBEARD_VERSION[6:])
 
     def _find_newest_version(self, whole_link=False):
         """
@@ -138,7 +141,6 @@ class WindowsUpdateManager(UpdateManager):
                 if whole_link:
                     return curLine.strip()
                 else:
-                    return int(match.group(1))
 
         return None
 

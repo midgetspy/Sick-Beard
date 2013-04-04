@@ -24,6 +24,7 @@ import re, socket
 import shutil
 import traceback
 import time, sys
+import hashlib
 
 from httplib import BadStatusLine
 
@@ -173,6 +174,51 @@ def getURL (url, headers=[]):
         return None
 
     return result
+
+def _remove_file_failed(file):
+    try:
+        os.remove(file)
+    except:
+        pass
+
+def download_file(url, filename):
+    try:
+        req = urllib2.urlopen(url)
+        CHUNK = 16 * 1024
+        with open(filename, 'wb') as fp:
+            while True:
+                chunk = req.read(CHUNK)
+                if not chunk: break
+                fp.write(chunk)
+            fp.close()
+        req.close()
+
+    except urllib2.HTTPError, e:
+        _remove_file_failed(filename)
+        logger.log(u"HTTP error " + str(e.code) + " while loading URL " + url, logger.WARNING)
+        return False
+    except urllib2.URLError, e:
+        _remove_file_failed(filename)
+        logger.log(u"URL error " + str(e.reason) + " while loading URL " + url, logger.WARNING)
+        return False
+    except BadStatusLine:
+        _remove_file_failed(filename)
+        logger.log(u"BadStatusLine error while loading URL " + url, logger.WARNING)
+        return False
+    except socket.timeout:
+        _remove_file_failed(filename)
+        logger.log(u"Timed out while loading URL " + url, logger.WARNING)
+        return False
+    except ValueError:
+        _remove_file_failed(filename)
+        logger.log(u"Unknown error while loading URL " + url, logger.WARNING)
+        return False
+    except Exception:
+        _remove_file_failed(filename)
+        logger.log(u"Unknown exception while loading URL " + url + ": " + traceback.format_exc(), logger.WARNING)
+        return False
+    
+    return True
 
 def findCertainShow (showList, tvdbid):
     results = filter(lambda x: x.tvdbid == tvdbid, showList)
@@ -718,4 +764,23 @@ def backupVersionedFile(oldFile, version):
         if numTries >= 10:
             logger.log(u"Unable to back up "+oldFile+", please do it manually.")
             sys.exit(1)
-            
+
+# try to convert to int, if it fails the default will be returned
+def tryInt(s, s_default = 0):
+    try: return int(s)
+    except: return s_default
+
+# generates a md5 hash of a file
+def md5_for_file(filename, block_size=2**16):
+    try:    
+        with open(filename,'rb') as f:
+            md5 = hashlib.md5()
+            while True:
+                data = f.read(block_size)
+                if not data:
+                    break
+                md5.update(data)
+            f.close()
+            return md5.hexdigest()
+    except Exception:
+        return None

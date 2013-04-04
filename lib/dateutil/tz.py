@@ -930,7 +930,7 @@ def gettz(name=None):
                     except OSError:
                         pass
                 if not tz:
-                    from dateutil.zoneinfo import gettz
+                    from lib.dateutil.zoneinfo import gettz
                     tz = gettz(name)
                 if not tz:
                     for c in name:
