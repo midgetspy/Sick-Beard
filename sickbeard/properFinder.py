@@ -79,7 +79,7 @@ class ProperFinder():
             # if they haven't been added by a different provider than add the proper to the list
             for x in curPropers:
                 name = self._genericName(x.name)
-                
+
                 if not name in propers:
                     logger.log(u"Found new proper: "+x.name, logger.DEBUG)
                     x.provider = curProvider
@@ -132,7 +132,7 @@ class ProperFinder():
 
                         # set the tvdbid in the db to the show's tvdbid
                         curProper.tvdbid = curShow.tvdbid
-
+                        curProper.show = curShow
                         # since we found it, break out
                         break
 
@@ -142,8 +142,8 @@ class ProperFinder():
 
             if curProper.tvdbid == -1:
                 continue
-            
-            if not show_name_helpers.filterBadReleases(curProper.name):
+
+            if not show_name_helpers.filterBadReleases(curProper.name, curProper.show):
                 logger.log(u"Proper "+curProper.name+" isn't a valid scene release that we want, igoring it", logger.DEBUG)
                 continue
 
@@ -235,7 +235,7 @@ class ProperFinder():
 
                 # snatch it
                 downloadResult = search.snatchEpisode(result, SNATCHED_PROPER)
-                
+
                 return downloadResult
 
     def _genericName(self, name):
