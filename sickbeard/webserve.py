@@ -857,7 +857,7 @@ class ConfigGeneral:
     @cherrypy.expose
     def saveGeneral(self, log_dir=None, web_port=None, web_log=None, web_ipv6=None,
                     launch_browser=None, web_username=None, use_api=None, api_key=None,
-                    web_password=None, version_notify=None, enable_https=None, https_cert=None, https_key=None):
+                    web_password=None, version_notify=None, enable_https=None, https_cert=None, https_key=None, display_posters=None):
 
         results = []
 
@@ -875,6 +875,11 @@ class ConfigGeneral:
             launch_browser = 1
         else:
             launch_browser = 0
+            
+        if display_posters == "on":
+            display_posters = 1
+        else:
+            display_posters = 0            
 
         if version_notify == "on":
             version_notify = 1
@@ -885,6 +890,7 @@ class ConfigGeneral:
             results += ["Unable to create directory " + os.path.normpath(log_dir) + ", log dir not changed."]
 
         sickbeard.LAUNCH_BROWSER = launch_browser
+        sickbeard.DISPLAY_POSTERS = display_posters
 
         sickbeard.WEB_PORT = int(web_port)
         sickbeard.WEB_IPV6 = web_ipv6
