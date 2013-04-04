@@ -52,7 +52,7 @@ def processDir (dirName, nzbName=None, recurse=False):
             break
     else:
         path, dirs = ek.ek(os.path.split, dirName) #Script Post Processing
-        if os.path.isfile(os.path.join(dirName, nzbName)): #For single file without Subdir
+        if not nzbName is None and os.path.isfile(os.path.join(dirName, nzbName)): #For single file without Subdir
             files = [os.path.join(dirName, nzbName)]
             dirs = []
         else:    
