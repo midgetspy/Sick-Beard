@@ -128,7 +128,7 @@ class NZBIndexProvider(generic.NZBProvider):
 
         results = []
 
-        for curResult in self._doSearch("PROPER"):
+        for curResult in self._doSearch("PROPER | REPACK"):
 
             (title, url) = self._get_title_and_url(curResult)
 
