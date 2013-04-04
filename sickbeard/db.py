@@ -16,7 +16,7 @@
 # You should have received a copy of the GNU General Public License
 # along with Sick Beard.  If not, see <http://www.gnu.org/licenses/>.
 
-from __future__ import with_statement 
+from __future__ import with_statement
 
 import os.path
 import re
@@ -53,6 +53,64 @@ class DBConnection:
             self.connection.row_factory = self._dict_factory
         else:
             self.connection.row_factory = sqlite3.Row
+
+    def checkDBVersion(self):
+        try:
+            result = self.select("SELECT db_version FROM db_version")
+        except sqlite3.OperationalError, e:
+            if "no such table: db_version" in e.message:
+                return 0
+
+        if result:
+            return int(result[0]["db_version"])
+        else:
+            return 0
+
+    def mass_action(self, querylist):
+
+        with db_lock:
+
+            if querylist == None:
+                return
+
+            sqlResult = []
+            attempt = 0
+
+            while attempt < 5:
+                try:
+                    for qu in querylist:
+                        query = qu[0]
+                        if len(qu) > 1:
+                            args = qu[1]
+                        else:
+                            args = None
+                        if args == None:
+                            logger.log(query, logger.DEBUG)
+                            sqlResult.append(self.connection.execute(query))
+                        else:
+                            logger.log(query + " with args " + str(args), logger.DEBUG)
+                            sqlResult.append(self.connection.execute(query, args))
+                    self.connection.commit()
+                    return sqlResult
+                except sqlite3.OperationalError, e:
+                    sqlResult = []
+                    if self.connection:
+                        self.connection.rollback()
+                    if "unable to open database file" in e.message or "database is locked" in e.message:
+                        logger.log(u"DB error: " + ex(e), logger.WARNING)
+                        attempt += 1
+                        time.sleep(1)
+                    else:
+                        logger.log(u"DB error: " + ex(e), logger.ERROR)
+                        raise
+                except sqlite3.DatabaseError, e:
+                    sqlResult = []
+                    if self.connection:
+                        self.connection.rollback()
+                    logger.log(u"Fatal error executing query: " + ex(e), logger.ERROR)
+                    raise
+
+            return sqlResult
 
     def action(self, query, args=None):
 
