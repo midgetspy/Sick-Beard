@@ -1130,29 +1130,29 @@ class ConfigProviders:
             else:
                 logger.log(u"don't know what " + curProvider + " is, skipping")
 
-            if thepiratebay_trusted == "on":
-                thepiratebay_trusted = 1
-            else:
-                thepiratebay_trusted = 0
+        if thepiratebay_trusted == "on":
+            thepiratebay_trusted = 1
+        else:
+            thepiratebay_trusted = 0
 
-            sickbeard.THEPIRATEBAY_TRUSTED = thepiratebay_trusted
+        sickbeard.THEPIRATEBAY_TRUSTED = thepiratebay_trusted
 
-            if thepiratebay_url and not re.match('https?://.*', thepiratebay_url):
-                thepiratebay_url = 'http://' + thepiratebay_url
+        if thepiratebay_url and not re.match('https?://.*', thepiratebay_url):
+            thepiratebay_url = 'http://' + thepiratebay_url
 
-            if not thepiratebay_url.endswith('/'):
-                thepiratebay_url = thepiratebay_url + '/'
+        if not thepiratebay_url.endswith('/'):
+            thepiratebay_url = thepiratebay_url + '/'
 
-            sickbeard.THEPIRATEBAY_URL = thepiratebay_url
+        sickbeard.THEPIRATEBAY_URL = thepiratebay_url
 
-            if thepiratebay_proxy == "on":
-                thepiratebay_proxy = 1
-                sickbeard.THEPIRATEBAY_PROXY_URL = thepiratebay_proxy_url.strip()
-            else:
-                thepiratebay_proxy = 0
-                sickbeard.THEPIRATEBAY_PROXY_URL = ""
+        if thepiratebay_proxy == "on":
+            thepiratebay_proxy = 1
+            sickbeard.THEPIRATEBAY_PROXY_URL = thepiratebay_proxy_url.strip()
+        else:
+            thepiratebay_proxy = 0
+            sickbeard.THEPIRATEBAY_PROXY_URL = ""
 
-            sickbeard.THEPIRATEBAY_PROXY = thepiratebay_proxy
+        sickbeard.THEPIRATEBAY_PROXY = thepiratebay_proxy
 
         sickbeard.TVTORRENTS_DIGEST = tvtorrents_digest.strip()
         sickbeard.TVTORRENTS_HASH = tvtorrents_hash.strip()
