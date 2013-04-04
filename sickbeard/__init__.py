@@ -30,7 +30,7 @@ from threading import Lock
 
 # apparently py2exe won't build these unless they're imported somewhere
 from sickbeard import providers, metadata
-from providers import ezrss, tvtorrents, torrentleech, btn, nzbsrus, newznab, womble, nzbx, omgwtfnzbs
+from providers import ezrss, tvtorrents, torrentleech, btn, scc, nzbsrus, newznab, womble, nzbx, omgwtfnzbs
 from sickbeard.config import CheckSection, check_setting_int, check_setting_str, ConfigMigrator
 
 from sickbeard import searchCurrent, searchBacklog, showUpdater, versionChecker, properFinder, autoPostProcesser
@@ -333,7 +333,7 @@ def initialize(consoleLogging=True):
                 USE_PLEX, PLEX_NOTIFY_ONSNATCH, PLEX_NOTIFY_ONDOWNLOAD, PLEX_UPDATE_LIBRARY, \
                 PLEX_SERVER_HOST, PLEX_HOST, PLEX_USERNAME, PLEX_PASSWORD, \
                 showUpdateScheduler, __INITIALIZED__, LAUNCH_BROWSER, showList, loadingShowList, \
-                NZBS, NZBS_UID, NZBS_HASH, EZRSS, TVTORRENTS, TVTORRENTS_DIGEST, TVTORRENTS_HASH, BTN, BTN_API_KEY, TORRENTLEECH, TORRENTLEECH_KEY, \
+                NZBS, NZBS_UID, NZBS_HASH, EZRSS, TVTORRENTS, TVTORRENTS_DIGEST, TVTORRENTS_HASH, BTN, BTN_API_KEY, SCC, SCC_USERNAME, SCC_PASSWORD, TORRENTLEECH, TORRENTLEECH_KEY, \
                 TORRENT_DIR, USENET_RETENTION, SOCKET_TIMEOUT, \
                 SEARCH_FREQUENCY, DEFAULT_SEARCH_FREQUENCY, BACKLOG_SEARCH_FREQUENCY, \
                 QUALITY_DEFAULT, FLATTEN_FOLDERS_DEFAULT, STATUS_DEFAULT, \
@@ -550,6 +550,10 @@ def initialize(consoleLogging=True):
         CheckSection(CFG, 'BTN')
         BTN = bool(check_setting_int(CFG, 'BTN', 'btn', 0))
         BTN_API_KEY = check_setting_str(CFG, 'BTN', 'btn_api_key', '')
+
+        SCC =  bool(check_setting_int(CFG, 'SCC', 'scc', 0)) 
+        SCC_USERNAME = check_setting_str(CFG, 'SCC', 'scc_username', '')
+        SCC_PASSWORD = check_setting_str(CFG, 'SCC', 'scc_password', '')
 
         CheckSection(CFG, 'TorrentLeech')
         TORRENTLEECH = bool(check_setting_int(CFG, 'TorrentLeech', 'torrentleech', 0))
@@ -1043,6 +1047,11 @@ def save_config():
     new_config['BTN'] = {}
     new_config['BTN']['btn'] = int(BTN)
     new_config['BTN']['btn_api_key'] = BTN_API_KEY
+
+    new_config['SCC'] = {}
+    new_config['SCC']['scc'] = int(SCC)
+    new_config['SCC']['scc_username'] = SCC_USERNAME
+    new_config['SCC']['scc_password'] = SCC_PASSWORD
 
     new_config['TorrentLeech'] = {}
     new_config['TorrentLeech']['torrentleech'] = int(TORRENTLEECH)
