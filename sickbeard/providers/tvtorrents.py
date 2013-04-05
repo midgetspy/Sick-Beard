@@ -108,7 +108,14 @@ class TvTorrentsProvider(generic.TorrentProvider):
         if not show:
             return []
 
-        if season != None and not show.air_by_date:
+        seasonEp = show.getAllEpisodes(season)
+
+        wantedEp = [x for x in seasonEp if show.getOverview(x.status) in (Overview.WANTED, Overview.QUAL)]          
+
+        #If Every episode in Season is a wanted Episode then only search for complete season 
+        # (TvTorrents add a complete season torrent at once when the last episode in the seasion has been
+        # broadcast, episode torrents are then deleted)
+        if wantedEp == seasonEp and not show.air_by_date:
             search_string = {'Season': [], 'Episode': []}
             for show_name in set(show_name_helpers.allPossibleShowNames(show)):
                 ep_string = show_name +' Season %d Complete' % int(season) #1) ShowName Season X Complete   
