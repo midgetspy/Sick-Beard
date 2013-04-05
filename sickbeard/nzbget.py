@@ -59,10 +59,9 @@ def sendNZB(nzb):
             logger.log(u"Protocol Error: " + e.errmsg, logger.ERROR)
         return False
 
-    # if it aired recently make it high priority
-    for curEp in nzb.episodes:
-        if datetime.date.today() - curEp.airdate <= datetime.timedelta(days=7):
-            addToTop = True
+    # add to top of queue if high priority is specified (recently aired episode)
+    if nzb.priority == 1:
+        addToTop = True
 
     # if it's a normal result need to download the NZB content
     if nzb.resultType == "nzb":
@@ -85,4 +84,4 @@ def sendNZB(nzb):
         return True
     else:
         logger.log(u"NZBget could not add %s to the queue" % (nzb.name + ".nzb"), logger.ERROR)
-        return False
+        return False

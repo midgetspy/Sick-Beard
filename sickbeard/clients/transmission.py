@@ -79,7 +79,7 @@ class TransmissionAPI(GenericClient):
 
     def _set_torrent_ratio(self, result):
         
-        torrent_id = self.response.json["arguments"]["torrent-added"]["id"]
+        torrent_id = self._get_torrent_hash(result)
         
         if sickbeard.TORRENT_RATIO == '':
             # Use global settings
@@ -102,5 +102,31 @@ class TransmissionAPI(GenericClient):
         self._request(method='post', data=post_data)            
         
         return self.response.json['result'] == "success"    
+
+    def _set_torrent_priority(self, result):
+
+        torrent_id = self._get_torrent_hash(result)
+
+        arguments = { 'ids': [torrent_id]}
+
+        if result.priority == -1:
+            arguments['priority-low'] = []
+        elif result.priority == 1:
+            # set high priority for all files in torrent
+            arguments['priority-high'] = []
+            # move torrent to the top if the queue
+            arguments['queuePosition'] = 0
+            if sickbeard.TORRENT_HIGH_BANDWIDTH:
+                arguments['bandwidthPriority'] = 1
+        else:
+            arguments['priority-normal'] = []
+        
+        post_data = json.dumps({'arguments': arguments,
+                                'method': 'torrent-set',
+                                })       
+        self._request(method='post', data=post_data)            
+        
+        return self.response.json['result'] == "success"    
+	
 
 api = TransmissionAPI()

@@ -82,6 +82,14 @@
                             </label>
                         </div>
 
+                        <div class="field-pair">
+                            <input type="checkbox" name="allow_high_priority" id="allow_high_priority" #if $sickbeard.ALLOW_HIGH_PRIORITY == True then "checked=\"checked\"" else ""# />
+                            <label class="clearfix" for="allow_high_priority">
+                                <span class="component-title">Allow high priority</span>
+                                <span class="component-desc">Set high priority for downloads of recently aired episodes?</span>
+                            </label>
+                        </div>
+
                         <div class="clearfix"></div>
                         <input type="submit" class="btn config_submitter" value="Save Changes" /><br/>
                         
@@ -384,6 +392,17 @@
                                 <label class="nocheck clearfix">
                                     <span class="component-title">&nbsp;</span>
                                     <span class="component-desc">Don't start downloading when torrent is added?</span>
+                                </label>
+                            </div>
+
+                            <div class="field-pair" id="Torrent_High_Bandwidth">
+                                <label class="nocheck clearfix">
+                                    <span class="component-title" id="torrent_high_bandwidth_desc">Allow high bandwidth</span>
+                                    <input type="checkbox" name="torrent_high_bandwidth" class="enabler" id="torrent_high_bandwidth" #if $sickbeard.TORRENT_HIGH_BANDWIDTH == True then "checked=\"checked\"" else ""# />
+                                </label>
+                                <label class="nocheck clearfix">
+                                    <span class="component-title">&nbsp;</span>
+                                    <span class="component-desc">Use high bandwidth allocation on torrent if priority is high (recently aired episode if enabled)?</span>
                                 </label>
                             </div>
 

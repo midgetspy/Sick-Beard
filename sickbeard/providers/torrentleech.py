@@ -95,24 +95,23 @@ class TorrentLeechProvider(generic.TorrentProvider):
         if not show:
             return []
 
-        seasonEp = show.getAllEpisodes(season)
-
-        wantedEp = [x for x in seasonEp if show.getOverview(x.status) in (Overview.WANTED, Overview.QUAL)]          
-
-        #If Every episode in Season is a wanted Episode then search for Season first
-        if wantedEp == seasonEp and not show.air_by_date:
+        # If season is specified and show not "air by date" we get only the season search strings as these also should return matches
+        # for all episodes from that season
+        if season != None and not show.air_by_date:
             search_string = {'Season': [], 'Episode': []}
             for show_name in set(show_name_helpers.allPossibleShowNames(show)):
                 ep_string = show_name +' S%02d' % int(season) #1) ShowName SXX   
                 search_string['Season'].append(ep_string)
-                      
-        #Building the search string with the episodes we need         
-        for ep_obj in wantedEp:
-            search_string['Episode'] += self._get_episode_search_strings(ep_obj)[0]['Episode']
-        
-        #If no Episode is needed then return an empty list
-        if not search_string['Episode']:
-            return []
+	else:
+            seasonEp = show.getAllEpisodes(season)
+            wantedEp = [x for x in seasonEp if show.getOverview(x.status) in (Overview.WANTED, Overview.QUAL)]          
+            #Building the search string with the episodes we need         
+            for ep_obj in wantedEp:
+                search_string['Episode'] += self._get_episode_search_strings(ep_obj)[0]['Episode']
+            
+            #If no Episode is needed then return an empty list
+            if not search_string['Episode']:
+                return []
         
         return [search_string]
 
