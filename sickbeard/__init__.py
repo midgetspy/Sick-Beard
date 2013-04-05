@@ -372,7 +372,6 @@ DISPLAY_SHOW_SPECIALS = None
 COMING_EPS_LAYOUT = None
 COMING_EPS_DISPLAY_PAUSED = None
 COMING_EPS_SORT = None
-COMING_EPS_MISSED_DAYS = None
 COMING_EPS_MISSED_RANGE = None
 
 USE_SUBTITLES = False
@@ -1431,10 +1430,8 @@ def save_config():
     new_config['GUI']['home_layout'] = HOME_LAYOUT
     new_config['GUI']['display_show_specials'] = int(DISPLAY_SHOW_SPECIALS)
     new_config['GUI']['coming_eps_layout'] = COMING_EPS_LAYOUT
-    new_config['GUI']['coming_eps_display_paused'] = helpers.tryInt(COMING_EPS_DISPLAY_PAUSED)
+    new_config['GUI']['coming_eps_display_paused'] = int(COMING_EPS_DISPLAY_PAUSED)
     new_config['GUI']['coming_eps_sort'] = COMING_EPS_SORT
-    new_config['General']['coming_eps_missed_days'] = COMING_EPS_MISSED_DAYS
-	new_config['General']['coming_eps_missed_days'] = COMING_EPS_MISSED_DAYS
 
     new_config['Subtitles'] = {}
     new_config['Subtitles']['use_subtitles'] = int(USE_SUBTITLES)

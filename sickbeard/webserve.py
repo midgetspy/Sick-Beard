@@ -64,7 +64,7 @@ except ImportError:
     from lib import simplejson as json
 
 try:
-import xml.etree.cElementTree as etree
+    import xml.etree.cElementTree as etree
 except ImportError:
     import xml.etree.ElementTree as etree
 
@@ -3053,7 +3053,7 @@ class Home:
     
     @cherrypy.expose
     def updateXBMC(self, showName=None):
-        if sickbeard.XBMC_UPDATE_ONLYFIRST:
+
         # only send update to first host in the list -- workaround for xbmc sql backend users
         if sickbeard.XBMC_UPDATE_ONLYFIRST:
             # only send update to first host in the list -- workaround for xbmc sql backend users
@@ -3460,7 +3460,7 @@ class WebInterface:
         today = today1.toordinal()
         next_week1 = (datetime.date.today() + datetime.timedelta(days=7))
         next_week = next_week1.toordinal()
-        recently = (datetime.date.today() - datetime.timedelta(days=sickbeard.COMING_EPS_MISSED_DAYS)).toordinal()
+        recently = (datetime.date.today() - datetime.timedelta(days=sickbeard.COMING_EPS_MISSED_RANGE)).toordinal()
 
         done_show_list = []
         qualList = Quality.DOWNLOADED + Quality.SNATCHED + [ARCHIVED, IGNORED]
@@ -3514,7 +3514,8 @@ class WebInterface:
             foreign_timezone = network_timezones.get_network_timezone(item['network'], network_dict, sb_timezone)
             foreign_naive = datetime.datetime(te.year, te.month, te.day, hr, m,tzinfo=foreign_timezone)
             sql_results[index]['localtime'] = foreign_naive.astimezone(sb_timezone)
-        
+            
+            
         sql_results.sort(sorts[sickbeard.COMING_EPS_SORT])
 
         t = PageTemplate(file="comingEpisodes.tmpl")
