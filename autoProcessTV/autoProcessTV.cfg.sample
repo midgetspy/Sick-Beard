@@ -1,6 +1,6 @@
 [SickBeard]
 host=localhost
-port=8081
+port=8083
 username=
 password=
 web_root=
