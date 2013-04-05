@@ -85,7 +85,14 @@
                             <input type="checkbox" class="enabler" #if $sickbeard.SUBTITLES_DIR_SUB then " checked=\"checked\"" else ""# id="subtitles_dir_sub" name="subtitles_dir_sub">
                             <label for="subtitles_dir_subs" class="clearfix">
                                 <span class="component-title">Use Subs Folder</span>
-		                                <span class="component-desc">Use Subs folder in episode path (usefull for Xbmc Subtitles plugin users) ? Do not use if you use a customd dir</span>
+		                                <span class="component-desc">Use Subs folder in episode path (usefull for Xbmc Subtitles plugin users) ? Do not use if you use a custom dir</span>
+                            </label>
+                        </div>
+                        		<div class="field-pair">
+                            <input type="checkbox" class="enabler" #if $sickbeard.SUBSNOLANG then " checked=\"checked\"" else ""# id="subsnolang" name="subsnolang">
+                            <label for="subsnolang" class="clearfix">
+                                <span class="component-title">Create Sub Files without language code</span>
+		                                <span class="component-desc">Create a sub file without language code next to the language coded one (usefull for players which needs exactly same name between video and srt files</span>
                             </label>
                         </div>
 		                        <div class="field-pair">

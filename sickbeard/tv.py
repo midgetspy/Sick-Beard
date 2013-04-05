@@ -844,38 +844,6 @@ class TVShow(object):
             for episodeLoc in episodes:
                 episode = self.makeEpFromFile(episodeLoc['location']);
                 subtitles = episode.downloadSubtitles()
-        
-                if sickbeard.SUBTITLES_DIR:
-                    for video in subtitles:
-                        subs_new_path = ek.ek(os.path.join, os.path.dirname(video.path), sickbeard.SUBTITLES_DIR)
-                        dir_exists = helpers.makeDir(subs_new_path)
-                        if not dir_exists:
-                            logger.log(u"Unable to create subtitles folder "+subs_new_path, logger.ERROR)
-                        else:
-                            helpers.chmodAsParent(subs_new_path)
-                        
-                        for subtitle in subtitles.get(video):
-                            new_file_path = ek.ek(os.path.join, subs_new_path, os.path.basename(subtitle.path))
-                            helpers.moveFile(subtitle.path, new_file_path)
-                            helpers.chmodAsParent(new_file_path)
-                else:
-                    if sickbeard.SUBTITLES_DIR_SUB:
-                        for video in subtitles:
-                            subs_new_path = os.path.join(self._location,"Subs")
-                            dir_exists = helpers.makeDir(subs_new_path)
-                            if not dir_exists:
-                                logger.log(u"Unable to create subtitles folder "+subs_new_path, logger.ERROR)
-                            else:
-                                helpers.chmodAsParent(subs_new_path)
-                        
-                        for subtitle in subtitles.get(video):
-                            new_file_path = ek.ek(os.path.join, subs_new_path, os.path.basename(subtitle.path))
-                            helpers.moveFile(subtitle.path, new_file_path)
-                            helpers.chmodAsParent(new_file_path)
-                    else :
-                        for video in subtitles:
-                            for subtitle in subtitles.get(video):
-                                helpers.chmodAsParent(subtitle.path)
                 
         except Exception as e:
             logger.log("Error occurred when downloading subtitles: " + str(e), logger.DEBUG)
@@ -1132,8 +1100,10 @@ class TVEpisode(object):
                 for subtitle in subtitles.get(video):
                     new_file_path = ek.ek(os.path.join, subs_new_path, os.path.basename(subtitle.path))
                     helpers.moveFile(subtitle.path, new_file_path)
+                    if sickbeard.SUBSNOLANG:
+                                helpers.copyFile(new_file_path,new_file_path[:-6]+"srt")
                        
-        if sickbeard.SUBTITLES_DIR_SUB:
+        elif sickbeard.SUBTITLES_DIR_SUB:
             for video in subtitles:
                 subs_new_path = os.path.join(os.path.dirname(video.path), "Subs")
                 if not os.path.isdir(subs_new_path):
@@ -1143,6 +1113,16 @@ class TVEpisode(object):
                     new_file_path = ek.ek(os.path.join, subs_new_path, os.path.basename(subtitle.path))
                     helpers.moveFile(subtitle.path, new_file_path)
                     subtitle.path=new_file_path
+                    if sickbeard.SUBSNOLANG:
+                                helpers.copyFile(new_file_path,new_file_path[:-6]+"srt")
+                                subtitle.path=new_file_path
+        else:
+                for video in subtitles:
+                    for subtitle in subtitles.get(video):
+                        if sickbeard.SUBSNOLANG:
+                            helpers.copyFile(subtitle.path,subtitle.path[:-6]+"srt")
+                            helpers.chmodAsParent(subtitle.path[:-6]+"srt")
+                        helpers.chmodAsParent(subtitle.path) 
         return subtitles
 
 

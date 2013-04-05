@@ -413,25 +413,8 @@ class Manage:
                 show = sickbeard.helpers.findCertainShow(sickbeard.showList, int(cur_tvdb_id))
                 subtitles = show.getEpisode(int(season), int(episode)).downloadSubtitles()
                 
-                if sickbeard.SUBTITLES_DIR:
-                    for video in subtitles:
-                        subs_new_path = ek.ek(os.path.join, os.path.dirname(video.path), sickbeard.SUBTITLES_DIR)
-                        if not ek.ek(os.path.isdir, subs_new_path):
-                            ek.ek(os.mkdir, subs_new_path)
-                        
-                        for subtitle in subtitles.get(video):
-                            new_file_path = ek.ek(os.path.join, subs_new_path, os.path.basename(subtitle.path))
-                            helpers.moveFile(subtitle.path, new_file_path)
-                       
-                if sickbeard.SUBTITLES_DIR_SUB:
-                    for video in subtitles:
-                        subs_new_path = os.path.join(os.path.dirname(video.path),"Subs")
-                        if not os.path.isdir(subs_new_path):
-                            os.makedirs(subs_new_path)
-                        
-                        for subtitle in subtitles.get(video):
-                            new_file_path = ek.ek(os.path.join, subs_new_path, os.path.basename(subtitle.path))
-                            helpers.moveFile(subtitle.path, new_file_path)
+                      
+                    
                         
         redirect('/manage/subtitleMissed')
 
@@ -1752,7 +1735,7 @@ class ConfigSubtitles:
         return _munge(t)
 
     @cherrypy.expose
-    def saveSubtitles(self, use_subtitles=None, subtitles_plugins=None, subtitles_languages=None, subtitles_dir=None, subtitles_dir_sub=None, service_order=None, subtitles_history=None):
+    def saveSubtitles(self, use_subtitles=None, subtitles_plugins=None, subtitles_languages=None, subtitles_dir=None, subtitles_dir_sub=None, subsnolang = None, service_order=None, subtitles_history=None):
         results = []
 
         if use_subtitles == "on":
@@ -1776,12 +1759,18 @@ class ConfigSubtitles:
         if subtitles_dir_sub == "on":
             subtitles_dir_sub = 1
         else: 
-            subtitles_dir_sub = 0   
+            subtitles_dir_sub = 0
+        
+        if subsnolang == "on":
+            subsnolang = 1
+        else: 
+            subsnolang = 0   
 
         sickbeard.USE_SUBTITLES = use_subtitles
         sickbeard.SUBTITLES_LANGUAGES = [lang.alpha2 for lang in subtitles.isValidLanguage(subtitles_languages.replace(' ', '').split(','))] if subtitles_languages != ''  else ''
         sickbeard.SUBTITLES_DIR = subtitles_dir
-        sickbeard.SUBTITLES_DIR_SUB = subtitles_dir_sub
+        sickbeard.SUBTITLES_DIR_SUB = subtitles_dir_sub        
+        sickbeard.SUBSNOLANG = subsnolang
         sickbeard.SUBTITLES_HISTORY = subtitles_history
         
         # Subtitles services
@@ -3194,6 +3183,9 @@ class Home:
                     for subtitle in subtitles.get(video):
                         new_file_path = ek.ek(os.path.join, subs_new_path, os.path.basename(subtitle.path))
                         helpers.moveFile(subtitle.path, new_file_path)
+                        if sickbeard.SUBSNOLANG:
+                                helpers.copyFile(new_file_path,new_file_path[:-6]+"srt")
+                                helpers.chmodAsParent(new_file_path[:-6]+"srt")
                         helpers.chmodAsParent(new_file_path)
             else:
                     if sickbeard.SUBTITLES_DIR_SUB:
@@ -3208,10 +3200,16 @@ class Home:
                         for subtitle in subtitles.get(video):
                             new_file_path = ek.ek(os.path.join, subs_new_path, os.path.basename(subtitle.path))
                             helpers.moveFile(subtitle.path, new_file_path)
+                            if sickbeard.SUBSNOLANG:
+                                helpers.copyFile(new_file_path,new_file_path[:-6]+"srt")
+                                helpers.chmodAsParent(new_file_path[:-6]+"srt")
                             helpers.chmodAsParent(new_file_path)
                     else:
                         for video in subtitles:
                             for subtitle in subtitles.get(video):
+                                if sickbeard.SUBSNOLANG:
+                                    helpers.copyFile(subtitle.path,subtitle.path[:-6]+"srt")
+                                    helpers.chmodAsParent(subtitle.path[:-6]+"srt")
                                 helpers.chmodAsParent(subtitle.path)            
         except:
             return json.dumps({'result': 'failure'})
