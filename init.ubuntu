@@ -41,7 +41,7 @@ DESC=SickBeard
 ## otherwise default sickbeard is used
 
 ## The defaults
-# Run as username 
+# Run as username
 RUN_AS=${SB_USER-sickbeard}
 
 # Path to app SB_HOME=path_to_app_SickBeard.py
@@ -71,6 +71,8 @@ DAEMON_OPTS=" SickBeard.py -q --daemon --nolaunch --pidfile=${PID_FILE} --datadi
 test -x $DAEMON || exit 0
 
 set -e
+
+. /lib/lsb/init-functions
 
 # Create PID directory if not exist and ensure the SickBeard user can write to it
 if [ ! -d $PID_PATH ]; then
@@ -106,9 +108,14 @@ case "$1" in
         start-stop-daemon --stop --pidfile $PID_FILE --retry 15
         start-stop-daemon -d $APP_PATH -c $RUN_AS $EXTRA_SSD_OPTS --start --pidfile $PID_FILE --exec $DAEMON -- $DAEMON_OPTS
         ;;
+
+  status)
+       status_of_proc -p $PIDFILE $NAME $NAME
+        ;;
+
     *)
         N=/etc/init.d/$NAME
-        echo "Usage: $N {start|stop|restart|force-reload}" >&2
+        echo "Usage: $N {start|stop|restart|force-reload|status}" >&2
         exit 1
         ;;
 esac
