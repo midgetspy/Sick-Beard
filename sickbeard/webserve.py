@@ -787,7 +787,7 @@ class ConfigSearch:
         # handle some special cases
         sickbeard.USE_TORRENTS = 1 if postData.get('use_torrents') == "on" else 0
         sickbeard.USE_NZBS = 1 if postData.get('use_nzbs') == "on" else 0
-        sickbeard.TORRENT_PAUSE = 1 if postData.get('torrent_pause') == "on" else 0
+        sickbeard.TORRENT_PAUSED = 1 if postData.get('torrent_paused') == "on" else 0
         sickbeard.DOWLOAD_PROPERS = 1 if postData.get('download_propers') == "on" else 0
         sickbeard.USENET_RETENTION = int(postData.get('usenet_retention', 200))
 
