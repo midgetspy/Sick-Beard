@@ -41,7 +41,7 @@ DESC=SickBeard
 ## otherwise default sickbeard is used
 
 ## The defaults
-# Run as username 
+# Run as username
 RUN_AS=${SB_USER-sickbeard}
 
 # Path to app SB_HOME=path_to_app_SickBeard.py
@@ -72,16 +72,14 @@ test -x $DAEMON || exit 0
 
 set -e
 
-# Create PID directory if not exist and ensure the SickBeard user can write to it
-if [ ! -d $PID_PATH ]; then
-    mkdir -p $PID_PATH
-    chown $RUN_AS $PID_PATH
-fi
+# Source LSB function library
+. /lib/lsb/init-functions
 
-if [ ! -d $DATA_DIR ]; then
-    mkdir -p $DATA_DIR
-    chown $RUN_AS $DATA_DIR
-fi
+# Create PID directory if not exist and ensure the SickBeard user can write to it
+[ -d $PID_PATH ] || mkdir -p $PID_PATH && chown $RUN_AS $PID_PATH
+
+# Create data directory and ensure the SickBeard user can write to it
+[ -d $DATA_DIR ] || mkdir -p $DATA_DIR && chown $RUN_AS $DATA_DIR
 
 if [ -e $PID_FILE ]; then
     PID=`cat $PID_FILE`
@@ -106,9 +104,14 @@ case "$1" in
         start-stop-daemon --stop --pidfile $PID_FILE --retry 15
         start-stop-daemon -d $APP_PATH -c $RUN_AS $EXTRA_SSD_OPTS --start --pidfile $PID_FILE --exec $DAEMON -- $DAEMON_OPTS
         ;;
+
+  status)
+       status_of_proc -p $PID_FILE $NAME $NAME
+        ;;
+
     *)
         N=/etc/init.d/$NAME
-        echo "Usage: $N {start|stop|restart|force-reload}" >&2
+        echo "Usage: $N {start|stop|restart|force-reload|status}" >&2
         exit 1
         ;;
 esac
