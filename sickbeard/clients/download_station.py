@@ -54,4 +54,11 @@ class DownloadStationAPI(GenericClient):
         
         return self.response.json['success']
 
+    def _add_torrent_file(self, result):
+    
+        post_data = 'api=SYNO.DownloadStation.Task&version=1&method=create&file=' + b64encode(result.content) + '&session=DownloadStation&_sid=' + self.auth
+        self._request(method='post', data=post_data)
+    
+        return self.response.json['success']
+
 api = DownloadStationAPI()
