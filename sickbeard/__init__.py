@@ -152,9 +152,9 @@ TORRENT_DIR = None
 DOWNLOAD_PROPERS = None
 
 SEARCH_FREQUENCY = None
-BACKLOG_SEARCH_FREQUENCY = 21
+BACKLOG_SEARCH_FREQUENCY = 1
 
-MIN_SEARCH_FREQUENCY = 10
+MIN_SEARCH_FREQUENCY = 1
 
 DEFAULT_SEARCH_FREQUENCY = 60
 
@@ -865,7 +865,7 @@ def initialize(consoleLogging=True):
                                                      runImmediately=True)
 
         backlogSearchScheduler = searchBacklog.BacklogSearchScheduler(searchBacklog.BacklogSearcher(),
-                                                                      cycleTime=datetime.timedelta(minutes=get_backlog_cycle_time()),
+                                                                      cycleTime=datetime.timedelta(minutes=90),
                                                                       threadName="BACKLOG",
                                                                       runImmediately=True)
         backlogSearchScheduler.action.cycleTime = BACKLOG_SEARCH_FREQUENCY
