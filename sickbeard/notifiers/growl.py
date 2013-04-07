@@ -127,7 +127,13 @@ class GrowlNotifier:
             opts['port'] = pc[1]
             logger.log(u"Sending growl to "+opts['host']+":"+str(opts['port'])+": "+message)
             try:
-                return self._send_growl(opts, message)
+                if self._send_growl(opts, message):
+                    return True
+                else: 
+                    if self._sendRegistration(host, password, 'Sickbeard'):
+                        return self._send_growl(opts, message)
+                    else:
+                        return False
             except socket.error, e:
                 logger.log(u"Unable to send growl to "+opts['host']+":"+str(opts['port'])+": "+ex(e))
                 return False
