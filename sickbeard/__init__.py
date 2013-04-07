@@ -30,7 +30,7 @@ from threading import Lock
 
 # apparently py2exe won't build these unless they're imported somewhere
 from sickbeard import providers, metadata
-from providers import ezrss, tvtorrents, torrentleech, btn, nzbsrus, newznab, womble, nzbx, omgwtfnzbs, binnewz, t411, cpasbien
+from providers import ezrss, tvtorrents, torrentleech, btn, nzbsrus, newznab, womble, nzbx, omgwtfnzbs, binnewz, t411, cpasbien, piratebay
 from sickbeard.config import CheckSection, check_setting_int, check_setting_str, ConfigMigrator
 
 from sickbeard import searchCurrent, searchBacklog, showUpdater, versionChecker, properFinder, autoPostProcesser, subtitles
@@ -203,6 +203,11 @@ BINNEWZ = False
 T411 = False
 T411_USERNAME = None
 T411_PASSWORD = None
+
+THEPIRATEBAY = False
+THEPIRATEBAY_TRUSTED = True
+THEPIRATEBAY_PROXY = False
+THEPIRATEBAY_PROXY_URL = None
 
 Cpasbien = False
 
@@ -383,6 +388,7 @@ def initialize(consoleLogging=True):
                 NZBS, NZBS_UID, NZBS_HASH, EZRSS, TVTORRENTS, TVTORRENTS_DIGEST, TVTORRENTS_HASH, BTN, BTN_API_KEY, TORRENTLEECH, TORRENTLEECH_KEY, TORRENT_DIR, USENET_RETENTION, SOCKET_TIMEOUT, \
 				BINNEWZ, \
                 T411, T411_USERNAME, T411_PASSWORD, \
+                THEPIRATEBAY, THEPIRATEBAY_PROXY, THEPIRATEBAY_PROXY_URL, THEPIRATEBAY_TRUSTED, \
                 Cpasbien, \
                 SEARCH_FREQUENCY, DEFAULT_SEARCH_FREQUENCY, BACKLOG_SEARCH_FREQUENCY, \
                 QUALITY_DEFAULT, FLATTEN_FOLDERS_DEFAULT, SUBTITLES_DEFAULT, STATUS_DEFAULT, AUDIO_SHOW_DEFAULT, \
@@ -637,6 +643,12 @@ def initialize(consoleLogging=True):
         T411_USERNAME = check_setting_str(CFG, 'T411', 'username', '')
         T411_PASSWORD = check_setting_str(CFG, 'T411', 'password', '')
         
+        CheckSection(CFG, 'PirateBay')
+        THEPIRATEBAY = bool(check_setting_int(CFG, 'PirateBay', 'piratebay', 0))
+        THEPIRATEBAY_PROXY = bool(check_setting_int(CFG, 'PirateBay', 'piratebay_proxy', 0))
+        THEPIRATEBAY_PROXY_URL = check_setting_str(CFG, 'PirateBay', 'piratebay_proxy_url', '')
+        THEPIRATEBAY_TRUSTED = bool(check_setting_int(CFG, 'PirateBay', 'piratebay_trusted', 0))
+
         CheckSection(CFG, 'Cpasbien')
         Cpasbien = bool(check_setting_int(CFG, 'Cpasbien', 'cpasbien', 0))
 
@@ -1222,6 +1234,12 @@ def save_config():
     
     new_config['Cpasbien'] = {}
     new_config['Cpasbien']['cpasbien'] = int(Cpasbien)
+
+    new_config['PirateBay'] = {}
+    new_config['PirateBay']['piratebay'] = int(THEPIRATEBAY)
+    new_config['PirateBay']['piratebay_proxy'] = THEPIRATEBAY_PROXY
+    new_config['PirateBay']['piratebay_proxy_url'] = THEPIRATEBAY_PROXY_URL
+    new_config['PirateBay']['piratebay_trusted'] = THEPIRATEBAY_TRUSTED
 
     new_config['Womble'] = {}
     new_config['Womble']['womble'] = int(WOMBLE)
