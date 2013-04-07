@@ -847,11 +847,6 @@ class PostProcessor(object):
         # create any folders we need
         helpers.make_dirs(dest_path)
 
-        # download subtitles
-        if sickbeard.USE_SUBTITLES and ep_obj.show.subtitles:
-            cur_ep.location = self.file_path
-            cur_ep.downloadSubtitles()
-
         # figure out the base name of the resulting episode file
         if sickbeard.RENAME_EPISODES:
             orig_extension = self.file_name.rpartition('.')[-1]
@@ -866,9 +861,9 @@ class PostProcessor(object):
         try:
             # move the episode and associated files to the show dir
             if sickbeard.KEEP_PROCESSED_DIR:
-                self._copy(self.file_path, dest_path, new_base_name, sickbeard.MOVE_ASSOCIATED_FILES, sickbeard.USE_SUBTITLES and ep_obj.show.subtitles)
+                self._copy(self.file_path, dest_path, new_base_name, sickbeard.MOVE_ASSOCIATED_FILES)
             else:
-                self._move(self.file_path, dest_path, new_base_name, sickbeard.MOVE_ASSOCIATED_FILES, sickbeard.USE_SUBTITLES and ep_obj.show.subtitles)
+                self._move(self.file_path, dest_path, new_base_name, sickbeard.MOVE_ASSOCIATED_FILES)
         except (OSError, IOError):
             raise exceptions.PostProcessingFailed("Unable to move the files to their new home")
 
@@ -880,6 +875,10 @@ class PostProcessor(object):
 
         # log it to history
         history.logDownload(ep_obj, self.file_path, new_ep_quality, self.release_group)
+        
+        # download subtitles
+        if sickbeard.USE_SUBTITLES and ep_obj.show.subtitles:
+            cur_ep.downloadSubtitles()
 
         # send notifications
         notifiers.notify_download(ep_obj.prettyName())
