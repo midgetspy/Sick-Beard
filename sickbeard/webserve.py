@@ -3525,12 +3525,11 @@ class WebInterface:
             
             #Normalize/Format the Airing Time
             if not locale.getlocale()[0] is None:
-                format = "%A %H:%M %p"
                 locale.setlocale(locale.LC_TIME, 'us_US')
-                sql_results[index]['localtime_string'] = str(sql_results[index]['localtime'].strftime(format))
+                sql_results[index]['localtime_string'] = sql_results[index]['localtime'].strftime("%A %H:%M %p")
                 locale.setlocale(locale.LC_ALL, '') #Reseting to default locale
             else:
-                sql_results[index]['localtime_string'] = sql_results[index]['localtime']    
+                sql_results[index]['localtime_string'] = sql_results[index]['localtime'].strftime("%A %H:%M %p")    
             
         sql_results.sort(sorts[sickbeard.COMING_EPS_SORT])
 
