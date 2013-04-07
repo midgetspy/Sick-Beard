@@ -154,7 +154,7 @@ DOWNLOAD_PROPERS = None
 SEARCH_FREQUENCY = None
 BACKLOG_SEARCH_FREQUENCY = 1
 
-MIN_SEARCH_FREQUENCY = 1
+MIN_SEARCH_FREQUENCY = 10
 
 DEFAULT_SEARCH_FREQUENCY = 60
 
@@ -367,7 +367,7 @@ __INITIALIZED__ = False
 
 def get_backlog_cycle_time():
     cycletime = SEARCH_FREQUENCY * 2 + 7
-    return max([cycletime, 720])
+    return max([cycletime, 120])
 
 
 def initialize(consoleLogging=True):
@@ -877,7 +877,7 @@ def initialize(consoleLogging=True):
                                                      runImmediately=True)
 
         backlogSearchScheduler = searchBacklog.BacklogSearchScheduler(searchBacklog.BacklogSearcher(),
-                                                                      cycleTime=datetime.timedelta(minutes=90),
+                                                                      cycleTime=datetime.timedelta(minutes=get_backlog_cycle_time()),
                                                                       threadName="BACKLOG",
                                                                       runImmediately=True)
         backlogSearchScheduler.action.cycleTime = BACKLOG_SEARCH_FREQUENCY
