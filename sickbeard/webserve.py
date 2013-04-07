@@ -26,6 +26,7 @@ import re
 import threading
 import datetime
 import random
+import locale
 
 from Cheetah.Template import Template
 import cherrypy.lib
@@ -1362,10 +1363,6 @@ class ConfigProviders:
 
         sickbeard.TVTORRENTS_DIGEST = tvtorrents_digest.strip()
         sickbeard.TVTORRENTS_HASH = tvtorrents_hash.strip()
-	sickbeard.TVTORRENTS_USERNAME = tvtorrents_username.strip()
-	sickbeard.TVTORRENTS_PASSWORD = tvtorrents_password.strip()
-
-        sickbeard.TORRENTLEECH_KEY = torrentleech_key.strip()
 
         sickbeard.BTN_API_KEY = btn_api_key.strip()
 
@@ -3524,6 +3521,11 @@ class WebInterface:
             foreign_timezone = network_timezones.get_network_timezone(item['network'], network_dict, sb_timezone)
             foreign_naive = datetime.datetime(te.year, te.month, te.day, hr, m,tzinfo=foreign_timezone)
             sql_results[index]['localtime'] = foreign_naive.astimezone(sb_timezone)
+            
+
+            locale.setlocale(locale.LC_TIME, 'us_US')
+            format = "%A %H:%M"
+            print str(sql_results[index]['localtime'].strftime(format))
             
             
         sql_results.sort(sorts[sickbeard.COMING_EPS_SORT])
