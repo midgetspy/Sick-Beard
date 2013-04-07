@@ -3517,16 +3517,19 @@ class WebInterface:
             if hr < 0 or hr > 23 or m < 0 or m > 59:
                 hr = 0
                 m = 0
+                
             te = datetime.datetime.fromordinal(helpers.tryInt(item['airdate']))
             foreign_timezone = network_timezones.get_network_timezone(item['network'], network_dict, sb_timezone)
             foreign_naive = datetime.datetime(te.year, te.month, te.day, hr, m,tzinfo=foreign_timezone)
             sql_results[index]['localtime'] = foreign_naive.astimezone(sb_timezone)
             
-
+            #Normalize/Format the Airing Time
+            format = "%A %H:%M %p"
             locale.setlocale(locale.LC_TIME, 'us_US')
-            format = "%A %H:%M"
-            print str(sql_results[index]['localtime'].strftime(format))
+            sql_results[index]['localtime_string'] = str(sql_results[index]['localtime'].strftime(format))
             
+            #Resetting locale do default
+            locale.setlocale(locale.LC_ALL, '')
             
         sql_results.sort(sorts[sickbeard.COMING_EPS_SORT])
 
