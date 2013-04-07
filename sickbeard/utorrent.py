@@ -181,6 +181,8 @@ def testAuthentication(host=None, username=None, password=None):
 
 def sendTORRENT(result):
     url = '&action=add-url&s=' + quote(result.url).replace('/', '%2F') + '&t=' + str(int(time.time()))
+    if result.provider.token:
+        url = url + ":COOKIE:" + result.provider.token
 
     success, new_result = _action(url, sickbeard.TORRENT_HOST, sickbeard.TORRENT_USERNAME, sickbeard.TORRENT_PASSWORD)
 
