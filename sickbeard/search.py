@@ -142,7 +142,8 @@ def snatchEpisode(result, endStatus=SNATCHED):
             dlResult = _downloadResult(result)
         else:
             client = clients.getClientIstance(sickbeard.TORRENT_METHOD)()
-            result.content=result.extraInfo[0]
+            if hasattr(result,'extraInfo') and result.resultType=="torrentdata":
+                result.content=result.extraInfo[0]
             dlResult = client.sendTORRENT(result)
     else:
         logger.log(u"Unknown result type, unable to download it", logger.ERROR)
