@@ -48,7 +48,7 @@ class ThePirateBayProvider(generic.TorrentProvider):
 
     def __init__(self):
 
-        generic.TorrentProvider.__init__(self, "piratebay")
+        generic.TorrentProvider.__init__(self, "PirateBay")
         
         self.supportsBacklog = True
 
