@@ -1363,6 +1363,8 @@ class ConfigProviders:
 
         sickbeard.TVTORRENTS_DIGEST = tvtorrents_digest.strip()
         sickbeard.TVTORRENTS_HASH = tvtorrents_hash.strip()
+        sickbeard.TVTORRENTS_USERNAME = tvtorrents_username.strip()
+        sickbeard.TVTORRENTS_PASSWORD = tvtorrents_password.strip()        
 
         sickbeard.BTN_API_KEY = btn_api_key.strip()
 
