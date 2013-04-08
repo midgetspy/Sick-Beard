@@ -32,7 +32,8 @@ from sickbeard import show_name_helpers
 from sickbeard.common import Overview 
 from sickbeard.exceptions import ex
 from sickbeard import encodingKludge as ek
-#from lib import requests
+
+from lib import requests
 from bs4 import BeautifulSoup
 
 class KATProvider(generic.TorrentProvider):
@@ -45,11 +46,9 @@ class KATProvider(generic.TorrentProvider):
 
         self.cache = KATCache(self)
         
-        self.url = 'https://www.kat.ph/'
+        self.url = 'http://www.kat.ph/'
 
         self.searchurl = self.url+'usearch/%s/?field=seeders&sorder=desc'  # order by seed       
-
-#        self.re_title_url =  '/torrent/(?P<id>\d+)/(?P<title>.*?)//1".+?(?P<url>magnet.*?)//1".+?(?P<seeders>\d+)</td>.+?(?P<leechers>\d+)</td>'
 
     def isEnabled(self):
         return sickbeard.KAT
@@ -270,10 +269,10 @@ class KATProvider(generic.TorrentProvider):
         if not headers:
             headers = []
 
-        # Glype Proxies does not support Direct Linking.
-        # We have to fake a search on the proxy site to get data
-        if self.proxy.isEnabled():
-            headers.append(('Referer', self.proxy.getProxyURL()))
+#        # Glype Proxies does not support Direct Linking.
+#        # We have to fake a search on the proxy site to get data
+#        if self.proxy.isEnabled():
+#            headers.append(('Referer', self.proxy.getProxyURL()))
             
         result = None
 
@@ -290,23 +289,36 @@ class KATProvider(generic.TorrentProvider):
         Save the result to disk.
         """
         
-        #Hack for rtorrent user (it will not work for other torrent client)
-        if sickbeard.TORRENT_METHOD == "blackhole" and result.url.startswith('magnet'): 
-            magnetFileName = ek.ek(os.path.join, sickbeard.TORRENT_DIR, helpers.sanitizeFileName(result.name) + '.' + self.providerType)
-            magnetFileContent = 'd10:magnet-uri' + `len(result.url)` + ':' + result.url + 'e'
+        torrent_hash = re.findall('urn:btih:([\w]{32,40})', result.url)[0].upper()
+        
+        if not torrent_hash:
+           logger.log("Unable to extract torrent hash from link: " + ex(result.url), logger.ERROR) 
+           return False
+           
+        try:
+            r = requests.get('http://torcache.net/torrent/' + torrent_hash + '.torrent')
+        except Exception, e:
+            logger.log("Unable to connect to Torcache: " + ex(e), logger.ERROR)
+            return False
+                         
+        if not r.status_code == 200:
+            return False
+            
+        magnetFileName = ek.ek(os.path.join, sickbeard.TORRENT_DIR, helpers.sanitizeFileName(result.name) + '.' + self.providerType)
+        magnetFileContent = r.content
 
-            try:
-                fileOut = open(magnetFileName, 'wb')
-                fileOut.write(magnetFileContent)
-                fileOut.close()
-                helpers.chmodAsParent(magnetFileName)
-            except IOError, e:
-                logger.log("Unable to save the file: "+ex(e), logger.ERROR)
-                return False
-            logger.log(u"Saved magnet link to "+magnetFileName+" ", logger.MESSAGE)
-            return True
+        try:    
+            fileOut = open(magnetFileName, 'wb')
+            fileOut.write(magnetFileContent)
+            fileOut.close()
+            helpers.chmodAsParent(magnetFileName)
+        except IOError, e:
+            logger.log("Unable to save the file: " + ex(e), logger.ERROR)
+            return False
+        logger.log(u"Saved magnet link to " + magnetFileName + " ", logger.MESSAGE)
+        return True
 
-class ThePirateBayCache(tvcache.TVCache):
+class KATCache(tvcache.TVCache):
 
     def __init__(self, provider):
 
@@ -316,42 +328,43 @@ class ThePirateBayCache(tvcache.TVCache):
         self.minTime = 20
 
     def updateCache(self):
-
-        re_title_url = self.provider.proxy._buildRE(self.provider.re_title_url)
-                
-        if not self.shouldUpdate():
-            return
-
-        data = self._getData()
-
-        # as long as the http request worked we count this as an update
-        if data:
-            self.setLastUpdate()
-        else:
-            return []
-
-        # now that we've loaded the current RSS feed lets delete the old cache
-        logger.log(u"Clearing "+self.provider.name+" cache and updating with new information")
-        self._clearCache()
-
-        match = re.compile(re_title_url, re.DOTALL).finditer(urllib.unquote(data))
-        if not match:
-            logger.log(u"The Data returned from the ThePirateBay is incomplete, this result is unusable", logger.ERROR)
-            return []
-                
-        for torrent in match:
-
-            title = torrent.group('title').replace('_','.')#Do not know why but SickBeard skip release with '_' in name
-            url = torrent.group('url')
-           
-            #accept torrent only from Trusted people
-            if sickbeard.THEPIRATEBAY_TRUSTED and re.search('(VIP|Trusted|Helper)',torrent.group(0))== None:
-                logger.log(u"ThePirateBay Provider found result "+torrent.group('title')+" but that doesn't seem like a trusted result so I'm ignoring it",logger.DEBUG)
-                continue
-           
-            item = (title,url)
-
-            self._parseItem(item)
+        
+        pass
+#        re_title_url = self.provider.proxy._buildRE(self.provider.re_title_url)
+#                
+#        if not self.shouldUpdate():
+#            return
+#
+#        data = self._getData()
+#
+#        # as long as the http request worked we count this as an update
+#        if data:
+#            self.setLastUpdate()
+#        else:
+#            return []
+#
+#        # now that we've loaded the current RSS feed lets delete the old cache
+#        logger.log(u"Clearing "+self.provider.name+" cache and updating with new information")
+#        self._clearCache()
+#
+#        match = re.compile(re_title_url, re.DOTALL).finditer(urllib.unquote(data))
+#        if not match:
+#            logger.log(u"The Data returned from the ThePirateBay is incomplete, this result is unusable", logger.ERROR)
+#            return []
+#                
+#        for torrent in match:
+#
+#            title = torrent.group('title').replace('_','.')#Do not know why but SickBeard skip release with '_' in name
+#            url = torrent.group('url')
+#           
+#            #accept torrent only from Trusted people
+#            if sickbeard.THEPIRATEBAY_TRUSTED and re.search('(VIP|Trusted|Helper)',torrent.group(0))== None:
+#                logger.log(u"ThePirateBay Provider found result "+torrent.group('title')+" but that doesn't seem like a trusted result so I'm ignoring it",logger.DEBUG)
+#                continue
+#           
+#            item = (title,url)
+#
+#            self._parseItem(item)
 
     def _getData(self):
        

@@ -24,6 +24,7 @@ __all__ = ['ezrss',
            'thepiratebay',
            'dtt',
            'torrentleech',
+#           'kat',
            'nzbx',
            'iptorrents',
            'omgwtfnzbs'
@@ -108,7 +109,7 @@ def getProviderModule(name):
     if name in __all__ and prefix+name in sys.modules:
         return sys.modules[prefix+name]
     else:
-        raise Exception("Can't find "+prefix+name+" in "+repr(sys.modules))
+        raise Exception("Can't find "+prefix+name+" in "+"Providers")
 
 def getProviderClass(id):
 

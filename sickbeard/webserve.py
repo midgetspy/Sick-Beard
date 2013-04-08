@@ -857,7 +857,7 @@ class ConfigGeneral:
     @cherrypy.expose
     def saveGeneral(self, log_dir=None, web_port=None, web_log=None, web_ipv6=None,
                     update_shows_on_start=None, launch_browser=None, web_username=None, use_api=None, api_key=None,
-                    web_password=None, version_notify=None, enable_https=None, https_cert=None, https_key=None, missed_days=None):
+                    web_password=None, version_notify=None, enable_https=None, https_cert=None, https_key=None):
 
         results = []
 
@@ -897,13 +897,6 @@ class ConfigGeneral:
         sickbeard.WEB_LOG = web_log
         sickbeard.WEB_USERNAME = web_username
         sickbeard.WEB_PASSWORD = web_password
-
-        miss_h = helpers.tryInt(missed_days, 3)
-        if (miss_h < 2):
-            miss_h = 2
-        elif (miss_h > 30):
-            miss_h = 30
-        sickbeard.COMING_EPS_MISSED_DAYS = miss_h
 
         if use_api == "on":
             use_api = 1
@@ -1268,6 +1261,7 @@ class ConfigProviders:
                       thepiratebay_trusted=None, thepiratebay_proxy=None, thepiratebay_proxy_url=None,
                       torrentleech_username=None, torrentleech_password=None,
                       iptorrents_username=None, iptorrents_password=None, iptorrents_freeleech=None,
+                      kat_trusted = None, kat_verified = None,
                       newzbin_username=None, newzbin_password=None,
                       provider_order=None):
 
@@ -1357,12 +1351,16 @@ class ConfigProviders:
             elif curProvider == 'iptorrents':
                 sickbeard.IPTORRENTS = curEnabled
             elif curProvider == 'omgwtfnzbs':
-                sickbeard.OMGWTFNZBS = curEnabled                
+                sickbeard.OMGWTFNZBS = curEnabled  
+            elif curProvider == 'kickasstorrents':
+                sickbeard.KAT = curEnabled                    
             else:
                 logger.log(u"don't know what "+curProvider+" is, skipping")
 
         sickbeard.TVTORRENTS_DIGEST = tvtorrents_digest.strip()
         sickbeard.TVTORRENTS_HASH = tvtorrents_hash.strip()
+        sickbeard.TVTORRENTS_USERNAME = tvtorrents_username.strip()
+        sickbeard.TVTORRENTS_PASSWORD = tvtorrents_password.strip()
 
         sickbeard.BTN_API_KEY = btn_api_key.strip()
 
@@ -1408,6 +1406,20 @@ class ConfigProviders:
             iptorrents_freeleech = 0
 
         sickbeard.IPTORRENTS_FREELEECH = iptorrents_freeleech
+
+        if kat_trusted == "on":
+            kat_trusted = 1
+        else:
+            kat_trusted = 0
+
+        sickbeard.KAT_TRUSTED = kat_trusted
+            
+        if kat_verified == "on":
+            kat_verified = 1
+        else:
+            kat_verified = 0   
+            
+        sickbeard.KAT_VERIFIED = kat_verified    
 
         sickbeard.NZBSRUS_UID = nzbs_r_us_uid.strip()
         sickbeard.NZBSRUS_HASH = nzbs_r_us_hash.strip()

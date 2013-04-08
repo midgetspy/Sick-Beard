@@ -148,7 +148,9 @@ class NumericProviders (AddAirdateIndex):
                 7: 'ezrss',
                 8: 'thepiratebay',
                 9: 'dtt',
-                10: 'torrentleech' }
+                10: 'torrentleech',
+#                11: 'kat',
+             }
                 
     def execute(self):
         self.connection.action("ALTER TABLE history RENAME TO history_old")

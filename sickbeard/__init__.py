@@ -30,7 +30,7 @@ from threading import Lock
 
 # apparently py2exe won't build these unless they're imported somewhere
 from sickbeard import providers, metadata
-from providers import ezrss, tvtorrents, btn, nzbsrus, newznab, womble, thepiratebay, dtt, torrentleech, nzbx, iptorrents, omgwtfnzbs
+from providers import ezrss, tvtorrents, btn, nzbsrus, newznab, womble, thepiratebay, dtt, torrentleech, kat, nzbx, iptorrents, omgwtfnzbs
 from sickbeard.config import CheckSection, check_setting_int, check_setting_str, ConfigMigrator
 
 
@@ -195,6 +195,9 @@ IPTORRENTS_USERNAME = None
 IPTORRENTS_PASSWORD = None
 IPTORRENTS_FREELEECH = False
 
+KAT = None
+KAT_TRUSTED = False
+KAT_VERIFIED = False
 
 ADD_SHOWS_WO_DIR = None
 CREATE_MISSING_SHOW_DIRS = None
@@ -412,7 +415,8 @@ def initialize(consoleLogging=True):
                 showUpdateScheduler, __INITIALIZED__, LAUNCH_BROWSER, UPDATE_SHOWS_ON_START, showList, loadingShowList, \
                 NZBS, NZBS_UID, NZBS_HASH, EZRSS, TVTORRENTS, TVTORRENTS_DIGEST, TVTORRENTS_HASH, TVTORRENTS_USERNAME, TVTORRENTS_PASSWORD, BTN, BTN_API_KEY, \
                 DTT, DTT_NORAR, DTT_SINGLE, THEPIRATEBAY, THEPIRATEBAY_TRUSTED, THEPIRATEBAY_PROXY, THEPIRATEBAY_PROXY_URL, THEPIRATEBAY_BLACKLIST, TORRENTLEECH, TORRENTLEECH_USERNAME, TORRENTLEECH_PASSWORD, \
-                IPTORRENTS, IPTORRENTS_USERNAME, IPTORRENTS_PASSWORD, IPTORRENTS_FREELEECH, TORRENT_DIR, USENET_RETENTION, SOCKET_TIMEOUT, SEARCH_FREQUENCY, DEFAULT_SEARCH_FREQUENCY, BACKLOG_SEARCH_FREQUENCY, \
+                IPTORRENTS, IPTORRENTS_USERNAME, IPTORRENTS_PASSWORD, IPTORRENTS_FREELEECH, KAT, KAT_TRUSTED, KAT_VERIFIED, \
+                TORRENT_DIR, USENET_RETENTION, SOCKET_TIMEOUT, SEARCH_FREQUENCY, DEFAULT_SEARCH_FREQUENCY, BACKLOG_SEARCH_FREQUENCY, \
                 QUALITY_DEFAULT, FLATTEN_FOLDERS_DEFAULT, SUBTITLES_DEFAULT, STATUS_DEFAULT, \
                 GROWL_NOTIFY_ONSNATCH, GROWL_NOTIFY_ONDOWNLOAD, GROWL_NOTIFY_ONSUBTITLEDOWNLOAD, TWITTER_NOTIFY_ONSNATCH, TWITTER_NOTIFY_ONDOWNLOAD, TWITTER_NOTIFY_ONSUBTITLEDOWNLOAD, \
                 USE_GROWL, GROWL_HOST, GROWL_PASSWORD, USE_PROWL, PROWL_NOTIFY_ONSNATCH, PROWL_NOTIFY_ONDOWNLOAD, PROWL_NOTIFY_ONSUBTITLEDOWNLOAD, PROWL_API, PROWL_PRIORITY, PROG_DIR, NZBMATRIX, NZBMATRIX_USERNAME, \
@@ -601,6 +605,10 @@ def initialize(consoleLogging=True):
         IPTORRENTS_USERNAME = check_setting_str(CFG, 'IPTORRENTS', 'iptorrents_username', '')
         IPTORRENTS_PASSWORD = check_setting_str(CFG, 'IPTORRENTS', 'iptorrents_password', '')
         IPTORRENTS_FREELEECH = bool(check_setting_int(CFG, 'IPTORRENTS', 'iptorrents_freeleech', 0))
+
+        KAT = bool(check_setting_int(CFG, 'KAT', 'kat', 0))
+        KAT_TRUSTED = bool(check_setting_int(CFG, 'KAT', 'kat_trusted', 0))
+        KAT_VERIFIED = bool(check_setting_int(CFG, 'KAT', 'kat_verified', 0))
 
         NZBS = bool(check_setting_int(CFG, 'NZBs', 'nzbs', 0))
         NZBS_UID = check_setting_str(CFG, 'NZBs', 'nzbs_uid', '')
@@ -842,7 +850,7 @@ def initialize(consoleLogging=True):
         COMING_EPS_LAYOUT = check_setting_str(CFG, 'GUI', 'coming_eps_layout', 'banner')
         COMING_EPS_DISPLAY_PAUSED = bool(check_setting_int(CFG, 'GUI', 'coming_eps_display_paused', 0))
         COMING_EPS_SORT = check_setting_str(CFG, 'GUI', 'coming_eps_sort', 'date')
-        COMING_EPS_MISSED_RANGE = check_setting_int(CFG, 'GUI', 'coming_eps_sort', 7)
+        COMING_EPS_MISSED_RANGE = check_setting_int(CFG, 'GUI', 'coming_eps_missed_range', 7)
 
         newznabData = check_setting_str(CFG, 'Newznab', 'newznab_data', '')
         newznabProviderList = providers.getNewznabProviderList(newznabData)
@@ -1155,18 +1163,18 @@ def save_config():
     new_config['General']['log_dir'] = LOG_DIR
     new_config['General']['web_port'] = WEB_PORT
     new_config['General']['web_host'] = WEB_HOST
-    new_config['General']['web_ipv6'] = helpers.tryInt(WEB_IPV6)
-    new_config['General']['web_log'] = helpers.tryInt(WEB_LOG)
+    new_config['General']['web_ipv6'] = int(WEB_IPV6)
+    new_config['General']['web_log'] = int(WEB_LOG)
     new_config['General']['web_root'] = WEB_ROOT
     new_config['General']['web_username'] = WEB_USERNAME
     new_config['General']['web_password'] = WEB_PASSWORD
-    new_config['General']['use_api'] = helpers.tryInt(USE_API)
+    new_config['General']['use_api'] = int(USE_API)
     new_config['General']['api_key'] = API_KEY
-    new_config['General']['enable_https'] = helpers.tryInt(ENABLE_HTTPS)
+    new_config['General']['enable_https'] = int(ENABLE_HTTPS)
     new_config['General']['https_cert'] = HTTPS_CERT
     new_config['General']['https_key'] = HTTPS_KEY
-    new_config['General']['use_nzbs'] = helpers.tryInt(USE_NZBS)
-    new_config['General']['use_torrents'] = helpers.tryInt(USE_TORRENTS)
+    new_config['General']['use_nzbs'] = int(USE_NZBS)
+    new_config['General']['use_torrents'] = int(USE_TORRENTS)
     new_config['General']['nzb_method'] = NZB_METHOD
     new_config['General']['torrent_method'] = TORRENT_METHOD    
     new_config['General']['usenet_retention'] = int(USENET_RETENTION)
@@ -1177,17 +1185,17 @@ def save_config():
     new_config['General']['status_default'] = int(STATUS_DEFAULT)
     new_config['General']['flatten_folders_default'] = int(FLATTEN_FOLDERS_DEFAULT)
     new_config['General']['provider_order'] = ' '.join([x.getID() for x in providers.sortedProviderList()])
-    new_config['General']['version_notify'] = helpers.tryInt(VERSION_NOTIFY)
+    new_config['General']['version_notify'] = int(VERSION_NOTIFY)
     new_config['General']['naming_strip_year'] = int(NAMING_STRIP_YEAR)
     new_config['General']['naming_pattern'] = NAMING_PATTERN
-    new_config['General']['naming_custom_abd'] = helpers.tryInt(NAMING_CUSTOM_ABD)
+    new_config['General']['naming_custom_abd'] = int(NAMING_CUSTOM_ABD)
     new_config['General']['naming_abd_pattern'] = NAMING_ABD_PATTERN
-    new_config['General']['naming_multi_ep'] = helpers.tryInt(NAMING_MULTI_EP)
-    new_config['General']['launch_browser'] = helpers.tryInt(LAUNCH_BROWSER)
+    new_config['General']['naming_multi_ep'] = int(NAMING_MULTI_EP)
+    new_config['General']['launch_browser'] = int(LAUNCH_BROWSER)
     new_config['General']['update_shows_on_start'] = int(UPDATE_SHOWS_ON_START)
 
-    new_config['General']['use_banner'] = helpers.tryInt(USE_BANNER)
-    new_config['General']['use_listview'] = helpers.tryInt(USE_LISTVIEW)
+    new_config['General']['use_banner'] = int(USE_BANNER)
+    new_config['General']['use_listview'] = int(USE_LISTVIEW)
     new_config['General']['metadata_xbmc'] = metadata_provider_dict['XBMC'].get_config()
     new_config['General']['metadata_mediabrowser'] = metadata_provider_dict['MediaBrowser'].get_config()
     new_config['General']['metadata_ps3'] = metadata_provider_dict['Sony PS3'].get_config()
@@ -1199,10 +1207,10 @@ def save_config():
     new_config['General']['cache_dir'] = ACTUAL_CACHE_DIR if ACTUAL_CACHE_DIR else 'cache'
     new_config['General']['root_dirs'] = ROOT_DIRS if ROOT_DIRS else ''
     new_config['General']['tv_download_dir'] = TV_DOWNLOAD_DIR
-    new_config['General']['keep_processed_dir'] = helpers.tryInt(KEEP_PROCESSED_DIR)
-    new_config['General']['move_associated_files'] = helpers.tryInt(MOVE_ASSOCIATED_FILES)
-    new_config['General']['process_automatically'] = helpers.tryInt(PROCESS_AUTOMATICALLY)
-    new_config['General']['rename_episodes'] = helpers.tryInt(RENAME_EPISODES)
+    new_config['General']['keep_processed_dir'] = int(KEEP_PROCESSED_DIR)
+    new_config['General']['move_associated_files'] = int(MOVE_ASSOCIATED_FILES)
+    new_config['General']['process_automatically'] = int(PROCESS_AUTOMATICALLY)
+    new_config['General']['rename_episodes'] = int(RENAME_EPISODES)
     new_config['General']['create_missing_show_dirs'] = CREATE_MISSING_SHOW_DIRS
     new_config['General']['add_shows_wo_dir'] = ADD_SHOWS_WO_DIR
     
@@ -1215,17 +1223,17 @@ def save_config():
     new_config['Blackhole']['torrent_dir'] = TORRENT_DIR
 
     new_config['EZRSS'] = {}
-    new_config['EZRSS']['ezrss'] = helpers.tryInt(EZRSS)
+    new_config['EZRSS']['ezrss'] = int(EZRSS)
     
     new_config['TVTORRENTS'] = {}
-    new_config['TVTORRENTS']['tvtorrents'] = helpers.tryInt(TVTORRENTS)
+    new_config['TVTORRENTS']['tvtorrents'] = int(TVTORRENTS)
     new_config['TVTORRENTS']['tvtorrents_digest'] = TVTORRENTS_DIGEST
     new_config['TVTORRENTS']['tvtorrents_hash'] = TVTORRENTS_HASH
     new_config['TVTORRENTS']['tvtorrents_username'] = TVTORRENTS_USERNAME
     new_config['TVTORRENTS']['tvtorrents_password'] = TVTORRENTS_PASSWORD
 
     new_config['BTN'] = {}
-    new_config['BTN']['btn'] = helpers.tryInt(BTN)
+    new_config['BTN']['btn'] = int(BTN)
     new_config['BTN']['btn_api_key'] = BTN_API_KEY
 
     new_config['DTT'] = {}
@@ -1251,28 +1259,33 @@ def save_config():
     new_config['IPTORRENTS']['iptorrents_password'] = IPTORRENTS_PASSWORD
     new_config['IPTORRENTS']['iptorrents_freeleech'] = int(IPTORRENTS_FREELEECH)
 
+    new_config['KAT'] = {}
+    new_config['KAT']['kat'] = int(KAT)
+    new_config['KAT']['kat_trusted'] = int(KAT_TRUSTED)
+    new_config['KAT']['kat_verified'] = int(KAT_VERIFIED)
+    
     new_config['NZBs'] = {}
-    new_config['NZBs']['nzbs'] = helpers.tryInt(NZBS)
+    new_config['NZBs']['nzbs'] = int(NZBS)
     new_config['NZBs']['nzbs_uid'] = NZBS_UID
     new_config['NZBs']['nzbs_hash'] = NZBS_HASH
 
     new_config['NZBsRUS'] = {}
-    new_config['NZBsRUS']['nzbsrus'] = helpers.tryInt(NZBSRUS)
+    new_config['NZBsRUS']['nzbsrus'] = int(NZBSRUS)
     new_config['NZBsRUS']['nzbsrus_uid'] = NZBSRUS_UID
     new_config['NZBsRUS']['nzbsrus_hash'] = NZBSRUS_HASH
 
     new_config['NZBMatrix'] = {}
-    new_config['NZBMatrix']['nzbmatrix'] = helpers.tryInt(NZBMATRIX)
+    new_config['NZBMatrix']['nzbmatrix'] = int(NZBMATRIX)
     new_config['NZBMatrix']['nzbmatrix_username'] = NZBMATRIX_USERNAME
     new_config['NZBMatrix']['nzbmatrix_apikey'] = NZBMATRIX_APIKEY
 
     new_config['Newzbin'] = {}
-    new_config['Newzbin']['newzbin'] = helpers.tryInt(NEWZBIN)
+    new_config['Newzbin']['newzbin'] = int(NEWZBIN)
     new_config['Newzbin']['newzbin_username'] = NEWZBIN_USERNAME
     new_config['Newzbin']['newzbin_password'] = NEWZBIN_PASSWORD
 
     new_config['Womble'] = {}
-    new_config['Womble']['womble'] = helpers.tryInt(WOMBLE)
+    new_config['Womble']['womble'] = int(WOMBLE)
     
     new_config['nzbX'] = {}
     new_config['nzbX']['nzbx'] = int(NZBX)    
@@ -1328,60 +1341,60 @@ def save_config():
     new_config['Plex']['plex_password'] = PLEX_PASSWORD
 
     new_config['Growl'] = {}
-    new_config['Growl']['use_growl'] = helpers.tryInt(USE_GROWL)
-    new_config['Growl']['growl_notify_onsnatch'] = helpers.tryInt(GROWL_NOTIFY_ONSNATCH)
-    new_config['Growl']['growl_notify_ondownload'] = helpers.tryInt(GROWL_NOTIFY_ONDOWNLOAD)
+    new_config['Growl']['use_growl'] = int(USE_GROWL)
+    new_config['Growl']['growl_notify_onsnatch'] = int(GROWL_NOTIFY_ONSNATCH)
+    new_config['Growl']['growl_notify_ondownload'] = int(GROWL_NOTIFY_ONDOWNLOAD)
     new_config['Growl']['growl_notify_onsubtitledownload'] = int(GROWL_NOTIFY_ONSUBTITLEDOWNLOAD) 
     new_config['Growl']['growl_host'] = GROWL_HOST
     new_config['Growl']['growl_password'] = GROWL_PASSWORD
     
     new_config['Prowl'] = {}
-    new_config['Prowl']['use_prowl'] = helpers.tryInt(USE_PROWL)
-    new_config['Prowl']['prowl_notify_onsnatch'] = helpers.tryInt(PROWL_NOTIFY_ONSNATCH)
-    new_config['Prowl']['prowl_notify_ondownload'] = helpers.tryInt(PROWL_NOTIFY_ONDOWNLOAD)
+    new_config['Prowl']['use_prowl'] = int(USE_PROWL)
+    new_config['Prowl']['prowl_notify_onsnatch'] = int(PROWL_NOTIFY_ONSNATCH)
+    new_config['Prowl']['prowl_notify_ondownload'] = int(PROWL_NOTIFY_ONDOWNLOAD)
     new_config['Prowl']['prowl_notify_onsubtitledownload'] = int(PROWL_NOTIFY_ONSUBTITLEDOWNLOAD) 
     new_config['Prowl']['prowl_api'] = PROWL_API
     new_config['Prowl']['prowl_priority'] = PROWL_PRIORITY
 
     new_config['Twitter'] = {}
-    new_config['Twitter']['use_twitter'] = helpers.tryInt(USE_TWITTER)
-    new_config['Twitter']['twitter_notify_onsnatch'] = helpers.tryInt(TWITTER_NOTIFY_ONSNATCH)
-    new_config['Twitter']['twitter_notify_ondownload'] = helpers.tryInt(TWITTER_NOTIFY_ONDOWNLOAD)
+    new_config['Twitter']['use_twitter'] = int(USE_TWITTER)
+    new_config['Twitter']['twitter_notify_onsnatch'] = int(TWITTER_NOTIFY_ONSNATCH)
+    new_config['Twitter']['twitter_notify_ondownload'] = int(TWITTER_NOTIFY_ONDOWNLOAD)
     new_config['Twitter']['twitter_notify_onsubtitledownload'] = int(TWITTER_NOTIFY_ONSUBTITLEDOWNLOAD)
     new_config['Twitter']['twitter_username'] = TWITTER_USERNAME
     new_config['Twitter']['twitter_password'] = TWITTER_PASSWORD
     new_config['Twitter']['twitter_prefix'] = TWITTER_PREFIX
 
     new_config['Notifo'] = {}
-    new_config['Notifo']['use_notifo'] = helpers.tryInt(USE_NOTIFO)
-    new_config['Notifo']['notifo_notify_onsnatch'] = helpers.tryInt(NOTIFO_NOTIFY_ONSNATCH)
-    new_config['Notifo']['notifo_notify_ondownload'] = helpers.tryInt(NOTIFO_NOTIFY_ONDOWNLOAD)
+    new_config['Notifo']['use_notifo'] = int(USE_NOTIFO)
+    new_config['Notifo']['notifo_notify_onsnatch'] = int(NOTIFO_NOTIFY_ONSNATCH)
+    new_config['Notifo']['notifo_notify_ondownload'] = int(NOTIFO_NOTIFY_ONDOWNLOAD)
     new_config['Notifo']['notifo_notify_onsubtitledownload'] = int(NOTIFO_NOTIFY_ONSUBTITLEDOWNLOAD)
     new_config['Notifo']['notifo_username'] = NOTIFO_USERNAME
     new_config['Notifo']['notifo_apisecret'] = NOTIFO_APISECRET
 
     new_config['Boxcar'] = {}
-    new_config['Boxcar']['use_boxcar'] = helpers.tryInt(USE_BOXCAR)
-    new_config['Boxcar']['boxcar_notify_onsnatch'] = helpers.tryInt(BOXCAR_NOTIFY_ONSNATCH)
-    new_config['Boxcar']['boxcar_notify_ondownload'] = helpers.tryInt(BOXCAR_NOTIFY_ONDOWNLOAD)
+    new_config['Boxcar']['use_boxcar'] = int(USE_BOXCAR)
+    new_config['Boxcar']['boxcar_notify_onsnatch'] = int(BOXCAR_NOTIFY_ONSNATCH)
+    new_config['Boxcar']['boxcar_notify_ondownload'] = int(BOXCAR_NOTIFY_ONDOWNLOAD)
     new_config['Boxcar']['boxcar_notify_onsubtitledownload'] = int(BOXCAR_NOTIFY_ONSUBTITLEDOWNLOAD)
     new_config['Boxcar']['boxcar_username'] = BOXCAR_USERNAME
 
     new_config['Pushover'] = {}
-    new_config['Pushover']['use_pushover'] = helpers.tryInt(USE_PUSHOVER)
-    new_config['Pushover']['pushover_notify_onsnatch'] = helpers.tryInt(PUSHOVER_NOTIFY_ONSNATCH)
-    new_config['Pushover']['pushover_notify_ondownload'] = helpers.tryInt(PUSHOVER_NOTIFY_ONDOWNLOAD)
+    new_config['Pushover']['use_pushover'] = int(USE_PUSHOVER)
+    new_config['Pushover']['pushover_notify_onsnatch'] = int(PUSHOVER_NOTIFY_ONSNATCH)
+    new_config['Pushover']['pushover_notify_ondownload'] = int(PUSHOVER_NOTIFY_ONDOWNLOAD)
     new_config['Pushover']['pushover_notify_onsubtitledownload'] = int(PUSHOVER_NOTIFY_ONSUBTITLEDOWNLOAD)
     new_config['Pushover']['pushover_userkey'] = PUSHOVER_USERKEY
 
     new_config['Libnotify'] = {}
-    new_config['Libnotify']['use_libnotify'] = helpers.tryInt(USE_LIBNOTIFY)
-    new_config['Libnotify']['libnotify_notify_onsnatch'] = helpers.tryInt(LIBNOTIFY_NOTIFY_ONSNATCH)
-    new_config['Libnotify']['libnotify_notify_ondownload'] = helpers.tryInt(LIBNOTIFY_NOTIFY_ONDOWNLOAD)
+    new_config['Libnotify']['use_libnotify'] = int(USE_LIBNOTIFY)
+    new_config['Libnotify']['libnotify_notify_onsnatch'] = int(LIBNOTIFY_NOTIFY_ONSNATCH)
+    new_config['Libnotify']['libnotify_notify_ondownload'] = int(LIBNOTIFY_NOTIFY_ONDOWNLOAD)
     new_config['Libnotify']['libnotify_notify_onsubtitledownload'] = int(LIBNOTIFY_NOTIFY_ONSUBTITLEDOWNLOAD)
 
     new_config['NMJ'] = {}
-    new_config['NMJ']['use_nmj'] = helpers.tryInt(USE_NMJ)
+    new_config['NMJ']['use_nmj'] = int(USE_NMJ)
     new_config['NMJ']['nmj_host'] = NMJ_HOST
     new_config['NMJ']['nmj_database'] = NMJ_DATABASE
     new_config['NMJ']['nmj_mount'] = NMJ_MOUNT
@@ -1393,7 +1406,7 @@ def save_config():
     new_config['NMJv2']['nmjv2_dbloc'] = NMJv2_DBLOC
 
     new_config['Synology'] = {}
-    new_config['Synology']['use_synoindex'] = helpers.tryInt(USE_SYNOINDEX)
+    new_config['Synology']['use_synoindex'] = int(USE_SYNOINDEX)
 
     new_config['SynologyNotifier'] = {}
     new_config['SynologyNotifier']['use_synologynotifier'] = int(USE_SYNOLOGYNOTIFIER)
@@ -1402,7 +1415,7 @@ def save_config():
     new_config['SynologyNotifier']['synologynotifier_notify_onsubtitledownload'] = int(SYNOLOGYNOTIFIER_NOTIFY_ONSUBTITLEDOWNLOAD)
 
     new_config['Trakt'] = {}
-    new_config['Trakt']['use_trakt'] = helpers.tryInt(USE_TRAKT)
+    new_config['Trakt']['use_trakt'] = int(USE_TRAKT)
     new_config['Trakt']['trakt_username'] = TRAKT_USERNAME
     new_config['Trakt']['trakt_password'] = TRAKT_PASSWORD
     new_config['Trakt']['trakt_api'] = TRAKT_API
@@ -1422,9 +1435,9 @@ def save_config():
     new_config['pyTivo']['pytivo_tivo_name'] = PYTIVO_TIVO_NAME
 
     new_config['NMA'] = {}
-    new_config['NMA']['use_nma'] = helpers.tryInt(USE_NMA)
-    new_config['NMA']['nma_notify_onsnatch'] = helpers.tryInt(NMA_NOTIFY_ONSNATCH)
-    new_config['NMA']['nma_notify_ondownload'] = helpers.tryInt(NMA_NOTIFY_ONDOWNLOAD)
+    new_config['NMA']['use_nma'] = int(USE_NMA)
+    new_config['NMA']['nma_notify_onsnatch'] = int(NMA_NOTIFY_ONSNATCH)
+    new_config['NMA']['nma_notify_ondownload'] = int(NMA_NOTIFY_ONDOWNLOAD)
     new_config['NMA']['nma_notify_onsubtitledownload'] = int(NMA_NOTIFY_ONSUBTITLEDOWNLOAD)
     new_config['NMA']['nma_api'] = NMA_API
     new_config['NMA']['nma_priority'] = NMA_PRIORITY
@@ -1439,6 +1452,7 @@ def save_config():
     new_config['GUI']['coming_eps_layout'] = COMING_EPS_LAYOUT
     new_config['GUI']['coming_eps_display_paused'] = int(COMING_EPS_DISPLAY_PAUSED)
     new_config['GUI']['coming_eps_sort'] = COMING_EPS_SORT
+    new_config['GUI']['coming_eps_missed_range'] = int(COMING_EPS_MISSED_RANGE)
 
     new_config['Subtitles'] = {}
     new_config['Subtitles']['use_subtitles'] = int(USE_SUBTITLES)
@@ -1487,8 +1501,8 @@ def getEpList(epIDs, showid=None):
     epList = []
 
     for curEp in sqlResults:
-        curShowObj = helpers.findCertainShow(showList, helpers.tryInt(curEp["showid"]))
-        curEpObj = curShowObj.getEpisode(helpers.tryInt(curEp["season"]), helpers.tryInt(curEp["episode"]))
+        curShowObj = helpers.findCertainShow(showList, int(curEp["showid"]))
+        curEpObj = curShowObj.getEpisode(int(curEp["season"]), int(curEp["episode"]))
         epList.append(curEpObj)
 
     return epList
