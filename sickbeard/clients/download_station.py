@@ -1,7 +1,4 @@
-# Authors:
-# Mr_Orange
-# Jens Timmerman <jens.timmerman@gmail.com>
-# Pedro Jose Pereira Vieito <pvieito@gmail.com> (@pvieito)
+# Authors: Pedro Jose Pereira Vieito <pvieito@gmail.com> (@pvieito) & Mr_Orange
 #
 # URL: https://github.com/mr-orange/Sick-Beard
 #
@@ -20,12 +17,11 @@
 # You should have received a copy of the GNU General Public License
 # along with Sick Beard. If not, see <http://www.gnu.org/licenses/>.
 
-import json
-from base64 import b64encode
-
 import sickbeard
 from sickbeard import logger
 from sickbeard.clients.generic import GenericClient
+import json
+from base64 import b64encode
 
 class DownloadStationAPI(GenericClient):
     
@@ -44,21 +40,21 @@ class DownloadStationAPI(GenericClient):
             self.auth = json.loads(self.response.text)['data']['sid']
         except:
             return None
-    
+        
         return self.auth
     
     def _add_torrent_uri(self, result):
         
-        post_data = 'api=SYNO.DownloadStation.Task&version=1&method=create&uri=' + result.url + '&session=DownloadStation&_sid=' + self.auth
+        post_data = {'api':'SYNO.DownloadStation.Task', 'version':'1', 'method':'create', 'session':'DownloadStation', '_sid':self.auth, 'uri':result.url}
         self._request(method='post', data=post_data)
         
-        return self.response.json['success']
-
+        return json.loads(self.response.text)['success']
+    
     def _add_torrent_file(self, result):
-    
-        post_data = 'api=SYNO.DownloadStation.Task&version=1&method=create&file=' + b64encode(result.content) + '&session=DownloadStation&_sid=' + self.auth
+        
+    	post_data = {'api':'SYNO.DownloadStation.Task', 'version':'1', 'method':'create', 'session':'DownloadStation', '_sid':self.auth, 'uri':result.url}
         self._request(method='post', data=post_data)
-    
-        return self.response.json['success']
+        
+        return json.loads(self.response.text)['success']
 
 api = DownloadStationAPI()
