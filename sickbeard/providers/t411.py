@@ -100,7 +100,7 @@ class T411Provider(generic.TorrentProvider):
 
         results = []
         searchUrl = self.url + '/torrents/search/?' + searchString
-        logger.log(u"Search string: " + searchURL, logger.DEBUG)
+        logger.log(u"Search string: " + searchUrl, logger.DEBUG)
         
         r = self.opener.open( searchUrl )
         soup = BeautifulSoup( r )
