@@ -20,6 +20,7 @@
 
 import httplib
 import datetime
+import re
 
 import sickbeard
 
@@ -33,6 +34,7 @@ from sickbeard import logger
 def sendNZB(nzb):
 
     addToTop = False
+    nzbgetprio = 0
     nzbgetXMLrpc = "http://nzbget:%(password)s@%(host)s/xmlrpc"
 
     if sickbeard.NZBGET_HOST == None:
@@ -59,9 +61,11 @@ def sendNZB(nzb):
             logger.log(u"Protocol Error: " + e.errmsg, logger.ERROR)
         return False
 
-    # add to top of queue if high priority is specified (recently aired episode)
-    if nzb.priority == 1:
-        addToTop = True
+    # if it aired recently make it high priority
+    for curEp in nzb.episodes:
+        if datetime.date.today() - curEp.airdate <= datetime.timedelta(days=7):
+            addToTop = True
+            nzbgetprio = 100
 
     # if it's a normal result need to download the NZB content
     if nzb.resultType == "nzb":
@@ -79,9 +83,19 @@ def sendNZB(nzb):
     logger.log(u"Sending NZB to NZBget")
     logger.log(u"URL: " + url, logger.DEBUG)
 
-    if nzbGetRPC.append(nzb.name + ".nzb", sickbeard.NZBGET_CATEGORY, addToTop, nzbcontent64):
-        logger.log(u"NZB sent to NZBget successfully", logger.DEBUG)
-        return True
-    else:
-        logger.log(u"NZBget could not add %s to the queue" % (nzb.name + ".nzb"), logger.ERROR)
+    try:
+        # Find out if nzbget supports priority (Version 9.0+), old versions beginning with a 0.x will use the old command
+        if re.search(r"^0", nzbGetRPC.version()):
+            nzbget_result = nzbGetRPC.append(nzb.name + ".nzb", sickbeard.NZBGET_CATEGORY, addToTop, nzbcontent64)
+        else:
+            nzbget_result = nzbGetRPC.append(nzb.name + ".nzb", sickbeard.NZBGET_CATEGORY, nzbgetprio, False, nzbcontent64)
+        
+        if nzbget_result:
+            logger.log(u"NZB sent to NZBget successfully", logger.DEBUG)
+            return True
+        else:
+            logger.log(u"NZBget could not add %s to the queue" % (nzb.name + ".nzb"), logger.ERROR)
+            return False
+    except:
+        logger.log(u"Connect Error to NZBget: could not add %s to the queue" % (nzb.name + ".nzb"), logger.ERROR)
         return False
