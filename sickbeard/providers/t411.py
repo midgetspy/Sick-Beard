@@ -18,7 +18,7 @@
 # along with Sick Beard.  If not, see <http://www.gnu.org/licenses/>.
 
 from bs4 import BeautifulSoup
-from sickbeard import classes, show_name_helpers
+from sickbeard import classes, show_name_helpers, logger
 from sickbeard.common import Quality
 import generic
 import cookielib
@@ -100,6 +100,7 @@ class T411Provider(generic.TorrentProvider):
 
         results = []
         searchUrl = self.url + '/torrents/search/?' + searchString
+        logger.log(u"Search string: " + searchURL, logger.DEBUG)
         
         r = self.opener.open( searchUrl )
         soup = BeautifulSoup( r )
@@ -118,7 +119,7 @@ class T411Provider(generic.TorrentProvider):
                 torrentPage = self.opener.open( pageURL )
                 torrentSoup = BeautifulSoup( torrentPage )
                
-                downloadTorrentLink = torrentSoup.find("a", text=u"Télécharger")
+                downloadTorrentLink = torrentSoup.find("a", text=u"Tï¿½lï¿½charger")
                 if downloadTorrentLink:
                     
                     downloadURL = self.url + downloadTorrentLink['href']
