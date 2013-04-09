@@ -1104,8 +1104,7 @@
 
                 <div class="component-group clearfix">
                     <div class="component-group-desc">
-                        <img class="notifier-icon" src="$sbRoot/images/notifiers/email.png" alt="" title="Email" />
-                        <h3><a href="http://en.wikipedia.org/wiki/Comparison_of_webmail_providers" onclick="window.open(this.href, '_blank'); return false;">Email</a></h3>
+                        <h3><a href="http://en.wikipedia.org/wiki/Comparison_of_webmail_providers" onclick="window.open(this.href, '_blank'); return false;"><img class="notifier-icon" src="$sbRoot/images/notifiers/email.png" alt="" title="Email" /> Email</a></h3>
                         <p>Allows configuration of email notifications on a per show basis.</p>
                     </div>
                     <fieldset class="component-group-list">
@@ -1171,12 +1170,9 @@
                                 </label>
                             </div>
                             <div class="field-pair">
+								<input type="checkbox" name="email_tls" id="email_tls" #if $sickbeard.EMAIL_TLS then "checked=\"checked\"" else ""# size="35" />
                                 <label class="nocheck clearfix">
                                     <span class="component-title">Use TLS</span>
-                                    <input type="checkbox" name="email_tls" id="email_tls" #if $sickbeard.EMAIL_TLS then "checked=\"checked\"" else ""# size="35" />
-                                </label>
-                                <label class="nocheck clearfix">
-                                    <span class="component-title">&nbsp;</span>
                                     <span class="component-desc">Check to use TLS encryption.</span>
                                 </label>
                             </div>

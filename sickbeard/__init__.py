@@ -372,6 +372,18 @@ NMA_NOTIFY_ONSUBTITLEDOWNLOAD = False
 NMA_API = None
 NMA_PRIORITY = 0
 
+USE_EMAIL = False
+EMAIL_NOTIFY_ONSNATCH = False
+EMAIL_NOTIFY_ONDOWNLOAD = False
+EMAIL_NOTIFY_ONSUBTITLEDOWNLOAD = False
+EMAIL_HOST = None
+EMAIL_PORT = 25
+EMAIL_TLS = False
+EMAIL_USER = None
+EMAIL_PASSWORD = None
+EMAIL_FROM = None
+EMAIL_LIST = None
+
 GUI_NAME = None
 HOME_LAYOUT = None
 DISPLAY_SHOW_SPECIALS = None
@@ -435,6 +447,7 @@ def initialize(consoleLogging=True):
                 USE_PUSHOVER, PUSHOVER_USERKEY, PUSHOVER_NOTIFY_ONDOWNLOAD, PUSHOVER_NOTIFY_ONSUBTITLEDOWNLOAD, PUSHOVER_NOTIFY_ONSNATCH, \
                 USE_LIBNOTIFY, LIBNOTIFY_NOTIFY_ONSNATCH, LIBNOTIFY_NOTIFY_ONDOWNLOAD, LIBNOTIFY_NOTIFY_ONSUBTITLEDOWNLOAD, USE_NMJ, NMJ_HOST, NMJ_DATABASE, NMJ_MOUNT, USE_NMJv2, NMJv2_HOST, NMJv2_DATABASE, NMJv2_DBLOC, USE_SYNOINDEX, \
                 USE_SYNOLOGYNOTIFIER, SYNOLOGYNOTIFIER_NOTIFY_ONSNATCH, SYNOLOGYNOTIFIER_NOTIFY_ONDOWNLOAD, SYNOLOGYNOTIFIER_NOTIFY_ONSUBTITLEDOWNLOAD, \
+                USE_EMAIL, EMAIL_HOST, EMAIL_PORT, EMAIL_TLS, EMAIL_USER, EMAIL_PASSWORD, EMAIL_FROM, EMAIL_NOTIFY_ONSNATCH, EMAIL_NOTIFY_ONDOWNLOAD, EMAIL_NOTIFY_ONSUBTITLEDOWNLOAD, EMAIL_LIST, \
                 USE_BANNER, USE_LISTVIEW, METADATA_XBMC, METADATA_MEDIABROWSER, METADATA_PS3, METADATA_SYNOLOGY, METADATA_MEDE8ER, metadata_provider_dict, \
                 NEWZBIN, NEWZBIN_USERNAME, NEWZBIN_PASSWORD, GIT_PATH, MOVE_ASSOCIATED_FILES, \
                 GUI_NAME, HOME_LAYOUT, DISPLAY_SHOW_SPECIALS, COMING_EPS_LAYOUT, COMING_EPS_SORT, COMING_EPS_DISPLAY_PAUSED, COMING_EPS_MISSED_RANGE, METADATA_WDTV, METADATA_TIVO, IGNORE_WORDS, CREATE_MISSING_SHOW_DIRS, \
@@ -765,6 +778,18 @@ def initialize(consoleLogging=True):
         NMA_NOTIFY_ONSUBTITLEDOWNLOAD = bool(check_setting_int(CFG, 'NMA', 'nma_notify_onsubtitledownload', 0))
         NMA_API = check_setting_str(CFG, 'NMA', 'nma_api', '')
         NMA_PRIORITY = check_setting_str(CFG, 'NMA', 'nma_priority', "0")
+
+        USE_EMAIL = bool(check_setting_int(CFG, 'Email', 'use_email', 0))
+        EMAIL_NOTIFY_ONSNATCH = bool(check_setting_int(CFG, 'Email', 'email_notify_onsnatch', 0))
+        EMAIL_NOTIFY_ONDOWNLOAD = bool(check_setting_int(CFG, 'Email', 'email_notify_ondownload', 0))
+        EMAIL_NOTIFY_ONSUBTITLEDOWNLOAD = bool(check_setting_int(CFG, 'Email', 'email_notify_onsubtitledownload', 0))
+        EMAIL_HOST = check_setting_str(CFG, 'Email', 'email_host', '')
+        EMAIL_PORT = check_setting_int(CFG, 'Email', 'email_port', 25)
+        EMAIL_TLS = bool(check_setting_int(CFG, 'Email', 'email_tls', 0))
+        EMAIL_USER = check_setting_str(CFG, 'Email', 'email_user', '')
+        EMAIL_PASSWORD = check_setting_str(CFG, 'Email', 'email_password', '')
+        EMAIL_FROM = check_setting_str(CFG, 'Email', 'email_from', '')
+        EMAIL_LIST = check_setting_str(CFG, 'Email', 'email_list', '')
 
         USE_SUBTITLES = bool(check_setting_int(CFG, 'Subtitles', 'use_subtitles', 0))
         SUBTITLES_LANGUAGES = check_setting_str(CFG, 'Subtitles', 'subtitles_languages', '').split(',')
@@ -1444,6 +1469,19 @@ def save_config():
     new_config['NMA']['nma_notify_onsubtitledownload'] = int(NMA_NOTIFY_ONSUBTITLEDOWNLOAD)
     new_config['NMA']['nma_api'] = NMA_API
     new_config['NMA']['nma_priority'] = NMA_PRIORITY
+
+    new_config['Email'] = {}
+    new_config['Email']['use_email'] = int(USE_EMAIL)
+    new_config['Email']['email_notify_onsnatch'] = int(EMAIL_NOTIFY_ONSNATCH)
+    new_config['Email']['email_notify_ondownload'] = int(EMAIL_NOTIFY_ONDOWNLOAD)
+    new_config['Email']['email_notify_onsubtitledownload'] = int(EMAIL_NOTIFY_ONSUBTITLEDOWNLOAD)
+    new_config['Email']['email_host'] = EMAIL_HOST
+    new_config['Email']['email_port'] = int(EMAIL_PORT)
+    new_config['Email']['email_tls'] = int(EMAIL_TLS)
+    new_config['Email']['email_user'] = EMAIL_USER
+    new_config['Email']['email_password'] = EMAIL_PASSWORD
+    new_config['Email']['email_from'] = EMAIL_FROM
+    new_config['Email']['email_list'] = EMAIL_LIST
 
     new_config['Newznab'] = {}
     new_config['Newznab']['newznab_data'] = '!!!'.join([x.configStr() for x in newznabProviderList])
