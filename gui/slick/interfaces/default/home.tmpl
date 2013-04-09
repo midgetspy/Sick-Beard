@@ -85,7 +85,7 @@
 	        sortList: [[6,0],[2,0]],
 	        textExtraction: {
 	        #if ( $layout != 'simple'):
-		        3: function(node) { return \$(node).find("img").attr("alt"); }
+		        3: function(node) { return \$(node).find("img").attr("alt"); },
 	        #end if
 	            4: function(node) { return \$(node).find("span").text(); },
 	            6: function(node) { return \$(node).find("img").attr("alt"); }
