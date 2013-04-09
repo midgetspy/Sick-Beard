@@ -43,7 +43,11 @@
     format: function(s) {
         if (s.indexOf('Loading...') == 0)
             return s.replace('Loading...','000');
-        return (s || '').replace(/^(The|A)\s/i,'');
+		#if not $sickbeard.SORT_ARTICLE:
+			return (s || '').replace(/^(The|A|An)\s/i,'');
+		#else:
+			return (s || '');
+		#end if		
     },
     type: 'text'
 });
@@ -234,7 +238,7 @@
                     #set $too_late_header = True
                 #elif $cur_ep_enddate >= $today and $cur_ep_airdate < $next_week.date():
                     #if $cur_ep_airdate == $today.date():
-                    	<br /><h1 class="day">$datetime.date.fromordinal($cur_ep_airdate.toordinal).strftime("%A").decode($sickbeard.SYS_ENCODING).capitalize()<span style="font-size: 12px;">[today]</span></h1>
+                    	<br /><h1 class="day">$datetime.date.fromordinal($cur_ep_airdate.toordinal).strftime("%A").decode($sickbeard.SYS_ENCODING).capitalize() <span style="font-size: 12px;">[today]</span></h1>
                     #set $today_header = True
                     #else:
                     	<br /><h1 class="day">$datetime.date.fromordinal($cur_ep_airdate.toordinal).strftime("%A").decode($sickbeard.SYS_ENCODING).capitalize()</h1>
@@ -243,7 +247,7 @@
                 #set $cur_segment = $cur_ep_airdate
             #end if
             #if $cur_ep_airdate == $today.date() and not $today_header:
-                <br /><h1 class="day">$datetime.date.fromordinal($cur_ep_airdate.toordinal).strftime("%A").decode($sickbeard.SYS_ENCODING) <span style="font-size: 12px;">[today]</span></h1>
+                <br /><h1 class="day">$datetime.date.fromordinal($cur_ep_airdate.toordinal).strftime("%A").decode($sickbeard.SYS_ENCODING).capitalize() <span style="font-size: 12px;">[today]</span></h1>
                 #set $today_header = True
             #end if
             #if $cur_ep_enddate < $today:

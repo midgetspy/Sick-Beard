@@ -28,8 +28,11 @@
     },
     format: function(s) {
         if (s.indexOf('Loading...') == 0)
-            return s.replace('Loading...','000');
-        return (s || '').replace(/^(The|A)\s/i,'');
+		#if not $sickbeard.SORT_ARTICLE:
+			return (s || '').replace(/^(The|A|An)\s/i,'');
+		#else:
+			return (s || '');
+		#end if	
     },
     type: 'text'
 });
@@ -81,7 +84,9 @@
 	
 	        sortList: [[6,0],[2,0]],
 	        textExtraction: {
-	            3: function(node) { return \$(node).find("img").attr("alt"); },
+	        #if ( $layout != 'simple'):
+		        3: function(node) { return \$(node).find("img").attr("alt"); }
+	        #end if
 	            4: function(node) { return \$(node).find("span").text(); },
 	            6: function(node) { return \$(node).find("img").attr("alt"); }
 	        },
