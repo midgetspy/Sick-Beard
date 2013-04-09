@@ -21,7 +21,6 @@ import sickbeard
 from sickbeard import logger
 from sickbeard.clients.generic import GenericClient
 import json
-from base64 import b64encode
 
 class DownloadStationAPI(GenericClient):
     
