@@ -46,6 +46,21 @@ def processDir (dirName, nzbName=None, recurse=False):
 
     returnStr += logHelper(u"Processing folder "+dirName, logger.DEBUG)
 
+    # if they passed us a real dir then assume it's the one we want
+    if ek.ek(os.path.isdir, dirName):
+        dirName = ek.ek(os.path.realpath, dirName)
+
+    # if they've got a download dir configured then use it
+    elif sickbeard.TV_DOWNLOAD_DIR and ek.ek(os.path.isdir, sickbeard.TV_DOWNLOAD_DIR) \
+            and ek.ek(os.path.normpath, dirName) != ek.ek(os.path.normpath, sickbeard.TV_DOWNLOAD_DIR):
+        dirName = ek.ek(os.path.join, sickbeard.TV_DOWNLOAD_DIR, ek.ek(os.path.abspath, dirName).split(os.path.sep)[-1])
+        returnStr += logHelper(u"Trying to use folder "+dirName, logger.DEBUG)
+
+    # if we didn't find a real dir then quit
+    if not ek.ek(os.path.isdir, dirName):
+        returnStr += logHelper(u"Unable to figure out what folder to process. If your downloader and Sick Beard aren't on the same PC make sure you fill out your TV download dir in the config.", logger.DEBUG)
+        return returnStr
+
     if dirName == sickbeard.TV_DOWNLOAD_DIR and not nzbName: #Scheduled Post Processing Active
         #Get at first all the subdir in the dirName
         for path, dirs, files in ek.ek(os.walk, dirName):
