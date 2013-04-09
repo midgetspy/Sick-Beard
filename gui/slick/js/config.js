@@ -45,4 +45,5 @@ function config_success(){
         $(this).next().remove();
         $(this).show();
     });
+    $('#email_show').trigger('notify');
 }

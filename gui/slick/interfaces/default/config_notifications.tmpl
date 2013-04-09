@@ -1102,6 +1102,139 @@
                     </fieldset>
                 </div><!-- /trakt component-group //-->
 
+                <div class="component-group clearfix">
+                    <div class="component-group-desc">
+                        <img class="notifier-icon" src="$sbRoot/images/notifiers/email.png" alt="" title="Email" />
+                        <h3><a href="http://en.wikipedia.org/wiki/Comparison_of_webmail_providers" onclick="window.open(this.href, '_blank'); return false;">Email</a></h3>
+                        <p>Allows configuration of email notifications on a per show basis.</p>
+                    </div>
+                    <fieldset class="component-group-list">
+                        <div class="field-pair">
+                            <input type="checkbox" class="enabler" name="use_email" id="use_email" #if $sickbeard.USE_EMAIL then "checked=\"checked\"" else ""# />
+                            <label class="clearfix" for="use_email">
+                                <span class="component-title">Enable</span>
+                                <span class="component-desc">Should Sick Beard send email notifications?</span>
+                            </label>
+                        </div>
+
+                        <div id="content_use_email">
+                            <div class="field-pair">
+                                <input type="checkbox" name="email_notify_onsnatch" id="email_notify_onsnatch" #if $sickbeard.EMAIL_NOTIFY_ONSNATCH then "checked=\"checked\"" else ""# />
+                                <label class="clearfix" for="email_notify_onsnatch">
+                                    <span class="component-title">Notify on Snatch</span>
+                                    <span class="component-desc">Send notification when we start a download?</span>
+                                </label>
+                            </div>
+                            <div class="field-pair">
+                                <input type="checkbox" name="email_notify_ondownload" id="email_notify_ondownload" #if $sickbeard.EMAIL_NOTIFY_ONDOWNLOAD then "checked=\"checked\"" else ""# />
+                                <label class="clearfix" for="email_notify_ondownload">
+                                    <span class="component-title">Notify on Download</span>
+                                    <span class="component-desc">Send notification when we finish a download?</span>
+                                </label>
+                            </div>
+                            <div class="field-pair">
+                                <input type="checkbox" name="email_notify_onsubtitledownload" id="email_notify_onsubtitledownload" #if $sickbeard.EMAIL_NOTIFY_ONSUBTITLEDOWNLOAD then "checked=\"checked\"" else ""# />
+                                <label class="clearfix" for="email_notify_onsubtitledownload">
+                                    <span class="component-title">Notify on Subs Download</span>
+
+                                    <span class="component-desc">Send notification when we finish a subtitle download?</span>
+                                </label>
+                            </div>
+                            <div class="field-pair">
+                                <label class="nocheck clearfix">
+                                    <span class="component-title">SMTP Host</span>
+                                    <input type="text" name="email_host" id="email_host" value="$sickbeard.EMAIL_HOST" size="35" />
+                                </label>
+                                <label class="nocheck clearfix">
+                                    <span class="component-title">&nbsp;</span>
+                                    <span class="component-desc">Hostname of your SMTP email server.</span>
+                                </label>
+                            </div>
+                            <div class="field-pair">
+                                <label class="nocheck clearfix">
+                                    <span class="component-title">SMTP Port</span>
+                                    <input type="text" name="email_port" id="email_port" value="$sickbeard.EMAIL_PORT" size="35" />
+                                </label>
+                                <label class="nocheck clearfix">
+                                    <span class="component-title">&nbsp;</span>
+                                    <span class="component-desc">The port number used to connect to your SMTP host.</span>
+                                </label>
+                            </div>
+                            <div class="field-pair">
+                                <label class="nocheck clearfix">
+                                    <span class="component-title">SMTP From</span>
+                                    <input type="text" name="email_from" id="email_from" value="$sickbeard.EMAIL_FROM" size="35" />
+                                </label>
+                                <label class="nocheck clearfix">
+                                    <span class="component-title">&nbsp;</span>
+                                    <span class="component-desc">Sender email address; some hosts require a real address.</span>
+                                </label>
+                            </div>
+                            <div class="field-pair">
+                                <label class="nocheck clearfix">
+                                    <span class="component-title">Use TLS</span>
+                                    <input type="checkbox" name="email_tls" id="email_tls" #if $sickbeard.EMAIL_TLS then "checked=\"checked\"" else ""# size="35" />
+                                </label>
+                                <label class="nocheck clearfix">
+                                    <span class="component-title">&nbsp;</span>
+                                    <span class="component-desc">Check to use TLS encryption.</span>
+                                </label>
+                            </div>
+                            <div class="field-pair">
+                                <label class="nocheck clearfix">
+                                    <span class="component-title">SMTP User</span>
+                                    <input type="text" name="email_user" id="email_user" value="$sickbeard.EMAIL_USER" size="35" />
+                                </label>
+                                <label class="nocheck clearfix">
+                                    <span class="component-title">&nbsp;</span>
+                                    <span class="component-desc">(Optional) Your SMTP server username.</span>
+                                </label>
+                            </div>
+                            <div class="field-pair">
+                                <label class="nocheck clearfix">
+                                    <span class="component-title">SMTP Password</span>
+                                    <input type="password" name="email_password" id="email_password" value="$sickbeard.EMAIL_PASSWORD" size="35" />
+                                </label>
+                                <label class="nocheck clearfix">
+                                    <span class="component-title">&nbsp;</span>
+                                    <span class="component-desc">(Optional) Your SMTP server password.</span>
+                                </label>
+                            </div>
+                            <div class="field-pair">
+                                <label class="nocheck clearfix">
+                                    <span class="component-title">Global Email List</span>
+                                    <input type="text" name="email_list" id="email_list" value="$sickbeard.EMAIL_LIST" size="35" />
+                                </label>
+                                <label class="nocheck clearfix">
+                                    <span class="component-title">&nbsp;</span>
+                                    <span class="component-desc">All emails here receive notifications for ALL shows.</span>
+                                </label>
+                            </div>
+                            <div class="field-pair">
+                                <label class="nocheck clearfix">
+                                    <span class="component-title">Show Notification Lists</span>
+                                    <select name="email_show" id="email_show">
+                                        <option value="-1">-- Select a Show --</option>
+                                    </select>
+                                </label>
+                                <label class="nocheck clearfix">
+                                    <span class="component-title">&nbsp;</span>
+                                    <input style="margin-top: 3px;" type="text" name="email_show_list" id="email_show_list" size="35" />
+                                </label>
+
+                                <label class="nocheck clearfix">
+                                    <span class="component-title">&nbsp;</span>
+                                    <span class="component-desc">Configure per show notifications here.</span>
+                                </label>
+                            </div>
+
+                            <div class="testNotification" id="testEmail-result">Click below to test.</div>
+                            <input type="button" value="Test Email" id="testEmail" />
+                            <input type="submit" class="config_submitter" value="Save Changes" />
+                        </div><!-- /content_use_email //-->
+                    </fieldset>
+                </div><!-- /email component-group //-->
+
             </div><!-- /config-components //-->
         </form>
 
