@@ -206,7 +206,7 @@ class ThePirateBayProvider(generic.TorrentProvider):
         for mode in search_params.keys():
             for search_string in search_params[mode]:
 
-                searchURL = self.proxy._buildURL(self.searchurl %(urllib.quote(search_string)))    
+                searchURL = self.proxy._buildURL(self.searchurl %(urllib.quote(search_string.encode("utf-8"))))    
         
                 logger.log(u"Search string: " + searchURL, logger.DEBUG)
         
