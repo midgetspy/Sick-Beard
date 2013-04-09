@@ -119,7 +119,7 @@ class T411Provider(generic.TorrentProvider):
                 torrentPage = self.opener.open( pageURL )
                 torrentSoup = BeautifulSoup( torrentPage )
                
-                downloadTorrentLink = torrentSoup.find("a", text=u"Tï¿½lï¿½charger")
+                downloadTorrentLink = torrentSoup.find("a", text=u"Télécharger")
                 if downloadTorrentLink:
                     
                     downloadURL = self.url + downloadTorrentLink['href']
