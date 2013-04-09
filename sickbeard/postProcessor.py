@@ -36,6 +36,7 @@ from sickbeard import logger
 from sickbeard import notifiers
 from sickbeard import show_name_helpers
 from sickbeard import scene_exceptions
+from sickbeard import search_queue
 
 from sickbeard import encodingKludge as ek
 from sickbeard.exceptions import ex
@@ -761,6 +762,11 @@ class PostProcessor(object):
                 with curEp.lock:
                     curEp.status = int(common.WANTED)
                     curEp.saveToDB()
+            self._log(u"Triggering search for episode(s)", logger.DEBUG)
+            for curEp in [ep_obj] + ep_obj.relatedEps:
+                self._log(u"Searching for: " + curEp.name)
+                queue_item = search_queue.ManualSearchQueueItem(curEp)
+                sickbeard.searchQueueScheduler.action.add_item(queue_item)
            
             # we 'succeeded' in the sense that no errors were encountered
             return True
