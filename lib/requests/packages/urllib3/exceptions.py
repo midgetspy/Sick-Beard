@@ -18,10 +18,6 @@ class PoolError(HTTPError):
         self.pool = pool
         HTTPError.__init__(self, "%s: %s" % (pool, message))
 
-    def __reduce__(self):
-        # For pickling purposes.
-        return self.__class__, (None, self.url)
-
 
 class SSLError(HTTPError):
     "Raised when SSL certificate fails in an HTTPS connection."
@@ -38,16 +34,10 @@ class DecodeError(HTTPError):
 class MaxRetryError(PoolError):
     "Raised when the maximum number of retries is exceeded."
 
-    def __init__(self, pool, url, reason=None):
-        self.reason = reason
-
+    def __init__(self, pool, url):
         message = "Max retries exceeded with url: %s" % url
-        if reason:
-            message += " (Caused by %s: %s)" % (type(reason), reason)
-        else:
-            message += " (Caused by redirect)"
-
         PoolError.__init__(self, pool, message)
+
         self.url = url
 
 
@@ -82,6 +72,6 @@ class LocationParseError(ValueError, HTTPError):
 
     def __init__(self, location):
         message = "Failed to parse: %s" % location
-        HTTPError.__init__(self, message)
+        super(LocationParseError, self).__init__(self, message)
 
         self.location = location

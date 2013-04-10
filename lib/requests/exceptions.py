@@ -16,11 +16,7 @@ class RequestException(RuntimeError):
 
 class HTTPError(RequestException):
     """An HTTP error occurred."""
-
-    def __init__(self, *args, **kwargs):
-        """ Initializes HTTPError with optional `response` object. """
-        self.response = kwargs.pop('response', None)
-        super(HTTPError, self).__init__(*args, **kwargs)
+    response = None
 
 
 class ConnectionError(RequestException):

@@ -49,24 +49,17 @@ class DownloadStationAPI(GenericClient):
     
     def _add_torrent_uri(self, result):
         
-        data = {'api':'SYNO.DownloadStation.Task', 'version':'1', 'method':'create', 'session':'DownloadStation', '_sid':self.auth, 'uri':result.url}
-        self._request(method='post', data=data)
+        post_data = {'api':'SYNO.DownloadStation.Task', 'version':'1', 'method':'create', 'session':'DownloadStation', '_sid':self.auth, 'uri':result.url}
+        self._request(method='post', data=post_data)
         
         return json.loads(self.response.text)['success']
     
     def _add_torrent_file(self, result):
     
-<<<<<<< HEAD
     	# This should work, but it doesn't
 	post_data = {'api':'SYNO.DownloadStation.Task', 'version':'1', 'method':'create', 'session':'DownloadStation', '_sid':self.auth}
 	post_files = {'file':('tv.torrent', result.content)}
 	self._request(method='post', data=post_data, files=post_files)
-=======
-        # This should work, but it doesn't!?
-        data = {'api':'SYNO.DownloadStation.Task', 'version':'1', 'method':'create', 'session':'DownloadStation', '_sid':self.auth}
-        files = {'file':('tv.torrent', result.content)}
-        self._request(method='post', data=data, files=files)
->>>>>>> Updated Requests Library v1.2.0
         
         return json.loads(self.response.text)['success']
 

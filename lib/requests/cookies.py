@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 """
 Compatibility code to be able to use `cookielib.CookieJar` with requests.
 
@@ -32,22 +30,26 @@ class MockRequest(object):
     def __init__(self, request):
         self._r = request
         self._new_headers = {}
-        self.type = urlparse(self._r.url).scheme
 
     def get_type(self):
-        return self.type
+        return urlparse(self._r.full_url).scheme
 
     def get_host(self):
-        return urlparse(self._r.url).netloc
+        return urlparse(self._r.full_url).netloc
 
     def get_origin_req_host(self):
-        return self.get_host()
+        if self._r.response.history:
+            r = self._r.response.history[0]
+            return urlparse(r.url).netloc
+        else:
+            return self.get_host()
 
     def get_full_url(self):
-        return self._r.url
+        return self._r.full_url
 
     def is_unverifiable(self):
-        return True
+        # unverifiable == redirected
+        return bool(self._r.response.history)
 
     def has_header(self, name):
         return name in self._r.headers or name in self._new_headers
@@ -231,7 +233,7 @@ class RequestsCookieJar(cookielib.CookieJar, collections.MutableMapping):
         Python dict of name-value pairs of cookies that meet the requirements."""
         dictionary = {}
         for cookie in iter(self):
-            if (domain is None or cookie.domain == domain) and (path is None
+            if (domain == None or cookie.domain == domain) and (path == None
                                                 or cookie.path == path):
                 dictionary[cookie.name] = cookie.value
         return dictionary
@@ -240,27 +242,17 @@ class RequestsCookieJar(cookielib.CookieJar, collections.MutableMapping):
         """Dict-like __getitem__() for compatibility with client code. Throws exception
         if there are more than one cookie with name. In that case, use the more
         explicit get() method instead. Caution: operation is O(n), not O(1)."""
-
         return self._find_no_duplicates(name)
 
     def __setitem__(self, name, value):
         """Dict-like __setitem__ for compatibility with client code. Throws exception
         if there is already a cookie of that name in the jar. In that case, use the more
         explicit set() method instead."""
-
         self.set(name, value)
 
     def __delitem__(self, name):
         """Deletes a cookie given a name. Wraps cookielib.CookieJar's remove_cookie_by_name()."""
         remove_cookie_by_name(self, name)
-
-    def update(self, other):
-        """Updates this jar with cookies from another CookieJar or dict-like"""
-        if isinstance(other, cookielib.CookieJar):
-            for cookie in other:
-                self.set_cookie(cookie)
-        else:
-            super(RequestsCookieJar, self).update(other)
 
     def _find(self, name, domain=None, path=None):
         """Requests uses this method internally to get cookie values. Takes as args name
@@ -285,7 +277,7 @@ class RequestsCookieJar(cookielib.CookieJar, collections.MutableMapping):
             if cookie.name == name:
                 if domain is None or cookie.domain == domain:
                     if path is None or cookie.path == path:
-                        if toReturn is not None:  # if there are multiple cookies that meet passed in criteria
+                        if toReturn != None:  # if there are multiple cookies that meet passed in criteria
                             raise CookieConflictError('There are multiple cookies with name, %r' % (name))
                         toReturn = cookie.value  # we will eventually return this as long as no cookie conflict
 
@@ -307,10 +299,8 @@ class RequestsCookieJar(cookielib.CookieJar, collections.MutableMapping):
             self._cookies_lock = threading.RLock()
 
     def copy(self):
-        """Return a copy of this RequestsCookieJar."""
-        new_cj = RequestsCookieJar()
-        new_cj.update(self)
-        return new_cj
+        """This is not implemented. Calling this will throw an exception."""
+        raise NotImplementedError
 
 
 def create_cookie(name, value, **kwargs):
@@ -332,7 +322,8 @@ def create_cookie(name, value, **kwargs):
         comment=None,
         comment_url=None,
         rest={'HttpOnly': None},
-        rfc2109=False,)
+        rfc2109=False,
+        )
 
     badargs = set(kwargs) - set(result)
     if badargs:
@@ -367,7 +358,8 @@ def morsel_to_cookie(morsel):
         comment=morsel['comment'],
         comment_url=bool(morsel['comment']),
         rest={'HttpOnly': morsel['httponly']},
-        rfc2109=False,)
+        rfc2109=False,
+        )
     return c
 
 

@@ -2,23 +2,26 @@
 # -*- coding: utf-8 -*-
 
 """
-certs.py
-~~~~~~~~
+ceritfi.py
+~~~~~~~~~~
 
-This module returns the preferred default CA certificate bundle.
-
-If you are packaging Requests, e.g., for a Linux distribution or a managed
-environment, you can change the definition of where() to return a separately
-packaged CA bundle.
+This module returns the installation location of cacert.pem.
 """
 
-import os.path
+import os
+try:
+    import certifi
+except ImportError:
+    certifi = None
 
 
 def where():
-    """Return the preferred certificate bundle."""
-    # vendored bundle inside Requests
-    return os.path.join(os.path.dirname(__file__), 'cacert.pem')
+
+    if certifi:
+        return certifi.where()
+    else:
+        f = os.path.split(__file__)[0]
+        return os.path.join(f, 'cacert.pem')
 
 if __name__ == '__main__':
     print(where())
