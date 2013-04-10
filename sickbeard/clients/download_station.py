@@ -1,4 +1,6 @@
-# Authors: Pedro Jose Pereira Vieito <pvieito@gmail.com> (@pvieito) & Mr_Orange
+# Authors: 
+# Pedro Jose Pereira Vieito <pvieito@gmail.com> (Twitter: @pvieito)
+# Jens Timmerman <jens.timmerman@gmail.com> & Mr_Orange
 #
 # URL: https://github.com/mr-orange/Sick-Beard
 #
@@ -16,11 +18,14 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with Sick Beard. If not, see <http://www.gnu.org/licenses/>.
+#
+# Uses the Synology Download Station API v1: http://download.synology.com/download/other/Synology_Download_Station_Official_API_V3.pdf.
+
+import json
 
 import sickbeard
 from sickbeard import logger
 from sickbeard.clients.generic import GenericClient
-import json
 
 class DownloadStationAPI(GenericClient):
     
@@ -51,6 +56,7 @@ class DownloadStationAPI(GenericClient):
     
     def _add_torrent_file(self, result):
         
+        # The Torrent file url is processed directly by the Download Station
     	post_data = {'api':'SYNO.DownloadStation.Task', 'version':'1', 'method':'create', 'session':'DownloadStation', '_sid':self.auth, 'uri':result.url}
         self._request(method='post', data=post_data)
         
