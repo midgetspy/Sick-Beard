@@ -46,7 +46,7 @@ class KATProvider(generic.TorrentProvider):
 
         self.cache = KATCache(self)
         
-        self.url = 'http://www.kat.ph/'
+        self.url = 'https://kat.ph/'
 
         self.searchurl = self.url+'usearch/%s/?field=seeders&sorder=desc'  # order by seed       
 
@@ -88,7 +88,9 @@ class KATProvider(generic.TorrentProvider):
 
     def _find_season_quality(self,title,torrent_link):
         """ Return the modified title of a Season Torrent with the quality found inspecting torrent file list """
-
+        
+        return None
+        
         mediaExtensions = ['avi', 'mkv', 'wmv', 'divx',
                            'vob', 'dvr-ms', 'wtv', 'ts'
                            'ogv', 'rar', 'zip'] 
@@ -97,7 +99,7 @@ class KATProvider(generic.TorrentProvider):
         
         fileName = None
         
-        data = self.getURL(torrent_link)
+        html = self.getURL(torrent_link)
         
         if not data:
             return None
@@ -132,7 +134,7 @@ class KATProvider(generic.TorrentProvider):
             return title
             
         except:
-            log.error('Failed parsing Torrent File list: %s', traceback.format_exc())                
+            logger.log('Failed parsing Torrent File list: %s', traceback.format_exc(),logger.ERROR)                
 
     def _get_season_search_strings(self, show, season=None):
 
@@ -149,7 +151,7 @@ class KATProvider(generic.TorrentProvider):
         if wantedEp == seasonEp and not show.air_by_date:
             search_string = {'Season': [], 'Episode': []}
             for show_name in set(show_name_helpers.allPossibleShowNames(show)):
-                ep_string = show_name +' S%02d' % int(season) #1) ShowName SXX   
+                ep_string = show_name +' S%02d' % int(season) + ' -S%02d' % int(season) + 'E' #1) ShowName SXX -SXXE  
                 search_string['Season'].append(ep_string)
                       
                 ep_string = show_name+' Season '+str(season)+' -Ep*' #2) ShowName Season X  
@@ -188,53 +190,47 @@ class KATProvider(generic.TorrentProvider):
         return [search_string]
 
     def _doSearch(self, search_params, show=None):
-    
+
         results = []
-        items = {'Season': [], 'Episode': []}
+        items = {'Season': [], 'Episode': [], 'RSS': []}
 
         for mode in search_params.keys():
             for search_string in search_params[mode]:
-
-                searchURL = self.searchurl %(urllib.quote(search_string))    
-        
-                logger.log(u"Search string: " + searchURL, logger.DEBUG)
-        
-                data = self.getURL(searchURL)
-                if not data:
+                
+                if mode != 'RSS':
+                    searchURL = self.searchurl %(urllib.quote(search_string))    
+                    logger.log(u"Search string: " + searchURL, logger.DEBUG)
+                else:
+                    searchURL = self.url + 'tv/?field=time_add&sorder=desc'
+                    logger.log(u"KAT cache update URL: "+ searchURL, logger.DEBUG)
+                    
+                html = self.getURL(searchURL)
+                if not html:
                     return []
 
-                table_order = ['name', 'size', 'files', 'age', 'seeds', 'leechers']
-
                 try:
-                    html = BeautifulSoup(data)
+                    soup = BeautifulSoup(html)
 
-                    resultdiv = html.find('div', attrs = {'class':'tabs'})
+                    torrent_table = soup.find('table', attrs = {'class' : 'data'})
+
+                    if not torrent_table:
+                        logger.log(u"The Data returned from " + self.provider.name + " is incomplete, this result is unusable", logger.ERROR)
+                        return []
                     
-                    for div in [x for x in resultdiv.find_all('div', recursive = False) if x.get('id')]:
-                        for tr in [x for x in div.find_all('tr') if x['class'] != 'firstr' and x.get['id']]:
-                            for colname, td in [(c,x) for c in range(len(table_order)) for x in tr.find_all('td')]:   
-                                 
-                                if colname is 'name':
-                                    link = self.url + td.find('div', {'class': 'torrentname'}).find_all('a')[1]
-                                    id = tr.get('id')[-8:]
-                                    title = re.sub('-t%s.html' %id, '', link.text)
-                                    url = td.find('a', 'imagnet')['href']
-                                    verified = True if td.find('a', 'iverif') else False
-                                    trusted = True if td.find('img', {'alt': 'verified'}) else False
-                                if colname is 'seeds':
-                                    seeders = int(td.text)
-                                if colname is 'leechers':
-                                    leechers = int(td.text)    
+                    for tr in torrent_table.find_all('tr')[1:]:
+                        link = self.url + (tr.find('div', {'class': 'torrentname'}).find_all('a')[1])['href']
+                        id = tr.get('id')[-7:]
+                        title = (tr.find('div', {'class': 'torrentname'}).find_all('a')[1]).text
+                        url = tr.find('a', 'imagnet')['href']
+                        verified = True if tr.find('a', 'iverify') else False
+                        trusted =  True if tr.find('img', {'alt': 'verified'}) else False
+                        seeders = int(tr.find_all('td')[-2].text)
+                        leechers = int(tr.find_all('td')[-1].text)
 
-                        if seeders == 0 or not title \
-                        or not show_name_helpers.filterBadReleases(title):
+                        if (mode != 'RSS' and seeders == 0) or not title:
                             continue 
-
-                        if sickbeard.KAT_TRUSTED and trusted:
-                            logger.log(u"KAT Provider found result "+title+" but that doesn't seem like a trusted result so I'm ignoring it",logger.DEBUG)
-                            continue
-                   
-                        if sickbeard.KAT_VERIFIED and verified:
+                  
+                        if sickbeard.KAT_VERIFIED and not verified:
                             logger.log(u"KAT Provider found result "+title+" but that doesn't seem like a verified result so I'm ignoring it",logger.DEBUG)
                             continue
 
@@ -245,8 +241,8 @@ class KATProvider(generic.TorrentProvider):
 
                         items[mode].append(item)
 
-                except:
-                    logger.log(u"Failed to parsing " + self.name + " page url: " + searchURL, logger.ERROR)
+                except Exception, e:
+                    logger.log(u"Failed to parsing " + self.name + (" Exceptions: "  + str(e) if e else ''), logger.ERROR)
 
             #For each search mode sort all the items by seeders
             items[mode].sort(key=lambda tup: tup[3], reverse=True)        
@@ -266,23 +262,13 @@ class KATProvider(generic.TorrentProvider):
 
     def getURL(self, url, headers=None):
 
-        if not headers:
-            headers = []
-
-#        # Glype Proxies does not support Direct Linking.
-#        # We have to fake a search on the proxy site to get data
-#        if self.proxy.isEnabled():
-#            headers.append(('Referer', self.proxy.getProxyURL()))
-            
-        result = None
-
         try:
-            result = helpers.getURL(url, headers)
-        except (urllib2.HTTPError, IOError), e:
+            r = requests.get(url)
+        except Exception, e:
             logger.log(u"Error loading "+self.name+" URL: " + str(sys.exc_info()) + " - " + ex(e), logger.ERROR)
             return None
-
-        return result
+    
+        return r.content
 
     def downloadResult(self, result):
         """
@@ -328,54 +314,21 @@ class KATCache(tvcache.TVCache):
         self.minTime = 20
 
     def updateCache(self):
+
+        if not self.shouldUpdate():
+            return
+
+        search_params = {'RSS': ['rss']}
+        rss_results = self.provider._doSearch(search_params)
         
-        pass
-#        re_title_url = self.provider.proxy._buildRE(self.provider.re_title_url)
-#                
-#        if not self.shouldUpdate():
-#            return
-#
-#        data = self._getData()
-#
-#        # as long as the http request worked we count this as an update
-#        if data:
-#            self.setLastUpdate()
-#        else:
-#            return []
-#
-#        # now that we've loaded the current RSS feed lets delete the old cache
-#        logger.log(u"Clearing "+self.provider.name+" cache and updating with new information")
-#        self._clearCache()
-#
-#        match = re.compile(re_title_url, re.DOTALL).finditer(urllib.unquote(data))
-#        if not match:
-#            logger.log(u"The Data returned from the ThePirateBay is incomplete, this result is unusable", logger.ERROR)
-#            return []
-#                
-#        for torrent in match:
-#
-#            title = torrent.group('title').replace('_','.')#Do not know why but SickBeard skip release with '_' in name
-#            url = torrent.group('url')
-#           
-#            #accept torrent only from Trusted people
-#            if sickbeard.THEPIRATEBAY_TRUSTED and re.search('(VIP|Trusted|Helper)',torrent.group(0))== None:
-#                logger.log(u"ThePirateBay Provider found result "+torrent.group('title')+" but that doesn't seem like a trusted result so I'm ignoring it",logger.DEBUG)
-#                continue
-#           
-#            item = (title,url)
-#
-#            self._parseItem(item)
+        if rss_results:
+            self.setLastUpdate()
+        else:
+            return []    
 
-    def _getData(self):
-       
-        #url for the last 50 tv-show
-        url = self.provider.url+'tv/'
-
-        logger.log(u"KAT cache update URL: "+ url, logger.DEBUG)
-
-        data = self.provider.getURL(url)
-
-        return data
+        for result in rss_results:
+            item = (result[0], result[1])
+            self._parseItem(item)
 
     def _parseItem(self, item):
 

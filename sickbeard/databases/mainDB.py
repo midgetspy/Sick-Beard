@@ -149,7 +149,7 @@ class NumericProviders (AddAirdateIndex):
                 8: 'thepiratebay',
                 9: 'dtt',
                 10: 'torrentleech',
-#                11: 'kat',
+                11: 'kat',
              }
                 
     def execute(self):
