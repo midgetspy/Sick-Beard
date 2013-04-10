@@ -305,6 +305,9 @@ COMING_EPS_LAYOUT = None
 COMING_EPS_DISPLAY_PAUSED = None
 COMING_EPS_SORT = None
 COMING_EPS_MISSED_DAYS = None
+DATE_PRESET = None
+TIME_PRESET = None
+TIME_PRESET_W_SECONDS = None
 
 EXTRA_SCRIPTS = []
 
@@ -355,7 +358,7 @@ def initialize(consoleLogging=True):
                 USE_LIBNOTIFY, LIBNOTIFY_NOTIFY_ONSNATCH, LIBNOTIFY_NOTIFY_ONDOWNLOAD, USE_NMJ, NMJ_HOST, NMJ_DATABASE, NMJ_MOUNT, USE_NMJv2, NMJv2_HOST, NMJv2_DATABASE, NMJv2_DBLOC, USE_SYNOINDEX, \
                 USE_BANNER, USE_LISTVIEW, METADATA_XBMC, METADATA_MEDIABROWSER, METADATA_PS3, METADATA_SYNOLOGY, metadata_provider_dict, \
                 NEWZBIN, NEWZBIN_USERNAME, NEWZBIN_PASSWORD, GIT_PATH, MOVE_ASSOCIATED_FILES, \
-                COMING_EPS_LAYOUT, COMING_EPS_SORT, COMING_EPS_MISSED_DAYS, COMING_EPS_DISPLAY_PAUSED, METADATA_WDTV, METADATA_TIVO, IGNORE_WORDS, CREATE_MISSING_SHOW_DIRS, \
+                COMING_EPS_LAYOUT, COMING_EPS_SORT, COMING_EPS_MISSED_DAYS, DATE_PRESET, TIME_PRESET, TIME_PRESET_W_SECONDS, COMING_EPS_DISPLAY_PAUSED, METADATA_WDTV, METADATA_TIVO, IGNORE_WORDS, CREATE_MISSING_SHOW_DIRS, \
                 ADD_SHOWS_WO_DIR
 
         if __INITIALIZED__:
@@ -534,6 +537,9 @@ def initialize(consoleLogging=True):
         COMING_EPS_DISPLAY_PAUSED = bool(check_setting_int(CFG, 'GUI', 'coming_eps_display_paused', 0))
         COMING_EPS_SORT = check_setting_str(CFG, 'GUI', 'coming_eps_sort', 'date')
         COMING_EPS_MISSED_DAYS = check_setting_int(CFG, 'General', 'coming_eps_missed_days', 3)
+        DATE_PRESET = check_setting_str(CFG, 'GUI', 'date_preset', '%x')
+        TIME_PRESET_W_SECONDS = check_setting_str(CFG, 'GUI', 'time_preset', '%I:%M:%S %p')
+        TIME_PRESET = TIME_PRESET_W_SECONDS.replace(u":%S",u"") 
 
         CheckSection(CFG, 'Newznab')
         newznabData = check_setting_str(CFG, 'Newznab', 'newznab_data', '')
@@ -1206,6 +1212,8 @@ def save_config():
     new_config['GUI']['coming_eps_display_paused'] = helpers.tryInt(COMING_EPS_DISPLAY_PAUSED)
     new_config['GUI']['coming_eps_sort'] = COMING_EPS_SORT
     new_config['General']['coming_eps_missed_days'] = COMING_EPS_MISSED_DAYS
+    new_config['GUI']['date_preset'] = DATE_PRESET
+    new_config['GUI']['time_preset'] = TIME_PRESET_W_SECONDS
 
     new_config['General']['config_version'] = CONFIG_VERSION
 

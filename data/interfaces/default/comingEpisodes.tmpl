@@ -1,6 +1,7 @@
 #import sickbeard
 #import datetime
 #from sickbeard.common import *
+#from sickbeard import sbdatetime, helpers
 #set global $title="Coming Episodes"
 
 #set global $sbPath=".."
@@ -106,7 +107,7 @@
 
     #for $cur_result in $sql_results:
 
-        #if int($cur_result["paused"]) and not $sickbeard.COMING_EPS_DISPLAY_PAUSED:
+        #if helpers.tryInt($cur_result["paused"]) and not $sickbeard.COMING_EPS_DISPLAY_PAUSED:
             #continue
         #end if
 
@@ -126,13 +127,13 @@
 
     <!-- start $cur_result["show_name"] //-->
       <tr class="$show_div">
-        <td align="center" class="nowrap">$cur_result["localtime"].strftime('%c').decode($sickbeard.SYS_ENCODING)<span class="sort_data">$time.mktime($cur_result["localtime"].timetuple())</span></td>
+        <td align="center" class="nowrap">$sbdatetime.sbdatetime.sbfdatetime($cur_result["localtime"]).decode($sickbeard.SYS_ENCODING)<span class="sort_data">$time.mktime($cur_result["localtime"].timetuple())</span></td>
         <td class="tvShow"><a href="$sbRoot/home/displayShow?show=${cur_result["showid"]}">$cur_result["show_name"]</a>
-            #if int($cur_result["paused"]):
+            #if helpers.tryInt($cur_result["paused"]):
             <span class="pause">[paused]</span>
             #end if
         </td>
-        <td class="nowrap" align="center"><%="%02ix%02i" % (int(cur_result["season"]), int(cur_result["episode"])) %></td>
+        <td class="nowrap" align="center"><%="%02ix%02i" % (helpers.tryInt(cur_result["season"]), helpers.tryInt(cur_result["episode"])) %></td>
         <td>
         #if $cur_result["description"] != "" and $cur_result["description"] != None:
             <img alt="" src="$sbRoot/images/info32.png" height="16" width="16" class="plotInfo" id="plot_info_<%=str(cur_result["showid"])+"_"+str(cur_result["season"])+"_"+str(cur_result["episode"])%>" />
@@ -141,8 +142,8 @@
         </td>
         <td align="center">$cur_result["network"]</td>
         <td align="center">
-#if int($cur_result["quality"]) in $qualityPresets:
-    <span class="quality $qualityPresetStrings[int($cur_result["quality"])]">$qualityPresetStrings[int($cur_result["quality"])]</span>
+#if helpers.tryInt($cur_result["quality"]) in $qualityPresets:
+    <span class="quality $qualityPresetStrings[helpers.tryInt($cur_result["quality"])]">$qualityPresetStrings[helpers.tryInt($cur_result["quality"])]</span>
 #else:
     <span class="quality Custom">Custom</span>
 #end if
@@ -188,7 +189,7 @@
     #for $cur_result in $sql_results:
     <!-- start $cur_result["show_name"] //-->
         
-        #if int($cur_result["paused"]) and not $sickbeard.COMING_EPS_DISPLAY_PAUSED:
+        #if helpers.tryInt($cur_result["paused"]) and not $sickbeard.COMING_EPS_DISPLAY_PAUSED:
             #continue
         #end if
 
@@ -271,7 +272,7 @@
         <tr>
           <th #if $layout == 'banner' then "" else "colspan=\"2\""#>
             <span class="tvshowTitle"><a href="$sbRoot/home/displayShow?show=${cur_result["showid"]}">$cur_result["show_name"]
-            #if int($cur_result["paused"]):
+            #if helpers.tryInt($cur_result["paused"]):
             <span class="pause">[paused]</span>
             #end if            
             </a></span>
@@ -290,14 +291,14 @@
         <tr>
 #end if          
           <td class="nextEp">
-            <span class="title">Next Episode:</span> <span><%=str(cur_result["season"])+"x"+"%02i" % int(cur_result["episode"]) %> - $cur_result["name"] ($datetime.date.fromtimestamp($time.mktime($cur_result["localtime"].timetuple())).strftime('%x').decode($sickbeard.SYS_ENCODING))</span>
+            <span class="title">Next Episode:</span> <span><%=str(cur_result["season"])+"x"+"%02i" % helpers.tryInt(cur_result["episode"]) %> - $cur_result["name"] ($sbdatetime.sbdatetime.fromtimestamp($time.mktime($cur_result["localtime"].timetuple())).sbfdate().decode($sickbeard.SYS_ENCODING))</span>
           </td>
         </tr>
         <tr>
           <td style="vertical-align: top;">
-            <span class="title">Airs:</span> <span>$datetime.datetime.fromtimestamp($time.mktime($cur_result["localtime"].timetuple())).strftime('%X').decode($sickbeard.SYS_ENCODING) on $cur_result["network"]</span>
-#if int($cur_result["quality"]) in $qualityPresets:
- [<span class="title">$qualityPresetStrings[int($cur_result["quality"])]</span>]<br />
+            <span class="title">Airs:</span> <span>$sbdatetime.sbdatetime.fromtimestamp($time.mktime($cur_result["localtime"].timetuple())).sbftime().decode($sickbeard.SYS_ENCODING) on $cur_result["network"]</span>
+#if helpers.tryInt($cur_result["quality"]) in $qualityPresets:
+ [<span class="title">$qualityPresetStrings[helpers.tryInt($cur_result["quality"])]</span>]<br />
 #else:
  [<span class="title">Custom</span>]<br />
 #end if

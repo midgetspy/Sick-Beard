@@ -6,22 +6,39 @@
 #from sickbeard import providers
 #from sickbeard.providers import generic
 #from sickbeard.common import *
+#from sickbeard import sbdatetime, helpers
 #set global $title="History"
 
 #set global $sbPath=".."
 
 #set global $topmenu="history"#
 #include $os.path.join($sickbeard.PROG_DIR, "data/interfaces/default/inc_top.tmpl")
-
+<style type="text/css">
+.sort_data {display:none}
+</style>
 <script type="text/javascript">
 <!--
+\$.tablesorter.addParser({
+    id: 'cDate',
+    is: function(s) {
+        return false;
+    },
+    format: function(s) {
+        return s; 
+    },
+    type: 'numeric'
+});
 \$(document).ready(function() 
 { 
     \$("#historyTable:has(tbody tr)").tablesorter({
         widgets: ['zebra', 'stickyHeaders', 'filter'],
         sortList: [[0,1]],
         textExtraction: {
+            0: function(node) { return \$(node).find("span").text().toLowerCase(); },
             4: function(node) { return \$(node).find("span").text().toLowerCase(); }
+        },
+        headers: {
+            0: { sorter: 'cDate' }
         }
     });
     \$('#limit').change(function(){
@@ -45,10 +62,11 @@
   <thead><tr><th class="nowrap">Time</th><th>Episode</th><th>Action</th><th>Provider</th><th>Quality</th></tr></thead>
   <tbody>
 #for $hItem in $historyResults:
-#set $curStatus, $curQuality = $Quality.splitCompositeStatus(int($hItem["action"]))
+#set $curStatus, $curQuality = $Quality.splitCompositeStatus(helpers.tryInt($hItem["action"]))
   <tr>
-    <td class="nowrap">$datetime.datetime.strptime(str($hItem["date"]), $history.dateFormat)</td>
-    <td><a href="$sbRoot/home/displayShow?show=$hItem["showid"]#season-$hItem["season"]">$hItem["show_name"] - <%=str(hItem["season"]) +"x"+ "%02i" % int(hItem["episode"]) %></a></td>
+    #set $curdatetime = $datetime.datetime.strptime(str($hItem["date"]), $history.dateFormat)
+    <td class="nowrap">$sbdatetime.sbdatetime.sbfdatetime($curdatetime, show_seconds=True)<span class="sort_data">$time.mktime($curdatetime.timetuple())</span></td>
+    <td><a href="$sbRoot/home/displayShow?show=$hItem["showid"]#season-$hItem["season"]">$hItem["show_name"] - <%=str(hItem["season"]) +"x"+ "%02i" % helpers.tryInt(hItem["episode"]) %></a></td>
     <td align="center">$statusStrings[$curStatus]</td>
     <td align="center">
     #if $curStatus == DOWNLOADED and $str($hItem["provider"]) == '-1':

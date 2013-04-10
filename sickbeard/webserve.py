@@ -48,7 +48,6 @@ from sickbeard.exceptions import ex
 from sickbeard.webapi import Api
 
 from lib.tvdb_api import tvdb_api
-from lib.dateutil import tz
 
 import network_timezones
 
@@ -688,7 +687,8 @@ class ConfigGeneral:
     @cherrypy.expose
     def saveGeneral(self, log_dir=None, web_port=None, web_log=None, web_ipv6=None,
                     launch_browser=None, web_username=None, use_api=None, api_key=None,
-                    web_password=None, version_notify=None, enable_https=None, https_cert=None, https_key=None, missed_days=None):
+                    web_password=None, version_notify=None, enable_https=None, https_cert=None, https_key=None,
+                    missed_days=None, date_preset=None, time_preset=None):
 
         results = []
 
@@ -729,6 +729,13 @@ class ConfigGeneral:
         elif (miss_h > 30):
             miss_h = 30
         sickbeard.COMING_EPS_MISSED_DAYS = miss_h
+
+        if date_preset:
+            sickbeard.DATE_PRESET = date_preset
+
+        if time_preset:
+            sickbeard.TIME_PRESET_W_SECONDS = time_preset
+            sickbeard.TIME_PRESET = sickbeard.TIME_PRESET_W_SECONDS.replace(u":%S",u"")
 
         if use_api == "on":
             use_api = 1
@@ -2841,10 +2848,6 @@ class WebInterface:
     @cherrypy.expose
     def comingEpisodes(self, layout="None"):
 
-        # get local timezone and load network timezones
-        sb_timezone = tz.tzlocal()
-        network_dict = network_timezones.load_network_dict()
-
         myDB = db.DBConnection()
 
         today1 = datetime.date.today()
@@ -2875,36 +2878,9 @@ class WebInterface:
         # make a dict out of the sql results
         sql_results = [dict(row) for row in sql_results1]
         
-        # regex to parse time (12/24 hour format)
-        time_regex = re.compile(r"(\d{1,2}):(\d{2,2})( [PA]M)?\b", flags=re.IGNORECASE)
-        
         # add localtime to the dict
         for index, item in enumerate(sql_results1):
-            mo = time_regex.search(item['airs'])
-            if mo != None and len(mo.groups()) >= 2:
-                try:
-                    hr = helpers.tryInt(mo.group(1))
-                    m = helpers.tryInt(mo.group(2))
-                    ap = mo.group(3)
-                    # convert am/pm to 24 hour clock
-                    if ap != None:
-                        if ap.lower() == u" pm" and hr != 12:
-                            hr += 12
-                        elif ap.lower() == u" am" and hr == 12:
-                            hr -= 12
-                except:
-                    hr = 0
-                    m = 0
-            else:
-                hr = 0
-                m = 0
-            if hr < 0 or hr > 23 or m < 0 or m > 59:
-                hr = 0
-                m = 0
-            te = datetime.datetime.fromordinal(helpers.tryInt(item['airdate']))
-            foreign_timezone = network_timezones.get_network_timezone(item['network'], network_dict, sb_timezone)
-            foreign_naive = datetime.datetime(te.year, te.month, te.day, hr, m,tzinfo=foreign_timezone)
-            sql_results[index]['localtime'] = foreign_naive.astimezone(sb_timezone)
+            sql_results[index]['localtime'] = network_timezones.parse_date_time(item['airdate'],item['airs'],item['network'])
         
         sql_results.sort(sorts[sickbeard.COMING_EPS_SORT])
 
@@ -2924,8 +2900,8 @@ class WebInterface:
             paused_item,
         ]
 
-        t.next_week = datetime.datetime.combine(next_week1, datetime.time(tzinfo=sb_timezone))
-        t.today = datetime.datetime.now().replace(tzinfo=sb_timezone)
+        t.next_week = datetime.datetime.combine(next_week1, datetime.time(tzinfo=network_timezones.sb_timezone))
+        t.today = datetime.datetime.now().replace(tzinfo=network_timezones.sb_timezone)
         t.sql_results = sql_results
 
         # Allow local overriding of layout parameter
