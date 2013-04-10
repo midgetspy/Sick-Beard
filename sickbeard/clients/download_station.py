@@ -55,11 +55,11 @@ class DownloadStationAPI(GenericClient):
         return json.loads(self.response.text)['success']
     
     def _add_torrent_file(self, result):
-        
-	    # This should work, but it doesn't
-		post_data = {'api':'SYNO.DownloadStation.Task', 'version':'1', 'method':'create', 'session':'DownloadStation', '_sid':self.auth}
+    
+    	# This should work, but it doesn't
+	    post_data = {'api':'SYNO.DownloadStation.Task', 'version':'1', 'method':'create', 'session':'DownloadStation', '_sid':self.auth}
 		post_files = {'file':('tv.torrent', result.content)}
-        self._request(method='post', data=post_data, files=post_files)
+		self._request(method='post', data=post_data, files=post_files)
         
         return json.loads(self.response.text)['success']
 
