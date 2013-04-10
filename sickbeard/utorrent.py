@@ -135,8 +135,7 @@ def _action(url, host, username, password):
     return False, "uTorrent is not running or the uTorrent API is not enabled."
 
 def _findTorrentHash(url):
-    i = 0
-    while i < 15:
+    for i in range(0, 15):
         try:
             if url.startswith('magnet'):
                 token_re = "&dn=([^<>]+)&tr="
@@ -153,22 +152,29 @@ def _findTorrentHash(url):
         try:
             myParser = NameParser()
             parse_result = myParser.parse(name)
-
-            success, list = _action('&list=1', sickbeard.TORRENT_HOST, sickbeard.TORRENT_USERNAME, sickbeard.TORRENT_PASSWORD)
         except:
             logger.log(u"Unable to parse the filename " + name + " into a valid episode", logger.WARNING)
             return False
+        
+        success, torrent_list = _action('&list=1', sickbeard.TORRENT_HOST, sickbeard.TORRENT_USERNAME, sickbeard.TORRENT_PASSWORD)
+        
+        if not success:
+            continue
+        
         #Don't fail when a torrent name can't be parsed to a name
-        for torrent in list['torrents']:
+        for torrent in torrent_list['torrents']:
             try:
-                torrent_result = myParser.parse(torrent[2])
-            
-                if torrent_result.series_name == parse_result.series_name and torrent_result.season_number == parse_result.season_number and torrent_result.episode_numbers == parse_result.episode_numbers:
+                #Try to match URL first
+                if url == torrent[19]:
                     return torrent[0]
+            
+                #If that fails try to parse the name of the torrent
+                torrent_result = myParser.parse(torrent[2])
+                if torrent_result.series_name == parse_result.series_name and torrent_result.season_number == parse_result.season_number and torrent_result.episode_numbers == parse_result.episode_numbers:
+                    return torrent[0]                
             except InvalidNameException:
                 pass
 
-        i += 1
         time.sleep(1)
 
 def testAuthentication(host=None, username=None, password=None):
@@ -186,15 +192,15 @@ def sendTORRENT(result):
 
     success, new_result = _action(url, sickbeard.TORRENT_HOST, sickbeard.TORRENT_USERNAME, sickbeard.TORRENT_PASSWORD)
 
-    hash = _findTorrentHash(result.url)
+    torrent_hash = _findTorrentHash(result.url)
     torrent_label = sickbeard.TORRENT_PATH.replace("/", "_").replace("\\", "_")
 
-    if hash and torrent_label:
-        url = '&action=setprops&s=label&hash=' + hash +'&v=' + quote(torrent_label) + '&t=' + str(int(time.time()))
+    if torrent_hash and torrent_label:
+        url = '&action=setprops&s=label&hash=' + torrent_hash +'&v=' + quote(torrent_label) + '&t=' + str(int(time.time()))
         _action(url, sickbeard.TORRENT_HOST, sickbeard.TORRENT_USERNAME, sickbeard.TORRENT_PASSWORD)
     
-    if hash and sickbeard.TORRENT_PAUSED:
-        url = '&action=pause&hash=' + hash + '&t=' + str(int(time.time()))
+    if torrent_hash and sickbeard.TORRENT_PAUSED:
+        url = '&action=pause&hash=' + torrent_hash + '&t=' + str(int(time.time()))
         _action(url, sickbeard.TORRENT_HOST, sickbeard.TORRENT_USERNAME, sickbeard.TORRENT_PASSWORD)
 
     return success, new_result
