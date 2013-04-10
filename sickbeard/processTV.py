@@ -50,7 +50,7 @@ def processDir (dirName, nzbName=None, recurse=False):
     if ek.ek(os.path.isdir, dirName):
         dirName = ek.ek(os.path.realpath, dirName)
 
-    # if they've got a download dir configured then use it
+    # if the client and Sickbeard are not on the same machine translate the Dir in a network dir 
     elif sickbeard.TV_DOWNLOAD_DIR and ek.ek(os.path.isdir, sickbeard.TV_DOWNLOAD_DIR) \
             and ek.ek(os.path.normpath, dirName) != ek.ek(os.path.normpath, sickbeard.TV_DOWNLOAD_DIR):
         dirName = ek.ek(os.path.join, sickbeard.TV_DOWNLOAD_DIR, ek.ek(os.path.abspath, dirName).split(os.path.sep)[-1])
@@ -184,27 +184,6 @@ def validateDir(path, dirName, returnStr):
     elif ek.ek(os.path.basename, dirName).startswith('_UNPACK_'):
         returnStr += logHelper(u"The directory name indicates that this release is in the process of being unpacked, skipping", logger.DEBUG)
         return False
-
-#    try:
-#        np = NameParser(dirName)
-#        parse_result = np.parse(dirName)
-#    except InvalidNameException:
-#        
-#        #Try to parse files name if any 
-#        fileList = ek.ek(os.listdir, ek.ek(os.path.join, path, dirName))
-#        videoFiles = filter(helpers.isMediaFile, fileList)
-#        
-##        if not videoFiles:
-##            return False
-#        
-#        #Be strict for bad named folder
-#        for cur_video_file in videoFiles:
-#            try:
-#                np = NameParser(cur_video_file)
-#                parse_result = np.parse(cur_video_file)
-#            except InvalidNameException:
-#                returnStr += logHelper(u"Folder " + dirName +  " seems to Not Contain TV, skipping it", logger.DEBUG)
-#                return False
     
     # make sure the dir isn't inside a show dir
     myDB = db.DBConnection()
