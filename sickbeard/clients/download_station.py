@@ -22,16 +22,33 @@
 # Uses the Synology Download Station API v1: http://download.synology.com/download/other/Synology_Download_Station_Official_API_V3.pdf.
 
 import json
+import requests
+
+import re
+import time
+from hashlib import sha1
 
 import sickbeard
 from sickbeard import logger
+from sickbeard.exceptions import ex
+from sickbeard.clients import http_error_code
+from lib.bencode import bencode, bdecode
 from sickbeard.clients.generic import GenericClient
 
 class DownloadStationAPI(GenericClient):
     
     def __init__(self, host=None, username=None, password=None):
+                
+        self.name = 'DownloadStation'
+        self.username = sickbeard.TORRENT_USERNAME if username is None else username
+        self.password = sickbeard.TORRENT_PASSWORD if password is None else password
+        self.host = sickbeard.TORRENT_HOST if host is None else host
         
-        super(DownloadStationAPI, self).__init__('DownloadStation', host, username, password)
+        self.url = None
+        self.response = None
+        self.auth = None
+        self.last_time = time.time()
+        self.session = requests.session()
         
         self.url = self.host + 'webapi/DownloadStation/task.cgi'
     
@@ -46,20 +63,20 @@ class DownloadStationAPI(GenericClient):
             return None
         
         return self.auth
-    
+            
     def _add_torrent_uri(self, result):
         
-        post_data = {'api':'SYNO.DownloadStation.Task', 'version':'1', 'method':'create', 'session':'DownloadStation', '_sid':self.auth, 'uri':result.url}
-        self._request(method='post', data=post_data)
+        data = {'api':'SYNO.DownloadStation.Task', 'version':'1', 'method':'create', 'session':'DownloadStation', '_sid':self.auth, 'uri':result.url}
+        self._request(method='post', data=data)
         
         return json.loads(self.response.text)['success']
     
     def _add_torrent_file(self, result):
     
-    	# This should work, but it doesn't
-	post_data = {'api':'SYNO.DownloadStation.Task', 'version':'1', 'method':'create', 'session':'DownloadStation', '_sid':self.auth}
-	post_files = {'file':('tv.torrent', result.content)}
-	self._request(method='post', data=post_data, files=post_files)
+        # This should work, but it doesn't
+        data = {'api':'SYNO.DownloadStation.Task', 'version':'1', 'method':'create', 'session':'DownloadStation', '_sid':self.auth}
+        files = {'file':('tv.torrent', result.content)}
+        self._request(method='post', data=data, files=files)
         
         return json.loads(self.response.text)['success']
 
