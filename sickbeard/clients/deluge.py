@@ -37,7 +37,10 @@ class DelugeAPI(GenericClient):
                                 "params": [self.password],
                                 "id": 1
                                 })
-        self.response = self.session.post(self.url, data=post_data.encode('utf-8'))
+        try:
+            self.response = self.session.post(self.url, data=post_data.encode('utf-8'))
+        except:
+            return None     
         
         self.auth = self.response.json["result"]
         
@@ -77,7 +80,7 @@ class DelugeAPI(GenericClient):
                 
             if labels != None:
                 if label not in labels:
-                    logger.log(self.name + ': ' + label +u" label does not exist in Deluge we must add it", logger.MESSAGE)
+                    logger.log(self.name + ': ' + label +u" label does not exist in Deluge we must add it", logger.DEBUG)
                     post_data = json.dumps({"method": 'label.add',
                                             "params": [label],
                                             "id": 4

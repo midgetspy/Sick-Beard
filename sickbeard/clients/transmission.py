@@ -34,9 +34,9 @@ class TransmissionAPI(GenericClient):
     def _get_auth(self):
 
         post_data = json.dumps({'method': 'session-get',})
-        self.response = self.session.post(self.url, data=post_data.encode('utf-8'))
 
         try: 
+            self.response = self.session.post(self.url, data=post_data.encode('utf-8'))
             self.auth = re.search('X-Transmission-Session-Id:\s*(\w+)', self.response.text).group(1)
         except:
             return None     
@@ -69,7 +69,7 @@ class TransmissionAPI(GenericClient):
         arguments = { 'metainfo': b64encode(result.content),
                       'paused': 1 if sickbeard.TORRENT_PAUSED else 0,
                       'download-dir': sickbeard.TORRENT_PATH
-                      }       
+                      }        
         post_data = json.dumps({'arguments': arguments,
                                 'method': 'torrent-add',
                                 })
@@ -79,7 +79,7 @@ class TransmissionAPI(GenericClient):
 
     def _set_torrent_ratio(self, result):
         
-        torrent_id = self.response.json["arguments"]["torrent-added"]["id"]
+        torrent_id = self._get_torrent_hash(result)
         
         if sickbeard.TORRENT_RATIO == '':
             # Use global settings

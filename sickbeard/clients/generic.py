@@ -5,6 +5,7 @@ from hashlib import sha1
 import sickbeard
 from sickbeard import logger
 from sickbeard.exceptions import ex
+from sickbeard.clients import http_error_code
 from lib.bencode import bencode, bdecode
 from lib import requests
 
@@ -13,16 +14,15 @@ class GenericClient(object):
     def __init__(self, name, host=None, username=None, password=None):
 
         self.name = name
-        
-        self.url = ''
         self.username = sickbeard.TORRENT_USERNAME if username is None else username
         self.password = sickbeard.TORRENT_PASSWORD if password is None else password
         self.host = sickbeard.TORRENT_HOST if host is None else host
-
-        self.session = requests.session(auth=(self.username, self.password),timeout=10)
+        
+        self.url = None
         self.response = None
         self.auth = None
         self.last_time = time.time()
+        self.session = requests.session(auth=(self.username, self.password),timeout=60)
 
     def _request(self, method='get', params={}, data=None, files=None):
 
@@ -30,7 +30,7 @@ class GenericClient(object):
             self.last_time = time.time()
             self._get_auth()
         
-        logger.log(self.name + u': Requested a ' + method.upper() + ' connection to url '+ self.url + ' with Params= ' + str(params) + ' Data=' + str(data), logger.DEBUG)
+        logger.log(self.name + u': Requested a ' + method.upper() + ' connection to url '+ self.url + ' with Params= ' + str(params) + ' Data=' + str(data if data else 'None')[0:99] + ('...' if len(data if data else 'None') > 100 else ''), logger.DEBUG)
         
         if not self.auth:
             logger.log(self.name + u': Autenthication Failed' , logger.ERROR)
@@ -50,13 +50,13 @@ class GenericClient(object):
         except Exception, e:
             logger.log(self.name + u': Unknown exception raised when send torrent to ' + self.name + ': ' + ex(e), logger.ERROR)
             return False
-        
+
         if self.response.status_code == 401:
             logger.log(self.name + u': Invalid Username or Password, check your config', logger.ERROR)    
             return False
-
-        if self.response.status_code == 301:
-            logger.log(self.name + u': HTTP Timeout ', logger.DEBUG)        
+        
+        if self.response.status_code in http_error_code.keys():
+            logger.log(self.name + u': ' + http_error_code[self.response.status_code], logger.DEBUG)
             return False
         
         logger.log(self.name + u': Response to '+ method.upper() + ' request is ' + self.response.text, logger.DEBUG)
@@ -98,11 +98,17 @@ class GenericClient(object):
         return True
 
     def _set_torrent_path(self, torrent_path):
-        
+        """
+        This should be overridden should return the True/False from the client 
+        when a torrent is set with path
+        """        
         return True
     
     def _set_torrent_pause(self, result):
-
+        """
+        This should be overridden should return the True/False from the client 
+        when a torrent is set with pause
+        """
         return True
     
     def _get_torrent_hash(self, result):
@@ -175,4 +181,3 @@ class GenericClient(object):
                 return False, 'Error: Unable to get ' + self.name + ' Authentication, check your config!'             
         except Exception:                                                
             return False, 'Error: Unable to connect to '+ self.name                                            
-                                            

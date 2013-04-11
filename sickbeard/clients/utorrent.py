@@ -36,16 +36,13 @@ class uTorrentAPI(GenericClient):
 
     def _get_auth(self):
 
-        response = self.session.get(self.url + 'token.html')
-        if response.status_code == 404:
-            return None
-        
         try: 
-            self.auth = re.findall("<div.*?>(.*?)</", response.text)[0]
+            self.response = self.session.get(self.url + 'token.html')
+            self.auth = re.findall("<div.*?>(.*?)</", self.response.text)[0]
         except:    
             return None
             
-        return self.auth
+        return self.auth if not self.response.status_code == 404 else None
       
     def _add_torrent_uri(self, result):
 
