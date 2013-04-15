@@ -25,7 +25,7 @@ from sickbeard.providers.generic import GenericProvider
 from sickbeard import encodingKludge as ek
 from sickbeard.name_parser.parser import NameParser, InvalidNameException
 
-MAX_DB_VERSION = 12
+MAX_DB_VERSION = 13
 
 
 class MainSanityCheck(db.DBSanityCheck):
@@ -542,7 +542,6 @@ class RenameSeasonFolders(AddSizeAndSceneNameFields):
 
         self.incDBVersion()
 
-
 class Add1080pAndRawHDQualities(RenameSeasonFolders):
     """Add support for 1080p related qualities along with RawHD
 
@@ -666,3 +665,12 @@ class Add1080pAndRawHDQualities(RenameSeasonFolders):
         # cleanup and reduce db if any previous data was removed
         logger.log(u"Performing a vacuum on the database.", logger.DEBUG)
         self.connection.action("VACUUM")
+
+class AddEpisodeManagementFields(Add1080pAndRawHDQualities):
+    def test(self):
+        return self.checkDBVersion() >= 13
+
+    def execute(self):
+        self.addColumn("tv_shows", "episode_management", "NUMERIC", 0)
+        self.incDBVersion()
+    
