@@ -126,6 +126,9 @@ METADATA_SYNOLOGY = None
 QUALITY_DEFAULT = None
 STATUS_DEFAULT = None
 FLATTEN_FOLDERS_DEFAULT = None
+EPISODE_MANAGEMENT_DEFAULT = None
+EPISODE_MANAGEMENT_OFF = 0
+EPISODE_MANAGEMENT_SEASON = 11
 PROVIDER_ORDER = []
 
 NAMING_MULTI_EP = None
@@ -336,7 +339,7 @@ def initialize(consoleLogging=True):
                 NZBS, NZBS_UID, NZBS_HASH, EZRSS, TVTORRENTS, TVTORRENTS_DIGEST, TVTORRENTS_HASH, BTN, BTN_API_KEY, TORRENTLEECH, TORRENTLEECH_KEY, \
                 TORRENT_DIR, USENET_RETENTION, SOCKET_TIMEOUT, \
                 SEARCH_FREQUENCY, DEFAULT_SEARCH_FREQUENCY, BACKLOG_SEARCH_FREQUENCY, \
-                QUALITY_DEFAULT, FLATTEN_FOLDERS_DEFAULT, STATUS_DEFAULT, \
+                QUALITY_DEFAULT, FLATTEN_FOLDERS_DEFAULT, EPISODE_MANAGEMENT_DEFAULT, EPISODE_MANAGEMENT_OFF, EPISODE_MANAGEMENT_SEASON, STATUS_DEFAULT, \
                 GROWL_NOTIFY_ONSNATCH, GROWL_NOTIFY_ONDOWNLOAD, TWITTER_NOTIFY_ONSNATCH, TWITTER_NOTIFY_ONDOWNLOAD, \
                 USE_GROWL, GROWL_HOST, GROWL_PASSWORD, USE_PROWL, PROWL_NOTIFY_ONSNATCH, PROWL_NOTIFY_ONDOWNLOAD, PROWL_API, PROWL_PRIORITY, PROG_DIR, NZBMATRIX, NZBMATRIX_USERNAME, \
                 USE_PYTIVO, PYTIVO_NOTIFY_ONSNATCH, PYTIVO_NOTIFY_ONDOWNLOAD, PYTIVO_UPDATE_LIBRARY, PYTIVO_HOST, PYTIVO_SHARE_NAME, PYTIVO_TIVO_NAME, \
@@ -430,6 +433,7 @@ def initialize(consoleLogging=True):
         STATUS_DEFAULT = check_setting_int(CFG, 'General', 'status_default', SKIPPED)
         VERSION_NOTIFY = check_setting_int(CFG, 'General', 'version_notify', 1)
         FLATTEN_FOLDERS_DEFAULT = bool(check_setting_int(CFG, 'General', 'flatten_folders_default', 0))
+        EPISODE_MANAGEMENT_DEFAULT = check_setting_int(CFG, 'General', 'episode_management_default', EPISODE_MANAGEMENT_OFF)
 
         PROVIDER_ORDER = check_setting_str(CFG, 'General', 'provider_order', '').split()
 
@@ -997,6 +1001,7 @@ def save_config():
     new_config['General']['quality_default'] = int(QUALITY_DEFAULT)
     new_config['General']['status_default'] = int(STATUS_DEFAULT)
     new_config['General']['flatten_folders_default'] = int(FLATTEN_FOLDERS_DEFAULT)
+    new_config['General']['episode_management_default'] = int(EPISODE_MANAGEMENT_DEFAULT)
     new_config['General']['provider_order'] = ' '.join([x.getID() for x in providers.sortedProviderList()])
     new_config['General']['version_notify'] = int(VERSION_NOTIFY)
     new_config['General']['naming_pattern'] = NAMING_PATTERN
