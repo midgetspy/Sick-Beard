@@ -384,6 +384,9 @@ class Manage:
         quality_all_same = True
         last_quality = None
 
+        episode_management_all_same = True
+        last_episode_management = None
+
         root_dir_list = []
 
         for curShow in showList:
@@ -412,17 +415,24 @@ class Manage:
                 else:
                     last_quality = curShow.quality
 
+            if episode_management_all_same:
+                if last_episode_management not in (curShow.episode_management, None):
+                    episode_management_all_same = False
+                else:
+                    last_episode_management = curShow.episode_management
+
         t.showList = toEdit
         t.paused_value = last_paused if paused_all_same else None
         t.flatten_folders_value = last_flatten_folders if flatten_folders_all_same else None
         t.quality_value = last_quality if quality_all_same else None
+        t.episode_management_value = last_episode_management if episode_management_all_same else None
         t.root_dir_list = root_dir_list
 
         return _munge(t)
 
     @cherrypy.expose
     def massEditSubmit(self, paused=None, flatten_folders=None, quality_preset=False,
-                       anyQualities=[], bestQualities=[], toEdit=None, *args, **kwargs):
+                       anyQualities=[], bestQualities=[], episode_management=None, toEdit=None, *args, **kwargs):
 
         dir_map = {}
         for cur_arg in kwargs:
@@ -463,7 +473,12 @@ class Manage:
             if quality_preset == 'keep':
                 anyQualities, bestQualities = Quality.splitQuality(showObj.quality)
 
-            curErrors += Home().editShow(curShow, new_show_dir, anyQualities, bestQualities, new_flatten_folders, new_paused, directCall=True)
+            if episode_management == 'keep':
+                new_episode_management = showObj.episode_management
+            else:
+                new_episode_management = int(episode_management)
+
+            curErrors += Home().editShow(curShow, new_show_dir, anyQualities, bestQualities, new_flatten_folders, new_paused, new_episode_management, directCall=True)
 
             if curErrors:
                 logger.log(u"Errors: "+str(curErrors), logger.ERROR)
