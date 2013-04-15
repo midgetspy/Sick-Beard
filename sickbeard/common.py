@@ -145,7 +145,7 @@ class Quality:
         checkName = lambda list, func: func([re.search(x, name, re.I) for x in list])
 
 
-        if checkName(["(pdtv|hdtv|dsr|hdtvrip|webrip|wehdbrip)(.repack)?.(xvi-?d|x264)"], all) and not checkName(["(720|1080)[pi]"], all):
+        if checkName(["(pdtv|hdtv|dsr|hdtvrip|webrip|webhdrip)(.repack)?.(xvi-?d|x264)"], all) and not checkName(["(720|1080)[pi]"], all):
             return Quality.SDTV
         elif checkName(["(dvdrip|bdrip|blurayrip)(.repack)?(.ws)?.(xvi-?d|divx|x264)"], any) and not checkName(["(720|1080)[pi]"], all):
             return Quality.SDDVD
@@ -155,9 +155,9 @@ class Quality:
             return Quality.RAWHDTV
         elif checkName(["1080p", "hdtv", "x264"], all):
             return Quality.FULLHDTV
-        elif checkName(["720p", "web.dl|webrip"], all) or checkName(["720p", "(webhd|itunes)", "h.?264"], all) or checkName(["720p", "(webhd|itunes)", "avc"], all):
+        elif checkName(["720p", "web.dl|webrip|webhdrip"], all) or checkName(["720p", "(webhd|itunes)", "h.?264"], all) or checkName(["720p", "(webhd|itunes)", "avc"], all):
             return Quality.HDWEBDL
-        elif checkName(["1080p", "web.dl|webrip"], all) or checkName(["1080p", "itunes", "h.?264"], all):
+        elif checkName(["1080p", "web.dl|webrip|webhdrip"], all) or checkName(["1080p", "itunes", "h.?264"], all):
             return Quality.FULLHDWEBDL
         elif checkName(["720p", "bluray|hddvd", "x264"], all):
             return Quality.HDBLURAY
