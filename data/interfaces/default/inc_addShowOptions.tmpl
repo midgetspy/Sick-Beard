@@ -27,6 +27,22 @@
         #include $os.path.join($sickbeard.PROG_DIR, "data/interfaces/default/inc_qualityChooser.tmpl")
 
         <div class="field-pair alt">
+            <label for="episode_management" class="nocheck clearfix">
+                <span class="component-title">
+                    <select name="episode_management" id="episode_management">
+                        <option value="0" #if $sickbeard.EPISODE_MANAGEMENT_DEFAULT == 0 then 'selected="selected"' else ''#>All</option>
+                        <option value="11" #if $sickbeard.EPISODE_MANAGEMENT_DEFAULT == 11 then 'selected="selected"' else ''#>Current Season</option>
+                    #for $opt in range(1,11):
+                        <option value="$opt" #if $sickbeard.EPISODE_MANAGEMENT_DEFAULT == $opt then 'selected="selected"' else ''#>$opt episodes</option>
+                    #end for
+                    </select>
+                </span>
+                <span class="component-desc">Maximum number of episodes to keep at any given time<br />
+                Note: choosing a value other than 'Any' gives SickBeard the permission to delete old episodes!</span>
+            </label>
+        </div>
+
+        <div class="field-pair">
             <label for="saveDefaultsButton" class="nocheck clearfix">
                 <span class="component-title"><input class="btn" type="button" id="saveDefaultsButton" value="Save Defaults" disabled="disabled" /></span>
                 <span class="component-desc">Persist current values as the defaults</span>

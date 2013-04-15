@@ -649,7 +649,7 @@ class ConfigGeneral:
         sickbeard.ROOT_DIRS = rootDirString
 
     @cherrypy.expose
-    def saveAddShowDefaults(self, defaultFlattenFolders, defaultStatus, anyQualities, bestQualities):
+    def saveAddShowDefaults(self, defaultFlattenFolders, defaultStatus, anyQualities, bestQualities, default_episode_management):
 
         if anyQualities:
             anyQualities = anyQualities.split(',')
@@ -672,6 +672,7 @@ class ConfigGeneral:
             defaultFlattenFolders = 0
 
         sickbeard.FLATTEN_FOLDERS_DEFAULT = int(defaultFlattenFolders)
+        sickbeard.EPISODE_MANAGEMENT_DEFAULT = int(default_episode_management)
 
     @cherrypy.expose
     def generateKey(self):
