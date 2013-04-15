@@ -93,8 +93,24 @@
 </div>
 
 <div class="optionWrapper clearfix">
+    <span class="selectTitle">Maximum number of episodes <span class="separator">**</span></span>
+    <div class="selectChoices">
+        <select id="edit_episode_management" name="episode_management">
+            <option value="keep">&lt; keep &gt;</option>
+            <option value="0" #if $episode_management_value == 0 then 'selected="selected"' else ''#>All</option>
+            <option value="11" #if $episode_management_value == 11 then 'selected="selected"' else ''#>Current Season</option>
+        #for $opt in range(1,11):
+            <option value="$opt" #if $episode_management_value == $opt then 'selected="selected"' else ''#>$opt episodes</option>
+        #end for
+        </select>
+    </div><br />
+</div>
+
+<div class="optionWrapper clearfix">
     <br /><span class="separator" style="font-size: 1.2em; font-weight: 700;">*</span>
     Changing these settings will cause the selected shows to be refreshed.
+    <br /><span class="separator" style="font-size: 1.2em; font-weight: 700;">**</span>
+    Changing this setting may result in episodes being deleted.
 </div>
 
 <div class="optionWrapper clearfix" style="text-align: center;">
