@@ -1079,10 +1079,10 @@ class TVEpisode(object):
         newsubtitles = set(self.subtitles).difference(set(previous_subtitles))
         
         if newsubtitles:
-            subtitleList = (subliminal.language.Language(x).name for x in newsubtitles)
-            logger.log(str(self.show.tvdbid) + ": Downloaded " + ", ".join(subtitleList) + " subtitles for episode " + str(self.season) + "x" + str(self.episode), logger.DEBUG)
+            subtitleList = ", ".join(subliminal.language.Language(x).name for x in newsubtitles)
+            logger.log(str(self.show.tvdbid) + ": Downloaded " + subtitleList + " subtitles for episode " + str(self.season) + "x" + str(self.episode), logger.DEBUG)
             
-            notifiers.notify_subtitle_download(self.prettyName(), ", ".join(subtitleList))
+            notifiers.notify_subtitle_download(self.prettyName(), subtitleList)
 
         else:
             logger.log(str(self.show.tvdbid) + ": No subtitles downloaded for episode " + str(self.season) + "x" + str(self.episode), logger.DEBUG)

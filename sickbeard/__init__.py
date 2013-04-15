@@ -1385,6 +1385,7 @@ def save_config():
     new_config['NMA']['use_nma'] = int(USE_NMA)
     new_config['NMA']['nma_notify_onsnatch'] = int(NMA_NOTIFY_ONSNATCH)
     new_config['NMA']['nma_notify_ondownload'] = int(NMA_NOTIFY_ONDOWNLOAD)
+    new_config['NMA']['nma_notify_onsubtitledownload'] = int(NMA_NOTIFY_ONSUBTITLEDOWNLOAD)
     new_config['NMA']['nma_api'] = NMA_API
     new_config['NMA']['nma_priority'] = NMA_PRIORITY
 
