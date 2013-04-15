@@ -2259,11 +2259,11 @@ class ErrorLogs:
 
         data = []
         if os.path.isfile(logger.sb_log_instance.log_file):
-            f = ek.ek(open, logger.sb_log_instance.log_file)
+            f = open(logger.sb_log_instance.log_file)
             data = f.readlines()
             f.close()
 
-        regex =  "^(\w{3})\-(\d\d)\s*(\d\d)\:(\d\d):(\d\d)\s*([A-Z]+)\s*(.+?)\s*\:\:\s*(.*)$"
+        regex =  "^(\w+).?\-(\d\d)\s+(\d\d)\:(\d\d):(\d\d)\s+([A-Z]+)\s+(.*)$"
 
         finalData = []
 
