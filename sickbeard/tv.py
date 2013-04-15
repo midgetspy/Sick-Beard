@@ -18,6 +18,7 @@
 
 from __future__ import with_statement
 
+import os
 import os.path
 import datetime
 import threading
@@ -60,6 +61,7 @@ class TVShow(object):
         self.runtime = 0
         self.quality = int(sickbeard.QUALITY_DEFAULT)
         self.flatten_folders = int(sickbeard.FLATTEN_FOLDERS_DEFAULT)
+        self.episode_management = int(sickbeard.EPISODE_MANAGEMENT_DEFAULT)
 
         self.status = ""
         self.airs = ""
@@ -604,6 +606,7 @@ class TVShow(object):
 
             self.quality = int(sqlResults[0]["quality"])
             self.flatten_folders = int(sqlResults[0]["flatten_folders"])
+            self.episode_management = int(sqlResults[0]["episode_management"])
             self.paused = int(sqlResults[0]["paused"])
 
             self._location = sqlResults[0]["location"]
@@ -824,7 +827,8 @@ class TVShow(object):
                         "air_by_date": self.air_by_date,
                         "startyear": self.startyear,
                         "tvr_name": self.tvrname,
-                        "lang": self.lang
+                        "lang": self.lang,
+                        "episode_management": self.episode_management,
                         }
 
         myDB.upsert("tv_shows", newValueDict, controlValueDict)
@@ -845,6 +849,7 @@ class TVShow(object):
         toReturn += "genre: " + self.genre + "\n"
         toReturn += "runtime: " + str(self.runtime) + "\n"
         toReturn += "quality: " + str(self.quality) + "\n"
+        toReturn += "episodemanagement: " + str(self.episode_management) + "\n"
         return toReturn
 
 
