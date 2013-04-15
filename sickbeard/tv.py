@@ -1750,3 +1750,26 @@ class TVEpisode(object):
             self.saveToDB()
             for relEp in self.relatedEps:
                 relEp.saveToDB()
+
+    def deleteMedia(self):
+        """
+        Removes the current media file and all related files from the filesystem
+        """
+
+        # attempt to remove myself from the filesystem
+        success = False
+        with self.lock:
+            try:
+                os.unlink(self._location)
+            except OSError, e:
+                logger.log(u"Deleting "+self.show.name+" "+str(self.season)+"x"+str(self.episode)+" failed: "+ex(e), logger.ERROR)
+                # TODO: turn off episode management for this series - user intervention required
+            else:
+                logger.log(u"Removing " + self.show.name+" "+str(self.season)+"x"+str(self.episode)+" from filesystem. Episode given status of IGNORED", logger.MESSAGE)
+                self.location = ""
+                self.status = IGNORED
+                self.saveToDB()
+                success = True
+
+        return success
+
