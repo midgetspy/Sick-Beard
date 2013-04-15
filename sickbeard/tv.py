@@ -935,6 +935,47 @@ class TVShow(object):
             else:
                 return Overview.GOOD
 
+    def identifyStaleMedia(self):
+        """
+        Processes all TVEpisodes and identifies any that violate the episode management settings. 
+        """
+        if self.episode_management == sickbeard.EPISODE_MANAGEMENT_OFF:
+            logger.log(str(self.tvdbid) + ": episode management off, no cleanup necessary", logger.DEBUG)
+            return []
+
+        stale_episodes = None
+        episodes_on_disk = self.getAllEpisodes(has_location=True)
+
+        if self.episode_management == sickbeard.EPISODE_MANAGEMENT_SEASON:
+            logger.log(str(self.tvdbid) + ": episode management is set to 'current season'", logger.DEBUG)
+
+            # build list of valid statuses
+            statuses = [Quality.compositeStatus(DOWNLOADED, quality) for quality in Quality.qualityStrings]
+
+            myDB = db.DBConnection()
+            sqlResults = myDB.select(
+                "SELECT season FROM tv_episodes WHERE showid = ? AND location != '' AND status IN (" + ",".join("?" for x in statuses) + ") ORDER BY season DESC LIMIT 1", 
+                [self.tvdbid] + statuses
+            )
+
+            if not sqlResults or not len(sqlResults):
+                return 
+
+            season = int(sqlResults[0]["season"])
+            season_episodes = set(self.getAllEpisodes(season=season, has_location=True))
+
+            stale_episodes = list(set(episodes_on_disk) - season_episodes)
+
+        elif self.episode_management in range(1,11):
+            logger.log(str(self.tvdbid) + u": episode management is set to keep '" + str(self.episode_management) + u" episode(s)'", logger.DEBUG)
+            stale_episodes = episodes_on_disk[0:-self.episode_management]
+
+        logger.log(str(self.tvdbid) + u": identified " + str(len(stale_episodes)) + u" stale episode(s)", logger.DEBUG)
+        return stale_episodes
+
+    def deleteStaleMedia(self, stale_episodes):
+        return [ep for ep in stale_episodes if ep.deleteMedia()]
+
 def dirty_setter(attr_name):
     def wrapper(self, val):
         if getattr(self, attr_name) != val:
