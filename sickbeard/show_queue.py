@@ -115,8 +115,8 @@ class ShowQueue(generic_queue.GenericQueue):
 
         return queueItemObj
 
-    def addShow(self, tvdb_id, showDir, default_status=None, quality=None, flatten_folders=None, lang="en"):
-        queueItemObj = QueueItemAdd(tvdb_id, showDir, default_status, quality, flatten_folders, lang)
+    def addShow(self, tvdb_id, showDir, default_status=None, quality=None, flatten_folders=None, episode_management=None, lang="en"):
+        queueItemObj = QueueItemAdd(tvdb_id, showDir, default_status, quality, flatten_folders, episode_management, lang)
 
         self.add_item(queueItemObj)
 
@@ -167,13 +167,14 @@ class ShowQueueItem(generic_queue.QueueItem):
 
 
 class QueueItemAdd(ShowQueueItem):
-    def __init__(self, tvdb_id, showDir, default_status, quality, flatten_folders, lang):
+    def __init__(self, tvdb_id, showDir, default_status, quality, flatten_folders, episode_management, lang):
 
         self.tvdb_id = tvdb_id
         self.showDir = showDir
         self.default_status = default_status
         self.quality = quality
         self.flatten_folders = flatten_folders
+        self.episode_management = episode_management
         self.lang = lang
 
         self.show = None
@@ -251,6 +252,7 @@ class QueueItemAdd(ShowQueueItem):
             self.show.location = self.showDir
             self.show.quality = self.quality if self.quality else sickbeard.QUALITY_DEFAULT
             self.show.flatten_folders = self.flatten_folders if self.flatten_folders != None else sickbeard.FLATTEN_FOLDERS_DEFAULT
+            self.show.episode_management = self.episode_management if self.episode_management != None else sickbeard.EPISODE_MANAGEMENT_DEFAULT
             self.show.paused = 0
 
             # be smartish about this
