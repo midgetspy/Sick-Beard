@@ -26,7 +26,8 @@ if len(sys.argv) < 7:
     print "Not enough arguments received from SABnzbd. Please update it."
     sys.exit()
 else:
-    if sys.argv[2] != sys.argv[3]:
+    if sys.argv[2].split(".nzb")[0] != sys.argv[3]:
+        print "seems like the release was downloaded from nzbindex useing nzbname/foldername for this one..."
         autoProcessTV.processEpisode(sys.argv[1], sys.argv[3], sys.argv[7])
     else:
         autoProcessTV.processEpisode(sys.argv[1], sys.argv[2], sys.argv[7])
