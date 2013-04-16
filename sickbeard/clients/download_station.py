@@ -1,6 +1,5 @@
 # Authors: 
 # Pedro Jose Pereira Vieito <pvieito@gmail.com> (Twitter: @pvieito)
-# Jens Timmerman <jens.timmerman@gmail.com> & Mr_Orange
 #
 # URL: https://github.com/mr-orange/Sick-Beard
 #
@@ -21,18 +20,9 @@
 #
 # Uses the Synology Download Station API v1: http://download.synology.com/download/other/Synology_Download_Station_Official_API_V3.pdf.
 
-import json
 import requests
 
-import re
-import time
-from hashlib import sha1
-
 import sickbeard
-from sickbeard import logger
-from sickbeard.exceptions import ex
-from sickbeard.clients import http_error_code
-from lib.bencode import bencode, bdecode
 from sickbeard.clients.generic import GenericClient
 
 class DownloadStationAPI(GenericClient):
@@ -58,7 +48,7 @@ class DownloadStationAPI(GenericClient):
         
         try:
             self.response = self.session.get(auth_url)
-            self.auth = json.loads(self.response.text)['data']['sid']
+            self.auth = self.response.json['data']['sid']
         except:
             return None
         
@@ -66,18 +56,27 @@ class DownloadStationAPI(GenericClient):
             
     def _add_torrent_uri(self, result):
         
-        data = {'api':'SYNO.DownloadStation.Task', 'version':'1', 'method':'create', 'session':'DownloadStation', '_sid':self.auth, 'uri':result.url}
+        data = {'api':'SYNO.DownloadStation.Task', 
+                'version':'1', 'method':'create', 
+                'session':'DownloadStation', 
+                '_sid':self.auth, 
+                'uri':result.url
+                }
         self._request(method='post', data=data)
         
-        return json.loads(self.response.text)['success']
+        return self.response.json['success']
     
     def _add_torrent_file(self, result):
-    
-        # This should work, but it doesn't
-        data = {'api':'SYNO.DownloadStation.Task', 'version':'1', 'method':'create', 'session':'DownloadStation', '_sid':self.auth}
+
+        data = {'api':'SYNO.DownloadStation.Task',
+                'version':'1',
+                'method':'create',
+                'session':'DownloadStation',
+                '_sid':self.auth
+                }
         files = {'file':('tv.torrent', result.content)}
         self._request(method='post', data=data, files=files)
         
-        return json.loads(self.response.text)['success']
+        return self.response.json['success']
 
 api = DownloadStationAPI()
