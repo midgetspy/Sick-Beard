@@ -30,7 +30,7 @@ import datetime
 from name_parser.parser import NameParser, InvalidNameException
 
 resultFilters = ["sub(pack|s|bed|\.)", "nlsub(bed|s)?", "swesub(bed)?",
-                 "(dir|sample|nfo)fix", "sample", "(dvd)?extras", "fastsub(bed|s)?"]
+                 "(dir|sample|nfo)fix", "sample", "(dvd)?extras", "fastsub(bed|s)?", "VOSTFR"]
 
 mandatory = []
 
