@@ -16,10 +16,11 @@
 # You should have received a copy of the GNU General Public License
 # along with Sick Beard.  If not, see <http://www.gnu.org/licenses/>.
 
-import re
-import urllib, urllib2
 import sys
 import os
+import traceback
+import urllib, urllib2
+import re
 
 import sickbeard
 import generic
@@ -48,7 +49,7 @@ class KATProvider(generic.TorrentProvider):
         
         self.url = 'https://kat.ph/'
 
-        self.searchurl = self.url+'usearch/%s/?field=seeders&sorder=desc'  # order by seed       
+        self.searchurl = self.url+'usearch/%s/?field=seeders&sorder=desc'  #order by seed       
 
     def isEnabled(self):
         return sickbeard.KAT
@@ -89,27 +90,29 @@ class KATProvider(generic.TorrentProvider):
     def _find_season_quality(self,title,torrent_link):
         """ Return the modified title of a Season Torrent with the quality found inspecting torrent file list """
         
-        return None
-        
         mediaExtensions = ['avi', 'mkv', 'wmv', 'divx',
                            'vob', 'dvr-ms', 'wtv', 'ts'
-                           'ogv', 'rar', 'zip'] 
+                           'ogv', 'rar', 'zip', 'mp4'] 
         
         quality = Quality.UNKNOWN        
         
         fileName = None
         
-        html = self.getURL(torrent_link)
+        data = self.getURL(torrent_link)
         
         if not data:
             return None
         
         try: 
-            html = BeautifulSoup(data)
-            file_table = html.find('table', attrs = {'class':'torrentFileList'})
-            files = file_table.find_all('td',attrs = {'class':'torFileName'}, recursive = False)
+            soup = BeautifulSoup(data)
+            file_table = soup.find('table', attrs = {'class': 'torrentFileList'})
+
+            if not file_table:
+                return None 
             
-            for fileName in filter(lambda x: x.rpartition(".")[2].lower() in mediaExtensions, files.string):
+            files = [x.text for x in file_table.find_all('td', attrs = {'class' : 'torFileName'} )]
+            
+            for fileName in filter(lambda x: x.rpartition(".")[2].lower() in mediaExtensions, files):
                 quality = Quality.sceneQuality(os.path.basename(fileName))
                 if quality != Quality.UNKNOWN: break
     
@@ -133,8 +136,8 @@ class KATProvider(generic.TorrentProvider):
             
             return title
             
-        except:
-            logger.log('Failed parsing Torrent File list: %s', traceback.format_exc(),logger.ERROR)                
+        except Exception, e:
+            logger.log('Failed parsing Torrent File list: ' + str(e), logger.ERROR)                
 
     def _get_season_search_strings(self, show, season=None):
 
@@ -212,12 +215,13 @@ class KATProvider(generic.TorrentProvider):
                     soup = BeautifulSoup(html)
 
                     torrent_table = soup.find('table', attrs = {'class' : 'data'})
+                    torrent_rows = torrent_table.find_all('tr')[1:] if torrent_table else None
 
-                    if not torrent_table:
+                    if not torrent_rows:
                         logger.log(u"The Data returned from " + self.provider.name + " is incomplete, this result is unusable", logger.ERROR)
                         return []
                     
-                    for tr in torrent_table.find_all('tr')[1:]:
+                    for tr in torrent_rows:
                         link = self.url + (tr.find('div', {'class': 'torrentname'}).find_all('a')[1])['href']
                         id = tr.get('id')[-7:]
                         title = (tr.find('div', {'class': 'torrentname'}).find_all('a')[1]).text
@@ -324,7 +328,10 @@ class KATCache(tvcache.TVCache):
         if rss_results:
             self.setLastUpdate()
         else:
-            return []    
+            return []
+        
+        logger.log(u"Clearing " + self.provider.name + " cache and updating with new information")
+        self._clearCache()
 
         for result in rss_results:
             item = (result[0], result[1])
