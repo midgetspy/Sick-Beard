@@ -22,7 +22,13 @@ import functools
 
 import sickbeard
 
-date_presets = ('%m/%d/%Y',
+date_presets = ('%Y-%m-%d',
+                '%a, %Y-%m-%d',
+                '%A, %Y-%m-%d',
+                '%y-%m-%d',
+                '%a, %y-%m-%d',
+                '%A, %y-%m-%d',
+                '%m/%d/%Y',
                 '%a, %m/%d/%Y',
                 '%A, %m/%d/%Y',
                 '%m/%d/%y',
