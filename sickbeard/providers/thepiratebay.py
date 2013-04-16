@@ -104,7 +104,7 @@ class ThePirateBayProvider(generic.TorrentProvider):
 
         mediaExtensions = ['avi', 'mkv', 'wmv', 'divx',
                            'vob', 'dvr-ms', 'wtv', 'ts'
-                           'ogv', 'rar', 'zip'] 
+                           'ogv', 'rar', 'zip', 'mp4'] 
         
         quality = Quality.UNKNOWN        
         
