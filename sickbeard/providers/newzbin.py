@@ -370,7 +370,7 @@ class NewzbinCache(tvcache.TVCache):
 
         if not title or not url:
             logger.log("The XML returned from the "+self.provider.name+" feed is incomplete, this result is unusable", logger.ERROR)
-            return
+            return None
 
         quality = self.provider.getQuality(item)
 
@@ -378,7 +378,7 @@ class NewzbinCache(tvcache.TVCache):
 
         logger.log("Adding item from RSS to cache: "+title, logger.DEBUG)
 
-        self._addCacheEntry(title, url, quality=quality)
+        return self._addCacheEntry(title, url, quality=quality)
 
 
 provider = NewzbinProvider()

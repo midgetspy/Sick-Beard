@@ -103,7 +103,7 @@ class NzbXCache(tvcache.TVCache):
     def _parseItem(self, item):
         title, url = self.provider._get_title_and_url(item)
         logger.log(u"Adding item from RSS to cache: " + title, logger.DEBUG)
-        self._addCacheEntry(title, url)
+        return self._addCacheEntry(title, url)
 
     def updateCache(self):
         if not self.shouldUpdate():
@@ -118,7 +118,15 @@ class NzbXCache(tvcache.TVCache):
         logger.log(u"Clearing nzbX cache and updating with new information")
         self._clearCache()
 
+        cl = []
         for item in items:
-            self._parseItem(item)
+            ci = self._parseItem(item)
+            if ci is not None:
+                cl.append(ci)
+
+        if len(cl) > 0:
+            myDB = self._getDB()
+            myDB.mass_action(cl)
+
 
 provider = NzbXProvider()
