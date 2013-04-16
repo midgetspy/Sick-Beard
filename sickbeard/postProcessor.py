@@ -729,6 +729,7 @@ class PostProcessor(object):
         self._log(u"Is ep a priority download: " + str(priority_download), logger.DEBUG)
 
         # set the status of the episodes
+        (original_status, _) = common.Quality.splitCompositeStatus(ep_obj.status)
         for curEp in [ep_obj] + ep_obj.relatedEps:
             curEp.status = common.Quality.compositeStatus(common.SNATCHED, new_ep_quality)
 
@@ -843,6 +844,18 @@ class PostProcessor(object):
             with cur_ep.lock:
                 cur_ep.location = ek.ek(os.path.join, dest_path, new_file_name)
                 cur_ep.saveToDB()
+
+        # if the episode was wanted or manually snatched (because it was marked skipped/ignored)
+        # we probably don't want to now process it as stale media if it gets marked as stale 
+        stale_media = ep_obj.show.identifyStaleMedia()
+        if original_status in [common.WANTED, common.SKIPPED, common.IGNORED] and ep_obj in stale_media:
+            self._log(u"Episode was identified as stale. However, it is a wanted episode so management settings will be disabled", logger.WARNING)
+            ep_obj.show.episode_management = int(sickbeard.EPISODE_MANAGEMENT_OFF)
+        else:
+            # remove stale episodes
+            deleted_media = ep_obj.show.deleteStaleMedia(stale_media)
+            if deleted_media is not None and len(deleted_media) > 0:
+                self._log(u"Removed " + str(len(deleted_media)) + " stale episode(s)", logger.DEBUG) 
 
         # log it to history
         history.logDownload(ep_obj, self.file_path, new_ep_quality, self.release_group)
