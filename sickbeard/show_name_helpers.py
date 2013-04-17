@@ -240,6 +240,24 @@ def makeSceneSearchString (episode):
                 toReturn.append(curShow + "." + curEpString + " " + langCodes[episode.show.lang]);
     return toReturn
 
+def trimRelease(name):
+    realname = name
+    #releasetrim = '^<?.* \d{9,} ?-? '
+        #use regex and sub to replace common spam
+    #releasetrim = ['^<?.* \d{9,} ?-? ', '^\.zZz\. "?', '^(.*) >', '^\[\d{5,}.*\[ ', '^\.: ', '^\s?-?\s?\[.+ presents\s?', '^\s+?\[\d{2}\/\d{2}]\s?-?\s?"?', '^>.*<<\s', '^\[.*\[\d{2}/\d{2}\]\s?-\s?"']
+    releasetrim = ['^sof-', '^euhd-', '^amb-', '^itg-', '^idtv-', '^zzgtv-', '^itn-', '^tcpa-', '^tvp-',
+                      '^<?.* \d{9,} ?-? ', '^\.zZz\. "?', '^(.*) >', '^\[\d{5,}.*\[ ', '^\.: ', '^\s?-?\s?\[.+ presents\s?',
+                      '^\s+?\[\d{2}\/\d{2}]\s?-?\s?"?', '^>.*<<\s', '^\[.*\[\d{2}/\d{2}\]\s?-\s?"','^\[.*\d{2}] - \'']
+    realname = name
+    for regex in releasetrim:
+        name = re.sub(regex, "", name)
+
+    if realname != name:
+        logger.log(u"REGEX - Releasename: "+realname, logger.DEBUG)
+        logger.log(u"REGEX - Cleaned Releasename: "+name, logger.DEBUG)
+
+    return name
+
 def isGoodResult(name, show, log=True):
     """
     Use an automatically-created regex to make sure the result actually is the show it claims to be
@@ -255,14 +273,12 @@ def isGoodResult(name, show, log=True):
 
         #releasetrim = '^<?.* \d{9,} ?-? '
         #use regex and sub to replace common spam
-        releasetrim = ['^<?.* \d{9,} ?-? ','^\.zZz\. "?','^(.*) >','^\[\d{5,}.*\[ ','^\.: ','^\s?-?\s?\[.+ presents\s?','^\s+?\[\d{2}\/\d{2}]\s?-?\s?"?','^>.*<<\s','^\[.*\[\d{2}/\d{2}\]\s?-\s?"']
-        realname = name
-        for regex in releasetrim:
-            name = re.sub(regex, "", name)
-
-        if realname != name:
-            logger.log(u"REGEX - Releasename: "+realname, logger.DEBUG)
-            logger.log(u"REGEX - Cleaned Releasename: "+name, logger.DEBUG)
+        # releasetrim = ['^<?.* \d{9,} ?-? ','^\.zZz\. "?','^(.*) >','^\[\d{5,}.*\[ ','^\.: ','^\s?-?\s?\[.+ presents\s?','^\s+?\[\d{2}\/\d{2}]\s?-?\s?"?','^>.*<<\s','^\[.*\[\d{2}/\d{2}\]\s?-\s?"']
+        # realname = name
+        # for regex in releasetrim:
+        #     name = re.sub(regex, "", name)
+        #
+        name = trimRelease(name)
 
         curRegex = '^' + escaped_name + '\W+(?:(?:S\d[\dE._ -])|(?:\d\d?x)|(?:\d{4}\W\d\d\W\d\d)|(?:(?:part|pt)[\._ -]?(\d|[ivx]))|Season\W+\d+\W+|E\d+\W+)'
         if log:
