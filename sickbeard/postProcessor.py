@@ -372,16 +372,19 @@ class PostProcessor(object):
         if not name:
             return to_return
 
-        trimprefix = ['^sof-', '^euhd-', '^amb-', '^itg-', '^idtv-', '^zzgtv-', '^itn-', '^tcpa-', '^tvp-',
-                      '^<?.* \d{9,} ?-? ', '^\.zZz\. "?', '^(.*) >', '^\[\d{5,}.*\[ ', '^\.: ', '^\s?-?\s?\[.+ presents\s?',
-                      '^\s+?\[\d{2}\/\d{2}]\s?-?\s?"?', '^>.*<<\s', '^\[.*\[\d{2}/\d{2}\]\s?-\s?"']
-        for regex in trimprefix:
-            name = re.sub(regex, "", name)
+        # trimprefix = ['^sof-', '^euhd-', '^amb-', '^itg-', '^idtv-', '^zzgtv-', '^itn-', '^tcpa-', '^tvp-',
+        #               '^<?.* \d{9,} ?-? ', '^\.zZz\. "?', '^(.*) >', '^\[\d{5,}.*\[ ', '^\.: ', '^\s?-?\s?\[.+ presents\s?',
+        #               '^\s+?\[\d{2}\/\d{2}]\s?-?\s?"?', '^>.*<<\s', '^\[.*\[\d{2}/\d{2}\]\s?-\s?"','^\[.*\d{2}] - \'']
+        # for regex in trimprefix:
+        #     name = re.sub(regex, "", name)
+
+        #orginal_name = name
+        fixed_name = show_name_helpers.trimRelease(name)
 
         # parse the name to break it into show name, season, and episode
         np = NameParser(file)
-        parse_result = np.parse(name)
-        self._log("Parsed "+name+" into "+str(parse_result).decode('utf-8'), logger.DEBUG)
+        parse_result = np.parse(fixed_name)
+        self._log("Parsed "+fixed_name+" into "+str(parse_result).decode('utf-8'), logger.DEBUG)
 
         if parse_result.air_by_date:
             season = -1
@@ -781,7 +784,7 @@ class PostProcessor(object):
             if release_name is not None:
                 self._log(u"Marking release as bad: " + release_name, logger.DEBUG)
                 myDB = db.DBConnection('failed.db')
-                myDB.select("INSERT INTO failed (release) VALUES (?)", [re.sub("[\.\-\ ]", "_", release_name)])
+                myDB.select("INSERT INTO failed (release) VALUES (?)", [re.sub("[\.\-\/\/+\'\" ]", "_", release_name)])
             else:
                 self._log(u"Release name not found. Can't mark as invalid. REPORT THIS, along with:", logger.ERROR)
                 self._log(u" - nzb_name: " + str(self.nzb_name), logger.ERROR)
