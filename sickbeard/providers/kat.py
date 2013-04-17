@@ -218,7 +218,7 @@ class KATProvider(generic.TorrentProvider):
                     torrent_rows = torrent_table.find_all('tr')[1:] if torrent_table else None
 
                     if not torrent_rows:
-                        logger.log(u"The Data returned from " + self.name + " is incomplete, this result is unusable", logger.ERROR)
+#                        logger.log(u"The Data returned from " + self.name + " do not contains any torrent", logger.ERROR)
                         return []
                     
                     for tr in torrent_rows:
