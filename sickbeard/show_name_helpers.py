@@ -29,7 +29,7 @@ import datetime
 
 from name_parser.parser import NameParser, InvalidNameException
 
-resultFilters = ["sub(pack|s|bed|\.)", "nlsub(bed|s)?", "swesub(bed)?",
+resultFilters = ["sub(pack|s|bed|\.)?", "nlsub(bed|s)?", "swesub(bed)?",
                  "(dir|sample|nfo)fix", "sample", "(dvd)?extras", "fastsub(bed|s)?", "VOSTFR"]
 
 mandatory = []
@@ -247,7 +247,7 @@ def trimRelease(name):
     #releasetrim = ['^<?.* \d{9,} ?-? ', '^\.zZz\. "?', '^(.*) >', '^\[\d{5,}.*\[ ', '^\.: ', '^\s?-?\s?\[.+ presents\s?', '^\s+?\[\d{2}\/\d{2}]\s?-?\s?"?', '^>.*<<\s', '^\[.*\[\d{2}/\d{2}\]\s?-\s?"']
     releasetrim = ['^sof-', '^euhd-', '^amb-', '^itg-', '^idtv-', '^zzgtv-', '^itn-', '^tcpa-', '^tvp-',
                       '^<?.* \d{9,} ?-? ', '^\.zZz\. "?', '^(.*) >', '^\[\d{5,}.*\[ ', '^\.: ', '^\s?-?\s?\[.+ presents\s?',
-                      '^\s+?\[\d{2}\/\d{2}]\s?-?\s?"?', '^>.*<<\s', '^\[.*\[\d{2}/\d{2}\]\s?-\s?"','^\[.*\d{2}] - \'']
+                      '^\s+?\[\d{2}\/\d{2}]\s?-?\s?"?', '^>.*<<\s', '^\[.*\[\d{2}/\d{2}\]\s?-\s?"','^<?.+?\[.*\d{2}] - \'']
     realname = name
     for regex in releasetrim:
         name = re.sub(regex, "", name)
