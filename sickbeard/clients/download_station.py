@@ -18,9 +18,11 @@
 # You should have received a copy of the GNU General Public License
 # along with Sick Beard. If not, see <http://www.gnu.org/licenses/>.
 #
-# Uses the Synology Download Station API v1: http://download.synology.com/download/other/Synology_Download_Station_Official_API_V3.pdf.
+# Uses the Synology Download Station API: http://download.synology.com/download/other/Synology_Download_Station_Official_API_V3.pdf.
 
 import requests
+import json
+import time
 
 import sickbeard
 from sickbeard.clients.generic import GenericClient
@@ -48,7 +50,7 @@ class DownloadStationAPI(GenericClient):
         
         try:
             self.response = self.session.get(auth_url)
-            self.auth = self.response.json['data']['sid']
+            self.auth = json.loads(self.response.text)['data']['sid']
         except:
             return None
         
@@ -64,7 +66,7 @@ class DownloadStationAPI(GenericClient):
                 }
         self._request(method='post', data=data)
         
-        return self.response.json['success']
+        return json.loads(self.response.text)['success']
     
     def _add_torrent_file(self, result):
 
@@ -77,6 +79,6 @@ class DownloadStationAPI(GenericClient):
         files = {'file':('tv.torrent', result.content)}
         self._request(method='post', data=data, files=files)
         
-        return self.response.json['success']
+        return json.loads(self.response.text)['success']
 
 api = DownloadStationAPI()
