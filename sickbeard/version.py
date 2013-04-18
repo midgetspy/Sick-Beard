@@ -1,1 +1,1 @@
-SICKBEARD_VERSION = "Pistachitos"
+SICKBEARD_VERSION = "ThePirateBay"
