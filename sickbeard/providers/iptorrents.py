@@ -32,9 +32,9 @@ from bs4 import BeautifulSoup
 
 class IPTorrentsProvider(generic.TorrentProvider):
 
-    urls = {'base_url' : 'http://www.iptorrents.com',
-            'login' : 'http://www.iptorrents.com/torrents/',
-            'search' : 'http://www.iptorrents.com/torrents/?l%d=1%s&q=%s&qf=ti',
+    urls = {'base_url' : 'https://www.iptorrents.com',
+            'login' : 'https://www.iptorrents.com/torrents/',
+            'search' : 'https://www.iptorrents.com/torrents/?l%d=1%s&q=%s&qf=ti',
             }
 
     def __init__(self):
