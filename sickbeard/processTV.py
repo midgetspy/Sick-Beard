@@ -46,6 +46,8 @@ def processDir (dirName, nzbName=None, recurse=False):
 
     returnStr += logHelper(u"Processing folder "+dirName, logger.DEBUG)
 
+    returnStr += logHelper(u"TV_DOWNLOAD_DIR: " + sickbeard.TV_DOWNLOAD_DIR, logger.DEBUG)
+
     # if they passed us a real dir then assume it's the one we want
     if ek.ek(os.path.isdir, dirName):
         dirName = ek.ek(os.path.realpath, dirName)
@@ -73,6 +75,10 @@ def processDir (dirName, nzbName=None, recurse=False):
         else:    
             files = ek.ek(os.listdir, dirName)
             dirs = [dirs]
+
+    returnStr += logHelper(u"path: " + path, logger.DEBUG)
+    returnStr += logHelper(u"dirs: " + str(dir), logger.DEBUG)
+    returnStr += logHelper(u"files: " + str(files), logger.DEBUG)
 
     process_result = False
     videoFiles = filter(helpers.isMediaFile, files)
