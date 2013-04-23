@@ -76,16 +76,17 @@ def processDir (dirName, nzbName=None, recurse=False):
             files = ek.ek(os.listdir, dirName)
             dirs = [dirs]
 
-    returnStr += logHelper(u"path: " + path, logger.DEBUG)
-    returnStr += logHelper(u"dirs: " + str(dir), logger.DEBUG)
-    returnStr += logHelper(u"files: " + str(files), logger.DEBUG)
-
     process_result = False
     videoFiles = filter(helpers.isMediaFile, files)
 
     # If nzbName is set and there's more than one videofile in the folder, files will be lost (overwritten).
     if nzbName != None and len(videoFiles) >= 2:
         nzbName = None
+
+    returnStr += logHelper(u"PostProcessing Path: " + path, logger.DEBUG)
+    returnStr += logHelper(u"PostProcessing Dirs: " + str(dirs), logger.DEBUG)
+    returnStr += logHelper(u"PostProcessing Files: " + str(files), logger.DEBUG)
+    returnStr += logHelper(u"PostProcessing VideoFiles: " + str(videoFiles), logger.DEBUG)
 
     #Process Video File in the current Path
     for cur_video_file in videoFiles:
