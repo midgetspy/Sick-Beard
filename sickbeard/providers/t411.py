@@ -103,7 +103,7 @@ class T411Provider(generic.TorrentProvider):
         logger.log(u"Search string: " + searchUrl, logger.DEBUG)
         
         r = self.opener.open( searchUrl )
-        soup = BeautifulSoup( r )
+        soup = BeautifulSoup( r, "html.parser" )
         resultsTable = soup.find("table", { "class" : "results" })
         if resultsTable:
             rows = resultsTable.find("tbody").findAll("tr")
@@ -119,7 +119,7 @@ class T411Provider(generic.TorrentProvider):
                 torrentPage = self.opener.open( pageURL )
                 torrentSoup = BeautifulSoup( torrentPage )
                
-                downloadTorrentLink = torrentSoup.find("a", text=u"Télécharger")
+                downloadTorrentLink = torrentSoup.find("a", text=u"Tï¿½lï¿½charger")
                 if downloadTorrentLink:
                     
                     downloadURL = self.url + downloadTorrentLink['href']
