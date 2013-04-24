@@ -168,8 +168,6 @@ EZRSS = False
 TVTORRENTS = False
 TVTORRENTS_DIGEST = None
 TVTORRENTS_HASH = None
-TVTORRENTS_USERNAME = None
-TVTORRENTS_PASSWORD = None
 
 TORRENTLEECH = False
 TORRENTLEECH_KEY = None
@@ -426,7 +424,7 @@ def initialize(consoleLogging=True):
                 USE_PLEX, PLEX_NOTIFY_ONSNATCH, PLEX_NOTIFY_ONDOWNLOAD, PLEX_NOTIFY_ONSUBTITLEDOWNLOAD, PLEX_UPDATE_LIBRARY, \
                 PLEX_SERVER_HOST, PLEX_HOST, PLEX_USERNAME, PLEX_PASSWORD, \
                 showUpdateScheduler, __INITIALIZED__, LAUNCH_BROWSER, UPDATE_SHOWS_ON_START, SORT_ARTICLE, showList, loadingShowList, \
-                NZBS, NZBS_UID, NZBS_HASH, EZRSS, TVTORRENTS, TVTORRENTS_DIGEST, TVTORRENTS_HASH, TVTORRENTS_USERNAME, TVTORRENTS_PASSWORD, BTN, BTN_API_KEY, \
+                NZBS, NZBS_UID, NZBS_HASH, EZRSS, TVTORRENTS, TVTORRENTS_DIGEST, TVTORRENTS_HASH, BTN, BTN_API_KEY, \
                 DTT, DTT_NORAR, DTT_SINGLE, THEPIRATEBAY, THEPIRATEBAY_TRUSTED, THEPIRATEBAY_PROXY, THEPIRATEBAY_PROXY_URL, THEPIRATEBAY_BLACKLIST, TORRENTLEECH, TORRENTLEECH_USERNAME, TORRENTLEECH_PASSWORD, \
                 IPTORRENTS, IPTORRENTS_USERNAME, IPTORRENTS_PASSWORD, IPTORRENTS_FREELEECH, KAT, KAT_TRUSTED, KAT_VERIFIED, \
                 TORRENT_DIR, USENET_RETENTION, SOCKET_TIMEOUT, SEARCH_FREQUENCY, DEFAULT_SEARCH_FREQUENCY, BACKLOG_SEARCH_FREQUENCY, \
@@ -596,9 +594,7 @@ def initialize(consoleLogging=True):
         TVTORRENTS = bool(check_setting_int(CFG, 'TVTORRENTS', 'tvtorrents', 0))    
         TVTORRENTS_DIGEST = check_setting_str(CFG, 'TVTORRENTS', 'tvtorrents_digest', '')
         TVTORRENTS_HASH = check_setting_str(CFG, 'TVTORRENTS', 'tvtorrents_hash', '')
-        TVTORRENTS_USERNAME = check_setting_str(CFG, 'TVTORRENTS', 'tvtorrents_username', '')
-        TVTORRENTS_PASSWORD = check_setting_str(CFG, 'TVTORRENTS', 'tvtorrents_password', '')
-
+        
         BTN = bool(check_setting_int(CFG, 'BTN', 'btn', 0))    
         BTN_API_KEY = check_setting_str(CFG, 'BTN', 'btn_api_key', '')
 
@@ -1257,8 +1253,6 @@ def save_config():
     new_config['TVTORRENTS']['tvtorrents'] = int(TVTORRENTS)
     new_config['TVTORRENTS']['tvtorrents_digest'] = TVTORRENTS_DIGEST
     new_config['TVTORRENTS']['tvtorrents_hash'] = TVTORRENTS_HASH
-    new_config['TVTORRENTS']['tvtorrents_username'] = TVTORRENTS_USERNAME
-    new_config['TVTORRENTS']['tvtorrents_password'] = TVTORRENTS_PASSWORD
 
     new_config['BTN'] = {}
     new_config['BTN']['btn'] = int(BTN)
