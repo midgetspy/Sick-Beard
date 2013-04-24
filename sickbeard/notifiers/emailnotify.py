@@ -47,7 +47,7 @@ class EmailNotifier:
             show = self._parseEp(ep_name)
             to = self._generate_recepients(show)
             if len(to) == 0:
-                logger.log('Skipping email notify because there are no configured recepients!', logger.WARN)
+                logger.log('Skipping email notify because there are no configured recepients!', logger.WARNING)
             else:
                 msg = MIMEText("'%s' snatched!" % ep_name)
                 msg['Subject'] = 'Sick Beard has snatched a new episode!'
@@ -69,7 +69,7 @@ class EmailNotifier:
             show = self._parseEp(ep_name)
             to = self._generate_recepients(show)
             if len(to) == 0:
-                logger.log('Skipping email notify because there are no configured recepients!', logger.WARN)
+                logger.log('Skipping email notify because there are no configured recepients!', logger.WARNING)
             else:
                 msg = MIMEText("'%s' downloaded!" % ep_name)
                 msg['Subject'] = 'Sick Beard has downloaded a new episode!'
@@ -91,7 +91,7 @@ class EmailNotifier:
             show = self._parseEp(ep_name)
             to = self._generate_recepients(show)
             if len(to) == 0:
-                logger.log('Skipping email notify because there are no configured recepients!', logger.WARN)
+                logger.log('Skipping email notify because there are no configured recepients!', logger.WARNING)
             else:
                 msg = MIMEText("'%s' downloaded!" % ep_name + ": " + lang)
                 msg['Subject'] = 'Sick Beard has downloaded a new subtitle!'
