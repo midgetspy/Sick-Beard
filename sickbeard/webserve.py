@@ -3650,6 +3650,72 @@ class WebInterface:
                 
 
         return _munge(t)
+        
+    # Raw iCalendar implementation by Pedro Jose Pereira Vieito (@pvieito).
+    #
+    # iCalendar (iCal) - Standard RFC 5545 <http://tools.ietf.org/html/rfc5546> 
+    # Works with iCloud, Google Calendar and Outlook.
+    @cherrypy.expose
+    def calendar(self):
+        """ Provides a subscribeable URL for iCal subscriptions
+        """
+
+        logger.log(u"Receiving iCal request from %s" % cherrypy.request.remote.ip)
+
+        poster_url = cherrypy.url().replace('ical', '')
+
+        time_re = re.compile('([0-9]{1,2})\:([0-9]{2})(\ |)([AM|am|PM|pm]{2})')
+
+		# Create a iCal string        
+        ical = 'BEGIN:VCALENDAR\n' 
+        ical += 'VERSION:2.0\n'
+        ical += 'PRODID://Sick-Beard Upcoming Episodes//\n'
+
+        # Get shows info
+        myDB = db.DBConnection()
+        
+        # Limit dates
+        past_date = (datetime.date.today() + datetime.timedelta(weeks=-52)).toordinal()
+        future_date = (datetime.date.today() + datetime.timedelta(weeks=52)).toordinal()
+        
+        # Get all the shows that are not paused and are currently on air (from kjoconnor Fork)
+        calendar_shows = myDB.select("SELECT show_name, tvdb_id, network, airs, runtime FROM tv_shows WHERE status = 'Continuing' AND paused != '1'")
+        for show in calendar_shows:
+            # Get all episodes of this show airing between today and next month
+            episode_list = myDB.select("SELECT tvdbid, name, season, episode, description, airdate FROM tv_episodes WHERE airdate >= ? AND airdate < ? AND showid = ?", (past_date, future_date, int(show["tvdb_id"])))
+
+            for episode in episode_list:
+                
+				# Get local timezone and load network timezones
+				local_zone = tz.tzlocal() 
+				network_zone = network_timezones.get_network_timezone(show['network'], network_timezones.load_network_dict(), local_zone)
+				
+				# Get the air date and time
+				air_date = datetime.datetime.fromordinal(int(episode['airdate']))
+				air_time = re.compile('([0-9]{1,2})\:([0-9]{2})(\ |)([AM|am|PM|pm]{2})').search(show["airs"])
+				
+				# Parse out the air time
+				if(air_time.group(4).lower() == 'pm'):
+					t = datetime.time((int(air_time.group(1)) + 12), int(air_time.group(2)), 0, tzinfo=network_zone)
+				else:
+					t = datetime.time(int(air_time.group(1)), int(air_time.group(2)), 0, tzinfo=network_zone)
+				
+				# Combine air time and air date into one datetime object
+				air_date_time = datetime.datetime.combine(air_date, t).astimezone(local_zone)
+				
+				# Create event for episode
+				ical = ical + 'BEGIN:VEVENT\n'
+				ical = ical + 'DTSTART:' + str(air_date_time.date()).replace("-", "") + '\n'
+				ical = ical + 'SUMMARY:' + show['show_name'] + ': ' + episode['name'] + '\n'
+				ical = ical + 'UID:' + str(datetime.date.today().isoformat()) + '-' + str(random.randint(10000,99999)) + '@Sick-Beard\n'
+				ical = ical + 'DESCRIPTION:' + episode['description'] + '\n'
+				ical = ical + 'LOCATION:' + 'Episode ' + str(episode['episode']) + ' - Season ' + str(episode['season']) + '\n'
+				ical = ical + 'END:VEVENT\n'
+
+        # Ending the iCal
+        ical += 'END:VCALENDAR\n' 
+        
+        return ical
 
     manage = Manage()
 
