@@ -154,10 +154,10 @@ class KATProvider(generic.TorrentProvider):
         if wantedEp == seasonEp and not show.air_by_date:
             search_string = {'Season': [], 'Episode': []}
             for show_name in set(show_name_helpers.allPossibleShowNames(show)):
-                ep_string = show_name +' S%02d' % int(season) + ' -S%02d' % int(season) + 'E' #1) ShowName SXX -SXXE  
+                ep_string = show_name +' S%02d' % int(season) + ' -S%02d' % int(season) + 'E' + ' category:tv' #1) ShowName SXX -SXXE  
                 search_string['Season'].append(ep_string)
                       
-                ep_string = show_name+' Season '+str(season)+' -Ep*' #2) ShowName Season X  
+                ep_string = show_name+' Season '+str(season)+' -Ep*' + ' category:tv' #2) ShowName Season X  
                 search_string['Season'].append(ep_string)
 
         #Building the search string with the episodes we need         
@@ -186,7 +186,7 @@ class KATProvider(generic.TorrentProvider):
                 ep_string = show_name_helpers.sanitizeSceneName(show_name) +' '+ \
                 sickbeard.config.naming_ep_type[2] % {'seasonnumber': ep_obj.season, 'episodenumber': ep_obj.episode} +'|'+\
                 sickbeard.config.naming_ep_type[0] % {'seasonnumber': ep_obj.season, 'episodenumber': ep_obj.episode} +'|'+\
-                sickbeard.config.naming_ep_type[3] % {'seasonnumber': ep_obj.season, 'episodenumber': ep_obj.episode} \
+                sickbeard.config.naming_ep_type[3] % {'seasonnumber': ep_obj.season, 'episodenumber': ep_obj.episode} + ' category:tv' \
 
                 search_string['Episode'].append(ep_string)
     
