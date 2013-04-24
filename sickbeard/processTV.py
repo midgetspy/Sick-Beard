@@ -46,6 +46,8 @@ def processDir (dirName, nzbName=None, recurse=False):
 
     returnStr += logHelper(u"Processing folder "+dirName, logger.DEBUG)
 
+    returnStr += logHelper(u"TV_DOWNLOAD_DIR: " + sickbeard.TV_DOWNLOAD_DIR, logger.DEBUG)
+
     # if they passed us a real dir then assume it's the one we want
     if ek.ek(os.path.isdir, dirName):
         dirName = ek.ek(os.path.realpath, dirName)
@@ -67,8 +69,8 @@ def processDir (dirName, nzbName=None, recurse=False):
             break
     else:
         path, dirs = ek.ek(os.path.split, dirName) #Script Post Processing
-        if not nzbName is None and os.path.isfile(os.path.join(dirName, nzbName)): #For single file without Subdir
-            files = [os.path.join(dirName, nzbName)]
+        if not nzbName is None and not nzbName.endswith('.nzb') and os.path.isfile(os.path.join(dirName, nzbName)): #For single torrent file without Dir
+            files = [os.path.join(dirName, release_name)]
             dirs = []
         else:    
             files = ek.ek(os.listdir, dirName)
@@ -80,6 +82,11 @@ def processDir (dirName, nzbName=None, recurse=False):
     # If nzbName is set and there's more than one videofile in the folder, files will be lost (overwritten).
     if nzbName != None and len(videoFiles) >= 2:
         nzbName = None
+
+    returnStr += logHelper(u"PostProcessing Path: " + path, logger.DEBUG)
+    returnStr += logHelper(u"PostProcessing Dirs: " + str(dirs), logger.DEBUG)
+    returnStr += logHelper(u"PostProcessing Files: " + str(files), logger.DEBUG)
+    returnStr += logHelper(u"PostProcessing VideoFiles: " + str(videoFiles), logger.DEBUG)
 
     #Process Video File in the current Path
     for cur_video_file in videoFiles:
@@ -104,7 +111,7 @@ def processDir (dirName, nzbName=None, recurse=False):
     #Process Video File in all TV Subdir
     for dir in [x for x in dirs if validateDir(path, x, returnStr)]:
 
-        process_result = False
+#        process_result = False
 
         for processPath, processDir, fileList in ek.ek(os.walk, ek.ek(os.path.join, path, dir), topdown=False):
 

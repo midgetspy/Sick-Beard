@@ -34,7 +34,7 @@ class IPTorrentsProvider(generic.TorrentProvider):
 
     urls = {'base_url' : 'https://www.iptorrents.com',
             'login' : 'https://www.iptorrents.com/torrents/',
-            'search' : 'https://www.iptorrents.com/torrents/?l%d=1%s&q=%s&qf=ti',
+            'search' : 'https://www.iptorrents.com/torrents/?%s%s&q=%s&qf=ti',
             }
 
     def __init__(self):
@@ -49,7 +49,7 @@ class IPTorrentsProvider(generic.TorrentProvider):
         
         self.session = None
 
-        self.categorie = 73
+        self.categorie = 'l73=1&l78=1&l66=1&l65=1&l79=1&l5=1&l4=1'
 
     def isEnabled(self):
         return sickbeard.IPTORRENTS
@@ -144,7 +144,7 @@ class IPTorrentsProvider(generic.TorrentProvider):
             for search_string in search_params[mode]:
 
                 # URL with 50 tv-show results, or max 150 if adjusted in IPTorrents profile
-                searchURL = self.urls['search'] % (self.categorie, freeleech, search_string)
+                searchURL = self.urls['search'] % (self.categorie, freeleech, search_string) + ';o=seeders'
 
                 logger.log(u"" + self.name + " search page URL: " + searchURL, logger.DEBUG)
         
@@ -266,11 +266,6 @@ class IPTorrentsCache(tvcache.TVCache):
                 torrent_name = torrent.string
                 torrent_download_url = self.provider.urls['base_url'] + (result.find_all('td')[3].find('a'))['href']
                 torrent_details_url = self.provider.urls['base_url'] + torrent['href']
-
-                ## Not used, perhaps in the future ##
-                #torrent_id = int(torrent['href'].replace('/details.php?id=', ''))
-                #torrent_seeders = int(result.find('td', attrs = {'class' : 'ac t_seeders'}).string)
-                #torrent_leechers = int(result.find('td', attrs = {'class' : 'ac t_leechers'}).string)
 
                 # Filter torrents with no name/url
                 if not torrent_name or not torrent_download_url:

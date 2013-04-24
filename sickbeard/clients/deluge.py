@@ -59,7 +59,7 @@ class DelugeAPI(GenericClient):
     def _add_torrent_file(self, result):
 
         post_data = json.dumps({"method": "core.add_torrent_file",
-                                "params": ['tv.torrent', b64encode(result.content),{}],
+                                "params": [result.name, b64encode(result.content),{}],
                                 "id": 2
                                 })           
         self._request(method='post', data=post_data)
