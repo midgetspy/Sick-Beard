@@ -762,6 +762,8 @@ class PostProcessor(object):
                 with curEp.lock:
                     curEp.status = int(common.WANTED)
                     curEp.saveToDB()
+            # Doesn't seem to be an issue that this is done before the release is marked as bad
+            # FIXME? Maybe move marking it as failed before doing all this?
             self._log(u"Triggering search for episode(s)", logger.DEBUG)
             for curEp in [ep_obj] + ep_obj.relatedEps:
                 self._log(u"Searching for: " + curEp.name)

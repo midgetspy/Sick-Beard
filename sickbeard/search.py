@@ -36,6 +36,7 @@ from sickbeard import ui
 from sickbeard import encodingKludge as ek
 from sickbeard import providers
 from sickbeard import db
+from sickbeard import failed_history
 
 from sickbeard.exceptions import ex
 from sickbeard.providers.generic import GenericProvider
@@ -208,9 +209,7 @@ def pickBestResult(results, quality_list=None):
             continue
 
         if cur_result.provider.providerType != GenericProvider.TORRENT:
-            myDB = db.DBConnection('failed.db')
-            sql_results = myDB.select("SELECT * FROM failed WHERE release like ?", [re.sub("[\.\-\ ]", "_", cur_result.name)])
-            if len(sql_results) > 0:
+            if failed_history.hasFailed(cur_result.name):
                 logger.log(cur_result.name + u" has previously failed, rejecting it")
                 continue
         

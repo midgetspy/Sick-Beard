@@ -36,6 +36,8 @@ from sickbeard import logger
 from sickbeard import ui, search_queue
 from sickbeard.common import WANTED, statusStrings
 
+from sickbeard import failed_history
+
 
 def logHelper (logMessage, logLevel=logger.MESSAGE):
     logger.log(logMessage, logLevel)
@@ -112,8 +114,7 @@ def processDir (dirName, nzbName=None, recurse=False, failed=False):
         returnStr += processor.log 
 
         returnStr += logHelper(u"Marking release as bad: " + releaseName)
-        myDB = db.DBConnection('failed.db')
-        myDB.select("INSERT INTO failed (release) VALUES (?)", [re.sub("[\.\-\ ]", "_", releaseName)])
+        failed_history.logFailed(releaseName)
 
         if sickbeard.DELETE_FAILED and process_result:
             returnStr += logHelper(u"Deleting folder of failed download " + dirName, logger.DEBUG)
