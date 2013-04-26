@@ -1261,7 +1261,7 @@ class ConfigProviders:
     def saveProviders(self, nzbmatrix_username=None, nzbmatrix_apikey=None,
                       nzbs_r_us_uid=None, nzbs_r_us_hash=None, newznab_string='',
                       omgwtfnzbs_uid=None, omgwtfnzbs_key=None,
-                      tvtorrents_digest=None, tvtorrents_hash=None,tvtorrents_username=None,tvtorrents_password=None, 
+                      tvtorrents_digest=None, tvtorrents_hash=None, 
                       btn_api_key=None,
                       dtt_norar = None, dtt_single = None,
                       thepiratebay_trusted=None, thepiratebay_proxy=None, thepiratebay_proxy_url=None,
@@ -1365,8 +1365,6 @@ class ConfigProviders:
 
         sickbeard.TVTORRENTS_DIGEST = tvtorrents_digest.strip()
         sickbeard.TVTORRENTS_HASH = tvtorrents_hash.strip()
-        sickbeard.TVTORRENTS_USERNAME = tvtorrents_username.strip()
-        sickbeard.TVTORRENTS_PASSWORD = tvtorrents_password.strip()        
 
         sickbeard.BTN_API_KEY = btn_api_key.strip()
 
