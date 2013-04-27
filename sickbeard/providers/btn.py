@@ -269,12 +269,16 @@ class BTNProvider(generic.TorrentProvider):
         results = []
         for item in self._doSearch({'release': '%.proper.%'}, age=4):
             if item['Time']:
-                name, url = self._get_title_and_url(item)
-                results.append(classes.Proper(name, url, datetime.fromtimestamp(float(item['Time']))))
+                resDate = datetime.fromtimestamp(float(item['Time']))
+                if date == None or resDate > date:
+                    name, url = self._get_title_and_url(item)
+                    results.append(classes.Proper(name, url, resDate))
         for item in self._doSearch({'release': '%.repack.%'}, age=4):
             if item['Time']:
-                name, url = self._get_title_and_url(item)
-                results.append(classes.Proper(name, url, datetime.fromtimestamp(float(item['Time']))))
+                resDate = datetime.fromtimestamp(float(item['Time']))
+                if date == None or resDate > date:
+                    name, url = self._get_title_and_url(item)
+                    results.append(classes.Proper(name, url, resDate))
 
         return results
 
