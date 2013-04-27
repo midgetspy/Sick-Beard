@@ -188,4 +188,11 @@ $(document).ready(function () {
         $.get(sbRoot + "/home/testNMA", {'nma_api': nma_api, 'nma_priority': nma_priority},
             function (data) { $('#testNMA-result').html(data); });
     });
+
+    $('#testPushalot').click(function () {
+        $('#testPushalot-result').html(loading);
+        var pushalot_authorizationtoken = $("pushalot_authorizationtoken").val();
+        $.get(sbRoot + "/home/testPushalot", {'authorizationToken': pushalot_authorizationtoken},
+            function (data) { $('#testPushalot-result').html(data); });
+    });
 });
