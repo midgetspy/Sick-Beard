@@ -1,6 +1,7 @@
 #import sickbeard
 #import datetime
 #from sickbeard.common import *
+#from sickbeard import sbdatetime, helpers
 #set global $title="Coming Episodes"
 
 #set global $sbPath=".."
@@ -10,6 +11,10 @@
 #include $os.path.join($sickbeard.PROG_DIR, "data/interfaces/default/inc_top.tmpl")
 #set $sort = $sickbeard.COMING_EPS_SORT
 <script type="text/javascript" src="$sbRoot/js/ajaxEpSearch.js?$sbPID"></script>
+
+<style type="text/css">
+.sort_data {display:none}
+</style>
 
 <div class="h2footer align-right">
     <b>Key:</b> 
@@ -47,7 +52,16 @@
     },
     type: 'numeric'
 });
-
+\$.tablesorter.addParser({
+    id: 'cDate',
+    is: function(s) {
+        return false;
+    },
+    format: function(s) {
+        return s; 
+    },
+    type: 'numeric'
+});
 
 \$(document).ready(function(){
 
@@ -61,10 +75,11 @@
         widgets: ['stickyHeaders'],
         sortList: sortList,
         textExtraction: {
+            0: function(node) { return \$(node).find("span").text().toLowerCase(); },
             5: function(node) { return \$(node).find("span").text().toLowerCase(); }
         },
         headers: {
-            0: { sorter: 'isoDate' },
+            0: { sorter: 'cDate' },
             1: { sorter: 'loadingNames' },
             2: { sorter: false },
             3: { sorter: false },
@@ -92,17 +107,18 @@
 
     #for $cur_result in $sql_results:
 
-        #if int($cur_result["paused"]) and not $sickbeard.COMING_EPS_DISPLAY_PAUSED:
+        #if helpers.tryInt($cur_result["paused"]) and not $sickbeard.COMING_EPS_DISPLAY_PAUSED:
             #continue
         #end if
 
-        #set $cur_ep_airdate = int($cur_result["airdate"])
-            #if $cur_ep_airdate < $today:
+        #set $cur_ep_airdate = $cur_result["localtime"].date()
+        #set $cur_ep_enddate = $cur_result["localtime"] + datetime.timedelta(minutes=$cur_result["runtime"])
+            #if $cur_ep_enddate < $today:
                 #set $show_div = "listing-overdue"
-            #elif $cur_ep_airdate >= $next_week:
+            #elif $cur_ep_airdate >= $next_week.date():
                 #set $show_div = "listing-toofar"
-            #elif $cur_ep_airdate >= $today and $cur_ep_airdate < $next_week:
-                #if $cur_ep_airdate == $today:
+            #elif $cur_ep_airdate >= $today.date() and $cur_ep_airdate < $next_week.date():
+                #if $cur_ep_airdate == $today.date():
                     #set $show_div = "listing-current"
                 #else:
                     #set $show_div = "listing-default"
@@ -111,13 +127,13 @@
 
     <!-- start $cur_result["show_name"] //-->
       <tr class="$show_div">
-        <td align="center" class="nowrap">$datetime.date.fromordinal(int($cur_result["airdate"]))</td>
+        <td align="center" class="nowrap">$sbdatetime.sbdatetime.sbfdatetime($cur_result["localtime"]).decode($sickbeard.SYS_ENCODING)<span class="sort_data">$time.mktime($cur_result["localtime"].timetuple())</span></td>
         <td class="tvShow"><a href="$sbRoot/home/displayShow?show=${cur_result["showid"]}">$cur_result["show_name"]</a>
-            #if int($cur_result["paused"]):
+            #if helpers.tryInt($cur_result["paused"]):
             <span class="pause">[paused]</span>
             #end if
         </td>
-        <td class="nowrap" align="center"><%="%02ix%02i" % (int(cur_result["season"]), int(cur_result["episode"])) %></td>
+        <td class="nowrap" align="center"><%="%02ix%02i" % (helpers.tryInt(cur_result["season"]), helpers.tryInt(cur_result["episode"])) %></td>
         <td>
         #if $cur_result["description"] != "" and $cur_result["description"] != None:
             <img alt="" src="$sbRoot/images/info32.png" height="16" width="16" class="plotInfo" id="plot_info_<%=str(cur_result["showid"])+"_"+str(cur_result["season"])+"_"+str(cur_result["episode"])%>" />
@@ -126,8 +142,8 @@
         </td>
         <td align="center">$cur_result["network"]</td>
         <td align="center">
-#if int($cur_result["quality"]) in $qualityPresets:
-    <span class="quality $qualityPresetStrings[int($cur_result["quality"])]">$qualityPresetStrings[int($cur_result["quality"])]</span>
+#if helpers.tryInt($cur_result["quality"]) in $qualityPresets:
+    <span class="quality $qualityPresetStrings[helpers.tryInt($cur_result["quality"])]">$qualityPresetStrings[helpers.tryInt($cur_result["quality"])]</span>
 #else:
     <span class="quality Custom">Custom</span>
 #end if
@@ -163,6 +179,7 @@
     #set $cur_segment = None
     #set $too_late_header = False
     #set $missed_header = False
+    #set $today_header = False
     #set $show_div = "epListing listing-default"
 
     #if $sort == "show": 
@@ -172,48 +189,80 @@
     #for $cur_result in $sql_results:
     <!-- start $cur_result["show_name"] //-->
         
-        #if int($cur_result["paused"]) and not $sickbeard.COMING_EPS_DISPLAY_PAUSED:
+        #if helpers.tryInt($cur_result["paused"]) and not $sickbeard.COMING_EPS_DISPLAY_PAUSED:
             #continue
         #end if
 
         #if $sort == "network":
             #if $cur_result["network"] and $cur_segment != $cur_result["network"]:
                 <br /><h2 class="network">$cur_result["network"]</h2>
-                #set $cur_ep_airdate = int($cur_result["airdate"])
-                #if $cur_ep_airdate < $today:
-                    #set $show_div = "epListing listing-overdue"
-                #elif $cur_ep_airdate >= $next_week:
-                    #set $show_div = "epListing listing-toofar"
-                #elif $cur_ep_airdate >= $today and $cur_ep_airdate < $next_week:
-                    #if $cur_ep_airdate == $today:
-                        #set $show_div = "epListing listing-current"
-                    #else:
-                        #set $show_div = "epListing listing-default"
-                    #end if
-                #end if
                 #set $cur_segment = $cur_result["network"]
             #end if
-        #elif $sort == "date":
-            #set $cur_ep_airdate = int($cur_result["airdate"])
-            #if $cur_segment != $cur_ep_airdate:
-                #if $cur_ep_airdate < $today and not $missed_header:
-                    <br /><h2 class="day">Missed</h2>
-                    #set $missed_header = True
-                    #set $show_div = "epListing listing-overdue"
-                #elif $cur_ep_airdate >= $next_week and not $too_late_header:
-                    <br /><h2 class="day">Later</h2>
-                    #set $show_div = "epListing listing-toofar"
-                    #set $too_late_header = True
-                #elif $cur_ep_airdate >= $today and $cur_ep_airdate < $next_week:
-                    #if $cur_ep_airdate == $today:
-                    <br /><h2 class="day">$datetime.date.fromordinal($cur_ep_airdate).strftime("%A").decode($sickbeard.SYS_ENCODING) <span style="font-size: 12px;">[today]</span></h2>
+            #set $cur_ep_airdate = $cur_result["localtime"].date()
+            #set $cur_ep_enddate = $cur_result["localtime"] + datetime.timedelta(minutes=$cur_result["runtime"])
+            #if $cur_ep_enddate < $today:
+                #set $show_div = "epListing listing-overdue"
+            #elif $cur_ep_airdate >= $next_week.date():
+                #set $show_div = "epListing listing-toofar"
+            #elif $cur_ep_enddate >= $today and $cur_ep_airdate < $next_week.date():
+                #if $cur_ep_airdate == $today.date():
+
                         #set $show_div = "epListing listing-current"
                     #else:
-                    <br /><h2 class="day">$datetime.date.fromordinal($cur_ep_airdate).strftime("%A").decode($sickbeard.SYS_ENCODING)</h2>
                         #set $show_div = "epListing listing-default"
+                #end if
+            #end if
+        #elif $sort == "date":
+            #set $cur_ep_airdate = $cur_result["localtime"].date()
+            #set $cur_ep_enddate = $cur_result["localtime"] + datetime.timedelta(minutes=$cur_result["runtime"])
+            #if $cur_segment != $cur_ep_airdate:
+                #if $cur_ep_enddate < $today and $cur_ep_airdate != $today.date() and not $missed_header:
+                    <br /><h2 class="day">Missed</h2>
+                    #set $missed_header = True
+                #elif $cur_ep_airdate >= $next_week.date() and not $too_late_header:
+
+                    <br /><h2 class="day">Later</h2>
+
+                    #set $too_late_header = True
+                #elif $cur_ep_enddate >= $today and $cur_ep_airdate < $next_week.date():
+                    #if $cur_ep_airdate == $today.date():
+                    <br /><h2 class="day">$datetime.date.fromordinal($cur_ep_airdate.toordinal).strftime("%A").decode($sickbeard.SYS_ENCODING) <span style="font-size: 12px;">[today]</span></h2>
+                    #set $today_header = True
+                    #else:
+                    <br /><h2 class="day">$datetime.date.fromordinal($cur_ep_airdate.toordinal).strftime("%A").decode($sickbeard.SYS_ENCODING)</h2>
                     #end if
                 #end if
                 #set $cur_segment = $cur_ep_airdate
+            #end if
+            #if $cur_ep_airdate == $today.date() and not $today_header:
+                <br /><h2 class="day">$datetime.date.fromordinal($cur_ep_airdate.toordinal).strftime("%A").decode($sickbeard.SYS_ENCODING) <span style="font-size: 12px;">[today]</span></h2>
+                #set $today_header = True
+            #end if
+            #if $cur_ep_enddate < $today:
+                #set $show_div = "epListing listing-overdue"
+            #elif $cur_ep_airdate >= $next_week.date():
+                #set $show_div = "epListing listing-toofar"
+            #elif $cur_ep_enddate >= $today and $cur_ep_airdate < $next_week.date():
+                #if $cur_ep_airdate == $today.date():
+                        #set $show_div = "epListing listing-current"
+                    #else:
+
+                        #set $show_div = "epListing listing-default"
+                    #end if
+                #end if
+        #elif $sort == "show":
+            #set $cur_ep_airdate = $cur_result["localtime"].date()
+            #set $cur_ep_enddate = $cur_result["localtime"] + datetime.timedelta(minutes=$cur_result["runtime"])
+            #if $cur_ep_enddate < $today:
+                #set $show_div = "epListing listing-overdue"
+            #elif $cur_ep_airdate >= $next_week.date():
+                #set $show_div = "epListing listing-toofar"
+            #elif $cur_ep_enddate >= $today and $cur_ep_airdate < $next_week.date():
+                #if $cur_ep_airdate == $today.date():
+                    #set $show_div = "epListing listing-current"
+                #else:
+                    #set $show_div = "epListing listing-default"
+                #end if
             #end if
         #end if
 
@@ -223,7 +272,7 @@
         <tr>
           <th #if $layout == 'banner' then "" else "colspan=\"2\""#>
             <span class="tvshowTitle"><a href="$sbRoot/home/displayShow?show=${cur_result["showid"]}">$cur_result["show_name"]
-            #if int($cur_result["paused"]):
+            #if helpers.tryInt($cur_result["paused"]):
             <span class="pause">[paused]</span>
             #end if            
             </a></span>
@@ -242,14 +291,14 @@
         <tr>
 #end if          
           <td class="nextEp">
-            <span class="title">Next Episode:</span> <span><%=str(cur_result["season"])+"x"+"%02i" % int(cur_result["episode"]) %> - $cur_result["name"] ($datetime.date.fromordinal(int($cur_result["airdate"])))</span>
+            <span class="title">Next Episode:</span> <span><%=str(cur_result["season"])+"x"+"%02i" % helpers.tryInt(cur_result["episode"]) %> - $cur_result["name"] ($sbdatetime.sbdatetime.fromtimestamp($time.mktime($cur_result["localtime"].timetuple())).sbfdate().decode($sickbeard.SYS_ENCODING))</span>
           </td>
         </tr>
         <tr>
           <td style="vertical-align: top;">
-            <span class="title">Airs:</span> <span>$cur_result["airs"] on $cur_result["network"]</span>
-#if int($cur_result["quality"]) in $qualityPresets:
- [<span class="title">$qualityPresetStrings[int($cur_result["quality"])]</span>]<br />
+            <span class="title">Airs:</span> <span>$sbdatetime.sbdatetime.fromtimestamp($time.mktime($cur_result["localtime"].timetuple())).sbftime().decode($sickbeard.SYS_ENCODING) on $cur_result["network"]</span>
+#if helpers.tryInt($cur_result["quality"]) in $qualityPresets:
+ [<span class="title">$qualityPresetStrings[helpers.tryInt($cur_result["quality"])]</span>]<br />
 #else:
  [<span class="title">Custom</span>]<br />
 #end if

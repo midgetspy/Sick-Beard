@@ -1,6 +1,6 @@
 #import sickbeard
-#import sickbeard.helpers
 #from sickbeard.common import *
+#from sickbeard import helpers, sbdatetime, network_timezones
 #import os.path, os
 #import datetime
 #set global $title=$show.name
@@ -17,13 +17,13 @@
     <select id="seasonJump">
         <option value="jump">Jump to Season</option>
     #for $seasonNum in $seasonResults:
-        <option value="#season-$seasonNum["season"]">#if int($seasonNum["season"]) == 0 then "Specials" else "Season " + str($seasonNum["season"])#</option>
+        <option value="#season-$seasonNum["season"]">#if helpers.tryInt($seasonNum["season"]) == 0 then "Specials" else "Season " + str($seasonNum["season"])#</option>
     #end for
     </select>
 #else:
     <b>Season:</b>
     #for $seasonNum in $seasonResults:
-        #if int($seasonNum["season"]) == 0:
+        #if helpers.tryInt($seasonNum["season"]) == 0:
             <a href="#season-$seasonNum["season"]">Specials</a>
         #else:
             <a href="#season-$seasonNum["season"]">${str($seasonNum["season"])}</a>
@@ -60,11 +60,11 @@
 <div id="summary" class="align-left">
 <table>
 #if $show.network and $show.airs:
-    <tr><td class="showLegend">Airs: </td><td>$show.airs on $show.network</td></tr>
+    <tr><td class="showLegend">Originally Airs: </td><td>$show.airs #if not $network_timezones.test_timeformat($show.airs) then " <font color='#FF0000'><b>(invalid Timeformat)</b></font> " else ""# on $show.network</td></tr>
 #else if $show.network:
-    <tr><td class="showLegend">Airs: </td><td>$show.network</td></tr>
+    <tr><td class="showLegend">Originally Airs: </td><td>$show.network</td></tr>
 #else if $show.airs:
-    <tr><td class="showLegend">Airs: </td><td>$show.airs</td></tr>
+    <tr><td class="showLegend">Originally Airs: </td><td>$show.airs #if not $network_timezones.test_timeformat($show.airs) then " <font color='#FF0000'><b>(invalid Timeformat)</b></font> " else ""#</td></tr>
 #end if
     <tr><td class="showLegend">Status: </td><td>$show.status</td></tr>
 #if $showLoc[1]:
@@ -72,7 +72,7 @@
 #else:
     <tr><td class="showLegend"><span style="color: red;">Location: </span></td><td><span style="color: red;">$showLoc[0]</span> (dir is missing)</td></tr>
 #end if
-#set $anyQualities, $bestQualities = $Quality.splitQuality(int($show.quality))
+#set $anyQualities, $bestQualities = $Quality.splitQuality(helpers.tryInt($show.quality))
     <tr><td class="showLegend">Quality: </td><td>
 #if $show.quality in $qualityPresets:
 $qualityPresetStrings[$show.quality]
@@ -87,8 +87,8 @@ replace with: <b><%=", ".join([Quality.qualityStrings[x] for x in sorted(bestQua
     </td></tr>
     <tr><td class="showLegend">Language:</td><td><img src="$sbRoot/images/flags/${show.lang}.png" width="16" height="11" alt="" /> $show.lang</td></tr>
     <tr><td class="showLegend">Flatten Folders: </td><td><img src="$sbRoot/images/#if $show.flatten_folders == 1 or $sickbeard.NAMING_FORCE_FOLDERS then "yes16.png\" alt=\"Y" else "no16.png\" alt=\"N"#" width="16" height="16" /></td></tr>
-    <tr><td class="showLegend">Paused: </td><td><img src="$sbRoot/images/#if int($show.paused) == 1 then "yes16.png\" alt=\"Y" else "no16.png\" alt=\"N"#" width="16" height="16" /></td></tr>
-    <tr><td class="showLegend">Air-by-Date: </td><td><img src="$sbRoot/images/#if int($show.air_by_date) == 1 then "yes16.png\" alt=\"Y" else "no16.png\" alt=\"N"#" width="16" height="16" /></td></tr>
+    <tr><td class="showLegend">Paused: </td><td><img src="$sbRoot/images/#if helpers.tryInt($show.paused) == 1 then "yes16.png\" alt=\"Y" else "no16.png\" alt=\"N"#" width="16" height="16" /></td></tr>
+    <tr><td class="showLegend">Air-by-Date: </td><td><img src="$sbRoot/images/#if helpers.tryInt($show.air_by_date) == 1 then "yes16.png\" alt=\"Y" else "no16.png\" alt=\"N"#" width="16" height="16" /></td></tr>
 </table>
 </div>
 
@@ -127,22 +127,22 @@ Change selected episodes to
     
 #for $epResult in $sqlResults:
 
-    #if int($epResult["season"]) != $curSeason:
+    #if helpers.tryInt($epResult["season"]) != $curSeason:
   <tr><td colspan="9"><a name="season-$epResult["season"]"></a></td></tr>
   <tr class="seasonheader" id="season-$epResult["season"]">
     <td colspan="9">
-        <h2>#if int($epResult["season"]) == 0 then "Specials" else "Season "+str($epResult["season"])#</h2>
+        <h2>#if helpers.tryInt($epResult["season"]) == 0 then "Specials" else "Season "+str($epResult["season"])#</h2>
     </td>
   </tr>
   <tr id="season-$epResult["season"]-cols"><th width="1%"><input type="checkbox" class="seasonCheck" id="$epResult["season"]" /></th><th>NFO</th><th>TBN</th><th>Episode</th><th>Name</th><th class="nowrap">Airdate</th><th>Filename</th><th>Status</th><th>Search</th></tr>
-        #set $curSeason = int($epResult["season"])
+        #set $curSeason = helpers.tryInt($epResult["season"])
     #end if    
 
   #set $epStr = str($epResult["season"]) + "x" + str($epResult["episode"])
   #set $epLoc = $epResult["location"]
   <tr class="$Overview.overviewStrings[$epCats[$epStr]] season-$curSeason">
     <td width="1%">
-#if int($epResult["status"]) != $UNAIRED
+#if helpers.tryInt($epResult["status"]) != $UNAIRED
       <input type="checkbox" class="epCheck" id="<%=str(epResult["season"])+'x'+str(epResult["episode"])%>" name="<%=str(epResult["season"]) +"x"+str(epResult["episode"]) %>" />
 #end if
     </td>
@@ -155,7 +155,7 @@ Change selected episodes to
     <img src="$sbRoot/images/info32.png" height="16" class="plotInfo" alt="" id="plot_info_$show.tvdbid<%="_"+str(epResult["season"])+"_"+str(epResult["episode"])%>" />
     #end if
     </td>
-    <td align="center" class="nowrap">#if int($epResult["airdate"]) == 1 then "never" else $datetime.date.fromordinal(int($epResult["airdate"]))#</td>
+    <td align="center" class="nowrap">#if helpers.tryInt($epResult["airdate"]) == 1 then "never" else $sbdatetime.sbdatetime.sbfdatetime($network_timezones.parse_date_time(helpers.tryInt($epResult["airdate"]),$show.airs,$show.network))#</td>
     <td>
 #if $epLoc and $show._location and $epLoc.lower().startswith($show._location.lower()):
 $epLoc[len($show._location)+1:]
@@ -164,9 +164,9 @@ $epLoc
 #end if
 
     </td>
-    <td class="status_column">$statusStrings[int($epResult["status"])]</td>
+    <td class="status_column">$statusStrings[helpers.tryInt($epResult["status"])]</td>
     <td align="center">
-    #if int($epResult["season"]) != 0:
+    #if helpers.tryInt($epResult["season"]) != 0:
       <a class="epSearch" href="searchEpisode?show=$show.tvdbid&amp;season=$epResult["season"]&amp;episode=$epResult["episode"]"><img src="$sbRoot/images/search16.png" height="16" alt="search" title="Manual Search" /></a>
     #end if
     </td>

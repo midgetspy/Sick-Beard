@@ -49,6 +49,8 @@ from sickbeard.webapi import Api
 
 from lib.tvdb_api import tvdb_api
 
+import network_timezones
+
 try:
     import json
 except ImportError:
@@ -134,12 +136,12 @@ def _getEpisode(show, season, episode):
     if show == None or season == None or episode == None:
         return "Invalid parameters"
 
-    showObj = sickbeard.helpers.findCertainShow(sickbeard.showList, int(show))
+    showObj = sickbeard.helpers.findCertainShow(sickbeard.showList, helpers.tryInt(show))
 
     if showObj == None:
         return "Show not in show list"
 
-    epObj = showObj.getEpisode(int(season), int(episode))
+    epObj = showObj.getEpisode(helpers.tryInt(season), helpers.tryInt(episode))
 
     if epObj == None:
         return "Episode couldn't be retrieved"
@@ -212,16 +214,16 @@ class Manage:
     def showEpisodeStatuses(self, tvdb_id, whichStatus):
         myDB = db.DBConnection()
 
-        status_list = [int(whichStatus)]
+        status_list = [helpers.tryInt(whichStatus)]
         if status_list[0] == SNATCHED:
             status_list = Quality.SNATCHED + Quality.SNATCHED_PROPER
 
-        cur_show_results = myDB.select("SELECT season, episode, name FROM tv_episodes WHERE showid = ? AND season != 0 AND status IN ("+','.join(['?']*len(status_list))+")", [int(tvdb_id)] + status_list)
+        cur_show_results = myDB.select("SELECT season, episode, name FROM tv_episodes WHERE showid = ? AND season != 0 AND status IN ("+','.join(['?']*len(status_list))+")", [helpers.tryInt(tvdb_id)] + status_list)
 
         result = {}
         for cur_result in cur_show_results:
-            cur_season = int(cur_result["season"])
-            cur_episode = int(cur_result["episode"])
+            cur_season = helpers.tryInt(cur_result["season"])
+            cur_episode = helpers.tryInt(cur_result["episode"])
 
             if cur_season not in result:
                 result[cur_season] = {}
@@ -234,7 +236,7 @@ class Manage:
     def episodeStatuses(self, whichStatus=None):
 
         if whichStatus:
-            whichStatus = int(whichStatus)
+            whichStatus = helpers.tryInt(whichStatus)
             status_list = [whichStatus]
             if status_list[0] == SNATCHED:
                 status_list = Quality.SNATCHED + Quality.SNATCHED_PROPER
@@ -256,7 +258,7 @@ class Manage:
         show_names = {}
         sorted_show_ids = []
         for cur_status_result in status_results:
-            cur_tvdb_id = int(cur_status_result["tvdb_id"])
+            cur_tvdb_id = helpers.tryInt(cur_status_result["tvdb_id"])
             if cur_tvdb_id not in ep_counts:
                 ep_counts[cur_tvdb_id] = 1
             else:
@@ -274,7 +276,7 @@ class Manage:
     @cherrypy.expose
     def changeEpisodeStatuses(self, oldStatus, newStatus, *args, **kwargs):
 
-        status_list = [int(oldStatus)]
+        status_list = [helpers.tryInt(oldStatus)]
         if status_list[0] == SNATCHED:
             status_list = Quality.SNATCHED + Quality.SNATCHED_PROPER
 
@@ -310,7 +312,7 @@ class Manage:
     @cherrypy.expose
     def backlogShow(self, tvdb_id):
 
-        show_obj = helpers.findCertainShow(sickbeard.showList, int(tvdb_id))
+        show_obj = helpers.findCertainShow(sickbeard.showList, helpers.tryInt(tvdb_id))
 
         if show_obj:
             sickbeard.backlogSearchScheduler.action.searchBacklog([show_obj]) #@UndefinedVariable
@@ -344,7 +346,7 @@ class Manage:
 
             for curResult in sqlResults:
 
-                curEpCat = curShow.getOverview(int(curResult["status"]))
+                curEpCat = curShow.getOverview(helpers.tryInt(curResult["status"]))
                 epCats[str(curResult["season"]) + "x" + str(curResult["episode"])] = curEpCat
                 epCounts[curEpCat] += 1
 
@@ -370,7 +372,7 @@ class Manage:
         showIDs = toEdit.split("|")
         showList = []
         for curID in showIDs:
-            curID = int(curID)
+            curID = helpers.tryInt(curID)
             showObj = helpers.findCertainShow(sickbeard.showList, curID)
             if showObj:
                 showList.append(showObj)
@@ -436,7 +438,7 @@ class Manage:
         errors = []
         for curShow in showIDs:
             curErrors = []
-            showObj = helpers.findCertainShow(sickbeard.showList, int(curShow))
+            showObj = helpers.findCertainShow(sickbeard.showList, helpers.tryInt(curShow))
             if not showObj:
                 continue
 
@@ -513,7 +515,7 @@ class Manage:
             if curShowID == '':
                 continue
 
-            showObj = sickbeard.helpers.findCertainShow(sickbeard.showList, int(curShowID))
+            showObj = sickbeard.helpers.findCertainShow(sickbeard.showList, helpers.tryInt(curShowID))
 
             if showObj == None:
                 continue
@@ -646,17 +648,17 @@ class ConfigGeneral:
         else:
             bestQualities = []
 
-        newQuality = Quality.combineQualities(map(int, anyQualities), map(int, bestQualities))
+        newQuality = Quality.combineQualities(map(helpers.tryInt, anyQualities), map(helpers.tryInt, bestQualities))
 
-        sickbeard.STATUS_DEFAULT = int(defaultStatus)
-        sickbeard.QUALITY_DEFAULT = int(newQuality)
+        sickbeard.STATUS_DEFAULT = helpers.tryInt(defaultStatus)
+        sickbeard.QUALITY_DEFAULT = helpers.tryInt(newQuality)
 
         if defaultFlattenFolders == "true":
             defaultFlattenFolders = 1
         else:
             defaultFlattenFolders = 0
 
-        sickbeard.FLATTEN_FOLDERS_DEFAULT = int(defaultFlattenFolders)
+        sickbeard.FLATTEN_FOLDERS_DEFAULT = helpers.tryInt(defaultFlattenFolders)
 
     @cherrypy.expose
     def generateKey(self):
@@ -685,7 +687,8 @@ class ConfigGeneral:
     @cherrypy.expose
     def saveGeneral(self, log_dir=None, web_port=None, web_log=None, web_ipv6=None,
                     launch_browser=None, web_username=None, use_api=None, api_key=None,
-                    web_password=None, version_notify=None, enable_https=None, https_cert=None, https_key=None):
+                    web_password=None, version_notify=None, enable_https=None, https_cert=None, https_key=None,
+                    missed_days=None, date_preset=None, time_preset=None):
 
         results = []
 
@@ -714,11 +717,25 @@ class ConfigGeneral:
 
         sickbeard.LAUNCH_BROWSER = launch_browser
 
-        sickbeard.WEB_PORT = int(web_port)
+        sickbeard.WEB_PORT = helpers.tryInt(web_port, 8081)
         sickbeard.WEB_IPV6 = web_ipv6
         sickbeard.WEB_LOG = web_log
         sickbeard.WEB_USERNAME = web_username
         sickbeard.WEB_PASSWORD = web_password
+
+        miss_h = helpers.tryInt(missed_days, 3)
+        if (miss_h < 2):
+            miss_h = 2
+        elif (miss_h > 30):
+            miss_h = 30
+        sickbeard.COMING_EPS_MISSED_DAYS = miss_h
+
+        if date_preset:
+            sickbeard.DATE_PRESET = date_preset
+
+        if time_preset:
+            sickbeard.TIME_PRESET_W_SECONDS = time_preset
+            sickbeard.TIME_PRESET = sickbeard.TIME_PRESET_W_SECONDS.replace(u":%S",u"")
 
         if use_api == "on":
             use_api = 1
@@ -802,7 +819,7 @@ class ConfigSearch:
         sickbeard.USE_TORRENTS = use_torrents
 
         sickbeard.NZB_METHOD = nzb_method
-        sickbeard.USENET_RETENTION = int(usenet_retention)
+        sickbeard.USENET_RETENTION = helpers.tryInt(usenet_retention)
 
         sickbeard.DOWNLOAD_PROPERS = download_propers
 
@@ -901,7 +918,7 @@ class ConfigPostProcessing:
 
         if self.isNamingValid(naming_pattern, naming_multi_ep) != "invalid":
             sickbeard.NAMING_PATTERN = naming_pattern
-            sickbeard.NAMING_MULTI_EP = int(naming_multi_ep)
+            sickbeard.NAMING_MULTI_EP = helpers.tryInt(naming_multi_ep)
             sickbeard.NAMING_FORCE_FOLDERS = naming.check_force_season_folders()
         else:
             results.append("You tried saving an invalid naming config, not saving your naming settings")
@@ -929,7 +946,7 @@ class ConfigPostProcessing:
     def testNaming(self, pattern=None, multi=None, abd=False):
 
         if multi != None:
-            multi = int(multi)
+            multi = helpers.tryInt(multi)
 
         result = naming.test_name(pattern, multi, abd)
 
@@ -1079,7 +1096,7 @@ class ConfigProviders:
         # do the enable/disable
         for curProviderStr in provider_str_list:
             curProvider, curEnabled = curProviderStr.split(':')
-            curEnabled = int(curEnabled)
+            curEnabled = helpers.tryInt(curEnabled)
 
             provider_list.append(curProvider)
 
@@ -1509,7 +1526,7 @@ class HomePostProcess:
             redirect("/home/postprocess")
         else:
             result = processTV.processDir(dir, nzbName)
-            if quiet != None and int(quiet) == 1:
+            if quiet != None and helpers.tryInt(quiet) == 1:
                 return result
 
             result = result.replace("\n","<br />\n")
@@ -1587,7 +1604,7 @@ class NewHomeAddShows:
 
                 # add each result to our list
                 for curSeries in series:
-                    tvdb_id = int(curSeries.findtext('seriesid'))
+                    tvdb_id = helpers.tryInt(curSeries.findtext('seriesid'))
 
                     # don't add duplicates
                     if tvdb_id in [x[0] for x in results]:
@@ -1615,7 +1632,7 @@ class NewHomeAddShows:
 
         root_dirs = [urllib.unquote_plus(x) for x in root_dirs]
 
-        default_index = int(sickbeard.ROOT_DIRS.split('|')[0])
+        default_index = helpers.tryInt(sickbeard.ROOT_DIRS.split('|')[0])
         if len(root_dirs) > default_index:
             tmp = root_dirs[default_index]
             if tmp in root_dirs:
@@ -1749,7 +1766,7 @@ class NewHomeAddShows:
         if len(series_pieces) < 3:
             return "Error with show selection."
 
-        tvdb_id = int(series_pieces[0])
+        tvdb_id = helpers.tryInt(series_pieces[0])
         show_name = series_pieces[2]
 
         # use the whole path if it's given, or else append the show name to the root dir to get the full show path
@@ -1789,10 +1806,10 @@ class NewHomeAddShows:
             anyQualities = [anyQualities]
         if type(bestQualities) != list:
             bestQualities = [bestQualities]
-        newQuality = Quality.combineQualities(map(int, anyQualities), map(int, bestQualities))
+        newQuality = Quality.combineQualities(map(helpers.tryInt, anyQualities), map(helpers.tryInt, bestQualities))
 
         # add the show
-        sickbeard.showQueueScheduler.action.addShow(tvdb_id, show_dir, int(defaultStatus), newQuality, flatten_folders, tvdbLang) #@UndefinedVariable
+        sickbeard.showQueueScheduler.action.addShow(tvdb_id, show_dir, helpers.tryInt(defaultStatus), newQuality, flatten_folders, tvdbLang) #@UndefinedVariable
         ui.notifications.message('Show added', 'Adding the specified show into '+show_dir)
 
         return finishAddShow()
@@ -1850,7 +1867,7 @@ class NewHomeAddShows:
                 show_dir, tvdb_id, show_name = self.split_extra_show(cur_dir)
                 if not show_dir or not tvdb_id or not show_name:
                     continue
-                tvdb_id_given.append((show_dir, int(tvdb_id), show_name))
+                tvdb_id_given.append((show_dir, helpers.tryInt(tvdb_id), show_name))
 
 
         # if they want me to prompt for settings then I will just carry on to the newShow page
@@ -1907,7 +1924,7 @@ class ErrorLogs:
         t = PageTemplate(file="viewlogs.tmpl")
         t.submenu = ErrorLogsMenu
 
-        minLevel = int(minLevel)
+        minLevel = helpers.tryInt(minLevel)
 
         data = []
         if os.path.isfile(logger.sb_log_instance.log_file):
@@ -2229,7 +2246,7 @@ class Home:
         if show == None:
             return _genericMessage("Error", "Invalid show ID")
         else:
-            showObj = sickbeard.helpers.findCertainShow(sickbeard.showList, int(show))
+            showObj = sickbeard.helpers.findCertainShow(sickbeard.showList, helpers.tryInt(show))
 
             if showObj == None:
                 return _genericMessage("Error", "Show not in show list")
@@ -2295,7 +2312,7 @@ class Home:
 
         for curResult in sqlResults:
 
-            curEpCat = showObj.getOverview(int(curResult["status"]))
+            curEpCat = showObj.getOverview(helpers.tryInt(curResult["status"]))
             epCats[str(curResult["season"])+"x"+str(curResult["episode"])] = curEpCat
             epCounts[curEpCat] += 1
 
@@ -2329,7 +2346,7 @@ class Home:
             else:
                 return _genericMessage("Error", errString)
 
-        showObj = sickbeard.helpers.findCertainShow(sickbeard.showList, int(show))
+        showObj = sickbeard.helpers.findCertainShow(sickbeard.showList, helpers.tryInt(show))
 
         if showObj == None:
             errString = "Unable to find the specified show: "+str(show)
@@ -2383,7 +2400,7 @@ class Home:
 
         errors = []
         with showObj.lock:
-            newQuality = Quality.combineQualities(map(int, anyQualities), map(int, bestQualities))
+            newQuality = Quality.combineQualities(map(helpers.tryInt, anyQualities), map(helpers.tryInt, bestQualities))
             showObj.quality = newQuality
 
             # reversed for now
@@ -2445,7 +2462,7 @@ class Home:
         if show == None:
             return _genericMessage("Error", "Invalid show ID")
 
-        showObj = sickbeard.helpers.findCertainShow(sickbeard.showList, int(show))
+        showObj = sickbeard.helpers.findCertainShow(sickbeard.showList, helpers.tryInt(show))
 
         if showObj == None:
             return _genericMessage("Error", "Unable to find the specified show")
@@ -2464,7 +2481,7 @@ class Home:
         if show == None:
             return _genericMessage("Error", "Invalid show ID")
 
-        showObj = sickbeard.helpers.findCertainShow(sickbeard.showList, int(show))
+        showObj = sickbeard.helpers.findCertainShow(sickbeard.showList, helpers.tryInt(show))
 
         if showObj == None:
             return _genericMessage("Error", "Unable to find the specified show")
@@ -2486,7 +2503,7 @@ class Home:
         if show == None:
             return _genericMessage("Error", "Invalid show ID")
 
-        showObj = sickbeard.helpers.findCertainShow(sickbeard.showList, int(show))
+        showObj = sickbeard.helpers.findCertainShow(sickbeard.showList, helpers.tryInt(show))
 
         if showObj == None:
             return _genericMessage("Error", "Unable to find the specified show")
@@ -2536,7 +2553,7 @@ class Home:
             else:
                 return _genericMessage("Error", errMsg)
 
-        if not statusStrings.has_key(int(status)):
+        if not statusStrings.has_key(helpers.tryInt(status)):
             errMsg = "Invalid status"
             if direct:
                 ui.notifications.error('Error', errMsg)
@@ -2544,7 +2561,7 @@ class Home:
             else:
                 return _genericMessage("Error", errMsg)
 
-        showObj = sickbeard.helpers.findCertainShow(sickbeard.showList, int(show))
+        showObj = sickbeard.helpers.findCertainShow(sickbeard.showList, helpers.tryInt(show))
 
         if showObj == None:
             errMsg = "Error", "Show not in show list"
@@ -2564,9 +2581,9 @@ class Home:
 
                 epInfo = curEp.split('x')
 
-                epObj = showObj.getEpisode(int(epInfo[0]), int(epInfo[1]))
+                epObj = showObj.getEpisode(helpers.tryInt(epInfo[0]), helpers.tryInt(epInfo[1]))
 
-                if int(status) == WANTED:
+                if helpers.tryInt(status) == WANTED:
                     # figure out what segment the episode is in and remember it so we can backlog it
                     if epObj.show.air_by_date:
                         ep_segment = str(epObj.airdate)[:7]
@@ -2585,11 +2602,11 @@ class Home:
                         logger.log(u"Refusing to change status of "+curEp+" because it is UNAIRED", logger.ERROR)
                         continue
 
-                    if int(status) in Quality.DOWNLOADED and epObj.status not in Quality.SNATCHED + Quality.SNATCHED_PROPER + Quality.DOWNLOADED + [IGNORED] and not ek.ek(os.path.isfile, epObj.location):
+                    if helpers.tryInt(status) in Quality.DOWNLOADED and epObj.status not in Quality.SNATCHED + Quality.SNATCHED_PROPER + Quality.DOWNLOADED + [IGNORED] and not ek.ek(os.path.isfile, epObj.location):
                         logger.log(u"Refusing to change status of "+curEp+" to DOWNLOADED because it's not SNATCHED/DOWNLOADED", logger.ERROR)
                         continue
 
-                    epObj.status = int(status)
+                    epObj.status = helpers.tryInt(status)
                     epObj.saveToDB()
 
         msg = "Backlog was automatically started for the following seasons of <b>"+showObj.name+"</b>:<br />"
@@ -2614,7 +2631,7 @@ class Home:
         if show == None:
             return _genericMessage("Error", "You must specify a show")
 
-        showObj = sickbeard.helpers.findCertainShow(sickbeard.showList, int(show))
+        showObj = sickbeard.helpers.findCertainShow(sickbeard.showList, helpers.tryInt(show))
 
         if showObj == None:
             return _genericMessage("Error", "Show not in show list")
@@ -2662,7 +2679,7 @@ class Home:
             errMsg = "You must specify a show and at least one episode"
             return _genericMessage("Error", errMsg)
 
-        show_obj = sickbeard.helpers.findCertainShow(sickbeard.showList, int(show))
+        show_obj = sickbeard.helpers.findCertainShow(sickbeard.showList, helpers.tryInt(show))
 
         if show_obj == None:
             errMsg = "Error", "Show not in show list"
@@ -2689,9 +2706,9 @@ class Home:
                 continue
             related_eps_result = myDB.select("SELECT * FROM tv_episodes WHERE location = ? AND episode != ?", [ep_result[0]["location"], epInfo[1]])
 
-            root_ep_obj = show_obj.getEpisode(int(epInfo[0]), int(epInfo[1]))
+            root_ep_obj = show_obj.getEpisode(helpers.tryInt(epInfo[0]), helpers.tryInt(epInfo[1]))
             for cur_related_ep in related_eps_result:
-                related_ep_obj = show_obj.getEpisode(int(cur_related_ep["season"]), int(cur_related_ep["episode"]))
+                related_ep_obj = show_obj.getEpisode(helpers.tryInt(cur_related_ep["season"]), helpers.tryInt(cur_related_ep["episode"]))
                 if related_ep_obj not in root_ep_obj.relatedEps:
                     root_ep_obj.relatedEps.append(related_ep_obj)
 
@@ -2770,7 +2787,7 @@ class WebInterface:
         if show is None:
             return cherrypy.lib.static.serve_file(default_image_path, content_type="image/png")
         else:
-            showObj = sickbeard.helpers.findCertainShow(sickbeard.showList, int(show))
+            showObj = sickbeard.helpers.findCertainShow(sickbeard.showList, helpers.tryInt(show))
 
         if showObj is None:
             return cherrypy.lib.static.serve_file(default_image_path, content_type="image/png")
@@ -2840,32 +2857,38 @@ class WebInterface:
 
         myDB = db.DBConnection()
 
-        today = datetime.date.today().toordinal()
-        next_week = (datetime.date.today() + datetime.timedelta(days=7)).toordinal()
-        recently = (datetime.date.today() - datetime.timedelta(days=3)).toordinal()
+        today1 = datetime.date.today()
+        today = today1.toordinal()
+        next_week1 = (datetime.date.today() + datetime.timedelta(days=7))
+        next_week = next_week1.toordinal()
+        recently = (datetime.date.today() - datetime.timedelta(days=sickbeard.COMING_EPS_MISSED_DAYS)).toordinal()
 
         done_show_list = []
         qualList = Quality.DOWNLOADED + Quality.SNATCHED + [ARCHIVED, IGNORED]
-        sql_results = myDB.select("SELECT *, tv_shows.status as show_status FROM tv_episodes, tv_shows WHERE season != 0 AND airdate >= ? AND airdate < ? AND tv_shows.tvdb_id = tv_episodes.showid AND tv_episodes.status NOT IN ("+','.join(['?']*len(qualList))+")", [today, next_week] + qualList)
-        for cur_result in sql_results:
-            done_show_list.append(int(cur_result["showid"]))
+        sql_results1 = myDB.select("SELECT *, 0 as localtime, tv_shows.status as show_status FROM tv_episodes, tv_shows WHERE season != 0 AND airdate >= ? AND airdate < ? AND tv_shows.tvdb_id = tv_episodes.showid AND tv_episodes.status NOT IN ("+','.join(['?']*len(qualList))+")", [today, next_week] + qualList)
+        for cur_result in sql_results1:
+            done_show_list.append(helpers.tryInt(cur_result["showid"]))
 
-        more_sql_results = myDB.select("SELECT *, tv_shows.status as show_status FROM tv_episodes outer_eps, tv_shows WHERE season != 0 AND showid NOT IN ("+','.join(['?']*len(done_show_list))+") AND tv_shows.tvdb_id = outer_eps.showid AND airdate = (SELECT airdate FROM tv_episodes inner_eps WHERE inner_eps.showid = outer_eps.showid AND inner_eps.airdate >= ? ORDER BY inner_eps.airdate ASC LIMIT 1) AND outer_eps.status NOT IN ("+','.join(['?']*len(Quality.DOWNLOADED+Quality.SNATCHED))+")", done_show_list + [next_week] + Quality.DOWNLOADED + Quality.SNATCHED)
-        sql_results += more_sql_results
+        more_sql_results = myDB.select("SELECT *, 0 as localtime, tv_shows.status as show_status FROM tv_episodes outer_eps, tv_shows WHERE season != 0 AND showid NOT IN ("+','.join(['?']*len(done_show_list))+") AND tv_shows.tvdb_id = outer_eps.showid AND airdate = (SELECT airdate FROM tv_episodes inner_eps WHERE inner_eps.showid = outer_eps.showid AND inner_eps.airdate >= ? ORDER BY inner_eps.airdate ASC LIMIT 1) AND outer_eps.status NOT IN ("+','.join(['?']*len(Quality.DOWNLOADED+Quality.SNATCHED))+")", done_show_list + [next_week] + Quality.DOWNLOADED + Quality.SNATCHED)
+        sql_results1 += more_sql_results
 
-        more_sql_results = myDB.select("SELECT *, tv_shows.status as show_status FROM tv_episodes, tv_shows WHERE season != 0 AND tv_shows.tvdb_id = tv_episodes.showid AND airdate < ? AND airdate >= ? AND tv_episodes.status = ? AND tv_episodes.status NOT IN ("+','.join(['?']*len(qualList))+")", [today, recently, WANTED] + qualList)
-        sql_results += more_sql_results
+        more_sql_results = myDB.select("SELECT *, 0 as localtime, tv_shows.status as show_status FROM tv_episodes, tv_shows WHERE season != 0 AND tv_shows.tvdb_id = tv_episodes.showid AND airdate < ? AND airdate >= ? AND tv_episodes.status = ? AND tv_episodes.status NOT IN ("+','.join(['?']*len(qualList))+")", [today, recently, WANTED] + qualList)
+        sql_results1 += more_sql_results
 
-        #epList = sickbeard.comingList
-
-        # sort by air date
+        # sort by localtime
         sorts = {
-            'date': (lambda x, y: cmp(int(x["airdate"]), int(y["airdate"]))),
-            'show': (lambda a, b: cmp(a["show_name"], b["show_name"])),
-            'network': (lambda a, b: cmp(a["network"], b["network"])),
+            'date': (lambda x, y: cmp(x["localtime"], y["localtime"])),
+            'show': (lambda a, b: cmp((a["show_name"], a["localtime"]), (b["show_name"], b["localtime"]))),
+            'network': (lambda a, b: cmp((a["network"], a["localtime"]), (b["network"], b["localtime"]))),
         }
 
-        #epList.sort(sorts[sort])
+        # make a dict out of the sql results
+        sql_results = [dict(row) for row in sql_results1]
+        
+        # add localtime to the dict
+        for index, item in enumerate(sql_results1):
+            sql_results[index]['localtime'] = network_timezones.parse_date_time(item['airdate'],item['airs'],item['network'])
+        
         sql_results.sort(sorts[sickbeard.COMING_EPS_SORT])
 
         t = PageTemplate(file="comingEpisodes.tmpl")
@@ -2884,8 +2907,8 @@ class WebInterface:
             paused_item,
         ]
 
-        t.next_week = next_week
-        t.today = today
+        t.next_week = datetime.datetime.combine(next_week1, datetime.time(tzinfo=network_timezones.sb_timezone))
+        t.today = datetime.datetime.now().replace(tzinfo=network_timezones.sb_timezone)
         t.sql_results = sql_results
 
         # Allow local overriding of layout parameter

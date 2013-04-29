@@ -1,8 +1,11 @@
 #import os.path
+#import datetime
 #import sickbeard
+#import locale
 #from sickbeard.common import *
 #from sickbeard import config
 #from sickbeard import metadata
+#from sickbeard.sbdatetime import *
 #from sickbeard.metadata.generic import GenericMetadata
 #set global $title  = "Config - General"
 #set global $header = "General Configuration"
@@ -191,6 +194,69 @@
                         <input type="submit" class="btn config_submitter" value="Save Changes" />
                     </fieldset>
                 </div><!-- /component-group4 //-->
+
+                <div id="core-component-group5" class="component-group clearfix">
+
+                    <div class="component-group-desc">
+                        <h3>Coming Episodes</h3>
+                    </div>
+
+                    <fieldset class="component-group-list">
+                        
+                        <div class="field-pair">
+                            <label class="nocheck clearfix">
+                                <span class="component-title">Missed Days</span>
+                                <input type="text" name="missed_days" value="$sickbeard.COMING_EPS_MISSED_DAYS" size="10" />
+                            </label>
+                            <label class="nocheck clearfix">
+                                <span class="component-title">&nbsp;</span>
+                                <span class="component-desc">How many missed days should be displayed.<br>Minimum: 2 Days, Maximum: 30 Days, Default: 3 Days<br><b>Note:</b> This value is without timezone correction.</span>
+                            </label>
+                        </div>
+
+                        <input type="submit" class="btn config_submitter" value="Save Changes" />
+                    </fieldset>
+                </div><!-- /component-group5 //-->
+
+                <div id="core-component-group6" class="component-group clearfix">
+
+                    <div class="component-group-desc">
+                        <h3>Date and Time</h3>
+                    </div>
+
+                    <fieldset class="component-group-list">
+
+                        <div class="field-pair">
+                            <label class="nocheck clearfix" for="date_presets">
+                                <span class="component-title">Date Format:</span>
+                                <span class="component-desc">
+                                    <select id="date_presets" name="date_preset">
+                                        <option value="%x" #if "%x" == $sickbeard.DATE_PRESET then "selected=\"selected\"" else ""#>Use System Default</option>
+                                        #for $cur_preset in $date_presets:
+                                            <option value="$cur_preset" #if $cur_preset == $sickbeard.DATE_PRESET then "selected=\"selected\"" else ""#>$datetime.datetime.now().strftime($cur_preset)</option>
+                                        #end for
+                                    </select>
+                                </span>
+                            </label>
+                        </div>
+
+                        <div class="field-pair">
+                            <label class="nocheck clearfix" for="time_presets">
+                                <span class="component-title">Time Format:</span>
+                                <span class="component-desc">
+                                    <select id="time_presets" name="time_preset">
+                                         #for $cur_preset in $time_presets:
+                                            <option value="$cur_preset" #if $cur_preset == $sickbeard.TIME_PRESET_W_SECONDS then "selected=\"selected\"" else ""#>$sbdatetime.now().sbftime(show_seconds=True,t_preset=$cur_preset)</option>
+                                         #end for
+                                    </select>
+                                <b>Note:</b> Seconds are only shown on the History Page.
+                                </span>
+                            </label>
+                        </div>
+
+                        <input type="submit" class="btn config_submitter" value="Save Changes" />
+                    </fieldset>
+                </div><!-- /component-group6 //-->
 
                 <div class="component-group-save">
                     <input type="submit" class="btn config_submitter" value="Save Changes" />

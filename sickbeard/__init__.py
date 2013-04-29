@@ -304,6 +304,10 @@ NMA_PRIORITY = 0
 COMING_EPS_LAYOUT = None
 COMING_EPS_DISPLAY_PAUSED = None
 COMING_EPS_SORT = None
+COMING_EPS_MISSED_DAYS = None
+DATE_PRESET = None
+TIME_PRESET = None
+TIME_PRESET_W_SECONDS = None
 
 EXTRA_SCRIPTS = []
 
@@ -354,7 +358,7 @@ def initialize(consoleLogging=True):
                 USE_LIBNOTIFY, LIBNOTIFY_NOTIFY_ONSNATCH, LIBNOTIFY_NOTIFY_ONDOWNLOAD, USE_NMJ, NMJ_HOST, NMJ_DATABASE, NMJ_MOUNT, USE_NMJv2, NMJv2_HOST, NMJv2_DATABASE, NMJv2_DBLOC, USE_SYNOINDEX, \
                 USE_BANNER, USE_LISTVIEW, METADATA_XBMC, METADATA_MEDIABROWSER, METADATA_PS3, METADATA_SYNOLOGY, metadata_provider_dict, \
                 NEWZBIN, NEWZBIN_USERNAME, NEWZBIN_PASSWORD, GIT_PATH, MOVE_ASSOCIATED_FILES, \
-                COMING_EPS_LAYOUT, COMING_EPS_SORT, COMING_EPS_DISPLAY_PAUSED, METADATA_WDTV, METADATA_TIVO, IGNORE_WORDS, CREATE_MISSING_SHOW_DIRS, \
+                COMING_EPS_LAYOUT, COMING_EPS_SORT, COMING_EPS_MISSED_DAYS, DATE_PRESET, TIME_PRESET, TIME_PRESET_W_SECONDS, COMING_EPS_DISPLAY_PAUSED, METADATA_WDTV, METADATA_TIVO, IGNORE_WORDS, CREATE_MISSING_SHOW_DIRS, \
                 ADD_SHOWS_WO_DIR
 
         if __INITIALIZED__:
@@ -532,6 +536,10 @@ def initialize(consoleLogging=True):
         COMING_EPS_LAYOUT = check_setting_str(CFG, 'GUI', 'coming_eps_layout', 'banner')
         COMING_EPS_DISPLAY_PAUSED = bool(check_setting_int(CFG, 'GUI', 'coming_eps_display_paused', 0))
         COMING_EPS_SORT = check_setting_str(CFG, 'GUI', 'coming_eps_sort', 'date')
+        COMING_EPS_MISSED_DAYS = check_setting_int(CFG, 'General', 'coming_eps_missed_days', 3)
+        DATE_PRESET = check_setting_str(CFG, 'GUI', 'date_preset', '%x')
+        TIME_PRESET_W_SECONDS = check_setting_str(CFG, 'GUI', 'time_preset', '%I:%M:%S %p')
+        TIME_PRESET = TIME_PRESET_W_SECONDS.replace(u":%S",u"") 
 
         CheckSection(CFG, 'Newznab')
         newznabData = check_setting_str(CFG, 'Newznab', 'newznab_data', '')
@@ -883,7 +891,7 @@ def halt():
 
 def sig_handler(signum=None, frame=None):
     if type(signum) != type(None):
-        logger.log(u"Signal %i caught, saving and exiting..." % int(signum))
+        logger.log(u"Signal %i caught, saving and exiting..." % helpers.tryInt(signum))
         saveAndShutdown()
 
 
@@ -978,35 +986,35 @@ def save_config():
     new_config['General']['log_dir'] = LOG_DIR
     new_config['General']['web_port'] = WEB_PORT
     new_config['General']['web_host'] = WEB_HOST
-    new_config['General']['web_ipv6'] = int(WEB_IPV6)
-    new_config['General']['web_log'] = int(WEB_LOG)
+    new_config['General']['web_ipv6'] = helpers.tryInt(WEB_IPV6)
+    new_config['General']['web_log'] = helpers.tryInt(WEB_LOG)
     new_config['General']['web_root'] = WEB_ROOT
     new_config['General']['web_username'] = WEB_USERNAME
     new_config['General']['web_password'] = WEB_PASSWORD
-    new_config['General']['use_api'] = int(USE_API)
+    new_config['General']['use_api'] = helpers.tryInt(USE_API)
     new_config['General']['api_key'] = API_KEY
-    new_config['General']['enable_https'] = int(ENABLE_HTTPS)
+    new_config['General']['enable_https'] = helpers.tryInt(ENABLE_HTTPS)
     new_config['General']['https_cert'] = HTTPS_CERT
     new_config['General']['https_key'] = HTTPS_KEY
-    new_config['General']['use_nzbs'] = int(USE_NZBS)
-    new_config['General']['use_torrents'] = int(USE_TORRENTS)
+    new_config['General']['use_nzbs'] = helpers.tryInt(USE_NZBS)
+    new_config['General']['use_torrents'] = helpers.tryInt(USE_TORRENTS)
     new_config['General']['nzb_method'] = NZB_METHOD
-    new_config['General']['usenet_retention'] = int(USENET_RETENTION)
-    new_config['General']['search_frequency'] = int(SEARCH_FREQUENCY)
-    new_config['General']['download_propers'] = int(DOWNLOAD_PROPERS)
-    new_config['General']['quality_default'] = int(QUALITY_DEFAULT)
-    new_config['General']['status_default'] = int(STATUS_DEFAULT)
-    new_config['General']['flatten_folders_default'] = int(FLATTEN_FOLDERS_DEFAULT)
+    new_config['General']['usenet_retention'] = helpers.tryInt(USENET_RETENTION)
+    new_config['General']['search_frequency'] = helpers.tryInt(SEARCH_FREQUENCY)
+    new_config['General']['download_propers'] = helpers.tryInt(DOWNLOAD_PROPERS)
+    new_config['General']['quality_default'] = helpers.tryInt(QUALITY_DEFAULT)
+    new_config['General']['status_default'] = helpers.tryInt(STATUS_DEFAULT)
+    new_config['General']['flatten_folders_default'] = helpers.tryInt(FLATTEN_FOLDERS_DEFAULT)
     new_config['General']['provider_order'] = ' '.join([x.getID() for x in providers.sortedProviderList()])
-    new_config['General']['version_notify'] = int(VERSION_NOTIFY)
+    new_config['General']['version_notify'] = helpers.tryInt(VERSION_NOTIFY)
     new_config['General']['naming_pattern'] = NAMING_PATTERN
-    new_config['General']['naming_custom_abd'] = int(NAMING_CUSTOM_ABD)
+    new_config['General']['naming_custom_abd'] = helpers.tryInt(NAMING_CUSTOM_ABD)
     new_config['General']['naming_abd_pattern'] = NAMING_ABD_PATTERN
-    new_config['General']['naming_multi_ep'] = int(NAMING_MULTI_EP)
-    new_config['General']['launch_browser'] = int(LAUNCH_BROWSER)
+    new_config['General']['naming_multi_ep'] = helpers.tryInt(NAMING_MULTI_EP)
+    new_config['General']['launch_browser'] = helpers.tryInt(LAUNCH_BROWSER)
 
-    new_config['General']['use_banner'] = int(USE_BANNER)
-    new_config['General']['use_listview'] = int(USE_LISTVIEW)
+    new_config['General']['use_banner'] = helpers.tryInt(USE_BANNER)
+    new_config['General']['use_listview'] = helpers.tryInt(USE_LISTVIEW)
     new_config['General']['metadata_xbmc'] = metadata_provider_dict['XBMC'].get_config()
     new_config['General']['metadata_mediabrowser'] = metadata_provider_dict['MediaBrowser'].get_config()
     new_config['General']['metadata_ps3'] = metadata_provider_dict['Sony PS3'].get_config()
@@ -1017,10 +1025,10 @@ def save_config():
     new_config['General']['cache_dir'] = ACTUAL_CACHE_DIR if ACTUAL_CACHE_DIR else 'cache'
     new_config['General']['root_dirs'] = ROOT_DIRS if ROOT_DIRS else ''
     new_config['General']['tv_download_dir'] = TV_DOWNLOAD_DIR
-    new_config['General']['keep_processed_dir'] = int(KEEP_PROCESSED_DIR)
-    new_config['General']['move_associated_files'] = int(MOVE_ASSOCIATED_FILES)
-    new_config['General']['process_automatically'] = int(PROCESS_AUTOMATICALLY)
-    new_config['General']['rename_episodes'] = int(RENAME_EPISODES)
+    new_config['General']['keep_processed_dir'] = helpers.tryInt(KEEP_PROCESSED_DIR)
+    new_config['General']['move_associated_files'] = helpers.tryInt(MOVE_ASSOCIATED_FILES)
+    new_config['General']['process_automatically'] = helpers.tryInt(PROCESS_AUTOMATICALLY)
+    new_config['General']['rename_episodes'] = helpers.tryInt(RENAME_EPISODES)
     new_config['General']['create_missing_show_dirs'] = CREATE_MISSING_SHOW_DIRS
     new_config['General']['add_shows_wo_dir'] = ADD_SHOWS_WO_DIR
 
@@ -1033,50 +1041,50 @@ def save_config():
     new_config['Blackhole']['torrent_dir'] = TORRENT_DIR
 
     new_config['EZRSS'] = {}
-    new_config['EZRSS']['ezrss'] = int(EZRSS)
+    new_config['EZRSS']['ezrss'] = helpers.tryInt(EZRSS)
 
     new_config['TVTORRENTS'] = {}
-    new_config['TVTORRENTS']['tvtorrents'] = int(TVTORRENTS)
+    new_config['TVTORRENTS']['tvtorrents'] = helpers.tryInt(TVTORRENTS)
     new_config['TVTORRENTS']['tvtorrents_digest'] = TVTORRENTS_DIGEST
     new_config['TVTORRENTS']['tvtorrents_hash'] = TVTORRENTS_HASH
 
     new_config['BTN'] = {}
-    new_config['BTN']['btn'] = int(BTN)
+    new_config['BTN']['btn'] = helpers.tryInt(BTN)
     new_config['BTN']['btn_api_key'] = BTN_API_KEY
 
     new_config['TorrentLeech'] = {}
-    new_config['TorrentLeech']['torrentleech'] = int(TORRENTLEECH)
+    new_config['TorrentLeech']['torrentleech'] = helpers.tryInt(TORRENTLEECH)
     new_config['TorrentLeech']['torrentleech_key'] = TORRENTLEECH_KEY
 
     new_config['NZBs'] = {}
-    new_config['NZBs']['nzbs'] = int(NZBS)
+    new_config['NZBs']['nzbs'] = helpers.tryInt(NZBS)
     new_config['NZBs']['nzbs_uid'] = NZBS_UID
     new_config['NZBs']['nzbs_hash'] = NZBS_HASH
 
     new_config['NZBsRUS'] = {}
-    new_config['NZBsRUS']['nzbsrus'] = int(NZBSRUS)
+    new_config['NZBsRUS']['nzbsrus'] = helpers.tryInt(NZBSRUS)
     new_config['NZBsRUS']['nzbsrus_uid'] = NZBSRUS_UID
     new_config['NZBsRUS']['nzbsrus_hash'] = NZBSRUS_HASH
 
     new_config['NZBMatrix'] = {}
-    new_config['NZBMatrix']['nzbmatrix'] = int(NZBMATRIX)
+    new_config['NZBMatrix']['nzbmatrix'] = helpers.tryInt(NZBMATRIX)
     new_config['NZBMatrix']['nzbmatrix_username'] = NZBMATRIX_USERNAME
     new_config['NZBMatrix']['nzbmatrix_apikey'] = NZBMATRIX_APIKEY
 
     new_config['Newzbin'] = {}
-    new_config['Newzbin']['newzbin'] = int(NEWZBIN)
+    new_config['Newzbin']['newzbin'] = helpers.tryInt(NEWZBIN)
     new_config['Newzbin']['newzbin_username'] = NEWZBIN_USERNAME
     new_config['Newzbin']['newzbin_password'] = NEWZBIN_PASSWORD
 
     new_config['Womble'] = {}
-    new_config['Womble']['womble'] = int(WOMBLE)
+    new_config['Womble']['womble'] = helpers.tryInt(WOMBLE)
 
     new_config['nzbX'] = {}
-    new_config['nzbX']['nzbx'] = int(NZBX)
-    new_config['nzbX']['nzbx_completion'] = int(NZBX_COMPLETION)
+    new_config['nzbX']['nzbx'] = helpers.tryInt(NZBX)
+    new_config['nzbX']['nzbx_completion'] = helpers.tryInt(NZBX_COMPLETION)
 
     new_config['omgwtfnzbs'] = {}
-    new_config['omgwtfnzbs']['omgwtfnzbs'] = int(OMGWTFNZBS)
+    new_config['omgwtfnzbs']['omgwtfnzbs'] = helpers.tryInt(OMGWTFNZBS)
     new_config['omgwtfnzbs']['omgwtfnzbs_uid'] = OMGWTFNZBS_UID
     new_config['omgwtfnzbs']['omgwtfnzbs_key'] = OMGWTFNZBS_KEY
 
@@ -1093,106 +1101,106 @@ def save_config():
     new_config['NZBget']['nzbget_host'] = NZBGET_HOST
 
     new_config['XBMC'] = {}
-    new_config['XBMC']['use_xbmc'] = int(USE_XBMC)
-    new_config['XBMC']['xbmc_notify_onsnatch'] = int(XBMC_NOTIFY_ONSNATCH)
-    new_config['XBMC']['xbmc_notify_ondownload'] = int(XBMC_NOTIFY_ONDOWNLOAD)
-    new_config['XBMC']['xbmc_update_library'] = int(XBMC_UPDATE_LIBRARY)
-    new_config['XBMC']['xbmc_update_full'] = int(XBMC_UPDATE_FULL)
-    new_config['XBMC']['xbmc_update_onlyfirst'] = int(XBMC_UPDATE_ONLYFIRST)
+    new_config['XBMC']['use_xbmc'] = helpers.tryInt(USE_XBMC)
+    new_config['XBMC']['xbmc_notify_onsnatch'] = helpers.tryInt(XBMC_NOTIFY_ONSNATCH)
+    new_config['XBMC']['xbmc_notify_ondownload'] = helpers.tryInt(XBMC_NOTIFY_ONDOWNLOAD)
+    new_config['XBMC']['xbmc_update_library'] = helpers.tryInt(XBMC_UPDATE_LIBRARY)
+    new_config['XBMC']['xbmc_update_full'] = helpers.tryInt(XBMC_UPDATE_FULL)
+    new_config['XBMC']['xbmc_update_onlyfirst'] = helpers.tryInt(XBMC_UPDATE_ONLYFIRST)
     new_config['XBMC']['xbmc_host'] = XBMC_HOST
     new_config['XBMC']['xbmc_username'] = XBMC_USERNAME
     new_config['XBMC']['xbmc_password'] = XBMC_PASSWORD
 
     new_config['Plex'] = {}
-    new_config['Plex']['use_plex'] = int(USE_PLEX)
-    new_config['Plex']['plex_notify_onsnatch'] = int(PLEX_NOTIFY_ONSNATCH)
-    new_config['Plex']['plex_notify_ondownload'] = int(PLEX_NOTIFY_ONDOWNLOAD)
-    new_config['Plex']['plex_update_library'] = int(PLEX_UPDATE_LIBRARY)
+    new_config['Plex']['use_plex'] = helpers.tryInt(USE_PLEX)
+    new_config['Plex']['plex_notify_onsnatch'] = helpers.tryInt(PLEX_NOTIFY_ONSNATCH)
+    new_config['Plex']['plex_notify_ondownload'] = helpers.tryInt(PLEX_NOTIFY_ONDOWNLOAD)
+    new_config['Plex']['plex_update_library'] = helpers.tryInt(PLEX_UPDATE_LIBRARY)
     new_config['Plex']['plex_server_host'] = PLEX_SERVER_HOST
     new_config['Plex']['plex_host'] = PLEX_HOST
     new_config['Plex']['plex_username'] = PLEX_USERNAME
     new_config['Plex']['plex_password'] = PLEX_PASSWORD
 
     new_config['Growl'] = {}
-    new_config['Growl']['use_growl'] = int(USE_GROWL)
-    new_config['Growl']['growl_notify_onsnatch'] = int(GROWL_NOTIFY_ONSNATCH)
-    new_config['Growl']['growl_notify_ondownload'] = int(GROWL_NOTIFY_ONDOWNLOAD)
+    new_config['Growl']['use_growl'] = helpers.tryInt(USE_GROWL)
+    new_config['Growl']['growl_notify_onsnatch'] = helpers.tryInt(GROWL_NOTIFY_ONSNATCH)
+    new_config['Growl']['growl_notify_ondownload'] = helpers.tryInt(GROWL_NOTIFY_ONDOWNLOAD)
     new_config['Growl']['growl_host'] = GROWL_HOST
     new_config['Growl']['growl_password'] = GROWL_PASSWORD
 
     new_config['Prowl'] = {}
-    new_config['Prowl']['use_prowl'] = int(USE_PROWL)
-    new_config['Prowl']['prowl_notify_onsnatch'] = int(PROWL_NOTIFY_ONSNATCH)
-    new_config['Prowl']['prowl_notify_ondownload'] = int(PROWL_NOTIFY_ONDOWNLOAD)
+    new_config['Prowl']['use_prowl'] = helpers.tryInt(USE_PROWL)
+    new_config['Prowl']['prowl_notify_onsnatch'] = helpers.tryInt(PROWL_NOTIFY_ONSNATCH)
+    new_config['Prowl']['prowl_notify_ondownload'] = helpers.tryInt(PROWL_NOTIFY_ONDOWNLOAD)
     new_config['Prowl']['prowl_api'] = PROWL_API
     new_config['Prowl']['prowl_priority'] = PROWL_PRIORITY
 
     new_config['Twitter'] = {}
-    new_config['Twitter']['use_twitter'] = int(USE_TWITTER)
-    new_config['Twitter']['twitter_notify_onsnatch'] = int(TWITTER_NOTIFY_ONSNATCH)
-    new_config['Twitter']['twitter_notify_ondownload'] = int(TWITTER_NOTIFY_ONDOWNLOAD)
+    new_config['Twitter']['use_twitter'] = helpers.tryInt(USE_TWITTER)
+    new_config['Twitter']['twitter_notify_onsnatch'] = helpers.tryInt(TWITTER_NOTIFY_ONSNATCH)
+    new_config['Twitter']['twitter_notify_ondownload'] = helpers.tryInt(TWITTER_NOTIFY_ONDOWNLOAD)
     new_config['Twitter']['twitter_username'] = TWITTER_USERNAME
     new_config['Twitter']['twitter_password'] = TWITTER_PASSWORD
     new_config['Twitter']['twitter_prefix'] = TWITTER_PREFIX
 
     new_config['Notifo'] = {}
-    new_config['Notifo']['use_notifo'] = int(USE_NOTIFO)
-    new_config['Notifo']['notifo_notify_onsnatch'] = int(NOTIFO_NOTIFY_ONSNATCH)
-    new_config['Notifo']['notifo_notify_ondownload'] = int(NOTIFO_NOTIFY_ONDOWNLOAD)
+    new_config['Notifo']['use_notifo'] = helpers.tryInt(USE_NOTIFO)
+    new_config['Notifo']['notifo_notify_onsnatch'] = helpers.tryInt(NOTIFO_NOTIFY_ONSNATCH)
+    new_config['Notifo']['notifo_notify_ondownload'] = helpers.tryInt(NOTIFO_NOTIFY_ONDOWNLOAD)
     new_config['Notifo']['notifo_username'] = NOTIFO_USERNAME
     new_config['Notifo']['notifo_apisecret'] = NOTIFO_APISECRET
 
     new_config['Boxcar'] = {}
-    new_config['Boxcar']['use_boxcar'] = int(USE_BOXCAR)
-    new_config['Boxcar']['boxcar_notify_onsnatch'] = int(BOXCAR_NOTIFY_ONSNATCH)
-    new_config['Boxcar']['boxcar_notify_ondownload'] = int(BOXCAR_NOTIFY_ONDOWNLOAD)
+    new_config['Boxcar']['use_boxcar'] = helpers.tryInt(USE_BOXCAR)
+    new_config['Boxcar']['boxcar_notify_onsnatch'] = helpers.tryInt(BOXCAR_NOTIFY_ONSNATCH)
+    new_config['Boxcar']['boxcar_notify_ondownload'] = helpers.tryInt(BOXCAR_NOTIFY_ONDOWNLOAD)
     new_config['Boxcar']['boxcar_username'] = BOXCAR_USERNAME
 
     new_config['Pushover'] = {}
-    new_config['Pushover']['use_pushover'] = int(USE_PUSHOVER)
-    new_config['Pushover']['pushover_notify_onsnatch'] = int(PUSHOVER_NOTIFY_ONSNATCH)
-    new_config['Pushover']['pushover_notify_ondownload'] = int(PUSHOVER_NOTIFY_ONDOWNLOAD)
+    new_config['Pushover']['use_pushover'] = helpers.tryInt(USE_PUSHOVER)
+    new_config['Pushover']['pushover_notify_onsnatch'] = helpers.tryInt(PUSHOVER_NOTIFY_ONSNATCH)
+    new_config['Pushover']['pushover_notify_ondownload'] = helpers.tryInt(PUSHOVER_NOTIFY_ONDOWNLOAD)
     new_config['Pushover']['pushover_userkey'] = PUSHOVER_USERKEY
 
     new_config['Libnotify'] = {}
-    new_config['Libnotify']['use_libnotify'] = int(USE_LIBNOTIFY)
-    new_config['Libnotify']['libnotify_notify_onsnatch'] = int(LIBNOTIFY_NOTIFY_ONSNATCH)
-    new_config['Libnotify']['libnotify_notify_ondownload'] = int(LIBNOTIFY_NOTIFY_ONDOWNLOAD)
+    new_config['Libnotify']['use_libnotify'] = helpers.tryInt(USE_LIBNOTIFY)
+    new_config['Libnotify']['libnotify_notify_onsnatch'] = helpers.tryInt(LIBNOTIFY_NOTIFY_ONSNATCH)
+    new_config['Libnotify']['libnotify_notify_ondownload'] = helpers.tryInt(LIBNOTIFY_NOTIFY_ONDOWNLOAD)
 
     new_config['NMJ'] = {}
-    new_config['NMJ']['use_nmj'] = int(USE_NMJ)
+    new_config['NMJ']['use_nmj'] = helpers.tryInt(USE_NMJ)
     new_config['NMJ']['nmj_host'] = NMJ_HOST
     new_config['NMJ']['nmj_database'] = NMJ_DATABASE
     new_config['NMJ']['nmj_mount'] = NMJ_MOUNT
 
     new_config['Synology'] = {}
-    new_config['Synology']['use_synoindex'] = int(USE_SYNOINDEX)
+    new_config['Synology']['use_synoindex'] = helpers.tryInt(USE_SYNOINDEX)
 
     new_config['NMJv2'] = {}
-    new_config['NMJv2']['use_nmjv2'] = int(USE_NMJv2)
+    new_config['NMJv2']['use_nmjv2'] = helpers.tryInt(USE_NMJv2)
     new_config['NMJv2']['nmjv2_host'] = NMJv2_HOST
     new_config['NMJv2']['nmjv2_database'] = NMJv2_DATABASE
     new_config['NMJv2']['nmjv2_dbloc'] = NMJv2_DBLOC
 
     new_config['Trakt'] = {}
-    new_config['Trakt']['use_trakt'] = int(USE_TRAKT)
+    new_config['Trakt']['use_trakt'] = helpers.tryInt(USE_TRAKT)
     new_config['Trakt']['trakt_username'] = TRAKT_USERNAME
     new_config['Trakt']['trakt_password'] = TRAKT_PASSWORD
     new_config['Trakt']['trakt_api'] = TRAKT_API
 
     new_config['pyTivo'] = {}
-    new_config['pyTivo']['use_pytivo'] = int(USE_PYTIVO)
-    new_config['pyTivo']['pytivo_notify_onsnatch'] = int(PYTIVO_NOTIFY_ONSNATCH)
-    new_config['pyTivo']['pytivo_notify_ondownload'] = int(PYTIVO_NOTIFY_ONDOWNLOAD)
-    new_config['pyTivo']['pyTivo_update_library'] = int(PYTIVO_UPDATE_LIBRARY)
+    new_config['pyTivo']['use_pytivo'] = helpers.tryInt(USE_PYTIVO)
+    new_config['pyTivo']['pytivo_notify_onsnatch'] = helpers.tryInt(PYTIVO_NOTIFY_ONSNATCH)
+    new_config['pyTivo']['pytivo_notify_ondownload'] = helpers.tryInt(PYTIVO_NOTIFY_ONDOWNLOAD)
+    new_config['pyTivo']['pyTivo_update_library'] = helpers.tryInt(PYTIVO_UPDATE_LIBRARY)
     new_config['pyTivo']['pytivo_host'] = PYTIVO_HOST
     new_config['pyTivo']['pytivo_share_name'] = PYTIVO_SHARE_NAME
     new_config['pyTivo']['pytivo_tivo_name'] = PYTIVO_TIVO_NAME
 
     new_config['NMA'] = {}
-    new_config['NMA']['use_nma'] = int(USE_NMA)
-    new_config['NMA']['nma_notify_onsnatch'] = int(NMA_NOTIFY_ONSNATCH)
-    new_config['NMA']['nma_notify_ondownload'] = int(NMA_NOTIFY_ONDOWNLOAD)
+    new_config['NMA']['use_nma'] = helpers.tryInt(USE_NMA)
+    new_config['NMA']['nma_notify_onsnatch'] = helpers.tryInt(NMA_NOTIFY_ONSNATCH)
+    new_config['NMA']['nma_notify_ondownload'] = helpers.tryInt(NMA_NOTIFY_ONDOWNLOAD)
     new_config['NMA']['nma_api'] = NMA_API
     new_config['NMA']['nma_priority'] = NMA_PRIORITY
 
@@ -1201,8 +1209,11 @@ def save_config():
 
     new_config['GUI'] = {}
     new_config['GUI']['coming_eps_layout'] = COMING_EPS_LAYOUT
-    new_config['GUI']['coming_eps_display_paused'] = int(COMING_EPS_DISPLAY_PAUSED)
+    new_config['GUI']['coming_eps_display_paused'] = helpers.tryInt(COMING_EPS_DISPLAY_PAUSED)
     new_config['GUI']['coming_eps_sort'] = COMING_EPS_SORT
+    new_config['General']['coming_eps_missed_days'] = COMING_EPS_MISSED_DAYS
+    new_config['GUI']['date_preset'] = DATE_PRESET
+    new_config['GUI']['time_preset'] = TIME_PRESET_W_SECONDS
 
     new_config['General']['config_version'] = CONFIG_VERSION
 
@@ -1242,8 +1253,8 @@ def getEpList(epIDs, showid=None):
     epList = []
 
     for curEp in sqlResults:
-        curShowObj = helpers.findCertainShow(showList, int(curEp["showid"]))
-        curEpObj = curShowObj.getEpisode(int(curEp["season"]), int(curEp["episode"]))
+        curShowObj = helpers.findCertainShow(showList, helpers.tryInt(curEp["showid"]))
+        curEpObj = curShowObj.getEpisode(helpers.tryInt(curEp["season"]), helpers.tryInt(curEp["episode"]))
         epList.append(curEpObj)
 
     return epList

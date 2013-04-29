@@ -58,8 +58,8 @@ class TVShow(object):
         self.network = ""
         self.genre = ""
         self.runtime = 0
-        self.quality = int(sickbeard.QUALITY_DEFAULT)
-        self.flatten_folders = int(sickbeard.FLATTEN_FOLDERS_DEFAULT)
+        self.quality = helpers.tryInt(sickbeard.QUALITY_DEFAULT)
+        self.flatten_folders = helpers.tryInt(sickbeard.FLATTEN_FOLDERS_DEFAULT)
 
         self.status = ""
         self.airs = ""
@@ -139,14 +139,14 @@ class TVShow(object):
 
         ep_list = []
         for cur_result in results:
-            cur_ep = self.getEpisode(int(cur_result["season"]), int(cur_result["episode"]))
+            cur_ep = self.getEpisode(helpers.tryInt(cur_result["season"]), helpers.tryInt(cur_result["episode"]))
             if cur_ep:
                 if cur_ep.location:
                     # if there is a location, check if it's a multi-episode (share_location > 0) and put them in relatedEps
                     if cur_result["share_location"] > 0:
                         related_eps_result = myDB.select("SELECT * FROM tv_episodes WHERE showid = ? AND season = ? AND location = ? AND episode != ? ORDER BY episode ASC", [self.tvdbid, cur_ep.season, cur_ep.location, cur_ep.episode])
                         for cur_related_ep in related_eps_result:
-                            related_ep = self.getEpisode(int(cur_related_ep["season"]), int(cur_related_ep["episode"]))
+                            related_ep = self.getEpisode(helpers.tryInt(cur_related_ep["season"]), helpers.tryInt(cur_related_ep["episode"]))
                             if related_ep not in cur_ep.relatedEps:
                                 cur_ep.relatedEps.append(related_ep)
                 ep_list.append(cur_ep)
@@ -295,8 +295,8 @@ class TVShow(object):
 
             deleteEp = False
                     
-            curSeason = int(curResult["season"])
-            curEpisode = int(curResult["episode"])
+            curSeason = helpers.tryInt(curResult["season"])
+            curEpisode = helpers.tryInt(curResult["episode"])
             if curSeason not in cachedSeasons:
                 try:
                     cachedSeasons[curSeason] = cachedShow[curSeason]
@@ -463,8 +463,8 @@ class TVShow(object):
                 t = tvdb_api.Tvdb(**ltvdb_api_parms)
 
                 epObj = t[self.tvdbid].airedOn(parse_result.air_date)[0]
-                season = int(epObj["seasonnumber"])
-                episodes = [int(epObj["episodenumber"])]
+                season = helpers.tryInt(epObj["seasonnumber"])
+                episodes = [helpers.tryInt(epObj["episodenumber"])]
             except tvdb_exceptions.tvdb_episodenotfound:
                 logger.log(u"Unable to find episode with date " + str(parse_result.air_date) + " for show " + self.name + ", skipping", logger.WARNING)
                 return None
@@ -474,7 +474,7 @@ class TVShow(object):
 
         for curEpNum in episodes:
 
-            episode = int(curEpNum)
+            episode = helpers.tryInt(curEpNum)
 
             logger.log(str(self.tvdbid) + ": " + file + " parsed to " + self.name + " " + str(season) + "x" + str(episode), logger.DEBUG)
 
@@ -602,14 +602,14 @@ class TVShow(object):
             if self.air_by_date == None:
                 self.air_by_date = 0
 
-            self.quality = int(sqlResults[0]["quality"])
-            self.flatten_folders = int(sqlResults[0]["flatten_folders"])
-            self.paused = int(sqlResults[0]["paused"])
+            self.quality = helpers.tryInt(sqlResults[0]["quality"])
+            self.flatten_folders = helpers.tryInt(sqlResults[0]["flatten_folders"])
+            self.paused = helpers.tryInt(sqlResults[0]["paused"])
 
             self._location = sqlResults[0]["location"]
 
             if self.tvrid == 0:
-                self.tvrid = int(sqlResults[0]["tvr_id"])
+                self.tvrid = helpers.tryInt(sqlResults[0]["tvr_id"])
 
             if self.lang == "":
                 self.lang = sqlResults[0]["lang"]
@@ -646,13 +646,16 @@ class TVShow(object):
             self.airs = myEp["airs_dayofweek"] + " " + myEp["airs_time"]
 
         if myEp["firstaired"] != None and myEp["firstaired"]:
-            self.startyear = int(myEp["firstaired"].split('-')[0])
+            self.startyear = helpers.tryInt(myEp["firstaired"].split('-')[0])
 
         if self.airs == None:
             self.airs = ""
 
         if myEp["status"] != None:
             self.status = myEp["status"]
+
+        if myEp["runtime"] != None:
+            self.runtime = helpers.tryInt(myEp["runtime"])
 
         if self.status == None:
             self.status = ""
@@ -682,9 +685,9 @@ class TVShow(object):
 
             self.name = showXML.findtext('title')
             if showXML.findtext('tvdbid') != None:
-                self.tvdbid = int(showXML.findtext('tvdbid'))
+                self.tvdbid = helpers.tryInt(showXML.findtext('tvdbid'))
             elif showXML.findtext('id'):
-                self.tvdbid = int(showXML.findtext('id'))
+                self.tvdbid = helpers.tryInt(showXML.findtext('id'))
             else:
                 raise exceptions.NoNFOException("Empty <id> or <tvdbid> field in NFO")
 
@@ -729,7 +732,7 @@ class TVShow(object):
             logger.log(str(self.tvdbid) + ": Found episode " + str(sqlResults[0]["season"]) + "x" + str(sqlResults[0]["episode"]), logger.DEBUG)
             foundEps = []
             for sqlEp in sqlResults:
-                curEp = self.getEpisode(int(sqlEp["season"]), int(sqlEp["episode"]))
+                curEp = self.getEpisode(helpers.tryInt(sqlEp["season"]), helpers.tryInt(sqlEp["episode"]))
                 foundEps.append(curEp)
             return foundEps
 
@@ -780,8 +783,8 @@ class TVShow(object):
 
         for ep in sqlResults:
             curLoc = os.path.normpath(ep["location"])
-            season = int(ep["season"])
-            episode = int(ep["episode"])
+            season = helpers.tryInt(ep["season"])
+            episode = helpers.tryInt(ep["episode"])
 
             try:
                 curEp = self.getEpisode(season, episode)
@@ -867,7 +870,7 @@ class TVShow(object):
             logger.log(u"Unable to find the episode", logger.DEBUG)
             return False
 
-        epStatus = int(sqlResults[0]["status"])
+        epStatus = helpers.tryInt(sqlResults[0]["status"])
 
         logger.log(u"current episode status: "+str(epStatus), logger.DEBUG)
 
@@ -1071,19 +1074,19 @@ class TVEpisode(object):
             self.description = sqlResults[0]["description"]
             if self.description == None:
                 self.description = ""
-            self.airdate = datetime.date.fromordinal(int(sqlResults[0]["airdate"]))
+            self.airdate = datetime.date.fromordinal(helpers.tryInt(sqlResults[0]["airdate"]))
             #logger.log(u"1 Status changes from " + str(self.status) + " to " + str(sqlResults[0]["status"]), logger.DEBUG)
-            self.status = int(sqlResults[0]["status"])
+            self.status = helpers.tryInt(sqlResults[0]["status"])
 
             # don't overwrite my location
             if sqlResults[0]["location"] != "" and sqlResults[0]["location"] != None:
                 self.location = os.path.normpath(sqlResults[0]["location"])
             if sqlResults[0]["file_size"]:
-                self.file_size = int(sqlResults[0]["file_size"])
+                self.file_size = helpers.tryInt(sqlResults[0]["file_size"])
             else:
                 self.file_size = 0
 
-            self.tvdbid = int(sqlResults[0]["tvdbid"])
+            self.tvdbid = helpers.tryInt(sqlResults[0]["tvdbid"])
             
             if sqlResults[0]["release_name"] != None:
                 self.release_name = sqlResults[0]["release_name"]
@@ -1158,7 +1161,7 @@ class TVEpisode(object):
             self.description = ""
         else:
             self.description = tmp_description
-        rawAirdate = [int(x) for x in myEp["firstaired"].split("-")]
+        rawAirdate = [helpers.tryInt(x) for x in myEp["firstaired"].split("-")]
         try:
             self.airdate = datetime.date(rawAirdate[0], rawAirdate[1], rawAirdate[2])
         except ValueError:
@@ -1169,7 +1172,7 @@ class TVEpisode(object):
             return False
         
         #early conversion to int so that episode doesn't get marked dirty
-        self.tvdbid = int(myEp["id"])
+        self.tvdbid = helpers.tryInt(myEp["id"])
         
         #don't update show status if show dir is missing, unless missing show dirs are created during post-processing
         if not ek.ek(os.path.isdir, self.show._location) and not sickbeard.CREATE_MISSING_SHOW_DIRS:
@@ -1252,8 +1255,8 @@ class TVEpisode(object):
                     raise exceptions.NoNFOException("Error in NFO format")
 
                 for epDetails in showXML.getiterator('episodedetails'):
-                    if epDetails.findtext('season') == None or int(epDetails.findtext('season')) != self.season or \
-                       epDetails.findtext('episode') == None or int(epDetails.findtext('episode')) != self.episode:
+                    if epDetails.findtext('season') == None or helpers.tryInt(epDetails.findtext('season')) != self.season or \
+                       epDetails.findtext('episode') == None or helpers.tryInt(epDetails.findtext('episode')) != self.episode:
                         logger.log(str(self.show.tvdbid) + ": NFO has an <episodedetails> block for a different episode - wanted " + str(self.season) + "x" + str(self.episode) + " but got " + str(epDetails.findtext('season')) + "x" + str(epDetails.findtext('episode')), logger.DEBUG)
                         continue
 
@@ -1261,15 +1264,15 @@ class TVEpisode(object):
                         raise exceptions.NoNFOException("Error in NFO format (missing episode title or airdate)")
 
                     self.name = epDetails.findtext('title')
-                    self.episode = int(epDetails.findtext('episode'))
-                    self.season = int(epDetails.findtext('season'))
+                    self.episode = helpers.tryInt(epDetails.findtext('episode'))
+                    self.season = helpers.tryInt(epDetails.findtext('season'))
 
                     self.description = epDetails.findtext('plot')
                     if self.description == None:
                         self.description = ""
 
                     if epDetails.findtext('aired'):
-                        rawAirdate = [int(x) for x in epDetails.findtext('aired').split("-")]
+                        rawAirdate = [helpers.tryInt(x) for x in epDetails.findtext('aired').split("-")]
                         self.airdate = datetime.date(rawAirdate[0], rawAirdate[1], rawAirdate[2])
                     else:
                         self.airdate = datetime.date.fromordinal(1)

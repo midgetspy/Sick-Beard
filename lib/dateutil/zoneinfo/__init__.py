@@ -4,7 +4,7 @@ Copyright (c) 2003-2005  Gustavo Niemeyer <gustavo@niemeyer.net>
 This module offers extensions to the standard python 2.3+
 datetime module.
 """
-from dateutil.tz import tzfile
+from lib.dateutil.tz import tzfile
 from tarfile import TarFile
 import os
 
