@@ -28,7 +28,7 @@ from sickbeard.common import Quality
 
 from sickbeard import helpers, exceptions, show_name_helpers
 from sickbeard import name_cache
-from sickbeard.exceptions import ex
+from sickbeard.exceptions import MultipleShowObjectsException, ex
 
 #import xml.etree.cElementTree as etree
 import xml.dom.minidom
@@ -123,9 +123,15 @@ class TVCache():
             logger.log(u"Resulting XML from "+self.provider.name+" isn't RSS, not parsing it", logger.ERROR)
             return []
 
+        cl = []
         for item in items:
+            ci = self._parseItem(item)
+            if ci is not None:
+                cl.append(ci)
 
-            self._parseItem(item)
+        if len(cl) > 0:
+            myDB = self._getDB()
+            myDB.mass_action(cl)
 
     def _translateLinkURL(self, url):
         return url.replace('&amp;','&')
@@ -139,13 +145,13 @@ class TVCache():
 
         if not title or not url:
             logger.log(u"The XML returned from the "+self.provider.name+" feed is incomplete, this result is unusable", logger.ERROR)
-            return
+            return None
 
         url = self._translateLinkURL(url)
 
         logger.log(u"Adding item from RSS to cache: "+title, logger.DEBUG)
 
-        self._addCacheEntry(title, url)
+        return self._addCacheEntry(title, url)
 
     def _getLastUpdate(self):
         myDB = self._getDB()
@@ -180,8 +186,6 @@ class TVCache():
 
     def _addCacheEntry(self, name, url, season=None, episodes=None, tvdb_id=0, tvrage_id=0, quality=None, extraNames=[]):
 
-        myDB = self._getDB()
-
         parse_result = None
 
         # if we don't have complete info then parse the filename to get it
@@ -195,11 +199,11 @@ class TVCache():
 
         if not parse_result:
             logger.log(u"Giving up because I'm unable to parse this name: "+name, logger.DEBUG)
-            return False
+            return None
 
         if not parse_result.series_name:
             logger.log(u"No series name retrieved from "+name+", unable to cache it", logger.DEBUG)
-            return False
+            return None
 
         tvdb_lang = None
 
@@ -208,7 +212,10 @@ class TVCache():
 
             # if we have only the tvdb_id, use the database
             if tvdb_id:
-                showObj = helpers.findCertainShow(sickbeard.showList, tvdb_id)
+                try:
+                    showObj = helpers.findCertainShow(sickbeard.showList, tvdb_id)
+                except (MultipleShowObjectsException):
+                    showObj = None
                 if showObj:
                     tvrage_id = showObj.tvrid
                     tvdb_lang = showObj.lang
@@ -218,7 +225,10 @@ class TVCache():
 
             # if we have only a tvrage_id then use the database
             elif tvrage_id:
-                showObj = helpers.findCertainTVRageShow(sickbeard.showList, tvrage_id)
+                try:
+                    showObj = helpers.findCertainTVRageShow(sickbeard.showList, tvrage_id)
+                except (MultipleShowObjectsException):
+                    showObj = None
                 if showObj:
                     tvdb_id = showObj.tvdbid
                     tvdb_lang = showObj.lang
@@ -269,7 +279,10 @@ class TVCache():
 
                 # if we found the show then retrieve the show object
                 if tvdb_id:
-                    showObj = helpers.findCertainShow(sickbeard.showList, tvdb_id)
+                    try:
+                        showObj = helpers.findCertainShow(sickbeard.showList, tvdb_id)
+                    except (MultipleShowObjectsException):
+                        showObj = None
                     if showObj:
                         tvrage_id = showObj.tvrid
                         tvdb_lang = showObj.lang
@@ -296,10 +309,10 @@ class TVCache():
                 episodes = [int(epObj["episodenumber"])]
             except tvdb_exceptions.tvdb_episodenotfound:
                 logger.log(u"Unable to find episode with date "+str(parse_result.air_date)+" for show "+parse_result.series_name+", skipping", logger.WARNING)
-                return False
+                return None
             except tvdb_exceptions.tvdb_error, e:
                 logger.log(u"Unable to contact TVDB: "+ex(e), logger.WARNING)
-                return False
+                return None
 
         episodeText = "|"+"|".join(map(str, episodes))+"|"
 
@@ -309,8 +322,8 @@ class TVCache():
         if not quality:
             quality = Quality.nameQuality(name)
 
-        myDB.action("INSERT INTO "+self.providerID+" (name, season, episodes, tvrid, tvdbid, url, time, quality) VALUES (?,?,?,?,?,?,?,?)",
-                    [name, season, episodeText, tvrage_id, tvdb_id, url, curTimestamp, quality])
+        return ["INSERT INTO "+self.providerID+" (name, season, episodes, tvrid, tvdbid, url, time, quality) VALUES (?,?,?,?,?,?,?,?)",
+                    [name, season, episodeText, tvrage_id, tvdb_id, url, curTimestamp, quality]]
 
 
     def searchCache(self, episode, manualSearch=False):
@@ -350,7 +363,10 @@ class TVCache():
                 continue
 
             # get the show object, or if it's not one of our shows then ignore it
-            showObj = helpers.findCertainShow(sickbeard.showList, int(curResult["tvdbid"]))
+            try:
+                showObj = helpers.findCertainShow(sickbeard.showList, int(curResult["tvdbid"]))
+            except (MultipleShowObjectsException):
+                showObj = None
             if not showObj:
                 continue
 

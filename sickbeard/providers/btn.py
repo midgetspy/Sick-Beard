@@ -1,5 +1,4 @@
-# coding=utf-8
-# Author: Daniël Heimans
+# Author: DaniÃ«l Heimans
 # URL: http://code.google.com/p/sickbeard
 #
 # This file is part of Sick Beard.
@@ -322,10 +321,10 @@ class BTNCache(tvcache.TVCache):
         
         if not title or not url:
             logger.log(u"The result returned from the BTN regular search is incomplete, this result is unusable", logger.ERROR)
-            return
+            return None
         logger.log(u"Adding item from regular BTN search to cache: " + title, logger.DEBUG)
 
-        self._addCacheEntry(title, url)
+        return self._addCacheEntry(title, url)
 
     def _checkAuth(self, data):
         return self.provider.checkAuthFromData(data)
