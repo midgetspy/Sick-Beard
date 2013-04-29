@@ -208,7 +208,10 @@ def parse_date_time(d, t, network):
     te = datetime.datetime.fromordinal(helpers.tryInt(d))
     foreign_timezone = get_network_timezone(network, network_dict)
     foreign_naive = datetime.datetime(te.year, te.month, te.day, hr, m,tzinfo=foreign_timezone)
-    return foreign_naive.astimezone(sb_timezone)
+    try:
+        return foreign_naive.astimezone(sb_timezone)
+    except (ValueError):
+        return te
 
 def test_timeformat(t):
     mo = time_regex.search(t)
