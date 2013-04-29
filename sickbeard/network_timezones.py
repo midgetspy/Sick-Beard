@@ -211,7 +211,7 @@ def parse_date_time(d, t, network):
     try:
         return foreign_naive.astimezone(sb_timezone)
     except (ValueError):
-        return te
+        return foreign_naive
 
 def test_timeformat(t):
     mo = time_regex.search(t)
