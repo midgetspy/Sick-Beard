@@ -39,7 +39,7 @@ class QualityTests(unittest.TestCase):
 
     def test_HDTV(self):
         self.assertEqual(common.Quality.HDTV, common.Quality.nameQuality("Test.Show.S01E02.720p.HDTV.x264-GROUP"))
-        self.assertEqual(common.Quality.HDTV, common.Quality.nameQuality("Test.Show.S01E02.HR.WS.PDTV.x264-GROUP")) # why does this not pass?
+        self.assertEqual(common.Quality.HDTV, common.Quality.nameQuality("Test.Show.S01E02.HR.WS.PDTV.x264-GROUP"))
 
     def test_RAWHDTV(self):
         self.assertEqual(common.Quality.RAWHDTV, common.Quality.nameQuality("Test.Show.S01E02.720p.HDTV.DD5.1.MPEG2-GROUP"))
