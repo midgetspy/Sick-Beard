@@ -23,12 +23,13 @@ import generic
 from sickbeard import scene_exceptions
 from sickbeard import logger
 from sickbeard import tvcache
+from sickbeard import classes
 from sickbeard.helpers import sanitizeSceneName
 from sickbeard.common import Quality
 from sickbeard.exceptions import ex, AuthException
 
 from lib import jsonrpclib
-import datetime
+from datetime import datetime
 import time
 import socket
 import math
@@ -59,9 +60,12 @@ class BTNProvider(generic.TorrentProvider):
 
         return result
 
-    def _doSearch(self, search_params, show=None):
+    def _doSearch(self, search_params, show=None, age=0):
         params = {}
         apikey = sickbeard.BTN_API_KEY
+
+        if age:
+            params['age'] = "<=" + str(age*86400)
 
         if search_params:
             params.update(search_params)
@@ -260,6 +264,23 @@ class BTNProvider(generic.TorrentProvider):
         quality = Quality.nameQuality(title)
 
         return quality
+
+    def findPropers(self, date=None):
+        results = []
+        for item in self._doSearch({'release': '%.proper.%'}, age=4):
+            if item['Time']:
+                resDate = datetime.fromtimestamp(float(item['Time']))
+                if date == None or resDate > date:
+                    name, url = self._get_title_and_url(item)
+                    results.append(classes.Proper(name, url, resDate))
+        for item in self._doSearch({'release': '%.repack.%'}, age=4):
+            if item['Time']:
+                resDate = datetime.fromtimestamp(float(item['Time']))
+                if date == None or resDate > date:
+                    name, url = self._get_title_and_url(item)
+                    results.append(classes.Proper(name, url, resDate))
+
+        return results
 
     def _doGeneralSearch(self, search_string):
         # 'search' looks as broad is it can find. Can contain episode overview and title for example, 
