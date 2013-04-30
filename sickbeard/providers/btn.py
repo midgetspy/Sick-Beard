@@ -158,7 +158,7 @@ class BTNProvider(generic.TorrentProvider):
                 title += '.' + search_result['Codec'] if title else search_result['Codec']
         
         if 'DownloadURL' in search_result:
-            url = search_result['DownloadURL']
+            url = search_result['DownloadURL'].replace('\\', '')#Hack for FreenasBox 
         else:
             url = None
 
