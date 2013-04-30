@@ -185,8 +185,8 @@ class TorrentLeechProvider(generic.TorrentProvider):
 
                         items[mode].append(item)
 
-                except:
-                    logger.log(u"Failed to parsing " + self.name + " page url: " + searchURL, logger.ERROR)
+                except Exception, e:
+                    logger.log(u"Failed parsing " + self.name + (" Exceptions: "  + str(e) if e else '') + ' HTML data:\n ' + soup.prettify(), logger.ERROR)
 
             #For each search mode sort all the items by seeders
             items[mode].sort(key=lambda tup: tup[3], reverse=True)        
