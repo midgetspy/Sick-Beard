@@ -47,7 +47,7 @@ class KATProvider(generic.TorrentProvider):
 
         self.cache = KATCache(self)
         
-        self.url = 'https://kat.ph/'
+        self.url = 'http://katproxy.com/'
 
         self.searchurl = self.url+'usearch/%s/?field=seeders&sorder=desc'  #order by seed       
 
