@@ -125,7 +125,7 @@ class GenericClient(object):
         else:
             info = bdecode(result.content)["info"]
             torrent_hash = sha1(bencode(info)).hexdigest()
-        
+
         return torrent_hash
         
     def sendTORRENT(self, result):
@@ -138,9 +138,10 @@ class GenericClient(object):
             logger.log(self.name + u': Autenthication Failed' , logger.ERROR)
             return r_code
         
-        result.hash = self._get_torrent_hash(result)
-        
         try:
+
+            result.hash = self._get_torrent_hash(result)
+            
             if result.url.startswith('magnet'):
                 r_code = self._add_torrent_uri(result)
             else:
