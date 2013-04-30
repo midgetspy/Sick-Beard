@@ -228,7 +228,7 @@ class ThePirateBayProvider(generic.TorrentProvider):
                     leechers = int(torrent.group('leechers'))
 
                     #Filter unseeded torrent
-                    if seeders == 0 or not title:
+                    if seeders == 0:
                         continue 
                    
                     #Accept Torrent only from Good People for every Episode Search
@@ -238,7 +238,10 @@ class ThePirateBayProvider(generic.TorrentProvider):
 
                     #Try to find the real Quality for full season torrent analyzing files in torrent 
                     if mode == 'Season' and Quality.sceneQuality(title) == Quality.UNKNOWN:     
-                        if not self._find_season_quality(title,id): continue
+                        title = self._find_season_quality(title,id)
+                        
+                    if not title:
+                        continue
                         
                     item = title, url, id, seeders, leechers
                     

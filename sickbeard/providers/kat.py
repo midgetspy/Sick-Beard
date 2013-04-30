@@ -232,7 +232,7 @@ class KATProvider(generic.TorrentProvider):
                         seeders = int(tr.find_all('td')[-2].text)
                         leechers = int(tr.find_all('td')[-1].text)
 
-                        if (mode != 'RSS' and seeders == 0) or not title:
+                        if mode != 'RSS' and seeders == 0:
                             continue 
                   
                         if sickbeard.KAT_VERIFIED and not verified:
@@ -240,7 +240,10 @@ class KATProvider(generic.TorrentProvider):
                             continue
 
                         if mode == 'Season' and Quality.sceneQuality(title) == Quality.UNKNOWN:
-                            if not self._find_season_quality(title,link): continue
+                            title = self._find_season_quality(title,link)
+
+                        if not title:
+                            continue
 
                         item = title, url, id, seeders, leechers
 
