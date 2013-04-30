@@ -555,8 +555,8 @@ def initialize(consoleLogging=True):
 
         TVDB_BASE_URL = 'http://thetvdb.com/api/' + TVDB_API_KEY
 
-        USE_NZBS = bool(check_setting_int(CFG, 'General', 'use_nzbs', 1))
-        USE_TORRENTS = bool(check_setting_int(CFG, 'General', 'use_torrents', 0))
+        USE_NZBS = bool(check_setting_int(CFG, 'General', 'use_nzbs', 0))
+        USE_TORRENTS = bool(check_setting_int(CFG, 'General', 'use_torrents', 1))
 
         NZB_METHOD = check_setting_str(CFG, 'General', 'nzb_method', 'blackhole')
         if NZB_METHOD not in ('blackhole', 'sabnzbd', 'nzbget'):
@@ -602,7 +602,7 @@ def initialize(consoleLogging=True):
         DTT_NORAR = bool(check_setting_int(CFG, 'DTT', 'dtt_norar', 0))
         DTT_SINGLE = bool(check_setting_int(CFG, 'DTT', 'dtt_single', 0))
         
-        THEPIRATEBAY = bool(check_setting_int(CFG, 'THEPIRATEBAY', 'thepiratebay', 0)) 
+        THEPIRATEBAY = bool(check_setting_int(CFG, 'THEPIRATEBAY', 'thepiratebay', 1)) 
         THEPIRATEBAY_TRUSTED = bool(check_setting_int(CFG, 'THEPIRATEBAY', 'thepiratebay_trusted', 1))         
         THEPIRATEBAY_PROXY = bool(check_setting_int(CFG, 'THEPIRATEBAY', 'thepiratebay_proxy', 0))
         THEPIRATEBAY_PROXY_URL = check_setting_str(CFG, 'THEPIRATEBAY', 'thepiratebay_proxy_url', '')        
@@ -619,7 +619,7 @@ def initialize(consoleLogging=True):
 
         KAT = bool(check_setting_int(CFG, 'KAT', 'kat', 0))
         KAT_TRUSTED = bool(check_setting_int(CFG, 'KAT', 'kat_trusted', 0))
-        KAT_VERIFIED = bool(check_setting_int(CFG, 'KAT', 'kat_verified', 0))
+        KAT_VERIFIED = bool(check_setting_int(CFG, 'KAT', 'kat_verified', 1))
 
         NZBS = bool(check_setting_int(CFG, 'NZBs', 'nzbs', 0))
         NZBS_UID = check_setting_str(CFG, 'NZBs', 'nzbs_uid', '')
@@ -637,7 +637,7 @@ def initialize(consoleLogging=True):
         NEWZBIN_USERNAME = check_setting_str(CFG, 'Newzbin', 'newzbin_username', '')
         NEWZBIN_PASSWORD = check_setting_str(CFG, 'Newzbin', 'newzbin_password', '')
 
-        WOMBLE = bool(check_setting_int(CFG, 'Womble', 'womble', 1))
+        WOMBLE = bool(check_setting_int(CFG, 'Womble', 'womble', 0))
 
         NZBX = bool(check_setting_int(CFG, 'nzbX', 'nzbx', 0))
         NZBX_COMPLETION = check_setting_int(CFG, 'nzbX', 'nzbx_completion', 100)
