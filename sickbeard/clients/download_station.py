@@ -76,7 +76,7 @@ class DownloadStationAPI(GenericClient):
                 'session':'DownloadStation',
                 '_sid':self.auth
                 }
-        files = {'file':(result.name, result.content)}
+        files = {'file':('tv.torrent', result.content)}
         self._request(method='post', data=data, files=files)
         
         return json.loads(self.response.text)['success']
