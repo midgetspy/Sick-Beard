@@ -369,6 +369,12 @@ NMA_NOTIFY_ONSUBTITLEDOWNLOAD = False
 NMA_API = None
 NMA_PRIORITY = 0
 
+USE_PUSHALOT = False
+PUSHALOT_NOTIFY_ONSNATCH = False
+PUSHALOT_NOTIFY_ONDOWNLOAD = False
+PUSHALOT_NOTIFY_ONSUBTITLEDOWNLOAD = False
+PUSHALOT_AUTHORIZATIONTOKEN = None
+
 USE_EMAIL = False
 EMAIL_NOTIFY_ONSNATCH = False
 EMAIL_NOTIFY_ONDOWNLOAD = False
@@ -432,6 +438,7 @@ def initialize(consoleLogging=True):
                 USE_GROWL, GROWL_HOST, GROWL_PASSWORD, USE_PROWL, PROWL_NOTIFY_ONSNATCH, PROWL_NOTIFY_ONDOWNLOAD, PROWL_NOTIFY_ONSUBTITLEDOWNLOAD, PROWL_API, PROWL_PRIORITY, PROG_DIR, NZBMATRIX, NZBMATRIX_USERNAME, \
                 USE_PYTIVO, PYTIVO_NOTIFY_ONSNATCH, PYTIVO_NOTIFY_ONDOWNLOAD, PYTIVO_NOTIFY_ONSUBTITLEDOWNLOAD, PYTIVO_UPDATE_LIBRARY, PYTIVO_HOST, PYTIVO_SHARE_NAME, PYTIVO_TIVO_NAME, \
                 USE_NMA, NMA_NOTIFY_ONSNATCH, NMA_NOTIFY_ONDOWNLOAD, NMA_NOTIFY_ONSUBTITLEDOWNLOAD, NMA_API, NMA_PRIORITY, \
+                USE_PUSHALOT, PUSHALOT_NOTIFY_ONSNATCH, PUSHALOT_NOTIFY_ONDOWNLOAD, PUSHALOT_NOTIFY_ONSUBTITLEDOWNLOAD, PUSHALOT_AUTHORIZATIONTOKEN, \
                 NZBMATRIX_APIKEY, versionCheckScheduler, VERSION_NOTIFY, PROCESS_AUTOMATICALLY, \
                 KEEP_PROCESSED_DIR, TV_DOWNLOAD_DIR, TVDB_BASE_URL, MIN_SEARCH_FREQUENCY, \
                 showQueueScheduler, searchQueueScheduler, ROOT_DIRS, CACHE_DIR, ACTUAL_CACHE_DIR, TVDB_API_PARMS, \
@@ -471,6 +478,7 @@ def initialize(consoleLogging=True):
         CheckSection(CFG, 'SynologyNotifier')
         CheckSection(CFG, 'pyTivo')
         CheckSection(CFG, 'NMA')
+        CheckSection(CFG, 'Pushalot')
         CheckSection(CFG, 'Subtitles')
 
         LOG_DIR = check_setting_str(CFG, 'General', 'log_dir', 'Logs')
@@ -772,6 +780,12 @@ def initialize(consoleLogging=True):
         NMA_NOTIFY_ONSUBTITLEDOWNLOAD = bool(check_setting_int(CFG, 'NMA', 'nma_notify_onsubtitledownload', 0))
         NMA_API = check_setting_str(CFG, 'NMA', 'nma_api', '')
         NMA_PRIORITY = check_setting_str(CFG, 'NMA', 'nma_priority', "0")
+
+        USE_PUSHALOT = bool(check_setting_int(CFG, 'Pushalot', 'use_pushalot', 0))
+        PUSHALOT_NOTIFY_ONSNATCH = bool(check_setting_int(CFG, 'Pushalot', 'pushalot_notify_onsnatch', 0))
+        PUSHALOT_NOTIFY_ONDOWNLOAD = bool(check_setting_int(CFG, 'Pushalot', 'pushalot_notify_ondownload', 0))
+        PUSHALOT_NOTIFY_ONSUBTITLEDOWNLOAD = bool(check_setting_int(CFG, 'Pushalot', 'pushalot_notify_onsubtitledownload', 0))
+        PUSHALOT_AUTHORIZATIONTOKEN = check_setting_str(CFG, 'Pushalot', 'pushalot_authorizationtoken', '')
 
         USE_EMAIL = bool(check_setting_int(CFG, 'Email', 'use_email', 0))
         EMAIL_NOTIFY_ONSNATCH = bool(check_setting_int(CFG, 'Email', 'email_notify_onsnatch', 0))
@@ -1460,6 +1474,13 @@ def save_config():
     new_config['NMA']['nma_notify_onsubtitledownload'] = int(NMA_NOTIFY_ONSUBTITLEDOWNLOAD)
     new_config['NMA']['nma_api'] = NMA_API
     new_config['NMA']['nma_priority'] = NMA_PRIORITY
+
+    new_config['Pushalot'] = {}
+    new_config['Pushalot']['use_pushalot'] = int(USE_PUSHALOT)
+    new_config['Pushalot']['pushalot_notify_onsnatch'] = int(PUSHALOT_NOTIFY_ONSNATCH)
+    new_config['Pushalot']['pushalot_notify_ondownload'] = int(PUSHALOT_NOTIFY_ONDOWNLOAD)
+    new_config['Pushalot']['pushalot_notify_onsubtitledownload'] = int(PUSHALOT_NOTIFY_ONSUBTITLEDOWNLOAD)
+    new_config['Pushalot']['pushalot_authorizationtoken'] = PUSHALOT_AUTHORIZATIONTOKEN
 
     new_config['Email'] = {}
     new_config['Email']['use_email'] = int(USE_EMAIL)

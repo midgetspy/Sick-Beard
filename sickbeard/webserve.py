@@ -1473,6 +1473,7 @@ class ConfigNotifications:
                           use_pytivo=None, pytivo_notify_onsnatch=None, pytivo_notify_ondownload=None, pytivo_notify_onsubtitledownload=None, pytivo_update_library=None, 
                           pytivo_host=None, pytivo_share_name=None, pytivo_tivo_name=None,
                           use_nma=None, nma_notify_onsnatch=None, nma_notify_ondownload=None, nma_notify_onsubtitledownload=None, nma_api=None, nma_priority=0,
+                          use_pushalot=None, pushalot_notify_onsnatch=None, pushalot_notify_ondownload=None, pushalot_notify_onsubtitledownload=None, pushalot_authorizationtoken=None,
                           use_email=None, email_notify_onsnatch=None, email_notify_ondownload=None, email_notify_onsubtitledownload=None, email_host=None, email_port=25, email_from=None,
                           email_tls=None, email_user=None, email_password=None, email_list=None, email_show_list=None, email_show=None ):
 
@@ -1788,6 +1789,26 @@ class ConfigNotifications:
         else:
             nma_notify_onsubtitledownload = 0
 
+        if use_pushalot == "on":
+            use_pushalot = 1
+        else:
+            use_pushalot = 0
+
+        if pushalot_notify_onsnatch == "on":
+            pushalot_notify_onsnatch = 1
+        else:
+            pushalot_notify_onsnatch = 0
+
+        if pushalot_notify_ondownload == "on":
+            pushalot_notify_ondownload = 1
+        else:
+            pushalot_notify_ondownload = 0
+
+        if pushalot_notify_onsubtitledownload == "on":
+            pushalot_notify_onsubtitledownload = 1
+        else:
+            pushalot_notify_onsubtitledownload = 0
+
         sickbeard.USE_XBMC = use_xbmc
         sickbeard.XBMC_NOTIFY_ONSNATCH = xbmc_notify_onsnatch
         sickbeard.XBMC_NOTIFY_ONDOWNLOAD = xbmc_notify_ondownload
@@ -1905,7 +1926,13 @@ class ConfigNotifications:
         sickbeard.NMA_NOTIFY_ONSUBTITLEDOWNLOAD = nma_notify_onsubtitledownload
         sickbeard.NMA_API = nma_api
         sickbeard.NMA_PRIORITY = nma_priority
-        
+
+        sickbeard.USE_PUSHALOT = use_pushalot
+        sickbeard.PUSHALOT_NOTIFY_ONSNATCH = pushalot_notify_onsnatch
+        sickbeard.PUSHALOT_NOTIFY_ONDOWNLOAD = pushalot_notify_ondownload
+        sickbeard.PUSHALOT_NOTIFY_ONSUBTITLEDOWNLOAD = pushalot_notify_onsubtitledownload
+        sickbeard.PUSHALOT_AUTHORIZATIONTOKEN = pushalot_authorizationtoken
+
         sickbeard.save_config()
 
         if len(results) > 0:
@@ -2760,6 +2787,16 @@ class Home:
             return "Test NMA notice sent successfully"
         else:
             return "Test NMA notice failed"
+
+    @cherrypy.expose
+    def testPushalot(self, authorizationToken=None):
+        cherrypy.response.headers['Cache-Control'] = "max-age=0,no-cache,no-store"
+
+        result = notifiers.pushalot_notifier.test_notify(authorizationToken)
+        if result:
+            return "Pushalot notification succeeded. Check your Pushalot clients to make sure it worked"
+        else:
+            return "Error sending Pushalot notification"
 
     @cherrypy.expose
     def shutdown(self, pid=None):

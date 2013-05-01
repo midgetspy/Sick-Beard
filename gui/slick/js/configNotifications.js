@@ -226,6 +226,12 @@ $(document).ready(function(){
             function (data) { $('#testNMA-result').html(data); });
     });
 
+    $('#testPushalot').click(function () {
+        $('#testPushalot-result').html(loading);
+        var pushalot_authorizationtoken = $("pushalot_authorizationtoken").val();
+        $.get(sbRoot + "/home/testPushalot", {'authorizationToken': pushalot_authorizationtoken},
+            function (data) { $('#testPushalot-result').html(data); });
+    });
 
     $('#email_show').change(function () {
         var key = parseInt($('#email_show').val(), 10);
