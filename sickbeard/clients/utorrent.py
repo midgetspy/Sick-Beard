@@ -52,7 +52,7 @@ class uTorrentAPI(GenericClient):
     def _add_torrent_file(self, result):
 
         params = {'action':'add-file'}
-        files={'torrent_file': (result.name, result.content)}
+        files={'torrent_file': (result.name + '.torrent', result.content)}
         return  self._request(method='post', params=params, files=files)
 
     def _set_torrent_label(self, result):
