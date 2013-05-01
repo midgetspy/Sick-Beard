@@ -162,7 +162,7 @@ class NameParser(object):
         if type(number) == int:
             return number
 
-        # the lazy way
+        # good lord I'm lazy
         if number.lower() == 'i': return 1
         if number.lower() == 'ii': return 2
         if number.lower() == 'iii': return 3
@@ -178,6 +178,20 @@ class NameParser(object):
         if number.lower() == 'xiii': return 13
         if number.lower() == 'xiv': return 14
         if number.lower() == 'xv': return 15
+        if number.lower() == 'xvi': return 16
+        if number.lower() == 'xvii': return 17
+        if number.lower() == 'xviii': return 18
+        if number.lower() == 'xix': return 19
+        if number.lower() == 'xx': return 20
+        if number.lower() == 'xxi': return 21
+        if number.lower() == 'xxii': return 22
+        if number.lower() == 'xxiii': return 23
+        if number.lower() == 'xxiv': return 24
+        if number.lower() == 'xxv': return 25
+        if number.lower() == 'xxvi': return 26
+        if number.lower() == 'xxvii': return 27
+        if number.lower() == 'xxviii': return 28
+        if number.lower() == 'xxix': return 29
 
         return int(number)
 

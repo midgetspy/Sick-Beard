@@ -17,13 +17,11 @@
 # You should have received a copy of the GNU General Public License
 # along with Sick Beard.  If not, see <http://www.gnu.org/licenses/>.
 
-import random
 import unittest
 import test_lib as test
 
 import sickbeard
 from sickbeard.tv import TVEpisode, TVShow
-from sickbeard import exceptions
 
 
 class TVShowTests(test.SickbeardTestDBCase):
@@ -113,5 +111,3 @@ if __name__ == '__main__':
     print "######################################################################"
     suite = unittest.TestLoader().loadTestsFromTestCase(TVTests)
     unittest.TextTestRunner(verbosity=2).run(suite)
-
-
