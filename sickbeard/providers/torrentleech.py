@@ -153,7 +153,7 @@ class TorrentLeechProvider(generic.TorrentProvider):
         
                 data = self.getURL(searchURL)
                 if not data:
-                    break
+                    continue
 
                 try:
                     html = BeautifulSoup(data)
@@ -162,7 +162,7 @@ class TorrentLeechProvider(generic.TorrentProvider):
                     
                     if not torrent_table:
                         logger.log(u"No results found for: " + search_string + "(" + searchURL + ")", logger.DEBUG)
-                        break
+                        continue
 
                     for result in torrent_table.find_all('tr')[1:]:
 

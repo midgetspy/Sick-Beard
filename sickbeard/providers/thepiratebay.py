@@ -28,7 +28,7 @@ from sickbeard.name_parser.parser import NameParser, InvalidNameException
 from sickbeard import logger
 from sickbeard import tvcache
 from sickbeard import helpers
-from sickbeard import show_name_helpers
+from sickbeard.show_name_helpers import allPossibleShowNames, sanitizeSceneName
 from sickbeard.common import Overview 
 from sickbeard.exceptions import ex
 from sickbeard import encodingKludge as ek
@@ -74,7 +74,7 @@ class ThePirateBayProvider(generic.TorrentProvider):
         quality = Quality.sceneQuality(item[0])
         return quality    
 
-    def _reverseQuality(self,quality):
+    def _reverseQuality(self, title, quality):
 
         quality_string = ''
 
@@ -89,9 +89,15 @@ class ThePirateBayProvider(generic.TorrentProvider):
         elif quality == Quality.RAWHDTV:
             quality_string = '1080i HDTV mpeg2'
         elif quality == Quality.HDWEBDL:
-            quality_string = '720p WEB-DL'
+            if re.search('web.dl', title, re.I):
+                quality_string = '720p WEB-DL h264'
+            if re.search('webrip', title, re.I):
+                quality_string = '720p WEBRIP x264'
         elif quality == Quality.FULLHDWEBDL:
-            quality_string = '1080p WEB-DL'            
+            if re.search('web.dl', title, re.I):
+                quality_string = '1080p WEB-DL h264'            
+            if re.search('webrip', title, re.I):
+                quality_string = '1080p WEBRIP x264'
         elif quality == Quality.HDBLURAY:
             quality_string = '720p Bluray x264'
         elif quality == Quality.FULLHDBLURAY:
@@ -99,7 +105,7 @@ class ThePirateBayProvider(generic.TorrentProvider):
         
         return quality_string
 
-    def _find_season_quality(self,title,torrent_id):
+    def _find_season_quality(self,title,torrent_id, ep_number):
         """ Return the modified title of a Season Torrent with the quality found inspecting torrent file list """
 
         mediaExtensions = ['avi', 'mkv', 'wmv', 'divx',
@@ -121,8 +127,14 @@ class ThePirateBayProvider(generic.TorrentProvider):
         
         if not filesList: 
             logger.log(u"Unable to get the torrent file list for " + title, logger.ERROR)
+        
+        videoFiles = filter(lambda x: x.rpartition(".")[2].lower() in mediaExtensions, filesList)
+
+        #Filtering SingleEpisode/MultiSeason Torrent
+        if len(videoFiles) < ep_number or len(videoFiles) > float(ep_number * 1.1 ): 
+            return None
             
-        for fileName in filter(lambda x: x.rpartition(".")[2].lower() in mediaExtensions, filesList):
+        for fileName in videoFiles:
             quality = Quality.sceneQuality(os.path.basename(fileName))
             if quality != Quality.UNKNOWN: break
 
@@ -160,7 +172,7 @@ class ThePirateBayProvider(generic.TorrentProvider):
         #If Every episode in Season is a wanted Episode then search for Season first
         if wantedEp == seasonEp and not show.air_by_date:
             search_string = {'Season': [], 'Episode': []}
-            for show_name in set(show_name_helpers.allPossibleShowNames(show)):
+            for show_name in set(allPossibleShowNames(show)):
                 ep_string = show_name + ' S%02d' % int(season) #1) ShowName SXX   
                 search_string['Season'].append(ep_string)
                       
@@ -185,12 +197,12 @@ class ThePirateBayProvider(generic.TorrentProvider):
             return []
                 
         if ep_obj.show.air_by_date:
-            for show_name in set(show_name_helpers.allPossibleShowNames(ep_obj.show)):
-                ep_string = show_name_helpers.sanitizeSceneName(show_name) + ' ' + str(ep_obj.airdate)
+            for show_name in set(allPossibleShowNames(ep_obj.show)):
+                ep_string = sanitizeSceneName(show_name) + ' ' + str(ep_obj.airdate)
                 search_string['Episode'].append(ep_string)
         else:
-            for show_name in set(show_name_helpers.allPossibleShowNames(ep_obj.show)):
-                ep_string = show_name_helpers.sanitizeSceneName(show_name) + ' ' + \
+            for show_name in set(allPossibleShowNames(ep_obj.show)):
+                ep_string = sanitizeSceneName(show_name) + ' ' + \
                 sickbeard.config.naming_ep_type[2] % {'seasonnumber': ep_obj.season, 'episodenumber': ep_obj.episode} + '*|' + \
                 sickbeard.config.naming_ep_type[0] % {'seasonnumber': ep_obj.season, 'episodenumber': ep_obj.episode} + '*|' + \
                 sickbeard.config.naming_ep_type[3] % {'seasonnumber': ep_obj.season, 'episodenumber': ep_obj.episode} + '*' \
@@ -213,7 +225,7 @@ class ThePirateBayProvider(generic.TorrentProvider):
         
                 data = self.getURL(searchURL)
                 if not data:
-                    return []
+                    continue
         
                 re_title_url = self.proxy._buildRE(self.re_title_url)
                 
@@ -238,6 +250,7 @@ class ThePirateBayProvider(generic.TorrentProvider):
 
                     #Try to find the real Quality for full season torrent analyzing files in torrent 
                     if mode == 'Season' and Quality.sceneQuality(title) == Quality.UNKNOWN:     
+                        ep_number = int(len(search_params['Episode']) / len(allPossibleShowNames(show)))
                         title = self._find_season_quality(title,id)
                         
                     if not title:

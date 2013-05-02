@@ -140,6 +140,9 @@ class IPTorrentsProvider(generic.TorrentProvider):
 
         freeleech = '&free=on' if sickbeard.IPTORRENTS_FREELEECH else ''
         
+        if not self._doLogin():
+            return         
+        
         for mode in search_params.keys():
             for search_string in search_params[mode]:
 
