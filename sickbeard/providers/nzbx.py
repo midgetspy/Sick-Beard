@@ -51,7 +51,7 @@ class NzbXProvider(generic.NZBProvider):
 
     def _get_title_and_url(self, item):
         title = item['name']
-        url = self.url + 'nzb?' + str(item['guid']) + '*|*' + urllib.quote_plus(title)
+        url = self.url + 'nzb?' + str(item['guid']) + '*|*' + urllib.quote_plus(title.encode(sickbeard.SYS_ENCODING))
         return (title, url)
 
     def _doSearch(self, search, show=None, age=0):
