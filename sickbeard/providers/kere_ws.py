@@ -17,7 +17,6 @@
 # along with Sick Beard.  If not, see <http://www.gnu.org/licenses/>.
 
 
-
 import urllib
 import datetime
 import re
@@ -39,98 +38,102 @@ from sickbeard import logger
 from sickbeard import tvcache
 from sickbeard.exceptions import ex
 
+
 class KereWSProvider(newznab.NewznabProvider):
 
-	def __init__(self):
-		# use the newznab constructor, the parameters used here are only default values because at startup the config file isn't read
-		newznab.NewznabProvider.__init__(self, "kerews", "http://kere.ws/",  None)
-		self.catIDs="2000,8000"
-		#self.enabled = 1
+    def __init__(self):
+        # use the newznab constructor, the parameters used here are only default
+        # values because at startup the config file isn't read
+        newznab.NewznabProvider.__init__(self, "kerews", "http://kere.ws/",  None)
+        self.catIDs = "2000,8000"
+        # self.enabled = 1
 
-		self.cache = KereWSCache(self)
+        self.cache = KereWSCache(self)
 
-	def isEnabled(self):
-		return sickbeard.KEREWS
+    def isEnabled(self):
+        return sickbeard.KEREWS
 
-	def _doSearch(self, search_params, show=None, max_age=0):
+    def _doSearch(self, search_params, show=None, max_age=0):
 
-		params = {"t": "tvsearch",
-				"maxage": sickbeard.USENET_RETENTION,
-				"limit": 100,
-				"cat": sickbeard.KEREWS_CATIDS}
+        params = {"t": "tvsearch",
+                  "maxage": sickbeard.USENET_RETENTION,
+                  "limit": 100,
+                  "cat": sickbeard.KEREWS_CATIDS}
 
-		if search_params:
-			params.update(search_params)
+        if search_params:
+            params.update(search_params)
 
-		if sickbeard.KEREWS_APIKEY:
-			params['apikey'] = sickbeard.KEREWS_APIKEY
+        if sickbeard.KEREWS_APIKEY:
+            params['apikey'] = sickbeard.KEREWS_APIKEY
 
-		searchURL = sickbeard.KEREWS_URL + 'api?' + urllib.urlencode(params)
+        searchURL = sickbeard.KEREWS_URL + 'api?' + urllib.urlencode(params)
 
-		logparams = params
-		logparams['apikey'] = "XXXXXXXXXXXXXX"
-		logURL = sickbeard.KEREWS_URL + 'api?' + urllib.urlencode(logparams)
+        logparams = params
+        logparams['apikey'] = "XXXXXXXXXXXXXX"
+        logURL = sickbeard.KEREWS_URL + 'api?' + urllib.urlencode(logparams)
 
-		logger.log(u"Search url: " + logURL, logger.DEBUG)
+        logger.log(u"Search url: " + logURL, logger.DEBUG)
 
-		data = self.getURL(searchURL)
+        data = self.getURL(searchURL)
 
-		if not data:
-			return []
+        if not data:
+            return []
 
-		# hack this in until it's fixed server side
-		if not data.startswith('<?xml'):
-			data = '<?xml version="1.0" encoding="ISO-8859-1" ?>' + data
+        # hack this in until it's fixed server side
+        if not data.startswith('<?xml'):
+            data = '<?xml version="1.0" encoding="ISO-8859-1" ?>' + data
 
-		try:
-			parsedXML = parseString(data)
-			items = parsedXML.getElementsByTagName('item')
-		except Exception, e:
-			logger.log(u"Error trying to load "+self.name+" RSS feed: "+ex(e), logger.ERROR)
-			logger.log(u"RSS data: "+data, logger.DEBUG)
-			return []
+        try:
+            parsedXML = parseString(data)
+            items = parsedXML.getElementsByTagName('item')
+        except Exception, e:
+            logger.log(u"Error trying to load "+self.name+" RSS feed: "+ex(e), logger.ERROR)
+            logger.log(u"RSS data: "+data, logger.DEBUG)
+            return []
 
-		if not self._checkAuthFromData(data):
-			return []
+        if not self._checkAuthFromData(data):
+            return []
 
-		if parsedXML.documentElement.tagName != 'rss':
-			logger.log(u"Resulting XML from "+self.name+" isn't RSS, not parsing it", logger.ERROR)
-			return []
+        if parsedXML.documentElement.tagName != 'rss':
+            logger.log(u"Resulting XML from "+self.name+" isn't RSS, not parsing it", logger.ERROR)
+            return []
 
-		results = []
+        results = []
 
-		for curItem in items:
-			(title, url) = self._get_title_and_url(curItem)
+        for curItem in items:
+            (title, url) = self._get_title_and_url(curItem)
 
-			if not title or not url:
-				logger.log(u"The XML returned from the "+self.name+" RSS feed is incomplete, this result is unusable: "+data, logger.ERROR)
-				continue
+            if not title or not url:
+                logger.log(u"The XML returned from the "+self.name +
+                           " RSS feed is incomplete, this result is unusable: "+data, logger.ERROR)
+                continue
 
-			results.append(curItem)
+            results.append(curItem)
 
-		return results
+        return results
+
 
 class KereWSCache(newznab.NewznabCache):
 
-	def _getRSSData(self):
+    def _getRSSData(self):
 
-		params = {"t": "tvsearch",
-				"age": sickbeard.USENET_RETENTION,
-				"cat": sickbeard.KEREWS_CATIDS}
+        params = {"t": "tvsearch",
+                  "age": sickbeard.USENET_RETENTION,
+                  "cat": sickbeard.KEREWS_CATIDS}
 
-		if sickbeard.KEREWS_APIKEY:
-			params['apikey'] = sickbeard.KEREWS_APIKEY
+        if sickbeard.KEREWS_APIKEY:
+            params['apikey'] = sickbeard.KEREWS_APIKEY
 
-		url = sickbeard.KEREWS_URL + 'api?' + urllib.urlencode(params)
+        url = sickbeard.KEREWS_URL + 'api?' + urllib.urlencode(params)
 
-		logger.log(self.provider.name + " cache update URL: "+ url, logger.DEBUG)
+        logger.log(self.provider.name + " cache update URL: " + url, logger.DEBUG)
 
-		data = self.provider.getURL(url)
+        data = self.provider.getURL(url)
 
-		# hack this in until it's fixed server side
-		if data and not data.startswith('<?xml'):
-			data = '<?xml version="1.0" encoding="ISO-8859-1" ?>' + data
+        # hack this in until it's fixed server side
+        if data and not data.startswith('<?xml'):
+            data = '<?xml version="1.0" encoding="ISO-8859-1" ?>' + data
 
-		return data
+        return data
 
 provider = KereWSProvider()
