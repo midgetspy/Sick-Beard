@@ -681,3 +681,4 @@ class AddSubtitleColumns(Add1080pAndRawHDQualities):
         # cleanup and reduce db if any previous data was removed
         logger.log(u"Performing a vacuum on the database.", logger.DEBUG)
         self.connection.action("VACUUM")
+
