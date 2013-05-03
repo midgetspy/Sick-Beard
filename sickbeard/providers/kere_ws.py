@@ -52,8 +52,8 @@ class KereWSProvider(newznab.NewznabProvider):
 	def isEnabled(self):
 		return sickbeard.KEREWS
 
-	def _doSearch(self, search_params, show=None):
-		
+	def _doSearch(self, search_params, show=None, max_age=0):
+
 		params = {"t": "tvsearch",
 				"maxage": sickbeard.USENET_RETENTION,
 				"limit": 100,
@@ -74,7 +74,7 @@ class KereWSProvider(newznab.NewznabProvider):
 		logger.log(u"Search url: " + logURL, logger.DEBUG)
 
 		data = self.getURL(searchURL)
-		
+
 		if not data:
 			return []
 
