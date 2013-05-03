@@ -43,7 +43,7 @@
         return false;
     },
     format: function(s) {
-        return s.replace('hd',3).replace('sd',1).replace('any',0).replace('best',2).replace('custom',4); 
+        return s.replace('hd1080p',5).replace('hd720p',4).replace('hd',3).replace('sd',2).replace('any',1).replace('best',0).replace('custom',7);
     },
     type: 'numeric'
 });
@@ -132,7 +132,7 @@
     <span class="quality Custom">Custom</span>
 #end if
         </td>
-        <td align="center"><a href="http://www.thetvdb.com/?tab=series&amp;id=${cur_result["showid"]}" onclick="window.open(this.href, '_blank'); return false;" title="http://www.thetvdb.com/?tab=series&amp;id=${cur_result["showid"]}"><img alt="[info]" height="16" width="16" src="$sbRoot/images/thetvdb16.png" /></a></td>
+        <td align="center"><a href="http://thetvdb.com/?tab=series&amp;id=${cur_result["showid"]}" onclick="window.open(this.href, '_blank'); return false;" title="http://thetvdb.com/?tab=series&amp;id=${cur_result["showid"]}"><img alt="[info]" height="16" width="16" src="$sbRoot/images/thetvdb16.png" /></a></td>
         <td align="center">
         <a href="$sbRoot/home/searchEpisode?show=${cur_result["showid"]}&amp;season=$cur_result["season"]&amp;episode=$cur_result["episode"]" title="Manual Search" id="forceUpdate-${cur_result["showid"]}" class="forceUpdate epSearch"><img alt="[search]" height="16" width="16" src="$sbRoot/images/search16.png" id="forceUpdateImage-${cur_result["showid"]}" /></a>
         </td>
@@ -228,7 +228,7 @@
             #end if            
             </a></span>
             <span class="tvshowTitleIcons">
-                <a href="http://www.thetvdb.com/?tab=series&amp;id=${cur_result["showid"]}" onclick="window.open(this.href, '_blank'); return false;" title="http://www.thetvdb.com/?tab=series&amp;id=${cur_result["showid"]}"><img alt="[tvdb]" height="16" width="16" src="$sbRoot/images/thetvdb16.png" /></a>
+                <a href="http://thetvdb.com/?tab=series&amp;id=${cur_result["showid"]}" onclick="window.open(this.href, '_blank'); return false;" title="http://thetvdb.com/?tab=series&amp;id=${cur_result["showid"]}"><img alt="[tvdb]" height="16" width="16" src="$sbRoot/images/thetvdb16.png" /></a>
                 <span><a href="$sbRoot/home/searchEpisode?show=${cur_result["showid"]}&amp;season=$cur_result["season"]&amp;episode=$cur_result["episode"]" title="Manual Search" id="forceUpdate-${cur_result["showid"]}" class="epSearch forceUpdate"><img alt="[search]" height="16" width="16" src="$sbRoot/images/search16.png" id="forceUpdateImage-${cur_result["showid"]}" /></a></span>
             </span>
           </th>

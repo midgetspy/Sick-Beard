@@ -52,6 +52,7 @@ from sickbeard import db
 from sickbeard.tv import TVShow
 from sickbeard import logger
 from sickbeard.version import SICKBEARD_VERSION
+from sickbeard.databases.mainDB import MAX_DB_VERSION
 
 from sickbeard.webserveInit import initWebServer
 
@@ -260,6 +261,14 @@ def main():
         logger.log(u"Unable to find '" + sickbeard.CONFIG_FILE + "' , all settings will be default!", logger.ERROR)
 
     sickbeard.CFG = ConfigObj(sickbeard.CONFIG_FILE)
+
+    if db.DBConnection().checkDBVersion() > MAX_DB_VERSION:
+        print 'Your database version has been incremented'
+        print 'past what this version of Sick Beard supports.'
+        print
+        print 'If you have used other forks of SB which have'
+        print 'modified your database it may now be unusable.'
+        sys.exit(1)
 
     # Initialize the config and our threads
     sickbeard.initialize(consoleLogging=consoleLogging)

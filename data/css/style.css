@@ -531,7 +531,9 @@ displayShow.tmpl + manage_backlogOverview.tmpl
 .wanted {
   background-color: #ffb0b0;
 }
-
+.snatched {
+  background-color: #ebc1ea;
+}
 /* =======================================================================
 manage_backlogOverview.tmpl
 ========================================================================== */
@@ -1056,11 +1058,19 @@ span.quality {
 }
 span.Custom {
   background: none repeat scroll 0 0 #449;
-  /* blue */
+  /* purplish blue */
 }
-span.HD,span.WEB-DL,span.BluRay {
+span.HD {
+  background: none repeat scroll 0 0 #008fbb;
+  /* greenish blue */
+}
+span.HD720p {
   background: none repeat scroll 0 0 #494;
   /* green */
+}
+span.HD1080p {
+  background: none repeat scroll 0 0 #499;
+  /* blue */
 }
 span.SD {
   background: none repeat scroll 0 0 #944;
@@ -1069,6 +1079,10 @@ span.SD {
 span.Any {
   background: none repeat scroll 0 0 #444;
   /* black */
+}
+span.RawHD {
+  background: none repeat scroll 0 0 #999944;
+  /* dark orange */
 }
 /* unused boolean tags */
 span.false {
