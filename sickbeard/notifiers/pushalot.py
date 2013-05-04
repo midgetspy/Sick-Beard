@@ -19,17 +19,9 @@
 
 from httplib import HTTPSConnection, HTTPException
 from urllib import urlencode
-
-try:
-    # this only exists in 2.6
-    from ssl import SSLError
-except ImportError:
-    # make a fake one since I don't know what it is supposed to be in 2.5
-    class SSLError(Exception):
-        pass
+from ssl import SSLError
 
 import sickbeard
-
 from sickbeard import logger, common
 
 class PushalotNotifier:

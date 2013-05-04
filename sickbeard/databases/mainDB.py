@@ -711,3 +711,162 @@ class AddEmailSubscriptionTable(AddProperNamingSupport):
     def execute(self):
         self.addColumn('tv_shows', 'notify_list', 'TEXT', None)
         self.incDBVersion()
+        
+class AddSDHD_WEBDL_WEBRIPQualities(Add1080pAndRawHDQualities):
+    """Add support for 1080p related qualities along with RawHD
+
+    Quick overview of what the upgrade needs to do:
+
+        ---------------------------------------- 
+        |Quality       | old      | new        | 
+        ---------------------------------------- 
+        |SDDVD         |2   (1<<1)|8    (1<<3) | 
+        |HDTV          |4   (1<<2)|16   (1<<4) | 
+        |RAWHDTV       |8   (1<<3)|32   (1<<5) | 
+        |FULLHDTV      |16  (1<<4)|64   (1<<6) | 
+        |HDWEBDL       |32  (1<<5)|256  (1<<8) | 
+        |FULLHDWEBDL   |64  (1<<6)|1024 (1<<10)| 
+        |HDBLURAY      |128 (1<<7)|2048 (1<<11)| 
+        |FULLHDBLURAY  |256 (1<<8)|4096 (1<<12)| 
+        |--------------------------------------- 
+        |SDWEBRIP      |NONE      |2   (1<<1)  | 
+        |SDWEBDL       |NONE      |4   (1<<2)  | 
+        |HDWEBRIP      |NONE      |128 (1<<7)  | 
+        |FULLHDWEBRIP  |NONE      |512 (1<<9)  | 
+     
+    """
+
+    O_NONE = 0              # 0                                         
+    O_SDTV = 1              # 1                                         
+    O_SDDVD = 1 << 1        # 2                                         
+    O_HDTV = 1 << 2         # 4                                         
+    O_RAWHDTV = 1 << 3      # 8   
+    O_FULLHDTV = 1 << 4     # 16            
+    O_HDWEBDL = 1 << 5      # 32                                        
+    O_FULLHDWEBDL = 1 << 6  # 64                         
+    O_HDBLURAY = 1 << 7     # 128                                       
+    O_FULLHDBLURAY = 1 << 8 # 256 
+    O_UNKNOWN = 1 << 15
+    
+    def test(self):
+        return self.checkDBVersion() >= 16
+
+    def _update_quality(self, old_quality):
+        """Update bitwise flags to reflect new quality values
+
+        Check flag bits (clear old then set their new locations) starting
+        with the highest bits so we dont overwrite data we need later on
+        """
+
+        result = old_quality
+        # move fullhdbluray from 1<<8 to 1<<12 if set
+        if(result & (1<<8)):
+            result = result & ~(1<<8)
+            result = result | (1<<12)
+        # move hdbluray from 1<<7 to 1<<11 if set
+        if(result & (1<<7)):
+            result = result & ~(1<<7)
+            result = result | (1<<11)
+        # move fullhdwebdl from 1<<6 to 1<<10 if set
+        if(result & (1<<6)):
+            result = result & ~(1<<6)
+            result = result | (1<<10)
+        # move hdwebdl from 1<<5 to 1<<8 if set
+        if(result & (1<<5)):
+            result = result & ~(1<<5)
+            result = result | (1<<8)
+        # move fullhdtv from 1<<4 to 1<<6 if set
+        if(result & (1<<4)):
+            result = result & ~(1<<4)
+            result = result | (1<<6)
+        # move rawhdtv from 1<<3 to 1<<5 if set
+        if(result & (1<<3)):
+            result = result & ~(1<<3)
+            result = result | (1<<5)
+        # move hdtv from 1<<2 to 1<<4 if set
+        if(result & (1<<2)):
+            result = result & ~(1<<2)
+            result = result | (1<<4)
+        # move SDDVD from 1<<2 to 1<<4 if set
+        if(result & (1<<1)):
+            result = result & ~(1<<1)
+            result = result | (1<<3)
+
+        return result
+    
+    def execute(self):
+        backupDatabase(self.checkDBVersion())
+
+        # update the default quality so we dont grab the wrong qualities after migration
+        sickbeard.QUALITY_DEFAULT = self._update_composite_qualities(sickbeard.QUALITY_DEFAULT)
+        sickbeard.save_config()
+
+        #shift previous qualities to new placevalues
+        old_sd = common.Quality.combineQualities([self.O_SDTV, self.O_SDDVD], [])
+        new_sd = common.Quality.combineQualities([common.Quality.SDTV, common.Quality.SDDVD, common.Quality.SDWEBRIP, common.Quality.SDWEBDL], [])
+        
+        old_hd = common.Quality.combineQualities([self.O_HDTV, self.O_FULLHDTV, self.O_HDWEBDL, self.O_HDWEBDL, self.O_FULLHDWEBDL, self.O_HDBLURAY, self.O_FULLHDBLURAY], [])
+        new_hd = common.Quality.combineQualities([common.Quality.HDTV, common.Quality.FULLHDTV, common.Quality.HDWEBRIP, common.Quality.FULLHDWEBRIP ,common.Quality.HDWEBDL, common.Quality.FULLHDWEBDL, common.Quality.HDBLURAY, common.Quality.FULLHDBLURAY], [])
+
+        old_hd720p = common.Quality.combineQualities([self.O_HDTV, self.O_HDWEBDL, self.O_HDBLURAY], [])
+        new_hd720p = common.Quality.combineQualities([common.Quality.HDTV, common.Quality.HDWEBRIP, common.Quality.HDWEBDL, common.Quality.HDBLURAY], [])
+
+        old_hd1080p = common.Quality.combineQualities([self.O_FULLHDTV, self.O_FULLHDWEBDL, self.O_FULLHDBLURAY], [])
+        new_hd1080p = common.Quality.combineQualities([common.Quality.FULLHDTV, common.Quality.FULLHDWEBRIP, common.Quality.FULLHDWEBDL, common.Quality.FULLHDBLURAY], [])
+
+        # update ANY -- shift existing qualities and add new 1080p qualities, note that rawHD was not added to the ANY template
+        old_any = common.Quality.combineQualities([self.O_SDTV, self.O_SDDVD, self.O_HDTV, self.O_FULLHDTV, self.O_HDWEBDL, self.O_FULLHDWEBDL, self.O_HDBLURAY, self.O_FULLHDBLURAY, self.O_UNKNOWN], [])
+        new_any = common.Quality.combineQualities([common.Quality.SDTV, common.Quality.SDWEBRIP, common.Quality.SDWEBDL, common.Quality.SDDVD, common.Quality.HDTV, common.Quality.FULLHDTV, common.Quality.HDWEBRIP, common.Quality.FULLHDWEBRIP, common.Quality.HDWEBDL, common.Quality.FULLHDWEBDL, common.Quality.HDBLURAY, common.Quality.FULLHDBLURAY, common.Quality.UNKNOWN], [])
+
+        # update qualities (including templates)
+        logger.log(u"[1/4] Updating pre-defined templates and the quality for each show...", logger.MESSAGE)
+        ql = []
+        shows = self.connection.select("SELECT * FROM tv_shows")
+        for cur_show in shows:
+            if cur_show["quality"] == old_sd:
+                new_quality = new_sd
+            elif cur_show["quality"] == old_hd:
+                new_quality = new_hd
+            elif cur_show["quality"] == old_hd720p:
+                new_quality = new_hd720p
+            elif cur_show["quality"] == old_hd1080p:
+                new_quality = new_hd1080p
+            elif cur_show["quality"] == old_any:
+                new_quality = new_any
+            else:
+                new_quality = self._update_composite_qualities(cur_show["quality"])
+            ql.append(["UPDATE tv_shows SET quality = ? WHERE show_id = ?", [new_quality, cur_show["show_id"]]])
+        self.connection.mass_action(ql)
+
+        # update status that are are within the old hdwebdl (1<<3 which is 8) and better -- exclude unknown (1<<15 which is 32768)
+        logger.log(u"[2/4] Updating the status for the episodes within each show...", logger.MESSAGE)
+        ql = []
+        episodes = self.connection.select("SELECT * FROM tv_episodes WHERE status < 3276800 AND status >= 200")
+        for cur_episode in episodes:
+            ql.append(["UPDATE tv_episodes SET status = ? WHERE episode_id = ?", [self._update_status(cur_episode["status"]), cur_episode["episode_id"]]])
+        self.connection.mass_action(ql)
+
+        # make two seperate passes through the history since snatched and downloaded (action & quality) may not always coordinate together
+
+        # update previous history so it shows the correct action
+        logger.log(u"[3/4] Updating history to reflect the correct action...", logger.MESSAGE)
+        ql = []
+        historyAction = self.connection.select("SELECT * FROM history WHERE action < 3276800 AND action >= 200")
+        for cur_entry in historyAction:
+            ql.append(["UPDATE history SET action = ? WHERE showid = ? AND date = ?", [self._update_status(cur_entry["action"]), cur_entry["showid"], cur_entry["date"]]])
+        self.connection.mass_action(ql)
+
+        # update previous history so it shows the correct quality
+        logger.log(u"[4/4] Updating history to reflect the correct quality...", logger.MESSAGE)
+        ql = []
+        historyQuality = self.connection.select("SELECT * FROM history WHERE quality < 32768 AND quality >= 2")
+        for cur_entry in historyQuality:
+            ql.append(["UPDATE history SET quality = ? WHERE showid = ? AND date = ?", [self._update_quality(cur_entry["quality"]), cur_entry["showid"], cur_entry["date"]]])
+        self.connection.mass_action(ql)
+
+        self.incDBVersion()
+
+        # cleanup and reduce db if any previous data was removed
+        logger.log(u"Performing a vacuum on the database.", logger.DEBUG)
+        self.connection.action("VACUUM")
+    

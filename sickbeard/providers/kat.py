@@ -121,6 +121,7 @@ class KATProvider(generic.TorrentProvider):
             
             #Filtering SingleEpisode/MultiSeason Torrent
             if len(videoFiles) < ep_number or len(videoFiles) > float(ep_number * 1.1 ): 
+                logger.log(u"Result " + title + " Seem to be a Single Episode or MultiSeason torrent, skipping result...", logger.DEBUG)
                 return None
                 
             for fileName in videoFiles:
@@ -131,7 +132,7 @@ class KATProvider(generic.TorrentProvider):
                 quality = Quality.assumeQuality(os.path.basename(fileName))            
     
             if quality == Quality.UNKNOWN:
-                logger.log(u"No Season quality for "+title, logger.DEBUG)
+                logger.log(u"Unable to obtain a Season Quality for " + title, logger.DEBUG)
                 return None
     
             try:

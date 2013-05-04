@@ -132,6 +132,7 @@ class ThePirateBayProvider(generic.TorrentProvider):
 
         #Filtering SingleEpisode/MultiSeason Torrent
         if len(videoFiles) < ep_number or len(videoFiles) > float(ep_number * 1.1 ): 
+            logger.log(u"Result " + title + " Seem to be a Single Episode or MultiSeason torrent, skipping result...", logger.DEBUG)
             return None
             
         for fileName in videoFiles:
@@ -142,7 +143,7 @@ class ThePirateBayProvider(generic.TorrentProvider):
             quality = Quality.assumeQuality(os.path.basename(fileName))            
 
         if quality == Quality.UNKNOWN:
-            logger.log(u"No Season quality for " + title, logger.DEBUG)
+            logger.log(u"Unable to obtain a Season Quality for " + title, logger.DEBUG)
             return None
 
         try:
@@ -251,7 +252,7 @@ class ThePirateBayProvider(generic.TorrentProvider):
                     #Try to find the real Quality for full season torrent analyzing files in torrent 
                     if mode == 'Season' and Quality.sceneQuality(title) == Quality.UNKNOWN:     
                         ep_number = int(len(search_params['Episode']) / len(allPossibleShowNames(show)))
-                        title = self._find_season_quality(title,id)
+                        title = self._find_season_quality(title,id, ep_number)
                         
                     if not title:
                         continue
