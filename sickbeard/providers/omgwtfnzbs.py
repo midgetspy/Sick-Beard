@@ -45,7 +45,7 @@ class OmgwtfnzbsProvider(generic.NZBProvider):
         return sickbeard.OMGWTFNZBS
 
     def _checkAuth(self):
-        if not sickbeard.OMGWTFNZBS_UID or not sickbeard.OMGWTFNZBS_KEY:
+        if not sickbeard.OMGWTFNZBS_USERNAME in (None, "") or not sickbeard.OMGWTFNZBS_APIKEY in (None, ""):
             raise exceptions.AuthException("omgwtfnzbs authentication details are empty, check your config")
 
     def _get_season_search_strings(self, show, season):
@@ -58,8 +58,8 @@ class OmgwtfnzbsProvider(generic.NZBProvider):
         return (item['release'], item['getnzb'])
 
     def _doSearch(self, search, show=None, retention=0):
-        params = {'user': sickbeard.OMGWTFNZBS_UID,
-                  'api': sickbeard.OMGWTFNZBS_KEY,
+        params = {'user': sickbeard.OMGWTFNZBS_USERNAME,
+                  'api': sickbeard.OMGWTFNZBS_APIKEY,
                   'eng': 1,
                   'catid': '19,20', # SD,HD
                   'retention': sickbeard.USENET_RETENTION,
@@ -108,8 +108,8 @@ class OmgwtfnzbsCache(tvcache.TVCache):
         self.minTime = 20
 
     def _getRSSData(self):
-        params = {'user': sickbeard.OMGWTFNZBS_UID,
-                  'api': sickbeard.OMGWTFNZBS_KEY,
+        params = {'user': sickbeard.OMGWTFNZBS_USERNAME,
+                  'api': sickbeard.OMGWTFNZBS_APIKEY,
                   'eng': 1,
                   'catid': '19,20'} # SD,HD
 
