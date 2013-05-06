@@ -62,7 +62,7 @@ class KATProvider(generic.TorrentProvider):
         quality = Quality.sceneQuality(item[0])
         return quality    
 
-    def _reverseQuality(self, title, quality):
+    def _reverseQuality(self, quality):
 
         quality_string = ''
 
@@ -77,15 +77,9 @@ class KATProvider(generic.TorrentProvider):
         elif quality == Quality.RAWHDTV:
             quality_string = '1080i HDTV mpeg2'
         elif quality == Quality.HDWEBDL:
-            if re.search('web.dl', title, re.I):
-                quality_string = '720p WEB-DL h264'
-            if re.search('webrip', title, re.I):
-                quality_string = '720p WEBRIP x264'
+            quality_string = '720p WEB-DL h264'
         elif quality == Quality.FULLHDWEBDL:
-            if re.search('web.dl', title, re.I):
-                quality_string = '1080p WEB-DL h264'            
-            if re.search('webrip', title, re.I):
-                quality_string = '1080p WEBRIP x264'
+            quality_string = '1080p WEB-DL h264'            
         elif quality == Quality.HDBLURAY:
             quality_string = '720p Bluray x264'
         elif quality == Quality.FULLHDBLURAY:
