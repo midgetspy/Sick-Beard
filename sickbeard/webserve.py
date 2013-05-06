@@ -40,6 +40,7 @@ from sickbeard import encodingKludge as ek
 from sickbeard import search_queue
 from sickbeard import image_cache
 from sickbeard import naming
+from sickbeard import failed_history
 
 from sickbeard.providers import newznab
 from sickbeard.common import Quality, Overview, statusStrings
@@ -571,7 +572,7 @@ class Manage:
         redirect("/manage")
 
     @cherrypy.expose
-    def failedDownloads(self, limit=100, toRemove=None):
+    def failedDownloads(self, limit=100, toRemove=None, add=None):
 
         myDB = db.DBConnection("failed.db")
 
@@ -579,6 +580,9 @@ class Manage:
             toRemove = toRemove.split("|")
         else:
             toRemove = []
+
+        if add != None and not myDB.select("SELECT * FROM failed WHERE release = ?", [failed_history.prepareFailedName(add)]):
+            failed_history.logFailed(add)
 
         for release in toRemove:
             myDB.action('DELETE FROM failed WHERE release = ?', [release])
