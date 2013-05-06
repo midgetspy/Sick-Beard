@@ -174,6 +174,9 @@ class GenericProvider:
         return True
 
     def searchRSS(self):
+
+        self._checkAuth()
+
         self.cache.updateCache()
         return self.cache.findNeededEpisodes()
 
@@ -277,6 +280,8 @@ class GenericProvider:
 
 
     def findSeasonResults(self, show, season):
+
+        self._checkAuth()
 
         itemList = []
         results = {}

@@ -45,7 +45,7 @@ class OmgwtfnzbsProvider(generic.NZBProvider):
         return sickbeard.OMGWTFNZBS
 
     def _checkAuth(self):
-        if sickbeard.OMGWTFNZBS_USERNAME in (None, "") or sickbeard.OMGWTFNZBS_APIKEY in (None, ""):
+        if not sickbeard.OMGWTFNZBS_USERNAME or not sickbeard.OMGWTFNZBS_APIKEY:
             raise exceptions.AuthException("omgwtfnzbs authentication details are empty, check your config")
 
     def _get_season_search_strings(self, show, season):
@@ -115,10 +115,6 @@ class OmgwtfnzbsCache(tvcache.TVCache):
         self.minTime = 20
 
     def _getRSSData(self):
-        # unable to call _checkAuth() from the OmgwtfnzbsProvider class, so just duplicating some code here
-        if sickbeard.OMGWTFNZBS_USERNAME in (None, "") or sickbeard.OMGWTFNZBS_APIKEY in (None, ""):
-            raise exceptions.AuthException("omgwtfnzbs authentication details are empty, check your config")
-
         params = {'user': sickbeard.OMGWTFNZBS_USERNAME,
                   'api': sickbeard.OMGWTFNZBS_APIKEY,
                   'eng': 1,
