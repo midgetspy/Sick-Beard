@@ -196,7 +196,7 @@ class IPTorrentsProvider(generic.TorrentProvider):
                         items[mode].append(item)
 
                 except Exception, e:
-                    logger.log(u"Failed parsing " + self.name + (" Exceptions: "  + str(e) if e else '') + ' HTML data:\n ' + soup.prettify(), logger.ERROR)
+                    logger.log(u"Failed parsing " + self.name + (" Exceptions: "  + str(e) if e else ''), logger.ERROR)
 
             results += items[mode]  
                 
