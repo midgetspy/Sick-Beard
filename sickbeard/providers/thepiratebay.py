@@ -159,7 +159,8 @@ class ThePirateBayProvider(generic.TorrentProvider):
     
         if not show:
             return []
-
+        
+        self.show = show
         seasonEp = show.getAllEpisodes(season)
 
         wantedEp = [x for x in seasonEp if show.getOverview(x.status) in (Overview.WANTED, Overview.QUAL)]          
@@ -190,7 +191,9 @@ class ThePirateBayProvider(generic.TorrentProvider):
        
         if not ep_obj:
             return []
-                
+        
+        self.show = ep_obj.show
+        
         if ep_obj.show.air_by_date:
             for show_name in set(allPossibleShowNames(ep_obj.show)):
                 ep_string = sanitizeSceneName(show_name) + ' ' + str(ep_obj.airdate)
@@ -245,7 +248,7 @@ class ThePirateBayProvider(generic.TorrentProvider):
 
                     #Try to find the real Quality for full season torrent analyzing files in torrent 
                     if mode == 'Season' and Quality.sceneQuality(title) == Quality.UNKNOWN:     
-                        ep_number = int(len(search_params['Episode']) / len(allPossibleShowNames(show)))
+                        ep_number = int(len(search_params['Episode']) / len(allPossibleShowNames(self.show)))
                         title = self._find_season_quality(title,id, ep_number)
                         
                     if not title:
