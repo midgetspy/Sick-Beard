@@ -153,7 +153,7 @@ class TorrentLeechProvider(generic.TorrentProvider):
         
                 data = self.getURL(searchURL)
                 if not data:
-                    break
+                    continue
 
                 try:
                     html = BeautifulSoup(data)
@@ -162,7 +162,7 @@ class TorrentLeechProvider(generic.TorrentProvider):
                     
                     if not torrent_table:
                         logger.log(u"No results found for: " + search_string + "(" + searchURL + ")", logger.DEBUG)
-                        break
+                        continue
 
                     for result in torrent_table.find_all('tr')[1:]:
 
@@ -185,8 +185,8 @@ class TorrentLeechProvider(generic.TorrentProvider):
 
                         items[mode].append(item)
 
-                except:
-                    logger.log(u"Failed to parsing " + self.name + " page url: " + searchURL, logger.ERROR)
+                except Exception, e:
+                    logger.log(u"Failed parsing " + self.name + (" Exceptions: "  + str(e) if e else '') + ' HTML data:\n ' + soup.prettify(), logger.ERROR)
 
             #For each search mode sort all the items by seeders
             items[mode].sort(key=lambda tup: tup[3], reverse=True)        

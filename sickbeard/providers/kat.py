@@ -29,7 +29,7 @@ from sickbeard.name_parser.parser import NameParser, InvalidNameException
 from sickbeard import logger
 from sickbeard import tvcache
 from sickbeard import helpers
-from sickbeard import show_name_helpers
+from sickbeard.show_name_helpers import allPossibleShowNames, sanitizeSceneName
 from sickbeard.common import Overview 
 from sickbeard.exceptions import ex
 from sickbeard import encodingKludge as ek
@@ -47,7 +47,7 @@ class KATProvider(generic.TorrentProvider):
 
         self.cache = KATCache(self)
         
-        self.url = 'https://kat.ph/'
+        self.url = 'http://katproxy.com/'
 
         self.searchurl = self.url+'usearch/%s/?field=seeders&sorder=desc'  #order by seed       
 
@@ -62,7 +62,7 @@ class KATProvider(generic.TorrentProvider):
         quality = Quality.sceneQuality(item[0])
         return quality    
 
-    def _reverseQuality(self,quality):
+    def _reverseQuality(self, quality):
 
         quality_string = ''
 
@@ -77,9 +77,9 @@ class KATProvider(generic.TorrentProvider):
         elif quality == Quality.RAWHDTV:
             quality_string = '1080i HDTV mpeg2'
         elif quality == Quality.HDWEBDL:
-            quality_string = '720p WEB-DL'
+            quality_string = '720p WEB-DL h264'
         elif quality == Quality.FULLHDWEBDL:
-            quality_string = '1080p WEB-DL'            
+            quality_string = '1080p WEB-DL h264'            
         elif quality == Quality.HDBLURAY:
             quality_string = '720p Bluray x264'
         elif quality == Quality.FULLHDBLURAY:
@@ -87,7 +87,7 @@ class KATProvider(generic.TorrentProvider):
         
         return quality_string
 
-    def _find_season_quality(self,title,torrent_link):
+    def _find_season_quality(self,title, torrent_link, ep_number):
         """ Return the modified title of a Season Torrent with the quality found inspecting torrent file list """
         
         mediaExtensions = ['avi', 'mkv', 'wmv', 'divx',
@@ -97,7 +97,7 @@ class KATProvider(generic.TorrentProvider):
         quality = Quality.UNKNOWN        
         
         fileName = None
-        
+
         data = self.getURL(torrent_link)
         
         if not data:
@@ -111,8 +111,14 @@ class KATProvider(generic.TorrentProvider):
                 return None 
             
             files = [x.text for x in file_table.find_all('td', attrs = {'class' : 'torFileName'} )]
+            videoFiles = filter(lambda x: x.rpartition(".")[2].lower() in mediaExtensions, files)
             
-            for fileName in filter(lambda x: x.rpartition(".")[2].lower() in mediaExtensions, files):
+            #Filtering SingleEpisode/MultiSeason Torrent
+            if len(videoFiles) < ep_number or len(videoFiles) > float(ep_number * 1.1 ): 
+                logger.log(u"Result " + title + " Seem to be a Single Episode or MultiSeason torrent, skipping result...", logger.DEBUG)
+                return None
+                
+            for fileName in videoFiles:
                 quality = Quality.sceneQuality(os.path.basename(fileName))
                 if quality != Quality.UNKNOWN: break
     
@@ -120,7 +126,7 @@ class KATProvider(generic.TorrentProvider):
                 quality = Quality.assumeQuality(os.path.basename(fileName))            
     
             if quality == Quality.UNKNOWN:
-                logger.log(u"No Season quality for "+title, logger.DEBUG)
+                logger.log(u"Unable to obtain a Season Quality for " + title, logger.DEBUG)
                 return None
     
             try:
@@ -132,12 +138,13 @@ class KATProvider(generic.TorrentProvider):
             logger.log(u"Season quality for "+title+" is "+Quality.qualityStrings[quality], logger.DEBUG)
             
             if parse_result.series_name and parse_result.season_number: 
-                title = parse_result.series_name+' S%02d' % int(parse_result.season_number)+' '+self._reverseQuality(quality)
+                title = parse_result.series_name+' S%02d' % int(parse_result.season_number)+' '+self._reverseQuality(fileName, quality)
             
             return title
             
         except Exception, e:
-            logger.log('Failed parsing Torrent File list: ' + str(e), logger.ERROR)                
+            logger.log(u"Failed parsing " + self.name + (" Exceptions: "  + str(e) if e else '') + ' HTML data:\n <!--' + str(data) + '//-->', logger.ERROR)
+                
 
     def _get_season_search_strings(self, show, season=None):
 
@@ -153,7 +160,7 @@ class KATProvider(generic.TorrentProvider):
         #If Every episode in Season is a wanted Episode then search for Season first
         if wantedEp == seasonEp and not show.air_by_date:
             search_string = {'Season': [], 'Episode': []}
-            for show_name in set(show_name_helpers.allPossibleShowNames(show)):
+            for show_name in set(allPossibleShowNames(show)):
                 ep_string = show_name +' S%02d' % int(season) + ' -S%02d' % int(season) + 'E' + ' category:tv' #1) ShowName SXX -SXXE  
                 search_string['Season'].append(ep_string)
                       
@@ -178,12 +185,12 @@ class KATProvider(generic.TorrentProvider):
             return []
                 
         if ep_obj.show.air_by_date:
-            for show_name in set(show_name_helpers.allPossibleShowNames(ep_obj.show)):
-                ep_string = show_name_helpers.sanitizeSceneName(show_name) +' '+ str(ep_obj.airdate)
+            for show_name in set(allPossibleShowNames(ep_obj.show)):
+                ep_string = sanitizeSceneName(show_name) +' '+ str(ep_obj.airdate)
                 search_string['Episode'].append(ep_string)
         else:
-            for show_name in set(show_name_helpers.allPossibleShowNames(ep_obj.show)):
-                ep_string = show_name_helpers.sanitizeSceneName(show_name) +' '+ \
+            for show_name in set(allPossibleShowNames(ep_obj.show)):
+                ep_string = sanitizeSceneName(show_name) +' '+ \
                 sickbeard.config.naming_ep_type[2] % {'seasonnumber': ep_obj.season, 'episodenumber': ep_obj.episode} +'|'+\
                 sickbeard.config.naming_ep_type[0] % {'seasonnumber': ep_obj.season, 'episodenumber': ep_obj.episode} +'|'+\
                 sickbeard.config.naming_ep_type[3] % {'seasonnumber': ep_obj.season, 'episodenumber': ep_obj.episode} + ' category:tv' \
@@ -209,7 +216,7 @@ class KATProvider(generic.TorrentProvider):
                     
                 html = self.getURL(searchURL)
                 if not html:
-                    return []
+                    continue
 
                 try:
                     soup = BeautifulSoup(html)
@@ -219,7 +226,7 @@ class KATProvider(generic.TorrentProvider):
 
                     if not torrent_rows:
 #                        logger.log(u"The Data returned from " + self.name + " do not contains any torrent", logger.ERROR)
-                        return []
+                        continue
                     
                     for tr in torrent_rows:
                         link = self.url + (tr.find('div', {'class': 'torrentname'}).find_all('a')[1])['href']
@@ -231,7 +238,7 @@ class KATProvider(generic.TorrentProvider):
                         seeders = int(tr.find_all('td')[-2].text)
                         leechers = int(tr.find_all('td')[-1].text)
 
-                        if (mode != 'RSS' and seeders == 0) or not title:
+                        if mode != 'RSS' and seeders == 0:
                             continue 
                   
                         if sickbeard.KAT_VERIFIED and not verified:
@@ -239,7 +246,11 @@ class KATProvider(generic.TorrentProvider):
                             continue
 
                         if mode == 'Season' and Quality.sceneQuality(title) == Quality.UNKNOWN:
-                            if not self._find_season_quality(title,link): continue
+                            ep_number = int(len(search_params['Episode']) / len(allPossibleShowNames(show)))
+                            title = self._find_season_quality(title, link, ep_number)
+
+                        if not title:
+                            continue
 
                         item = title, url, id, seeders, leechers
 

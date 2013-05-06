@@ -1789,6 +1789,10 @@ input[type="submit"].btn.btn-mini {
   background-position: -312px 0;
 }
 
+.icon-calendar {
+  background-position: -192px -120px;
+}
+
 h3 {
     font-size: 18px;
     line-height: 27px;

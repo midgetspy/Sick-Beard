@@ -50,7 +50,7 @@ class TwitterNotifier:
             
     def notify_subtitle_download(self, ep_name, lang):
         if sickbeard.TWITTER_NOTIFY_ONSUBTITLEDOWNLOAD:
-            self._notifyTwitter(common.notifyStrings[common.NOTIFY_SUBTITLE_DOWNLOAD], ep_name + ": " + lang)
+            self._notifyTwitter(common.notifyStrings[common.NOTIFY_SUBTITLE_DOWNLOAD]+' '+ep_name + ": " + lang)
 
     def test_notify(self):
         return self._notifyTwitter("This is a test notification from Sick Beard", force=True)

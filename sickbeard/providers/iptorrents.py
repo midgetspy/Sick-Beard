@@ -140,6 +140,9 @@ class IPTorrentsProvider(generic.TorrentProvider):
 
         freeleech = '&free=on' if sickbeard.IPTORRENTS_FREELEECH else ''
         
+        if not self._doLogin():
+            return         
+        
         for mode in search_params.keys():
             for search_string in search_params[mode]:
 
@@ -150,20 +153,24 @@ class IPTorrentsProvider(generic.TorrentProvider):
         
                 data = self.getURL(searchURL)
                 if not data:
-                    return []
+                    continue
                 
                 try:
                     html = BeautifulSoup(data)
 
+                    if not html:
+                        logger.log(u"Invalid HTML data: " + str(data) , logger.DEBUG)
+                        continue
+                    
                     if html.find(text='Nothing found!'):
                         logger.log(u"No results found for: " + search_string + " (" + searchURL + ")", logger.DEBUG)
-                        return []
+                        continue
                     
                     torrent_table = html.find('table', attrs = {'class' : 'torrents'})
                     
                     if not torrent_table:
                         logger.log(u"The data returned from " + self.name + " is incomplete, this result is unusable", logger.DEBUG)
-                        return []
+                        continue
                     
                     torrents = torrent_table.find_all('tr')
 
@@ -188,8 +195,8 @@ class IPTorrentsProvider(generic.TorrentProvider):
                         logger.log(u"Found result: " + torrent_name + " (" + torrent_details_url + ")", logger.DEBUG)
                         items[mode].append(item)
 
-                except:
-                    logger.log(u"Failed to parse " + self.name + " search page URL: " + searchURL, logger.ERROR)
+                except Exception, e:
+                    logger.log(u"Failed parsing " + self.name + (" Exceptions: "  + str(e) if e else '') + ' HTML data:\n ' + soup.prettify(), logger.ERROR)
 
             results += items[mode]  
                 

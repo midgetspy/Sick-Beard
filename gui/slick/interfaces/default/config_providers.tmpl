@@ -99,7 +99,7 @@ var show_nzb_providers = #if $sickbeard.USE_NZBS then "true" else "false"#;
                                 <span class="component-title jumbo">Configure Provider:</span>
                                 <span class="component-desc">
                                     #set $provider_config_list = []
-                                    #for $cur_provider in ("thepiratebay", "dailytvtorrents", "tvtorrents", "btn", "torrentleech", "iptorrents", "nzbs_r_us", "omgwtfnzbs"):
+                                    #for $cur_provider in ("thepiratebay", "dailytvtorrents", "tvtorrents", "btn", "torrentleech", "iptorrents", "nzbs_r_us", "omgwtfnzbs", "kickasstorrents"):
                                         #set $cur_provider_obj = $sickbeard.providers.getProviderClass($cur_provider)
                                         #if $cur_provider_obj.providerType == $GenericProvider.NZB and not $sickbeard.USE_NZBS:
                                         	#continue
@@ -280,6 +280,15 @@ var show_nzb_providers = #if $sickbeard.USE_NZBS then "true" else "false"#;
                         </div>
 </div><!-- /iptorrentsDiv //-->
 
+<div class="providerDiv" id="kickasstorrentsDiv">
+                        <div class="field-pair">
+                            <input type="checkbox" name="kat_verified" id="kat_verified" #if $sickbeard.KAT_VERIFIED then "checked=\"checked\"" else ""#/>
+                            <label class="clearfix" for="kat_verified">
+                                <span class="component-title">Verified Only</span>
+                                <span class="component-desc">Download only verified torrent?</span>
+                            </label>
+                        </div>
+</div>
 <!-- end div for editing providers -->
 
                     <input type="submit" class="btn config_submitter" value="Save Changes" /><br/>
