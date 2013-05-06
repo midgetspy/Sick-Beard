@@ -119,7 +119,7 @@ class IPTorrentsProvider(generic.TorrentProvider):
        
         if not ep_obj:
             return []
-                
+        
         if ep_obj.show.air_by_date:
             for show_name in set(show_name_helpers.allPossibleShowNames(ep_obj.show)):
                 ep_string = show_name_helpers.sanitizeSceneName(show_name) +' '+ str(ep_obj.airdate)
@@ -133,7 +133,7 @@ class IPTorrentsProvider(generic.TorrentProvider):
     
         return [search_string]
 
-    def _doSearch(self, search_params, show=None):
+    def _doSearch(self, search_params):
     
         results = []
         items = {'Season': [], 'Episode': []}
@@ -141,7 +141,7 @@ class IPTorrentsProvider(generic.TorrentProvider):
         freeleech = '&free=on' if sickbeard.IPTORRENTS_FREELEECH else ''
         
         if not self._doLogin():
-            return         
+            return []        
         
         for mode in search_params.keys():
             for search_string in search_params[mode]:

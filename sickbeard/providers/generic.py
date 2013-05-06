@@ -215,7 +215,7 @@ class GenericProvider:
         
         return (title, url)
     
-    def findEpisode (self, episode, manualSearch=False):
+    def findEpisode(self, episode, manualSearch=False):
 
         self._checkAuth()
 
@@ -234,7 +234,7 @@ class GenericProvider:
         itemList = []
 
         for cur_search_string in self._get_episode_search_strings(episode):
-            itemList += self._doSearch(cur_search_string, show=episode.show)
+            itemList += self._doSearch(cur_search_string)
 
         for item in itemList:
 
@@ -281,7 +281,7 @@ class GenericProvider:
         results = {}
 
         for curString in self._get_season_search_strings(show, season):
-            itemList += self._doSearch(curString, show)
+            itemList += self._doSearch(curString)
 
         for item in itemList:
 

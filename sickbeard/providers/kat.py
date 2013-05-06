@@ -153,6 +153,7 @@ class KATProvider(generic.TorrentProvider):
         if not show:
             return []
 
+        self.show = show
         seasonEp = show.getAllEpisodes(season)
 
         wantedEp = [x for x in seasonEp if show.getOverview(x.status) in (Overview.WANTED, Overview.QUAL)]          
@@ -183,6 +184,8 @@ class KATProvider(generic.TorrentProvider):
        
         if not ep_obj:
             return []
+        
+        self.show = ep_obj.show
                 
         if ep_obj.show.air_by_date:
             for show_name in set(allPossibleShowNames(ep_obj.show)):
@@ -199,7 +202,7 @@ class KATProvider(generic.TorrentProvider):
     
         return [search_string]
 
-    def _doSearch(self, search_params, show=None):
+    def _doSearch(self, search_params):
 
         results = []
         items = {'Season': [], 'Episode': [], 'RSS': []}
@@ -246,7 +249,7 @@ class KATProvider(generic.TorrentProvider):
                             continue
 
                         if mode == 'Season' and Quality.sceneQuality(title) == Quality.UNKNOWN:
-                            ep_number = int(len(search_params['Episode']) / len(allPossibleShowNames(show)))
+                            ep_number = int(len(search_params['Episode']) / len(allPossibleShowNames(self.show)))
                             title = self._find_season_quality(title, link, ep_number)
 
                         if not title:

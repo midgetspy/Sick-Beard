@@ -142,7 +142,7 @@ class TorrentLeechProvider(generic.TorrentProvider):
         items = {'Season': [], 'Episode': []}
         
         if not self._doLogin():
-            return 
+            return []
         
         for mode in search_params.keys():
             for search_string in search_params[mode]:
