@@ -138,7 +138,7 @@ class KATProvider(generic.TorrentProvider):
             logger.log(u"Season quality for "+title+" is "+Quality.qualityStrings[quality], logger.DEBUG)
             
             if parse_result.series_name and parse_result.season_number: 
-                title = parse_result.series_name+' S%02d' % int(parse_result.season_number)+' '+self._reverseQuality(fileName, quality)
+                title = parse_result.series_name+' S%02d' % int(parse_result.season_number)+' '+self._reverseQuality(quality)
             
             return title
             
