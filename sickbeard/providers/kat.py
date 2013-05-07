@@ -225,13 +225,13 @@ class KATProvider(generic.TorrentProvider):
                     soup = BeautifulSoup(html)
 
                     torrent_table = soup.find('table', attrs = {'class' : 'data'})
-                    torrent_rows = torrent_table.find_all('tr')[1:] if torrent_table else None
+                    torrent_rows = torrent_table.find_all('tr') if torrent_table else []
 
                     if not torrent_rows:
 #                        logger.log(u"The Data returned from " + self.name + " do not contains any torrent", logger.ERROR)
                         continue
                     
-                    for tr in torrent_rows:
+                    for tr in torrent_rows[1:]:
                         link = self.url + (tr.find('div', {'class': 'torrentname'}).find_all('a')[1])['href']
                         id = tr.get('id')[-7:]
                         title = (tr.find('div', {'class': 'torrentname'}).find_all('a')[1]).text
