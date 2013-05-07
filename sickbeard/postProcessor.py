@@ -385,6 +385,7 @@ class PostProcessor(object):
             season = parse_result.season_number
             episodes = parse_result.episode_numbers
 
+
         to_return = (None, season, episodes)
 
         # do a scene reverse-lookup to get a list of all possible names
@@ -393,8 +394,17 @@ class PostProcessor(object):
         if not name_list:
             return (None, season, episodes)
 
-        def _finalize(parse_result):
+        def _finalize(parse_result, failed = None):
             self.release_group = parse_result.release_group
+
+            #DIRTY FIX for complete Season nzb that failed, makes some problems with cache if the same file is called again,
+            #but this shouldn happen anyway...
+            if parse_result.which_regex[0] == "season_only" and failed:
+                show_obj = helpers.findCertainShow(sickbeard.showList, parse_result.scene_id)
+                all_eps = show_obj.getAllEpisodes(season=parse_result.season_number)
+                for ep in all_eps:
+                    if not ep in episodes:
+                        episodes.append(ep._episode)
 
             # remember whether it's a proper
             if parse_result.extra_info:
@@ -424,7 +434,8 @@ class PostProcessor(object):
             scene_id = scene_exceptions.get_scene_exception_by_name(cur_name)
             if scene_id:
                 self._log(u"Scene exception lookup got tvdb id " + str(scene_id) + u", using that", logger.DEBUG)
-                _finalize(parse_result)
+                parse_result.scene_id = scene_id
+                _finalize(parse_result, self.failed)
                 return (scene_id, season, episodes)
 
         # see if we can find the name directly in the DB, if so use it
@@ -433,7 +444,8 @@ class PostProcessor(object):
             db_result = helpers.searchDBForShow(cur_name)
             if db_result:
                 self._log(u"Lookup successful, using tvdb id " + str(db_result[0]), logger.DEBUG)
-                _finalize(parse_result)
+                parse_result.scene_id = int(db_result[0])
+                _finalize(parse_result, self.failed)
                 return (int(db_result[0]), season, episodes)
 
         # see if we can find the name with a TVDB lookup
@@ -463,10 +475,10 @@ class PostProcessor(object):
                 continue
 
             self._log(u"Lookup successful, using tvdb id " + str(showObj["id"]), logger.DEBUG)
-            _finalize(parse_result)
+            _finalize(parse_result, self.failed)
             return (int(showObj["id"]), season, episodes)
 
-        _finalize(parse_result)
+        _finalize(parse_result, self.failed)
         return to_return
 
     def _find_info(self):
