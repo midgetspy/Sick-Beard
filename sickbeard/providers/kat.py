@@ -329,7 +329,10 @@ class KATProvider(generic.TorrentProvider):
 
     def dumpHTML(self, data):
         
-        dumpName = ek.ek(os.path.join, sickbeard.CACHE_DIR, 'kat')
+        import datetime
+        
+        fileName = 'KAT_' + datetime.datetime.now().strftime("%y%m%d_%H%M%S") + '.html'
+        dumpName = ek.ek(os.path.join, sickbeard.CACHE_DIR, fileName)
 
         try:    
             fileOut = open(dumpName, 'wb')
@@ -339,7 +342,7 @@ class KATProvider(generic.TorrentProvider):
         except IOError, e:
             logger.log("Unable to save the file: " + ex(e), logger.ERROR)
             return False
-        logger.log(u"Saved kat html dump " + dumpName + " ", logger.MESSAGE)
+        logger.log(u"Saved kat html dump " + dumpName, logger.MESSAGE)
         return True
 
 class KATCache(tvcache.TVCache):
