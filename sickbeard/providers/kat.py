@@ -261,7 +261,8 @@ class KATProvider(generic.TorrentProvider):
 
                 except Exception, e:
                     logger.log(u"Failed to parsing " + self.name + (" Exceptions: "  + str(e) if e else ''), logger.ERROR)
-
+                    self.dumpHTML(html)
+                    
             #For each search mode sort all the items by seeders
             items[mode].sort(key=lambda tup: tup[3], reverse=True)        
 
@@ -285,7 +286,11 @@ class KATProvider(generic.TorrentProvider):
         except Exception, e:
             logger.log(u"Error loading "+self.name+" URL: " + str(sys.exc_info()) + " - " + ex(e), logger.ERROR)
             return None
-    
+        
+        if r.status_code != 200:
+            logger.log(u"KAT page requested " + url +" returned status code " + str(r.status_code), logger.DEBUG)
+            return None
+            
         return r.content
 
     def downloadResult(self, result):
@@ -320,6 +325,21 @@ class KATProvider(generic.TorrentProvider):
             logger.log("Unable to save the file: " + ex(e), logger.ERROR)
             return False
         logger.log(u"Saved magnet link to " + magnetFileName + " ", logger.MESSAGE)
+        return True
+
+    def dumpHTML(self, data):
+        
+        dumpName = ek.ek(os.path.join, sickbeard.CACHE_DIR, 'kat')
+
+        try:    
+            fileOut = open(dumpName, 'wb')
+            fileOut.write(data)
+            fileOut.close()
+            helpers.chmodAsParent(dumpName)
+        except IOError, e:
+            logger.log("Unable to save the file: " + ex(e), logger.ERROR)
+            return False
+        logger.log(u"Saved kat html dump " + dumpName + " ", logger.MESSAGE)
         return True
 
 class KATCache(tvcache.TVCache):
