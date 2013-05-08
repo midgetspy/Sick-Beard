@@ -202,6 +202,7 @@ class PostProcessor(object):
                 ek.ek(os.remove, cur_file)
                 # do the library update for synoindex
                 notifiers.synoindex_notifier.deleteFile(cur_file)
+    	self.del_file = cur_file
 
     def _combined_file_operation (self, file_path, new_path, new_base_name, associated_files=False, action=None):
         """
@@ -649,10 +650,16 @@ class PostProcessor(object):
         
         ep_obj: The object to use when calling the extra script
         """
+        try:
+            self.del_file
+        except AttributeError:
+            self.del_file = "None"
+            self._log(u"No file being replaced")
         for curScriptName in sickbeard.EXTRA_SCRIPTS:
             
             # generate a safe command line string to execute the script and provide all the parameters
-            script_cmd = shlex.split(curScriptName) + [ep_obj.location, self.file_path, str(ep_obj.show.tvdbid), str(ep_obj.season), str(ep_obj.episode), str(ep_obj.airdate)]
+            script_cmd = shlex.split(curScriptName) + [ep_obj.location, self.file_path, str(ep_obj.show.tvdbid), str(ep_obj.season), str(ep_obj.episode), str(ep_obj.airdate), self.del_file]
+            self.del_file = "None"
             
             # use subprocess to run the command and capture output
             self._log(u"Executing command "+str(script_cmd))
