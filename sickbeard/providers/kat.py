@@ -24,18 +24,18 @@ import re
 
 import sickbeard
 import generic
-from sickbeard.common import Quality
+from sickbeard.common import Quality, Overview 
 from sickbeard.name_parser.parser import NameParser, InvalidNameException
 from sickbeard import logger
 from sickbeard import tvcache
 from sickbeard import helpers
 from sickbeard.show_name_helpers import allPossibleShowNames, sanitizeSceneName
-from sickbeard.common import Overview 
 from sickbeard.exceptions import ex
 from sickbeard import encodingKludge as ek
 
 from lib import requests
 from bs4 import BeautifulSoup
+from lib.unidecode import unidecode
 
 class KATProvider(generic.TorrentProvider):
 
@@ -211,7 +211,7 @@ class KATProvider(generic.TorrentProvider):
             for search_string in search_params[mode]:
                 
                 if mode != 'RSS':
-                    searchURL = self.searchurl %(urllib.quote(search_string))    
+                    searchURL = self.searchurl %(urllib.quote(unidecode(search_string)))    
                     logger.log(u"Search string: " + searchURL, logger.DEBUG)
                 else:
                     searchURL = self.url + 'tv/?field=time_add&sorder=desc'

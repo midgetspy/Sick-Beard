@@ -28,7 +28,7 @@ from sickbeard.common import Overview
 from sickbeard.exceptions import ex
 from lib import requests
 from bs4 import BeautifulSoup
-
+from lib.unidecode import unidecode
 
 class IPTorrentsProvider(generic.TorrentProvider):
 
@@ -147,7 +147,7 @@ class IPTorrentsProvider(generic.TorrentProvider):
             for search_string in search_params[mode]:
 
                 # URL with 50 tv-show results, or max 150 if adjusted in IPTorrents profile
-                searchURL = self.urls['search'] % (self.categorie, freeleech, search_string) + ';o=seeders'
+                searchURL = self.urls['search'] % (self.categorie, freeleech, unidecode(search_string)) + ';o=seeders'
 
                 logger.log(u"" + self.name + " search page URL: " + searchURL, logger.DEBUG)
         
