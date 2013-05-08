@@ -31,7 +31,7 @@ from sickbeard import scene_exceptions
 from sickbeard import common
 
 from sickbeard import encodingKludge as ek
-from sickbeard.name_parser.parser import NameParser
+from sickbeard.name_parser.parser import NameParser, InvalidNameException
 
 
 class FailedProcessor(object):
@@ -58,7 +58,11 @@ class FailedProcessor(object):
             raise exceptions.FailedProcessingFailed()
 
         parser = NameParser(False)
-        parsed = parser.parse(releaseName)
+        try:
+            parsed = parser.parse(releaseName)
+        except InvalidNameException as e:
+            self._log(u"Error: release name is invalid: " + releaseName, logger.WARNING)
+            raise exceptions.FailedProcessingFailed()
 
         logger.log(u"name_parser info: ", logger.DEBUG)
         logger.log(u" - " + str(parsed.series_name), logger.DEBUG)
