@@ -28,7 +28,7 @@ from sickbeard.common import Overview
 from sickbeard.exceptions import ex
 from lib import requests
 from bs4 import BeautifulSoup
-
+from lib.unidecode import unidecode
 
 class IPTorrentsProvider(generic.TorrentProvider):
 
@@ -147,7 +147,7 @@ class IPTorrentsProvider(generic.TorrentProvider):
             for search_string in search_params[mode]:
 
                 # URL with 50 tv-show results, or max 150 if adjusted in IPTorrents profile
-                searchURL = self.urls['search'] % (self.categorie, freeleech, search_string) + ';o=seeders'
+                searchURL = self.urls['search'] % (self.categorie, freeleech, unidecode(search_string)) + ';o=seeders'
 
                 logger.log(u"" + self.name + " search page URL: " + searchURL, logger.DEBUG)
         
@@ -167,12 +167,12 @@ class IPTorrentsProvider(generic.TorrentProvider):
                         continue
                     
                     torrent_table = html.find('table', attrs = {'class' : 'torrents'})
+                    torrents = torrent_table.find_all('tr') if torrent_table else []
                     
-                    if not torrent_table:
-                        logger.log(u"The data returned from " + self.name + " is incomplete, this result is unusable", logger.DEBUG)
+                    if not torrents:
+#                        logger.log(u"The data returned from " + self.name + " is incomplete, this result is unusable", logger.DEBUG)
                         continue
                     
-                    torrents = torrent_table.find_all('tr')
 
                     for result in torrents[1:]:
 
@@ -249,22 +249,23 @@ class IPTorrentsCache(tvcache.TVCache):
         logger.log(u"" + self.provider.name + " cache page URL: " + cacheURL, logger.DEBUG)
 
         data = self.provider.getURL(cacheURL)
+
         if not data:
-            return
+            return []
 
         try:
             html = BeautifulSoup(data)
+
             torrent_table = html.find('table', attrs = {'class' : 'torrents'})
+            torrents = torrent_table.find_all('tr') if torrent_table else []
     
-            if not torrent_table:
-                logger.log(u"The data returned from " + self.provider.name + " is incomplete, this result is unusable", logger.DEBUG)
-                return
+            if not torrents:
+#                logger.log(u"The data returned from " + self.provider.name + " is incomplete, this result is unusable", logger.DEBUG)
+                return []
 
             logger.log(u"Clearing " + self.provider.name + " cache and updating with new information")
             self.setLastUpdate()
             self._clearCache()
-    
-            torrents = torrent_table.find_all('tr')
     
             for result in torrents[1:]:
     
@@ -281,8 +282,7 @@ class IPTorrentsCache(tvcache.TVCache):
                 logger.log(u"Adding item to cache: " + torrent_name + " (" + torrent_details_url + ")", logger.DEBUG)
                 self._addCacheEntry(torrent_name, torrent_download_url)
 
-        except:
-            logger.log(u"Failed to parse " + self.provider.name + " cache page URL: " + cacheURL, logger.ERROR)
-            return
+        except Exception, e:
+            logger.log(u"Failed to parse " + self.provider.name + " cache page URL: " + cacheURL + (" Exceptions: "  + str(e) if e else ''), logger.ERROR)
 
 provider = IPTorrentsProvider()

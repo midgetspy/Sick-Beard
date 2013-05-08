@@ -45,6 +45,8 @@ except ImportError:
 
 import xml.etree.cElementTree as etree
 
+import subliminal
+
 dateFormat = "%Y-%m-%d"
 dateTimeFormat = "%Y-%m-%d %H:%M"
 
@@ -810,7 +812,7 @@ class CMD_Episode(ApiCall):
             return _responds(RESULT_FAILURE, msg="Show not found")
 
         myDB = db.DBConnection(row_type="dict")
-        sqlResults = myDB.select("SELECT name, description, airdate, status, location, file_size, release_name FROM tv_episodes WHERE showid = ? AND episode = ? AND season = ?", [self.tvdbid, self.e, self.s])
+        sqlResults = myDB.select("SELECT name, description, airdate, status, location, file_size, release_name, subtitles FROM tv_episodes WHERE showid = ? AND episode = ? AND season = ?", [self.tvdbid, self.e, self.s])
         if not len(sqlResults) == 1:
             raise ApiError("Episode not found")
         episode = sqlResults[0]
@@ -980,6 +982,72 @@ class CMD_EpisodeSetStatus(ApiCall):
             return _responds(RESULT_FAILURE, ep_results, 'Failed to set all or some status. Check data.' + extra_msg)
         else:
             return _responds(RESULT_SUCCESS, msg='All status set successfully.' + extra_msg)
+
+class CMD_SubtitleSearch(ApiCall):
+    _help = {"desc": "search episode subtitles. the response might take some time",
+             "requiredParameters": {"tvdbid": {"desc": "thetvdb.com unique id of a show"},
+                                   "season": {"desc": "the season number"},
+                                   "episode": {"desc": "the episode number"}
+                                  }
+             }
+
+    def __init__(self, args, kwargs):
+        # required
+        self.tvdbid, args = self.check_params(args, kwargs, "tvdbid", None, True, "int", [])
+        self.s, args = self.check_params(args, kwargs, "season", None, True, "int", [])
+        self.e, args = self.check_params(args, kwargs, "episode", None, True, "int", [])
+        # optional
+        # super, missing, help
+        ApiCall.__init__(self, args, kwargs)
+
+    def run(self):
+        """ search episode subtitles """
+        showObj = sickbeard.helpers.findCertainShow(sickbeard.showList, int(self.tvdbid))
+        if not showObj:
+            return _responds(RESULT_FAILURE, msg="Show not found")
+
+        # retrieve the episode object and fail if we can't get one
+        epObj = showObj.getEpisode(int(self.s), int(self.e))
+        if isinstance(epObj, str):
+            return _responds(RESULT_FAILURE, msg="Episode not found")
+        
+        # try do download subtitles for that episode
+        previous_subtitles = epObj.subtitles
+        
+        try:
+            subtitles = epObj.downloadSubtitles()
+            
+            if sickbeard.SUBTITLES_DIR:
+                for video in subtitles:
+                    subs_new_path = ek.ek(os.path.join, os.path.dirname(video.path), sickbeard.SUBTITLES_DIR)
+                    dir_exists = helpers.makeDir(subs_new_path)
+                    if not dir_exists:
+                        logger.log(u"Unable to create subtitles folder "+subs_new_path, logger.ERROR)
+                    else:
+                        helpers.chmodAsParent(subs_new_path)
+                        
+                    for subtitle in subtitles.get(video):
+                        new_file_path = ek.ek(os.path.join, subs_new_path, os.path.basename(subtitle.path))
+                        helpers.moveFile(subtitle.path, new_file_path)
+                        helpers.chmodAsParent(new_file_path)
+            else:
+                for video in subtitles:
+                    for subtitle in subtitles.get(video):
+                        helpers.chmodAsParent(subtitle.path)
+        except:
+            return _responds(RESULT_FAILURE, msg='Unable to find subtitles')
+                    
+        # return the correct json value
+        if previous_subtitles != epObj.subtitles:
+            status = 'New subtitles downloaded: %s' % ' '.join(["<img src='"+sickbeard.WEB_ROOT+"/images/flags/"+subliminal.language.Language(x).alpha2+".png' alt='"+subliminal.language.Language(x).name+"'/>" for x in sorted(list(set(epObj.subtitles).difference(previous_subtitles)))])
+            response = _responds(RESULT_SUCCESS, msg='New subtitles found')
+        else:
+            status = 'No subtitles downloaded'
+            response = _responds(RESULT_FAILURE, msg='Unable to find subtitles')
+            
+        ui.notifications.message('Subtitles Search', status)
+        
+        return response
 
 
 class CMD_Exceptions(ApiCall):
@@ -2413,6 +2481,7 @@ _functionMaper = {"help": CMD_Help,
                   "episode": CMD_Episode,
                   "episode.search": CMD_EpisodeSearch,
                   "episode.setstatus": CMD_EpisodeSetStatus,
+                  "episode.subtitlesearch": CMD_SubtitleSearch,
                   "exceptions": CMD_Exceptions,
                   "history": CMD_History,
                   "history.clear": CMD_HistoryClear,
@@ -2448,5 +2517,5 @@ _functionMaper = {"help": CMD_Help,
                   "show.stats": CMD_ShowStats,
                   "show.update": CMD_ShowUpdate,
                   "shows": CMD_Shows,
-                  "shows.stats": CMD_ShowsStats
+                  "shows.stats": CMD_ShowsStats                  
                   }

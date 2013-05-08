@@ -19,8 +19,8 @@
 
 # Check needed software dependencies to nudge users to fix their setup
 import sys
-if sys.version_info < (2, 5):
-    print "Sorry, requires Python 2.5, 2.6 or 2.7."
+if sys.version_info < (2, 6):
+    print "Sorry, requires Python 2.6 or 2.7."
     sys.exit(1)
 
 try:

@@ -122,7 +122,7 @@ class TwitterNotifier:
         api = twitter.Api(username, password, access_token_key, access_token_secret)
     
         try:
-            api.PostUpdate(message)
+            api.PostUpdate(message.encode('utf8'))
         except Exception, e:
             logger.log(u"Error Sending Tweet: "+ex(e), logger.ERROR)
             return False

@@ -28,7 +28,7 @@ from sickbeard.common import Overview
 from sickbeard.exceptions import ex
 from lib import requests
 from bs4 import BeautifulSoup
-
+from lib.unidecode import unidecode
 
 class TorrentLeechProvider(generic.TorrentProvider):
 
@@ -147,7 +147,7 @@ class TorrentLeechProvider(generic.TorrentProvider):
         for mode in search_params.keys():
             for search_string in search_params[mode]:
                 
-                searchURL = self.urls['search'] % (search_string, self.categories)
+                searchURL = self.urls['search'] % (unidecode(search_string), self.categories)
 
                 logger.log(u"Search string: " + searchURL, logger.DEBUG)
         
@@ -159,9 +159,10 @@ class TorrentLeechProvider(generic.TorrentProvider):
                     html = BeautifulSoup(data)
                     
                     torrent_table = html.find('table', attrs = {'id' : 'torrenttable'})
+                    torrent_rows = torrent_table.find_all('tr') if torrent_table else []
                     
-                    if not torrent_table:
-                        logger.log(u"No results found for: " + search_string + "(" + searchURL + ")", logger.DEBUG)
+                    if not torrent_rows:
+#                        logger.log(u"No results found for: " + search_string + "(" + searchURL + ")", logger.DEBUG)
                         continue
 
                     for result in torrent_table.find_all('tr')[1:]:
@@ -235,13 +236,18 @@ class TorrentLeechCache(tvcache.TVCache):
             return
 
         data = self._getData()
+        
+        if not data:
+            return []
 
         try: 
             html = BeautifulSoup(data)
-            torrent_table = html.find('table', attrs = {'id' : 'torrenttable'})
 
-            if not torrent_table:
-                logger.log(u"The Data returned from " + self.provider.name + " is incomplete, this result is unusable", logger.ERROR)
+            torrent_table = html.find('table', attrs = {'id' : 'torrenttable'})
+            torrent_rows = torrent_table.find_all('tr') if torrent_table else []
+
+            if not torrent_rows:
+#                logger.log(u"The Data returned from " + self.provider.name + " is incomplete, this result is unusable", logger.ERROR)
                 return []
 
             # now that we've loaded the current feed lets delete the old cache
@@ -249,7 +255,7 @@ class TorrentLeechCache(tvcache.TVCache):
             self.setLastUpdate()
             self._clearCache()
         
-            for result in torrent_table.find_all('tr')[1:]:
+            for result in torrent_rows[1:]:
 
                 link = result.find('td', attrs = {'class' : 'name'}).find('a')
                 url = result.find('td', attrs = {'class' : 'quickdownload'}).find('a')
@@ -269,7 +275,6 @@ class TorrentLeechCache(tvcache.TVCache):
 
         except Exception, e:
             logger.log(u"Failed to parsing " + self.provider.name + " RSS: " + ex(e), logger.ERROR)
-            return []
 
     def _getData(self):
        

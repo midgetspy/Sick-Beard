@@ -33,6 +33,7 @@ from sickbeard.common import Overview
 from sickbeard.exceptions import ex
 from sickbeard import encodingKludge as ek
 from lib import requests
+from lib.unidecode import unidecode
 
 proxy_dict = {
               'Getprivate.eu (NL)' : 'http://getprivate.eu/',
@@ -217,7 +218,7 @@ class ThePirateBayProvider(generic.TorrentProvider):
         for mode in search_params.keys():
             for search_string in search_params[mode]:
 
-                searchURL = self.proxy._buildURL(self.searchurl %(urllib.quote(search_string)))    
+                searchURL = self.proxy._buildURL(self.searchurl %(urllib.quote(unidecode(search_string)))) 
         
                 logger.log(u"Search string: " + searchURL, logger.DEBUG)
         

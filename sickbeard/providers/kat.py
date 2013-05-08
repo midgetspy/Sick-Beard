@@ -24,18 +24,18 @@ import re
 
 import sickbeard
 import generic
-from sickbeard.common import Quality
+from sickbeard.common import Quality, Overview 
 from sickbeard.name_parser.parser import NameParser, InvalidNameException
 from sickbeard import logger
 from sickbeard import tvcache
 from sickbeard import helpers
 from sickbeard.show_name_helpers import allPossibleShowNames, sanitizeSceneName
-from sickbeard.common import Overview 
 from sickbeard.exceptions import ex
 from sickbeard import encodingKludge as ek
 
 from lib import requests
 from bs4 import BeautifulSoup
+from lib.unidecode import unidecode
 
 class KATProvider(generic.TorrentProvider):
 
@@ -138,7 +138,7 @@ class KATProvider(generic.TorrentProvider):
             logger.log(u"Season quality for "+title+" is "+Quality.qualityStrings[quality], logger.DEBUG)
             
             if parse_result.series_name and parse_result.season_number: 
-                title = parse_result.series_name+' S%02d' % int(parse_result.season_number)+' '+self._reverseQuality(fileName, quality)
+                title = parse_result.series_name+' S%02d' % int(parse_result.season_number)+' '+self._reverseQuality(quality)
             
             return title
             
@@ -211,7 +211,7 @@ class KATProvider(generic.TorrentProvider):
             for search_string in search_params[mode]:
                 
                 if mode != 'RSS':
-                    searchURL = self.searchurl %(urllib.quote(search_string))    
+                    searchURL = self.searchurl %(urllib.quote(unidecode(search_string)))    
                     logger.log(u"Search string: " + searchURL, logger.DEBUG)
                 else:
                     searchURL = self.url + 'tv/?field=time_add&sorder=desc'
@@ -225,13 +225,13 @@ class KATProvider(generic.TorrentProvider):
                     soup = BeautifulSoup(html)
 
                     torrent_table = soup.find('table', attrs = {'class' : 'data'})
-                    torrent_rows = torrent_table.find_all('tr')[1:] if torrent_table else None
+                    torrent_rows = torrent_table.find_all('tr') if torrent_table else []
 
                     if not torrent_rows:
 #                        logger.log(u"The Data returned from " + self.name + " do not contains any torrent", logger.ERROR)
                         continue
                     
-                    for tr in torrent_rows:
+                    for tr in torrent_rows[1:]:
                         link = self.url + (tr.find('div', {'class': 'torrentname'}).find_all('a')[1])['href']
                         id = tr.get('id')[-7:]
                         title = (tr.find('div', {'class': 'torrentname'}).find_all('a')[1]).text
@@ -261,7 +261,8 @@ class KATProvider(generic.TorrentProvider):
 
                 except Exception, e:
                     logger.log(u"Failed to parsing " + self.name + (" Exceptions: "  + str(e) if e else ''), logger.ERROR)
-
+                    self.dumpHTML(html)
+                    
             #For each search mode sort all the items by seeders
             items[mode].sort(key=lambda tup: tup[3], reverse=True)        
 
@@ -285,7 +286,11 @@ class KATProvider(generic.TorrentProvider):
         except Exception, e:
             logger.log(u"Error loading "+self.name+" URL: " + str(sys.exc_info()) + " - " + ex(e), logger.ERROR)
             return None
-    
+        
+        if r.status_code != 200:
+            logger.log(u"KAT page requested " + url +" returned status code " + str(r.status_code), logger.DEBUG)
+            return None
+            
         return r.content
 
     def downloadResult(self, result):
@@ -320,6 +325,24 @@ class KATProvider(generic.TorrentProvider):
             logger.log("Unable to save the file: " + ex(e), logger.ERROR)
             return False
         logger.log(u"Saved magnet link to " + magnetFileName + " ", logger.MESSAGE)
+        return True
+
+    def dumpHTML(self, data):
+        
+        import datetime
+        
+        fileName = 'KAT_' + datetime.datetime.now().strftime("%y%m%d_%H%M%S") + '.html'
+        dumpName = ek.ek(os.path.join, sickbeard.CACHE_DIR, fileName)
+
+        try:    
+            fileOut = open(dumpName, 'wb')
+            fileOut.write(data)
+            fileOut.close()
+            helpers.chmodAsParent(dumpName)
+        except IOError, e:
+            logger.log("Unable to save the file: " + ex(e), logger.ERROR)
+            return False
+        logger.log(u"Saved kat html dump " + dumpName, logger.MESSAGE)
         return True
 
 class KATCache(tvcache.TVCache):
