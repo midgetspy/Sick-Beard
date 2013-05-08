@@ -912,7 +912,7 @@ class TVShow(object):
                     curEp.saveToDB()
 
 
-    def downloadSubtitles(self):
+    def downloadSubtitles(self, force=False):
         #TODO: Add support for force option
         if not ek.ek(os.path.isdir, self._location):
             logger.log(str(self.tvdbid) + ": Show dir doesn't exist, can't download subtitles", logger.DEBUG)
@@ -923,7 +923,7 @@ class TVShow(object):
             episodes = db.DBConnection().select("SELECT location FROM tv_episodes WHERE showid = ? AND location NOT LIKE '' ORDER BY season DESC, episode DESC", [self.tvdbid])
             for episodeLoc in episodes:
                 episode = self.makeEpFromFile(episodeLoc['location']);
-                subtitles = episode.downloadSubtitles()
+                subtitles = episode.downloadSubtitles(force=force)
         
                 if sickbeard.SUBTITLES_DIR:
                     for video in subtitles:
@@ -1155,7 +1155,7 @@ class TVEpisode(object):
         """Look for subtitles files and refresh the subtitles property"""
         self.subtitles = subtitles.subtitlesLanguages(self.location)
 
-    def downloadSubtitles(self):
+    def downloadSubtitles(self,force=False):
         #TODO: Add support for force option
         if not ek.ek(os.path.isfile, self.location):
             logger.log(str(self.show.tvdbid) + ": Episode file doesn't exist, can't download subtitles for episode " + str(self.season) + "x" + str(self.episode), logger.DEBUG)
@@ -1166,7 +1166,7 @@ class TVEpisode(object):
 
         try:
             need_languages = set(sickbeard.SUBTITLES_LANGUAGES) - set(self.subtitles)
-            subtitles = subliminal.download_subtitles([self.location], languages=need_languages, services=sickbeard.subtitles.getEnabledServiceList(), force=False, multi=True, cache_dir=sickbeard.CACHE_DIR)
+            subtitles = subliminal.download_subtitles([self.location], languages=need_languages, services=sickbeard.subtitles.getEnabledServiceList(), force=force, multi=True, cache_dir=sickbeard.CACHE_DIR)
             
         except Exception as e:
             logger.log("Error occurred when downloading subtitles: " + str(e), logger.DEBUG)
