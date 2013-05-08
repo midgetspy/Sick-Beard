@@ -16,18 +16,18 @@
 # You should have received a copy of the GNU General Public License
 # along with Sick Beard.  If not, see <http://www.gnu.org/licenses/>.
 
-import sickbeard
+import re
+import datetime
 
+import sickbeard
 from sickbeard.common import countryList
 from sickbeard.helpers import sanitizeSceneName
 from sickbeard.scene_exceptions import get_scene_exceptions
 from sickbeard import logger
 from sickbeard import db
-
-import re
-import datetime
-
 from name_parser.parser import NameParser, InvalidNameException
+from lib.unidecode import unidecode
+
 
 resultFilters = ["sub(pack|s|bed)", "nlsub(bed|s)?", "swesub(bed)?",
                  "(dir|sample|nfo)fix", "sample", "(dvd)?extras", 
@@ -206,6 +206,7 @@ def isGoodResult(name, show, log=True):
 
     all_show_names = allPossibleShowNames(show)
     showNames = map(sanitizeSceneName, all_show_names) + all_show_names
+    showNames += map(unidecode, all_show_names) 
 
     for curName in set(showNames):
         escaped_name = re.sub('\\\\[\\s.-]', '\W+', re.escape(curName))
