@@ -32,6 +32,7 @@ from sickbeard import helpers
 from sickbeard.show_name_helpers import allPossibleShowNames, sanitizeSceneName
 from sickbeard.exceptions import ex
 from sickbeard import encodingKludge as ek
+from sickbeard import clients
 
 from lib import requests
 from bs4 import BeautifulSoup
@@ -104,7 +105,7 @@ class KATProvider(generic.TorrentProvider):
             return None
         
         try: 
-            soup = BeautifulSoup(data)
+            soup = BeautifulSoup(data, features=["html5lib", "permissive"])
             file_table = soup.find('table', attrs = {'class': 'torrentFileList'})
 
             if not file_table:
@@ -283,12 +284,12 @@ class KATProvider(generic.TorrentProvider):
 
         try:
             r = requests.get(url)
-        except Exception, e:
+        except (requests.exceptions.ConnectionError, requests.exceptions.HTTPError), e:
             logger.log(u"Error loading "+self.name+" URL: " + str(sys.exc_info()) + " - " + ex(e), logger.ERROR)
             return None
         
         if r.status_code != 200:
-            logger.log(u"KAT page requested " + url +" returned status code " + str(r.status_code), logger.DEBUG)
+            logger.log(self.name + u" page requested with url " + url +" returned status code is" + str(r.status_code) + ': ' + clients.http_error_code[r.status_code], logger.WARNING)
             return None
             
         return r.content
@@ -327,23 +328,6 @@ class KATProvider(generic.TorrentProvider):
         logger.log(u"Saved magnet link to " + magnetFileName + " ", logger.MESSAGE)
         return True
 
-    def dumpHTML(self, data):
-        
-        import datetime
-        
-        fileName = 'KAT_' + datetime.datetime.now().strftime("%y%m%d_%H%M%S") + '.html'
-        dumpName = ek.ek(os.path.join, sickbeard.CACHE_DIR, fileName)
-
-        try:    
-            fileOut = open(dumpName, 'wb')
-            fileOut.write(data)
-            fileOut.close()
-            helpers.chmodAsParent(dumpName)
-        except IOError, e:
-            logger.log("Unable to save the file: " + ex(e), logger.ERROR)
-            return False
-        logger.log(u"Saved kat html dump " + dumpName, logger.MESSAGE)
-        return True
 
 class KATCache(tvcache.TVCache):
 
