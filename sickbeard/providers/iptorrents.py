@@ -26,6 +26,7 @@ from sickbeard import tvcache
 from sickbeard import show_name_helpers
 from sickbeard.common import Overview 
 from sickbeard.exceptions import ex
+from sickbeard import clients
 from lib import requests
 from bs4 import BeautifulSoup
 from lib.unidecode import unidecode
@@ -156,7 +157,7 @@ class IPTorrentsProvider(generic.TorrentProvider):
                     continue
                 
                 try:
-                    html = BeautifulSoup(data)
+                    html = BeautifulSoup(data, features=["html5lib", "permissive"])
 
                     if not html:
                         logger.log(u"Invalid HTML data: " + str(data) , logger.DEBUG)
@@ -225,6 +226,10 @@ class IPTorrentsProvider(generic.TorrentProvider):
             logger.log(u"Error loading " + self.name + " URL: " + ex(e), logger.ERROR)
             return None
 
+        if r.status_code != 200:
+            logger.log(self.name + u" page requested with url " + url +" returned status code is" + str(r.status_code) + ': ' + clients.http_error_code[r.status_code], logger.WARNING)
+            return None
+
         return response.content
        
 class IPTorrentsCache(tvcache.TVCache):
@@ -254,7 +259,7 @@ class IPTorrentsCache(tvcache.TVCache):
             return []
 
         try:
-            html = BeautifulSoup(data)
+            html = BeautifulSoup(data, features=["html5lib", "permissive"])
 
             torrent_table = html.find('table', attrs = {'class' : 'torrents'})
             torrents = torrent_table.find_all('tr') if torrent_table else []
