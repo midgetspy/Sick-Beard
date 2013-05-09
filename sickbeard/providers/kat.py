@@ -222,7 +222,7 @@ class KATProvider(generic.TorrentProvider):
                     continue
 
                 try:
-                    soup = BeautifulSoup(html)
+                    soup = BeautifulSoup(html, features=["html5lib", "permissive"])
 
                     torrent_table = soup.find('table', attrs = {'class' : 'data'})
                     torrent_rows = torrent_table.find_all('tr') if torrent_table else []
