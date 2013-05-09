@@ -156,7 +156,7 @@ class IPTorrentsProvider(generic.TorrentProvider):
                     continue
                 
                 try:
-                    html = BeautifulSoup(data)
+                    html = BeautifulSoup(data, features=["html5lib", "permissive"])
 
                     if not html:
                         logger.log(u"Invalid HTML data: " + str(data) , logger.DEBUG)
@@ -254,7 +254,7 @@ class IPTorrentsCache(tvcache.TVCache):
             return []
 
         try:
-            html = BeautifulSoup(data)
+            html = BeautifulSoup(data, features=["html5lib", "permissive"])
 
             torrent_table = html.find('table', attrs = {'class' : 'torrents'})
             torrents = torrent_table.find_all('tr') if torrent_table else []

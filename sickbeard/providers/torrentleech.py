@@ -156,7 +156,7 @@ class TorrentLeechProvider(generic.TorrentProvider):
                     continue
 
                 try:
-                    html = BeautifulSoup(data)
+                    html = BeautifulSoup(data, features=["html5lib", "permissive"])
                     
                     torrent_table = html.find('table', attrs = {'id' : 'torrenttable'})
                     torrent_rows = torrent_table.find_all('tr') if torrent_table else []
@@ -241,7 +241,7 @@ class TorrentLeechCache(tvcache.TVCache):
             return []
 
         try: 
-            html = BeautifulSoup(data)
+            html = BeautifulSoup(data, features=["html5lib", "permissive"])
 
             torrent_table = html.find('table', attrs = {'id' : 'torrenttable'})
             torrent_rows = torrent_table.find_all('tr') if torrent_table else []
