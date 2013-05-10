@@ -220,8 +220,8 @@ class TorrentLeechProvider(generic.TorrentProvider):
             logger.log(u"Error loading "+self.name+" URL: " + ex(e), logger.ERROR)
             return None
 
-        if r.status_code != 200:
-            logger.log(self.name + u" page requested with url " + url +" returned status code is" + str(r.status_code) + ': ' + clients.http_error_code[r.status_code], logger.WARNING)
+        if response.status_code != 200:
+            logger.log(self.name + u" page requested with url " + url +" returned status code is" + str(response.status_code) + ': ' + clients.http_error_code[response.status_code], logger.WARNING)
             return None
 
         return response.content
