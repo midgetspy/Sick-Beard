@@ -3755,7 +3755,10 @@ class WebInterface:
 				ical = ical + 'DTSTART:' + str(air_date_time.date()).replace("-", "") + '\n'
 				ical = ical + 'SUMMARY:' + show['show_name'] + ': ' + episode['name'] + '\n'
 				ical = ical + 'UID:' + str(datetime.date.today().isoformat()) + '-' + str(random.randint(10000,99999)) + '@Sick-Beard\n'
-				ical = ical + 'DESCRIPTION:' + episode['description'] + '\n'
+				if (episode['description'] != ''):
+					ical = ical + 'DESCRIPTION:' + show['airs'] + ' on ' + show['network'] + '\\n\\n' + episode['description'] + '\n'
+				else:
+					ical = ical + 'DESCRIPTION:' + show['airs'] + ' on ' + show['network'] + '\n'
 				ical = ical + 'LOCATION:' + 'Episode ' + str(episode['episode']) + ' - Season ' + str(episode['season']) + '\n'
 				ical = ical + 'END:VEVENT\n'
 
