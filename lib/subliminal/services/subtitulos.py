@@ -52,7 +52,7 @@ class Subtitulos(ServiceBase):
         return self.query(video.path or video.release, languages, get_keywords(video.guess), video.series, video.season, video.episode)
 
     def query(self, filepath, languages, keywords, series, season, episode):
-        request_series = series.lower().replace(' ', '_').replace('&', '@').replace('(','').replace(')','')
+        request_series = series.lower().replace(' ', '-').replace('&', '@').replace('(','').replace(')','')
         if isinstance(request_series, unicode):
             request_series = unicodedata.normalize('NFKD', request_series).encode('ascii', 'ignore')
         logger.debug(u'Getting subtitles for %s season %d episode %d with languages %r' % (series, season, episode, languages))
