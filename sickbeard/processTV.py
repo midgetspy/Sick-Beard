@@ -89,7 +89,8 @@ def processDir(dirName, nzbName=None, recurse=False, failed=False):
             returnStr += logHelper(u"Processing succeeded: (" + str(nzbName) + ", " + dirName + ")")
         else:
             returnStr += logHelper(u"Processing failed: (" + str(nzbName) + ", " + dirName + "): " + process_fail_message, logger.WARNING)
-            return returnStr
+
+        return returnStr
 
     if ek.ek(os.path.basename, dirName).startswith('_UNDERSIZED_'):
         returnStr += logHelper(u"The directory name indicates that it was previously rejected for being undersized, cancelling", logger.DEBUG)
