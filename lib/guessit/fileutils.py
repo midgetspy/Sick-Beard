@@ -22,6 +22,7 @@ from __future__ import unicode_literals
 from guessit import s, u
 import os.path
 import zipfile
+import io
 
 
 def split_path(path):
@@ -84,4 +85,4 @@ def load_file_in_same_dir(ref_file, filename):
             zfile = zipfile.ZipFile(zfilename)
             return zfile.read('/'.join(path[i + 1:]))
 
-    return u(open(os.path.join(*path)).read())
+    return u(io.open(os.path.join(*path), encoding='utf-8').read())

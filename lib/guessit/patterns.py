@@ -150,7 +150,7 @@ prop_single = { 'releaseGroup': [ 'ESiR', 'WAF', 'SEPTiC', r'\[XCT\]', 'iNT', 'P
                                   'CtrlHD', 'POD', 'WiKi', 'DIMENSION', 'IMMERSE', 'FQM',
                                   '2HD', 'REPTiLE', 'CTU', 'HALCYON', 'EbP', 'SiTV',
                                   'SAiNTS', 'HDBRiSe', 'AlFleNi-TeaM', 'EVOLVE', '0TV',
-                                  'TLA', 'NTB', 'ASAP', 'MOMENTUM' ],
+                                  'TLA', 'NTB', 'ASAP', 'MOMENTUM', 'FoV', 'D-Z0N3' ],
 
                 'other': [ 'PROPER', 'REPACK', 'LIMITED', 'DualAudio', 'Audiofixed', 'R5',
                            'complete', 'classic', # not so sure about these ones, could appear in a title

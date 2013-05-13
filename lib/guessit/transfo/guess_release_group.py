@@ -32,6 +32,19 @@ def get_patterns(property_name):
 CODECS = get_patterns('videoCodec')
 FORMATS = get_patterns('format')
 
+GROUP_NAMES = [ r'(?P<videoCodec>' + codec + r')-?(?P<releaseGroup>.*?)[ \.]'
+                for codec in CODECS ]
+GROUP_NAMES += [ r'(?P<format>' + fmt + r')-?(?P<releaseGroup>.*?)[ \.]'
+                 for fmt in FORMATS ]
+
+GROUP_NAMES2 = [ r'\.(?P<videoCodec>' + codec + r')-(?P<releaseGroup>.*?)(-(.*?))?[ \.]'
+                 for codec in CODECS ]
+GROUP_NAMES2 += [ r'\.(?P<format>' + fmt + r')-(?P<releaseGroup>.*?)(-(.*?))?[ \.]'
+                  for fmt in FORMATS ]
+
+GROUP_NAMES = [ re.compile(r, re.IGNORECASE) for r in GROUP_NAMES ]
+GROUP_NAMES2 = [ re.compile(r, re.IGNORECASE) for r in GROUP_NAMES2 ]
+
 def adjust_metadata(md):
     return dict((property_name, compute_canonical_form(property_name, value) or value)
                 for property_name, value in md.items())
@@ -39,13 +52,8 @@ def adjust_metadata(md):
 
 def guess_release_group(string):
     # first try to see whether we have both a known codec and a known release group
-    group_names = [ r'(?P<videoCodec>' + codec + r')-?(?P<releaseGroup>.*?)[ \.]'
-                    for codec in CODECS ]
-    group_names += [ r'(?P<format>' + fmt + r')-?(?P<releaseGroup>.*?)[ \.]'
-                     for fmt in FORMATS ]
-
-    for rexp in group_names:
-        match = re.search(rexp, string, re.IGNORECASE)
+    for rexp in GROUP_NAMES:
+        match = rexp.search(string)
         if match:
             metadata = match.groupdict()
             release_group = compute_canonical_form('releaseGroup', metadata['releaseGroup'])
@@ -55,13 +63,8 @@ def guess_release_group(string):
     # pick anything as releaseGroup as long as we have a codec in front
     # this doesn't include a potential dash ('-') ending the release group
     # eg: [...].X264-HiS@SiLUHD-English.[...]
-    group_names = [ r'\.(?P<videoCodec>' + codec + r')-(?P<releaseGroup>.*?)(-(.*?))?[ \.]'
-                    for codec in CODECS ]
-    group_names += [ r'\.(?P<format>' + fmt + r')-(?P<releaseGroup>.*?)(-(.*?))?[ \.]'
-                    for fmt in FORMATS ]
-
-    for rexp in group_names:
-        match = re.search(rexp, string, re.IGNORECASE)
+    for rexp in GROUP_NAMES2:
+        match = rexp.search(string)
         if match:
             return adjust_metadata(match.groupdict()), (match.start(1), match.end(2))
 

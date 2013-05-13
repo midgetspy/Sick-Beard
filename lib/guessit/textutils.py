@@ -23,8 +23,12 @@ from guessit import s
 from guessit.patterns import sep
 import functools
 import unicodedata
+import re
 
 # string-related functions
+
+def normalize_unicode(s):
+    return unicodedata.normalize('NFC', s)
 
 
 def strip_brackets(s):
@@ -52,6 +56,13 @@ def clean_string(s):
         result = result[:-1]
 
     return result
+
+
+_words_rexp = re.compile('\w+', re.UNICODE)
+
+def find_words(s):
+    return _words_rexp.findall(s.replace('_', ' '))
+
 
 def reorder_title(title):
     ltitle = title.lower()

@@ -21,6 +21,7 @@
 from __future__ import unicode_literals
 from guessit import UnicodeMixin, base_text_type, u, s
 from guessit.fileutils import load_file_in_same_dir
+from guessit.textutils import find_words
 from guessit.country import Country
 import re
 import logging
@@ -317,7 +318,7 @@ def search_language(string, lang_filter=None):
         'is', 'it', 'am', 'mad', 'men', 'man', 'run', 'sin', 'st', 'to',
         'no', 'non', 'war', 'min', 'new', 'car', 'day', 'bad', 'bat', 'fan',
         'fry', 'cop', 'zen', 'gay', 'fat', 'cherokee', 'got', 'an', 'as',
-        'cat', 'her', 'be', 'hat', 'sun', 'may', 'my', 'mr',
+        'cat', 'her', 'be', 'hat', 'sun', 'may', 'my', 'mr', 'rum', 'pi',
         # french words
         'bas', 'de', 'le', 'son', 'vo', 'vf', 'ne', 'ca', 'ce', 'et', 'que',
         'mal', 'est', 'vol', 'or', 'mon', 'se',
@@ -325,7 +326,7 @@ def search_language(string, lang_filter=None):
         'la', 'el', 'del', 'por', 'mar',
         # other
         'ind', 'arw', 'ts', 'ii', 'bin', 'chan', 'ss', 'san', 'oss', 'iii',
-        'vi', 'ben'
+        'vi', 'ben', 'da'
         ])
     sep = r'[](){} \._-+'
 
@@ -334,7 +335,8 @@ def search_language(string, lang_filter=None):
 
     slow = ' %s ' % string.lower()
     confidence = 1.0 # for all of them
-    for lang in lng_all_names:
+
+    for lang in set(find_words(slow)) & lng_all_names:
 
         if lang in lng_common_words:
             continue
@@ -351,7 +353,7 @@ def search_language(string, lang_filter=None):
             if lang_filter and language not in lang_filter:
                 continue
 
-            # only allow those languages that have a 2-letter code, those who
+            # only allow those languages that have a 2-letter code, those that
             # don't are too esoteric and probably false matches
             if language.lang not in lng3_to_lng2:
                 continue
@@ -364,7 +366,7 @@ def search_language(string, lang_filter=None):
             else:
                 # Note: we could either be really confident that we found a
                 #       language or assume that full language names are too
-                # common words
+                #       common words and lower their confidence accordingly
                 confidence = 0.3 # going with the low-confidence route here
 
             return language, (pos - 1, end - 1), confidence
