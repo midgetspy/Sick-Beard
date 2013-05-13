@@ -30,7 +30,7 @@ def prepareFailedName(release):
 
 def logFailed(release):
     myDB = db.DBConnection('failed.db')
-    myDB.select("INSERT INTO failed (release) VALUES (?)", [prepareFailedName(release)])
+    myDB.action("INSERT INTO failed (release) VALUES (?)", [prepareFailedName(release)])
 
 def hasFailed(release):
     myDB = db.DBConnection('failed.db')
