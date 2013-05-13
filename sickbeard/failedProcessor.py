@@ -17,11 +17,11 @@
 
 from __future__ import with_statement
 
-import logger
 import os
 from glob import glob
 
 import sickbeard
+from sickbeard import logger
 from sickbeard import exceptions
 from sickbeard import show_name_helpers
 from sickbeard import helpers
@@ -60,7 +60,7 @@ class FailedProcessor(object):
         parser = NameParser(False)
         try:
             parsed = parser.parse(releaseName)
-        except InvalidNameException as e:
+        except InvalidNameException:
             self._log(u"Error: release name is invalid: " + releaseName, logger.WARNING)
             raise exceptions.FailedProcessingFailed()
 
