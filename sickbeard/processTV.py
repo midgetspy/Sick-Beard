@@ -30,6 +30,7 @@ from sickbeard.exceptions import ex
 
 from sickbeard import logger
 
+
 def logHelper (logMessage, logLevel=logger.MESSAGE):
     logger.log(logMessage, logLevel)
     return logMessage + u"\n"
@@ -86,6 +87,7 @@ def processDir (dirName, nzbName=None, recurse=False):
     # split the list into video files and folders
     folders = filter(lambda x: ek.ek(os.path.isdir, ek.ek(os.path.join, dirName, x)), fileList)
     videoFiles = filter(helpers.isMediaFile, fileList)
+    _checkOrphanedProcessedFiles(dirName, fileList)
 
     # recursively process all the folders
     for curFolder in folders:
@@ -102,6 +104,15 @@ def processDir (dirName, nzbName=None, recurse=False):
     for cur_video_file_path in videoFiles:
 
         cur_video_file_path = ek.ek(os.path.join, dirName, cur_video_file_path)
+
+        # prevent infinite auto process loop when KEEP_PROCESSED_DIR = true, by marking videos as processed
+        if sickbeard.KEEP_PROCESSED_DIR:
+            # check if file has already been processed - a .processed file will exist
+            helper_file = helpers.replaceExtension(cur_video_file_path, "processed")
+
+            if ek.ek(os.path.isfile, helper_file):
+                logHelper(u"Processing skipped for " + cur_video_file_path + ": .processed file detected.")
+                continue
 
         try:
             processor = postProcessor.PostProcessor(cur_video_file_path, nzbName)
@@ -133,3 +144,26 @@ def processDir (dirName, nzbName=None, recurse=False):
             returnStr += logHelper(u"Processing failed for "+cur_video_file_path+": "+process_fail_message, logger.WARNING)
 
     return returnStr
+
+def _checkOrphanedProcessedFiles(baseDir, fileList):
+    processedFiles = filter(_isProcessedHelperFile, fileList)
+
+    # check for orphaned .processed files and delete them
+    for processedFile in processedFiles:
+        # get filename without extension
+        baseName = processedFile.rpartition(".")[0]
+
+        # search the file list for all the files starting with baseName
+        matches = [file for file in fileList if file.startswith(baseName)]
+
+        # if only one matches, this is the current .processed file and it is orphaned; so it can be deleted
+        if len(matches) == 1:
+            os.remove(ek.ek(os.path.join, baseDir, processedFile))
+
+def _isProcessedHelperFile(file):
+    sepFile = file.rpartition(".")
+
+    if sepFile[0] == "":
+        return False
+    else:
+        return sepFile[2] == "processed"
