@@ -848,7 +848,7 @@ class ConfigPostProcessing:
     @cherrypy.expose
     def savePostProcessing(self, naming_pattern=None, naming_multi_ep=None,
                     xbmc_data=None, mediabrowser_data=None, synology_data=None, sony_ps3_data=None, wdtv_data=None, tivo_data=None,
-                    use_banner=None, keep_processed_dir=None, process_automatically=None, rename_episodes=None,
+                    use_banner=None, keep_processed_dir=None, process_automatically=None, auto_post_process_frequency=None, rename_episodes=None,
                     move_associated_files=None, tv_download_dir=None, naming_custom_abd=None, naming_abd_pattern=None):
 
         results = []
@@ -865,6 +865,9 @@ class ConfigPostProcessing:
             process_automatically = 1
         else:
             process_automatically = 0
+
+        if auto_post_process_frequency == '' or auto_post_process_frequency is None:
+            auto_post_process_frequency = 10
 
         if rename_episodes == "on":
             rename_episodes = 1
@@ -887,6 +890,7 @@ class ConfigPostProcessing:
             naming_custom_abd = 0
 
         sickbeard.PROCESS_AUTOMATICALLY = process_automatically
+        sickbeard.AUTO_POST_PROCESS_FREQUENCY = int(auto_post_process_frequency)
         sickbeard.KEEP_PROCESSED_DIR = keep_processed_dir
         sickbeard.RENAME_EPISODES = rename_episodes
         sickbeard.MOVE_ASSOCIATED_FILES = move_associated_files
