@@ -1155,7 +1155,7 @@ class ConfigNotifications:
                           plex_server_host=None, plex_host=None, plex_username=None, plex_password=None,
                           use_growl=None, growl_notify_onsnatch=None, growl_notify_ondownload=None, growl_host=None, growl_password=None,
                           use_prowl=None, prowl_notify_onsnatch=None, prowl_notify_ondownload=None, prowl_api=None, prowl_priority=0,
-                          use_twitter=None, twitter_notify_onsnatch=None, twitter_notify_ondownload=None,
+                          use_twitter=None, twitter_notify_onsnatch=None, twitter_notify_ondownload=None, twitter_use_direct_message=None, twitter_mention=None,
                           use_notifo=None, notifo_notify_onsnatch=None, notifo_notify_ondownload=None, notifo_username=None, notifo_apisecret=None,
                           use_boxcar=None, boxcar_notify_onsnatch=None, boxcar_notify_ondownload=None, boxcar_username=None,
                           use_pushover=None, pushover_notify_onsnatch=None, pushover_notify_ondownload=None, pushover_userkey=None,
@@ -1257,6 +1257,12 @@ class ConfigNotifications:
             twitter_notify_ondownload = 1
         else:
             twitter_notify_ondownload = 0
+
+        if twitter_use_direct_message == "on":
+            twitter_use_direct_message = 1
+        else:
+            twitter_use_direct_message = 0
+
         if use_twitter == "on":
             use_twitter = 1
         else:
@@ -1393,6 +1399,8 @@ class ConfigNotifications:
         sickbeard.USE_TWITTER = use_twitter
         sickbeard.TWITTER_NOTIFY_ONSNATCH = twitter_notify_onsnatch
         sickbeard.TWITTER_NOTIFY_ONDOWNLOAD = twitter_notify_ondownload
+        sickbeard.TWITTER_USE_DIRECT_MESSAGE = twitter_use_direct_message
+        sickbeard.TWITTER_MENTION = twitter_mention
 
         sickbeard.USE_NOTIFO = use_notifo
         sickbeard.NOTIFO_NOTIFY_ONSNATCH = notifo_notify_onsnatch
@@ -2721,6 +2729,7 @@ class Home:
 
         return json.dumps({'result': 'failure'})
 
+
 class UI:
 
     @cherrypy.expose
@@ -2736,7 +2745,7 @@ class UI:
         messages = {}
         cur_notification_num = 1
         for cur_notification in ui.notifications.get_notifications():
-            messages['notification-'+str(cur_notification_num)] = {'title': cur_notification.title,
+            messages['notification-' + str(cur_notification_num)] = {'title': cur_notification.title,
                                                                    'message': cur_notification.message,
                                                                    'type': cur_notification.type}
             cur_notification_num += 1
@@ -2745,6 +2754,12 @@ class UI:
 
 
 class WebInterface:
+
+    @cherrypy.expose
+    def robots_txt(self):
+        """ Keep web crawlers out """
+        cherrypy.response.headers['Content-Type'] = 'text/plain'
+        return 'User-agent: *\nDisallow: /\n'
 
     @cherrypy.expose
     def index(self):
