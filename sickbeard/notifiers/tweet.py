@@ -15,6 +15,7 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with Sick Beard.  If not, see <http://www.gnu.org/licenses/>.
+from lib.hachoir_parser.misc.file_3do import Face
 
 import sickbeard
 
@@ -29,6 +30,7 @@ except:
 
 import lib.oauth2 as oauth
 import lib.pythontwitter as twitter
+import re
 
 class TwitterNotifier:
 
@@ -112,16 +114,38 @@ class TwitterNotifier:
         password=self.consumer_secret
         access_token_key=sickbeard.TWITTER_USERNAME
         access_token_secret=sickbeard.TWITTER_PASSWORD
-    
-        logger.log(u"Sending tweet: "+message)
-    
+        mention = sickbeard.TWITTER_MENTION
+        use_direct_message = sickbeard.TWITTER_USE_DIRECT_MESSAGE
+
+        logger.log(u"Twitter notification, message: %s, mention: %s, direct message: %s" % (message, mention,
+                                                                                            use_direct_message))
+
         api = twitter.Api(username, password, access_token_key, access_token_secret)
-    
-        try:
-            api.PostUpdate(message)
-        except Exception, e:
-            logger.log(u"Error Sending Tweet: "+ex(e), logger.ERROR)
-            return False
+
+        if use_direct_message:
+            parsed_users = re.findall(r"@[a-zA-Z0-9_]+", mention)
+
+            if not parsed_users:
+                logger.log(u"No Twitter users specified as recipient for the direct message in 'Mention Twitter users'",
+                           logger.ERROR)
+                return False
+
+            for user in parsed_users:
+                logger.log(u"Sending direct message: "+message+u" to user: "+user, logger.DEBUG)
+                try:
+                    api.PostDirectMessage(user, message)
+                except Exception, e:
+                    logger.log(u"Error Sending Tweet: "+ex(e), logger.ERROR)
+                    return False
+        else:
+            message_with_mention = mention+" "+message
+
+            logger.log(u"Sending tweet: "+message_with_mention, logger.DEBUG)
+            try:
+                api.PostUpdate(message_with_mention)
+            except Exception, e:
+                logger.log(u"Error Sending Tweet: "+ex(e), logger.ERROR)
+                return False
     
         return True
     

@@ -861,7 +861,7 @@
                             </label>
                             <label class="nocheck clearfix" for="use_twitter">
                                 <span class="component-title">&nbsp;</span>
-                                <span class="component-desc">You may want to use a second account.</span>
+                                <span class="component-desc">You may want to use a second account or use direct messages.</span>
                             </label>
                         </div>
 
@@ -878,6 +878,23 @@
                                 <label class="clearfix" for="twitter_notify_ondownload">
                                     <span class="component-title">Notify on Download</span>
                                     <span class="component-desc">Send notification when we finish a download?</span>
+                                </label>
+                            </div>
+                            <div class="field-pair">
+                                <input type="checkbox" name="twitter_use_direct_message" id="twitter_use_direct_message" #if $sickbeard.TWITTER_USE_DIRECT_MESSAGE then "checked=\"checked\"" else ""# />
+                                <label class="clearfix" for="twitter_use_direct_message">
+                                    <span class="component-title">Use direct message</span>
+                                    <span class="component-desc">Send notifications as direct message instead of normal tweets? Direct messages don't show up on the twitter timeline</span>
+                                </label>
+                            </div>
+                            <div class="field-pair">
+                                <label class="nocheck clearfix">
+                                    <span class="component-title">Mention Twitter users</span>
+                                    <input type="text" name="twitter_mention" id="twitter_mention" value="$sickbeard.TWITTER_MENTION" size="35" />
+                                </label>
+                                <label class="nocheck clearfix">
+                                    <span class="component-title">&nbsp;</span>
+                                    <span class="component-desc">Mention other users in the tweet. Required if direct message is used; the mentioned users will each receive a direct message. (e.g. '@someUser1, @someUser2' without quotes) </span>
                                 </label>
                             </div>
                             <div class="field-pair">
