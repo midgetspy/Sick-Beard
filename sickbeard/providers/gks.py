@@ -16,9 +16,13 @@
 # You should have received a copy of the GNU General Public License
 # along with Sick Beard. If not, see <http://www.gnu.org/licenses/>.
 
-from bs4 import BeautifulSoup
+from xml.dom.minidom import parseString
 from sickbeard import classes, show_name_helpers, logger
 from sickbeard.common import Quality
+from sickbeard import helpers
+from sickbeard import logger
+from sickbeard import tvcache
+
 import generic
 import cookielib
 import sickbeard
@@ -28,27 +32,16 @@ import urllib2
 
 class GksProvider(generic.TorrentProvider):
 
-    def __init__(self):
-        
+    def __init__(self): 
         generic.TorrentProvider.__init__(self, "gks")
-
         self.supportsBacklog = True
-        
-        self.cj = cookielib.CookieJar()
-        self.opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(self.cj))
-        
         self.url = "https://gks.gs/"
-        
-        self.login_done = False
     
     def isEnabled(self):
         return sickbeard.GKS
-        
+
     def imageName(self):
         return 'gks.png'
-        
-    def getQuality(self, item):
-        return item.getQuality()
     
     def getSearchParams(self, searchString, audio_lang):
         if audio_lang == "en":
@@ -86,45 +79,36 @@ class GksProvider(generic.TorrentProvider):
             results.append( self.getSearchParams( "%s %dx%d" % ( showName, ep_obj.season, ep_obj.episode ), ep_obj.show.audio_lang))
             results.append( self.getSearchParams( "%s %dx%02d" % ( showName, ep_obj.season, ep_obj.episode ), ep_obj.show.audio_lang))
         return results
-    
-    def _get_title_and_url(self, item):
-        return (item.title, item.url)
-       
-    def _doSearch(self, searchString, show=None, season=None):
-
-        results = []
-        searchUrl = self.url + 'rdirect.php?type=search' + searchString
-        logger.log(u"Search string: " + searchUrl, logger.DEBUG)
         
-        r = self.opener.open( searchUrl )
-        soup = BeautifulSoup( r, "html.parser" )
-        resultsTable = soup.find("table", { "class" : "results" })
-        if resultsTable:
-            rows = resultsTable.find("tbody").findAll("tr")
-    
-            for row in rows:
-                link = row.find("a", title=True)
-                title = link['title']
-                
-                pageURL = link['href']
-                if pageURL.startswith("//"):
-                    pageURL = "http:" + pageURL
-                
-                torrentPage = self.opener.open( pageURL )
-                torrentSoup = BeautifulSoup( torrentPage )
-               
-                downloadTorrentLink = torrentSoup.find("a", text=u"T?l?charger")
-                if downloadTorrentLink:
-                    
-                    downloadURL = self.url + downloadTorrentLink['href']
-                    
-                    quality = Quality.nameQuality( title )
-
+    def _doSearch(self, searchString, show=None, season=None):
+        results = []
+        searchUrl = self.url+'rdirect.php?type=search&'+searchString
+        logger.log(u"Search URL: " + searchUrl, logger.DEBUG)
+        data = self.getURL(searchUrl)
+        parsedXML = parseString(data)
+        channel = parsedXML.getElementsByTagName('channel')[0]    
+        description = channel.getElementsByTagName('description')[0]
+        description_text = helpers.get_xml_text(description)
+        if "User can't be found" in description_text:
+            logger.log(u"GKS invalid digest, check your config", logger.ERROR)
+            return
+        elif "Invalid Hash" in description_text:
+            logger.log(u"GKS invalid hash, check your config", logger.ERROR)
+            return            
+        else :
+            items = channel.getElementsByTagName('item')
+            for item in items:
+                print item
+                title = helpers.get_xml_text(item.getElementsByTagName('title')[0])
+                if "Aucun Resultat" in title :
+                    break
+                else :
+                    downloadURL = helpers.get_xml_text(item.getElementsByTagName('link')[0])
+                    quality = Quality.nameQuality(title)
                     if show:
-                        results.append( GksSearchResult( self.opener, link['title'], downloadURL, quality, str(show.audio_lang) ) )
+                        results.append(GksSearchResult(title, downloadURL, quality, str(show.audio_lang)))
                     else:
-                        results.append( GksSearchResult( self.opener, link['title'], downloadURL, quality ) )
-
+                        results.append(GksSearchResult(title, downloadURL, quality))
         return results
     
     def getResult(self, episodes):
@@ -133,21 +117,19 @@ class GksProvider(generic.TorrentProvider):
         """
         result = classes.TorrentDataSearchResult(episodes)
         result.provider = self
-        return result    
-    
+        return result
+        
 class GksSearchResult:
     
-    def __init__(self, opener, title, url, quality, audio_langs=None):
-        self.opener = opener
+    def __init__(self, title, url, quality, audio_langs=None):
+        print "New Result :"+title+"  "+url
         self.title = title
         self.url = url
         self.quality = quality
         self.audio_langs=[audio_langs]
-        
-    def getNZB(self):
-        return self.opener.open( self.url , 'wb').read()
 
     def getQuality(self):
         return self.quality
 
+        
 provider = GksProvider()
