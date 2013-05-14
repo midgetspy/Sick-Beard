@@ -24,8 +24,8 @@ $(document).ready(function(){
     var whichBulkCheck = $(bulkCheck).attr('id');
 
     $('.'+whichBulkCheck).each(function(){
-        if (!this.disabled)
-            this.checked = !this.checked
+        if ($(this).closest('tr')[0].style.display != 'none')
+            this.checked = bulkCheck.checked
     });
   });
 
@@ -46,7 +46,7 @@ $(document).ready(function(){
         switch (found) {
           case 2: return false;
           case 1:
-            if (!this.disabled)
+            if ($(this).closest('tr')[0].style.display != 'none')
               this.checked = lastCheck.checked;
         }
 

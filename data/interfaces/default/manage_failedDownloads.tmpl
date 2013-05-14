@@ -18,8 +18,8 @@
 {
     \$("#failedTable:has(tbody tr)").tablesorter({
         widgets: ['zebra', 'stickyHeaders', 'filter'],
-        sortList: [[0,1]],
-        headers: { 1: { sorter: false } }
+        sortList: [[0,0]],
+        headers: { 1: { sorter: false, filter: false } }
     });
     \$('#limit').change(function(){
         url = '$sbRoot/manage/failedDownloads/?limit='+\$(this).val()
