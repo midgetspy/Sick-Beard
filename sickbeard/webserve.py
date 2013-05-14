@@ -1367,7 +1367,7 @@ class ConfigNotifications:
                           use_libnotify=None, libnotify_notify_onsnatch=None, libnotify_notify_ondownload=None, libnotify_notify_onsubtitledownload=None,
                           use_nmj=None, nmj_host=None, nmj_database=None, nmj_mount=None, use_synoindex=None,
                           use_nmjv2=None, nmjv2_host=None, nmjv2_dbloc=None, nmjv2_database=None,
-                          use_trakt=None, trakt_username=None, trakt_password=None, trakt_api=None,
+                          use_trakt=None, trakt_username=None, trakt_password=None, trakt_api=None,trakt_remove_watchlist=None,trakt_use_watchlist=None,trakt_start_paused=None,trakt_method_add=None,
                           use_pytivo=None, pytivo_notify_onsnatch=None, pytivo_notify_ondownload=None, pytivo_notify_onsubtitledownload=None, pytivo_update_library=None, 
                           pytivo_host=None, pytivo_share_name=None, pytivo_tivo_name=None,
                           use_nma=None, nma_notify_onsnatch=None, nma_notify_ondownload=None, nma_notify_onsubtitledownload=None, nma_api=None, nma_priority=0 ):
@@ -1572,7 +1572,21 @@ class ConfigNotifications:
         if use_trakt == "on":
             use_trakt = 1
         else:
-            use_trakt = 0
+            use_trakt = 0	
+        if trakt_remove_watchlist == "on":
+            trakt_remove_watchlist = 1
+        else:
+            trakt_remove_watchlist = 0
+
+        if trakt_use_watchlist == "on":
+            trakt_use_watchlist = 1
+        else:
+            trakt_use_watchlist = 0
+
+        if trakt_start_paused == "on":
+            trakt_start_paused = 1
+        else:
+            trakt_start_paused = 0
 
         if use_pytivo == "on":
             use_pytivo = 1
@@ -1699,6 +1713,10 @@ class ConfigNotifications:
         sickbeard.TRAKT_USERNAME = trakt_username
         sickbeard.TRAKT_PASSWORD = trakt_password
         sickbeard.TRAKT_API = trakt_api
+        sickbeard.TRAKT_REMOVE_WATCHLIST = trakt_remove_watchlist
+        sickbeard.TRAKT_USE_WATCHLIST = trakt_use_watchlist
+        sickbeard.TRAKT_METHOD_ADD = trakt_method_add
+        sickbeard.TRAKT_START_PAUSED = trakt_start_paused
 
         sickbeard.USE_PYTIVO = use_pytivo
         sickbeard.PYTIVO_NOTIFY_ONSNATCH = pytivo_notify_onsnatch == "off"

@@ -184,7 +184,7 @@ class ShowQueueItem(generic_queue.QueueItem):
 
 
 class QueueItemAdd(ShowQueueItem):
-    def __init__(self, tvdb_id, showDir, default_status, quality, flatten_folders, subtitles, lang, audio_lang):
+    def __init__(self, tvdb_id, showDir, default_status, quality, flatten_folders, lang, subtitles, audio_lang):
 
         self.tvdb_id = tvdb_id
         self.showDir = showDir
@@ -336,6 +336,9 @@ class QueueItemAdd(ShowQueueItem):
             sickbeard.backlogSearchScheduler.action.searchBacklog([self.show]) #@UndefinedVariable
 
         self.show.flushEpisodes()
+
+        # if there are specific episodes that need to be added by trakt
+        sickbeard.traktWatchListCheckerSchedular.action.manageNewShow(self.show)
 
         self.finish()
 

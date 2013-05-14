@@ -33,7 +33,7 @@ from sickbeard import providers, metadata
 from providers import ezrss, tvtorrents, torrentleech, btn, nzbsrus, newznab, womble, nzbx, omgwtfnzbs, binnewz, t411, cpasbien, piratebay
 from sickbeard.config import CheckSection, check_setting_int, check_setting_str, ConfigMigrator
 
-from sickbeard import searchCurrent, searchBacklog, showUpdater, versionChecker, properFinder, autoPostProcesser, subtitles
+from sickbeard import searchCurrent, searchBacklog, showUpdater, versionChecker, properFinder, autoPostProcesser, subtitles, traktWatchListChecker
 from sickbeard import helpers, db, exceptions, show_queue, search_queue, scheduler
 from sickbeard import logger
 from sickbeard import naming
@@ -78,6 +78,8 @@ properFinderScheduler = None
 autoPostProcesserScheduler = None
 autoTorrentPostProcesserScheduler = None
 subtitlesFinderScheduler = None
+traktWatchListCheckerSchedular = None
+
 showList = None
 loadingShowList = None
 
@@ -323,6 +325,10 @@ USE_TRAKT = False
 TRAKT_USERNAME = None
 TRAKT_PASSWORD = None
 TRAKT_API = ''
+TRAKT_REMOVE_WATCHLIST = False
+TRAKT_USE_WATCHLIST = False
+TRAKT_METHOD_ADD = 0
+TRAKT_START_PAUSED = False
 
 USE_PYTIVO = False
 PYTIVO_NOTIFY_ONSNATCH = False
@@ -381,7 +387,7 @@ def initialize(consoleLogging=True):
                 TORRENT_USERNAME, TORRENT_PASSWORD, TORRENT_HOST, TORRENT_PATH, TORRENT_RATIO, TORRENT_PAUSED, TORRENT_LABEL, \
                 USE_XBMC, XBMC_NOTIFY_ONSNATCH, XBMC_NOTIFY_ONDOWNLOAD, XBMC_NOTIFY_ONSUBTITLEDOWNLOAD, XBMC_UPDATE_FULL, XBMC_UPDATE_ONLYFIRST, \
                 XBMC_UPDATE_LIBRARY, XBMC_HOST, XBMC_USERNAME, XBMC_PASSWORD, \
-                USE_TRAKT, TRAKT_USERNAME, TRAKT_PASSWORD, TRAKT_API, \
+                USE_TRAKT, TRAKT_USERNAME, TRAKT_PASSWORD, TRAKT_API,TRAKT_REMOVE_WATCHLIST,TRAKT_USE_WATCHLIST,TRAKT_METHOD_ADD,TRAKT_START_PAUSED,traktWatchListCheckerSchedular, \
                 USE_PLEX, PLEX_NOTIFY_ONSNATCH, PLEX_NOTIFY_ONDOWNLOAD, PLEX_NOTIFY_ONSUBTITLEDOWNLOAD, PLEX_UPDATE_LIBRARY, \
                 PLEX_SERVER_HOST, PLEX_HOST, PLEX_USERNAME, PLEX_PASSWORD, \
                 showUpdateScheduler, __INITIALIZED__, LAUNCH_BROWSER, DISPLAY_POSTERS, showList, loadingShowList, \
@@ -785,6 +791,10 @@ def initialize(consoleLogging=True):
         TRAKT_USERNAME = check_setting_str(CFG, 'Trakt', 'trakt_username', '')
         TRAKT_PASSWORD = check_setting_str(CFG, 'Trakt', 'trakt_password', '')
         TRAKT_API = check_setting_str(CFG, 'Trakt', 'trakt_api', '')
+        TRAKT_REMOVE_WATCHLIST = bool(check_setting_int(CFG, 'Trakt', 'trakt_remove_watchlist', 0))
+        TRAKT_USE_WATCHLIST = bool(check_setting_int(CFG, 'Trakt', 'trakt_use_watchlist', 0))
+        TRAKT_METHOD_ADD = check_setting_str(CFG, 'Trakt', 'trakt_method_add', "0")
+        TRAKT_START_PAUSED = bool(check_setting_int(CFG, 'Trakt', 'trakt_start_paused', 0))
 
         CheckSection(CFG, 'pyTivo')
         USE_PYTIVO = bool(check_setting_int(CFG, 'pyTivo', 'use_pytivo', 0))
@@ -876,6 +886,11 @@ def initialize(consoleLogging=True):
                                                      threadName="TORRENT_POSTPROCESSER",
                                                      runImmediately=True)
 
+        traktWatchListCheckerSchedular = scheduler.Scheduler(traktWatchListChecker.TraktChecker(),
+                                                     cycleTime=datetime.timedelta(minutes=10),
+                                                     threadName="TRAKTWATCHLIST",
+                                                     runImmediately=True)
+
         backlogSearchScheduler = searchBacklog.BacklogSearchScheduler(searchBacklog.BacklogSearcher(),
                                                                       cycleTime=datetime.timedelta(minutes=get_backlog_cycle_time()),
                                                                       threadName="BACKLOG",
@@ -901,7 +916,7 @@ def start():
             showUpdateScheduler, versionCheckScheduler, showQueueScheduler, \
             properFinderScheduler, autoPostProcesserScheduler, autoTorrentPostProcesserScheduler, searchQueueScheduler, \
             subtitlesFinderScheduler, started, USE_SUBTITLES, \
-            started
+            traktWatchListCheckerSchedular, started
 
     with INIT_LOCK:
 
@@ -938,6 +953,8 @@ def start():
             if USE_SUBTITLES:
                 subtitlesFinderScheduler.thread.start()
 
+            # start the trakt watchlist
+            traktWatchListCheckerSchedular.thread.start()
 
             started = True
 
@@ -946,7 +963,7 @@ def halt():
     global __INITIALIZED__, currentSearchScheduler, backlogSearchScheduler, showUpdateScheduler, \
             showQueueScheduler, properFinderScheduler, autoPostProcesserScheduler, autoTorrentPostProcesserScheduler, searchQueueScheduler, \
             subtitlesFinderScheduler, started, \
-            started
+            traktWatchListCheckerSchedular
 
     with INIT_LOCK:
 
@@ -1013,6 +1030,12 @@ def halt():
                     autoTorrentPostProcesserScheduler.thread.join(10)
                 except:
                     pass
+            traktWatchListCheckerSchedular.abort = True
+            logger.log(u"Waiting for the TRAKTWATCHLIST thread to exit")
+            try:
+                traktWatchListCheckerSchedular.thread.join(10)
+            except:
+                pass
 
             properFinderScheduler.abort = True
             logger.log(u"Waiting for the PROPERFINDER thread to exit")
@@ -1370,6 +1393,10 @@ def save_config():
     new_config['Trakt']['trakt_username'] = TRAKT_USERNAME
     new_config['Trakt']['trakt_password'] = TRAKT_PASSWORD
     new_config['Trakt']['trakt_api'] = TRAKT_API
+    new_config['Trakt']['trakt_remove_watchlist'] = int(TRAKT_REMOVE_WATCHLIST)
+    new_config['Trakt']['trakt_use_watchlist'] = int(TRAKT_USE_WATCHLIST)
+    new_config['Trakt']['trakt_method_add'] = TRAKT_METHOD_ADD
+    new_config['Trakt']['trakt_start_paused'] = int(TRAKT_START_PAUSED)
 
     new_config['pyTivo'] = {}
     new_config['pyTivo']['use_pytivo'] = int(USE_PYTIVO)

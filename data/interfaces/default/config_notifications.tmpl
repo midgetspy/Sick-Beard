@@ -21,6 +21,8 @@
             <br />
 
 
+
+
                 <div class="component-group clearfix">
                     <div class="component-group-desc">
                         <img class="notifier-icon" src="$sbRoot/images/notifiers/xbmc.png" alt="" title="XBMC" />
@@ -399,6 +401,9 @@
                 </div><!-- /synoindex component-group //-->
 
 
+
+
+
                 <div class="component-group clearfix">
                     <div class="component-group-desc">
                         <img class="notifier-icon" src="$sbRoot/images/notifiers/pytivo.png" alt="" title="pyTivo" />
@@ -462,6 +467,8 @@
                 <br />
                 <h2>Devices</h2>
                 <br />
+
+
 
 
                 <div class="component-group clearfix">
@@ -893,8 +900,8 @@
                                 </label>
                             </div>
                             <div class="testNotification" id="testNMA-result">Click below to test.</div>
-                            <input type="button" class="btn" value="Test NMA" id="testNMA" />
-                            <input type="submit" class="btn config_submitter" value="Save Changes" />
+                            <input  class="btn" type="button" value="Test NMA" id="testNMA" />
+                            <input type="submit" class="config_submitter btn" value="Save Changes" />
                         </div><!-- /content_use_nma //-->
 
                     </fieldset>
@@ -907,6 +914,11 @@
                 <br />
                 <h2>Online</h2>
                 <br />
+
+
+
+
+
 
 
                 <div class="component-group clearfix">
@@ -1029,6 +1041,43 @@
                                     <span class="component-desc">Get your key at: <a href="http://trakt.tv/settings/api" onclick="window.open(this.href, '_blank'); return false;">http://trakt.tv/settings/api</a></span>
                                 </label>
                             </div>
+                            <div class="field-pair">
+                                <input type="checkbox" class="enabler" name="trakt_use_watchlist" id="trakt_use_watchlist" #if $sickbeard.TRAKT_USE_WATCHLIST then "checked=\"checked\"" else ""# />
+                                <label class="clearfix" for="trakt_use_watchlist">
+                                    <span class="component-title">Use Watchlist:</span>
+                                    <span class="component-desc">Gets new shows from the trakt watchlist</span>
+                                </label>
+                            </div>
+							<div id="content_trakt_use_watchlist">
+	                            <div class="field-pair">
+	                                <label class="nocheck clearfix">
+	                                    <span class="component-title">Watchlist Add Method:</span>
+	                                       <select id="trakt_method_add" name="trakt_method_add">
+	                                        <option value="0" #if $sickbeard.TRAKT_METHOD_ADD == "0" then 'selected="selected"' else ""#>Skip All</option>
+	                                        <option value="1" #if $sickbeard.TRAKT_METHOD_ADD == "1" then 'selected="selected"' else ""#>Download Pilot Only</option>
+	                                        <option value="2" #if $sickbeard.TRAKT_METHOD_ADD == "2" then 'selected="selected"' else ""#>Get whole show</option>
+	                                    </select>
+	                                </label>
+	                                <label class="nocheck clearfix">
+	                                    <span class="component-title">&nbsp;</span>
+	                                    <span class="component-desc">Method to decide which episodes to download in new show</span>
+	                                </label>
+	                            </div>                            
+	                            <div class="field-pair">
+	                                <input type="checkbox" name="trakt_remove_watchlist" id="trakt_remove_watchlist" #if $sickbeard.TRAKT_REMOVE_WATCHLIST then "checked=\"checked\"" else ""# />
+	                                <label class="clearfix" for="trakt_remove_watchlist">
+	                                    <span class="component-title">Remove from Watchlist:</span>
+	                                    <span class="component-desc">Remove an episode from the watchlist after it is downloaded</span>
+	                                </label>
+	                            </div>
+	                            <div class="field-pair">
+	                                <input type="checkbox" name="trakt_start_paused" id="trakt_start_paused" #if $sickbeard.TRAKT_START_PAUSED then "checked=\"checked\"" else ""# />
+	                                <label class="clearfix" for="trakt_start_paused">
+	                                    <span class="component-title">Start Paused:</span>
+	                                    <span class="component-desc">Starts shows grabbed from trakt watchlist paused</span>
+	                                </label>
+	                            </div>
+							</div>
                             <div class="testNotification" id="testTrakt-result">Click below to test.</div>
                             <input type="button" class="btn" value="Test Trakt" id="testTrakt" />
                             <input type="submit" class="btn config_submitter" value="Save Changes" />
@@ -1040,6 +1089,7 @@
                 <div class="component-group-save">
                     <input type="submit" class="btn config_submitter" value="Save Changes" />
                 </div><br />
+
 
             </div><!-- /config-components //-->
         </form>
