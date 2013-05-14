@@ -262,7 +262,6 @@ class KATProvider(generic.TorrentProvider):
 
                 except Exception, e:
                     logger.log(u"Failed to parsing " + self.name + (" Exceptions: "  + str(e) if e else ''), logger.ERROR)
-                    self.dumpHTML(html)
                     
             #For each search mode sort all the items by seeders
             items[mode].sort(key=lambda tup: tup[3], reverse=True)        
