@@ -46,20 +46,25 @@ class GksProvider(generic.TorrentProvider):
         return 'gks.png'
     
     def getSearchParams(self, searchString, audio_lang):
+        results = []
         if audio_lang == "en":
-            return urllib.urlencode( {'q': searchString, 'cat' : 22, 'ak' : sickbeard.GKS_KEY} ) + "&order=desc&sort=normal&exact"
+            results.append( urllib.urlencode( {'q': searchString, 'category' : 22, 'ak' : sickbeard.GKS_KEY} ) + "&order=desc&sort=normal&exact" )
         elif audio_lang == "fr":
-            return urllib.urlencode( {'q': searchString, 'cat' : 12, 'ak' : sickbeard.GKS_KEY} ) + "&order=desc&sort=normal&exact"
+            results.append( urllib.urlencode( {'q': searchString, 'category' : 12, 'ak' : sickbeard.GKS_KEY} ) + "&order=desc&sort=normal&exact" )
+            results.append( urllib.urlencode( {'q': searchString, 'category' : 14, 'ak' : sickbeard.GKS_KEY} ) + "&order=desc&sort=normal&exact" )
         else:
-            return urllib.urlencode( {'q': searchString, 'ak' : sickbeard.GKS_KEY} ) + "&order=desc&sort=normal&exact"
+            results.append( urllib.urlencode( {'q': searchString, 'ak' : sickbeard.GKS_KEY} ) + "&order=desc&sort=normal&exact" )
+        return results
 
     def _get_season_search_strings(self, show, season):
 
         showNames = show_name_helpers.allPossibleShowNames(show)
         results = []
         for showName in showNames:
-            results.append( self.getSearchParams(showName + "+S%02d" % season, show.audio_lang))
-            results.append( self.getSearchParams(showName + "+saison+%02d" % season, show.audio_lang))
+            for result in self.getSearchParams(showName + "+S%02d" % season, show.audio_lang) :
+                results.append(result)
+            for result in self.getSearchParams(showName + "+saison+%02d" % season, show.audio_lang):
+                results.append(result)
         return results
 
     def _get_episode_search_strings(self, ep_obj):
@@ -67,7 +72,8 @@ class GksProvider(generic.TorrentProvider):
         showNames = show_name_helpers.allPossibleShowNames(ep_obj.show)
         results = []
         for showName in showNames:
-            results.append( self.getSearchParams( "%s S%02dE%02d" % ( showName, ep_obj.season, ep_obj.episode), ep_obj.show.audio_lang))
+            for result in self.getSearchParams( "%s S%02dE%02d" % ( showName, ep_obj.season, ep_obj.episode), ep_obj.show.audio_lang) :
+                results.append(result)
         return results
         
     def _doSearch(self, searchString, show=None, season=None):
