@@ -16,7 +16,7 @@
 # You should have received a copy of the GNU General Public License
 # along with Sick Beard. If not, see <http://www.gnu.org/licenses/>.
 
-from bs4 import BeautifulSoup
+from xml.dom.minidom import parseString
 from sickbeard import classes, show_name_helpers, logger
 from sickbeard.common import Quality
 from sickbeard import helpers
@@ -72,7 +72,7 @@ class GksProvider(generic.TorrentProvider):
         showNames = show_name_helpers.allPossibleShowNames(ep_obj.show)
         results = []
         for showName in showNames:
-            for result in self.getSearchParams( "%s S%02dE%02d" % (showName, ep_obj.season, ep_obj.episode), ep_obj.show.audio_lang) :
+            for result in self.getSearchParams( "%s S%02dE%02d" % ( showName, ep_obj.season, ep_obj.episode), ep_obj.show.audio_lang) :
                 results.append(result)
         return results
         
@@ -80,24 +80,37 @@ class GksProvider(generic.TorrentProvider):
         results = []
         searchUrl = self.url+'rdirect.php?type=search&'+searchString
         logger.log(u"Search URL: " + searchUrl, logger.DEBUG)
-        data = self.opener.open(searchUrl)
-        soup = BeautifulSoup(data)
-        resultsTable = soup.find("channel")
-        if resultsTable:
-            items = resultsTable.findAll("item")
+        
+        data = self.getURL(searchUrl)
+        if "bad key" in str(data).lower() :
+            logger.log(u"GKS key invalid, check your config", logger.ERROR)
+            return []
+
+        parsedXML = parseString(data)
+        channel = parsedXML.getElementsByTagName('channel')[0]
+        description = channel.getElementsByTagName('description')[0]
+        description_text = helpers.get_xml_text(description).lower()
+        
+        if "user can't be found" in description_text:
+            logger.log(u"GKS invalid digest, check your config", logger.ERROR)
+            return []
+        elif "invalid hash" in description_text:
+            logger.log(u"GKS invalid hash, check your config", logger.ERROR)
+            return []
+        else :
+            items = channel.getElementsByTagName('item')
             for item in items:
-                title = item.title.string
-                if ("VOSTFR" in title and (not show.subtitles)) or "aucun resultat" in title:
-                    continue
+                title = helpers.get_xml_text(item.getElementsByTagName('title')[0])
+                if "aucun resultat" in title.lower() :
+                    logger.log(u"No results found in " + searchUrl, logger.DEBUG)
+                    return []
                 else :
-                    downloadURL = item.link.string
+                    downloadURL = helpers.get_xml_text(item.getElementsByTagName('link')[0])
                     quality = Quality.nameQuality(title)
                     if show:
-                        results.append(GksSearchResult(self.opener, title, downloadURL, quality, str(show.audio_lang) ) )
+                        results.append( GksSearchResult( self.opener, title, downloadURL, quality, str(show.audio_lang) ) )
                     else:
-                        results.append(GksSearchResult(self.opener, title, downloadURL, quality ) )
-        else :
-            logger.log(u"Please check your GKS.GS provider configuration", logger.ERROR)
+                        results.append( GksSearchResult( self.opener, title, downloadURL, quality ) )
         return results
     
     def getResult(self, episodes):
