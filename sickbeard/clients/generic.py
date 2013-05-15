@@ -155,7 +155,7 @@ class GenericClient(object):
                 logger.log(self.name + u': Unable to set the path for Torrent', logger.ERROR)
 
         except Exception, e:
-            logger.log(self.name + u': Failed Sending Torrent ', logger.ERROR)
+            logger.log(self.name + u': Failed Sending Torrent ', logger.DEBUG)
             logger.log(self.name + u': Exception raised when sending torrent: ' + ex(e), logger.DEBUG)
             return r_code
         
