@@ -288,7 +288,7 @@ class KATProvider(generic.TorrentProvider):
             return None
         
         if r.status_code != 200:
-            logger.log(self.name + u" page requested with url " + url +" returned status code is" + str(r.status_code) + ': ' + clients.http_error_code[r.status_code], logger.WARNING)
+            logger.log(self.name + u" page requested with url " + url +" returned status code is " + str(r.status_code) + ': ' + clients.http_error_code[r.status_code], logger.WARNING)
             return None
             
         return r.content
