@@ -45,7 +45,7 @@ class TraktChecker():
         logger.log(u"Starting trakt show watchlist check", logger.DEBUG)
         watchlist = TraktCall("user/watchlist/shows.json/%API%/" + sickbeard.TRAKT_USERNAME, sickbeard.TRAKT_API, sickbeard.TRAKT_USERNAME, sickbeard.TRAKT_PASSWORD)
         if watchlist is None:
-            logger.log(u"Could not connect to trakt service, aborting watchlist update", logger.ERROR)
+            logger.log(u"Could not connect to trakt service, aborting watchlist update", logger.DEBUG)
             return
         for show in watchlist:
             if int(sickbeard.TRAKT_METHOD_ADD) != 2:
