@@ -80,7 +80,6 @@ class GksProvider(generic.TorrentProvider):
         results = []
         searchUrl = self.url+'rdirect.php?type=search&'+searchString
         logger.log(u"Search URL: " + searchUrl, logger.DEBUG)
-		
         data = self.opener.open( searchUrl )
         soup = BeautifulSoup(data)
         resultsTable = soup.find("channel")
