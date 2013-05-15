@@ -120,6 +120,7 @@ ROOT_DIRS = None
 USE_BANNER = None
 USE_LISTVIEW = None
 METADATA_XBMC = None
+METADATA_XBMCFRODO = None
 METADATA_MEDIABROWSER = None
 METADATA_PS3 = None
 METADATA_WDTV = None
@@ -416,7 +417,7 @@ def initialize(consoleLogging=True):
                 USE_BOXCAR, BOXCAR_USERNAME, BOXCAR_PASSWORD, BOXCAR_NOTIFY_ONDOWNLOAD, BOXCAR_NOTIFY_ONSUBTITLEDOWNLOAD, BOXCAR_NOTIFY_ONSNATCH, \
                 USE_PUSHOVER, PUSHOVER_USERKEY, PUSHOVER_NOTIFY_ONDOWNLOAD, PUSHOVER_NOTIFY_ONSUBTITLEDOWNLOAD, PUSHOVER_NOTIFY_ONSNATCH, \
                 USE_LIBNOTIFY, LIBNOTIFY_NOTIFY_ONSNATCH, LIBNOTIFY_NOTIFY_ONDOWNLOAD, LIBNOTIFY_NOTIFY_ONSUBTITLEDOWNLOAD, USE_NMJ, NMJ_HOST, NMJ_DATABASE, NMJ_MOUNT, USE_NMJv2, NMJv2_HOST, NMJv2_DATABASE, NMJv2_DBLOC, USE_SYNOINDEX, \
-                USE_BANNER, USE_LISTVIEW, METADATA_XBMC, METADATA_MEDIABROWSER, METADATA_PS3, METADATA_SYNOLOGY, metadata_provider_dict, \
+                USE_BANNER, USE_LISTVIEW, METADATA_XBMC, METADATA_XBMCFRODO, METADATA_MEDIABROWSER, METADATA_PS3, METADATA_SYNOLOGY, metadata_provider_dict, \
                 NEWZBIN, NEWZBIN_USERNAME, NEWZBIN_PASSWORD, GIT_PATH, MOVE_ASSOCIATED_FILES, \
                 GKS, GKS_KEY, \
                 COMING_EPS_LAYOUT, COMING_EPS_SORT, COMING_EPS_DISPLAY_PAUSED, COMING_EPS_MISSED_RANGE, METADATA_WDTV, METADATA_TIVO, IGNORE_WORDS, CREATE_MISSING_SHOW_DIRS, \
@@ -557,6 +558,8 @@ def initialize(consoleLogging=True):
 
             if METADATA_TYPE == 'xbmc':
                 old_metadata_class = metadata.xbmc.metadata_class
+            elif METADATA_TYPE == 'xbmcfrodo':
+                old_metadata_class = metadata.xbmcfrodo.metadata_class
             elif METADATA_TYPE == 'mediabrowser':
                 old_metadata_class = metadata.mediabrowser.metadata_class
             elif METADATA_TYPE == 'ps3':
@@ -584,6 +587,7 @@ def initialize(consoleLogging=True):
         # this is the normal codepath for metadata config
         else:
             METADATA_XBMC = check_setting_str(CFG, 'General', 'metadata_xbmc', '0|0|0|0|0|0')
+            METADATA_XBMCFRODO = check_setting_str(CFG, 'General', 'metadata_xbmcfrodo', '0|0|0|0|0|0')
             METADATA_MEDIABROWSER = check_setting_str(CFG, 'General', 'metadata_mediabrowser', '0|0|0|0|0|0')
             METADATA_PS3 = check_setting_str(CFG, 'General', 'metadata_ps3', '0|0|0|0|0|0')
             METADATA_WDTV = check_setting_str(CFG, 'General', 'metadata_wdtv', '0|0|0|0|0|0')
@@ -591,6 +595,7 @@ def initialize(consoleLogging=True):
             METADATA_SYNOLOGY = check_setting_str(CFG, 'General', 'metadata_synology', '0|0|0|0|0|0')
 
             for cur_metadata_tuple in [(METADATA_XBMC, metadata.xbmc),
+                                       (METADATA_XBMCFRODO, metadata.xbmcfrodo),
                                        (METADATA_MEDIABROWSER, metadata.mediabrowser),
                                        (METADATA_PS3, metadata.ps3),
                                        (METADATA_WDTV, metadata.wdtv),
@@ -1193,6 +1198,7 @@ def save_config():
     new_config['General']['use_banner'] = int(USE_BANNER)
     new_config['General']['use_listview'] = int(USE_LISTVIEW)
     new_config['General']['metadata_xbmc'] = metadata_provider_dict['XBMC'].get_config()
+    new_config['General']['metadata_xbmcfrodo'] = metadata_provider_dict['XBMC (Frodo)'].get_config()
     new_config['General']['metadata_mediabrowser'] = metadata_provider_dict['MediaBrowser'].get_config()
     new_config['General']['metadata_ps3'] = metadata_provider_dict['Sony PS3'].get_config()
     new_config['General']['metadata_wdtv'] = metadata_provider_dict['WDTV'].get_config()
