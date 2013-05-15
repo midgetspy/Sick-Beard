@@ -20,7 +20,7 @@ import os
 
 import sickbeard
 from sickbeard import encodingKludge as ek
-from sickbeard import logger
+from sickbeard import logger,db
 from sickbeard import helpers
 from sickbeard import search_queue
 from sickbeard.common import SNATCHED, SNATCHED_PROPER, DOWNLOADED, SKIPPED, UNAIRED, IGNORED, ARCHIVED, WANTED, UNKNOWN
@@ -60,7 +60,18 @@ class TraktChecker():
                     self.startBacklog(newShow)
                 else:
                     self.todoWanted.append((int(show["tvdb_id"]), 1, 1))
-            self.todoWanted.append((int(show["tvdb_id"]), -1, -1)) #used to pause new shows if the settings say to
+            if int(sickbeard.TRAKT_METHOD_ADD) == 3:
+                newShow = helpers.findCertainShow(sickbeard.showList, int(show["tvdb_id"]))
+                
+                if newShow is not None:
+                    for ep in range(1,4):
+                        self.setEpisodeToWanted(newShow, 1, ep)
+                    self.startBacklog(newShow)
+                else:
+                    for ep in range(1,4):
+                        self.todoWanted.append((int(show["tvdb_id"]), 1, ep))
+                    
+                #self.todoWanted.append((int(show["tvdb_id"]), -1, -1)) #used to pause new shows if the settings say to
 
     def updateEpisodes(self):
         """
