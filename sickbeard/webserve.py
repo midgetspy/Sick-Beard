@@ -1232,6 +1232,7 @@ class ConfigProviders:
                       torrentleech_key=None,
                       btn_api_key=None,
                       newzbin_username=None, newzbin_password=None,t411_username=None,t411_password=None,
+                      gks_key=None,
                       provider_order=None):
 
         results = []
@@ -1309,6 +1310,8 @@ class ConfigProviders:
                 sickbeard.Cpasbien = curEnabled
             elif curProvider == 'piratebay':
                 sickbeard.THEPIRATEBAY = curEnabled
+            elif curProvider == 'gks':
+                sickbeard.GKS = curEnabled
             elif curProvider in newznabProviderDict:
                 newznabProviderDict[curProvider].enabled = bool(curEnabled)
             else:
@@ -1329,6 +1332,8 @@ class ConfigProviders:
 
         sickbeard.OMGWTFNZBS_UID = omgwtfnzbs_uid.strip()
         sickbeard.OMGWTFNZBS_KEY = omgwtfnzbs_key.strip()
+        
+        sickbeard.GKS_KEY = gks_key.strip()
 
         sickbeard.PROVIDER_ORDER = provider_list
 
