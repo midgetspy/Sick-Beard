@@ -1057,6 +1057,7 @@
 	                                        <option value="0" #if $sickbeard.TRAKT_METHOD_ADD == "0" then 'selected="selected"' else ""#>Skip All</option>
 	                                        <option value="1" #if $sickbeard.TRAKT_METHOD_ADD == "1" then 'selected="selected"' else ""#>Download Pilot Only</option>
 	                                        <option value="2" #if $sickbeard.TRAKT_METHOD_ADD == "2" then 'selected="selected"' else ""#>Get whole show</option>
+	                                        <option value="3" #if $sickbeard.TRAKT_METHOD_ADD == "3" then 'selected="selected"' else ""#>Only get first season</option>
 	                                    </select>
 	                                </label>
 	                                <label class="nocheck clearfix">
@@ -1071,13 +1072,7 @@
 	                                    <span class="component-desc">Remove an episode from the watchlist after it is downloaded</span>
 	                                </label>
 	                            </div>
-	                            <div class="field-pair">
-	                                <input type="checkbox" name="trakt_start_paused" id="trakt_start_paused" #if $sickbeard.TRAKT_START_PAUSED then "checked=\"checked\"" else ""# />
-	                                <label class="clearfix" for="trakt_start_paused">
-	                                    <span class="component-title">Start Paused:</span>
-	                                    <span class="component-desc">Starts shows grabbed from trakt watchlist paused</span>
-	                                </label>
-	                            </div>
+	                            
 							</div>
                             <div class="testNotification" id="testTrakt-result">Click below to test.</div>
                             <input type="button" class="btn" value="Test Trakt" id="testTrakt" />
