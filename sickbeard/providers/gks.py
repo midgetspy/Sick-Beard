@@ -86,8 +86,8 @@ class GksProvider(generic.TorrentProvider):
         if resultsTable:
             items = resultsTable.findAll("item")
             for item in items:
-                title = item.title.string.lower()
-                if ("vostfr" in title and (not show.subtitles)) or "aucun resultat" in title:
+                title = item.title.string
+                if ("VOSTFR" in title and (not show.subtitles)) or "aucun resultat" in title:
                     continue
                 else :
                     downloadURL = item.link.string
