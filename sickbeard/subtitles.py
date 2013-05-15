@@ -106,7 +106,7 @@ class SubtitlesFinder():
         myDB = db.DBConnection()
         today = datetime.date.today().toordinal()
         # you have 5 minutes to understand that one. Good luck
-        sqlResults = myDB.select('SELECT s.show_name, e.showid, e.season, e.episode, e.status, e.subtitles, e.subtitles_searchcount AS searchcount, e.subtitles_lastsearch AS lastsearch, e.location, (? - e.airdate) AS airdate_daydiff FROM tv_episodes AS e INNER JOIN tv_shows AS s ON (e.showid = s.tvdb_id) WHERE s.subtitles = 1 AND e.subtitles NOT LIKE (?) AND ((e.subtitles_searchcount <= 2 AND (? - e.airdate) > 7) OR (e.subtitles_searchcount <= 7 AND (? - e.airdate) <= 7)) AND (e.status IN ('+','.join([str(x) for x in Quality.DOWNLOADED])+') OR (e.status IN ('+','.join([str(x) for x in Quality.SNATCHED + Quality.SNATCHED_PROPER])+') AND e.location != ""))', [today, wantedLanguages(True), today, today])
+        sqlResults = myDB.select('SELECT s.show_name, e.showid, e.season, e.episode, e.status, e.subtitles, e.subtitles_searchcount AS searchcount, e.subtitles_lastsearch AS lastsearch, e.location, (? - e.airdate) AS airdate_daydiff FROM tv_episodes AS e INNER JOIN tv_shows AS s ON (e.showid = s.tvdb_id) WHERE s.subtitles = 1 AND e.subtitles NOT LIKE (?) AND ((e.subtitles_searchcount <= 2 AND (? - e.airdate) > 7) OR (e.subtitles_searchcount <= 7 AND (? - e.airdate) <= 7)) AND (e.status IN ('+','.join([str(x) for x in Quality.DOWNLOADED + [ARCHIVED]])+') OR (e.status IN ('+','.join([str(x) for x in Quality.SNATCHED + Quality.SNATCHED_PROPER])+') AND e.location != ""))', [today, wantedLanguages(True), today, today])
         if len(sqlResults) == 0:
             logger.log('No subtitles to download', logger.MESSAGE)
             return
@@ -123,8 +123,42 @@ class SubtitlesFinder():
                 # Recent shows rule 
                 (epToSub['airdate_daydiff'] <= 7 and epToSub['searchcount'] < 7 and now - datetime.datetime.strptime(epToSub['lastsearch'], '%Y-%m-%d %H:%M:%S') > datetime.timedelta(hours=rules['new'][epToSub['searchcount']]))):
                 logger.log('Downloading subtitles for episode %dx%d of show %s' % (epToSub['season'], epToSub['episode'], epToSub['show_name']), logger.DEBUG)
-                helpers.findCertainShow(sickbeard.showList, int(epToSub['showid'])).getEpisode(int(epToSub["season"]), int(epToSub["episode"])).downloadSubtitles()
-            
+                
+                showObj = helpers.findCertainShow(sickbeard.showList, int(epToSub['showid']))
+                if not showObj:
+                    logger.log(u'Show not found', logger.DEBUG)
+                    return
+                
+                epObj = showObj.getEpisode(int(epToSub["season"]), int(epToSub["episode"]))
+                if isinstance(epObj, str):
+                    logger.log(u'Episode not found', logger.DEBUG)
+                    return
+                
+                previous_subtitles = epObj.subtitles
+                
+                try:
+                    subtitles = epObj.downloadSubtitles()
+                    
+                    if sickbeard.SUBTITLES_DIR:
+                        for video in subtitles:
+                            subs_new_path = ek.ek(os.path.join, os.path.dirname(video.path), sickbeard.SUBTITLES_DIR)
+                            dir_exists = helpers.makeDir(subs_new_path)
+                            if not dir_exists:
+                                logger.log(u"Unable to create subtitles folder "+subs_new_path, logger.ERROR)
+                            else:
+                                helpers.chmodAsParent(subs_new_path)
+                                
+                            for subtitle in subtitles.get(video):
+                                new_file_path = ek.ek(os.path.join, subs_new_path, os.path.basename(subtitle.path))
+                                helpers.moveFile(subtitle.path, new_file_path)
+                                helpers.chmodAsParent(new_file_path)
+                    else:
+                        for video in subtitles:
+                            for subtitle in subtitles.get(video):
+                                helpers.chmodAsParent(subtitle.path)
+                except:
+                    logger.log(u'Unable to find subtitles', logger.DEBUG)
+                    return
 
     def _getRules(self):
         """

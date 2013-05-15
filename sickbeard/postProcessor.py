@@ -840,7 +840,7 @@ class PostProcessor(object):
                 
                 cur_ep.subtitles_searchcount = 0
                 
-                subtitles_lastsearch = '0001-01-01 00:00:00'
+                cur_ep.subtitles_lastsearch = '0001-01-01 00:00:00'
                 
                 cur_ep.is_proper = self.is_proper
                 

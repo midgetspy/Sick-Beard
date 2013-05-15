@@ -27,7 +27,7 @@ log = logging.getLogger(__name__)
 
 # list of common words which could be interpreted as countries, but which
 # are far too common to be able to say they represent a country
-country_common_words = frozenset([ 'bt' ])
+country_common_words = frozenset([ 'bt', 'bb' ])
 
 def process(mtree):
     for node in mtree.unidentified_leaves():
