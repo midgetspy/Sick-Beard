@@ -111,26 +111,16 @@ class T411Provider(generic.TorrentProvider):
             for row in rows:
                 link = row.find("a", title=True)
                 title = link['title']
+                id = row.find_all('td')[2].find_all('a')[0]['href'][1:].replace('torrents/nfo/?id=','')
+                downloadURL = ('http://www.t411.me/torrents/download/?id=%s' % id)
                 
-                pageURL = link['href']
-                if pageURL.startswith("//"):
-                    pageURL = "http:" + pageURL
+                quality = Quality.nameQuality( title )
+
+                if show:
+                    results.append( T411SearchResult( self.opener, link['title'], downloadURL, quality, str(show.audio_lang) ) )
+                else:
+                    results.append( T411SearchResult( self.opener, link['title'], downloadURL, quality ) )
                 
-                torrentPage = self.opener.open( pageURL )
-                torrentSoup = BeautifulSoup( torrentPage )
-               
-                downloadTorrentLink = torrentSoup.find("a", text=u"T�l�charger")
-                if downloadTorrentLink:
-                    
-                    downloadURL = self.url + downloadTorrentLink['href']
-                    
-                    quality = Quality.nameQuality( title )
-
-                    if show:
-                        results.append( T411SearchResult( self.opener, link['title'], downloadURL, quality, str(show.audio_lang) ) )
-                    else:
-                        results.append( T411SearchResult( self.opener, link['title'], downloadURL, quality ) )
-
         return results
     
     def getResult(self, episodes):
