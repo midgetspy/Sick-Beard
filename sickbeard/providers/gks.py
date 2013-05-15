@@ -72,7 +72,7 @@ class GksProvider(generic.TorrentProvider):
         showNames = show_name_helpers.allPossibleShowNames(ep_obj.show)
         results = []
         for showName in showNames:
-            for result in self.getSearchParams( "%s S%02dE%02d" % ( showName, ep_obj.season, ep_obj.episode), ep_obj.show.audio_lang) :
+            for result in self.getSearchParams( "%s S%02dE%02d" % (showName, ep_obj.season, ep_obj.episode), ep_obj.show.audio_lang) :
                 results.append(result)
         return results
         
@@ -86,16 +86,16 @@ class GksProvider(generic.TorrentProvider):
         if resultsTable:
             items = resultsTable.findAll("item")
             for item in items:
-                title = item.title.string
-                if "vostfr" in title.lower() or "aucun resultat" in title.lower():
+                title = item.title.string.lower()
+                if ("vostfr" in title and (not show.subtitles)) or "aucun resultat" in title:
                     continue
                 else :
                     downloadURL = item.link.string
                     quality = Quality.nameQuality(title)
                     if show:
-                        results.append( GksSearchResult( self.opener, title, downloadURL, quality, str(show.audio_lang) ) )
+                        results.append(GksSearchResult(self.opener, title, downloadURL, quality, str(show.audio_lang) ) )
                     else:
-                        results.append( GksSearchResult( self.opener, title, downloadURL, quality ) )
+                        results.append(GksSearchResult(self.opener, title, downloadURL, quality ) )
         else :
             logger.log(u"Please check your GKS.GS provider configuration", logger.ERROR)
         return results
