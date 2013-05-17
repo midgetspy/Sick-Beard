@@ -150,7 +150,7 @@ class TorrentDayProvider(generic.TorrentProvider):
                     uidhash = reRSS.findall(rss_res)
                     self.rssuid = uidhash[0][0]
                     self.rsshash = uidhash[0][1]
-                    self.rsslink = 'http://www.torrentday.com/torrents/rss?download;l24;l14;l7;l2;u={};tp={}'.format(self.rssuid,self.rsshash)
+                    self.rsslink = 'http://www.torrentday.com/torrents/rss?download;l24;l14;l7;l2;u={0};tp={1}'.format(self.rssuid,self.rsshash)
                     logger.log('RSS Url: {0}'.format(self.rsslink), logger.DEBUG)
             if not success:
                 logger.log("TorrentDay failed to log user '{0}' in. Incorrect Password?".format(sickbeard.TORRENTDAY_USERNAME), logger.ERROR)
