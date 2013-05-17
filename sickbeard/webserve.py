@@ -1033,7 +1033,7 @@ class ConfigPostProcessing:
 
     @cherrypy.expose
     def savePostProcessing(self, naming_pattern=None, naming_multi_ep=None,
-                    xbmc_data=None, mediabrowser_data=None, synology_data=None, sony_ps3_data=None, wdtv_data=None, tivo_data=None,
+                    xbmc_data=None, xbmc__frodo__data=None, mediabrowser_data=None, synology_data=None, sony_ps3_data=None, wdtv_data=None, tivo_data=None,
                     use_banner=None, keep_processed_dir=None, process_automatically=None, process_automatically_torrent=None, rename_episodes=None,
                     move_associated_files=None, tv_download_dir=None, torrent_download_dir=None, naming_custom_abd=None, naming_abd_pattern=None):
 
@@ -1088,6 +1088,7 @@ class ConfigPostProcessing:
         sickbeard.NAMING_CUSTOM_ABD = naming_custom_abd
 
         sickbeard.metadata_provider_dict['XBMC'].set_config(xbmc_data)
+        sickbeard.metadata_provider_dict['XBMC (Frodo)'].set_config(xbmc__frodo__data)
         sickbeard.metadata_provider_dict['MediaBrowser'].set_config(mediabrowser_data)
         sickbeard.metadata_provider_dict['Synology'].set_config(synology_data)
         sickbeard.metadata_provider_dict['Sony PS3'].set_config(sony_ps3_data)
