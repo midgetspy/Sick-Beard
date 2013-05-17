@@ -23,9 +23,8 @@ $(document).ready(function(){
     var bulkCheck = this;
     var whichBulkCheck = $(bulkCheck).attr('id');
 
-    $('.'+whichBulkCheck).each(function(){
-        if ($(this).closest('tr')[0].style.display != 'none')
-            this.checked = bulkCheck.checked
+    $('.'+whichBulkCheck+':visible').each(function(){
+        this.checked = bulkCheck.checked
     });
   });
 
@@ -42,11 +41,10 @@ $(document).ready(function(){
       var check = this;
       var found = 0;
 
-      $(name).each(function() {
+      $(name+':visible').each(function() {
         switch (found) {
           case 2: return false;
           case 1:
-            if ($(this).closest('tr')[0].style.display != 'none')
               this.checked = lastCheck.checked;
         }
 
@@ -54,7 +52,6 @@ $(document).ready(function(){
           found++;
       });
 
-      lastClick = this;
     });
 
   });
