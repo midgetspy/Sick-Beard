@@ -30,8 +30,8 @@ class NZBDownloader(object):
         self.lastRequestTime = None
         
     def waitBeforeNextRequest(self):
-        if self.lastRequestTime and self.lastRequestTime > ( time.mktime(time.localtime()) - 10):
-            time.sleep( 10 )
+        if self.lastRequestTime and self.lastRequestTime > ( time.mktime(time.localtime()) - 3):
+            time.sleep( 3 )
         self.lastRequestTime = time.gmtime()
         
     def open(self, request):
