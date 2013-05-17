@@ -153,10 +153,10 @@ class PostProcessor(object):
         if not file_path:
             return []
 
-        if file_path != self.file_path:
-            associated_dir = os.path.dirname(file_path)
-            associated_fname = os.path.basename(self.file_path) 
-            file_path = os.path.join(associated_dir, associated_fname)
+#        if file_path != self.file_path:
+#            associated_dir = os.path.dirname(file_path)
+#            associated_fname = os.path.basename(self.file_path) 
+#            file_path = os.path.join(associated_dir, associated_fname)
 
         file_path_list = []
     

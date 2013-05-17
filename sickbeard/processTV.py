@@ -76,7 +76,6 @@ def processDir (dirName, nzbName=None, recurse=False):
             files = ek.ek(os.listdir, dirName)
             dirs = [dirs]
 
-    process_result = False
     videoFiles = filter(helpers.isMediaFile, files)
 
     # If nzbName is set and there's more than one videofile in the folder, files will be lost (overwritten).
@@ -110,9 +109,9 @@ def processDir (dirName, nzbName=None, recurse=False):
 
     #Process Video File in all TV Subdir
     for dir in [x for x in dirs if validateDir(path, x, returnStr)]:
-
-#        process_result = False
-
+        
+        process_result = True
+        
         for processPath, processDir, fileList in ek.ek(os.walk, ek.ek(os.path.join, path, dir), topdown=False):
 
             videoFiles = filter(helpers.isMediaFile, fileList)
@@ -199,5 +198,16 @@ def validateDir(path, dirName, returnStr):
         if dirName.lower().startswith(ek.ek(os.path.realpath, sqlShow["location"]).lower()+os.sep) or dirName.lower() == ek.ek(os.path.realpath, sqlShow["location"]).lower():
             returnStr += logHelper(u"You're trying to post process an episode that's already been moved to its show dir", logger.ERROR)
             return False
+
+    #check if the dir have at least one tv video file
+    files = ek.ek(os.listdir, os.path.join(path, dirName))
+    videoFiles = filter(helpers.isMediaFile, files)
     
-    return True
+    for video in videoFiles:
+        try:
+            NameParser().parse(video)
+            return True
+        except InvalidNameException:
+            pass
+    
+    return False
