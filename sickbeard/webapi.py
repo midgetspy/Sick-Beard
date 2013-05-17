@@ -1462,7 +1462,7 @@ class CMD_SickBeardSearchTVDB(ApiCall):
         # optional
         self.name, args = self.check_params(args, kwargs, "name", None, False, "string", [])
         self.tvdbid, args = self.check_params(args, kwargs, "tvdbid", None, False, "int", [])
-        self.lang, args = self.check_params(args, kwargs, "lang", "en", False, "string", self.valid_languages.keys())
+        self.lang, args = self.check_params(args, kwargs, "lang", "fr", False, "string", self.valid_languages.keys())
         # super, missing, help
         ApiCall.__init__(self, args, kwargs)
 
@@ -1740,7 +1740,7 @@ class CMD_ShowAddExisting(ApiCall):
         if iqualityID or aqualityID:
             newQuality = Quality.combineQualities(iqualityID, aqualityID)
 
-        sickbeard.showQueueScheduler.action.addShow(int(self.tvdbid), self.location, SKIPPED, newQuality, int(self.flatten_folders)) #@UndefinedVariable
+        sickbeard.showQueueScheduler.action.addShow(int(self.tvdbid), self.location, SKIPPED, newQuality, int(self.flatten_folders),"fr", int(sickbeard.SUBTITLES_DEFAULT), sickbeard.AUDIO_SHOW_DEFAULT) #@UndefinedVariable
         return _responds(RESULT_SUCCESS, {"name": tvdbName}, tvdbName + " has been queued to be added")
 
 
@@ -1772,7 +1772,7 @@ class CMD_ShowAddNew(ApiCall):
         self.archive, args = self.check_params(args, kwargs, "archive", None, False, "list", ["sddvd", "hdtv", "rawhdtv", "fullhdtv", "hdwebdl", "fullhdwebdl", "hdbluray", "fullhdbluray"])
         self.flatten_folders, args = self.check_params(args, kwargs, "flatten_folders", str(sickbeard.FLATTEN_FOLDERS_DEFAULT), False, "bool", [])
         self.status, args = self.check_params(args, kwargs, "status", None, False, "string", ["wanted", "skipped", "archived", "ignored"])
-        self.lang, args = self.check_params(args, kwargs, "lang", "en", False, "string", self.valid_languages.keys())
+        self.lang, args = self.check_params(args, kwargs, "lang", "fr", False, "string", self.valid_languages.keys())
         # super, missing, help
         ApiCall.__init__(self, args, kwargs)
 
@@ -1862,7 +1862,7 @@ class CMD_ShowAddNew(ApiCall):
             else:
                 helpers.chmodAsParent(showPath)
 
-        sickbeard.showQueueScheduler.action.addShow(int(self.tvdbid), showPath, newStatus, newQuality, int(self.flatten_folders), self.lang) #@UndefinedVariable
+        sickbeard.showQueueScheduler.action.addShow(int(self.tvdbid), showPath, newStatus, newQuality, int(self.flatten_folders), self.lang, int(sickbeard.SUBTITLES_DEFAULT), sickbeard.AUDIO_SHOW_DEFAULT) #@UndefinedVariable
         return _responds(RESULT_SUCCESS, {"name": tvdbName}, tvdbName + " has been queued to be added")
 
 
