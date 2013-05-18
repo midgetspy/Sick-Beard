@@ -13,7 +13,7 @@
     $.fn.ajaxHisttrunc = function (options) {
         options = $.extend({}, $.ajaxHisttrunc.defaults, options);
 
-        $('.histtrunc').click(function () {
+        $('.histTrunc').click(function () {
             var parent = $(this).parent();
 
             // put the ajax spinner (for non white bg) placeholder while we wait
