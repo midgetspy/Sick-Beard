@@ -382,9 +382,26 @@
                         	<input class="btn" type="button" value="Test Connection" id="testTorrent" class="btn test-button"/>
                         	<input type="submit" class="btn config_submitter" value="Save Changes" /><br/>
                             </div>
-                    </div>                       
+                    </div>
+                    </div><!-- /component-group3 //-->
+                    <div id="core-component-group4" class="component-group clearfix">
+                    <div class="field-pair">
+                            <label class="clearfix" for="prefered_method">
+                                <span class="component-title jumbo">Preferred Method</span>
+                                <span class="component-desc">
+                                <select name="prefered_method" id="preferred_method">
+                                #set $prefered_method_text = {'torrent': "Torrent", 'nzb': "Newsgroup"}
+                                #for $curAction in ('torrent', 'nzb'):
+                                  #if $sickbeard.PREFERED_METHOD == $curAction:
+                                    #set $prefered_method = "selected=\"selected\""
+                                  #else
+                                    #set $prefered_method = ""
+                                  #end if
+                                  <option value="$curAction" $prefered_method>$prefered_method_text[$curAction]</option>  
+                                 #end for
+                                  </select>                     
                     </fieldset>
-                </div><!-- /component-group3 //-->
+                </div><!-- /component-group4 //-->
 
 				<div class="component-group-save">
                 <input type="submit" class="btn config_submitter button" value="Save Changes" /><br/>

@@ -237,6 +237,13 @@ def pickBestResult(results, quality_list=None, episode=None):
     # find the best result for the current episode
         bestResult = None
         for cur_result in results:
+            curmethod='nzb'
+            bestmethod='nzb'
+            if cur_result.resultType == 'torrentdata' or cur_result.resultType == 'torrent':
+                curmethod='torrent' 
+            if bestResult:
+                if bestResult.resultType == 'torrentdata' or bestResult.resultType == 'torrent':
+                    bestmethod='torrent'
             if hasattr(cur_result,'item'):
                 if hasattr(cur_result.item,'nzburl'):
                     eplink=cur_result.item.nzburl
@@ -257,7 +264,7 @@ def pickBestResult(results, quality_list=None, episode=None):
                 logger.log(eplink +" was already downloaded so let's skip it assuming the download failed, you can erase the downloaded links for that episode if you want", logger.DEBUG)
                 continue
         
-            if not bestResult or bestResult.quality < cur_result.quality and cur_result.quality != Quality.UNKNOWN:
+            if ((not bestResult or bestResult.quality < cur_result.quality and cur_result.quality != Quality.UNKNOWN)) or (bestmethod != sickbeard.PREFERED_METHOD and curmethod ==  sickbeard.PREFERED_METHOD and cur_result.quality != Quality.UNKNOWN):
                 bestResult = cur_result
             
             elif bestResult.quality == cur_result.quality:

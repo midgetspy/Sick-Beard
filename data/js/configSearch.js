@@ -114,6 +114,13 @@ $(document).ready(function(){
     
     $('#use_torrents').click(function(){
     	toggle_torrent_title();
+    	
+    $('#prefered_method').change($(this).prefered_method_handler);
+	
+	$(this).prefered_method_handler();
+    
+    $('#use_torrents').click(function(){
+    	toggle_torrent_title();
     });
 
     $('#testTorrent').click(function(){

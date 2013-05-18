@@ -153,7 +153,7 @@ USENET_RETENTION = None
 TORRENT_METHOD = None
 TORRENT_DIR = None
 DOWNLOAD_PROPERS = None
-
+PREFERED_METHOD = None
 SEARCH_FREQUENCY = None
 BACKLOG_SEARCH_FREQUENCY = 1
 
@@ -385,7 +385,7 @@ def initialize(consoleLogging=True):
     with INIT_LOCK:
 
         global LOG_DIR, WEB_PORT, WEB_LOG, WEB_ROOT, WEB_USERNAME, WEB_PASSWORD, WEB_HOST, WEB_IPV6, USE_API, API_KEY, ENABLE_HTTPS, HTTPS_CERT, HTTPS_KEY, \
-                USE_NZBS, USE_TORRENTS, NZB_METHOD, NZB_DIR, DOWNLOAD_PROPERS, TORRENT_METHOD, \
+                USE_NZBS, USE_TORRENTS, NZB_METHOD, NZB_DIR, DOWNLOAD_PROPERS, TORRENT_METHOD, PREFERED_METHOD, \
                 SAB_USERNAME, SAB_PASSWORD, SAB_APIKEY, SAB_CATEGORY, SAB_HOST, \
                 NZBGET_PASSWORD, NZBGET_CATEGORY, NZBGET_HOST, currentSearchScheduler, backlogSearchScheduler, \
                 TORRENT_USERNAME, TORRENT_PASSWORD, TORRENT_HOST, TORRENT_PATH, TORRENT_RATIO, TORRENT_PAUSED, TORRENT_LABEL, \
@@ -517,6 +517,10 @@ def initialize(consoleLogging=True):
         TORRENT_METHOD = check_setting_str(CFG, 'General', 'torrent_method', 'blackhole')
         if TORRENT_METHOD not in ('blackhole', 'utorrent', 'transmission', 'deluge', 'download_station'):
             TORRENT_METHOD = 'blackhole'
+
+        PREFERED_METHOD = check_setting_str(CFG, 'General', 'prefered_method', 'nzb')
+        if PREFERED_METHOD not in ('torrent', 'nzb'):
+            PREFERED_METHOD = 'nzb'
 
         DOWNLOAD_PROPERS = bool(check_setting_int(CFG, 'General', 'download_propers', 1))
         USENET_RETENTION = check_setting_int(CFG, 'General', 'usenet_retention', 500)
@@ -1178,7 +1182,8 @@ def save_config():
     new_config['General']['use_nzbs'] = int(USE_NZBS)
     new_config['General']['use_torrents'] = int(USE_TORRENTS)
     new_config['General']['nzb_method'] = NZB_METHOD
-    new_config['General']['torrent_method'] = TORRENT_METHOD    
+    new_config['General']['torrent_method'] = TORRENT_METHOD 
+    new_config['General']['prefered_method'] = PREFERED_METHOD    
     new_config['General']['usenet_retention'] = int(USENET_RETENTION)
     new_config['General']['search_frequency'] = int(SEARCH_FREQUENCY)
     new_config['General']['download_propers'] = int(DOWNLOAD_PROPERS)
