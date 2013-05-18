@@ -53,14 +53,25 @@ class T411Provider(generic.TorrentProvider):
         else:
             return urllib.urlencode( {'search': searchString, 'cat' : 210, 'submit' : 'Recherche', 'subcat': subcat } )
 
+    def seasonValue(self, season):
+        values = [968, 969, 970, 971, 972, 973, 974, 975, 976, 977, 978, 979, 980, 981, 982, 983, 984, 985, 986, 987, 988, 989, 990, 991, 994, 992, 993, 995, 996, 997]
+        return values[int(season) -1]
+
+    def episodeValue(self, episode):
+        values = [937, 938, 939, 940, 941, 942, 943, 944, 946, 947, 948, 949, 950, 951, 952, 954, 953, 955, 956, 957, 958, 959, 960, 961, 962, 963, 964, 965, 966, 967, 1088, 1089, 1090, 1091, 1092, 1093, 1094, 1095, 1096, 1097, 1098, 1099, 1100, 1101, 1102, 1103, 1104, 1105, 1106, 1107, 1108, 1109, 1110, 1110, 1111, 1112, 1113, 1114, 1115, 1116, 1117]
+        return values[int(episode) - 1]
+        
     def _get_season_search_strings(self, show, season):
 
         showNames = show_name_helpers.allPossibleShowNames(show)
         results = []
         for showName in showNames:
-            results.append( self.getSearchParams(showName + " S%02d" % season, show.audio_lang, 433 ))
-            results.append( self.getSearchParams(showName + " S%02d" % season, show.audio_lang, 637 ))
-            results.append( self.getSearchParams(showName + " S%02d" % season, show.audio_lang, 634 ))
+            if (int(season) < 31):
+                results.append( self.getSearchParams(showName, show.audio_lang, 433 ) + "&" + urllib.urlencode({'term[46][]': 936, 'term[45][]': self.seasonValue(season)}))
+                results.append( self.getSearchParams(showName, show.audio_lang, 637 ) + "&" + urllib.urlencode({'term[46][]': 936, 'term[45][]': self.seasonValue(season)}))
+            #results.append( self.getSearchParams(showName + " S%02d" % season, show.audio_lang, 433 )) TOO MANY ERRORS
+            #results.append( self.getSearchParams(showName + " S%02d" % season, show.audio_lang, 637 ))
+            #results.append( self.getSearchParams(showName + " S%02d" % season, show.audio_lang, 634 ))
             results.append( self.getSearchParams(showName + " saison %02d" % season, show.audio_lang, 433 ))
             results.append( self.getSearchParams(showName + " saison %02d" % season, show.audio_lang, 637 ))
             results.append( self.getSearchParams(showName + " saison %02d" % season, show.audio_lang, 634 ))
@@ -72,13 +83,17 @@ class T411Provider(generic.TorrentProvider):
         results = []
         for showName in showNames:
             results.append( self.getSearchParams( "%s S%02dE%02d" % ( showName, ep_obj.season, ep_obj.episode), ep_obj.show.audio_lang, 433 ))
-            results.append( self.getSearchParams( "%s %dx%d" % ( showName, ep_obj.season, ep_obj.episode ), ep_obj.show.audio_lang , 433 ))
+            if (int(ep_obj.season) < 31 and int(ep_obj.episode) < 61):
+                results.append( self.getSearchParams( showName, ep_obj.show.audio_lang, 433)+ "&" + urllib.urlencode({'term[46][]': self.episodeValue(ep_obj.episode), 'term[45][]': self.seasonValue(ep_obj.season)}))
+            #results.append( self.getSearchParams( "%s %dx%d" % ( showName, ep_obj.season, ep_obj.episode ), ep_obj.show.audio_lang , 433 )) MAY RETURN 1x12 WHEN SEARCHING 1x1
             results.append( self.getSearchParams( "%s %dx%02d" % ( showName, ep_obj.season, ep_obj.episode ), ep_obj.show.audio_lang, 433 ))
             results.append( self.getSearchParams( "%s S%02dE%02d" % ( showName, ep_obj.season, ep_obj.episode), ep_obj.show.audio_lang, 637 ))
-            results.append( self.getSearchParams( "%s %dx%d" % ( showName, ep_obj.season, ep_obj.episode ), ep_obj.show.audio_lang, 637 ))
+            if (int(ep_obj.season) < 31 and int(ep_obj.episode) < 61):
+                results.append( self.getSearchParams( showName, ep_obj.show.audio_lang, 637)+ "&" + urllib.urlencode({'term[46][]': self.episodeValue(ep_obj.episode), 'term[45][]': self.seasonValue(ep_obj.season)}))
+            #results.append( self.getSearchParams( "%s %dx%d" % ( showName, ep_obj.season, ep_obj.episode ), ep_obj.show.audio_lang, 637 ))
             results.append( self.getSearchParams( "%s %dx%02d" % ( showName, ep_obj.season, ep_obj.episode ), ep_obj.show.audio_lang, 637 ))
             results.append( self.getSearchParams( "%s S%02dE%02d" % ( showName, ep_obj.season, ep_obj.episode), ep_obj.show.audio_lang, 634))
-            results.append( self.getSearchParams( "%s %dx%d" % ( showName, ep_obj.season, ep_obj.episode ), ep_obj.show.audio_lang, 634 ))
+            #results.append( self.getSearchParams( "%s %dx%d" % ( showName, ep_obj.season, ep_obj.episode ), ep_obj.show.audio_lang, 634 ))
             results.append( self.getSearchParams( "%s %dx%02d" % ( showName, ep_obj.season, ep_obj.episode ), ep_obj.show.audio_lang, 634 ))
         return results
     
