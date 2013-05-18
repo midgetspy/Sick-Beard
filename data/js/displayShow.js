@@ -2,7 +2,7 @@ $(document).ready(function(){
 
     $('#sbRoot').ajaxEpSearch({'colorRow': true});
     $('#sbRoot').ajaxEpSubtitlesSearch({'colorRow': true});
-    $('#sbRoot').ajaxHisttrunc({'colorRow': true});
+    $('#sbRoot').ajaxHisttrunc();
 
     $('#seasonJump').change(function() {
         var id = $(this).val();
