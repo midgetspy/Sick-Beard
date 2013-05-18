@@ -143,7 +143,7 @@ class CpasbienSearchResult:
         self.title = title
         self.url = url
         self.quality = quality
-        self.audio_langs=[audio_langs]
+        self.audio_langs=audio_langs
         
     def getNZB(self):
         return self.opener.open( self.url , 'wb').read()

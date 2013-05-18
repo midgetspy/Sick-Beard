@@ -44,4 +44,4 @@ class NZBIndex(NZBDownloader):
                              
         for tr in results:
             nzblink = tr.find("a", text="Download")
-            return NZBGetURLSearchResult(self, nzblink.get("href"), None, refererURL)
+            return NZBGetURLSearchResult(self, nzblink.get("href"), None, nzblink.get("href"))

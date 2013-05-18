@@ -3163,6 +3163,16 @@ class Home:
         redirect("/home/displayShow?show=" + show)
 
     @cherrypy.expose
+    def trunchistory(self, epid):
+        
+        myDB = db.DBConnection()
+        nbep = myDB.select("Select count(*) from episode_links where episode_id=?",[epid])
+        myDB.action("DELETE from episode_links where episode_id=?",[epid])
+        messnum = str(nbep[0][0]) + ' history links deleted'
+        ui.notifications.message('Episode History Truncated' , messnum)
+        return json.dumps({'result': 'ok'})
+    
+    @cherrypy.expose
     def searchEpisode(self, show=None, season=None, episode=None):
 
         # retrieve the episode object and fail if we can't get one

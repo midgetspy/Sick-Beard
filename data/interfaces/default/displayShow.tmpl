@@ -89,6 +89,7 @@
 <script type="text/javascript" src="$sbRoot/js/plotTooltip.js?$sbPID"></script>
 <script type="text/javascript" src="$sbRoot/js/ajaxEpSearch.js?$sbPID"></script>
 <script type="text/javascript" src="$sbRoot/js/ajaxEpSubtitles.js?$sbPID"></script>
+<script type="text/javascript" src="$sbRoot/js/ajaxhisttrunc.js?$sbPID"></script>
 
 <div class="align-left"><b>Change Show:</b>
 <div class="navShow"><img id="prevShow" width="16" height="18" src="$sbRoot/images/prev.gif" alt="&lt;&lt;" title="Prev Show" /></div>
@@ -209,13 +210,13 @@ Change Audio of selected episodes to
 #for $epResult in $sqlResults:
 
     #if int($epResult["season"]) != $curSeason:
-  <tr><td colspan="10"><a name="season-$epResult["season"]"></a></td></tr>
+  <tr><td colspan="11"><a name="season-$epResult["season"]"></a></td></tr>
   <tr class="seasonheader" id="season-$epResult["season"]">
     <td colspan="9">
         <h2>#if int($epResult["season"]) == 0 then "Specials" else "Season "+str($epResult["season"])#</h2>
     </td>
   </tr>
-  <tr id="season-$epResult["season"]-cols"><th width="1%"><input type="checkbox" class="seasonCheck" id="$epResult["season"]" /></th><th>NFO</th><th>TBN</th><th>Episode</th><th>Name</th><th class="nowrap">Airdate</th><th>Filename</th><th>Audio</th>#if $sickbeard.USE_SUBTITLES and $show.subtitles then "<th>Subs</th>" else ""#<th>Status</th><th>Search</th></tr>
+  <tr id="season-$epResult["season"]-cols"><th width="1%"><input type="checkbox" class="seasonCheck" id="$epResult["season"]" /></th><th>NFO</th><th>TBN</th><th>Episode</th><th>Name</th><th class="nowrap">Airdate</th><th>Filename</th><th>Audio</th>#if $sickbeard.USE_SUBTITLES and $show.subtitles then "<th>Subs</th>" else ""#<th>Status</th><th>Search</th><th>Hist</th></tr>
         #set $curSeason = int($epResult["season"])
     #end if    
 
@@ -280,6 +281,9 @@ $epLoc
       <a class="epSubtitlesSearch" href="searchEpisodeSubtitles?show=$show.tvdbid&amp;season=$epResult["season"]&amp;episode=$epResult["episode"]"><img src="$sbRoot/images/closed_captioning.png" height="16" alt="search subtitles" title="Search Subtitles" /></a>
     #end if
     </td>
+    <td align="center">
+     <a class="histtrunc" href="trunchistory?epid=$epResult["episode_id"]"><img src="$sbRoot/images/corbeille.png" height="16" alt="trunc" title="Trunc Downloaded links History" /></a>
+     </td>
    </tr>
 
 #end for

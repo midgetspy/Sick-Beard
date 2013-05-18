@@ -25,7 +25,7 @@ from sickbeard.providers.generic import GenericProvider
 from sickbeard import encodingKludge as ek
 from sickbeard.name_parser.parser import NameParser, InvalidNameException
 
-MAX_DB_VERSION = 13
+MAX_DB_VERSION = 14
 
 
 class MainSanityCheck(db.DBSanityCheck):
@@ -100,7 +100,8 @@ class InitialSchema (db.SchemaUpgrade):
             "CREATE TABLE tv_shows (show_id INTEGER PRIMARY KEY, location TEXT, show_name TEXT, tvdb_id NUMERIC, network TEXT, genre TEXT, runtime NUMERIC, quality NUMERIC, airs TEXT, status TEXT, seasonfolders NUMERIC, paused NUMERIC, startyear NUMERIC);",
             "CREATE TABLE tv_episodes (episode_id INTEGER PRIMARY KEY, showid NUMERIC, tvdbid NUMERIC, name TEXT, season NUMERIC, episode NUMERIC, description TEXT, airdate NUMERIC, hasnfo NUMERIC, hastbn NUMERIC, status NUMERIC, location TEXT);",
             "CREATE TABLE info (last_backlog NUMERIC, last_tvdb NUMERIC);",
-            "CREATE TABLE history (action NUMERIC, date NUMERIC, showid NUMERIC, season NUMERIC, episode NUMERIC, quality NUMERIC, resource TEXT, provider NUMERIC);"
+            "CREATE TABLE history (action NUMERIC, date NUMERIC, showid NUMERIC, season NUMERIC, episode NUMERIC, quality NUMERIC, resource TEXT, provider NUMERIC);",
+            "CREATE TABLE episode_links (episode_id INTEGER, link TEXT);"
         ]
         for query in queries:
             self.connection.action(query)
@@ -696,4 +697,12 @@ class AddSubtitlesSupport(Add1080pAndRawHDQualities):
         self.addColumn("tv_episodes", "subtitles", "TEXT", "")
         self.addColumn("tv_episodes", "subtitles_searchcount")
         self.addColumn("tv_episodes", "subtitles_lastsearch", "TIMESTAMP", str(datetime.datetime.min))
+        self.incDBVersion()
+        
+class AddSubtitlesSupport(AddSubtitlesSupport):    
+    def test(self):
+        return self.checkDBVersion() >= 14
+
+    def execute(self):
+        self.connection.action("CREATE TABLE episode_links (episode_id INTEGER, link TEXT)")
         self.incDBVersion()
