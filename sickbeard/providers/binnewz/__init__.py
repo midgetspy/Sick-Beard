@@ -51,7 +51,7 @@ class BinNewzProvider(generic.NZBProvider):
         showNames = show_name_helpers.allPossibleShowNames(show)
         result = []
         for showName in showNames:
-            result.append( showName + ".S%02d" % season )
+            result.append( showName + ".saison %02d" % season )
         return result
 
     def _get_episode_search_strings(self, ep_obj):
@@ -73,9 +73,21 @@ class BinNewzProvider(generic.NZBProvider):
     def _doSearch(self, searchString, show=None, season=None):
         
         logger.log("BinNewz : Searching for " + searchString)
+        if show.quality==3:
+            cat1='24'
+            cat2='7'
+            cat3='56'
+            data = 'chkInit=1&edTitre='+searchString+'&chkTitre=on&chkFichier=on&chkCat=on&cats%5B%5D='+cat1+'&cats%5B%5D='+cat2+'&cats%5B%5D='+cat3+'&edAge=&edYear='
         
-        data = urllib.urlencode({'b_submit': 'BinnewZ', 'cats[]' : 'all', 'edSearchAll' : searchString, 'sections[]': 'all'})
+        elif show.quality==500:
+            cat1='44'
+            cat2='53'
+            data = 'chkInit=1&edTitre='+searchString+'&chkTitre=on&chkFichier=on&chkCat=on&cats%5B%5D='+cat1+'&cats%5B%5D='+cat2+'&edAge=&edYear='
         
+        else:
+            data = urllib.urlencode({'b_submit': 'BinnewZ', 'cats[]' : 'all', 'edSearchAll' : searchString, 'sections[]': 'all'})
+              
+       
         try:
             soup = BeautifulSoup( urllib2.urlopen("http://www.binnews.in/_bin/search2.php", data) )
         except Exception, e:
@@ -209,10 +221,12 @@ class BinNewzProvider(generic.NZBProvider):
                         
                 filenameLower = filename.lower()
                 if "720p" in qualityStr:
-                    if "HDTV" in name or "hdtv" in filenameLower:
-                        quality = Quality.HDTV
-                    else:
+                    if "web-dl" in name or "web-dl" in filenameLower:
+                        quality = Quality.HDWEBDL
+                    elif "bluray" in filenameLower or "blu-ray" in filenameLower:
                         quality = Quality.HDBLURAY
+                    else:
+                        quality=Quality.HDWEBDL
                     minSize = 600
                 elif "1080p" in qualityStr:
                     if "web-dl" in name or "web-dl" in filenameLower:
@@ -224,7 +238,7 @@ class BinNewzProvider(generic.NZBProvider):
                     minSize = 600
                 else:
                     quality = Quality.SDTV
-                    minSize = 150
+                    minSize = 130
                 
                 # FIXME
                 if show and show.quality == 28 and quality == Quality.SDTV:
