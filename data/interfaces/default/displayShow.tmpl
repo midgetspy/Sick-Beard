@@ -281,6 +281,9 @@ $epLoc
       <a class="epSubtitlesSearch" href="searchEpisodeSubtitles?show=$show.tvdbid&amp;season=$epResult["season"]&amp;episode=$epResult["episode"]"><img src="$sbRoot/images/closed_captioning.png" height="16" alt="search subtitles" title="Search Subtitles" /></a>
     #end if
     </td>
+    <td align="center">
+     <a class="hisTrunc" href="trunchistory?epid=$epResult["episode_id"]"><img src="$sbRoot/images/corbeille.png" height="16" alt="trunc" title="Trunc Downloaded links History" /></a>
+    </td>
    </tr>
 
 #end for
