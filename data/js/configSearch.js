@@ -111,14 +111,12 @@ $(document).ready(function(){
     $('#torrent_method').change($(this).torrent_method_handler);
 	
 	$(this).torrent_method_handler();
-    
+	   
     $('#use_torrents').click(function(){
     	toggle_torrent_title();
     	
     });
-    $('#prefered_method').change($(this).prefered_method_handler);
-	
-	$(this).prefered_method_handler();
+    
 
     $('#testTorrent').click(function(){
         $('#testTorrent-result').html(loading);
@@ -130,5 +128,8 @@ $(document).ready(function(){
         $.get(sbRoot+"/home/testTorrent", {'torrent_method': torrent_method, 'host': torrent_host, 'username': torrent_username, 'password': torrent_password}, 
         function (data){ $('#testTorrent-result').html(data); });
     });
-
+    $('#prefered_method').change($(this).prefered_method_handler);
+	
+	$(this).prefered_method_handler();
+   
 });
