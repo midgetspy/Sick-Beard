@@ -450,7 +450,7 @@ def findSeason(show, season):
         # pick the best season NZB
         bestSeasonNZB = None
         if SEASON_RESULT in foundResults:
-            bestSeasonNZB = pickBestResult(foundResults[SEASON_RESULT], anyQualities+bestQualities,episode=show.episodes[1])
+            bestSeasonNZB = pickBestResult(foundResults[SEASON_RESULT], anyQualities+bestQualities,episode=show.episodes[min(show.episodes)])
     
         highest_quality_overall = 0
         for cur_season in foundResults:
@@ -594,6 +594,6 @@ def findSeason(show, season):
             if len(foundResults[curEp]) == 0:
                 continue
             print curEp
-            finalResults.append(pickBestResult(foundResults[curEp],None,episode=show.episodes[1]))
+            finalResults.append(pickBestResult(foundResults[curEp],None,episode=show.episodes[min(show.episodes)]))
     
         return finalResults

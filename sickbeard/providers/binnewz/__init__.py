@@ -51,7 +51,7 @@ class BinNewzProvider(generic.NZBProvider):
         showNames = show_name_helpers.allPossibleShowNames(show)
         result = []
         for showName in showNames:
-            result.append( showName + ".saison %02d" % season )
+            result.append( showName + ".saison %2d" % season )
         return result
 
     def _get_episode_search_strings(self, ep_obj):
