@@ -70,6 +70,19 @@ ep_regexes = [
                ((?<![. _-])(?<!WEB)                        # Make sure this is really the release group
                -(?P<release_group>[^- ]+))?)?$              # Group
                '''),
+
+              ('standard_ep',
+               # Show.Name.S01EP02.Source.Quality.Etc-Group
+               # Show Name - S01EP02 - My Ep Name
+               # Show.Name.S01.EP03.My.Ep.Name
+               '''
+               ^((?P<series_name>.+?)[. _-]+)?             # Show_Name and separator
+               s(?P<season_num>\d+)[. _-]*                 # S01 and optional separator
+               ep(?P<ep_num>\d+)                            # E02 and separator
+               [. _-]*((?P<extra_info>.+?)                 # Source_Quality_Etc-
+               ((?<![. _-])(?<!WEB)                        # Make sure this is really the release group
+               -(?P<release_group>[^- ]+))?)?$              # Group
+               '''),
                                         
               ('standard',
                # Show.Name.S01E02.Source.Quality.Etc-Group
@@ -155,7 +168,7 @@ ep_regexes = [
                # Show.Name.S01.Source.Quality.Etc-Group
                '''
                ^((?P<series_name>.+?)[. _-]+)?             # Show_Name and separator
-               s(eason[. _-])?                             # S01/Season 01
+               s((ea|ai)son[. _-])?                        # S01/Season 01
                (?P<season_num>\d+)[. _-]*                  # S01 and optional separator
                [. _-]*((?P<extra_info>.+?)                 # Source_Quality_Etc-
                ((?<![. _-])(?<!WEB)                        # Make sure this is really the release group
