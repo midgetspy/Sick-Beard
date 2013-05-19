@@ -33,7 +33,7 @@ class TorrentDayProvider(generic.TorrentProvider):
         self.rsslink = ''
         self.url = 'http://www.torrentday.com/'
         self.downloadUrl = 'http://www.torrentday.com/download.php/'
-        self.token = None
+        #self.token = None
                 
         logger.log('Loading TorrentDay')
         
@@ -139,7 +139,7 @@ class TorrentDayProvider(generic.TorrentProvider):
                         elif cookies.name == 'pass':
                             passwd = 'PASS={0}; '.format(cookies.value)
                     self.cj = cookie
-                    self.token = ('{0}{1}'.format(uid,passwd))
+                    #self.token = ('{0}{1}'.format(uid,passwd))
                     success = True
                     logger.log("TorrentDay session: {0}".format(self.token), logger.DEBUG)
                     logger.log("TorrentDay successfully logged user '{0}' in.".format(sickbeard.TORRENTDAY_USERNAME))
