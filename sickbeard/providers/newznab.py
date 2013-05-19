@@ -113,7 +113,7 @@ class NewznabProvider(generic.NZBProvider):
     def _get_episode_search_strings(self, ep_obj):
         showNames = show_name_helpers.allPossibleShowNames(ep_obj.show)
         for show_name in showNames:
-            ep_obj.show.name=show_name
+            ep_obj.show.sname=show_name
             params = {}
 
             if not ep_obj:
@@ -125,9 +125,9 @@ class NewznabProvider(generic.NZBProvider):
         # if we can't then fall back on a very basic name search
             else:
                 if ep_obj.show.audio_lang=="fr":
-                    params['q'] = helpers.sanitizeSceneName(ep_obj.show.name) + " french"
+                    params['q'] = helpers.sanitizeSceneName(ep_obj.show.sname) + " french"
                 else:
-                    params['q'] = helpers.sanitizeSceneName(ep_obj.show.name)
+                    params['q'] = helpers.sanitizeSceneName(ep_obj.show.sname)
 
             if ep_obj.show.air_by_date:
                 date_str = str(ep_obj.airdate)
@@ -149,7 +149,7 @@ class NewznabProvider(generic.NZBProvider):
                 for cur_exception in name_exceptions:
 
                 # don't add duplicates
-                    if cur_exception == ep_obj.show.name:
+                    if cur_exception == ep_obj.show.sname:
                         continue
 
                     cur_return = params.copy()
