@@ -129,15 +129,13 @@ def processDir (dirName, nzbName=None, recurse=False):
                     returnStr += logHelper(u"Warning: unable to remove the folder " + dirName + ": " + ex(e), logger.WARNING)
 
             returnStr += logHelper(u"Processing succeeded for "+cur_video_file_path)
-            if sickbeard.TV_DOWNLOAD_DIR !="":
-                helpers.del_empty_dirs(sickbeard.TV_DOWNLOAD_DIR)
-            if sickbeard.TORRENT_DOWNLOAD_DIR !="":
-                helpers.del_empty_dirs(sickbeard.TORRENT_DOWNLOAD_DIR)
-                        
+                                    
         else:
             returnStr += logHelper(u"Processing failed for "+cur_video_file_path+": "+process_fail_message, logger.WARNING)
         if sickbeard.TV_DOWNLOAD_DIR !="":
-            helpers.del_empty_dirs(sickbeard.TV_DOWNLOAD_DIR)
+            for i in range(1,5):
+                helpers.del_empty_dirs(sickbeard.TV_DOWNLOAD_DIR)
         if sickbeard.TORRENT_DOWNLOAD_DIR !="":
-            helpers.del_empty_dirs(sickbeard.TORRENT_DOWNLOAD_DIR)
+            for i in range(1,5):
+                helpers.del_empty_dirs(sickbeard.TORRENT_DOWNLOAD_DIR)
     return returnStr
