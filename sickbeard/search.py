@@ -237,13 +237,13 @@ def pickBestResult(results, quality_list=None, episode=None):
     # find the best result for the current episode
         bestResult = None
         for cur_result in results:
-            curmethod='nzb'
-            bestmethod='nzb'
-            if cur_result.resultType == 'torrentdata' or cur_result.resultType == 'torrent':
-                curmethod='torrent' 
+            curmethod="nzb"
+            bestmethod="nzb"
+            if cur_result.resultType == "torrentdata" or cur_result.resultType == "torrent":
+                curmethod="torrent" 
             if bestResult:
-                if bestResult.resultType == 'torrentdata' or bestResult.resultType == 'torrent':
-                    bestmethod='torrent'
+                if bestResult.resultType == "torrentdata" or bestResult.resultType == "torrent":
+                    bestmethod="torrent"
             if hasattr(cur_result,'item'):
                 if hasattr(cur_result.item,'nzburl'):
                     eplink=cur_result.item.nzburl
