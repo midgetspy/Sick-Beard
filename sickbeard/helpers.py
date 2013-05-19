@@ -433,6 +433,21 @@ def moveFile(srcFile, destFile):
         copyFile(srcFile, destFile)
         ek.ek(os.unlink, srcFile)
 
+def del_empty_dirs(s_dir):
+    b_empty = True
+
+    for s_target in os.listdir(s_dir):
+        s_path = os.path.join(s_dir, s_target)
+        if os.path.isdir(s_path):
+            if not del_empty_dirs(s_path):
+                b_empty = False
+        else:
+            b_empty = False
+
+    if b_empty:
+        logger.log(u"Deleting " + s_dir.decode('utf-8')+ ' because it is empty')
+        os.rmdir(s_dir)
+
 def make_dirs(path):
     """
     Creates any folders that are missing and assigns them the permissions of their
