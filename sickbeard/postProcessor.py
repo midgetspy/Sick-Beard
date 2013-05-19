@@ -153,6 +153,7 @@ class PostProcessor(object):
             return []
 
         file_path_list = []
+        dumb_files_list =[]
     
         base_name = file_path.rpartition('.')[0]+'.'
         
@@ -175,9 +176,48 @@ class PostProcessor(object):
                 continue
 
             file_path_list.append(associated_file_path)
-        
+                    
         return file_path_list
+    def _list_dummy_files(self, file_path, oribasename=None,directory=None):
+        """
+        For a given file path searches for dummy files
+        
+        Returns: deletes all files which are dummy to the given file
+        """
 
+        if not file_path:
+            return []
+        dumb_files_list =[]
+        if oribasename:
+            base_name=oribasename
+        else:
+            base_name = file_path.rpartition('.')[0]+'.'
+        
+        # don't strip it all and use cwd by accident
+        if not base_name:
+            return []
+        
+        # don't confuse glob with chars we didn't mean to use
+        base_name = re.sub(r'[\[\]\*\?]', r'[\g<0>]', base_name)
+        if directory =="d":
+            cur_dir=file_path
+        else:
+            cur_dir=self.folder_path
+        ass_files=ek.ek(glob.glob, base_name+'*')
+        dum_files=ek.ek(glob.glob, cur_dir+'\*')
+        for dummy_file_path in dum_files:
+            if os.path.isdir(dummy_file_path):
+                self._list_dummy_files(dummy_file_path, base_name,"d")
+            elif (dummy_file_path in ass_files or dummy_file_path==self.file_path) or dummy_file_path[len(dummy_file_path)-3:] in common.mediaExtensions or sickbeard.MOVE_ASSOCIATED_FILES:
+                continue
+            else:
+                dumb_files_list.append(dummy_file_path)
+        for cur_file in dumb_files_list:
+            self._log(u"Deleting file "+cur_file, logger.DEBUG)
+            if ek.ek(os.path.isfile, cur_file):
+                ek.ek(os.remove, cur_file)
+                                         
+        return
     def _delete(self, file_path, associated_files=False):
         """
         Deletes the file and optionally all associated files.
@@ -191,6 +231,7 @@ class PostProcessor(object):
 
         # figure out which files we want to delete
         file_list = [file_path]
+        self._list_dummy_files(file_path)
         if associated_files:
             file_list = file_list + self._list_associated_files(file_path)
 
@@ -222,7 +263,8 @@ class PostProcessor(object):
             self._log(u"Must provide an action for the combined file operation", logger.ERROR)
             return
 
-        file_list = [file_path]
+        file_list = [file_path]        
+        self._list_dummy_files(file_path)
         if associated_files:
             file_list = file_list + self._list_associated_files(file_path)
         elif subtitles:

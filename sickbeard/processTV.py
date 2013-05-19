@@ -133,8 +133,11 @@ def processDir (dirName, nzbName=None, recurse=False):
                 helpers.del_empty_dirs(sickbeard.TV_DOWNLOAD_DIR)
             if sickbeard.TORRENT_DOWNLOAD_DIR !="":
                 helpers.del_empty_dirs(sickbeard.TORRENT_DOWNLOAD_DIR)
-            
+                        
         else:
             returnStr += logHelper(u"Processing failed for "+cur_video_file_path+": "+process_fail_message, logger.WARNING)
-
+        if sickbeard.TV_DOWNLOAD_DIR !="":
+            helpers.del_empty_dirs(sickbeard.TV_DOWNLOAD_DIR)
+        if sickbeard.TORRENT_DOWNLOAD_DIR !="":
+            helpers.del_empty_dirs(sickbeard.TORRENT_DOWNLOAD_DIR)
     return returnStr
