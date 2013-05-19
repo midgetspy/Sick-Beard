@@ -74,9 +74,9 @@ class OpenSubtitles(ServiceBase):
                               'twi', 'tyv', 'udm', 'uga', 'uig', 'ukr', 'umb', 'urd', 'uzb', 'vai', 'ven', 'vie',
                               'vol', 'vot', 'wak', 'wal', 'war', 'was', 'wel', 'wen', 'wln', 'wol', 'xal', 'xho',
                               'yao', 'yap', 'yid', 'yor', 'ypk', 'zap', 'zen', 'zha', 'znd', 'zul', 'zun',
-                              'por-BR', 'rum-MD'])
-    language_map = {'mol': Language('rum-MD'), 'scc': Language('srp'), 'pob': Language('por-BR'),
-                    Language('rum-MD'): 'mol', Language('srp'): 'scc', Language('por-BR'): 'pob'}
+                              'pob', 'rum-MD'])
+    language_map = {'mol': Language('rum-MD'), 'scc': Language('srp'),
+                    Language('rum-MD'): 'mol', Language('srp'): 'scc'}
     language_code = 'alpha3'
     videos = [Episode, Movie]
     require_video = False

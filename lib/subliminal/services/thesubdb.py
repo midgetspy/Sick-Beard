@@ -16,7 +16,7 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with subliminal.  If not, see <http://www.gnu.org/licenses/>.
 from . import ServiceBase
-from ..language import language_set
+from ..language import language_set, Language
 from ..subtitles import get_subtitle_path, ResultSubtitle
 from ..videos import Episode, Movie, UnknownVideo
 import logging
@@ -32,7 +32,7 @@ class TheSubDB(ServiceBase):
     api_based = True
     # Source: http://api.thesubdb.com/?action=languages
     languages = language_set(['af', 'cs', 'da', 'de', 'en', 'es', 'fi', 'fr', 'hu', 'id', 'it',
-                              'la', 'nl', 'no', 'oc', 'pl', 'pt', 'ro', 'ru', 'sl', 'sr', 'sv',
+                              'la', 'nl', 'no', 'oc', 'pl', 'pb', 'ro', 'ru', 'sl', 'sr', 'sv',
                               'tr'])
     videos = [Movie, Episode, UnknownVideo]
     require_video = True
@@ -49,6 +49,10 @@ class TheSubDB(ServiceBase):
             logger.error(u'Request %s returned status code %d' % (r.url, r.status_code))
             return []
         available_languages = language_set(r.content.split(','))
+        #this is needed becase for theSubDB pt languages is Portoguese Brazil and not Portoguese#
+        #So we are deleting pt language and adding pb language 
+        if Language('pt') in available_languages:
+            available_languages = available_languages - language_set(['pt']) | language_set(['pb'])
         languages &= available_languages
         if not languages:
             logger.debug(u'Could not find subtitles for hash %s with languages %r (only %r available)' % (moviehash, languages, available_languages))
