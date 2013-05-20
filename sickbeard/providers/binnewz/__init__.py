@@ -220,6 +220,7 @@ class BinNewzProvider(generic.NZBProvider):
                     
                         
                 filenameLower = filename.lower()
+                sourcelower = source.lower()
                 if "720p" in qualityStr:
                     if "web-dl" in name or "web-dl" in filenameLower:
                         quality = Quality.HDWEBDL
@@ -236,6 +237,9 @@ class BinNewzProvider(generic.NZBProvider):
                     else:
                         quality = Quality.FULLHDTV
                     minSize = 600
+                elif "dvdrip" in qualityStr or "dvdrip" in filenameLower or "dvdrip" in sourcelower:
+                    quality= Quality.SDDVD
+                    minSize = 130
                 else:
                     quality = Quality.SDTV
                     minSize = 130
