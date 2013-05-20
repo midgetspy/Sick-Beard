@@ -21,7 +21,7 @@ from nzbclub import NZBClub
 from nzbindex import NZBIndex
 
 from bs4 import BeautifulSoup
-from sickbeard import logger, classes, show_name_helpers
+from sickbeard import logger, classes, show_name_helpers,db
 from sickbeard.providers import generic
 from sickbeard.common import Quality
 from sickbeard.exceptions import ex
@@ -50,6 +50,8 @@ class BinNewzProvider(generic.NZBProvider):
         
         showNames = show_name_helpers.allPossibleShowNames(show)
         result = []
+        global globepid
+        globepid=show.tvdbid
         for showName in showNames:
             result.append( showName + ".saison %2d" % season )
         return result
@@ -58,6 +60,10 @@ class BinNewzProvider(generic.NZBProvider):
         strings = []
 
         showNames = show_name_helpers.allPossibleShowNames(ep_obj.show)
+        global globepid
+        myDB = db.DBConnection()
+        epidr=myDB.select("SELECT episode_id from tv_episodes where tvdbid=?",[ep_obj.tvdbid])
+        globepid = epidr[0][0]
         for showName in showNames:
             strings.append("%s S%02dE%02d" % ( showName, ep_obj.season, ep_obj.episode) )
             strings.append("%s %dx%d" % ( showName, ep_obj.season, ep_obj.episode ) )
@@ -219,8 +225,14 @@ class BinNewzProvider(generic.NZBProvider):
                     name = m.group(1) + " S" + m.group(2) + "E" + m.group(3) + m.group(4)
                     
                         
-                filenameLower = filename.lower()
-                sourcelower = source.lower()
+                if filename:
+                    filenameLower = filename.lower()
+                else:
+                    filenameLower=""
+                if source:
+                    sourcelower = source.lower()
+                else:
+                    sourcelower=""
                 if "720p" in qualityStr:
                     if "web-dl" in name or "web-dl" in filenameLower:
                         quality = Quality.HDWEBDL
@@ -274,12 +286,20 @@ class BinNewzProvider(generic.NZBProvider):
                         try:
                             binsearch_result =  downloader.search(searchItem, minSize, newsgroup )
                             if binsearch_result:
+                                links=[]
                                 binsearch_result.audio_langs = show.audio_lang
                                 binsearch_result.title = name
                                 binsearch_result.quality = quality
-                                results.append( binsearch_result )
-                                logger.log("Found : " + searchItem + " on " + downloader.__class__.__name__)
-                                break
+                                myDB = db.DBConnection()
+                                listlink=myDB.select("SELECT link from episode_links where episode_id =?",[globepid])
+                                for dlink in listlink:
+                                    links.append(dlink[0])
+                                if binsearch_result.nzburl in links:
+                                    continue
+                                else:
+                                    results.append( binsearch_result )
+                                    logger.log("Found : " + searchItem + " on " + downloader.__class__.__name__)
+                                    break
                         except Exception, e:
                             logger.log("Searching from " + downloader.__class__.__name__ + " failed : " + ex(e), logger.ERROR)
 
