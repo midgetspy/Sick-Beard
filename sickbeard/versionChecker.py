@@ -40,7 +40,9 @@ class CheckVersion():
         self.install_type = self.find_install_type()
 
         if self.install_type == 'win':
-            self.updater = WindowsUpdateManager()
+            # FIXME: Windows builds?
+            # self.updater = WindowsUpdateManager()
+            self.updater = None
         elif self.install_type == 'git':
             self.updater = GitUpdateManager()
         elif self.install_type == 'source':
@@ -213,15 +215,11 @@ class GitUpdateManager(UpdateManager):
         self._newest_commit_hash = None
         self._num_commits_behind = 0
 
-        self.git_url = 'http://code.google.com/p/sickbeard/downloads/list'
-
         self.branch = self._find_git_branch()
 
     def _git_error(self):
-        error_message = 'Unable to find your git executable - either delete your .git folder and run from source OR <a href="http://code.google.com/p/sickbeard/wiki/AdvancedSettings" onclick="window.open(this.href); return false;">set git_path in your config.ini</a> to enable updates.'
+        error_message = 'There was a problem running git - either delete your .git folder and run from source OR <a href="http://code.google.com/p/sickbeard/wiki/AdvancedSettings" onclick="window.open(this.href); return false;">set git_path in your config.ini</a> to enable updates.'
         sickbeard.NEWEST_VERSION_STRING = error_message
-
-        return None
 
     def _run_git(self, args):
         if sickbeard.GIT_PATH:
@@ -240,20 +238,17 @@ class GitUpdateManager(UpdateManager):
             cmd = cur_git + ' ' + args
 
             try:
-                logger.log(u"Executing " + cmd + " with your shell in " + sickbeard.PROG_DIR, logger.DEBUG)
-                p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=True, cwd=sickbeard.PROG_DIR)
+                logger.log(u"Executing '" + cmd + "' with your shell in " + sickbeard.PROG_DIR, logger.DEBUG)
+                p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, cwd=sickbeard.PROG_DIR, shell=True)
                 output, err = p.communicate()
                 logger.log(u"git output: " + output, logger.DEBUG)
+                logger.log(u"git error: " + err, logger.DEBUG)
             except OSError:
                 logger.log(u"Command " + cmd + " didn't work, couldn't find git.")
                 continue
 
-            if p.returncode != 0 or 'not found' in output or "not recognized as an internal or external command" in output:
-                logger.log(u"Unable to find git with command " + cmd, logger.DEBUG)
-                output = None
-            elif 'fatal:' in output or err:
-                logger.log(u"Git returned bad info, are you sure this is a git installation?", logger.ERROR)
-                output = None
+            if p.returncode != 0:
+                logger.log(u"Git error: " + cmd, logger.ERROR)
             elif output:
                 break
 
@@ -271,14 +266,16 @@ class GitUpdateManager(UpdateManager):
         output, err = self._run_git('rev-parse HEAD')
 
         if not output:
-            return self._git_error()
+            self._git_error()
+            return False
 
         logger.log(u"Git output: " + str(output), logger.DEBUG)
         cur_commit_hash = output.strip()
 
         if not re.match('^[a-z0-9]+$', cur_commit_hash):
             logger.log(u"Output doesn't look like a hash, not using it", logger.ERROR)
-            return self._git_error()
+            self._git_error()
+            return False
 
         self._cur_commit_hash = cur_commit_hash
 
@@ -308,7 +305,7 @@ class GitUpdateManager(UpdateManager):
         gh = github.GitHub()
 
         # find newest commit
-        for curCommit in gh.commits('midgetspy', 'Sick-Beard', self.branch):
+        for curCommit in gh.commits('Tolstyak', 'Sick-Beard', self.branch):
             if not self._newest_commit_hash:
                 self._newest_commit_hash = curCommit['sha']
                 if not self._cur_commit_hash:
@@ -322,23 +319,21 @@ class GitUpdateManager(UpdateManager):
         logger.log(u"newest: " + str(self._newest_commit_hash) + " and current: " + str(self._cur_commit_hash) + " and num_commits: " + str(self._num_commits_behind), logger.DEBUG)
 
     def set_newest_text(self):
-        # if we're up to date then don't set this
+        # 100 = max commits from one call
         if self._num_commits_behind == 100:
             message = "or else you're ahead of master"
-
         elif self._num_commits_behind > 0:
             message = "you're %d commit" % self._num_commits_behind
             if self._num_commits_behind > 1:
                 message += 's'
             message += ' behind'
-
         else:
             return
 
         if self._newest_commit_hash:
-            url = 'http://github.com/midgetspy/Sick-Beard/compare/' + self._cur_commit_hash + '...' + self._newest_commit_hash
+            url = 'http://github.com/Tolstyak/Sick-Beard/compare/' + self._cur_commit_hash + '...' + self._newest_commit_hash
         else:
-            url = 'http://github.com/midgetspy/Sick-Beard/commits/'
+            url = 'http://github.com/Tolstyak/Sick-Beard/commits/'
 
         new_str = 'There is a <a href="' + url + '" onclick="window.open(this.href); return false;">newer version available</a> (' + message + ')'
         new_str += "&mdash; <a href=\"" + self.get_update_url() + "\">Update Now</a>"
@@ -369,7 +364,8 @@ class GitUpdateManager(UpdateManager):
         output, err = self._run_git('pull origin ' + self.branch)
 
         if not output:
-            return self._git_error()
+            self._git_error()
+            return False
 
         pull_regex = '(\d+) .+,.+(\d+).+\(\+\),.+(\d+) .+\(\-\)'
 
@@ -439,7 +435,7 @@ class SourceUpdateManager(GitUpdateManager):
         Downloads the latest source tarball from github and installs it over the existing version.
         """
 
-        tar_download_url = 'https://github.com/midgetspy/Sick-Beard/tarball/' + version.SICKBEARD_VERSION
+        tar_download_url = 'https://github.com/Tolstyak/Sick-Beard/tarball/' + version.SICKBEARD_VERSION
         sb_update_dir = os.path.join(sickbeard.PROG_DIR, 'sb-update')
         version_path = os.path.join(sickbeard.PROG_DIR, 'version.txt')
 
