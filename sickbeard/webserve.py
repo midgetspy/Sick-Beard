@@ -734,6 +734,7 @@ class History:
         t.submenu = [
             { 'title': 'Clear History', 'path': 'history/clearHistory' },
             { 'title': 'Trim History',  'path': 'history/trimHistory'  },
+            { 'title': 'Trunc Episode History Links',  'path': 'history/truncEplinks'  },
         ]
 
         return _munge(t)
@@ -754,6 +755,17 @@ class History:
         myDB = db.DBConnection()
         myDB.action("DELETE FROM history WHERE date < "+str((datetime.datetime.today()-datetime.timedelta(days=30)).strftime(history.dateFormat)))
         ui.notifications.message('Removed history entries greater than 30 days old')
+        redirect("/history")
+
+
+    @cherrypy.expose
+    def truncEplinks(self):
+
+        myDB = db.DBConnection()
+        nbep=myDB.select("SELECT count(*) from episode_links")
+        myDB.action("DELETE FROM episode_links WHERE 1=1")
+        messnum = str(nbep[0][0]) + ' history links deleted'
+        ui.notifications.message('All Episode Links Removed', messnum)
         redirect("/history")
 
 
