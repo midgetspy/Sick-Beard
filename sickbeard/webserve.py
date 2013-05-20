@@ -1322,6 +1322,8 @@ class ConfigProviders:
                 sickbeard.T411 = curEnabled
             elif curProvider == 'cpasbien':
                 sickbeard.Cpasbien = curEnabled
+            elif curProvider == 'kat':
+                sickbeard.kat = curEnabled
             elif curProvider == 'piratebay':
                 sickbeard.THEPIRATEBAY = curEnabled
             elif curProvider == 'gks':

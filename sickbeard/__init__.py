@@ -30,7 +30,7 @@ from threading import Lock
 
 # apparently py2exe won't build these unless they're imported somewhere
 from sickbeard import providers, metadata
-from providers import ezrss, tvtorrents, torrentleech, btn, nzbsrus, newznab, womble, nzbx, omgwtfnzbs, binnewz, t411, cpasbien, piratebay, gks
+from providers import ezrss, tvtorrents, torrentleech, btn, nzbsrus, newznab, womble, nzbx, omgwtfnzbs, binnewz, t411, cpasbien, piratebay, gks, kat
 from sickbeard.config import CheckSection, check_setting_int, check_setting_str, ConfigMigrator
 
 from sickbeard import searchCurrent, searchBacklog, showUpdater, versionChecker, properFinder, autoPostProcesser, subtitles, traktWatchListChecker
@@ -213,6 +213,7 @@ THEPIRATEBAY_PROXY = False
 THEPIRATEBAY_PROXY_URL = None
 
 Cpasbien = False
+kat = False
 
 NZBMATRIX = False
 NZBMATRIX_USERNAME = None
@@ -400,6 +401,7 @@ def initialize(consoleLogging=True):
                 T411, T411_USERNAME, T411_PASSWORD, \
                 THEPIRATEBAY, THEPIRATEBAY_PROXY, THEPIRATEBAY_PROXY_URL, THEPIRATEBAY_TRUSTED, \
                 Cpasbien, \
+                kat, \
                 SEARCH_FREQUENCY, DEFAULT_SEARCH_FREQUENCY, BACKLOG_SEARCH_FREQUENCY, \
                 QUALITY_DEFAULT, FLATTEN_FOLDERS_DEFAULT, SUBTITLES_DEFAULT, STATUS_DEFAULT, AUDIO_SHOW_DEFAULT, \
                 GROWL_NOTIFY_ONSNATCH, GROWL_NOTIFY_ONDOWNLOAD, GROWL_NOTIFY_ONSUBTITLEDOWNLOAD, TWITTER_NOTIFY_ONSNATCH, TWITTER_NOTIFY_ONDOWNLOAD, TWITTER_NOTIFY_ONSUBTITLEDOWNLOAD, \
@@ -670,6 +672,9 @@ def initialize(consoleLogging=True):
 
         CheckSection(CFG, 'Cpasbien')
         Cpasbien = bool(check_setting_int(CFG, 'Cpasbien', 'cpasbien', 0))
+        
+        CheckSection(CFG, 'kat')
+        kat = bool(check_setting_int(CFG, 'kat', 'kat', 0))
 
         CheckSection(CFG, 'Newzbin')
         NEWZBIN = bool(check_setting_int(CFG, 'Newzbin', 'newzbin', 0))
@@ -1277,6 +1282,9 @@ def save_config():
     new_config['Cpasbien'] = {}
     new_config['Cpasbien']['cpasbien'] = int(Cpasbien)
 
+    new_config['kat'] = {}
+    new_config['kat']['kat'] = int(kat)
+    
     new_config['PirateBay'] = {}
     new_config['PirateBay']['piratebay'] = int(THEPIRATEBAY)
     new_config['PirateBay']['piratebay_proxy'] = THEPIRATEBAY_PROXY
