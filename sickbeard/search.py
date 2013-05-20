@@ -150,7 +150,7 @@ def snatchEpisode(result, endStatus=SNATCHED):
             dlResult = False
     
         if dlResult == False:
-            return Falsec
+            return False
     
         history.logSnatch(result)
     
