@@ -699,10 +699,11 @@ class AddSubtitlesSupport(Add1080pAndRawHDQualities):
         self.addColumn("tv_episodes", "subtitles_lastsearch", "TIMESTAMP", str(datetime.datetime.min))
         self.incDBVersion()
         
-class AddSubtitlesSupport(AddSubtitlesSupport):    
+class AddEpisodeLinkTable(AddSubtitlesSupport):    
     def test(self):
         return self.checkDBVersion() >= 14
 
     def execute(self):
-        self.connection.action("CREATE TABLE episode_links (episode_id INTEGER, link TEXT)")
+        if self.hasTable("episode_links") != True:
+            self.connection.action("CREATE TABLE episode_links (episode_id INTEGER, link TEXT)")
         self.incDBVersion()
