@@ -66,7 +66,7 @@ def filterBadReleases(name,showLang=u"en"):
 
     # if there's no info after the season info then assume it's fine
     if not check_string:
-        return True
+        check_string = name
 
     # if any of the bad strings are in the name then say no
     for x in resultFilters + sickbeard.IGNORE_WORDS.split(',') + additionalFilters:

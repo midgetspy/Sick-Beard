@@ -25,6 +25,7 @@ from sickbeard import logger
 from sickbeard import classes
 from sickbeard import show_name_helpers
 from datetime import datetime
+from sickbeard.name_parser.parser import NameParser, InvalidNameException
 
 try:
     import json
@@ -53,11 +54,25 @@ class NzbXProvider(generic.NZBProvider):
         title = item['name']
         url = self.url + 'nzb?' + str(item['guid']) + '*|*' + urllib.quote_plus(title)
         return (title, url)
+    
+    def _get_language(self, title=None, item=None):
+        if not title:
+            return 'en'
+        else:
+            try:
+                myParser = NameParser()
+                parse_result = myParser.parse(title)
+            except InvalidNameException:
+                logger.log(u"Unable to parse the filename "+title+" into a valid episode", logger.WARNING)
+                return 'en'
+
+        return parse_result.audio_langs  
 
     def _doSearch(self, search, show=None, age=0, season=None):
+        
         params = {'age': sickbeard.USENET_RETENTION,
                   'completion': sickbeard.NZBX_COMPLETION,
-                  'cat': 'tv-hd|tv-sd',
+                  'cat': 'tv',
                   'limit': 250,
                   'q': search}
 
