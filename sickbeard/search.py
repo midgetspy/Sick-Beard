@@ -150,7 +150,7 @@ def snatchEpisode(result, endStatus=SNATCHED):
             dlResult = False
     
         if dlResult == False:
-            return False
+            return Falsec
     
         history.logSnatch(result)
     
@@ -208,8 +208,9 @@ def searchForNeededEpisodes():
             for curResult in curFoundResults[curEp]:
                 if not bestResult or bestResult.quality < curResult.quality:
                     bestResult = curResult
-
-            bestResult = pickBestResult(curFoundResults[curEp])
+            epi={}
+            epi[1]=curEp
+            bestResult = pickBestResult(curFoundResults[curEp],episode=epi)
 
             # if it's already in the list (from another provider) and the newly found quality is no better then skip it
             if curEp in foundResults and bestResult.quality <= foundResults[curEp].quality:
