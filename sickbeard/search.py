@@ -248,13 +248,21 @@ def pickBestResult(results, quality_list=None, episode=None):
             if hasattr(cur_result,'item'):
                 if hasattr(cur_result.item,'nzburl'):
                     eplink=cur_result.item.nzburl
-                else:
+                elif hasattr(cur_result.item,'url'):
                     eplink=cur_result.item.url
+                elif hasattr(cur_result,'nzburl'):
+                    eplink=cur_result.nzburl
+                elif hasattr(cur_result,'url'):
+                    eplink=cur_result.url
+                else:
+                    eplink=""
             else:
                 if hasattr(cur_result,'nzburl'):
                     eplink=cur_result.nzburl
-                else:
+                elif hasattr(cur_result,'url'):
                     eplink=cur_result.url
+                else:
+                    eplink=""
             logger.log("Quality of "+cur_result.name+" is "+Quality.qualityStrings[cur_result.quality])
         
             if quality_list and cur_result.quality not in quality_list:
@@ -280,13 +288,21 @@ def pickBestResult(results, quality_list=None, episode=None):
             if hasattr(bestResult,'item'):
                 if hasattr(bestResult.item,'nzburl'):
                     eplink=bestResult.item.nzburl
-                else:
+                elif hasattr(bestResult.item,'url'):
                     eplink=bestResult.item.url
+                elif hasattr(bestResult,'nzburl'):
+                    eplink=bestResult.nzburl
+                elif hasattr(bestResult,'url'):
+                    eplink=bestResult.url
+                else:
+                    eplink=""
             else:
                 if hasattr(bestResult,'nzburl'):
                     eplink=bestResult.nzburl
-                else:
+                elif hasattr(bestResult,'url'):
                     eplink=bestResult.url
+                else:
+                    eplink=""
             count=myDB.select("SELECT count(*) from episode_links where episode_id=? and link=?",[epidr[0][0],eplink])
             if count[0][0]==0:
                 myDB.action("INSERT INTO episode_links (episode_id, link) VALUES (?,?)",[epidr[0][0],eplink])
@@ -305,10 +321,41 @@ def isFinalResult(result):
     """
     
     logger.log(u"Checking if we should keep searching after we've found "+result.name, logger.DEBUG)
-    
+    links=[]
+    lists=[]
+    myDB = db.DBConnection()
     show_obj = result.episodes[0].show
-    
+    epidr=myDB.select("SELECT episode_id from tv_episodes where showid=?",[show_obj.tvdbid])
+    for eplist in epidr:
+        lists.append(eplist[0])
+    for i in lists:
+        listlink=myDB.select("SELECT link from episode_links where episode_id =?",[i])
+        for dlink in listlink:
+            links.append(dlink[0])
     any_qualities, best_qualities = Quality.splitQuality(show_obj.quality)
+    if hasattr(result,'item'):
+        if hasattr(result.item,'nzburl'):
+            eplink=result.item.nzburl
+        elif hasattr(result.item,'url'):
+            eplink=result.item.url
+        elif hasattr(result,'nzburl'):
+            eplink=result.nzburl
+        elif hasattr(result,'url'):
+            eplink=result.url
+        else:
+            eplink=""
+    else:
+        if hasattr(result,'nzburl'):
+            eplink=result.nzburl
+        elif hasattr(result,'url'):
+            eplink=result.url
+        else:
+            eplink=""
+            
+    # if episode link seems to have been already downloaded continue searching:
+    if eplink in links:
+        logger.log(eplink +" was already downloaded so let's continue searching assuming the download failed", logger.DEBUG)
+        return False
     
     # if there is a redownload that's higher than this then we definitely need to keep looking
     if best_qualities and result.quality < max(best_qualities):
