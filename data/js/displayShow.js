@@ -1,7 +1,7 @@
 $(document).ready(function(){
 
-	$('#sbRoot').ajaxEpSearch({'colorRow': true});
-	
+    $('#sbRoot').ajaxEpSearch({'colorRow': true});
+
     $('#seasonJump').change(function() {
         var id = $(this).val();
         if (id && id != 'jump') {
@@ -12,12 +12,22 @@ $(document).ready(function(){
     });
 
     $("#prevShow").click(function(){
-        $('#pickShow option:selected').prev('option').attr('selected', 'selected');
+        var show = $('#pickShow option:selected');
+        if (show.prev('option').length < 1){
+            show.parent().children('option:last').attr('selected', 'selected');
+        } else{
+            show.prev('option').attr('selected', 'selected');
+        };
         $("#pickShow").change();
     });
 
     $("#nextShow").click(function(){
-        $('#pickShow option:selected').next('option').attr('selected', 'selected');
+        var show = $('#pickShow option:selected');
+        if (show.next('option').length < 1){
+            show.parent().children('option:first').attr('selected', 'selected');
+        } else{
+            show.next('option').attr('selected', 'selected');
+        };
         $("#pickShow").change();
     });
 
@@ -52,6 +62,30 @@ $(document).ready(function(){
                 this.checked = seasCheck.checked
             }
         });
+    });
+
+    var lastCheck = null;
+    $('.epCheck').click(function(event) {
+
+      if(!lastCheck || !event.shiftKey) {
+        lastCheck = this;
+        return;
+      }
+
+      var check = this;
+      var found = 0;
+
+      $('.epCheck').each(function() {
+        switch (found) {
+          case 2: return false;
+          case 1: this.checked = lastCheck.checked;
+        }
+
+        if (this == check || this == lastCheck)
+          found++;
+      });
+
+      lastClick = this;
     });
 
     // selects all visible episode checkboxes.

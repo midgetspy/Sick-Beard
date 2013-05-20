@@ -22,7 +22,7 @@ import sys
 import time
 import urllib
 
-import xml.etree.cElementTree as etree
+from xml.dom.minidom import parseString
 from datetime import datetime, timedelta
 
 import sickbeard
@@ -73,28 +73,24 @@ class NewzbinProvider(generic.NZBProvider):
 
         self.cache = NewzbinCache(self)
 
-        self.url = 'https://www.newzbin.com/'
-
-        self.NEWZBIN_NS = 'http://www.newzbin.com/DTD/2007/feeds/report/'
+        self.url = 'https://www.newzbin2.es/'
 
         self.NEWZBIN_DATE_FORMAT = '%a, %d %b %Y %H:%M:%S %Z'
-
-    def _report(self, name):
-        return '{'+self.NEWZBIN_NS+'}'+name
 
     def isEnabled(self):
         return sickbeard.NEWZBIN
 
     def getQuality(self, item):
-        attributes = item.find(self._report('attributes'))
+        attributes = item.getElementsByTagName('report:attributes')[0]
         attr_dict = {}
 
-        for attribute in attributes.getiterator(self._report('attribute')):
-            cur_attr = attribute.attrib['type']
+        for attribute in attributes.getElementsByTagName('report:attribute'):
+            cur_attr = attribute.getAttribute('type')
+            cur_attr_value = helpers.get_xml_text(attribute)
             if cur_attr not in attr_dict:
-                attr_dict[cur_attr] = [attribute.text]
+                attr_dict[cur_attr] = [cur_attr_value]
             else:
-                attr_dict[cur_attr].append(attribute.text)
+                attr_dict[cur_attr].append(cur_attr_value)
 
         logger.log("Finding quality of item based on attributes "+str(attr_dict), logger.DEBUG)
 
@@ -119,10 +115,11 @@ class NewzbinProvider(generic.NZBProvider):
 
     def _is_SDTV(self, attrs):
 
-        # Video Fmt: (XviD or DivX), NOT 720p, NOT 1080p
-        video_fmt = 'Video Fmt' in attrs and ('XviD' in attrs['Video Fmt'] or 'DivX' in attrs['Video Fmt']) \
+        # Video Fmt: (XviD, DivX, H.264/x264), NOT 720p, NOT 1080p, NOT 1080i
+        video_fmt = 'Video Fmt' in attrs and ('XviD' in attrs['Video Fmt'] or 'DivX' in attrs['Video Fmt'] or 'H.264/x264' in attrs['Video Fmt']) \
                             and ('720p' not in attrs['Video Fmt']) \
-                            and ('1080p' not in attrs['Video Fmt'])
+                            and ('1080p' not in attrs['Video Fmt']) \
+                            and ('1080i' not in attrs['Video Fmt'])
 
         # Source: TV Cap or HDTV or (None)
         source = 'Source' not in attrs or 'TV Cap' in attrs['Source'] or 'HDTV' in attrs['Source']
@@ -134,11 +131,12 @@ class NewzbinProvider(generic.NZBProvider):
 
     def _is_SDDVD(self, attrs):
 
-        # Video Fmt: (XviD or DivX), NOT 720p, NOT 1080p
-        video_fmt = 'Video Fmt' in attrs and ('XviD' in attrs['Video Fmt'] or 'DivX' in attrs['Video Fmt']) \
+        # Video Fmt: (XviD, DivX, H.264/x264), NOT 720p, NOT 1080p, NOT 1080i
+        video_fmt = 'Video Fmt' in attrs and ('XviD' in attrs['Video Fmt'] or 'DivX' in attrs['Video Fmt'] or 'H.264/x264' in attrs['Video Fmt']) \
                             and ('720p' not in attrs['Video Fmt']) \
-                            and ('1080p' not in attrs['Video Fmt'])
-
+                            and ('1080p' not in attrs['Video Fmt']) \
+                            and ('1080i' not in attrs['Video Fmt'])
+    						
         # Source: DVD
         source = 'Source' in attrs and 'DVD' in attrs['Source']
 
@@ -148,8 +146,8 @@ class NewzbinProvider(generic.NZBProvider):
         return video_fmt and source and subs
 
     def _is_HDTV(self, attrs):
-        # Video Fmt: x264, 720p
-        video_fmt = 'Video Fmt' in attrs and ('x264' in attrs['Video Fmt']) \
+        # Video Fmt: H.264/x264, 720p
+        video_fmt = 'Video Fmt' in attrs and ('H.264/x264' in attrs['Video Fmt']) \
                             and ('720p' in attrs['Video Fmt'])
 
         # Source: TV Cap or HDTV or (None)
@@ -162,19 +160,22 @@ class NewzbinProvider(generic.NZBProvider):
 
     def _is_WEBDL(self, attrs):
 
-        # Video Fmt: H.264, 720p
-        video_fmt = 'Video Fmt' in attrs and ('H.264' in attrs['Video Fmt']) \
+        # Video Fmt: H.264/x264, 720p
+        video_fmt = 'Video Fmt' in attrs and ('H.264/x264' in attrs['Video Fmt']) \
                             and ('720p' in attrs['Video Fmt'])
+
+        # Source: WEB-DL
+        source = 'Source' in attrs and 'WEB-DL' in attrs['Source']
 
         # Subtitles: (None)
         subs = 'Subtitles' not in attrs
 
-        return video_fmt and subs
+        return video_fmt and source and subs
 
     def _is_720pBluRay(self, attrs):
 
-        # Video Fmt: x264, 720p
-        video_fmt = 'Video Fmt' in attrs and ('x264' in attrs['Video Fmt']) \
+        # Video Fmt: H.264/x264, 720p
+        video_fmt = 'Video Fmt' in attrs and ('H.264/x264' in attrs['Video Fmt']) \
                             and ('720p' in attrs['Video Fmt'])
 
         # Source: Blu-ray or HD-DVD
@@ -184,8 +185,8 @@ class NewzbinProvider(generic.NZBProvider):
 
     def _is_1080pBluRay(self, attrs):
 
-        # Video Fmt: x264, 1080p
-        video_fmt = 'Video Fmt' in attrs and ('x264' in attrs['Video Fmt']) \
+        # Video Fmt: H.264/x264, 1080p
+        video_fmt = 'Video Fmt' in attrs and ('H.264/x264' in attrs['Video Fmt']) \
                             and ('1080p' in attrs['Video Fmt'])
 
         # Source: Blu-ray or HD-DVD
@@ -276,25 +277,26 @@ class NewzbinProvider(generic.NZBProvider):
         item_list = []
 
         try:
-            responseSoup = etree.ElementTree(etree.XML(data))
-            items = responseSoup.getiterator('item')
+            parsedXML = parseString(data)
+            items = parsedXML.getElementsByTagName('item')
         except Exception, e:
             logger.log("Error trying to load Newzbin RSS feed: "+ex(e), logger.ERROR)
             return []
 
         for cur_item in items:
-            title = cur_item.findtext('title')
-            if title == 'Feed Error':
+            title = helpers.get_xml_text(cur_item.getElementsByTagName('title')[0])
+            if title == 'Feeds Error':
                 raise exceptions.AuthException("The feed wouldn't load, probably because of invalid auth info")
             if sickbeard.USENET_RETENTION is not None:
                 try:
-                    dateString = cur_item.findtext('{http://www.newzbin.com/DTD/2007/feeds/report/}postdate')
+                    dateString = helpers.get_xml_text(cur_item.getElementsByTagName('report:postdate')[0])
                     # use the parse (imported as parseDate) function from the dateutil lib
                     # and we have to remove the timezone info from it because the retention_date will not have one
                     # and a comparison of them is not possible
                     post_date = parseDate(dateString).replace(tzinfo=None)
                     retention_date = datetime.now() - timedelta(days=sickbeard.USENET_RETENTION)
                     if post_date < retention_date:
+                        logger.log(u"Date "+str(post_date)+" is out of retention range, skipping", logger.DEBUG)
                         continue
                 except Exception, e:
                     logger.log("Error parsing date from Newzbin RSS feed: " + str(e), logger.ERROR)
@@ -339,6 +341,10 @@ class NewzbinProvider(generic.NZBProvider):
 
         return data
 
+    def _checkAuth(self):
+        if sickbeard.NEWZBIN_USERNAME in (None, "") or sickbeard.NEWZBIN_PASSWORD in (None, ""):
+            raise exceptions.AuthException("Newzbin authentication details are empty, check your config")
+
 class NewzbinCache(tvcache.TVCache):
 
     def __init__(self, provider):
@@ -346,7 +352,7 @@ class NewzbinCache(tvcache.TVCache):
         tvcache.TVCache.__init__(self, provider)
 
         # only poll Newzbin every 10 mins max
-        self.minTime = 10
+        self.minTime = 1
 
     def _getRSSData(self):
 
@@ -356,8 +362,7 @@ class NewzbinCache(tvcache.TVCache):
 
     def _parseItem(self, item):
 
-        title = item.findtext('title')
-        url = item.findtext('link')
+        (title, url) = self.provider._get_title_and_url(item)
 
         if title == 'Feeds Error':
             logger.log("There's an error in the feed, probably bad auth info", logger.DEBUG)

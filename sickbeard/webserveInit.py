@@ -20,8 +20,12 @@
 import cherrypy.lib.auth_basic
 import os.path
 
+import sickbeard
+
 from sickbeard import logger
 from sickbeard.webserve import WebInterface
+
+from sickbeard.helpers import create_https_certificates
 
 def initWebServer(options = {}):
         options.setdefault('port',      8081)
@@ -33,23 +37,76 @@ def initWebServer(options = {}):
         assert isinstance(options['port'], int)
         assert 'data_root' in options
 
-        # cherrypy setup
-        cherrypy.config.update({
-                'server.socket_port': options['port'],
-                'server.socket_host': options['host'],
-                'log.screen':         False,
-        })
-
-        #HTTP Errors
         def http_error_401_hander(status, message, traceback, version):
-            args = [status, message, traceback, version]
-            if int(status) == 401:
-                logger.log(u"Authentication error, check cherrypy log for more details", logger.WARNING)
-            else:
+            """ Custom handler for 401 error """
+            if status != "401 Unauthorized":
                 logger.log(u"CherryPy caught an error: %s %s" % (status, message), logger.ERROR)
                 logger.log(traceback, logger.DEBUG)
-            return "<html><body><h1>Error %s</h1>Something unexpected has happened. Please check the log.</body></html>" % args[0]
-        cherrypy.config.update({'error_page.401' : http_error_401_hander})
+            return r'''
+<html>
+    <head>
+        <title>%s</title>
+    </head>
+    <body>
+        <br/>
+        <font color="#0000FF">Error %s: You need to provide a valid username and password.</font>
+    </body>
+</html>
+''' % ('Access denied', status)
+
+        def http_error_404_hander(status, message, traceback, version):
+            """ Custom handler for 404 error, redirect back to main page """
+            return r'''
+<html>
+    <head>
+        <title>404</title>
+        <script type="text/javascript" charset="utf-8">
+          <!--
+          location.href = "%s"
+          //-->
+        </script>
+    </head>
+    <body>
+        <br/>
+    </body>
+</html>
+''' % '/'
+
+        # cherrypy setup
+        enable_https = options['enable_https']
+        https_cert = options['https_cert']
+        https_key = options['https_key']
+
+        if enable_https:
+            # If either the HTTPS certificate or key do not exist, make some self-signed ones.
+            if not (https_cert and os.path.exists(https_cert)) or not (https_key and os.path.exists(https_key)):
+                if not create_https_certificates(https_cert, https_key):
+                    logger.log(u"Unable to create cert/key files, disabling HTTPS")
+                    sickbeard.ENABLE_HTTPS = False
+                    enable_https = False
+
+            if not (os.path.exists(https_cert) and os.path.exists(https_key)):
+                logger.log(u"Disabled HTTPS because of missing CERT and KEY files", logger.WARNING)
+                sickbeard.ENABLE_HTTPS = False
+                enable_https = False
+
+        options_dict = {
+                        'server.socket_port': options['port'],
+                        'server.socket_host': options['host'],
+                        'log.screen':         False,
+                        'error_page.401':     http_error_401_hander,
+                        'error_page.404':     http_error_404_hander,
+        }
+
+        if enable_https:
+            options_dict['server.ssl_certificate'] = https_cert
+            options_dict['server.ssl_private_key'] = https_key
+            protocol = "https"
+        else:
+            protocol = "http"
+
+        logger.log(u"Starting Sick Beard on "+protocol+"://" + str(options['host']) + ":" + str(options['port']) + "/")
+        cherrypy.config.update(options_dict)
 
         # setup cherrypy logging
         if options['log_dir'] and os.path.isdir(options['log_dir']):
@@ -85,8 +142,17 @@ def initWebServer(options = {}):
                                 'tools.auth_basic.on':            True,
                                 'tools.auth_basic.realm':         'SickBeard',
                                 'tools.auth_basic.checkpassword': checkpassword
+                        },
+                        '/api':{
+                                'tools.auth_basic.on':            False
+                        },
+                        '/api/builder':{
+                                'tools.auth_basic.on':            True,
+                                'tools.auth_basic.realm':         'SickBeard',
+                                'tools.auth_basic.checkpassword': checkpassword
                         }
                 })
+
 
         cherrypy.server.start()
         cherrypy.server.wait()

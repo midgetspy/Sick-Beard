@@ -35,6 +35,13 @@ def logHelper (logMessage, logLevel=logger.MESSAGE):
     return logMessage + u"\n"
 
 def processDir (dirName, nzbName=None, recurse=False):
+    """
+    Scans through the files in dirName and processes whatever media files it finds
+    
+    dirName: The folder name to look in
+    nzbName: The NZB name which resulted in this folder being downloaded
+    recurse: Boolean for whether we should descend into subfolders or not
+    """
 
     returnStr = ''
 
@@ -86,6 +93,10 @@ def processDir (dirName, nzbName=None, recurse=False):
         returnStr += processDir(ek.ek(os.path.join, dirName, curFolder), recurse=True)
 
     remainingFolders = filter(lambda x: ek.ek(os.path.isdir, ek.ek(os.path.join, dirName, x)), fileList)
+
+    # If nzbName is set and there's more than one videofile in the folder, files will be lost (overwritten).
+    if nzbName != None and len(videoFiles) >= 2:
+        nzbName = None
 
     # process any files in the dir
     for cur_video_file_path in videoFiles:

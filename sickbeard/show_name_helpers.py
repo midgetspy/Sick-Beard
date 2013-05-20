@@ -174,6 +174,8 @@ def makeSceneSearchString (episode):
     myDB = db.DBConnection()
     numseasonsSQlResult = myDB.select("SELECT COUNT(DISTINCT season) as numseasons FROM tv_episodes WHERE showid = ? and season != 0", [episode.show.tvdbid])
     numseasons = int(numseasonsSQlResult[0][0])
+    numepisodesSQlResult = myDB.select("SELECT COUNT(episode) as numepisodes FROM tv_episodes WHERE showid = ? and season != 0", [episode.show.tvdbid])
+    numepisodes = int(numepisodesSQlResult[0][0])
 
     # see if we should use dates instead of episodes
     if episode.show.air_by_date and episode.airdate != datetime.date.fromordinal(1):
@@ -182,8 +184,9 @@ def makeSceneSearchString (episode):
         epStrings = ["S%02iE%02i" % (int(episode.season), int(episode.episode)),
                     "%ix%02i" % (int(episode.season), int(episode.episode))]
 
-    # for single-season shows just search for the show name
-    if numseasons == 1:
+    # for single-season shows just search for the show name -- if total ep count (exclude s0) is less than 11
+    # due to the amount of qualities and releases, it is easy to go over the 50 result limit on rss feeds otherwise
+    if numseasons == 1 and numepisodes < 11:
         epStrings = ['']
 
     showNames = set(makeSceneShowSearchStrings(episode.show))
@@ -206,6 +209,8 @@ def isGoodResult(name, show, log=True):
 
     for curName in set(showNames):
         escaped_name = re.sub('\\\\[\\s.-]', '\W+', re.escape(curName))
+        if show.startyear:
+            escaped_name += "(?:\W+"+str(show.startyear)+")?"
         curRegex = '^' + escaped_name + '\W+(?:(?:S\d[\dE._ -])|(?:\d\d?x)|(?:\d{4}\W\d\d\W\d\d)|(?:(?:part|pt)[\._ -]?(\d|[ivx]))|Season\W+\d+\W+|E\d+\W+)'
         if log:
             logger.log(u"Checking if show "+name+" matches " + curRegex, logger.DEBUG)

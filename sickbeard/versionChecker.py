@@ -28,7 +28,7 @@ import urllib, urllib2
 import zipfile, tarfile
 
 from urllib2 import URLError
-from lib.pygithub import github
+import gh_api as github
 
 class CheckVersion():
     """
@@ -108,31 +108,35 @@ class WindowsUpdateManager(UpdateManager):
 
     def __init__(self):
         self._cur_version = None
+        self._cur_commit_hash = None
         self._newest_version = None
 
         self.gc_url = 'http://code.google.com/p/sickbeard/downloads/list'
+        self.version_url = 'https://raw.github.com/midgetspy/Sick-Beard/windows_binaries/updates.txt'
 
     def _find_installed_version(self):
         return int(sickbeard.version.SICKBEARD_VERSION[6:])
 
     def _find_newest_version(self, whole_link=False):
         """
-        Checks google code for the newest Windows binary build. Returns either the
+        Checks git for the newest Windows binary build. Returns either the
         build number or the entire build URL depending on whole_link's value.
 
         whole_link: If True, returns the entire URL to the release. If False, it returns
                     only the build number. default: False
         """
 
-        regex = "//sickbeard\.googlecode\.com/files/SickBeard\-win32\-alpha\-build(\d+)(?:\.\d+)?\.zip"
+        regex = ".*SickBeard\-win32\-alpha\-build(\d+)(?:\.\d+)?\.zip"
 
-        svnFile = urllib.urlopen(self.gc_url)
+        svnFile = urllib.urlopen(self.version_url)
 
         for curLine in svnFile.readlines():
-            match = re.search(regex, curLine)
+            logger.log(u"checking line "+curLine, logger.DEBUG)
+            match = re.match(regex, curLine)
             if match:
+                logger.log(u"found a match", logger.DEBUG)
                 if whole_link:
-                    return match.group(0)
+                    return curLine.strip()
                 else:
                     return int(match.group(1))
 
@@ -142,7 +146,9 @@ class WindowsUpdateManager(UpdateManager):
         self._cur_version = self._find_installed_version()
         self._newest_version = self._find_newest_version()
 
-        if self._newest_version > self._cur_version:
+        logger.log(u"newest version: "+repr(self._newest_version), logger.DEBUG)
+
+        if self._newest_version and self._newest_version > self._cur_version:
             return True
 
     def set_newest_text(self):
@@ -153,6 +159,8 @@ class WindowsUpdateManager(UpdateManager):
     def update(self):
 
         new_link = self._find_newest_version(True)
+
+        logger.log(u"new_link: " + repr(new_link), logger.DEBUG)
 
         if not new_link:
             logger.log(u"Unable to find a new version link on google code, not updating")
@@ -206,6 +214,8 @@ class GitUpdateManager(UpdateManager):
 
         self.git_url = 'http://code.google.com/p/sickbeard/downloads/list'
 
+        self.branch = self._find_git_branch()
+
     def _git_error(self):
         error_message = 'Unable to find your git executable - either delete your .git folder and run from source OR <a href="http://code.google.com/p/sickbeard/wiki/AdvancedSettings" onclick="window.open(this.href); return false;">set git_path in your config.ini</a> to enable updates.'
         sickbeard.NEWEST_VERSION_STRING = error_message
@@ -238,7 +248,7 @@ class GitUpdateManager(UpdateManager):
                 logger.log(u"Command "+cmd+" didn't work, couldn't find git.")
                 continue
             
-            if 'not found' in output or "not recognized as an internal or external command" in output:
+            if p.returncode != 0 or 'not found' in output or "not recognized as an internal or external command" in output:
                 logger.log(u"Unable to find git with command "+cmd, logger.DEBUG)
                 output = None
             elif 'fatal:' in output or err:
@@ -275,6 +285,17 @@ class GitUpdateManager(UpdateManager):
             
         return True
 
+    def _find_git_branch(self):
+
+        branch_info = self._run_git('symbolic-ref -q HEAD')
+
+        if not branch_info or not branch_info[0]:
+            return 'master'
+
+        branch = branch_info[0].strip().replace('refs/heads/', '', 1)
+
+        return branch or 'master'
+
 
     def _check_github_for_update(self):
         """
@@ -290,13 +311,13 @@ class GitUpdateManager(UpdateManager):
         gh = github.GitHub()
 
         # find newest commit
-        for curCommit in gh.commits.forBranch('midgetspy', 'Sick-Beard', version.SICKBEARD_VERSION):
+        for curCommit in gh.commits('midgetspy', 'Sick-Beard', self.branch):
             if not self._newest_commit_hash:
-                self._newest_commit_hash = curCommit.id
+                self._newest_commit_hash = curCommit['sha']
                 if not self._cur_commit_hash:
                     break
 
-            if curCommit.id == self._cur_commit_hash:
+            if curCommit['sha'] == self._cur_commit_hash:
                 break
 
             self._num_commits_behind += 1
@@ -306,11 +327,13 @@ class GitUpdateManager(UpdateManager):
     def set_newest_text(self):
 
         # if we're up to date then don't set this
-        if self._num_commits_behind == 35:
+        if self._num_commits_behind == 100:
             message = "or else you're ahead of master"
 
         elif self._num_commits_behind > 0:
-            message = "you're "+str(self._num_commits_behind)+' commits behind'
+            message = "you're %d commit" % self._num_commits_behind
+            if self._num_commits_behind > 1: message += 's'
+            message += ' behind'
 
         else:
             return
@@ -329,8 +352,8 @@ class GitUpdateManager(UpdateManager):
         self._find_installed_version()
         try:
             self._check_github_for_update()
-        except Exception:
-            logger.log(u"Unable to contact github, can't check for update", logger.ERROR)
+        except Exception, e:
+            logger.log(u"Unable to contact github, can't check for update: "+repr(e), logger.ERROR)
             return False
 
         logger.log(u"After checking, cur_commit = "+str(self._cur_commit_hash)+", newest_commit = "+str(self._newest_commit_hash)+", num_commits_behind = "+str(self._num_commits_behind), logger.DEBUG)
@@ -346,12 +369,12 @@ class GitUpdateManager(UpdateManager):
         on the call's success.
         """
 
-        output, err = self._run_git('pull origin '+sickbeard.version.SICKBEARD_VERSION) #@UnusedVariable
+        output, err = self._run_git('pull origin '+self.branch) #@UnusedVariable
 
         if not output:
             return self._git_error()
 
-        pull_regex = '(\d+) files? changed, (\d+) insertions?\(\+\), (\d+) deletions?\(\-\)'
+        pull_regex = '(\d+) .+,.+(\d+).+\(\+\),.+(\d+) .+\(\-\)'
 
         (files, insertions, deletions) = (None, None, None)
 
@@ -424,7 +447,7 @@ class SourceUpdateManager(GitUpdateManager):
         Downloads the latest source tarball from github and installs it over the existing version.
         """
 
-        tar_download_url = 'http://github.com/midgetspy/Sick-Beard/tarball/'+version.SICKBEARD_VERSION
+        tar_download_url = 'https://github.com/midgetspy/Sick-Beard/tarball/'+version.SICKBEARD_VERSION
         sb_update_dir = os.path.join(sickbeard.PROG_DIR, 'sb-update')
         version_path = os.path.join(sickbeard.PROG_DIR, 'version.txt')
 
@@ -436,7 +459,7 @@ class SourceUpdateManager(GitUpdateManager):
             logger.log(u"Unable to retrieve new version from "+tar_download_url+", can't update", logger.ERROR)
             return False
 
-        download_name = data.geturl().split('/')[-1]
+        download_name = data.geturl().split('/')[-1].split('?')[0]
 
         tar_download_path = os.path.join(sickbeard.PROG_DIR, download_name)
 

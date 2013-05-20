@@ -61,7 +61,7 @@ class NameParser(object):
             try:
                 cur_regex = re.compile(cur_pattern, re.VERBOSE | re.IGNORECASE)
             except re.error, errormsg:
-                logger.log(u"WARNING: Invalid episode_pattern, %s. %s" % (errormsg, cur_regex.pattern))
+                logger.log(u"WARNING: Invalid episode_pattern, %s. %s" % (errormsg, cur_pattern))
             else:
                 self.compiled_regexes.append((cur_pattern_name, cur_regex))
 
@@ -162,7 +162,7 @@ class NameParser(object):
         if type(number) == int:
             return number
 
-        # the lazy way
+        # good lord I'm lazy
         if number.lower() == 'i': return 1
         if number.lower() == 'ii': return 2
         if number.lower() == 'iii': return 3
@@ -178,12 +178,30 @@ class NameParser(object):
         if number.lower() == 'xiii': return 13
         if number.lower() == 'xiv': return 14
         if number.lower() == 'xv': return 15
+        if number.lower() == 'xvi': return 16
+        if number.lower() == 'xvii': return 17
+        if number.lower() == 'xviii': return 18
+        if number.lower() == 'xix': return 19
+        if number.lower() == 'xx': return 20
+        if number.lower() == 'xxi': return 21
+        if number.lower() == 'xxii': return 22
+        if number.lower() == 'xxiii': return 23
+        if number.lower() == 'xxiv': return 24
+        if number.lower() == 'xxv': return 25
+        if number.lower() == 'xxvi': return 26
+        if number.lower() == 'xxvii': return 27
+        if number.lower() == 'xxviii': return 28
+        if number.lower() == 'xxix': return 29
 
         return int(number)
 
     def parse(self, name):
         
         name = self._unicodify(name)
+        
+        cached = name_parser_cache.get(name)
+        if cached:
+            return cached
 
         # break it into parts if there are any (dirname, file name, extension)
         dir_name, file_name = os.path.split(name)
@@ -232,6 +250,7 @@ class NameParser(object):
         if final_result.season_number == None and not final_result.episode_numbers and final_result.air_date == None and not final_result.series_name:
             raise InvalidNameException("Unable to parse "+name.encode(sickbeard.SYS_ENCODING))
 
+        name_parser_cache.add(name, final_result)
         # return it
         return final_result
 
@@ -309,6 +328,28 @@ class ParseResult(object):
             return True
         return False
     air_by_date = property(_is_air_by_date)
+
+class NameParserCache(object):
+    #TODO: check if the fifo list can beskiped and only use one dict
+    _previous_parsed_list = [] # keep a fifo list of the cached items
+    _previous_parsed = {}
+    _cache_size = 100
+    
+    def add(self, name, parse_result):
+        self._previous_parsed[name] = parse_result
+        self._previous_parsed_list.append(name)
+        while len(self._previous_parsed_list) > self._cache_size:
+            del_me = self._previous_parsed_list.pop(0)
+            self._previous_parsed.pop(del_me)
+    
+    def get(self, name):
+        if name in self._previous_parsed:
+            logger.log("Using cached parse result for: " + name, logger.DEBUG)
+            return self._previous_parsed[name]
+        else:
+            return None
+
+name_parser_cache = NameParserCache()
 
 class InvalidNameException(Exception):
     "The given name is not valid"

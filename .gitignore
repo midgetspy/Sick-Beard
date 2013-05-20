@@ -2,10 +2,18 @@
 ######################
 cache/*
 cache.db*
-config.ini
+config.ini*
 Logs/*
 sickbeard.db*
 autoProcessTV/autoProcessTV.cfg
+server.crt
+server.key
+
+#  SB Test Related   #
+######################
+tests/Logs/*
+tests/sickbeard.*
+tests/cache.db
 
 #  Compiled source   #
 ######################
@@ -17,9 +25,11 @@ autoProcessTV/autoProcessTV.cfg
 *.tmp
 *.wpr
 *.project
+*.pydevproject
 *.cproject
 *.tmproj
 *.tmproject
+*.sw?
 
 # OS generated files #
 ######################

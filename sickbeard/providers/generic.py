@@ -61,7 +61,7 @@ class GenericProvider:
         return re.sub("[^\w\d_]", "_", name).lower()
 
     def imageName(self):
-        return self.getID() + '.gif'
+        return self.getID() + '.png'
 
     def _checkAuth(self):
         return
@@ -106,12 +106,10 @@ class GenericProvider:
         if not headers:
             headers = []
 
-        result = None
+        result = helpers.getURL(url, headers)
 
-        try:
-            result = helpers.getURL(url, headers)
-        except (urllib2.HTTPError, IOError), e:
-            logger.log(u"Error loading "+self.name+" URL: " + str(sys.exc_info()) + " - " + ex(e), logger.ERROR)
+        if result is None:
+            logger.log(u"Error loading "+self.name+" URL: " + url, logger.ERROR)
             return None
 
         return result
@@ -180,7 +178,14 @@ class GenericProvider:
         return self.cache.findNeededEpisodes()
 
     def getQuality(self, item):
-        title = item.findtext('title')
+        """
+        Figures out the quality of the given RSS item node
+        
+        item: An xml.dom.minidom.Node representing the <item> tag of the RSS feed
+        
+        Returns a Quality value obtained from the node's data 
+        """
+        (title, url) = self._get_title_and_url(item) #@UnusedVariable
         quality = Quality.nameQuality(title)
         return quality
 
@@ -194,10 +199,20 @@ class GenericProvider:
         return []
     
     def _get_title_and_url(self, item):
-        title = item.findtext('title')
-        url = item.findtext('link')
-        if url:
-            url = url.replace('&amp;','&')
+        """
+        Retrieves the title and URL data from the item XML node
+
+        item: An xml.dom.minidom.Node representing the <item> tag of the RSS feed
+
+        Returns: A tuple containing two strings representing title and URL respectively
+        """
+        title = helpers.get_xml_text(item.getElementsByTagName('title')[0])
+        try:
+            url = helpers.get_xml_text(item.getElementsByTagName('link')[0])
+            if url:
+                url = url.replace('&amp;','&')
+        except IndexError:
+            url = None
         
         return (title, url)
     
@@ -205,7 +220,7 @@ class GenericProvider:
 
         self._checkAuth()
 
-        logger.log(u"Searching "+self.name+" for " + episode.prettyName(True))
+        logger.log(u"Searching "+self.name+" for " + episode.prettyName())
 
         self.cache.updateCache()
         results = self.cache.searchCache(episode, manualSearch)

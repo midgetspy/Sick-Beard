@@ -23,7 +23,7 @@ import sickbeard
 import urllib
 import datetime
 
-from common import USER_AGENT
+from common import USER_AGENT, Quality
 
 class SickBeardURLopener(urllib.FancyURLopener):
     version = USER_AGENT
@@ -84,7 +84,7 @@ class SearchResult:
         self.episodes = episodes
 
         # quality of the release
-        self.quality = -1
+        self.quality = Quality.UNKNOWN
 
         # release name
         self.name = ""
@@ -101,7 +101,7 @@ class SearchResult:
         return myString
 
     def fileName(self):
-        return self.episodes[0].prettyName(True) + "." + self.resultType
+        return self.episodes[0].prettyName() + "." + self.resultType
 
 class NZBSearchResult(SearchResult):
     """
@@ -149,7 +149,7 @@ class Proper:
         self.url = url
         self.date = date
         self.provider = None
-        self.quality = -1
+        self.quality = Quality.UNKNOWN
 
         self.tvdbid = -1
         self.season = -1

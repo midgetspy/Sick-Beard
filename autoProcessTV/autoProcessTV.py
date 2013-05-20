@@ -51,12 +51,22 @@ def processEpisode(dirName, nzbName=None):
         print "ERROR: You need an autoProcessTV.cfg file - did you rename and edit the .sample?"
         sys.exit(-1)
     
-    config.read(configFilename)
+    try:
+        fp = open(configFilename, "r")
+        config.readfp(fp)
+        fp.close()
+    except IOError, e:
+        print "Could not read configuration file: ", str(e)
+        sys.exit(1)
     
     host = config.get("SickBeard", "host")
     port = config.get("SickBeard", "port")
     username = config.get("SickBeard", "username")
     password = config.get("SickBeard", "password")
+    try:
+        ssl = int(config.get("SickBeard", "ssl"))
+    except (ConfigParser.NoOptionError, ValueError):
+        ssl = 0
     
     try:
         web_root = config.get("SickBeard", "web_root")
@@ -73,7 +83,12 @@ def processEpisode(dirName, nzbName=None):
         
     myOpener = AuthURLOpener(username, password)
     
-    url = "http://" + host + ":" + port + web_root + "/home/postprocess/processEpisode?" + urllib.urlencode(params)
+    if ssl:
+        protocol = "https://"
+    else:
+        protocol = "http://"
+
+    url = protocol + host + ":" + port + web_root + "/home/postprocess/processEpisode?" + urllib.urlencode(params)
     
     print "Opening URL:", url
     
@@ -81,7 +96,7 @@ def processEpisode(dirName, nzbName=None):
         urlObj = myOpener.openit(url)
     except IOError, e:
         print "Unable to open URL: ", str(e)
-        sys.exit()
+        sys.exit(1)
     
     result = urlObj.readlines()
     for line in result:

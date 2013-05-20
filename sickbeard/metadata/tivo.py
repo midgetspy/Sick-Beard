@@ -26,6 +26,7 @@ import sickbeard
 from sickbeard import logger, exceptions, helpers
 from sickbeard.metadata import generic
 from sickbeard import encodingKludge as ek
+from sickbeard import config
 
 from lib.tvdb_api import tvdb_api, tvdb_exceptions
 
@@ -174,7 +175,9 @@ class TIVOMetadata(generic.GenericMetadata):
             
             # Title of the episode (Pilot, Homer's Night Out, Episode 02, etc.) Should be included for episodic shows. 
             # Leave blank or omit for movies.
-            data += ("episodeTitle : " + curEpToWrite.name + "\n")
+            #
+            # Added season episode to title, so that the shows will sort correctly, as often the date information is wrong.
+            data += ("episodeTitle : " + curEpToWrite._format_pattern('%Sx%0E %EN') + "\n")
             
             
             # This should be entered for episodic shows and omitted for movies. The standard tivo format is to enter 
