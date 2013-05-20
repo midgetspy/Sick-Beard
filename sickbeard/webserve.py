@@ -1035,6 +1035,7 @@ class ConfigProviders:
                       omgwtfnzbs_uid=None, omgwtfnzbs_key=None,
                       tvtorrents_digest=None, tvtorrents_hash=None,
                       torrentleech_key=None,
+                      freshontv_passkey=None,
                       btn_api_key=None,
                       newzbin_username=None, newzbin_password=None,
                       provider_order=None):
@@ -1101,6 +1102,8 @@ class ConfigProviders:
                 sickbeard.OMGWTFNZBS = curEnabled
             elif curProvider == 'ezrss':
                 sickbeard.EZRSS = curEnabled
+            elif curProvider == 'freshontv':
+                sickbeard.FRESHONTV = curEnabled
             elif curProvider == 'tvtorrents':
                 sickbeard.TVTORRENTS = curEnabled
             elif curProvider == 'torrentleech':
