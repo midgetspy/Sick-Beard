@@ -151,7 +151,7 @@
         <select name="audioLang" id="showLangSelect">
         #for $k,$v in $common.showLanguages.iteritems():
             #if $k!="":
-            <option value="$k" #if $audio_value == False then "selected=\"selected\"" else ""#
+            <option value="$k" #if $audio_value == $k then "selected=\"selected\"" else ""#
             #end if
             >$v</option>
         #end for
