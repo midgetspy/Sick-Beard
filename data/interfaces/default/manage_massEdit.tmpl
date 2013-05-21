@@ -25,18 +25,27 @@
         var resultStr = '';
 
         if (data.results.length == 0) {
-            flag = ' class="flag" style="background-image:url($sbRoot/images/flags/en.png)"';
-            resultStr = '<option value="en" selected="selected" + flag>en</option>';
+            flag = ' class="flag" style="background-image:url($sbRoot/images/flags/${lang_value}.png)"';
+            resultStr = '<option value="$lang_value" selected="selected" + flag>$lang_value</option>';
         } else {
             var current_lang_added = false;
             \$.each(data.results, function(index, obj) {
+
+                if (obj == "$lang_value") {
+                    selected = ' selected="selected"';
+                    current_lang_added = true;
+                }
+                else {
+                    selected = '';
+                }
+
                 flag = ' class="flag" style="background-image:url($sbRoot/images/flags/' + obj + '.png);"';
-                if $lang_value == False then
-                    selected = "selected=\"selected\""
-                 else
-                    selected =""
-                resultStr += '<option value="' + obj + '"'+ selected + flag + '>' + obj + '</option>';
-            });        }
+                resultStr += '<option value="' + obj + '"' + selected + flag + '>' + obj + '</option>';
+            });
+            if (!current_lang_added)
+                resultStr += '<option value="$lang_value" selected="selected">$lang_value</option>';
+
+        }
         \$('#tvdbLangSelect').html(resultStr)
 
   });
