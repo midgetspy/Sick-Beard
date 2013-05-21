@@ -37,7 +37,6 @@ class NzbXProvider(generic.NZBProvider):
 
     def __init__(self):
         generic.NZBProvider.__init__(self, "nzbX")
-        self.cache = NzbXCache(self)
         self.url = 'https://nzbx.co/'
         self.supportsBacklog = True
 
