@@ -17,7 +17,42 @@
 #set $anyQualities, $bestQualities = $common.Quality.splitQuality($initial_quality)
 <script type="text/javascript" src="$sbRoot/js/qualityChooser.js?$sbPID"></script>
 <script type="text/javascript" src="$sbRoot/js/massEdit.js?$sbPID"></script>
+<script type="text/javascript" charset="utf-8">
+<!--
+\$(document).ready(function(){
 
+  \$.getJSON('$sbRoot/home/addShows/getTVDBLanguages', {}, function(data) {
+        var resultStr = '';
+
+        if (data.results.length == 0) {
+            flag = ' class="flag" style="background-image:url($sbRoot/images/flags/${lang_value}.png)"';
+            resultStr = '<option value="$lang_value" selected="selected" + flag>$lang_value</option>';
+        } else {
+            var current_lang_added = false;
+            \$.each(data.results, function(index, obj) {
+
+                if (obj == "$lang_value") {
+                    selected = ' selected="selected"';
+                    current_lang_added = true;
+                }
+                else {
+                    selected = '';
+                }
+
+                flag = ' class="flag" style="background-image:url($sbRoot/images/flags/' + obj + '.png);"';
+                resultStr += '<option value="' + obj + '"' + selected + flag + '>' + obj + '</option>';
+            });
+            if (!current_lang_added)
+                resultStr += '<option value="$lang_value" selected="selected">$lang_value</option>';
+
+        }
+        \$('#tvdbLangSelect').html(resultStr)
+
+  });
+
+});
+//-->
+</script>
 <form action="massEditSubmit" method="post">
 <input type="hidden" name="toEdit" value="$showList" />
 
@@ -101,6 +136,29 @@
         </select>
     </div><br />
 </div>
+
+<div class="optionWrapper clearfix alt">
+	<span class="selectTitle">Metadata Language:</span>
+    <div class="selectChoices">
+        <select name="tvdbLang" id="tvdbLangSelect"></select><br />
+        Note: This will only affect the language of the retrieved metadata file contents and episode filenames.<br />
+    </div><br />
+</div>
+
+<div class="optionWrapper clearfix">
+	<span class="selectTitle">Desired Audio Language:</span>
+    <div class="selectChoices">
+        <select name="audioLang" id="showLangSelect">
+        #for $k,$v in $common.showLanguages.iteritems():
+            #if $k!="":
+            <option value="$k" #if $audio_value == $k then "selected=\"selected\"" else ""#
+            #end if
+            >$v</option>
+        #end for
+        </select>
+    </div><br />
+</div>
+
 <div class="optionWrapper clearfix">
     <br /><span class="separator" style="font-size: 1.2em; font-weight: 700;">*</span>
     Changing these settings will cause the selected shows to be refreshed.
