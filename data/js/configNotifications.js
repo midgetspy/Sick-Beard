@@ -154,7 +154,7 @@ $(document).ready(function () {
             var JSONData = $.parseJSON(data);
             $('#testNMJv2-result').html(JSONData.message);
             $('#nmjv2_database').val(JSONData.database);
-            
+
             if (JSONData.database) {
                 $('#nmjv2_database').attr('readonly', true);
             } else {
@@ -166,7 +166,7 @@ $(document).ready(function () {
     $('#testNMJv2').click(function () {
         $('#testNMJv2-result').html(loading);
         var nmjv2_host = $("#nmjv2_host").val();
-        
+
         $.get(sbRoot + "/home/testNMJv2", {'host': nmjv2_host},
             function (data){ $('#testNMJv2-result').html(data); });
     });
@@ -187,5 +187,11 @@ $(document).ready(function () {
         var nma_priority = $("#nma_priority").val();
         $.get(sbRoot + "/home/testNMA", {'nma_api': nma_api, 'nma_priority': nma_priority},
             function (data) { $('#testNMA-result').html(data); });
+    });
+
+    $('#testDleskDevNotif').click(function () {
+	        $('#testDleskdevnotif-result').html(loading);
+	        $.get(sbRoot + "/home/testDleskDevNotif", '',
+	            function (data) { $('#testDleskdevnotif-result').html(data); });
     });
 });
