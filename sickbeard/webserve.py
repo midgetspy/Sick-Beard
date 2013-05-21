@@ -535,12 +535,20 @@ class Manage:
                 else:
                     last_subtitles = curShow.subtitles
 
+            if lang_all_same:
+                if last_lang not in (None, curShow.lang):
+                    lang_all_same = False
+                else:
+                    last_lang = curShow.lang
+
         t.showList = toEdit
         t.paused_value = last_paused if paused_all_same else None
         t.flatten_folders_value = last_flatten_folders if flatten_folders_all_same else None
         t.quality_value = last_quality if quality_all_same else None
         t.subtitles_value = last_subtitles if subtitles_all_same else None
         t.root_dir_list = root_dir_list
+        t.lang_value = last_lang if lang_all_same else 'unknown'
+
 
         return _munge(t)
 

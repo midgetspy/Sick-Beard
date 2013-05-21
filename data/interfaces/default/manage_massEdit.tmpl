@@ -31,7 +31,11 @@
             var current_lang_added = false;
             \$.each(data.results, function(index, obj) {
                 flag = ' class="flag" style="background-image:url($sbRoot/images/flags/' + obj + '.png);"';
-                resultStr += '<option value="' + obj + '"'+ flag + '>' + obj + '</option>';
+                if $lang_value == False then
+                    selected = "selected=\"selected\""
+                 else
+                    selected =""
+                resultStr += '<option value="' + obj + '"'+ selected + flag + '>' + obj + '</option>';
             });        }
         \$('#tvdbLangSelect').html(resultStr)
 
