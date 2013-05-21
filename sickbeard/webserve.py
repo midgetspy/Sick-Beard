@@ -548,8 +548,6 @@ class Manage:
         t.subtitles_value = last_subtitles if subtitles_all_same else None
         t.root_dir_list = root_dir_list
         t.lang_value = last_lang if lang_all_same else 'unknown'
-
-
         return _munge(t)
 
     @cherrypy.expose
