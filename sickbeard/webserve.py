@@ -499,7 +499,10 @@ class Manage:
         last_subtitles = None
 
         lang_all_same = True
-        last_lang= None
+        last_lang_metadata= None
+
+        lang_audio_all_same = True
+        last_lang_audio = None
 
         root_dir_list = []
 
@@ -536,10 +539,16 @@ class Manage:
                     last_subtitles = curShow.subtitles
 
             if lang_all_same:
-                if last_lang not in (None, curShow.lang):
+                if last_lang_metadata not in (None, curShow.lang):
                     lang_all_same = False
                 else:
-                    last_lang = curShow.lang
+                    last_lang_metadata = curShow.lang
+
+            if lang_audio_all_same:
+                if last_lang_audio not in (None, curShow.audio_lang):
+                    lang_audio_all_same = False
+                else:
+                    last_lang_audio = curShow.audio_lang
 
         t.showList = toEdit
         t.paused_value = last_paused if paused_all_same else None
@@ -547,12 +556,13 @@ class Manage:
         t.quality_value = last_quality if quality_all_same else None
         t.subtitles_value = last_subtitles if subtitles_all_same else None
         t.root_dir_list = root_dir_list
-        t.lang_value = last_lang if lang_all_same else 'unknown'
+        t.lang_value = last_lang_metadata if lang_all_same else None
+        t.audio_value = last_lang_audio if lang_audio_all_same else None
         return _munge(t)
 
     @cherrypy.expose
     def massEditSubmit(self, paused=None, flatten_folders=None, quality_preset=False, subtitles=None,
-                       anyQualities=[], bestQualities=[], tvdbLang=None, toEdit=None, *args, **kwargs):
+                       anyQualities=[], bestQualities=[], tvdbLang=None, audioLang = None, toEdit=None, *args, **kwargs):
 
         dir_map = {}
         for cur_arg in kwargs:
@@ -600,16 +610,19 @@ class Manage:
             if quality_preset == 'keep':
                 anyQualities, bestQualities = Quality.splitQuality(showObj.quality)
 
-            logger.log(u"tvdbLang: "+str(tvdbLang), logger.ERROR)
             if tvdbLang == 'None':
                 new_lang = 'en'
             else:
                 new_lang = tvdbLang
-            logger.log(u"new_lang: "+str(new_lang), logger.ERROR)
+
+            if audioLang == 'None':
+                new_audio_lang = showObj.audio_lang;
+            else:
+                new_audio_lang = audioLang
 
             exceptions_list = []
             
-            curErrors += Home().editShow(curShow, new_show_dir, anyQualities, bestQualities, exceptions_list, new_flatten_folders, new_paused, subtitles=new_subtitles, tvdbLang=new_lang, audio_lang=showObj.audio_lang, custom_search_names=showObj.custom_search_names, directCall=True)
+            curErrors += Home().editShow(curShow, new_show_dir, anyQualities, bestQualities, exceptions_list, new_flatten_folders, new_paused, subtitles=new_subtitles, tvdbLang=new_lang, audio_lang=new_audio_lang, custom_search_names=showObj.custom_search_names, directCall=True)
 
             if curErrors:
                 logger.log(u"Errors: "+str(curErrors), logger.ERROR)

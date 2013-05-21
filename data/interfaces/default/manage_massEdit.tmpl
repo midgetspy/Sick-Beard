@@ -146,6 +146,23 @@
 </div>
 
 <div class="optionWrapper clearfix">
+	<span class="selectTitle">Desired Audio language:</span>
+    <div class="selectChoices">
+        <select name="audioLang" id="showLangSelect">
+        #for $k,$v in $common.showLanguages.iteritems():
+            #if $k!="":
+            <option value="$k" #if $audio_value == False then "selected=\"selected\"" else ""#
+            #if $show.audio_lang == $k:
+                selected
+            #end if
+            #end if
+            >$v</option>
+        #end for
+        </select>
+    </div><br />
+</div>
+
+<div class="optionWrapper clearfix">
     <br /><span class="separator" style="font-size: 1.2em; font-weight: 700;">*</span>
     Changing these settings will cause the selected shows to be refreshed.
 </div>
