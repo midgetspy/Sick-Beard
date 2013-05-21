@@ -138,15 +138,14 @@
 </div>
 
 <div class="optionWrapper clearfix alt">
-	<span class="selectTitle">Metadata Language:</span>
+	<span class="selectTitle">Metadata Language <span class="separator">*</span></span>
     <div class="selectChoices">
         <select name="tvdbLang" id="tvdbLangSelect"></select><br />
-        Note: This will only affect the language of the retrieved metadata file contents and episode filenames.<br />
     </div><br />
 </div>
 
 <div class="optionWrapper clearfix">
-	<span class="selectTitle">Desired Audio Language:</span>
+	<span class="selectTitle">Desired Audio Language</span>
     <div class="selectChoices">
         <select name="audioLang" id="showLangSelect">
         #for $k,$v in $common.showLanguages.iteritems():
@@ -162,8 +161,8 @@
 <div class="optionWrapper clearfix">
     <br /><span class="separator" style="font-size: 1.2em; font-weight: 700;">*</span>
     Changing these settings will cause the selected shows to be refreshed.
+    Be sure the selected show are not being refreshed
 </div>
-
 <div class="optionWrapper clearfix" style="text-align: center;">
     <input class="btn btn-primary" type="submit" value="Submit" /><br />
 </div>

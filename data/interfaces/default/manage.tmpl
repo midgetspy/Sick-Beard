@@ -34,24 +34,25 @@
 \$(document).ready(function() 
 { 
     \$("#massUpdateTable:has(tbody tr)").tablesorter({
-        sortList: [[3,0]],
+        sortList: [[4,0]],
         textExtraction: {
             1: function(node) { return \$(node).find("img").attr("alt"); },
             2: function(node) { return \$(node).find("img").attr("alt"); },
-            4: function(node) { return \$(node).find("span").text().toLowerCase(); },
-            5: function(node) { return \$(node).find("img").attr("alt"); }
+            3: function(node) { return \$(node).find("img").attr("alt"); },
+            5: function(node) { return \$(node).find("span").text().toLowerCase(); },
+            6: function(node) { return \$(node).find("img").attr("alt"); }
         },
         widgets: ['zebra', 'stickyHeaders'],
         headers: {
             0: { sorter: false},
-            3: { sorter: 'showNames'},
-            4: { sorter: 'quality'},
-            7: { sorter: false},
+            4: { sorter: 'showNames'},
+            5: { sorter: 'quality'},
             8: { sorter: false},
             9: { sorter: false},
-            10: { sorter: false}
+            10: { sorter: false},
+            11: { sorter: false}
             #if $sickbeard.USE_SUBTITLES            
-         , 11: { sorter: false}
+         , 12: { sorter: false}
 #end if  
         }
     }); 
@@ -68,11 +69,12 @@
       <th width="1%">Edit<br/>
         <input type="checkbox" class="bulkCheck" id="editCheck" />
       </th>
-      <th class="nowrap">Lang</th>
+      <th class="nowrap">Meta</th>
+      <th class="nowrap">Audio</th>
       <th>Paused</th>
-      <th class="nowrap">Show Name</th>
+      <th class="nowrap">Name</th>
       <th>Quality</th>
-      <th>Flatten Folders</th>
+      <th>Flatten</th>
       <th>Status</th>
       <th width="1%">Update<br/>
         <input type="checkbox" class="bulkCheck" id="updateCheck" />
@@ -84,7 +86,7 @@
         <input type="checkbox" class="bulkCheck" id="renameCheck" />
       </th>
       #if $sickbeard.USE_SUBTITLES:
-      <th width="1%">Subtitle<br/><input type="checkbox" class="bulkCheck" id="subtitleCheck" /></th>
+      <th width="1%">Sub<br/><input type="checkbox" class="bulkCheck" id="subtitleCheck" /></th>
 #end if
 <!--      <th>Force Metadata Regen <input type="checkbox" class="bulkCheck" id="metadataCheck" /></th>//-->
       <th width="1%">Delete<br/>
@@ -94,8 +96,8 @@
   </thead>
 <tfoot>
   <tr>
-    <td rowspan="1" colspan="1" class="align-center"><input type="button" class="btn" value="Edit Selected" id="submitMassEdit" /></td>
-    <td rowspan="1" colspan="#if $sickbeard.USE_SUBTITLES then 11 else 10#" class="align-right"><input type="button" class="btn btn-primary" value="Submit" id="submitMassUpdate" /></td>
+    <td rowspan="1" colspan="1" class="align-left"><input type="button" class="btn" value="Edit Selected" id="submitMassEdit" /></td>
+    <td rowspan="1" colspan="#if $sickbeard.USE_SUBTITLES then 12 else 11#" class="align-right"><input type="button" class="btn btn-primary" value="Submit" id="submitMassUpdate" /></td>
   </tr>
 </tfoot>
   <tbody>
@@ -133,6 +135,7 @@ $myShowList.sort(lambda x, y: cmp(x.name, y.name))
   <tr>
     <td align="center"><input type="checkbox" class="editCheck" id="edit-$curShow.tvdbid" /></td>
     <td align="center"><img src="$sbRoot/images/flags/${curShow.lang}.png" width="16" height="11" alt="$curShow.lang" /></td>
+    <td align="center"><img src="$sbRoot/images/flags/${curShow.audio_lang}.png" alt="$curShow.audio_lang" width="16" /></td>
     <td align="center"><img src="$sbRoot/images/#if int($curShow.paused) == 1 then "yes16.png\" alt=\"Y\"" else "no16.png\" alt=\"N\""# width="16" height="16" /></td>
     <td class="tvShow"><a href="$sbRoot/home/displayShow?show=$curShow.tvdbid">$curShow.name</a></td>
 #if $curShow.quality in $qualityPresets:
@@ -141,7 +144,7 @@ $myShowList.sort(lambda x, y: cmp(x.name, y.name))
     <td align="center"><span class="quality Custom">Custom</span></td>
 #end if 
     <td align="center"><img src="$sbRoot/images/#if int($curShow.flatten_folders) == 1 then "yes16.png\" alt=\"Y\"" else "no16.png\" alt=\"N\""# width="16" height="16" /></td>
-    <td align="center">$curShow.status</td>
+        <td align="center">$curShow.status</td>
     <td align="center">$curUpdate</td>
     <td align="center">$curRefresh</td>
     <td align="center">$curRename</td>
