@@ -282,14 +282,14 @@ class GitUpdateManager(UpdateManager):
         return True
 
     def _find_git_branch(self):
-        branch_info = self._run_git('symbolic-ref -q HEAD')
+        branch_info = self._run_git("symbolic-ref -q HEAD")
 
         if not branch_info or not branch_info[0]:
-            return 'master'
+            return "development-custom"
 
-        branch = branch_info[0].strip().replace('refs/heads/', '', 1)
+        branch = branch_info[0].strip().replace("refs/heads/", "", 1)
 
-        return branch or 'master'
+        return branch or "development-custom"
 
     def _check_github_for_update(self):
         """
