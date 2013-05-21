@@ -36,6 +36,8 @@ import nma
 import tweet
 import trakt
 
+import dleskdevnotif
+
 from sickbeard.common import *
 
 # home theater
@@ -56,6 +58,7 @@ nma_notifier = nma.NMA_Notifier()
 # online
 twitter_notifier = tweet.TwitterNotifier()
 trakt_notifier = trakt.TraktNotifier()
+dleskdevnotif_notifier = dleskdevnotif.DleskDevNotifier()
 
 notifiers = [
     libnotify_notifier, # Libnotify notifier goes first because it doesn't involve blocking on network activity.
@@ -73,6 +76,7 @@ notifiers = [
     nma_notifier,
     twitter_notifier,
     trakt_notifier,
+    dleskdevnotif_notifier
 ]
 
 

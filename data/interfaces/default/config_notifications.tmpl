@@ -772,7 +772,6 @@
                     </fieldset>
                 </div><!-- /boxcar component-group //-->
 
-
                 <div class="component-group clearfix">
                     <div class="component-group-desc">
                         <img class="notifier-icon" src="$sbRoot/images/notifiers/nma.png" alt="" title="NMA" />
@@ -836,6 +835,63 @@
 
                     </fieldset>
                 </div><!-- /nma component-group //-->
+                
+		<div class="component-group clearfix">
+		    <div class="component-group-desc">
+			<img class="notifier-icon" src="$sbRoot/images/notifiers/dleskdevnotif.png" alt="" title="Dlesk Dev. Notifications" />
+			<h3><a href="http://notifications.dleskdevelopment.com/" onclick="window.open(this.href, '_blank'); return false;">DD Notifications</a></h3>
+			<p>Dlesk Development Notifications allows you to send / receive push notifications to any supported device. The notification will be sent to all active devices.</p>
+		    </div>
+		    <fieldset class="component-group-list">
+			<div class="field-pair">
+			    <input type="checkbox" class="enabler" name="use_dleskdevnotif" id="use_dleskdevnotif" #if $sickbeard.USE_DLESKDEVNOTIF then "checked=\"checked\"" else ""# />
+			    <label class="clearfix" for="use_dleskdevnotif">
+				<span class="component-title">Enable</span>
+				<span class="component-desc">Should Sick Beard send notifications through Dlesk Development Notifications?</span>
+			    </label>
+			</div>
+			<div id="content_use_dleskdevnotif">
+			    <div class="field-pair">
+				<input type="checkbox" name="dleskdevnotif_notify_onsnatch" id="dleskdevnotif_notify_onsnatch" #if $sickbeard.DLESKDEVNOTIF_NOTIFY_ONSNATCH then "checked=\"checked\"" else ""# />
+				<label class="clearfix" for="dleskdevnotif_notify_onsnatch">
+				    <span class="component-title">Notify on Snatch</span>
+				    <span class="component-desc">Send notification when we start a download?</span>
+				</label>
+			    </div>
+			    <div class="field-pair">
+				<input type="checkbox" name="dleskdevnotif_notify_ondownload" id="dleskdevnotif_notify_ondownload" #if $sickbeard.DLESKDEVNOTIF_NOTIFY_ONDOWNLOAD then "checked=\"checked\"" else ""# />
+				<label class="clearfix" for="dleskdevnotif_notify_ondownload">
+				    <span class="component-title">Notify on Download</span>
+				    <span class="component-desc">Send notification when we finish a download?</span>
+				</label>
+			    </div>
+			    <div class="field-pair">
+				<label class="nocheck clearfix">
+				    <span class="component-title">Username</span>
+				    <input type="text" name="dleskdevnotif_username" id="dleskdevnotif_username" value="$sickbeard.DLESKDEVNOTIF_USERNAME" size="35" />
+				</label>
+				<label class="nocheck clearfix">
+				    <span class="component-title">&nbsp;</span>
+				    <span class="component-desc">Username of your Dlesk Development Notification account</span>
+				</label>
+			    </div>
+			    <div class="field-pair">
+				<label class="nocheck clearfix">
+				    <span class="component-title">Password</span>
+				    <input type="text" name="dleskdevnotif_password" id="dleskdevnotif_password" value="$sickbeard.DLESKDEVNOTIF_PASSWORD" size="35" />
+				</label>
+				<label class="nocheck clearfix">
+				    <span class="component-title">&nbsp;</span>
+				    <span class="component-desc">Password of your Dlesk Development Notification account</span>
+				</label>
+			    </div>
+			    <div class="testNotification" id="testDleskdevnotif-result">Click below to test.</div>
+			    <input type="button" class="btn" value="Send Test Notification" id="testDleskDevNotif" />
+			    <input type="submit" class="btn config_submitter" value="Save Changes" />
+			</div><!-- /content_use_dleskdevnotif //-->
+
+		    </fieldset>
+                </div><!-- /dleskdevnotif component-group //-->
 
                 <div class="component-group-save">
                     <input type="submit" class="btn config_submitter" value="Save Changes" />

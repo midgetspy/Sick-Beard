@@ -261,6 +261,12 @@ BOXCAR_USERNAME = None
 BOXCAR_PASSWORD = None
 BOXCAR_PREFIX = None
 
+USE_DLESKDEVNOTIF = False
+DLESKDEVNOTIF_NOTIFY_ONSNATCH = False
+DLESKDEVNOTIF_NOTIFY_ONDOWNLOAD = False
+DLESKDEVNOTIF_USERNMAE = None
+DLESKDEVNOTIF_PASSWORD = None
+
 USE_PUSHOVER = False
 PUSHOVER_NOTIFY_ONSNATCH = False
 PUSHOVER_NOTIFY_ONDOWNLOAD = False
@@ -355,7 +361,7 @@ def initialize(consoleLogging=True):
                 USE_BANNER, USE_LISTVIEW, METADATA_XBMC, METADATA_MEDIABROWSER, METADATA_PS3, METADATA_SYNOLOGY, metadata_provider_dict, \
                 NEWZBIN, NEWZBIN_USERNAME, NEWZBIN_PASSWORD, GIT_PATH, MOVE_ASSOCIATED_FILES, \
                 COMING_EPS_LAYOUT, COMING_EPS_SORT, COMING_EPS_DISPLAY_PAUSED, METADATA_WDTV, METADATA_TIVO, IGNORE_WORDS, CREATE_MISSING_SHOW_DIRS, \
-                ADD_SHOWS_WO_DIR
+                ADD_SHOWS_WO_DIR, USE_DLESKDEVNOTIF, DLESKDEVNOTIF_NOTIFY_ONSNATCH, DLESKDEVNOTIF_NOTIFY_ONDOWNLOAD, DLESKDEVNOTIF_USERNAME, DLESKDEVNOTIF_PASSWORD
 
         if __INITIALIZED__:
             return False
@@ -654,6 +660,13 @@ def initialize(consoleLogging=True):
         BOXCAR_NOTIFY_ONSNATCH = bool(check_setting_int(CFG, 'Boxcar', 'boxcar_notify_onsnatch', 0))
         BOXCAR_NOTIFY_ONDOWNLOAD = bool(check_setting_int(CFG, 'Boxcar', 'boxcar_notify_ondownload', 0))
         BOXCAR_USERNAME = check_setting_str(CFG, 'Boxcar', 'boxcar_username', '')
+        
+        CheckSection(CFG, 'DleskDevNotif')
+        USE_DLESKDEVNOTIF = bool(check_setting_int(CFG, 'DleskDevNotif', 'use_dleskdevnotif', 0))
+        DLESKDEVNOTIF_NOTIFY_ONSNATCH = bool(check_setting_int(CFG, 'DleskDevNotif', 'dleskdevnotif_notify_onsnatch', 0))
+        DLESKDEVNOTIF_NOTIFY_ONDOWNLOAD = bool(check_setting_int(CFG, 'DleskDevNotif', 'dleskdevnotif_notify_ondownload', 0))
+        DLESKDEVNOTIF_USERNAME = check_setting_str(CFG, 'DleskDevNotif', 'dleskdevnotif_username', '')
+        DLESKDEVNOTIF_PASSWORD = check_setting_str(CFG, 'DleskDevNotif', 'dleskdevnotif_password', '')
 
         CheckSection(CFG, 'Pushover')
         USE_PUSHOVER = bool(check_setting_int(CFG, 'Pushover', 'use_pushover', 0))
@@ -1147,6 +1160,13 @@ def save_config():
     new_config['Boxcar']['boxcar_notify_onsnatch'] = int(BOXCAR_NOTIFY_ONSNATCH)
     new_config['Boxcar']['boxcar_notify_ondownload'] = int(BOXCAR_NOTIFY_ONDOWNLOAD)
     new_config['Boxcar']['boxcar_username'] = BOXCAR_USERNAME
+    
+    new_config['DleskDevNotif'] = {}
+    new_config['DleskDevNotif']['use_dleskdevnotif'] = int(USE_DLESKDEVNOTIF)
+    new_config['DleskDevNotif']['dleskdevnotif_notify_onsnatch'] = int(DLESKDEVNOTIF_NOTIFY_ONSNATCH)
+    new_config['DleskDevNotif']['dleskdevnotif_notify_ondownload'] = int(DLESKDEVNOTIF_NOTIFY_ONDOWNLOAD)
+    new_config['DleskDevNotif']['dleskdevnotif_username'] = DLESKDEVNOTIF_USERNAME
+    new_config['DleskDevNotif']['dleskdevnotif_password'] = DLESKDEVNOTIF_PASSWORD
 
     new_config['Pushover'] = {}
     new_config['Pushover']['use_pushover'] = int(USE_PUSHOVER)

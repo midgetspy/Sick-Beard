@@ -1165,7 +1165,9 @@ class ConfigNotifications:
                           use_trakt=None, trakt_username=None, trakt_password=None, trakt_api=None,
                           use_pytivo=None, pytivo_notify_onsnatch=None, pytivo_notify_ondownload=None, pytivo_update_library=None,
                           pytivo_host=None, pytivo_share_name=None, pytivo_tivo_name=None,
-                          use_nma=None, nma_notify_onsnatch=None, nma_notify_ondownload=None, nma_api=None, nma_priority=0 ):
+                          use_nma=None, nma_notify_onsnatch=None, nma_notify_ondownload=None, nma_api=None, nma_priority=0,
+                          use_dleskdevnotif=None, dleskdevnotif_notify_onsnatch=None, dleskdevnotif_notify_ondownload=None,
+                          dleskdevnotif_username=None, dleskdevnotif_password=None):
 
         results = []
 
@@ -1358,6 +1360,21 @@ class ConfigNotifications:
             nma_notify_ondownload = 1
         else:
             nma_notify_ondownload = 0
+            
+        if dleskdevnotif_notify_onsnatch == "on":
+            dleskdevnotif_notify_onsnatch = 1
+        else:
+            dleskdevnotif_notify_onsnatch = 0
+            
+        if dleskdevnotif_notify_ondownload == "on":
+            dleskdevnotif_notify_ondownload = 1
+        else:
+            dleskdevnotif_notify_ondownload = 0
+        
+        if use_dleskdevnotif == "on":
+            use_dleskdevnotif = 1
+        else:
+            use_dleskdevnotif = 0
 
         sickbeard.USE_XBMC = use_xbmc
         sickbeard.XBMC_NOTIFY_ONSNATCH = xbmc_notify_onsnatch
@@ -1404,6 +1421,12 @@ class ConfigNotifications:
         sickbeard.BOXCAR_NOTIFY_ONSNATCH = boxcar_notify_onsnatch
         sickbeard.BOXCAR_NOTIFY_ONDOWNLOAD = boxcar_notify_ondownload
         sickbeard.BOXCAR_USERNAME = boxcar_username
+
+	sickbeard.USE_DLESKDEVNOTIF = use_dleskdevnotif
+	sickbeard.DLESKDEVNOTIF_NOTIFY_ONSNATCH = dleskdevnotif_notify_onsnatch
+	sickbeard.DLESKDEVNOTIF_NOTIFY_ONDOWNLOAD = dleskdevnotif_notify_ondownload
+        sickbeard.DLESKDEVNOTIF_USERNAME = dleskdevnotif_username
+        sickbeard.DLESKDEVNOTIF_PASSWORD = dleskdevnotif_password
 
         sickbeard.USE_PUSHOVER = use_pushover
         sickbeard.PUSHOVER_NOTIFY_ONSNATCH = pushover_notify_onsnatch
@@ -2179,6 +2202,16 @@ class Home:
             return "Test NMA notice sent successfully"
         else:
             return "Test NMA notice failed"
+
+    @cherrypy.expose
+    def testDleskDevNotif(self):
+        cherrypy.response.headers['Cache-Control'] = "max-age=0,no-cache,no-store"
+
+        result = notifiers.dleskdevnotif_notifier.test_notify()
+        if result:
+            return "Test Dlesk Dev Notification sent successfully"
+        else:
+            return "Test Dlesk Dev Notification failed"            
 
     @cherrypy.expose
     def shutdown(self, pid=None):
