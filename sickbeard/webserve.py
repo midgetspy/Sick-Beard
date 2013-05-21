@@ -552,7 +552,7 @@ class Manage:
 
     @cherrypy.expose
     def massEditSubmit(self, paused=None, flatten_folders=None, quality_preset=False, subtitles=None,
-                       anyQualities=[], bestQualities=[], tvdbLangSelect=None, toEdit=None, *args, **kwargs):
+                       anyQualities=[], bestQualities=[], tvdbLang=None, toEdit=None, *args, **kwargs):
 
         dir_map = {}
         for cur_arg in kwargs:
@@ -600,11 +600,12 @@ class Manage:
             if quality_preset == 'keep':
                 anyQualities, bestQualities = Quality.splitQuality(showObj.quality)
 
-            logger.log(u"tvdbLangSelect: "+str(tvdbLangSelect), logger.ERROR)
-            if tvdbLangSelect == 'unknown':
+            logger.log(u"tvdbLang: "+str(lang), logger.ERROR)
+            if tvdbLang == 'None':
                 new_lang = 'en'
             else:
-                new_lang = tvdbLangSelect
+                new_lang = tvdbLang
+            logger.log(u"new_lang: "+str(new_lang), logger.ERROR)
 
             exceptions_list = []
             
