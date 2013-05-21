@@ -600,6 +600,7 @@ class Manage:
             if quality_preset == 'keep':
                 anyQualities, bestQualities = Quality.splitQuality(showObj.quality)
 
+            logger.log(u"tvdbLangSelect: "+tvdbLangSelect, logger.ERROR)
             if tvdbLangSelect == 'unknown':
                 new_lang = 'en'
             else:
