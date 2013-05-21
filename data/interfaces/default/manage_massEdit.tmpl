@@ -18,21 +18,34 @@
 <script type="text/javascript" src="$sbRoot/js/qualityChooser.js?$sbPID"></script>
 <script type="text/javascript" src="$sbRoot/js/massEdit.js?$sbPID"></script><script type="text/javascript" charset="utf-8">
 <!--
-\$(document).ready(function(){
+$(document).ready(function(){
 
-  \$.getJSON('$sbRoot/home/addShows/getTVDBLanguages', {}, function(data) {
+  $.getJSON('/home/addShows/getTVDBLanguages', {}, function(data) {
         var resultStr = '';
 
         if (data.results.length == 0) {
-            flag = ' class="flag" style="background-image:url($sbRoot/images/flags/${show.lang}.png)"';
-            resultStr = '<option value="$show.lang" selected="selected" + flag>$show.lang</option>';
+            flag = ' class="flag" style="background-image:url(/images/flags/en.png)"';
+            resultStr = '<option value="en" selected="selected" + flag>en</option>';
         } else {
-            \$.each(data.results, function(index, obj) {
-                flag = ' class="flag" style="background-image:url($sbRoot/images/flags/' + obj + '.png);"';
+            var current_lang_added = false;
+            $.each(data.results, function(index, obj) {
+
+                if (obj == "en") {
+                    selected = ' selected="selected"';
+                    current_lang_added = true;
+                }
+                else {
+                    selected = '';
+                }
+
+                flag = ' class="flag" style="background-image:url(/images/flags/' + obj + '.png);"';
                 resultStr += '<option value="' + obj + '"' + selected + flag + '>' + obj + '</option>';
             });
+            if (!current_lang_added)
+                resultStr += '<option value="en" selected="selected">en</option>';
+
         }
-        \$('#tvdbLangSelect').html(resultStr)
+        $('#tvdbLangSelect').html(resultStr)
 
   });
 
@@ -126,9 +139,8 @@
 <div class="optionWrapper clearfix">
 	<span class="selectTitle">Metadata Language:</span>
     <div class="selectChoices">
-        <select name="tvdbLang" id="tvdbLangSelect">
-                <option value="fr" selected="selected">fr</option>
-        </select>
+        <select name="tvdbLang" id="tvdbLangSelect"></select><br />
+        Note: This will only affect the language of the retrieved metadata file contents and episode filenames.<br />
     </div><br />
 </div>
 
