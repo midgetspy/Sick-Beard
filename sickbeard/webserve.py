@@ -591,10 +591,10 @@ class Manage:
             if quality_preset == 'keep':
                 anyQualities, bestQualities = Quality.splitQuality(showObj.quality)
 
-            if metadata != '':
-                new_metadata = metadata
-            else:
+            if metadata == '':
                 new_metadata = 'en'
+            else:
+                new_metadata = metadata
 
             exceptions_list = []
             
