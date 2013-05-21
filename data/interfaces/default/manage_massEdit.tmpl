@@ -16,8 +16,30 @@
 #end if
 #set $anyQualities, $bestQualities = $common.Quality.splitQuality($initial_quality)
 <script type="text/javascript" src="$sbRoot/js/qualityChooser.js?$sbPID"></script>
-<script type="text/javascript" src="$sbRoot/js/massEdit.js?$sbPID"></script>
+<script type="text/javascript" src="$sbRoot/js/massEdit.js?$sbPID"></script><script type="text/javascript" charset="utf-8">
+<!--
+\$(document).ready(function(){
 
+  \$.getJSON('$sbRoot/home/addShows/getTVDBLanguages', {}, function(data) {
+        var resultStr = '';
+
+        if (data.results.length == 0) {
+            flag = ' class="flag" style="background-image:url($sbRoot/images/flags/${show.lang}.png)"';
+            resultStr = '<option value="$show.lang" selected="selected" + flag>$show.lang</option>';
+        } else {
+            \$.each(data.results, function(index, obj) {
+                flag = ' class="flag" style="background-image:url($sbRoot/images/flags/' + obj + '.png);"';
+                resultStr += '<option value="' + obj + '"' + selected + flag + '>' + obj + '</option>';
+            });
+
+        }
+        \$('#tvdbLangSelect').html(resultStr)
+
+  });
+
+});
+//-->
+</script>
 <form action="massEditSubmit" method="post">
 <input type="hidden" name="toEdit" value="$showList" />
 
@@ -101,6 +123,16 @@
         </select>
     </div><br />
 </div>
+
+<div class="optionWrapper clearfix">
+	<span class="selectTitle">Metadata Language:</span>
+    <div class="selectChoices">
+        <select name="tvdbLang" id="tvdbLangSelect">
+                <option value="fr" selected="selected">fr</option>
+        </select>
+    </div><br />
+</div>
+
 <div class="optionWrapper clearfix">
     <br /><span class="separator" style="font-size: 1.2em; font-weight: 700;">*</span>
     Changing these settings will cause the selected shows to be refreshed.
