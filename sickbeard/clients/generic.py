@@ -116,11 +116,13 @@ class GenericClient(object):
         if result.url.startswith('magnet'):
             torrent_hash = re.findall('urn:btih:([\w]{32,40})', result.url)[0]
         else:
-            if hasattr(result , 'extraInfo'):
+            if hasattr(result , 'extraInfo') and len(result.extraInfo)>0:
                 torrent_hash = result.extraInfo[0]
-            else :
+            elif hasattr(result,'content') :
                 info = bdecode(result.content)["info"]
                 torrent_hash = sha1(bencode(info)).hexdigest()
+            else:
+                torrent_hash = result.url
         
         return torrent_hash
         
@@ -134,13 +136,15 @@ class GenericClient(object):
             logger.log(self.name + u': Autenthication Failed' , logger.ERROR)
             return r_code
         
-        result.hash = self._get_torrent_hash(result)
+        
         
         try:
-            if result.url.startswith('magnet'):
-                r_code = self._add_torrent_uri(result)
-            else:
+            
+            result.hash = self._get_torrent_hash(result)
+            if hasattr(result,'content') and not result.url.startswith('magnet'):
                 r_code = self._add_torrent_file(result)
+            else:
+                r_code = self._add_torrent_uri(result)
                 
             if not self._set_torrent_pause(result):
                 logger.log(self.name + u': Unable to set the pause for Torrent', logger.ERROR)
