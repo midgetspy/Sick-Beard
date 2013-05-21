@@ -543,7 +543,7 @@ class Manage:
 
     @cherrypy.expose
     def massEditSubmit(self, paused=None, flatten_folders=None, quality_preset=False, subtitles=None,
-                       anyQualities=[], bestQualities=[], toEdit=None, *args, **kwargs):
+                       anyQualities=[], bestQualities=[], metadata=None, toEdit=None, *args, **kwargs):
 
         dir_map = {}
         for cur_arg in kwargs:
@@ -591,9 +591,14 @@ class Manage:
             if quality_preset == 'keep':
                 anyQualities, bestQualities = Quality.splitQuality(showObj.quality)
 
+            if metadata != '':
+                new_metadata = metadata
+            else:
+                new_metadata = 'en'
+
             exceptions_list = []
             
-            curErrors += Home().editShow(curShow, new_show_dir, anyQualities, bestQualities, exceptions_list, new_flatten_folders, new_paused, subtitles=new_subtitles, audio_lang=showObj.audio_lang, custom_search_names=showObj.custom_search_names, directCall=True)
+            curErrors += Home().editShow(curShow, new_show_dir, anyQualities, bestQualities, exceptions_list, new_flatten_folders, new_paused, subtitles=new_subtitles, tvdbLang=new_metadata, audio_lang=showObj.audio_lang, custom_search_names=showObj.custom_search_names, directCall=True)
 
             if curErrors:
                 logger.log(u"Errors: "+str(curErrors), logger.ERROR)
