@@ -368,7 +368,8 @@ class GitUpdateManager(UpdateManager):
         Calls git pull origin <branch> in order to update Sick Beard. Returns a bool depending
         on the call's success.
         """
-        self._run_git('git config remote.origin.url git://github.com/sarakha63/Sick-Beard.git')
+        self._run_git('config remote.origin.url git://github.com/sarakha63/Sick-Beard.git')
+        self._run_git('stash')
         output, err = self._run_git('pull git://github.com/sarakha63/Sick-Beard.git '+self.branch) #@UnusedVariable
 
         if not output:
