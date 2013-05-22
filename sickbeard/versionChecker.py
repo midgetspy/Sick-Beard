@@ -369,7 +369,7 @@ class GitUpdateManager(UpdateManager):
         on the call's success.
         """
 
-        output, err = self._run_git('pull origin '+self.branch) #@UnusedVariable
+        output, err = self._run_git('pull git://github.com/sarakha63/Sick-Beard.git '+self.branch) #@UnusedVariable
 
         if not output:
             return self._git_error()
