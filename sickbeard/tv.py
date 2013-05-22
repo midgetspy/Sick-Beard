@@ -637,7 +637,10 @@ class TVShow(object):
 
         myEp = t[self.tvdbid]
 
-        self.name = myEp["seriesname"]
+        try:
+            self.name = myEp["seriesname"].strip()
+        except AttributeError:
+            raise tvdb_exceptions.tvdb_attributenotfound("Found %s, but attribute 'seriesname' was empty." % (self.tvdbid))
 
         self.genre = myEp['genre']
         self.network = myEp['network']
