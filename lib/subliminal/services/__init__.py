@@ -219,18 +219,10 @@ class ServiceBase(object):
                 # TODO: could check if maybe we already have a text file and
                 # download it directly
                 raise DownloadFailedError('Downloaded file is not a zip file')
-#            with zipfile.ZipFile(zippath) as zipsub:
-#                for subfile in zipsub.namelist():
-#                    if os.path.splitext(subfile)[1] in EXTENSIONS:
-#                        with open(filepath, 'w') as f:
-#                            f.write(zipsub.open(subfile).read())
-#                        break
-#                else:
-#                    raise DownloadFailedError('No subtitles found in zip file')
             zipsub = zipfile.ZipFile(zippath)
             for subfile in zipsub.namelist():
                 if os.path.splitext(subfile)[1] in EXTENSIONS:
-                    with open(filepath, 'w') as f:
+                    with open(filepath, 'wb') as f:
                         f.write(zipsub.open(subfile).read())
                     break
             else:

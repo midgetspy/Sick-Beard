@@ -37,10 +37,10 @@ class Podnapisi(ServiceBase):
                               'es', 'et', 'fa', 'fi', 'fr', 'ga', 'he', 'hi', 'hr', 'hu', 'id',
                               'is', 'it', 'ja', 'ko', 'lt', 'lv', 'mk', 'ms', 'nl', 'nn', 'pl',
                               'pt', 'ro', 'ru', 'sk', 'sl', 'sq', 'sr', 'sv', 'th', 'tr', 'uk',
-                              'vi', 'zh', 'es-ar', 'pt-br'])
+                              'vi', 'zh', 'es-ar', 'pb'])
     language_map = {'jp': Language('jpn'), Language('jpn'): 'jp',
                     'gr': Language('gre'), Language('gre'): 'gr',
-                    'pb': Language('por-BR'), Language('por-BR'): 'pb',
+#                    'pb': Language('por-BR'), Language('por-BR'): 'pb',
                     'ag': Language('spa-AR'), Language('spa-AR'): 'ag',
                     'cyr': Language('srp')}
     videos = [Episode, Movie]

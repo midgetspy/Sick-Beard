@@ -76,7 +76,6 @@ def processDir (dirName, nzbName=None, recurse=False):
             files = ek.ek(os.listdir, dirName)
             dirs = [dirs]
 
-    process_result = False
     videoFiles = filter(helpers.isMediaFile, files)
 
     # If nzbName is set and there's more than one videofile in the folder, files will be lost (overwritten).
@@ -91,6 +90,14 @@ def processDir (dirName, nzbName=None, recurse=False):
     #Process Video File in the current Path
     for cur_video_file in videoFiles:
 
+        # Avoid processing the same file again if we use KEEP_PROCESSING_DIR    
+        if sickbeard.KEEP_PROCESSED_DIR:
+            myDB = db.DBConnection()
+            sqlresult = myDB.select("SELECT * FROM tv_episodes WHERE release_name = ?", [cur_video_file.rpartition('.')[0]])
+            if sqlresult:
+                returnStr += logHelper(u"You're trying to post process the file " + cur_video_file + " that's already been processed, skipping", logger.DEBUG)
+                continue
+
         cur_video_file_path = ek.ek(os.path.join, dirName, cur_video_file)
             
         try:
@@ -104,15 +111,15 @@ def processDir (dirName, nzbName=None, recurse=False):
         returnStr += processor.log
 
         if process_result:
-                returnStr += logHelper(u"Processing succeeded for "+cur_video_file_path)
+            returnStr += logHelper(u"Processing succeeded for "+cur_video_file_path)
         else:
             returnStr += logHelper(u"Processing failed for "+cur_video_file_path+": "+process_fail_message, logger.WARNING)
 
     #Process Video File in all TV Subdir
     for dir in [x for x in dirs if validateDir(path, x, returnStr)]:
-
-#        process_result = False
-
+        
+        process_result = True
+        
         for processPath, processDir, fileList in ek.ek(os.walk, ek.ek(os.path.join, path, dir), topdown=False):
 
             videoFiles = filter(helpers.isMediaFile, fileList)
@@ -197,7 +204,26 @@ def validateDir(path, dirName, returnStr):
     sqlResults = myDB.select("SELECT * FROM tv_shows")
     for sqlShow in sqlResults:
         if dirName.lower().startswith(ek.ek(os.path.realpath, sqlShow["location"]).lower()+os.sep) or dirName.lower() == ek.ek(os.path.realpath, sqlShow["location"]).lower():
-            returnStr += logHelper(u"You're trying to post process an episode that's already been moved to its show dir", logger.ERROR)
+            returnStr += logHelper(u"You're trying to post process an episode that's already been moved to its show dir, skipping", logger.ERROR)
             return False
+
+    # Get the videofile list for the next checks
+    files = ek.ek(os.listdir, os.path.join(path, dirName))
+    videoFiles = filter(helpers.isMediaFile, files)
+
+    # Avoid processing the same dir again if we use KEEP_PROCESSING_DIR    
+    if sickbeard.KEEP_PROCESSED_DIR:
+        numPostProcFiles = myDB.select("SELECT COUNT(release_name) as numfiles FROM tv_episodes WHERE release_name = ?", [dirName])
+        if int(numPostProcFiles[0][0]) == len(videoFiles):
+            returnStr += logHelper(u"You're trying to post process a dir that's already been processed, skipping", logger.DEBUG)
+            return False
+        
+    #check if the dir have at least one tv video file
+    for video in videoFiles:
+        try:
+            NameParser().parse(video)
+            return True
+        except InvalidNameException:
+            pass
     
-    return True
+    return False

@@ -34,9 +34,9 @@ class Subtitulos(ServiceBase):
     server_url = 'http://www.subtitulos.es'
     site_url = 'http://www.subtitulos.es'
     api_based = False
-    languages = language_set(['eng-US', 'eng-GB', 'eng', 'fre', 'por-BR', 'por', 'spa-ES', u'spa', u'ita', u'cat'])
+    languages = language_set(['eng-US', 'eng-GB', 'eng', 'fre', 'pob', 'por', 'spa-ES', u'spa', u'ita', u'cat'])
     language_map = {u'Español': Language('spa'), u'Español (España)': Language('spa'), #u'Español (Latinoamérica)': Language('spa'),
-                    u'Català': Language('cat'), u'Brazilian': Language('por-BR'), u'English (US)': Language('eng-US'),
+                    u'Català': Language('cat'), u'Brazilian': Language('pob'), u'English (US)': Language('eng-US'),
                     u'English (UK)': Language('eng-GB'), 'Galego': Language('glg')}
     language_code = 'name'
     videos = [Episode]

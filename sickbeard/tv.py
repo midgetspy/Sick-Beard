@@ -1169,7 +1169,7 @@ class TVEpisode(object):
             subtitles = subliminal.download_subtitles([self.location], languages=need_languages, services=sickbeard.subtitles.getEnabledServiceList(), force=force, multi=True, cache_dir=sickbeard.CACHE_DIR)
             
         except Exception as e:
-            logger.log("Error occurred when downloading subtitles: " + str(e), logger.DEBUG)
+            logger.log("Error occurred when downloading subtitles: " + str(e), logger.ERROR)
             return
 
         self.refreshSubtitles()

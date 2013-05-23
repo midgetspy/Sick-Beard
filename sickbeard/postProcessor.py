@@ -153,11 +153,6 @@ class PostProcessor(object):
         if not file_path:
             return []
 
-        if file_path != self.file_path:
-            associated_dir = os.path.dirname(file_path)
-            associated_fname = os.path.basename(self.file_path) 
-            file_path = os.path.join(associated_dir, associated_fname)
-
         file_path_list = []
     
         base_name = file_path.rpartition('.')[0]+'.'
@@ -253,11 +248,11 @@ class PostProcessor(object):
             cur_file_name = ek.ek(os.path.basename, cur_file_path)
             
             # get the extension
-            cur_extension = cur_file_path.rpartition('.')[-1]
+            cur_extension = ek.ek(os.path.splitext, cur_file_path)[1][1:]
             
-            # check if file have language of subtitles
+            # check if file have subtitles language
             if cur_extension in common.subtitleExtensions:
-                cur_lang = cur_file_path.rpartition('.')[0].rpartition('.')[-1]
+                cur_lang = ek.ek(os.path.splitext, ek.ek(os.path.splitext, cur_file_path)[0])[1][1:]
                 if cur_lang in sickbeard.SUBTITLES_LANGUAGES:
                     cur_extension = cur_lang + '.' + cur_extension
         
@@ -300,8 +295,8 @@ class PostProcessor(object):
                 helpers.moveFile(cur_file_path, new_file_path)
                 helpers.chmodAsParent(new_file_path)
             except (IOError, OSError), e:
-                self._log("Unable to move file "+cur_file_path+" to "+new_file_path+": "+ex(e), logger.ERROR)
-                raise e
+                self._log("Unable to move file "+cur_file_path+" to "+new_file_path+": "+ex(str(e)), logger.ERROR)
+                raise ex(str(e))
                 
         self._combined_file_operation(file_path, new_path, new_base_name, associated_files, action=_int_move, subtitles=subtitles)
                 

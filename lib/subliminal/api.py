@@ -94,7 +94,10 @@ def download_subtitles(paths, languages=None, services=None, force=True, multi=F
     order = order or [LANGUAGE_INDEX, SERVICE_INDEX, SERVICE_CONFIDENCE, MATCHING_CONFIDENCE]
     subtitles_by_video = list_subtitles(paths, languages, services, force, multi, cache_dir, max_depth, scan_filter)
     for video, subtitles in subtitles_by_video.iteritems():
-        subtitles.sort(key=lambda s: key_subtitles(s, video, languages, services, order), reverse=True)
+        try:
+            subtitles.sort(key=lambda s: key_subtitles(s, video, languages, services, order), reverse=True)
+        except StopIteration:
+            break
     results = []
     service_instances = {}
     tasks = create_download_tasks(subtitles_by_video, languages, multi)
