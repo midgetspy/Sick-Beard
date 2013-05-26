@@ -31,7 +31,7 @@ from threading import Lock
 # apparently py2exe won't build these unless they're imported somewhere
 from sickbeard import providers, metadata
 from providers import ezrss, tvtorrents, btn, nzbsrus, newznab, womble, nzbx, omgwtfnzbs
-from providers import kickass, torrentz, dtt, torrentleech, thepiratebay, publichd, torrentday
+from providers import kickass, torrentz, dtt, torrentleech, thepiratebay, publichd, torrentday, sceneaccess
 from sickbeard.config import CheckSection, check_setting_int, check_setting_str, ConfigMigrator
 
 from sickbeard import searchCurrent, searchBacklog, showUpdater, versionChecker, properFinder, autoPostProcesser
@@ -183,6 +183,11 @@ TORRENTDAY_USERNAME = None
 TORRENTDAY_PASSWORD = None
 TORRENTDAY_UID =None
 TORRENTDAY_RSSHASH = None
+
+SCENEACCESS = False
+SCENEACCESS_USERNAME = None
+SCENEACCESS_PASSWORD = None
+SCENEACCESS_RSSHASH = None
 
 PUBLICHD = False
 
@@ -369,6 +374,7 @@ def initialize(consoleLogging=True):
                 KICKASS, TORRENTZ, TORRENTZ_VERIFIED, \
                 TORRENTLEECH, TORRENTLEECH_USERNAME, TORRENTLEECH_PASSWORD, \
                 TORRENTDAY, TORRENTDAY_USERNAME, TORRENTDAY_PASSWORD, TORRENTDAY_RSSHASH,TORRENTDAY_UID,\
+                SCENEACCESS,SCENEACCESS_USERNAME, SCENEACCESS_PASSWORD, SCENEACCESS_RSSHASH, \
                 PUBLICHD, \
                 NZBS, NZBS_UID, NZBS_HASH, EZRSS, DTT, DTT_NORAR, DTT_SINGLE, THEPIRATEBAY, THEPIRATEBAY_TRUSTED, THEPIRATEBAY_PROXY, THEPIRATEBAY_PROXY_URL, TVTORRENTS, TVTORRENTS_DIGEST, TVTORRENTS_HASH, BTN, BTN_API_KEY, TORRENT_DIR, USENET_RETENTION, SOCKET_TIMEOUT, \
                 SEARCH_FREQUENCY, DEFAULT_SEARCH_FREQUENCY, BACKLOG_SEARCH_FREQUENCY, \
@@ -533,8 +539,13 @@ def initialize(consoleLogging=True):
         TORRENTDAY_USERNAME = check_setting_str(CFG, 'TORRENTDAY', 'torrentday_username', '')   
         TORRENTDAY_PASSWORD = check_setting_str(CFG, 'TORRENTDAY', 'torrentday_password', '')
         TORRENTDAY_UID = check_setting_str(CFG, 'TORRENTDAY', 'torrentday_uid', '') 
-        TORRENTDAY_RSSHASH = check_setting_str(CFG, 'TORRENTDAY', 'torrentday_rsshash', '') 
-
+        TORRENTDAY_RSSHASH = check_setting_str(CFG, 'TORRENTDAY', 'torrentday_rsshash', '')
+        
+        SCENEACCESS = bool(check_setting_int(CFG, 'SCENEACCESS', 'sceneaccess', 0))
+        SCENEACCESS_USERNAME = check_setting_str(CFG, 'SCENEACCESS', 'sceneaccess_username', '')
+        SCENEACCESS_PASSWORD = check_setting_str(CFG, 'SCENEACCESS', 'sceneaccess_password', '')
+        SCENEACCESS_RSSHASH = check_setting_str(CFG, 'SCENEACCESS', 'sceneaccess_rsshash', '')
+        
         PUBLICHD = bool(check_setting_int(CFG, 'PUBLICHD', 'publichd', 0))    
 
         GIT_PATH = check_setting_str(CFG, 'General', 'git_path', '')
@@ -1134,6 +1145,13 @@ def save_config():
     new_config['TORRENTDAY']['torrentday_password'] = TORRENTDAY_PASSWORD
     new_config['TORRENTDAY']['torrentday_rsshash'] = TORRENTDAY_RSSHASH
     new_config['TORRENTDAY']['torrentday_uid'] = TORRENTDAY_UID
+
+    new_config['SCENEACCESS'] = {}
+    new_config['SCENEACCESS']['sceneaccess'] = int(SCENEACCESS)
+    new_config['SCENEACCESS']['sceneaccess_username'] = SCENEACCESS_USERNAME
+    new_config['SCENEACCESS']['sceneaccess_password'] = SCENEACCESS_PASSWORD
+    new_config['SCENEACCESS']['sceneaccess_rsshash'] = SCENEACCESS_RSSHASH
+
 
     new_config['PUBLICHD'] = {}
     new_config['PUBLICHD']['publichd'] = int(PUBLICHD)
