@@ -259,6 +259,9 @@ class TVRage:
         info = {}
 
         for x in urlData:
+            if x.startswith("No Show Results Were Found"):
+                logger.log(x.encode('utf-8'), logger.WARNING)
+                return info
             key, value = x.split("@")
             key = key.replace('<pre>','')
             info[key] = value.strip()
