@@ -218,12 +218,12 @@ def validateDir(path, dirName, returnStr):
             returnStr += logHelper(u"You're trying to post process a dir that's already been processed, skipping", logger.DEBUG)
             return False
         
-    #check if the dir have at least one tv video file
-    for video in videoFiles:
-        try:
-            NameParser().parse(video)
-            return True
-        except InvalidNameException:
-            pass
+#    #check if the dir have at least one tv video file
+#    for video in videoFiles:
+#        try:
+#            NameParser().parse(video)
+#            return True
+#        except InvalidNameException:
+#            pass
     
-    return False
+    return True
