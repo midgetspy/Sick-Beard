@@ -41,7 +41,6 @@ class SceneAccessProvider(generic.TorrentProvider):
     def __init__(self):
 
         generic.TorrentProvider.__init__(self, "SceneAccess")
-        
         self.supportsBacklog = True
         self.cache = SceneAccessCache(self)     
         self.url = 'https://sceneaccess.eu/'
@@ -81,7 +80,6 @@ class SceneAccessProvider(generic.TorrentProvider):
     ###################################################################################################
 
     def _get_season_search_strings(self, show, season=None):
-        
         search_string = []
     
         if not show:
@@ -101,12 +99,10 @@ class SceneAccessProvider(generic.TorrentProvider):
                     for show_name in set(show_name_helpers.allPossibleShowNames(show)):
                         ep_string = show_name_helpers.sanitizeSceneName(show_name) +' '+ str(datetime.date.fromordinal(sqlEp["airdate"])).replace('-', '.')
                         search_string.append(ep_string)
-                        #logger.log("[SceneAccess] get_season_search_strings(): " + ep_string)
                 else:
                     for show_name in set(show_name_helpers.allPossibleShowNames(show)):
                         ep_string = show_name_helpers.sanitizeSceneName(show_name) +' '+ sickbeard.config.naming_ep_type[2] % {'seasonnumber': season, 'episodenumber': int(sqlEp["episode"])}
                         search_string.append(ep_string)                       
-                        #logger.log("[SceneAccess] get_season_search_strings(): " + ep_string)
         return search_string
 
     ###################################################################################################
@@ -121,12 +117,10 @@ class SceneAccessProvider(generic.TorrentProvider):
             for show_name in set(show_name_helpers.allPossibleShowNames(ep_obj.show)):
                 ep_string = show_name_helpers.sanitizeSceneName(show_name) +' '+ str(ep_obj.airdate).replace('-', '.')
                 search_string.append(ep_string)
-                #logger.log("[SceneAccess] get_episode_search_strings() returning: " + ep_string)
         else:
             for show_name in set(show_name_helpers.allPossibleShowNames(ep_obj.show)):
                 ep_string = show_name_helpers.sanitizeSceneName(show_name) +' '+ sickbeard.config.naming_ep_type[2] % {'seasonnumber': ep_obj.season, 'episodenumber': ep_obj.episode}
                 search_string.append(ep_string)
-                #logger.log("[SceneAccess] get_episode_search_strings() returning: " + ep_string)
         return search_string    
  
     ###################################################################################################
@@ -146,20 +140,19 @@ class SceneAccessProvider(generic.TorrentProvider):
     def parseResults(self, searchUrl):
         #logger.log("[SceneAccess] parseResults() Was given Search string: " + searchUrl, logger.DEBUG)
         data = self.getURL(searchUrl)
-        #logger.log("[SceneAccess] parseResults() data: " + data,logger.DEBUG)
         results = []
         if data:
-            allItems = re.findall("<a\\s(?:[^\\s>]*?\\s)*?href=\"(?:mailto:)?(.*?)\".*?>(.+?)</a>", data)
-            for url, title in allItems:
-                if url and url.startswith("details?id=") and url.count("#") == 0:
-                    url = self.url + url
-                    title = title.strip("<b>|</b>")
-                    url = url.replace("details?id=", "download/") + "/" + "{0}".format(sickbeard.SCENEACCESS_RSSHASH) + "/" + title + ".torrent"
-                    #logger.log("[SceneAccess] parseResults() URL: " + url,logger.DEBUG)
-                    #logger.log("[SceneAccess] parseResults() Title: " + title.replace(".", " "),logger.DEBUG)
-                    results.append((title.replace(".", " "), url))
+            for torrent in re.compile('<td class="ttr_name"><a href="details\?id=\d+" title="(?P<title>.*?)">.*?<td class="td_dl"><a href="(?P<url>.*?)">' , re.MULTILINE|re.DOTALL).finditer(data):
+                item = (torrent.group('title').replace('.',' '), self.url + torrent.group('url'))
+                results.append(item)
+                #logger.log("[SceneAccess] parseResults() Title: " + torrent.group('title'),logger.DEBUG)
+                #logger.log("[SceneAccess] parseResults() URL: [" + item[1] + "]", logger.DEBUG)
+            if len(results):
+                logger.log("[SceneAccess] parseResults() Some results found.")
+            else:
+                logger.log("[SceneAccess] parseResults() No results found.")
         else:
-            logger.log("[SceneAccess] parseResults() Nothing found for " + searchUrl, logger.DEBUG)
+            logger.log("[SceneAccess] parseResults() Error no data returned!!")
         return results
     
     ###################################################################################################
@@ -169,17 +162,17 @@ class SceneAccessProvider(generic.TorrentProvider):
         if not headers:
             headers = []
         headers.append(('Cookie', self.token))
-
+        
         result = None
         try:
             result = helpers.getURL(url, headers)
             if result.count("<title>SceneAccess | Login</title>") > 0:
                 #if session has expired, just try once more.
-                logger.log("[SceneAccess] getURL() Session expired loading "+self.name+" URL: " + url +"\nLet's login again.", logger.DEBUG)
+                logger.log("[SceneAccess] getURL() Session expired loading "+self.name+" URL: " + url +"\nLet's login again.")
                 self.token = None
                 self.getURL(url, headers)
             else:
-                logger.log("[SceneAccess] Got Results from SceneAccess!")
+                logger.log("[SceneAccess] Got data from SceneAccess!",logger.DEBUG)
         except (urllib2.HTTPError, IOError, Exception), e:
             self.token = None
             logger.log("[SceneAccess] getURL() Error loading "+self.name+" URL: " + str(sys.exc_info()) + " - " + ex(e), logger.ERROR)
@@ -220,7 +213,7 @@ class SceneAccessProvider(generic.TorrentProvider):
                     passw = "pass=" + cookie.value  + ";"
             self.token = "%s%s" % (uid, passw)
             logger.log("[SceneAccess] Session: " + self.token, logger.DEBUG)
-            logger.log("[SceneAccess] successfully logged user '%s' in." % sickbeard.SCENEACCESS_USERNAME)
+            logger.log("[SceneAccess] Successfully logged user '%s' in." % sickbeard.SCENEACCESS_USERNAME)
             response.close()
     
     ###################################################################################################
@@ -230,18 +223,34 @@ class SceneAccessCache(tvcache.TVCache):
     ###################################################################################################
     
     def __init__(self, provider):
-        
         tvcache.TVCache.__init__(self, provider)
         self.minTime = 15
 
     ###################################################################################################
         
     def _getRSSData(self):
-        self.rss_url = "https://sceneaccess.eu/rss?feed=dl&cat=27,17,11&passkey={0}".format(sickbeard.SCENEACCESS_RSSHASH)
-        logger.log("[SceneAccess] RSS URL - {0}".format(self.rss_url))
-        xml = helpers.getURL(self.rss_url )
+        xml = ''
+        if sickbeard.SCENEACCESS_RSSHASH:
+            self.rss_url = "https://sceneaccess.eu/rss?feed=dl&cat=27,17,11&passkey={0}".format(sickbeard.SCENEACCESS_RSSHASH)
+            logger.log("[SceneAccess] RSS URL - {0}".format(self.rss_url))
+            xml = helpers.getURL(self.rss_url)
+        else:
+            logger.log("[SceneAccess] WARNING: RSS construction via browse since no hash provided.")
+            url = provider.url + "browse?search=&method=2&c27=27&c17=17&c11=11"
+            data = provider.parseResults(url)
+            xml = "<rss xmlns:atom=\"http://www.w3.org/2005/Atom\" version=\"2.0\">" + \
+            "<channel>" + \
+            "<title>SceneAccess</title>" + \
+            "<link>" + provider.url + "</link>" + \
+            "<description>torrent search</description>" + \
+            "<language>en-us</language>" + \
+            "<atom:link href=\"" + provider.url + "\" rel=\"self\" type=\"application/rss+xml\"/>"
+            
+            for title, url in data:
+                xml += "<item>" + "<title>" + title + "</title>" +  "<link>"+ url + "</link>" + "</item>"
+            xml += "</channel></rss>"
         return xml
-    
+        
     ###################################################################################################    
         
 provider = SceneAccessProvider()   
