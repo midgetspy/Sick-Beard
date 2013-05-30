@@ -144,7 +144,7 @@ class KATProvider(generic.TorrentProvider):
             return title
             
         except Exception, e:
-            logger.log(u"Failed parsing " + self.name + (" Exceptions: "  + str(e) if e else ''), logger.ERROR)
+            logger.log(u"Failed parsing " + self.name + " Traceback: "  + traceback.format_exc(), logger.ERROR)
                 
 
     def _get_season_search_strings(self, show, season=None):
