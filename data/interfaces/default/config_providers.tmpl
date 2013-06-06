@@ -88,7 +88,7 @@
                                 <span class="component-title jumbo">Configure Provider:</span>
                                 <span class="component-desc">
                                     #set $provider_config_list = []
-                                    #for $cur_provider in ("nzbs_r_us", "tvtorrents", "btn", "thepiratebay","dailytvtorrents", "torrentz", "torrentleech", "torrentday"):
+                                    #for $cur_provider in ("nzbs_r_us", "tvtorrents", "btn", "thepiratebay","dailytvtorrents", "torrentz", "torrentleech", "torrentday","sceneaccess"):
                                         #set $cur_provider_obj = $sickbeard.providers.getProviderClass($cur_provider)
                                         #if $cur_provider_obj.providerType == $GenericProvider.NZB and not $sickbeard.USE_NZBS:
                                             #continue
@@ -173,7 +173,7 @@
                                 <input class="component-desc" type="text" name="tvtorrents_hash" value="$sickbeard.TVTORRENTS_HASH" size="40" />
                             </label>
                         </div>
-                    </div><!-- /torrentleechDiv //-->
+                    </div><!-- /tvtorrentsDiv //-->
                     
 		    <div class="providerDiv" id="thepiratebayDiv">
                         <div class="field-pair">
@@ -214,6 +214,7 @@
                             </label>
                         </div>
                     </div><!-- /btnDiv //-->
+                    
                     <div class="providerDiv" id="dailytvtorrentsDiv">
                         <div class="field-pair">
                             <input type="checkbox" name="dtt_norar" id="dtt_norar" #if $sickbeard.DTT_NORAR then "checked=\"checked\"" else ""#/>
@@ -240,9 +241,8 @@
                             </label>
                         </div>
 		    </div><!-- /torrentzDiv //-->
-                
-                
-					<div class="providerDiv" id="torrentdayDiv">
+                    
+                    <div class="providerDiv" id="torrentdayDiv">
                         <div class="field-pair">
                             <label class="clearfix">
                                 <span class="component-title">Username:</span>
@@ -255,7 +255,7 @@
                                 <input class="component-desc" type="password" name="torrentday_password" value="$sickbeard.TORRENTDAY_PASSWORD" size="40" />
                             </label>
                         </div>
-					</div><!-- /torrentdayDiv //-->
+                    </div><!-- /torrentdayDiv //-->
                 
                     <div class="providerDiv" id="torrentleechDiv">
                         <div class="field-pair">
@@ -272,6 +272,27 @@
                             </label>
                         </div>
                     </div><!-- /torrentleechDiv //-->
+                    
+                    <div class="providerDiv" id="sceneaccessDiv">
+                        <div class="field-pair">
+                            <label class="clearfix">
+                                <span class="component-title">Username:</span>
+                                <input class="component-desc" type="text" name="sceneaccess_username" value="$sickbeard.SCENEACCESS_USERNAME" size="40" />
+                            </label>
+                        </div>
+                        <div class="field-pair">
+                            <label class="clearfix">
+                                <span class="component-title">Password:</span>
+                                <input class="component-desc" type="password" name="sceneaccess_password" value="$sickbeard.SCENEACCESS_PASSWORD" size="40" />
+                            </label>
+                        </div>
+                        <div class="field-pair">
+                            <label class="clearfix">
+                                <span class="component-title">RSS Hash:</span>
+                                <input class="component-desc" type="text" name="sceneaccess_rsshash" value="$sickbeard.SCENEACCESS_RSSHASH" size="40" /></b>
+                            </label>
+                        </div>
+                    </div><!-- /sceneaccessDiv //-->
 <!-- end div for editing providers -->
 
 
