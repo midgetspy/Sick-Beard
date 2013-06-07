@@ -2098,17 +2098,31 @@ class Home:
         return finalResult
 
     @cherrypy.expose
-    def testPLEX(self, host=None, username=None, password=None):
+    def testPLEX(self, server_host=None, host=None, username=None, password=None):
         cherrypy.response.headers['Cache-Control'] = "max-age=0,no-cache,no-store"
 
         finalResult = ''
-        for curHost in [x.strip() for x in host.split(",")]:
-            curResult = notifiers.plex_notifier.test_notify(urllib.unquote_plus(curHost), username, password)
-            if len(curResult.split(":")) > 2 and 'OK' in curResult.split(":")[2]:
-                finalResult += "Test Plex notice sent successfully to " + urllib.unquote_plus(curHost)
+
+        if server_host:
+            if notifiers.plex_notifier.test_server_connection(urllib.unquote_plus(server_host)):
+                finalResult += "Server: Successfully connected to " + urllib.unquote_plus(server_host)
             else:
-                finalResult += "Test Plex notice failed to " + urllib.unquote_plus(curHost)
-            finalResult += "<br />\n"
+                finalResult += "Server: Failed connecting to " + urllib.unquote_plus(server_host)
+        else:
+            finalResult += "No Plex Media Server IP:Port set, skipping..."
+
+        finalResult += "<br />\n"
+
+        if host:
+            for curHost in [x.strip() for x in host.split(",")]:
+                curResult = notifiers.plex_notifier.test_notify(urllib.unquote_plus(curHost), username, password)
+                if len(curResult.split(":")) > 2 and 'OK' in curResult.split(":")[2]:
+                    finalResult += "Client: Test Plex notice sent successfully to " + urllib.unquote_plus(curHost)
+                else:
+                    finalResult += "Client: Test Plex notice failed to " + urllib.unquote_plus(curHost)
+                finalResult += "<br />\n"
+        else:
+            finalResult += "No Plex Client IP:Port set, skipping.<br />\n"
 
         return finalResult
 
