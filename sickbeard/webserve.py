@@ -685,7 +685,8 @@ class ConfigGeneral:
     @cherrypy.expose
     def saveGeneral(self, log_dir=None, web_port=None, web_log=None, web_ipv6=None,
                     launch_browser=None, web_username=None, use_api=None, api_key=None,
-                    web_password=None, version_notify=None, enable_https=None, https_cert=None, https_key=None):
+                    web_password=None, version_notify=None, enable_https=None,
+                    https_cert=None, https_key=None, sort_article=None):
 
         results = []
 
@@ -709,10 +710,16 @@ class ConfigGeneral:
         else:
             version_notify = 0
 
+        if sort_article == "on":
+            sort_article = 1
+        else:
+            sort_article = 0
+
         if not config.change_LOG_DIR(log_dir):
             results += ["Unable to create directory " + os.path.normpath(log_dir) + ", log dir not changed."]
 
         sickbeard.LAUNCH_BROWSER = launch_browser
+        sickbeard.SORT_ARTICLE = sort_article
 
         sickbeard.WEB_PORT = int(web_port)
         sickbeard.WEB_IPV6 = web_ipv6
@@ -2300,12 +2307,14 @@ class Home:
             epCounts[curEpCat] += 1
 
         def titler(x):
-            if not x:
+            if not x or sickbeard.SORT_ARTICLE:
                 return x
             if x.lower().startswith('a '):
-                    x = x[2:]
+                x = x[2:]
+            elif x.lower().startswith('an '):
+                x = x[3:]
             elif x.lower().startswith('the '):
-                    x = x[4:]
+                x = x[4:]
             return x
         t.sortedShowList = sorted(sickbeard.showList, lambda x, y: cmp(titler(x.name), titler(y.name)))
 

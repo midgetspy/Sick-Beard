@@ -28,7 +28,11 @@
     format: function(s) {
         if (s.indexOf('Loading...') == 0)
             return s.replace('Loading...','000');
-        return (s || '').replace(/^(The|A)\s/i,'');
+        #if not $sickbeard.SORT_ARTICLE:
+        return (s || '').replace(/^(The|A|An)\s/i,'');
+        #else:
+        return (s || '');
+        #end if
     },
     type: 'text'
 });
