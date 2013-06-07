@@ -176,6 +176,7 @@ class NewznabProvider(generic.NZBProvider):
         params = {"t": "tvsearch",
                   "maxage": sickbeard.USENET_RETENTION,
                   "limit": 100,
+                  "offset": 0,
                   "cat": '5030,5040'}
 
         # if max_age is set, use it, don't allow it to be missing
@@ -192,44 +193,76 @@ class NewznabProvider(generic.NZBProvider):
         if self.key:
             params['apikey'] = self.key
 
-        searchURL = self.url + 'api?' + urllib.urlencode(params)
-
-        logger.log(u"Search url: " + searchURL, logger.DEBUG)
-
-        data = self.getURL(searchURL)
-
-        if not data:
-            return []
-
-        # hack this in until it's fixed server side
-        if not data.startswith('<?xml'):
-            data = '<?xml version="1.0" encoding="ISO-8859-1" ?>' + data
-
-        try:
-            parsedXML = parseString(data)
-            items = parsedXML.getElementsByTagName('item')
-        except Exception, e:
-            logger.log(u"Error trying to load " + self.name + " RSS feed: " + ex(e), logger.ERROR)
-            logger.log(u"RSS data: " + data, logger.DEBUG)
-            return []
-
-        if not self._checkAuthFromData(data):
-            return []
-
-        if parsedXML.documentElement.tagName != 'rss':
-            logger.log(u"Resulting XML from " + self.name + " isn't RSS, not parsing it", logger.ERROR)
-            return []
-
         results = []
 
-        for curItem in items:
-            (title, url) = self._get_title_and_url(curItem)
+        # Loop until all results have been retrieved from provider
+        while True:
+            searchURL = self.url + 'api?' + urllib.urlencode(params)
 
-            if not title or not url:
-                logger.log(u"The XML returned from the " + self.name + " RSS feed is incomplete, this result is unusable: " + data, logger.ERROR)
-                continue
+            logger.log(u"Search url: " + searchURL, logger.DEBUG)
 
-            results.append(curItem)
+            data = self.getURL(searchURL)
+
+            if not data:
+                # If we got data before, break loop and continue
+                if len(results) > 0:
+                    break
+                else:
+                    return []
+
+            # hack this in until it's fixed server side
+            if not data.startswith('<?xml'):
+                data = '<?xml version="1.0" encoding="ISO-8859-1" ?>' + data
+
+            try:
+                parsedXML = parseString(data)
+                logger.log(u"Parsing RSS data: <items>", logger.DEBUG)
+                items = parsedXML.getElementsByTagName('item')
+                logger.log(u"Parsing RSS data: <newznab:response>", logger.DEBUG)
+                numMatches = int(parsedXML.getElementsByTagName('newznab:response')[0].getAttribute("total"))
+            except Exception, e:
+                logger.log(u"Error trying to load " + self.name + " RSS feed: " + ex(e), logger.ERROR)
+                logger.log(u"RSS data: " + data, logger.DEBUG)
+                if len(results) > 0:
+                    logger.log(u"Continuing with just the previously retrieved RSS data.")
+                    break
+                else:
+                    return []
+
+            if not self._checkAuthFromData(data):
+                if len(results) > 0:
+                    logger.log(u"Continuing with just the previously retrieved RSS data.")
+                    break
+                else:
+                    return []
+
+            if parsedXML.documentElement.tagName != 'rss':
+                logger.log(u"Resulting XML from " + self.name + " isn't RSS, not parsing it", logger.ERROR)
+                if len(results) > 0:
+                    logger.log(u"Continuing with just the previously retrieved RSS data.")
+                    break
+                else:
+                    return []
+
+            for curItem in items:
+                (title, url) = self._get_title_and_url(curItem)
+
+                if not title or not url:
+                    logger.log(u"The XML returned from the " + self.name + " RSS feed is incomplete, this result is unusable: " + data, logger.ERROR)
+                    continue
+
+                results.append(curItem)
+
+            # One more time on the merry-go-round?
+            if params['offset'] + params['limit'] < numMatches:
+                params['offset'] += params['limit']
+            else:
+                break
+
+            # Sanity check, there ought to be an upper
+            # limit on how many time we come a-knockin
+            if params['offset'] >= 1000:
+                break
 
         return results
 
