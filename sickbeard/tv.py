@@ -554,11 +554,6 @@ class TVShow(object):
             with curEp.lock:
                 curEp.saveToDB()
 
-        # creating metafiles on the root should be good enough
-        if rootEp != None:
-            with rootEp.lock:
-                rootEp.createMetaFiles()
-
         return rootEp
 
 
