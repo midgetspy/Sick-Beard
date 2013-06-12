@@ -582,7 +582,8 @@ class GenericMetadata():
         # Returns a nested dictionary of season art with the season
         # number as primary key. It's really overkill but gives the option
         # to present to user via ui to pick down the road.
-        for cur_season in range(num_seasons):
+        # Add '1' to num_seasons so range() will include all seasons for shows without a season 0 (Specials).
+        for cur_season in range(num_seasons+1):
 
             result[cur_season] = {}
             
@@ -592,7 +593,7 @@ class GenericMetadata():
                     result[cur_season][seasonArtID] = seasonsArtObj[seasonArtID]['_bannerpath']
             
             if len(result[cur_season]) == 0:
-                continue
+                del result[cur_season]
 
         return result
 
