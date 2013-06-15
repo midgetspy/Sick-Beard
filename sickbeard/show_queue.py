@@ -172,7 +172,7 @@ class QueueItemAdd(ShowQueueItem):
         self.showDir = showDir
         self.default_status = default_status
         self.quality = quality
-        self.flatten_folders = flatten_folders
+        self.flatten_folder = flatten_folder
         self.lang = lang
         self.anime = anime
 

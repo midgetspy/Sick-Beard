@@ -14,12 +14,13 @@
         </div>
 		
 		<div class="field-pair alt">
-            <input type="checkbox" name="anime" id="anime" #if $sickbeard.ANIME_DEFAULT then "checked=\"checked\"" else ""# />
+            <input class="cb" type="checkbox" name="anime" id="anime" #if $sickbeard.ANIME_DEFAULT then "checked=\"checked\"" else ""# />
             <label for="anime" class="clearfix">
                 <span class="component-title">Anime</span>
                 <span class="component-desc">Is this show an Anime?</span>
-
-        <div class="field-pair alt">
+            </label>
+        </div>
+        <div class="field-pair">
             <input class="cb" type="checkbox" name="flatten_folders" id="flatten_folders" #if $sickbeard.FLATTEN_FOLDERS_DEFAULT then "checked=\"checked\"" else ""# />
             <label for="flatten_folders" class="clearfix">
                 <span class="component-title">Flatten Folders</span>

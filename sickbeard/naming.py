@@ -144,7 +144,6 @@ def validate_name(pattern, multi=None, file_only=False, abd=False, anime=False):
     cpr = cp.parse(new_name)
     
     if not cpr.parse_result:
-        logger.log(u"fail 1", logger.DEBUG)
         return False
 
     logger.log(new_name + " vs " + str(cpr.parse_result), logger.DEBUG)
@@ -153,10 +152,7 @@ def validate_name(pattern, multi=None, file_only=False, abd=False, anime=False):
         if cpr.air_date != ep.airdate:
             return False
     elif anime:
-        
-        logger.log(u"##############fail 2" + str(cpr.ab_episode_numbers) + " vs related "+ str([x.absolute_number for x in [ep] + ep.relatedEps]), logger.DEBUG)
         if cpr.ab_episode_numbers != [x.absolute_number for x in [ep] + ep.relatedEps]:
-            logger.log(u"fail 2", logger.DEBUG)
             return False
     else:
         if cpr.season != ep.season:

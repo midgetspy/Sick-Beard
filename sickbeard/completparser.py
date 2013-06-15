@@ -223,7 +223,7 @@ class CompleteParser(object):
                 if found_show and found_show.is_anime:
                     if mode == NameParser.ANIME_REGEX or mode == NameParser.NORMAL_REGEX:
                         break
-                elif show.is_anime and show.test_obj:
+                elif show and show.is_anime and show.test_obj:
                     if mode == NameParser.ANIME_REGEX or mode == NameParser.NORMAL_REGEX:
                         break
                 else:
