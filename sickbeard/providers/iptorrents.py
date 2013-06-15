@@ -17,6 +17,7 @@
 # along with Sick Beard.  If not, see <http://www.gnu.org/licenses/>.
 
 import re
+import traceback
 
 import sickbeard
 import generic
