@@ -479,6 +479,39 @@ def moveFile(srcFile, destFile):
         copyFile(srcFile, destFile)
         ek.ek(os.unlink, srcFile)
 
+def link(src, dst):
+    if os.name == 'nt':
+        import ctypes
+        if ctypes.windll.kernel32.CreateHardLinkW(unicode(dst), unicode(src), 0) == 0: raise ctypes.WinError()
+    else:
+        os.link(src, dst)
+
+def hardlinkFile(srcFile, destFile):
+    try:
+        ek.ek(link, srcFile, destFile)
+        fixSetGroupID(destFile)
+    except:
+        logger.log(u"Failed to create hardlink of " + srcFile + " at " + destFile + ". Copying instead", logger.ERROR)
+        copyFile(srcFile, destFile)
+        ek.ek(os.unlink, srcFile)
+
+def symlink(src, dst):
+    if os.name == 'nt':
+        import ctypes
+        if ctypes.windll.kernel32.CreateSymbolicLinkW(unicode(dst), unicode(src), 1 if os.path.isdir(src) else 0) in [0, 1280]: raise ctypes.WinError()
+    else:
+        os.symlink(src, dst)
+
+def moveAndSymlinkFile(srcFile, destFile):
+    try:
+        ek.ek(os.rename, srcFile, destFile)
+        fixSetGroupID(destFile)
+        ek.ek(symlink, destFile, srcFile)
+    except:
+        logger.log(u"Failed to create symlink of " + srcFile + " at " + destFile + ". Copying instead", logger.ERROR)
+        copyFile(srcFile, destFile)
+        ek.ek(os.unlink, srcFile)
+
 def make_dirs(path):
     """
     Creates any folders that are missing and assigns them the permissions of their

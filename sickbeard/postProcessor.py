@@ -320,6 +320,45 @@ class PostProcessor(object):
 
         self._combined_file_operation(file_path, new_path, new_base_name, associated_files, action=_int_copy, subtitles=subtitles)
 
+
+    def _hardlink(self, file_path, new_path, new_base_name, associated_files=False, subtitles=False):
+        """
+        file_path: The full path of the media file to move
+        new_path: Destination path where we want to create a hard linked file
+        new_base_name: The base filename (no extension) to use during the link. Use None to keep the same name.
+        associated_files: Boolean, whether we should move similarly-named files too
+        """
+
+        def _int_hard_link(cur_file_path, new_file_path):
+
+            self._log(u"Hard linking file from " + cur_file_path + " to " + new_file_path, logger.DEBUG)
+            try:
+                helpers.hardlinkFile(cur_file_path, new_file_path)
+                helpers.chmodAsParent(new_file_path)
+            except (IOError, OSError), e:
+                self._log("Unable to link file " + cur_file_path + " to " + new_file_path + ": "+ex(e), logger.ERROR)
+                raise e
+        self._combined_file_operation(file_path, new_path, new_base_name, associated_files, action=_int_hard_link)
+
+    def _moveAndSymlink(self, file_path, new_path, new_base_name, associated_files=False, subtitles=False):
+        """
+        file_path: The full path of the media file to move
+        new_path: Destination path where we want to move the file to create a symbolic link to
+        new_base_name: The base filename (no extension) to use during the link. Use None to keep the same name.
+        associated_files: Boolean, whether we should move similarly-named files too
+        """
+
+        def _int_move_and_sym_link(cur_file_path, new_file_path):
+
+            self._log(u"Moving then symbolic linking file from " + cur_file_path + " to " + new_file_path, logger.DEBUG)
+            try:
+                helpers.moveAndSymlinkFile(cur_file_path, new_file_path)
+                helpers.chmodAsParent(new_file_path)
+            except (IOError, OSError), e:
+                self._log("Unable to link file " + cur_file_path + " to " + new_file_path + ": " + ex(e), logger.ERROR)
+                raise e
+        self._combined_file_operation(file_path, new_path, new_base_name, associated_files, action=_int_move_and_sym_link)
+
     def _history_lookup(self):
         """
         Look up the NZB name in the history and see if it contains a record for self.nzb_name
@@ -873,10 +912,17 @@ class PostProcessor(object):
 
         try:
             # move the episode and associated files to the show dir
-            if sickbeard.KEEP_PROCESSED_DIR:
+            if sickbeard.PROCESS_METHOD == "copy":
                 self._copy(self.file_path, dest_path, new_base_name, sickbeard.MOVE_ASSOCIATED_FILES, sickbeard.USE_SUBTITLES and ep_obj.show.subtitles)
-            else:
+            elif sickbeard.PROCESS_METHOD == "move":
                 self._move(self.file_path, dest_path, new_base_name, sickbeard.MOVE_ASSOCIATED_FILES, sickbeard.USE_SUBTITLES and ep_obj.show.subtitles)
+            elif sickbeard.PROCESS_METHOD == "hardlink":
+              self._hardlink(self.file_path, dest_path, new_base_name, sickbeard.MOVE_ASSOCIATED_FILES, sickbeard.USE_SUBTITLES and ep_obj.show.subtitles)
+            elif sickbeard.PROCESS_METHOD == "symlink":
+              self._moveAndSymlink(self.file_path, dest_path, new_base_name, sickbeard.MOVE_ASSOCIATED_FILES, sickbeard.USE_SUBTITLES and ep_obj.show.subtitles)
+            else:
+              logger.log(u"Unknown process method: " + sickbeard.PROCESS_METHOD, logger.ERROR)
+              raise exceptions.PostProcessingFailed("Unable to move the files to their new home")
         except (OSError, IOError):
             raise exceptions.PostProcessingFailed("Unable to move the files to their new home")
 
