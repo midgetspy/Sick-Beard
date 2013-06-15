@@ -122,9 +122,7 @@ def processDir (dirName, nzbName=None, recurse=False):
         
         for processPath, processDir, fileList in ek.ek(os.walk, ek.ek(os.path.join, path, dir), topdown=False):
 
-            curPath = ek.ek(os.path.join, path, processPath)
-            if validateDir(curPath, dir, returnStr):
-                break
+            #TODO ADD some other checking
 
             videoFiles = filter(helpers.isMediaFile, fileList)
             notwantedFiles = [x for x in fileList if x not in videoFiles]
