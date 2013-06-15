@@ -122,6 +122,10 @@ def processDir (dirName, nzbName=None, recurse=False):
         
         for processPath, processDir, fileList in ek.ek(os.walk, ek.ek(os.path.join, path, dir), topdown=False):
 
+            curPath = ek.ek(os.path.join, path, processPath)
+            if validateDir(curPath, dir, returnStr):
+                break
+
             videoFiles = filter(helpers.isMediaFile, fileList)
             notwantedFiles = [x for x in fileList if x not in videoFiles]
 
@@ -217,13 +221,5 @@ def validateDir(path, dirName, returnStr):
         if int(numPostProcFiles[0][0]) == len(videoFiles):
             returnStr += logHelper(u"You're trying to post process a dir that's already been processed, skipping", logger.DEBUG)
             return False
-        
-#    #check if the dir have at least one tv video file
-#    for video in videoFiles:
-#        try:
-#            NameParser().parse(video)
-#            return True
-#        except InvalidNameException:
-#            pass
     
     return True
