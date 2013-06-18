@@ -21,16 +21,22 @@ import urllib
 
 from sickbeard import db
 
+
 def prepareFailedName(release):
     """Standardizes release name for failed DB"""
 
     fixed = urllib.unquote(release)
+    if(fixed.endswith(".nzb")):
+        fixed = fixed.rpartition(".")[0]
+
     fixed = re.sub("[\.\-\+\ ]", "_", fixed)
     return fixed
 
+
 def logFailed(release):
     myDB = db.DBConnection('failed.db')
-    myDB.select("INSERT INTO failed (release) VALUES (?)", [prepareFailedName(release)])
+    myDB.action("INSERT INTO failed (release) VALUES (?)", [prepareFailedName(release)])
+
 
 def hasFailed(release):
     myDB = db.DBConnection('failed.db')

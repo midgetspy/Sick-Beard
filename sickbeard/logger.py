@@ -127,7 +127,7 @@ class SBRotatingLogHandler(object):
                     os.remove(cur_file_name)
                 else:
                     os.rename(cur_file_name, self._log_file_name(i+1))
-            except WindowsError:
+            except OSError:
                 pass
         
         # the new log handler will always be on the un-numbered .log file

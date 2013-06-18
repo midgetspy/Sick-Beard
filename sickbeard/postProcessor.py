@@ -11,7 +11,7 @@
 # Sick Beard is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
+#  GNU General Public License for more details.
 #
 # You should have received a copy of the GNU General Public License
 # along with Sick Beard.  If not, see <http://www.gnu.org/licenses/>.
@@ -36,7 +36,6 @@ from sickbeard import logger
 from sickbeard import notifiers
 from sickbeard import show_name_helpers
 from sickbeard import scene_exceptions
-from sickbeard import search_queue
 
 from sickbeard import encodingKludge as ek
 from sickbeard.exceptions import ex
@@ -48,7 +47,7 @@ from lib.tvdb_api import tvdb_api, tvdb_exceptions
 
 class PostProcessor(object):
     """
-    A class which will process a file/folder according to the post processing settings in the config.
+    A class which will process a media file according to the post processing settings in the config.
     """
 
     EXISTS_LARGER = 1
@@ -62,38 +61,27 @@ class PostProcessor(object):
     FOLDER_NAME = 2
     FILE_NAME = 3
 
-    def __init__(self, item_path, nzb_name = None, failed = False, folder = False):
+    def __init__(self, file_path, nzb_name=None):
         """
         Creates a new post processor with the given file path and optionally an NZB name.
 
-        item_path: The path to the file/folder to be processed
+        file_path: The path to the file to be processed
         nzb_name: The name of the NZB which resulted in this file being downloaded (optional)
-        failed: Boolean indicating a failed download
-        folder: False = item_path is a file, True = item_path is a folder
         """
+        # absolute path to the folder that is being processed
+        self.folder_path = ek.ek(os.path.dirname, ek.ek(os.path.abspath, file_path))
 
-        if not folder:
-            # absolute path to the folder that is being processed
-            self.folder_path = ek.ek(os.path.dirname, ek.ek(os.path.abspath, item_path))
-            # full path to file
-            self.file_path = item_path
-            # file name only
-            self.file_name = ek.ek(os.path.basename, item_path)
-            # the name of the folder only
-            self.folder_name = ek.ek(os.path.basename, self.folder_path)
-        else:
-            self.folder_path = item_path
-            self.file_path = None
-            self.file_name = None
-            self.folder_name = ek.ek(os.path.basename, self.folder_path)
+        # full path to file
+        self.file_path = file_path
 
-        self.is_folder = folder
+        # file name only
+        self.file_name = ek.ek(os.path.basename, file_path)
+
+        # the name of the folder only
+        self.folder_name = ek.ek(os.path.basename, self.folder_path)
 
         # name of the NZB that resulted in this folder
         self.nzb_name = nzb_name
-
-        # True if the download failed from a bad NZB
-        self.failed = failed
 
         self.in_history = False
         self.release_group = None
@@ -371,12 +359,10 @@ class PostProcessor(object):
         if not name:
             return to_return
 
-        fixed_name = show_name_helpers.trimRelease(name)
-
         # parse the name to break it into show name, season, and episode
         np = NameParser(file)
-        parse_result = np.parse(fixed_name)
-        self._log("Parsed "+fixed_name+" into "+str(parse_result).decode('utf-8'), logger.DEBUG)
+        parse_result = np.parse(name)
+        self._log("Parsed " + name + " into " + str(parse_result).decode('utf-8'), logger.DEBUG)
 
         if parse_result.air_by_date:
             season = -1
@@ -384,7 +370,6 @@ class PostProcessor(object):
         else:
             season = parse_result.season_number
             episodes = parse_result.episode_numbers
-
 
         to_return = (None, season, episodes)
 
@@ -394,17 +379,8 @@ class PostProcessor(object):
         if not name_list:
             return (None, season, episodes)
 
-        def _finalize(parse_result, failed = None):
+        def _finalize(parse_result):
             self.release_group = parse_result.release_group
-
-            #DIRTY FIX for complete Season nzb that failed, makes some problems with cache if the same file is called again,
-            #but this shouldn happen anyway...
-            if parse_result.which_regex[0] == "season_only" and failed:
-                show_obj = helpers.findCertainShow(sickbeard.showList, parse_result.scene_id)
-                all_eps = show_obj.getAllEpisodes(season=parse_result.season_number)
-                for ep in all_eps:
-                    if not ep in episodes:
-                        episodes.append(ep._episode)
 
             # remember whether it's a proper
             if parse_result.extra_info:
@@ -434,8 +410,7 @@ class PostProcessor(object):
             scene_id = scene_exceptions.get_scene_exception_by_name(cur_name)
             if scene_id:
                 self._log(u"Scene exception lookup got tvdb id " + str(scene_id) + u", using that", logger.DEBUG)
-                parse_result.scene_id = scene_id
-                _finalize(parse_result, self.failed)
+                _finalize(parse_result)
                 return (scene_id, season, episodes)
 
         # see if we can find the name directly in the DB, if so use it
@@ -444,8 +419,7 @@ class PostProcessor(object):
             db_result = helpers.searchDBForShow(cur_name)
             if db_result:
                 self._log(u"Lookup successful, using tvdb id " + str(db_result[0]), logger.DEBUG)
-                parse_result.scene_id = int(db_result[0])
-                _finalize(parse_result, self.failed)
+                _finalize(parse_result)
                 return (int(db_result[0]), season, episodes)
 
         # see if we can find the name with a TVDB lookup
@@ -475,10 +449,10 @@ class PostProcessor(object):
                 continue
 
             self._log(u"Lookup successful, using tvdb id " + str(showObj["id"]), logger.DEBUG)
-            _finalize(parse_result, self.failed)
+            _finalize(parse_result)
             return (int(showObj["id"]), season, episodes)
 
-        _finalize(parse_result, self.failed)
+        _finalize(parse_result)
         return to_return
 
     def _find_info(self):
@@ -505,7 +479,7 @@ class PostProcessor(object):
                         lambda: self._analyze_name(self.file_path),
 
                         # try to analyze the dir + file name together as one name
-                        lambda: self._analyze_name(self.folder_name + u' ' + str(self.file_name))
+                        lambda: self._analyze_name(self.folder_name + u' ' + self.file_name)
 
                         ]
 
@@ -661,12 +635,11 @@ class PostProcessor(object):
                 return ep_quality
 
         # if we didn't get a quality from one of the names above, try assuming from each of the names
-        if self.file_name:
-            ep_quality = common.Quality.assumeQuality(self.file_name)
-            self._log(u"Guessing quality for name " + self.file_name + u", got " + common.Quality.qualityStrings[ep_quality], logger.DEBUG)
-            if ep_quality != common.Quality.UNKNOWN:
-                logger.log(self.file_name + u" looks like it has quality " + common.Quality.qualityStrings[ep_quality] + ", using that", logger.DEBUG)
-                return ep_quality
+        ep_quality = common.Quality.assumeQuality(self.file_name)
+        self._log(u"Guessing quality for name " + self.file_name + u", got " + common.Quality.qualityStrings[ep_quality], logger.DEBUG)
+        if ep_quality != common.Quality.UNKNOWN:
+            logger.log(self.file_name + u" looks like it has quality " + common.Quality.qualityStrings[ep_quality] + ", using that", logger.DEBUG)
+            return ep_quality
 
         return ep_quality
 
@@ -720,42 +693,20 @@ class PostProcessor(object):
 
         return False
 
-    def _get_release_name(self):
-        cur_release_name = None
-        if self.good_results[self.NZB_NAME]:
-            cur_release_name = self.nzb_name
-            if cur_release_name.lower().endswith('.nzb'):
-                cur_release_name = cur_release_name.rpartition('.')[0]
-        elif self.good_results[self.FOLDER_NAME]:
-            cur_release_name = self.folder_name
-        elif self.good_results[self.FILE_NAME]:
-            cur_release_name = self.file_name
-        return cur_release_name
-
     def process(self):
         """
-        Post-process a given file or (if failed) dir/nzb
+        Post-process a given file
         """
 
-        if self.file_path:
-            self._log(u"Processing " + self.file_path + " (" + str(self.nzb_name) + ")")
-        else:
-            self._log(u"Processing " + self.folder_path + " (" + str(self.nzb_name) + ")")
+        self._log(u"Processing " + self.file_path + " (" + str(self.nzb_name) + ")")
 
-        if self.is_folder and not self.failed:
-            self._log(u"Error: failed = False and folder = True not currently implemented")
-            self._log(u"If you think this should be supported, open a ticket")
+        if ek.ek(os.path.isdir, self.file_path):
+            self._log(u"File " + self.file_path + " seems to be a directory")
             return False
-
-        if self.file_path:
-            if ek.ek(os.path.isdir, self.file_path):
-                self._log(u"File " + self.file_path + " seems to be a directory")
+        for ignore_file in self.IGNORED_FILESTRINGS:
+            if ignore_file in self.file_path:
+                self._log(u"File " + self.file_path + " is ignored type, skipping")
                 return False
-            for ignore_file in self.IGNORED_FILESTRINGS:
-                if ignore_file in self.file_path:
-                    self._log(u"File " + self.file_path + " is ignored type, skipping")
-                    return False
-
         # reset per-file stuff
         self.in_history = False
 
@@ -768,24 +719,6 @@ class PostProcessor(object):
 
         # retrieve/create the corresponding TVEpisode objects
         ep_obj = self._get_ep_obj(tvdb_id, season, episodes)
-
-        if self.failed:
-            self._log(u"Setting episode(s) back to Wanted", logger.DEBUG)
-            for curEp in [ep_obj] + ep_obj.relatedEps:
-                self._log(u"Setting episode back to wanted: "+curEp.name)
-                with curEp.lock:
-                    curEp.status = int(common.WANTED)
-                    curEp.saveToDB()
-            # Doesn't seem to be an issue that this is done before the release is marked as bad
-            # FIXME? Maybe move marking it as failed before doing all this?
-            self._log(u"Triggering search for episode(s)", logger.DEBUG)
-            for curEp in [ep_obj] + ep_obj.relatedEps:
-                self._log(u"Searching for: " + curEp.name)
-                queue_item = search_queue.ManualSearchQueueItem(curEp)
-                sickbeard.searchQueueScheduler.action.add_item(queue_item)
-
-            # we 'succeeded' in the sense that no errors were encountered
-            return True
 
         # get the quality of the episode we're processing
         new_ep_quality = self._get_quality(ep_obj)
@@ -846,7 +779,20 @@ class PostProcessor(object):
         # update the ep info before we rename so the quality & release name go into the name properly
         for cur_ep in [ep_obj] + ep_obj.relatedEps:
             with cur_ep.lock:
-                cur_release_name = self._get_release_name()
+                cur_release_name = None
+
+                # use the best possible representation of the release name
+                if self.good_results[self.NZB_NAME]:
+                    cur_release_name = self.nzb_name
+                    if cur_release_name.lower().endswith('.nzb'):
+                        cur_release_name = cur_release_name.rpartition('.')[0]
+                elif self.good_results[self.FOLDER_NAME]:
+                    cur_release_name = self.folder_name
+                elif self.good_results[self.FILE_NAME]:
+                    cur_release_name = self.file_name
+                    # take the extension off the filename, it's not needed
+                    if '.' in self.file_name:
+                        cur_release_name = self.file_name.rpartition('.')[0]
 
                 if cur_release_name:
                     self._log("Found release name " + cur_release_name, logger.DEBUG)
