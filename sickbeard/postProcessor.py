@@ -359,10 +359,12 @@ class PostProcessor(object):
         if not name:
             return to_return
 
+        fixed_name = show_name_helpers.trimRelease(name)
+
         # parse the name to break it into show name, season, and episode
         np = NameParser(file)
-        parse_result = np.parse(name)
-        self._log("Parsed " + name + " into " + str(parse_result).decode('utf-8'), logger.DEBUG)
+        parse_result = np.parse(fixed_name)
+        self._log("Parsed " + fixed_name + " into " + str(parse_result).decode('utf-8'), logger.DEBUG)
 
         if parse_result.air_by_date:
             season = -1

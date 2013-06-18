@@ -58,10 +58,11 @@ class FailedProcessor(object):
             raise exceptions.FailedProcessingFailed()
 
         parser = NameParser(False)
+        fixed_name = show_name_helpers.trimRelease(releaseName)
         try:
-            parsed = parser.parse(releaseName)
+            parsed = parser.parse(fixed_name)
         except InvalidNameException:
-            self._log(u"Error: release name is invalid: " + releaseName, logger.WARNING)
+            self._log(u"Error: release name is invalid: " + fixed_name, logger.WARNING)
             raise exceptions.FailedProcessingFailed()
 
         logger.log(u"name_parser info: ", logger.DEBUG)
