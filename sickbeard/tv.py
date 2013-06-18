@@ -32,9 +32,6 @@ from name_parser.parser import NameParser, InvalidNameException
 
 from lib.tvdb_api import tvdb_api, tvdb_exceptions
 
-import lib.requests
-from sickbeard import germandates
-
 from sickbeard import db
 from sickbeard import helpers, exceptions, logger
 from sickbeard.exceptions import ex
@@ -75,7 +72,7 @@ class TVShow(object):
         self._isDirGood = False
 
         self.episodes = {}
-        
+
         otherShow = helpers.findCertainShow(sickbeard.showList, self.tvdbid)
         if otherShow != None:
             raise exceptions.MultipleShowObjectsException("Can't create a show if it already exists")
@@ -88,7 +85,7 @@ class TVShow(object):
         # no dir check needed if missing show dirs are created during post-processing
         if sickbeard.CREATE_MISSING_SHOW_DIRS:
             return self._location
-        
+
         if ek.ek(os.path.isdir, self._location):
             return self._location
         else:
@@ -204,7 +201,7 @@ class TVShow(object):
         self.getImages()
 
         self.writeShowNFO()
-        
+
         if not show_only:
             self.writeEpisodeNFOs()
 
@@ -257,14 +254,14 @@ class TVShow(object):
             # see if we should save the release name in the db
             ep_file_name = ek.ek(os.path.basename, curEpisode.location)
             ep_file_name = ek.ek(os.path.splitext, ep_file_name)[0]
-            
+
             parse_result = None
             try:
                 np = NameParser(False)
                 parse_result = np.parse(ep_file_name)
             except InvalidNameException:
                 pass
-        
+
             if not ' ' in ep_file_name and parse_result and parse_result.release_group:
                 logger.log(u"Name " + ep_file_name + " gave release group of " + parse_result.release_group + ", seems valid", logger.DEBUG)
                 curEpisode.release_name = ep_file_name
@@ -297,7 +294,7 @@ class TVShow(object):
         for curResult in sqlResults:
 
             deleteEp = False
-                    
+
             curSeason = int(curResult["season"])
             curEpisode = int(curResult["episode"])
             if curSeason not in cachedSeasons:
@@ -314,11 +311,11 @@ class TVShow(object):
 
             try:
                 curEp = self.getEpisode(curSeason, curEpisode)
-                
+
                 # if we found out that the ep is no longer on TVDB then delete it from our database too
                 if deleteEp:
                     curEp.deleteEpisode()
-                
+
                 curEp.loadFromDB(curSeason, curEpisode)
                 curEp.loadFromTVDB(tvapi=t, cachedSeason=cachedSeasons[curSeason])
                 scannedEps[curSeason][curEpisode] = True
@@ -508,7 +505,7 @@ class TVShow(object):
                         same_file = False
 
                     curEp.checkForMetaFiles()
-                
+
 
             if rootEp == None:
                 rootEp = curEp
@@ -516,7 +513,7 @@ class TVShow(object):
                 if curEp not in rootEp.relatedEps:
                     rootEp.relatedEps.append(curEp)
 
-            # if it's a new file then 
+            # if it's a new file then
             if not same_file:
                 curEp.release_name = ''
 
@@ -629,7 +626,7 @@ class TVShow(object):
 
             if not cache:
                 ltvdb_api_parms['cache'] = False
-            
+
             if self.lang:
                 ltvdb_api_parms['language'] = self.lang
 
@@ -753,7 +750,7 @@ class TVShow(object):
 
         # remove self from show list
         sickbeard.showList = [x for x in sickbeard.showList if x.tvdbid != self.tvdbid]
-        
+
         # clear the cache
         image_cache_dir = ek.ek(os.path.join, sickbeard.CACHE_DIR, 'images')
         for cache_file in ek.ek(glob.glob, ek.ek(os.path.join, image_cache_dir, str(self.tvdbid)+'.*')):
@@ -762,7 +759,7 @@ class TVShow(object):
 
     def populateCache(self):
         cache_inst = image_cache.ImageCache()
-        
+
         logger.log(u"Checking & filling cache for show "+self.name)
         cache_inst.fill_cache(self)
 
@@ -921,8 +918,10 @@ class TVShow(object):
 
             epStatus, curQuality = Quality.splitCompositeStatus(epStatus)
 
+            if epStatus in (SNATCHED, SNATCHED_PROPER):
+                return Overview.SNATCHED
             # if they don't want re-downloads then we call it good if they have anything
-            if maxBestQuality == None:
+            elif maxBestQuality == None:
                 return Overview.GOOD
             # if they have one but it's not the best they want then mark it as qual
             elif curQuality < maxBestQuality:
@@ -983,7 +982,7 @@ class TVEpisode(object):
 
     def _set_location(self, new_location):
         logger.log(u"Setter sets location to " + new_location, logger.DEBUG)
-        
+
         #self._location = newLocation
         dirty_setter("_location")(self, new_location)
 
@@ -1010,7 +1009,7 @@ class TVEpisode(object):
                 else:
                     new_result = False
                 cur_nfo = new_result or cur_nfo
-                
+
                 if cur_provider.episode_thumbnails:
                     new_result = cur_provider._has_episode_thumb(self)
                 else:
@@ -1046,7 +1045,7 @@ class TVEpisode(object):
                     # if we failed SQL *and* NFO, TVDB then fail
                     if result == False:
                         raise exceptions.EpisodeNotFoundException("Couldn't find episode " + str(season) + "x" + str(episode))
-        
+
         # don't update if not needed
         if self.dirty:
             self.saveToDB()
@@ -1085,7 +1084,7 @@ class TVEpisode(object):
                 self.file_size = 0
 
             self.tvdbid = int(sqlResults[0]["tvdbid"])
-            
+
             if sqlResults[0]["release_name"] != None:
                 self.release_name = sqlResults[0]["release_name"]
 
@@ -1159,44 +1158,19 @@ class TVEpisode(object):
             self.description = ""
         else:
             self.description = tmp_description
-        #rawAirdate = [int(x) for x in myEp["firstaired"].split("-")]
-
-        ### cytec airdateserver
-        if tvdb_lang == "de" and sickbeard.GERMANDATES:
-            airlist = germandates.getEpInfo(self.show.tvdbid, self.season, self.episode, self.show.name)
-        else:
-            airlist = None
-
-        if airlist:
-            try:
-                rawAirdate = [int(x) for x in airlist]
-                germandate = True
-                logger.log(u"Useing german airdate ({0}) for this episode: {1}x{2}".format(rawAirdate, season, episode), logger.DEBUG)
-            except:
-                #set it to never aired
-                rawAirdate = [int(x) for x in myEp["firstaired"].split("-")]
-                logger.log(u"No german airdate found for this episode: {1}x{2}... skipping".format(rawAirdate, season, episode), logger.DEBUG)
-                germandate = False
-        else:
-            rawAirdate = [int(x) for x in myEp["firstaired"].split("-")]
-            germandate = False
-            logger.log(u"Useing tvdb airdate for this episode", logger.DEBUG)
-        
+        rawAirdate = [int(x) for x in myEp["firstaired"].split("-")]
         try:
-            if germandate:
-                self.airdate = datetime.date(rawAirdate[2], rawAirdate[1], rawAirdate[0])
-            else:
-                self.airdate = datetime.date(rawAirdate[0], rawAirdate[1], rawAirdate[2])
+            self.airdate = datetime.date(rawAirdate[0], rawAirdate[1], rawAirdate[2])
         except ValueError:
             logger.log(u"Malformed air date retrieved from TVDB ("+self.show.name+" - "+str(season)+"x"+str(episode)+")", logger.ERROR)
             # if I'm incomplete on TVDB but I once was complete then just delete myself from the DB for now
             if self.tvdbid != -1:
                 self.deleteEpisode()
             return False
-        
+
         #early conversion to int so that episode doesn't get marked dirty
         self.tvdbid = int(myEp["id"])
-        
+
         #don't update show status if show dir is missing, unless missing show dirs are created during post-processing
         if not ek.ek(os.path.isdir, self.show._location) and not sickbeard.CREATE_MISSING_SHOW_DIRS:
             logger.log(u"The show dir is missing, not bothering to change the episode statuses since it'd probably be invalid")
@@ -1371,11 +1345,11 @@ class TVEpisode(object):
     def saveToDB(self, forceSave=False):
         """
         Saves this episode to the database if any of its data has been changed since the last save.
-        
+
         forceSave: If True it will save to the database even if no data has been changed since the
                     last save (aka if the record is not dirty).
         """
-        
+
         if not self.dirty and not forceSave:
             logger.log(str(self.show.tvdbid) + ": Not saving episode to db - record is not dirty", logger.DEBUG)
             return
@@ -1412,8 +1386,8 @@ class TVEpisode(object):
         """
         Returns the name of this episode in a "pretty" human-readable format. Used for logging
         and notifications and such.
-        
-        Returns: A string representing the episode's name and season/ep numbers 
+
+        Returns: A string representing the episode's name and season/ep numbers
         """
 
         return self._format_pattern('%SN - %Sx%0E - %EN')
@@ -1424,7 +1398,7 @@ class TVEpisode(object):
         Eg. "Ep Name (1)" and "Ep Name (2)" becomes "Ep Name"
             "Ep Name" and "Other Ep Name" becomes "Ep Name & Other Ep Name"
         """
-        
+
         multiNameRegex = "(.*) \(\d\)"
 
         self.relatedEps = sorted(self.relatedEps, key=lambda x: x.episode)
@@ -1463,15 +1437,15 @@ class TVEpisode(object):
         """
         Generates a replacement map for this episode which maps all possible custom naming patterns to the correct
         value for this episode.
-        
+
         Returns: A dict with patterns as the keys and their replacement values as the values.
         """
-        
+
         ep_name = self._ep_name()
-        
+
         def dot(name):
             return helpers.sanitizeSceneName(name)
-        
+
         def us(name):
             return re.sub('[ -]','_', name)
 
@@ -1497,7 +1471,7 @@ class TVEpisode(object):
             return parse_result.release_group
 
         epStatus, epQual = Quality.splitCompositeStatus(self.status) #@UnusedVariable
-        
+
         return {
                    '%SN': self.show.name,
                    '%S.N': dot(self.show.name),
@@ -1543,17 +1517,17 @@ class TVEpisode(object):
         """
         Manipulates an episode naming pattern and then fills the template in
         """
-        
+
         if pattern == None:
             pattern = sickbeard.NAMING_PATTERN
-        
+
         if multi == None:
             multi = sickbeard.NAMING_MULTI_EP
-        
+
         replace_map = self._replace_map()
 
         result_name = pattern
-        
+
         # if there's no release group then replace it with a reasonable facsimile
         if not replace_map['%RN']:
             if self.show.air_by_date:
@@ -1566,15 +1540,15 @@ class TVEpisode(object):
             result_name = result_name.replace('%RG', 'SiCKBEARD')
             result_name = result_name.replace('%rg', 'sickbeard')
             logger.log(u"Episode has no release name, replacing it with a generic one: "+result_name, logger.DEBUG)
-        
+
         # split off ep name part only
         name_groups = re.split(r'[\\/]', result_name)
-        
+
         # figure out the double-ep numbering style for each group, if applicable
         for cur_name_group in name_groups:
-        
+
             season_format = sep = ep_sep = ep_format = None
-        
+
             season_ep_regex = '''
                                 (?P<pre_sep>[ _.-]*)
                                 ((?:s(?:eason|eries)?\s*)?%0?S(?![._]?N))
@@ -1583,11 +1557,11 @@ class TVEpisode(object):
                                 (?P<post_sep>[ _.-]*)
                               '''
             ep_only_regex = '(E?%0?E(?![._]?N))'
-        
+
             # try the normal way
             season_ep_match = re.search(season_ep_regex, cur_name_group, re.I|re.X)
             ep_only_match = re.search(ep_only_regex, cur_name_group, re.I|re.X)
-            
+
             # if we have a season and episode then collect the necessary data
             if season_ep_match:
                 season_format = season_ep_match.group(2)
@@ -1602,7 +1576,7 @@ class TVEpisode(object):
                 # force 2-3-4 format if they chose to extend
                 if multi in (NAMING_EXTEND, NAMING_LIMITED_EXTEND, NAMING_LIMITED_EXTEND_E_PREFIXED):
                     ep_sep = '-'
-                
+
                 regex_used = season_ep_regex
 
             # if there's no season then there's not much choice so we'll just force them to use 03-04-05 style
@@ -1619,19 +1593,19 @@ class TVEpisode(object):
             # we need at least this much info to continue
             if not ep_sep or not ep_format:
                 continue
-            
+
             # start with the ep string, eg. E03
             ep_string = self._format_string(ep_format.upper(), replace_map)
             for other_ep in self.relatedEps:
-                
+
                 # for limited extend we only append the last ep
                 if multi in (NAMING_LIMITED_EXTEND, NAMING_LIMITED_EXTEND_E_PREFIXED) and other_ep != self.relatedEps[-1]:
                     continue
-                
+
                 elif multi == NAMING_DUPLICATE:
                     # add " - S01"
                     ep_string += sep + season_format
-                
+
                 elif multi == NAMING_SEPARATED_REPEAT:
                     ep_string += sep
 
@@ -1657,27 +1631,27 @@ class TVEpisode(object):
         result_name = self._format_string(result_name, replace_map)
 
         logger.log(u"formatting pattern: "+pattern+" -> "+result_name, logger.DEBUG)
-        
-        
+
+
         return result_name
 
     def proper_path(self):
-        """    
+        """
         Figures out the path where this episode SHOULD live according to the renaming rules, relative from the show dir
         """
-        
+
         result = self.formatted_filename()
 
         # if they want us to flatten it and we're allowed to flatten it then we will
         if self.show.flatten_folders and not sickbeard.NAMING_FORCE_FOLDERS:
             return result
-        
+
         # if not we append the folder on and use that
         else:
             result = ek.ek(os.path.join, self.formatted_dir(), result)
-        
+
         return result
-        
+
 
     def formatted_dir(self, pattern=None, multi=None):
         """
@@ -1690,10 +1664,10 @@ class TVEpisode(object):
                 pattern = sickbeard.NAMING_ABD_PATTERN
             else:
                 pattern = sickbeard.NAMING_PATTERN
-        
+
         # split off the dirs only, if they exist
         name_groups = re.split(r'[\\/]', pattern)
-        
+
         if len(name_groups) == 1:
             return ''
         else:
@@ -1704,17 +1678,17 @@ class TVEpisode(object):
         """
         Just the filename of the episode, formatted based on the naming settings
         """
-        
+
         if pattern == None:
             # we only use ABD if it's enabled, this is an ABD show, AND this is not a multi-ep
             if self.show.air_by_date and sickbeard.NAMING_CUSTOM_ABD and not self.relatedEps:
                 pattern = sickbeard.NAMING_ABD_PATTERN
             else:
                 pattern = sickbeard.NAMING_PATTERN
-            
+
         # split off the filename only, if they exist
         name_groups = re.split(r'[\\/]', pattern)
-        
+
         return self._format_pattern(name_groups[-1], multi)
 
     def rename(self):

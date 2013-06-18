@@ -30,17 +30,22 @@ from sickbeard.exceptions import ex
 
 from sickbeard import logger
 
+from sickbeard import ui, search_queue
+from sickbeard.common import WANTED, statusStrings
+
+
 def logHelper (logMessage, logLevel=logger.MESSAGE):
     logger.log(logMessage, logLevel)
     return logMessage + u"\n"
 
-def processDir (dirName, nzbName=None, recurse=False):
+def processDir (dirName, nzbName=None, recurse=False, failed=False):
     """
     Scans through the files in dirName and processes whatever media files it finds
     
     dirName: The folder name to look in
     nzbName: The NZB name which resulted in this folder being downloaded
     recurse: Boolean for whether we should descend into subfolders or not
+    failed: Boolean for whether or not the download failed
     """
 
     returnStr = ''
@@ -62,11 +67,32 @@ def processDir (dirName, nzbName=None, recurse=False):
         returnStr += logHelper(u"Unable to figure out what folder to process. If your downloader and Sick Beard aren't on the same PC make sure you fill out your TV download dir in the config.", logger.DEBUG)
         return returnStr
 
-    # TODO: check if it's failed and deal with it if it is
-    if ek.ek(os.path.basename, dirName).startswith('_FAILED_'):
-        returnStr += logHelper(u"The directory name indicates it failed to extract, cancelling", logger.DEBUG)
+    if failed:
+        returnStr += logHelper(u"Failed download detected: (" + str(nzbName) + ", " + dirName + ")")
+        try:
+            processor = postProcessor.PostProcessor(dirName, nzbName, failed=failed)
+            process_result = processor.process()
+            process_fail_message = ""
+        except exceptions.PostProcessingFailed, e:
+            process_result = False
+            process_fail_message = ex(e)
+
+        returnStr += processor.log 
+
+        if sickbeard.DELETE_FAILED and process_result:
+            returnStr += logHelper(u"Deleting folder of failed download " + dirName, logger.DEBUG)
+            try:
+                shutil.rmtree(dirName)
+            except (OSError, IOError), e:
+                returnStr += logHelper(u"Warning: Unable to remove the failed folder " + dirName + ": " + ex(e), logger.WARNING)
+
+        if process_result:
+            returnStr += logHelper(u"Processing succeeded: ("+str(nzbName) + ", " + dirName + ")")
+        else:
+            returnStr += logHelper(u"Processing failed: (" + str(nzbName)  + ", " + dirName + "): "+process_fail_message, logger.WARNING)
         return returnStr
-    elif ek.ek(os.path.basename, dirName).startswith('_UNDERSIZED_'):
+
+    if ek.ek(os.path.basename, dirName).startswith('_UNDERSIZED_'):
         returnStr += logHelper(u"The directory name indicates that it was previously rejected for being undersized, cancelling", logger.DEBUG)
         return returnStr
     elif ek.ek(os.path.basename, dirName).startswith('_UNPACK_'):
@@ -94,13 +120,17 @@ def processDir (dirName, nzbName=None, recurse=False):
 
     remainingFolders = filter(lambda x: ek.ek(os.path.isdir, ek.ek(os.path.join, dirName, x)), fileList)
 
+    # If nzbName is set and there's more than one videofile in the folder, files will be lost (overwritten).
+    if nzbName != None and len(videoFiles) >= 2:
+        nzbName = None
+
     # process any files in the dir
     for cur_video_file_path in videoFiles:
 
         cur_video_file_path = ek.ek(os.path.join, dirName, cur_video_file_path)
 
         try:
-            processor = postProcessor.PostProcessor(cur_video_file_path, nzbName)
+            processor = postProcessor.PostProcessor(cur_video_file_path, nzbName, failed=failed)
             process_result = processor.process()
             process_fail_message = ""
         except exceptions.PostProcessingFailed, e:

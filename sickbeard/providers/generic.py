@@ -106,8 +106,6 @@ class GenericProvider(object):
         if not headers:
             headers = []
 
-        result = None
-
         result = helpers.getURL(url, headers)
 
         if result is None:

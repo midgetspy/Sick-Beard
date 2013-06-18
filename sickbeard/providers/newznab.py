@@ -43,8 +43,8 @@ class NewznabProvider(generic.NZBProvider):
     def __init__(self, name, url, key=''):
 
         generic.NZBProvider.__init__(self, name)
-        
-        
+
+
 
         self.cache = NewznabCache(self)
 
@@ -54,9 +54,9 @@ class NewznabProvider(generic.NZBProvider):
         # if not catIDs:
         #     self.catIDs = '5000'
         #     logger.log(u"Using fallback catID: 5000, please select a cat id to search in for provider [" + name + "]", logger.ERROR)
-        # else:       
+        # else:
         #     self.catIDs = catIDs
-          
+
         # if a provider doesn't need an api key then this can be false
         self.needs_auth = True
 
@@ -203,7 +203,7 @@ class NewznabProvider(generic.NZBProvider):
             params['apikey'] = self.key
 
         searchURL = self.url + 'api?' + urllib.urlencode(params)
-        
+
         logparams = params
         logparams['apikey'] = "XXXXXXXXXXXXXX"
         logURL = self.url + 'api?' + urllib.urlencode(logparams)
