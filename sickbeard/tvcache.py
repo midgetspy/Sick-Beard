@@ -172,9 +172,9 @@ class TVCache():
 
     def shouldUpdate(self):
         # if we've updated recently then skip the update
-        #if datetime.datetime.today() - self.lastUpdate < datetime.timedelta(minutes=self.minTime):
-        #    logger.log(u"Last update was too soon, using old cache: today()-"+str(self.lastUpdate)+"<"+str(datetime.timedelta(minutes=self.minTime)), logger.DEBUG)
-        #    return False
+        if datetime.datetime.today() - self.lastUpdate < datetime.timedelta(minutes=self.minTime):
+            logger.log(u"Last update was too soon, using old cache: today()-"+str(self.lastUpdate)+"<"+str(datetime.timedelta(minutes=self.minTime)), logger.DEBUG)
+            return False
 
         return True
 
