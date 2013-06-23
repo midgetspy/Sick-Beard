@@ -31,7 +31,7 @@ from threading import Lock
 # apparently py2exe won't build these unless they're imported somewhere
 from sickbeard import providers, metadata
 from providers import ezrss, tvtorrents, btn, nzbsrus, newznab, womble, nzbx, omgwtfnzbs
-from providers import kickass, torrentz, dtt, torrentleech, thepiratebay, publichd, torrentday, sceneaccess
+from providers import kickass, torrentz, dtt, torrentleech, thepiratebay, publichd, torrentday, sceneaccess, iptorrents
 from sickbeard.config import CheckSection, check_setting_int, check_setting_str, ConfigMigrator
 
 from sickbeard import searchCurrent, searchBacklog, showUpdater, versionChecker, properFinder, autoPostProcesser
@@ -188,6 +188,12 @@ SCENEACCESS = False
 SCENEACCESS_USERNAME = None
 SCENEACCESS_PASSWORD = None
 SCENEACCESS_RSSHASH = None
+
+IPTORRENTS = False
+IPTORRENTS_USERNAME = None
+IPTORRENTS_PASSWORD = None
+IPTORRENTS_UID = None
+IPTORRENTS_RSSHASH = None
 
 PUBLICHD = False
 
@@ -375,6 +381,7 @@ def initialize(consoleLogging=True):
                 TORRENTLEECH, TORRENTLEECH_USERNAME, TORRENTLEECH_PASSWORD, \
                 TORRENTDAY, TORRENTDAY_USERNAME, TORRENTDAY_PASSWORD, TORRENTDAY_RSSHASH,TORRENTDAY_UID,\
                 SCENEACCESS,SCENEACCESS_USERNAME, SCENEACCESS_PASSWORD, SCENEACCESS_RSSHASH, \
+                IPTORRENTS,IPTORRENTS_USERNAME, IPTORRENTS_PASSWORD, IPTORRENTS_UID, IPTORRENTS_RSSHASH, \
                 PUBLICHD, \
                 NZBS, NZBS_UID, NZBS_HASH, EZRSS, DTT, DTT_NORAR, DTT_SINGLE, THEPIRATEBAY, THEPIRATEBAY_TRUSTED, THEPIRATEBAY_PROXY, THEPIRATEBAY_PROXY_URL, TVTORRENTS, TVTORRENTS_DIGEST, TVTORRENTS_HASH, BTN, BTN_API_KEY, TORRENT_DIR, USENET_RETENTION, SOCKET_TIMEOUT, \
                 SEARCH_FREQUENCY, DEFAULT_SEARCH_FREQUENCY, BACKLOG_SEARCH_FREQUENCY, \
@@ -545,6 +552,12 @@ def initialize(consoleLogging=True):
         SCENEACCESS_USERNAME = check_setting_str(CFG, 'SCENEACCESS', 'sceneaccess_username', '')
         SCENEACCESS_PASSWORD = check_setting_str(CFG, 'SCENEACCESS', 'sceneaccess_password', '')
         SCENEACCESS_RSSHASH = check_setting_str(CFG, 'SCENEACCESS', 'sceneaccess_rsshash', '')
+        
+        IPTORRENTS = bool(check_setting_int(CFG, 'IPTORRENTS', 'iptorrents', 0))
+        IPTORRENTS_USERNAME = check_setting_str(CFG, 'IPTORRENTS', 'iptorrents_username', '')
+        IPTORRENTS_PASSWORD = check_setting_str(CFG, 'IPTORRENTS', 'iptorrents_password', '')
+        IPTORRENTS_UID = check_setting_str(CFG, 'IPTORRENTS', 'iptorrents_uid', '')
+        IPTORRENTS_RSSHASH = check_setting_str(CFG, 'IPTORRENTS', 'iptorrents_rsshash', '')
         
         PUBLICHD = bool(check_setting_int(CFG, 'PUBLICHD', 'publichd', 0))    
 
@@ -1152,6 +1165,12 @@ def save_config():
     new_config['SCENEACCESS']['sceneaccess_password'] = SCENEACCESS_PASSWORD
     new_config['SCENEACCESS']['sceneaccess_rsshash'] = SCENEACCESS_RSSHASH
 
+    new_config['IPTORRENTS'] = {}
+    new_config['IPTORRENTS']['iptorrents'] = int(IPTORRENTS)
+    new_config['IPTORRENTS']['iptorrents_username'] = IPTORRENTS_USERNAME
+    new_config['IPTORRENTS']['iptorrents_password'] = IPTORRENTS_PASSWORD
+    new_config['IPTORRENTS']['iptorrents_uid'] = IPTORRENTS_UID
+    new_config['IPTORRENTS']['iptorrents_rsshash'] = IPTORRENTS_RSSHASH
 
     new_config['PUBLICHD'] = {}
     new_config['PUBLICHD']['publichd'] = int(PUBLICHD)

@@ -1018,6 +1018,7 @@ class ConfigProviders:
                       torrentleech_username = None, torrentleech_password = None,
                       torrentday_username = None, torrentday_password = None, torrentday_rsshash = None, torrentday_uid = None,
                       sceneaccess_username = None, sceneaccess_password = None, sceneaccess_rsshash = None,
+                      iptorrents_username = None, iptorrents_password = None,iptorrents_uid = None, iptorrents_rsshash = None,
                       torrentz_verified = None,
                       provider_order=None):
 
@@ -1099,6 +1100,8 @@ class ConfigProviders:
                 sickbeard.TORRENTDAY = curEnabled
             elif curProvider == 'sceneaccess':
                 sickbeard.SCENEACCESS = curEnabled
+            elif curProvider == 'iptorrents':
+                sickbeard.IPTORRENTS = curEnabled
             elif curProvider == 'publichd':
                 sickbeard.PUBLICHD = curEnabled
             elif curProvider == 'btn':
@@ -1149,9 +1152,14 @@ class ConfigProviders:
         sickbeard.TORRENTDAY_RSSHASH = torrentday_rsshash
         sickbeard.TORRENTDAY_UID = torrentday_uid
         
-        sickbeard.SCENEACCESS_USERNAME = sceneaccess_username
-        sickbeard.SCENEACCESS_PASSWORD = sceneaccess_password
-        sickbeard.SCENEACCESS_RSSHASH = sceneaccess_rsshash
+        sickbeard.SCENEACCESS_USERNAME = sceneaccess_username.strip()
+        sickbeard.SCENEACCESS_PASSWORD = sceneaccess_password.strip()
+        sickbeard.SCENEACCESS_RSSHASH = sceneaccess_rsshash.strip()
+        
+        sickbeard.IPTORRENTS_USERNAME = iptorrents_username.strip()
+        sickbeard.IPTORRENTS_PASSWORD = iptorrents_password.strip()
+        sickbeard.IPTORRENTS_UID = iptorrents_uid.strip()
+        sickbeard.IPTORRENTS_RSSHASH = iptorrents_rsshash.strip()
         
         if torrentz_verified == "on":
             torrentz_verified = 1
