@@ -126,9 +126,10 @@ def processDir (dirName, nzbName=None, recurse=False):
 
             videoFiles = filter(helpers.isMediaFile, fileList)
             notwantedFiles = [x for x in fileList if x not in videoFiles]
-            # Do not process video files in root directory a second time (copies and symbolic/physical links may remain).
-            if processPath == dirName:
-                videoFiles = []
+
+#            # Do not process video files in root directory a second time (copies and symbolic/physical links may remain).
+#            if processPath == dirName:
+#                videoFiles = []
 
             # If nzbName is set and there's more than one videofile in the folder, files will be lost (overwritten).
             if nzbName != None and len(videoFiles) >= 2:
