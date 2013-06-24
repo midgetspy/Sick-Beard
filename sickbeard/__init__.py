@@ -748,7 +748,7 @@ def initialize(consoleLogging=True):
         USE_NMJv2 = bool(check_setting_int(CFG, 'NMJv2', 'use_nmjv2', 0))
         NMJv2_HOST = check_setting_str(CFG, 'NMJv2', 'nmjv2_host', '')
         NMJv2_DATABASE = check_setting_str(CFG, 'NMJv2', 'nmjv2_database', '')
-        NMJ_DBLOC = check_setting_str(CFG, 'NMJv2', 'nmjv2_dbloc', '')
+        NMJv2_DBLOC = check_setting_str(CFG, 'NMJv2', 'nmjv2_dbloc', '')
 
         USE_SYNOINDEX = bool(check_setting_int(CFG, 'Synology', 'use_synoindex', 0))
 

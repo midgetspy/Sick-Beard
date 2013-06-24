@@ -625,7 +625,7 @@ def delete_empty_folders(check_empty_dir, keep_dir=None):
                 ek.ek(os.rmdir, check_empty_dir)
                 # do the library update for synoindex
                 notifiers.synoindex_notifier.deleteFolder(check_empty_dir)
-            except (WindowsError, OSError), e:
+            except OSError, e:
                 logger.log(u"Unable to delete " + check_empty_dir + ": " + repr(e) + " / " + str(e), logger.WARNING)
                 break
             check_empty_dir = ek.ek(os.path.dirname, check_empty_dir)

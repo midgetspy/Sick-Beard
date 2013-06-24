@@ -1,0 +1,12 @@
+[Unit]
+Description=SickBeard Daemon
+
+[Service]
+EnvironmentFile=-/etc/conf.d/sickbeard
+User=${SB_USER-sickbeard}
+Type=forking
+PIDFile=${SB_PIDFILE-/var/run/sickbeard/sickbeard.pid}
+ExecStart=${SB_PYTHON-/usr/bin/python2} ${SB_BIN-/opt/sickbeard/SickBeard.py} --config %h/.sickbeard/config.ini --datadir %h/.sickbeard ${SB_OPTS-}
+
+[Install]
+WantedBy=multi-user.target

@@ -451,6 +451,9 @@ class QueueItemUpdate(ShowQueueItem):
         except tvdb_exceptions.tvdb_error, e:
             logger.log(u"Unable to contact TVDB, aborting: " + ex(e), logger.WARNING)
             return
+        except tvdb_exceptions.tvdb_attributenotfound, e:
+            logger.log(u"Data retrieved from TVDB was incomplete, aborting: " + ex(e), logger.ERROR)
+            return
 
         logger.log(u"Retrieving show info from IMDb", logger.DEBUG)
         try:
