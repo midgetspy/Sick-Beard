@@ -71,6 +71,9 @@ class OmgwtfnzbsProvider(generic.NZBProvider):
         url = 'https://api.omgwtfnzbs.org/json?' + urllib.urlencode(params)
         logger.log(u"omgwtfnzbs search url: " + url, logger.DEBUG)
         data = self.getURL(url)
+        if not data:
+            logger.log(u"omgwtfnzbs returned no json data", logger.DEBUG)
+            return[]
         try:
             items = json.loads(data)
         except ValueError:

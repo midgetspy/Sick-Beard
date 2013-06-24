@@ -826,7 +826,7 @@ class ConfigSearch:
             use_torrents = 0
 
         if usenet_retention == None:
-            usenet_retention = 200
+            usenet_retention = 500
 
         sickbeard.USE_NZBS = use_nzbs
         sickbeard.USE_TORRENTS = use_torrents
