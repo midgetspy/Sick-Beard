@@ -21,12 +21,12 @@ import time
 import urllib
 import datetime
 
-from xml.dom.minidom import parseString     
+from xml.dom.minidom import parseString
 
 import sickbeard
 import generic
 
-from sickbeard import classes, logger, show_name_helpers
+from sickbeard import classes, logger, show_name_helpers, helpers
 from sickbeard import tvcache
 from sickbeard.exceptions import ex
 
@@ -98,7 +98,7 @@ class NZBClubProvider(generic.NZBProvider):
 
         logger.log(u"Sleeping 10 seconds to respect NZBClub's rules")
         time.sleep(10)
-        
+
         searchResult = self.getURL(searchURL,[("User-Agent","Mozilla/5.0 (Macintosh; Intel Mac OS X 10.7; rv:5.0) Gecko/20100101 Firefox/5.0"),("Accept","text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8"),("Accept-Language","de-de,de;q=0.8,en-us;q=0.5,en;q=0.3"),("Accept-Charset","ISO-8859-1,utf-8;q=0.7,*;q=0.7"),("Connection","keep-alive"),("Cache-Control","max-age=0")])
 
         if not searchResult:
