@@ -9,13 +9,13 @@ browser.css
   margin: 0;
 }
 #fileBrowserDialog ul li {
-  padding: 4px 0;
-  margin: 2px;
+  margin: 2px 0;
   list-style-type: none;
   cursor: pointer;
 }
 #fileBrowserDialog ul li a {
   display: block;
+  padding: 4px 0;
 }
 #fileBrowserDialog ul li a:hover {
   color: #00f;
@@ -58,11 +58,9 @@ browser.css
 /* =======================================================================
 formWizard.css
 ========================================================================== */
-/* TODO: cleanup the fixed height issue with custom quality */
 fieldset.sectionwrap {
   width: 800px;
   padding: 5px;
-  overflow: auto;
   text-align: left;
   border-width: 0;
 }
@@ -78,7 +76,7 @@ div.stepsguide {
 }
 div.stepsguide .step {
   float: left;
-  width: 260px;
+  width: 250px;
   font: bold 24px Arial;
 }
 div.stepsguide .step p {
@@ -122,19 +120,15 @@ div.formpaginate .prev, div.formpaginate .next {
   overflow: hidden;
   clear: both;
 }
-.stepDiv > #customQualityWrapper {
-  height: 190px;
-  overflow: auto;
-}
 #customQualityWrapper div.component-group-desc {
-  float:left;
-  width:165px;
+  float: left;
+  width: 165px;
 }
 #customQualityWrapper div.component-group-desc p {
-  width:85%;
-  margin:.8em 0;
-  font-size:1.2em;
-  color:#666;
+  width: 85%;
+  margin: .8em 0;
+  font-size: 1.2em;
+  color: #666;
 }
 
 /* =======================================================================
@@ -362,7 +356,7 @@ home.tmpl
 /* =======================================================================
 home_postprocess.tmpl
 ========================================================================== */
-#episodeDir {
+#episodeDir, #newRootDir {
   margin-right: 6px;
 }
 
@@ -448,11 +442,6 @@ ul#rootDirStaticList li {
   margin: 2px;
   list-style: none outside none;
   cursor: pointer;
-}
-/* for tabs: manage directories */
-#rootDirs, #rootDirsControls {
-  width: 50%;
-  min-width: 400px;
 }
 /* for tabs: customize options */
 #tabs div.field-pair,
@@ -542,7 +531,9 @@ displayShow.tmpl + manage_backlogOverview.tmpl
 .wanted {
   background-color: #ffb0b0;
 }
-
+.snatched {
+  background-color: #ebc1ea;
+}
 /* =======================================================================
 manage_backlogOverview.tmpl
 ========================================================================== */
@@ -1067,11 +1058,19 @@ span.quality {
 }
 span.Custom {
   background: none repeat scroll 0 0 #449;
-  /* blue */
+  /* purplish blue */
 }
-span.HD,span.WEB-DL,span.BluRay {
+span.HD {
+  background: none repeat scroll 0 0 #008fbb;
+  /* greenish blue */
+}
+span.HD720p {
   background: none repeat scroll 0 0 #494;
   /* green */
+}
+span.HD1080p {
+  background: none repeat scroll 0 0 #499;
+  /* blue */
 }
 span.SD {
   background: none repeat scroll 0 0 #944;
@@ -1080,6 +1079,10 @@ span.SD {
 span.Any {
   background: none repeat scroll 0 0 #444;
   /* black */
+}
+span.RawHD {
+  background: none repeat scroll 0 0 #999944;
+  /* dark orange */
 }
 /* unused boolean tags */
 span.false {
@@ -1198,22 +1201,15 @@ input[disabled], select[disabled], textarea[disabled], input[readonly], select[r
   background-color: #57442b;
   border-right: 1px solid #614e35;
 }
-.dropdown-menu a {
-  padding: 6px 15px;
-  color: #333;
-}
-.dropdown-menu li {
-  border-top: 1px solid #ccc;
-}
-.dropdown-menu li:first-child {
-  border-top: none;
-}
 .dropdown-menu li > a:hover,
 .dropdown-menu .active > a,
 .dropdown-menu .active > a:hover {
   color: #fff;
   text-decoration: none;
   background-color: #333;
+}
+ul.nav .dropdown-menu .divider {
+  margin: 5px 1px;
 }
 /*
 .dropdown-menu li > a:hover > [class^="icon-"],

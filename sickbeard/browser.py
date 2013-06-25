@@ -47,7 +47,7 @@ def getWinDrives():
     return drives
 
 
-def foldersAtPath(path, includeParent = False):
+def foldersAtPath(path, includeParent=False):
     """ Returns a list of dictionaries with the folders contained at the given path
         Give the empty string as the path to list the contents of the root path
         under Unix this means "/", on Windows this will be a list of drive letters)
@@ -81,6 +81,12 @@ def foldersAtPath(path, includeParent = False):
 
     fileList = [{ 'name': filename, 'path': ek.ek(os.path.join, path, filename) } for filename in ek.ek(os.listdir, path)]
     fileList = filter(lambda entry: ek.ek(os.path.isdir, entry['path']), fileList)
+
+    # prune out directories to proect the user from doing stupid things (already lower case the dir to reduce calls)
+    hideList = ["boot", "bootmgr", "cache", "msocache", "recovery", "$recycle.bin", "recycler", "system volume information", "temporary internet files"] # windows specific
+    hideList += [".fseventd", ".spotlight", ".trashes", ".vol", "cachedmessages", "caches", "trash"] # osx specific
+    fileList = filter(lambda entry: entry['name'].lower() not in hideList, fileList)
+
     fileList = sorted(fileList, lambda x, y: cmp(os.path.basename(x['name']).lower(), os.path.basename(y['path']).lower()))
 
     entries = [{'current_path': path}]
@@ -89,6 +95,7 @@ def foldersAtPath(path, includeParent = False):
     entries.extend(fileList)
 
     return entries
+
 
 class WebFileBrowser:
 

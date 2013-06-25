@@ -38,6 +38,7 @@ from sickbeard.common import USER_AGENT, mediaExtensions, XML_NSMAP
 
 from sickbeard import db
 from sickbeard import encodingKludge as ek
+from sickbeard import notifiers
 
 from lib.tvdb_api import tvdb_api, tvdb_exceptions
 
@@ -201,6 +202,8 @@ def makeDir (dir):
     if not ek.ek(os.path.isdir, dir):
         try:
             ek.ek(os.makedirs, dir)
+            # do the library update for synoindex
+            notifiers.synoindex_notifier.addFolder(dir)
         except OSError:
             return False
     return True
@@ -430,62 +433,78 @@ def make_dirs(path):
                     ek.ek(os.mkdir, sofar)
                     # use normpath to remove end separator, otherwise checks permissions against itself
                     chmodAsParent(ek.ek(os.path.normpath, sofar))
+                    # do the library update for synoindex
+                    notifiers.synoindex_notifier.addFolder(sofar)
                 except (OSError, IOError), e:
                     logger.log(u"Failed creating " + sofar + " : " + ex(e), logger.ERROR)
                     return False
 
     return True
 
+
 def rename_ep_file(cur_path, new_path):
     """
     Creates all folders needed to move a file to its new location, renames it, then cleans up any folders
     left that are now empty.
-    
+
     cur_path: The absolute path to the file you want to move/rename
     new_path: The absolute path to the destination for the file WITHOUT THE EXTENSION
     """
-    
-    logger.log(u"Renaming file from "+cur_path+" to "+new_path)
-    
+
     new_dest_dir, new_dest_name = os.path.split(new_path) #@UnusedVariable
     cur_file_name, cur_file_ext = os.path.splitext(cur_path) #@UnusedVariable
-    
+
     # put the extension on the incoming file
     new_path += cur_file_ext
-    
+
     make_dirs(os.path.dirname(new_path))
-    
+
     # move the file
     try:
+        logger.log(u"Renaming file from " + cur_path + " to " + new_path)
         ek.ek(os.rename, cur_path, new_path)
     except (OSError, IOError), e:
         logger.log(u"Failed renaming " + cur_path + " to " + new_path + ": " + ex(e), logger.ERROR)
         return False
-    
+
     # clean up any old folders that are empty
     delete_empty_folders(ek.ek(os.path.dirname, cur_path))
-    
-    return True
-    
 
-def delete_empty_folders(check_empty_dir):
+    return True
+
+
+def delete_empty_folders(check_empty_dir, keep_dir=None):
     """
     Walks backwards up the path and deletes any empty folders found.
-    
+
     check_empty_dir: The path to clean (absolute path to a folder)
+    keep_dir: Clean until this path is reached
     """
-    
-    logger.log(u"Trying to clean any empty folders under "+check_empty_dir)
-    
+
+    # treat check_empty_dir as empty when it only contains these items
+    ignore_items = []
+
+    logger.log(u"Trying to clean any empty folders under " + check_empty_dir)
+
     # as long as the folder exists and doesn't contain any files, delete it
-    while os.path.isdir(check_empty_dir) and not os.listdir(check_empty_dir):
-        logger.log(u"Deleting empty folder: "+check_empty_dir)
-        try:
-            os.rmdir(check_empty_dir)
-        except (WindowsError, OSError), e:
-            logger.log(u"Unable to delete "+check_empty_dir+": "+repr(e)+" / "+str(e), logger.WARNING)
+    while ek.ek(os.path.isdir, check_empty_dir) and check_empty_dir != keep_dir:
+
+        check_files = ek.ek(os.listdir, check_empty_dir)
+
+        if not check_files or (len(check_files) <= len(ignore_items) and all([check_file in ignore_items for check_file in check_files])):
+            # directory is empty or contains only ignore_items
+            try:
+                logger.log(u"Deleting empty folder: " + check_empty_dir)
+                # need shutil.rmtree when ignore_items is really implemented
+                ek.ek(os.rmdir, check_empty_dir)
+                # do the library update for synoindex
+                notifiers.synoindex_notifier.deleteFolder(check_empty_dir)
+            except (WindowsError, OSError), e:
+                logger.log(u"Unable to delete " + check_empty_dir + ": " + repr(e) + " / " + str(e), logger.WARNING)
+                break
+            check_empty_dir = ek.ek(os.path.dirname, check_empty_dir)
+        else:
             break
-        check_empty_dir = os.path.dirname(check_empty_dir)
 
 
 def chmodAsParent(childPath):

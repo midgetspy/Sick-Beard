@@ -48,7 +48,7 @@ FILENAME = u"show name - s0" + str(SEASON) + "e0" + str(EPISODE) + ".mkv"
 FILEDIR = os.path.join(TESTDIR, SHOWNAME)
 FILEPATH = os.path.join(FILEDIR, FILENAME)
 
-SHOWDIR = os.path.join(TESTDIR, SHOWNAME+" final")
+SHOWDIR = os.path.join(TESTDIR, SHOWNAME +" final")
 
 #sickbeard.logger.sb_log_instance = sickbeard.logger.SBRotatingLogHandler(os.path.join(TESTDIR, 'sickbeard.log'), sickbeard.logger.NUM_LOGS, sickbeard.logger.LOG_SIZE)
 sickbeard.logger.SBRotatingLogHandler.log_file = os.path.join(os.path.join(TESTDIR, 'Logs'), 'test_sickbeard.log')
@@ -68,10 +68,12 @@ def createTestLogFolder():
 def setSickbeardGlobals():
     sickbeard.SYS_ENCODING = 'UTF-8'
     sickbeard.showList = []
-    sickbeard.QUALITY_DEFAULT = 4
-    sickbeard.SEASON_FOLDERS_DEFAULT = 1
-    sickbeard.SEASON_FOLDERS_FORMAT = 'Season %02d'
-    sickbeard.RENAME_EPISODES = True
+    sickbeard.QUALITY_DEFAULT = 4 #hdtv
+    sickbeard.FLATTEN_FOLDERS_DEFAULT = 0
+
+    sickbeard.NAMING_PATTERN = ''
+    sickbeard.NAMING_ABD_PATTERN = ''
+    sickbeard.NAMING_MULTI_EP = 1
     
     sickbeard.NAMING_SHOW_NAME = 1
     sickbeard.NAMING_EP_NAME = 1
@@ -90,8 +92,16 @@ def setSickbeardGlobals():
     sickbeard.DATA_DIR = sickbeard.PROG_DIR
     sickbeard.LOG_DIR = os.path.join(TESTDIR, 'Logs')
 
-setSickbeardGlobals()
-createTestLogFolder()
+
+    sickbeard.PROVIDER_ORDER = ["sick_beard_index"]
+    sickbeard.newznabProviderList = providers.getNewznabProviderList("Sick Beard Index|http://momo.sickbeard.com/||1!!!NZBs.org|http://nzbs.org/||0")
+    sickbeard.providerList = providers.makeProviderList()
+
+    sickbeard.PROG_DIR = os.path.abspath('..')
+    sickbeard.DATA_DIR = sickbeard.PROG_DIR
+    sickbeard.LOG_DIR = os.path.join(TESTDIR, 'Logs')
+    createTestLogFolder()
+
 sickbeard.logger.sb_log_instance.initLogging(False)
 #=================
 # dummy functions
@@ -161,7 +171,7 @@ class TestCacheDBConnection(TestDBConnection, object):
             self.connection.execute(sql)
             self.connection.commit()
         except sqlite3.OperationalError, e:
-            if str(e) != "table "+providerName+" already exists":
+            if str(e) != "table " + providerName + " already exists":
                 raise
 
         # Create the table if it's not already there
@@ -192,7 +202,7 @@ def setUp_test_db():
     db.upgradeDatabase(db.DBConnection(), mainDB.InitialSchema)
     # fix up any db problems
     db.sanityCheckDatabase(db.DBConnection(), mainDB.MainSanityCheck)
-    
+
     #and for cache.b too
     db.upgradeDatabase(db.DBConnection("cache.db"), cache_db.InitialSchema)
 
@@ -261,4 +271,3 @@ if __name__ == '__main__':
 
     print "=================="
     print "or just call all_tests.py"
-

@@ -109,6 +109,7 @@ class WindowsUpdateManager(UpdateManager):
 
     def __init__(self):
         self._cur_version = None
+        self._cur_commit_hash = None
         self._newest_version = None
 
         self.gc_url = 'http://code.google.com/p/sickbeard/downloads/list'
@@ -374,7 +375,7 @@ class GitUpdateManager(UpdateManager):
         if not output:
             return self._git_error()
 
-        pull_regex = '(\d+) files? changed, (\d+) insertions?\(\+\), (\d+) deletions?\(\-\)'
+        pull_regex = '(\d+) .+,.+(\d+).+\(\+\),.+(\d+) .+\(\-\)'
 
         (files, insertions, deletions) = (None, None, None)
 
@@ -459,7 +460,7 @@ class SourceUpdateManager(GitUpdateManager):
             logger.log(u"Unable to retrieve new version from "+tar_download_url+", can't update", logger.ERROR)
             return False
 
-        download_name = data.geturl().split('/')[-1]
+        download_name = data.geturl().split('/')[-1].split('?')[0]
 
         tar_download_path = os.path.join(sickbeard.PROG_DIR, download_name)
 

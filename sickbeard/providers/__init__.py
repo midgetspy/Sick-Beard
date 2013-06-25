@@ -18,18 +18,19 @@
 
 __all__ = ['ezrss',
            'tvtorrents',
-           'nzbmatrix',
-           'nzbs_org_old',
+           'torrentleech',
            'nzbsrus',
            'womble',
-           'newzbin',
            'fanzub',
            'btn',
+           'nzbx',
+           'omgwtfnzbs',
            ]
 
 import sickbeard
 
 from os import sys
+
 
 def sortedProviderList():
 
@@ -50,9 +51,11 @@ def sortedProviderList():
 
     return newList
 
+
 def makeProviderList():
 
     return [x.provider for x in [getProviderModule(y) for y in __all__] if x]
+
 
 def getNewznabProviderList(data):
 
@@ -78,7 +81,7 @@ def getNewznabProviderList(data):
             providerDict[curDefault.name].name = curDefault.name
             providerDict[curDefault.name].url = curDefault.url
             providerDict[curDefault.name].needs_auth = curDefault.needs_auth
-        
+
     return filter(lambda x: x, providerList)
 
 
@@ -97,21 +100,23 @@ def makeNewznabProvider(configString):
 
     return newProvider
 
+
 def getDefaultNewznabProviders():
-    return 'Sick Beard Index|http://momo.sickbeard.com/|0|0!!!NZBs.org|http://beta.nzbs.org/||0'
+    return 'Sick Beard Index|http://lolo.sickbeard.com/|0|0!!!NZBs.org|http://nzbs.org/||0!!!Usenet-Crawler|http://www.usenet-crawler.com/||0'
 
 
 def getProviderModule(name):
     name = name.lower()
     prefix = "sickbeard.providers."
-    if name in __all__ and prefix+name in sys.modules:
-        return sys.modules[prefix+name]
+    if name in __all__ and prefix + name in sys.modules:
+        return sys.modules[prefix + name]
     else:
-        raise Exception("Can't find "+prefix+name+" in "+repr(sys.modules))
+        raise Exception("Can't find " + prefix + name + " in " + repr(sys.modules))
 
-def getProviderClass(id):
 
-    providerMatch = [x for x in sickbeard.providerList+sickbeard.newznabProviderList if x.getID() == id]
+def getProviderClass(providerID):
+
+    providerMatch = [x for x in sickbeard.providerList + sickbeard.newznabProviderList if x.getID() == providerID]
 
     if len(providerMatch) != 1:
         return None

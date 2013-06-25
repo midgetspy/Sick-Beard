@@ -12,12 +12,22 @@ $(document).ready(function(){
     });
 
     $("#prevShow").click(function(){
-        $('#pickShow option:selected').prev('option').attr('selected', 'selected');
+        var show = $('#pickShow option:selected');
+        if (show.prev('option').length < 1){
+            show.parent().children('option:last').attr('selected', 'selected');
+        } else{
+            show.prev('option').attr('selected', 'selected');
+        };
         $("#pickShow").change();
     });
 
     $("#nextShow").click(function(){
-        $('#pickShow option:selected').next('option').attr('selected', 'selected');
+        var show = $('#pickShow option:selected');
+        if (show.next('option').length < 1){
+            show.parent().children('option:first').attr('selected', 'selected');
+        } else{
+            show.next('option').attr('selected', 'selected');
+        };
         $("#pickShow").change();
     });
 

@@ -1,6 +1,6 @@
 #import sickbeard
 #from sickbeard.providers.generic import GenericProvider
-#set global $title="Config - Providers"
+#set global $title="Config - Search Providers"
 #set global $header="Search Providers"
 
 #set global $sbPath="../.."
@@ -11,16 +11,17 @@
 
 <script type="text/javascript" src="$sbRoot/js/configProviders.js?$sbPID"></script>
 <script type="text/javascript" src="$sbRoot/js/config.js?$sbPID"></script>
+#if $sickbeard.USE_NZBS
 <script type="text/javascript" charset="utf-8">
 <!--
 \$(document).ready(function(){
-    var show_nzb_providers = #if $sickbeard.USE_NZBS then "true" else "false"#;
 #for $curNewznabProvider in $sickbeard.newznabProviderList:
-    \$(this).addProvider('$curNewznabProvider.getID()', '$curNewznabProvider.name', '$curNewznabProvider.url', '$curNewznabProvider.key', $int($curNewznabProvider.default), show_nzb_providers);
+    \$(this).addProvider('$curNewznabProvider.getID()', '$curNewznabProvider.name', '$curNewznabProvider.url', '$curNewznabProvider.key', $int($curNewznabProvider.default));
 #end for
 });
 //-->
 </script>
+#end if
 
 <div id="config">
 <div id="config-content">
@@ -28,7 +29,7 @@
 <form id="configForm" action="saveProviders" method="post">
 
             <div id="config-components">
-                
+
                 <div id="core-component-group1" class="component-group clearfix">
 
                     <div class="component-group-desc">
@@ -78,14 +79,14 @@
                         <h3>Configure Built-In Providers</h3>
                         <p>Check with provider's website on how to obtain an API key if needed.</p>
                     </div>
-                    
+
                     <fieldset class="component-group-list">
                         <div class="field-pair">
                             <label class="clearfix" for="editAProvider">
                                 <span class="component-title jumbo">Configure Provider:</span>
                                 <span class="component-desc">
                                     #set $provider_config_list = []
-                                    #for $cur_provider in ("nzbs_r_us", "newzbin", "nzbmatrix", "tvtorrents", "btn"):
+                                    #for $cur_provider in ("nzbs_r_us", "omgwtfnzbs", "tvtorrents", "torrentleech", "btn"):
                                         #set $cur_provider_obj = $sickbeard.providers.getProviderClass($cur_provider)
                                         #if $cur_provider_obj.providerType == $GenericProvider.NZB and not $sickbeard.USE_NZBS:
                                             #continue
@@ -95,9 +96,9 @@
                                         $provider_config_list.append($cur_provider_obj)
                                     #end for
 
-                                    #if $provider_config_list:                                        
+                                    #if $provider_config_list:
                                     <select id="editAProvider" class="input-medium" >
-                                        #for $cur_provider in $provider_config_list + [$curProvider for $curProvider in $sickbeard.newznabProviderList if $curProvider.default and $curProvider.needs_auth]:
+                                        #for $cur_provider in $provider_config_list + [$curProvider for $curProvider in $sickbeard.newznabProviderList if $curProvider.default and $curProvider.needs_auth and $sickbeard.USE_NZBS]:
                                             <option value="$cur_provider.getID()">$cur_provider.name</option>
                                         #end for
                                     </select>
@@ -126,66 +127,36 @@
                         </div>
                     </div><!-- /${curNewznabProvider.getID()}Div //-->
 #end for
-<!--
-                    <div class="providerDiv" id="nzbs_orgDiv">
-                        <div class="field-pair">
-                            <label class="clearfix">
-                                <span class="component-title">NZBs.org UID</span>
-                                <input class="component-desc" type="text" name="nzbs_org_uid" value="$sickbeard.NZBS_UID" size="10" />
-                            </label>
-                        </div>
-                        <div class="field-pair">
-                            <label class="clearfix">
-                                <span class="component-title">NZBs.org Hash</span>
-                                <input class="component-desc" type="text" name="nzbs_org_hash" value="$sickbeard.NZBS_HASH" size="40" />
-                            </label>
-                        </div>
-                    </div>
--->
-                    <div class="providerDiv" id="nzbmatrixDiv">
-                        <div class="field-pair">
-                            <label class="clearfix">
-                                <span class="component-title">NZBMatrix Username</span>
-                                <input class="component-desc" type="text" name="nzbmatrix_username" value="$sickbeard.NZBMATRIX_USERNAME" size="10" />
-                            </label>
-                        </div>
-                        <div class="field-pair">
-                            <label class="clearfix">
-                                <span class="component-title">NZBMatrix API Key</span>
-                                <input class="component-desc" type="text" name="nzbmatrix_apikey" value="$sickbeard.NZBMATRIX_APIKEY" size="40" />
-                            </label>
-                        </div>
-                    </div><!-- /nzbmatrixDiv //-->
-
-                    <div class="providerDiv" id="newzbinDiv">
-                        <div class="field-pair">
-                            <label class="clearfix">
-                                <span class="component-title">Newzbin Username</span>
-                                <input class="component-desc" type="text" name="newzbin_username" value="$sickbeard.NEWZBIN_USERNAME" size="10" />
-                            </label>
-                        </div>
-                        <div class="field-pair">
-                            <label class="clearfix">
-                                <span class="component-title">Newzbin Password</span>
-                                <input class="component-desc" type="password" name="newzbin_password" value="$sickbeard.NEWZBIN_PASSWORD" size="40" />
-                            </label>
-                        </div>
-                    </div><!-- /newzbinDiv //-->
 
                     <div class="providerDiv" id="nzbs_r_usDiv">
                         <div class="field-pair">
                             <label class="clearfix">
-                                <span class="component-title">NZBs'R'US UID</span>
+                                <span class="component-title">NZBs'R'US User ID</span>
                                 <input class="component-desc" type="text" name="nzbs_r_us_uid" value="$sickbeard.NZBSRUS_UID" size="10" />
                             </label>
                         </div>
                         <div class="field-pair">
                             <label class="clearfix">
-                                <span class="component-title">NZBs'R'US Hash</span>
+                                <span class="component-title">NZBs'R'US API Key</span>
                                 <input class="component-desc" type="text" name="nzbs_r_us_hash" value="$sickbeard.NZBSRUS_HASH" size="40" />
                             </label>
                         </div>
                     </div><!-- /nzbs_r_usDiv //-->
+                    
+                    <div class="providerDiv" id="omgwtfnzbsDiv">
+                        <div class="field-pair">
+                            <label class="clearfix">
+                                <span class="component-title">omgwtfnzbs User ID</span>
+                                <input class="component-desc" type="text" name="omgwtfnzbs_uid" value="$sickbeard.OMGWTFNZBS_UID" size="10" />
+                            </label>
+                        </div>
+                        <div class="field-pair">
+                            <label class="clearfix">
+                                <span class="component-title">omgwtfnzbs API Key</span>
+                                <input class="component-desc" type="text" name="omgwtfnzbs_key" value="$sickbeard.OMGWTFNZBS_KEY" size="40" />
+                            </label>
+                        </div>
+                    </div><!-- /omgwtfnzbsDiv //-->
 
                     <div class="providerDiv" id="tvtorrentsDiv">
                         <div class="field-pair">
@@ -200,12 +171,21 @@
                                 <input class="component-desc" type="text" name="tvtorrents_hash" value="$sickbeard.TVTORRENTS_HASH" size="40" />
                             </label>
                         </div>
-                    </div><!-- /tvtorrentsDiv //-->
+                    </div><!-- /torrentleechDiv //-->
+
+                    <div class="providerDiv" id="torrentleechDiv">
+                        <div class="field-pair">
+                            <label class="clearfix">
+                                <span class="component-title">TorrentLeech RSS key (enable in profile):</span>
+                                <input class="component-desc" type="text" name="torrentleech_key" value="$sickbeard.TORRENTLEECH_KEY" size="40" />
+                            </label>
+                        </div>
+                    </div><!-- /torrentleechDiv //-->
 
                     <div class="providerDiv" id="btnDiv">
                         <div class="field-pair">
                             <label class="clearfix">
-                                <span class="component-title">BTN API KEY:</span>
+                                <span class="component-title">BTN API Key:</span>
                                 <input class="component-desc" type="text" name="btn_api_key" value="$sickbeard.BTN_API_KEY" size="40" />
                             </label>
                         </div>
@@ -214,9 +194,10 @@
 <!-- end div for editing providers -->
 
                     <input type="submit" class="btn config_submitter" value="Save Changes" /><br/>
-            
+
                     </fieldset>
                 </div><!-- /component-group2 //-->
+#if $sickbeard.USE_NZBS:
 
                 <div id="core-component-group3" class="component-group clearfix">
 
@@ -267,12 +248,12 @@
             </div>
             <div id="newznab_update_div" style="display: none;">
                 <input type="button" class="btn btn-danger newznab_delete" id="newznab_delete" value="Delete" />
-            </div> 
+            </div>
 </div>
 
                     </fieldset>
                 </div><!-- /component-group3 //-->
-
+#end if
                 <div class="component-group-save">
                     <input type="submit" class="btn config_submitter" value="Save Changes" />
                 </div><br />

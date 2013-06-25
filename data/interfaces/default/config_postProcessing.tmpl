@@ -7,7 +7,7 @@
 #from sickbeard import naming
 
 #set global $title  = "Config - Post Processing"
-#set global $header = "Post Processing Configuration"
+#set global $header = "Post Processing"
 
 #set global $sbPath="../.."
 
@@ -169,6 +169,26 @@
                                           <td>Show_Name</td>
                                         </tr>
                                         <tr class="even">
+                                          <td class="align-right"><b>Season Number:</b></td>
+                                          <td>%S</td>
+                                          <td>2</td>
+                                        </tr>
+                                        <tr>
+                                          <td>&nbsp;</td>
+                                          <td>%0S</td>
+                                          <td>02</td>
+                                        </tr>
+                                        <tr class="even">
+                                          <td class="align-right"><b>Episode Number:</b></td>
+                                          <td>%E</td>
+                                          <td>3</td>
+                                        </tr>
+                                        <tr>
+                                          <td>&nbsp;</td>
+                                          <td>%0E</td>
+                                          <td>03</td>
+                                        </tr>
+                                        <tr class="even">
                                           <td class="align-right"><b>Episode Name:</b></td>
                                           <td>%EN</td>
                                           <td>Episode Name</td>
@@ -182,26 +202,6 @@
                                           <td>&nbsp;</td>
                                           <td>%E_N</td>
                                           <td>Episode_Name</td>
-                                        </tr>
-                                        <tr>
-                                          <td class="align-right"><b>Season Number:</b></td>
-                                          <td>%S</td>
-                                          <td>2</td>
-                                        </tr>
-                                        <tr class="even">
-                                          <td>&nbsp;</td>
-                                          <td>%0S</td>
-                                          <td>02</td>
-                                        </tr>
-                                        <tr>
-                                          <td class="align-right"><b>Episode Number:</b></td>
-                                          <td>%E</td>
-                                          <td>3</td>
-                                        </tr>
-                                        <tr class="even">
-                                          <td>&nbsp;</td>
-                                          <td>%0E</td>
-                                          <td>03</td>
                                         </tr>
                                         <tr>
                                           <td class="align-right"><b>Quality:</b></td>
@@ -335,6 +335,26 @@
                                               <td>Show_Name</td>
                                             </tr>
                                             <tr class="even">
+                                              <td class="align-right"><b>Air-By-Date:</b></td>
+                                              <td>%AD</td>
+                                              <td>2010 03 09</td>
+                                            </tr>
+                                            <tr>
+                                              <td>&nbsp;</td>
+                                              <td>%A.D</td>
+                                              <td>2010.03.09</td>
+                                            </tr>
+                                            <tr class="even">
+                                              <td>&nbsp;</td>
+                                              <td>%A_D</td>
+                                              <td>2010_03_09</td>
+                                            </tr>
+                                            <tr>
+                                              <td>&nbsp;</td>
+                                              <td>%A-D</td>
+                                              <td>2010-03-09</td>
+                                            </tr>
+                                            <tr class="even">
                                               <td class="align-right"><b>Episode Name:</b></td>
                                               <td>%EN</td>
                                               <td>Episode Name</td>
@@ -363,26 +383,6 @@
                                               <td>&nbsp;</td>
                                               <td>%Q_N</td>
                                               <td>720p_BluRay</td>
-                                            </tr>
-                                            <tr class="even">
-                                              <td class="align-right"><b>Air-By-Date:</b></td>
-                                              <td>%AD</td>
-                                              <td>2010 03 09</td>
-                                            </tr>
-                                            <tr>
-                                              <td>&nbsp;</td>
-                                              <td>%A.D</td>
-                                              <td>2010.03.09</td>
-                                            </tr>
-                                            <tr class="even">
-                                              <td>&nbsp;</td>
-                                              <td>%A_D</td>
-                                              <td>2010_03_09</td>
-                                            </tr>
-                                            <tr>
-                                              <td>&nbsp;</td>
-                                              <td>%A-D</td>
-                                              <td>2010-03-09</td>
                                             </tr>
                                             <tr class="even">
                                               <td class="align-right"><b>Year:</b></td>
