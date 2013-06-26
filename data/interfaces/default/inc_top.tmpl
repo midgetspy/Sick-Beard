@@ -1,4 +1,5 @@
 #import sickbeard.version
+#import base64
 <!DOCTYPE HTML>
 <html>
     <head>
@@ -207,7 +208,8 @@
                     </ul>
                     <ul class="nav pull-right">
                         <li>
-                            <a id="navDonate" href="https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&amp;hosted_button_id=JA8M7VDY89SQ4" onclick="window.open(this.href); return false;"><img src="$sbRoot/images/paypal/btn_donate_LG.gif" alt="[donate]" height="26" width="92" /></a>
+                            #set paypal_url = "https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=JA8M7VDY89SQ4"
+                            <a href="http://base64.derefer.me/?${base64.b64encode(paypal_url)}" id="navDonate" onclick="window.open(this.href, '_blank'); return false;" title="${paypal_url}"><img src="$sbRoot/images/paypal/btn_donate_LG.gif" alt="[donate]" height="26" width="92" /></a>
                         </li>
                     </ul>
                 </div><!-- /nav-collapse -->

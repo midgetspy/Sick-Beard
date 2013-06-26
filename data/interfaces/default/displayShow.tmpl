@@ -3,8 +3,10 @@
 #from sickbeard.common import *
 #import os.path, os
 #import datetime
+#import base64
 #set global $title=$show.name
-#set global $header = '<a href="http://thetvdb.com/?tab=series&amp;id=%d" target="_new">%s</a>' % ($show.tvdbid, $show.name)
+#set tvdb_url = "http://thetvdb.com/?tab=series&id=" + str($show.tvdbid)
+#set global $header = '<a href="http://base64.derefer.me/?%s" title="%s" target="_new">%s</a>' % (base64.b64encode(tvdb_url), $tvdb_url, $show.name)
 
 #set global $topmenu="manageShows"#
 #include $os.path.join($sickbeard.PROG_DIR, "data/interfaces/default/inc_top.tmpl")
