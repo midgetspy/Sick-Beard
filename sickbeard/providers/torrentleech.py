@@ -66,8 +66,7 @@ class TorrentLeechProvider(generic.TorrentProvider):
 
     ###################################################################################################
     
-    def _get_airbydate_season_range(self, season):
-    
+    def _get_airbydate_season_range(self, season):   
         if season == None:
             return ()
         
