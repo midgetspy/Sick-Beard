@@ -88,7 +88,7 @@
                                 <span class="component-title jumbo">Configure Provider:</span>
                                 <span class="component-desc">
                                     #set $provider_config_list = []
-                                    #for $cur_provider in ("nzbs_r_us", "tvtorrents", "btn", "thepiratebay","dailytvtorrents", "torrentz", "torrentleech", "torrentday","sceneaccess"):
+                                    #for $cur_provider in ("nzbs_r_us", "tvtorrents", "btn", "thepiratebay","dailytvtorrents", "torrentz", "torrentleech", "torrentday","sceneaccess","iptorrents"):
                                         #set $cur_provider_obj = $sickbeard.providers.getProviderClass($cur_provider)
                                         #if $cur_provider_obj.providerType == $GenericProvider.NZB and not $sickbeard.USE_NZBS:
                                             #continue
@@ -293,6 +293,36 @@
                             </label>
                         </div>
                     </div><!-- /sceneaccessDiv //-->
+                    
+                    <div class="providerDiv" id="iptorrentsDiv">
+                        <div class="field-pair">
+                            <label class="clearfix">
+                                <span class="component-title">Username:</span>
+                                <input class="component-desc" type="text" name="iptorrents_username" value="$sickbeard.IPTORRENTS_USERNAME" size="40" />
+                            </label>
+                        </div>
+                        <div class="field-pair">
+                            <label class="clearfix">
+                                <span class="component-title">Password:</span>
+                                <input class="component-desc" type="password" name="iptorrents_password" value="$sickbeard.IPTORRENTS_PASSWORD" size="40" />
+                            </label>
+                        </div>
+                        <div class="field-pair">
+                            <label class="clearfix">
+                                <span class="component-title">RSS UID (*):</span>
+                                <input class="component-desc" type="text" name="iptorrents_uid" value="$sickbeard.IPTORRENTS_UID" size="40" /></b>
+                            </label>
+                        </div>
+                        <div class="field-pair">
+                            <label class="clearfix">
+                                <span class="component-title">RSS Hash (*):</span>
+                                <input class="component-desc" type="text" name="iptorrents_rsshash" value="$sickbeard.IPTORRENTS_RSSHASH" size="40" /></b>
+                            </label>
+                        </div>
+                        <div class="field-pair">
+                            <span class="component-title"><i>Note: options with (*) are optional, this is generated from </i><a href="http://www.iptorrents.com/getrss.php" target="_blank">http://www.iptorrents.com/getrss.php</a></span>
+                        </div>
+                    </div><!-- /iptorrentsDiv //-->
 <!-- end div for editing providers -->
 
 
