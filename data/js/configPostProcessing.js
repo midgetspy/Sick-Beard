@@ -131,7 +131,7 @@ $(document).ready(function () {
                     }
                 });
         
-        $.get(sbRoot + '/config/postProcessing/isNamingValid', {pattern: pattern,  multi: multi, anime: 'True'},
+        $.get(sbRoot + '/config/postProcessing/isNamingValid', {pattern: pattern, multi: multi, anime: 'True'},
             function (data) {
                 if (data == "invalid") {
                     $('#naming_anime_pattern').qtip('option', {
@@ -227,8 +227,8 @@ $(document).ready(function () {
         }, 500);
     });
 
-    $('#naming_anime_multi_ep').change(fill_examples);
-    $('#naming_anime_pattern').focusout(fill_examples);
+    $('#naming_anime_multi_ep').change(fill_anime_examples);
+    $('#naming_anime_pattern').focusout(fill_anime_examples);
     $('#naming_anime_pattern').keyup(function () {
         typewatch(function () {
             fill_anime_examples();

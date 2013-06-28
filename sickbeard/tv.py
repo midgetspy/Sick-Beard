@@ -1721,7 +1721,7 @@ class TVEpisode(object):
             pattern = sickbeard.NAMING_PATTERN
         
         if multi == None:
-            if self.show.is_anime:
+            if self.show.is_anime and sickbeard.NAMING_CUSTOM_ANIME:
                 multi = sickbeard.NAMING_ANIME_MULTI_EP
             else:
                 multi = sickbeard.NAMING_MULTI_EP
@@ -1891,7 +1891,7 @@ class TVEpisode(object):
             # we only use ABD if it's enabled, this is an ABD show, AND this is not a multi-ep
             if self.show.air_by_date and sickbeard.NAMING_CUSTOM_ABD and not self.relatedEps:
                 pattern = sickbeard.NAMING_ABD_PATTERN
-            elif self.show.is_anime:
+            elif self.show.is_anime and sickbeard.NAMING_CUSTOM_ANIME:
                 pattern = sickbeard.NAMING_ANIME_PATTERN
             else:
                 pattern = sickbeard.NAMING_PATTERN
