@@ -458,7 +458,6 @@ def initialize(consoleLogging=True):
         NAMING_CUSTOM_ABD = check_setting_int(CFG, 'General', 'naming_custom_abd', 0)
         NAMING_MULTI_EP = check_setting_int(CFG, 'General', 'naming_multi_ep', 1)
         NAMING_ANIME_MULTI_EP = check_setting_int(CFG, 'General', 'naming_anime_multi_ep', 1)
-        NAMING_FORCE_FOLDERS = naming.check_force_season_folders()
 
         USE_NZBS = bool(check_setting_int(CFG, 'General', 'use_nzbs', 1))
         USE_TORRENTS = bool(check_setting_int(CFG, 'General', 'use_torrents', 0))
@@ -750,6 +749,9 @@ def initialize(consoleLogging=True):
         migrator = ConfigMigrator(CFG)
         migrator.migrate_config()
 
+        # Database has to exist before naming.check_force_season_folders can be called.
+        NAMING_FORCE_FOLDERS = naming.check_force_season_folders()
+        
         currentSearchScheduler = scheduler.Scheduler(searchCurrent.CurrentSearcher(),
                                                      cycleTime=datetime.timedelta(minutes=SEARCH_FREQUENCY),
                                                      threadName="SEARCH",
