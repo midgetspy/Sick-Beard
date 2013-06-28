@@ -878,7 +878,7 @@ class ConfigPostProcessing:
                     xbmc_data=None, mediabrowser_data=None, synology_data=None, sony_ps3_data=None, wdtv_data=None, tivo_data=None,
                     use_banner=None, keep_processed_dir=None, process_automatically=None, rename_episodes=None,
                     move_associated_files=None, tv_download_dir=None, naming_custom_abd=None, naming_abd_pattern=None,
-                    naming_anime_multi_ep=None, naming_anime_pattern=None):
+                    naming_anime_multi_ep=None, naming_anime_pattern=None, naming_custom_anime=None):
 
         results = []
 
@@ -915,11 +915,17 @@ class ConfigPostProcessing:
         else:
             naming_custom_abd = 0
 
+        if naming_custom_anime == "on":
+            naming_custom_anime = 1
+        else:
+            naming_custom_anime = 0
+
         sickbeard.PROCESS_AUTOMATICALLY = process_automatically
         sickbeard.KEEP_PROCESSED_DIR = keep_processed_dir
         sickbeard.RENAME_EPISODES = rename_episodes
         sickbeard.MOVE_ASSOCIATED_FILES = move_associated_files
         sickbeard.NAMING_CUSTOM_ABD = naming_custom_abd
+        sickbeard.NAMING_CUSTOM_ANIME = naming_custom_anime
 
         sickbeard.metadata_provider_dict['XBMC'].set_config(xbmc_data)
         sickbeard.metadata_provider_dict['MediaBrowser'].set_config(mediabrowser_data)
@@ -939,7 +945,7 @@ class ConfigPostProcessing:
             sickbeard.NAMING_ANIME_PATTERN = naming_anime_pattern
             sickbeard.NAMING_ANIME_MULTI_EP = int(naming_anime_multi_ep)
             sickbeard.NAMING_FORCE_FOLDERS = naming.check_force_season_folders(sickbeard.NAMING_ANIME_PATTERN)
-        else:
+        elif naming_custom_anime:
             results.append("You tried saving an invalid anime naming config, not saving your anime naming settings")
 
         if self.isNamingValid(naming_abd_pattern, None, True) != "invalid":

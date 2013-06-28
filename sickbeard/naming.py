@@ -109,7 +109,11 @@ def check_valid_anime_naming(pattern=None, multi=None):
     Returns true if the naming is valid, false if not.
     """
     if pattern == None:
-        pattern = sickbeard.NAMING_PATTERN
+        if sickbeard.NAMING_CUSTOM_ANIME:
+            pattern = sickbeard.NAMING_ANIME_PATTERN
+        else:
+            pattern = sickbeard.NAMING_PATTERN
+        
         
     valid = validate_name(pattern, anime=True)
 

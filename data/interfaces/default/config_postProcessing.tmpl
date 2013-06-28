@@ -436,8 +436,10 @@
                         </div><!-- /naming_abd_different -->
                         
                         <div class="field-pair clearfix">
+                            <input type="checkbox" class="enabler" id="naming_custom_anime" name="naming_custom_anime" #if $sickbeard.NAMING_CUSTOM_ANIME then "checked=\"checked\"" else ""#/>
                             <label class="clearfix" for="naming_custom_anime">
                                 <span class="component-title">Custom Anime</span>
+                                <span class="component-desc">Name Anime shows differently than regular shows?</span>
                             </label>
                         </div>
                         
@@ -576,7 +578,7 @@
                             </div><!-- /naming_anime_custom -->
 
                             <div class="field-pair">
-                                <label class="nocheck clearfix" for="naming_multi_ep">
+                                <label class="nocheck clearfix" for="naming_anime_multi_ep">
                                     <span class="component-title">Multi-Episode Style:</span>
                                     <span class="component-desc">
                                         <select id="naming_anime_multi_ep" name="naming_anime_multi_ep">
