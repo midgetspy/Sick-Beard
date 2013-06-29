@@ -29,6 +29,10 @@ Manage episodes with status <select name="whichStatus">
 
 <script type="text/javascript" src="$sbRoot/js/manageEpisodeStatuses.js?$sbPID"></script>
 
+<br />
+
+<form action="$sbRoot/manage/changeEpisodeStatuses" method="post">
+
 <table class="sickbeardTable" cellspacing="1" border="0" cellpadding="0">
     #for $cur_tvdb_id in $sorted_show_ids:
 <tr id="$cur_tvdb_id">
@@ -38,9 +42,6 @@ Manage episodes with status <select name="whichStatus">
     #end for
 </table>
 
-<br />
-
-<form action="$sbRoot/manage/changeEpisodeStatuses" method="post">
 <input type="hidden" id="oldStatus" name="oldStatus" value="$whichStatus" />
 #if $whichStatus in ($common.ARCHIVED, $common.IGNORED, $common.SNATCHED):
 #set $row_class = "good"
