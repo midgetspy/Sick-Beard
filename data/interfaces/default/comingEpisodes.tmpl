@@ -1,5 +1,6 @@
 #import sickbeard
 #import datetime
+#import base64
 #from sickbeard.common import *
 #set global $title="Coming Episodes"
 
@@ -132,7 +133,8 @@
     <span class="quality Custom">Custom</span>
 #end if
         </td>
-        <td align="center"><a href="http://thetvdb.com/?tab=series&amp;id=${cur_result["showid"]}" onclick="window.open(this.href, '_blank'); return false;" title="http://thetvdb.com/?tab=series&amp;id=${cur_result["showid"]}"><img alt="[info]" height="16" width="16" src="$sbRoot/images/thetvdb16.png" /></a></td>
+        #set tvdb_url = "http://thetvdb.com/?tab=series&id=" + str($cur_result["showid"])
+        <td align="center"><a href="http://base64.derefer.me/?${base64.b64encode(tvdb_url)}" onclick="window.open(this.href, '_blank'); return false;" title="${tvdb_url}"><img alt="[info]" height="16" width="16" src="$sbRoot/images/thetvdb16.png" /></a></td>
         <td align="center">
         <a href="$sbRoot/home/searchEpisode?show=${cur_result["showid"]}&amp;season=$cur_result["season"]&amp;episode=$cur_result["episode"]" title="Manual Search" id="forceUpdate-${cur_result["showid"]}" class="forceUpdate epSearch"><img alt="[search]" height="16" width="16" src="$sbRoot/images/search16.png" id="forceUpdateImage-${cur_result["showid"]}" /></a>
         </td>
@@ -228,7 +230,8 @@
             #end if            
             </a></span>
             <span class="tvshowTitleIcons">
-                <a href="http://thetvdb.com/?tab=series&amp;id=${cur_result["showid"]}" onclick="window.open(this.href, '_blank'); return false;" title="http://thetvdb.com/?tab=series&amp;id=${cur_result["showid"]}"><img alt="[tvdb]" height="16" width="16" src="$sbRoot/images/thetvdb16.png" /></a>
+                #set tvdb_url = "http://thetvdb.com/?tab=series&id=" + str($cur_result["showid"])
+                <a href="http://base64.derefer.me/?${base64.b64encode(tvdb_url)}" onclick="window.open(this.href, '_blank'); return false;" title="${tvdb_url}"><img alt="[tvdb]" height="16" width="16" src="$sbRoot/images/thetvdb16.png" /></a>
                 <span><a href="$sbRoot/home/searchEpisode?show=${cur_result["showid"]}&amp;season=$cur_result["season"]&amp;episode=$cur_result["episode"]" title="Manual Search" id="forceUpdate-${cur_result["showid"]}" class="epSearch forceUpdate"><img alt="[search]" height="16" width="16" src="$sbRoot/images/search16.png" id="forceUpdateImage-${cur_result["showid"]}" /></a></span>
             </span>
           </th>
