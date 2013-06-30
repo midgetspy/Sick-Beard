@@ -1738,11 +1738,11 @@ input[type="submit"].btn.btn-mini {
 }
 
 [class^="icon-"], [class*=" icon-"] {
-    background-image: url("/images/glyphicons-halflings.png");
+    background-image: url("../images/glyphicons-halflings.png");
 }
 
 .icon-white {
-  background-image: url("/images/glyphicons-halflings-white.png");
+  background-image: url("../images/glyphicons-halflings-white.png");
 }
 
 [class^="icon-"],
