@@ -20,6 +20,11 @@
 #        multi-user.target equates to runlevel 3 (multi-user text mode)
 #        graphical.target  equates to runlevel 5 (multi-user X11 graphical mode)
 #
+#    - Requires/After= specifies other required services that are needed before Sickbeard should start
+#        The Requires= option ensures that the other services are able to start.
+#        The After= option enforces a load order for services. This can be used to ensure another service, 
+#         such as your nzb downloader, is started before Sickbeard. Another useful option may to be wait until after
+#         sshd.service is running to allow connecting to the system while Sickbeard starts.
 
 ### Example Using SickBeard as daemon with pid file
 # Type=forking
@@ -44,6 +49,8 @@
 
 [Unit]
 Description=SickBeard Daemon
+Requires=network.target
+After=network.target
 
 [Service]
 User=sickbeard
