@@ -72,14 +72,16 @@ test -x $DAEMON || exit 0
 
 set -e
 
-# Source LSB function library
-. /lib/lsb/init-functions
-
 # Create PID directory if not exist and ensure the SickBeard user can write to it
-[ -d $PID_PATH ] || mkdir -p $PID_PATH && chown $RUN_AS $PID_PATH
+if [ ! -d $PID_PATH ]; then
+    mkdir -p $PID_PATH
+    chown $RUN_AS $PID_PATH
+fi
 
-# Create data directory and ensure the SickBeard user can write to it
-[ -d $DATA_DIR ] || mkdir -p $DATA_DIR && chown $RUN_AS $DATA_DIR
+if [ ! -d $DATA_DIR ]; then
+    mkdir -p $DATA_DIR
+    chown $RUN_AS $DATA_DIR
+fi
 
 if [ -e $PID_FILE ]; then
     PID=`cat $PID_FILE`
@@ -94,6 +96,7 @@ case "$1" in
         echo "Starting $DESC"
         start-stop-daemon -d $APP_PATH -c $RUN_AS $EXTRA_SSD_OPTS --start --pidfile $PID_FILE --exec $DAEMON -- $DAEMON_OPTS
         ;;
+
     stop)
         echo "Stopping $DESC"
         start-stop-daemon --stop --pidfile $PID_FILE --retry 15
@@ -105,8 +108,31 @@ case "$1" in
         start-stop-daemon -d $APP_PATH -c $RUN_AS $EXTRA_SSD_OPTS --start --pidfile $PID_FILE --exec $DAEMON -- $DAEMON_OPTS
         ;;
 
-  status)
-       status_of_proc -p $PID_FILE $NAME $NAME
+    status)
+        # Use LSB function library if it exists
+        if [ -f /lib/lsb/init-functions ]; then
+            . /lib/lsb/init-functions
+
+            if [ -e $PID_FILE ]; then
+                status_of_proc -p $PID_FILE "$DAEMON" "$NAME" && exit 0 || exit $?
+            else
+                log_daemon_msg "$NAME is not running"
+                exit 3
+            fi
+
+        else
+        # Use basic functions
+            if [ -e $PID_FILE ]; then
+                PID=`cat $PID_FILE`
+                if kill -0 $PID > /dev/null 2>&1; then
+                    echo " * $NAME is running"
+                    exit 0
+                fi
+            else
+                echo " * $NAME is not running"
+                exit 3
+            fi
+        fi
         ;;
 
     *)
