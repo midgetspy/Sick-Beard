@@ -49,7 +49,7 @@ Manage episodes with status <select name="whichStatus">
 #set $row_class = $common.Overview.overviewStrings[$whichStatus]
 #end if
 <input type="hidden" id="row_class" value="$row_class" />
-
+<br />
 Set checked shows/episodes to <select name="newStatus">
 #set $statusList = [$common.SKIPPED, $common.WANTED, $common.ARCHIVED, $common.IGNORED]
 #if $int($whichStatus) in $statusList
