@@ -1,0 +1,110 @@
+{
+    "Wilfred (US)": {
+        "thetvdb_id": "239761",
+        "clearlogo": [
+            {
+                "id": "11977",
+                "url": "http://assets.fanart.tv/fanart/tv/239761/clearlogo/wilfred-us-4e04b6495dfd3.png",
+                "lang": "en",
+                "likes": "2"
+            }
+        ],
+        "clearart": [
+            {
+                "id": "11987",
+                "url": "http://assets.fanart.tv/fanart/tv/239761/clearart/wilfred-us-4e05f10e87711.png",
+                "lang": "en",
+                "likes": "2"
+            },
+            {
+                "id": "12470",
+                "url": "http://assets.fanart.tv/fanart/tv/239761/clearart/wilfred-us-4e2f151d5ed62.png",
+                "lang": "en",
+                "likes": "1"
+            }
+        ],
+        "tvthumb": [
+            {
+                "id": "19596",
+                "url": "http://assets.fanart.tv/fanart/tv/239761/tvthumb/wilfred-us-501cf526174fe.jpg",
+                "lang": "en",
+                "likes": "1"
+            },
+            {
+                "id": "11988",
+                "url": "http://assets.fanart.tv/fanart/tv/239761/tvthumb/wilfred-us-4e05f134c1817.jpg",
+                "lang": "en",
+                "likes": "0"
+            }
+        ],
+        "hdtvlogo": [
+            {
+                "id": "21101",
+                "url": "http://assets.fanart.tv/fanart/tv/239761/hdtvlogo/wilfred-us-505f373be58e6.png",
+                "lang": "en",
+                "likes": "1"
+            }
+        ],
+        "hdclearart": [
+            {
+                "id": "21112",
+                "url": "http://assets.fanart.tv/fanart/tv/239761/hdclearart/wilfred-us-505f94ed0ba13.png",
+                "lang": "en",
+                "likes": "1"
+            }
+        ],
+        "seasonthumb": [
+            {
+                "id": "19586",
+                "url": "http://assets.fanart.tv/fanart/tv/239761/seasonthumb/wilfred-us-501bb0a8e60f9.jpg",
+                "lang": "en",
+                "likes": "0",
+                "season": "1"
+            },
+            {
+                "id": "19587",
+                "url": "http://assets.fanart.tv/fanart/tv/239761/seasonthumb/wilfred-us-501bb0b4bf229.jpg",
+                "lang": "en",
+                "likes": "0",
+                "season": "2"
+            },
+            {
+                "id": "19588",
+                "url": "http://assets.fanart.tv/fanart/tv/239761/seasonthumb/wilfred-us-501bb144e6a46.jpg",
+                "lang": "en",
+                "likes": "0",
+                "season": "0"
+            }
+        ],
+        "showbackground": [
+            {
+                "id": "19965",
+                "url": "http://assets.fanart.tv/fanart/tv/239761/showbackground/wilfred-us-5034dbd49115e.jpg",
+                "lang": "en",
+                "likes": "0",
+                "season": "all"
+            },
+            {
+                "id": "23166",
+                "url": "http://assets.fanart.tv/fanart/tv/239761/showbackground/wilfred-us-50b0c92db6973.jpg",
+                "lang": "en",
+                "likes": "0",
+                "season": "all"
+            },
+            {
+                "id": "23167",
+                "url": "http://assets.fanart.tv/fanart/tv/239761/showbackground/wilfred-us-50b0c92dbb46b.jpg",
+                "lang": "en",
+                "likes": "0",
+                "season": "all"
+            },
+            {
+                "id": "23168",
+                "url": "http://assets.fanart.tv/fanart/tv/239761/showbackground/wilfred-us-50b0c92dbb9d1.jpg",
+                "lang": "en",
+                "likes": "0",
+                "season": "all"
+            }
+        ]
+    }
+}
