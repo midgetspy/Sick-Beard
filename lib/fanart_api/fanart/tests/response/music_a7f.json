@@ -1,0 +1,171 @@
+{
+    "Avenged Sevenfold": {
+        "mbid_id": "24e1b53c-3085-4581-8472-0b0088d2508c",
+        "artistbackground": [
+            {
+                "id": "3027",
+                "url": "http://assets.fanart.tv/fanart/music/24e1b53c-3085-4581-8472-0b0088d2508c/artistbackground/avenged-sevenfold-4ddd7889a0fcf.jpg",
+                "likes": "0"
+            },
+            {
+                "id": "64046",
+                "url": "http://assets.fanart.tv/fanart/music/24e1b53c-3085-4581-8472-0b0088d2508c/artistbackground/avenged-sevenfold-50c4db9a2c6e2.jpg",
+                "likes": "0"
+            },
+            {
+                "id": "64048",
+                "url": "http://assets.fanart.tv/fanart/music/24e1b53c-3085-4581-8472-0b0088d2508c/artistbackground/avenged-sevenfold-50c4dc653f004.jpg",
+                "likes": "0"
+            }
+        ],
+        "albums": {
+            "180560ee-2d9d-33cf-8de7-cdaaba610739": {
+                "albumcover": [
+                    {
+                        "id": "3028",
+                        "url": "http://assets.fanart.tv/fanart/music/24e1b53c-3085-4581-8472-0b0088d2508c/albumcover/city-of-evil-4ddd79ca0beea.jpg",
+                        "likes": "0"
+                    }
+                ],
+                "cdart": [
+                    {
+                        "id": "9921",
+                        "url": "http://assets.fanart.tv/fanart/music/24e1b53c-3085-4581-8472-0b0088d2508c/cdart/city-of-evil-4e5f7b9f50d37.png",
+                        "likes": "0",
+                        "disc": "1",
+                        "size": "1000"
+                    }
+                ]
+            },
+            "1c7120ae-32b6-3693-8974-599977b01601": {
+                "albumcover": [
+                    {
+                        "id": "3029",
+                        "url": "http://assets.fanart.tv/fanart/music/24e1b53c-3085-4581-8472-0b0088d2508c/albumcover/waking-the-fallen-4ddd79ca1b11e.jpg",
+                        "likes": "0"
+                    }
+                ],
+                "cdart": [
+                    {
+                        "id": "9922",
+                        "url": "http://assets.fanart.tv/fanart/music/24e1b53c-3085-4581-8472-0b0088d2508c/cdart/waking-the-fallen-4e5f7b9f5ebdf.png",
+                        "likes": "0",
+                        "disc": "1",
+                        "size": "1000"
+                    }
+                ]
+            },
+            "94672194-7f42-3965-a489-f2f3cdc1c79e": {
+                "albumcover": [
+                    {
+                        "id": "3030",
+                        "url": "http://assets.fanart.tv/fanart/music/24e1b53c-3085-4581-8472-0b0088d2508c/albumcover/avenged-sevenfold-4ddd79ca1bcd6.jpg",
+                        "likes": "0"
+                    }
+                ],
+                "cdart": [
+                    {
+                        "id": "9923",
+                        "url": "http://assets.fanart.tv/fanart/music/24e1b53c-3085-4581-8472-0b0088d2508c/cdart/avenged-sevenfold-4e5f7b9f5fb7f.png",
+                        "likes": "0",
+                        "disc": "1",
+                        "size": "1000"
+                    }
+                ]
+            },
+            "9d642393-0005-3e89-b3d4-35d89c2f6ad6": {
+                "albumcover": [
+                    {
+                        "id": "3031",
+                        "url": "http://assets.fanart.tv/fanart/music/24e1b53c-3085-4581-8472-0b0088d2508c/albumcover/sounding-the-seventh-trumpet-4ddd79ca1d05e.jpg",
+                        "likes": "0"
+                    }
+                ],
+                "cdart": [
+                    {
+                        "id": "9924",
+                        "url": "http://assets.fanart.tv/fanart/music/24e1b53c-3085-4581-8472-0b0088d2508c/cdart/sounding-the-seventh-trumpet-4e5f7b9f62e47.png",
+                        "likes": "0",
+                        "disc": "1",
+                        "size": "1000"
+                    }
+                ]
+            },
+            "fe4373ed-5e89-46b3-b4c0-31433ce217df": {
+                "albumcover": [
+                    {
+                        "id": "3032",
+                        "url": "http://assets.fanart.tv/fanart/music/24e1b53c-3085-4581-8472-0b0088d2508c/albumcover/nightmare-4ddd79ca1dffe.jpg",
+                        "likes": "0"
+                    }
+                ],
+                "cdart": [
+                    {
+                        "id": "11630",
+                        "url": "http://assets.fanart.tv/fanart/music/24e1b53c-3085-4581-8472-0b0088d2508c/cdart/nightmare-4e8059a3c581c.png",
+                        "likes": "0",
+                        "disc": "1",
+                        "size": "1000"
+                    }
+                ]
+            },
+            "41d1b72b-1eee-3319-937f-c85d6d2fcfbb": {
+                "albumcover": [
+                    {
+                        "id": "61014",
+                        "url": "http://assets.fanart.tv/fanart/music/24e1b53c-3085-4581-8472-0b0088d2508c/albumcover/warmness-on-the-soul-509d2e9150bf4.jpg",
+                        "likes": "0"
+                    }
+                ]
+            }
+        },
+        "musiclogo": [
+            {
+                "id": "5712",
+                "url": "http://assets.fanart.tv/fanart/music/24e1b53c-3085-4581-8472-0b0088d2508c/musiclogo/avenged-sevenfold-4dfc8aee78b49.png",
+                "likes": "0"
+            },
+            {
+                "id": "41835",
+                "url": "http://assets.fanart.tv/fanart/music/24e1b53c-3085-4581-8472-0b0088d2508c/musiclogo/avenged-sevenfold-4ffc75f3a7e54.png",
+                "likes": "0"
+            },
+            {
+                "id": "41836",
+                "url": "http://assets.fanart.tv/fanart/music/24e1b53c-3085-4581-8472-0b0088d2508c/musiclogo/avenged-sevenfold-4ffc75f3a8473.png",
+                "likes": "0"
+            }
+        ],
+        "artistthumb": [
+            {
+                "id": "31109",
+                "url": "http://assets.fanart.tv/fanart/music/24e1b53c-3085-4581-8472-0b0088d2508c/artistthumb/avenged-sevenfold-4fb2b533bc73a.jpg",
+                "likes": "0"
+            },
+            {
+                "id": "64042",
+                "url": "http://assets.fanart.tv/fanart/music/24e1b53c-3085-4581-8472-0b0088d2508c/artistthumb/avenged-sevenfold-50c4d9279d6e9.jpg",
+                "likes": "0"
+            }
+        ],
+        "hdmusiclogo": [
+            {
+                "id": "49644",
+                "url": "http://assets.fanart.tv/fanart/music/24e1b53c-3085-4581-8472-0b0088d2508c/hdmusiclogo/avenged-sevenfold-503fcebece042.png",
+                "likes": "0"
+            },
+            {
+                "id": "49645",
+                "url": "http://assets.fanart.tv/fanart/music/24e1b53c-3085-4581-8472-0b0088d2508c/hdmusiclogo/avenged-sevenfold-503fcebecf17e.png",
+                "likes": "0"
+            }
+        ],
+        "musicbanner": [
+            {
+                "id": "52630",
+                "url": "http://assets.fanart.tv/fanart/music/24e1b53c-3085-4581-8472-0b0088d2508c/musicbanner/avenged-sevenfold-505b2346a559d.jpg",
+                "likes": "0"
+            }
+        ]
+    }
+}

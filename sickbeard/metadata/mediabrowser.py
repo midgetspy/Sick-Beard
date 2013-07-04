@@ -56,6 +56,11 @@ class MediaBrowserMetadata(generic.GenericMetadata):
                  episode_metadata=False,
                  poster=False,
                  fanart=False,
+                 banner=False,
+                 landscape=False,
+                 logo=False,
+                 clearart=False,
+                 character=False,
                  episode_thumbnails=False,
                  season_thumbnails=False):
 
@@ -64,6 +69,11 @@ class MediaBrowserMetadata(generic.GenericMetadata):
                                          episode_metadata,
                                          poster,
                                          fanart,
+                                         banner,
+                                         landscape,
+                                         logo,
+                                         clearart,
+                                         character,
                                          episode_thumbnails,
                                          season_thumbnails)
         
@@ -76,7 +86,13 @@ class MediaBrowserMetadata(generic.GenericMetadata):
         self.eg_show_metadata = "series.xml"
         self.eg_episode_metadata = "Season##\\metadata\\<i>filename</i>.xml"
         self.eg_fanart = "backdrop.jpg"
+        self.eg_extra_fanart = "extrafanart\\<i>extrafanart_*.jpg"
         self.eg_poster = "folder.jpg"
+        self.eg_banner = "banner.jpg"
+        self.eg_landscape = "landscape.jpg"
+        self.eg_logo = "logo.png"
+        self.eg_clearart = "clearart.png"
+        self.eg_character = "character.png"
         self.eg_episode_thumbnails = "Season##\\metadata\\<i>filename</i>.jpg"
         self.eg_season_thumbnails = "Season##\\folder.jpg"
     

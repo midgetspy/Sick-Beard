@@ -823,7 +823,6 @@ class ConfigSearch:
         sickbeard.NZBGET_CATEGORY = nzbget_category
         sickbeard.NZBGET_HOST = nzbget_host
 
-
         sickbeard.save_config()
 
         if len(results) > 0:
@@ -849,7 +848,7 @@ class ConfigPostProcessing:
     def savePostProcessing(self, naming_pattern=None, naming_multi_ep=None,
                     xbmc_data=None, mediabrowser_data=None, synology_data=None, sony_ps3_data=None, wdtv_data=None, tivo_data=None,
                     use_banner=None, keep_processed_dir=None, process_automatically=None, rename_episodes=None,
-                    move_associated_files=None, tv_download_dir=None, naming_custom_abd=None, naming_abd_pattern=None):
+                    move_associated_files=None, tv_download_dir=None, naming_custom_abd=None, naming_abd_pattern=None, fanart_apikey=None):
 
         results = []
 
@@ -912,6 +911,7 @@ class ConfigPostProcessing:
             results.append("You tried saving an invalid air-by-date naming config, not saving your air-by-date settings")
 
         sickbeard.USE_BANNER = use_banner
+        sickbeard.FANART_API_KEY = fanart_apikey
 
         sickbeard.save_config()
 

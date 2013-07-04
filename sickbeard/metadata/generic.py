@@ -17,6 +17,7 @@
 # along with Sick Beard.  If not, see <http://www.gnu.org/licenses/>.
 
 import os.path
+import os
 
 import xml.etree.cElementTree as etree
 
@@ -32,6 +33,8 @@ from sickbeard.exceptions import ex
 
 from lib.tvdb_api import tvdb_api, tvdb_exceptions
 
+from lib.fanart_api.fanart.tv import TvShow 
+import lib.fanart_api.fanart.errors as fanarttv_errors
 
 class GenericMetadata():
     """
@@ -40,6 +43,12 @@ class GenericMetadata():
     
     - show poster
     - show fanart
+    - show extra fanart
+    - show banner
+    - show landscape image
+    - show logo
+    - show clearart
+    - show character art
     - show metadata file
     - episode thumbnail
     - episode metadata file
@@ -51,6 +60,12 @@ class GenericMetadata():
                  episode_metadata=False,
                  poster=False,
                  fanart=False,
+                 extra_fanart=False,
+                 banner=False,
+                 landscape=False,
+                 logo=False,
+                 clearart=False,
+                 character=False,
                  episode_thumbnails=False,
                  season_thumbnails=False):
 
@@ -59,6 +74,11 @@ class GenericMetadata():
         
         self.poster_name = "folder.jpg"
         self.fanart_name = "fanart.jpg"
+        self.banner_name = "banner.jpg"
+        self.landscape_name = "landscape.jpg"
+        self.logo_name = "logo.png"
+        self.clearart_name = "clearart.png"
+        self.character_name = "character.png"
 
         self.generate_show_metadata = True
         self.generate_ep_metadata = True
@@ -69,11 +89,17 @@ class GenericMetadata():
         self.episode_metadata = episode_metadata
         self.poster = poster
         self.fanart = fanart
+        self.extra_fanart = extra_fanart
+        self.banner = banner
+        self.landscape = landscape
+        self.logo = logo
+        self.clearart = clearart
+        self.character = character
         self.episode_thumbnails = episode_thumbnails
         self.season_thumbnails = season_thumbnails
     
     def get_config(self):
-        config_list = [self.show_metadata, self.episode_metadata, self.poster, self.fanart, self.episode_thumbnails, self.season_thumbnails]
+        config_list = [self.show_metadata, self.episode_metadata, self.poster, self.fanart, self.extra_fanart, self.banner, self.landscape, self.logo, self.clearart, self.character, self.episode_thumbnails, self.season_thumbnails]
         return '|'.join([str(int(x)) for x in config_list])
 
     def get_id(self):
@@ -89,8 +115,14 @@ class GenericMetadata():
         self.episode_metadata = config_list[1]
         self.poster = config_list[2]
         self.fanart = config_list[3]
-        self.episode_thumbnails = config_list[4]
-        self.season_thumbnails = config_list[5]
+        self.extra_fanart = config_list[4]
+        self.banner = config_list[5]
+        self.landscape = config_list[6]
+        self.logo = config_list[7]
+        self.clearart = config_list[8]
+        self.character = config_list[9]
+        self.episode_thumbnails = config_list[10]
+        self.season_thumbnails = config_list[11]
     
     def _has_show_metadata(self, show_obj):
         result = ek.ek(os.path.isfile, self.get_show_file_path(show_obj))
@@ -110,6 +142,31 @@ class GenericMetadata():
     def _has_fanart(self, show_obj):
         result = ek.ek(os.path.isfile, self.get_fanart_path(show_obj))
         logger.log("Checking if "+self.get_fanart_path(show_obj)+" exists: "+str(result), logger.DEBUG)
+        return result
+    
+    def _has_banner(self, show_obj):
+        result = ek.ek(os.path.isfile, self.get_banner_path(show_obj))
+        logger.log("Checking if "+self.get_banner_path(show_obj)+" exists: "+str(result), logger.DEBUG)
+        return result
+    
+    def _has_landscape(self, show_obj):
+        result = ek.ek(os.path.isfile, self.get_landscape_path(show_obj))
+        logger.log("Checking if "+self.get_landscape_path(show_obj)+" exists: "+str(result), logger.DEBUG)
+        return result
+    
+    def _has_logo(self, show_obj):
+        result = ek.ek(os.path.isfile, self.get_logo_path(show_obj))
+        logger.log("Checking if "+self.get_logo_path(show_obj)+" exists: "+str(result), logger.DEBUG)
+        return result
+    
+    def _has_clearart(self, show_obj):
+        result = ek.ek(os.path.isfile, self.get_clearart_path(show_obj))
+        logger.log("Checking if "+self.get_clearart_path(show_obj)+" exists: "+str(result), logger.DEBUG)
+        return result
+    
+    def _has_character(self, show_obj):
+        result = ek.ek(os.path.isfile, self.get_character_path(show_obj))
+        logger.log("Checking if "+self.get_character_path(show_obj)+" exists: "+str(result), logger.DEBUG)
         return result
     
     def _has_episode_thumb(self, ep_obj):
@@ -137,6 +194,21 @@ class GenericMetadata():
             
     def get_fanart_path(self, show_obj):
         return ek.ek(os.path.join, show_obj.location, self.fanart_name)
+    
+    def get_banner_path(self, show_obj):
+        return ek.ek(os.path.join, show_obj.location, self.banner_name)
+    
+    def get_landscape_path(self, show_obj):
+        return ek.ek(os.path.join, show_obj.location, self.landscape_name)
+    
+    def get_logo_path(self, show_obj):
+        return ek.ek(os.path.join, show_obj.location, self.logo_name)
+    
+    def get_clearart_path(self, show_obj):
+        return ek.ek(os.path.join, show_obj.location, self.clearart_name)
+    
+    def get_character_path(self, show_obj):
+        return ek.ek(os.path.join, show_obj.location, self.character_name)
             
     def get_episode_thumb_path(self, ep_obj):
         """
@@ -168,6 +240,17 @@ class GenericMetadata():
             season_thumb_file_path = 'season' + str(season).zfill(2)
         
         return ek.ek(os.path.join, show_obj.location, season_thumb_file_path+'.tbn')
+    
+    def get_extra_fanart_path(self, show_obj, image_id):
+        """
+        Returns the full path to the file for a given image_id.
+        
+        show_obj: a TVShow instance for which to generate the path
+        image_id: A unique identification number for the image. A good example 
+                  would be the fanart.tv id.
+        """
+        extra_fanart_file_path = os.path.join('extrafanart', 'extrafanart_'+str(image_id))
+        return ek.ek(os.path.join, show_obj.location, extra_fanart_file_path+'.jpg')
     
     def _show_data(self, show_obj):
         """
@@ -205,6 +288,41 @@ class GenericMetadata():
         if self.fanart and show_obj and not self._has_fanart(show_obj):
             logger.log("Metadata provider "+self.name+" creating fanart for "+show_obj.name, logger.DEBUG)
             return self.save_fanart(show_obj)
+        return False
+    
+    def create_extra_fanart(self, show_obj):
+        if self.extra_fanart and show_obj:
+            logger.log("Metadata provider "+self.name+" creating extra fanart for "+show_obj.name, logger.DEBUG)
+            return self.save_extra_fanart(show_obj)
+    
+    def create_banner(self, show_obj):
+        if self.banner and show_obj and not self._has_banner(show_obj):
+            logger.log("Metadata provider "+self.name+" creating banner for "+show_obj.name, logger.DEBUG)
+            return self.save_banner(show_obj)
+        return False
+    
+    def create_landscape(self, show_obj):
+        if self.landscape and show_obj and not self._has_landscape(show_obj):
+            logger.log("Metadata provider "+self.name+" creating landscape image for "+show_obj.name, logger.DEBUG)
+            return self.save_landscape(show_obj)
+        return False
+    
+    def create_logo(self, show_obj):
+        if self.logo and show_obj and not self._has_logo(show_obj):
+            logger.log("Metadata provider "+self.name+" creating logo for "+show_obj.name, logger.DEBUG)
+            return self.save_logo(show_obj)
+        return False
+    
+    def create_clearart(self, show_obj):
+        if self.clearart and show_obj and not self._has_clearart(show_obj):
+            logger.log("Metadata provider "+self.name+" creating ClearArt for "+show_obj.name, logger.DEBUG)
+            return self.save_clearart(show_obj)
+        return False
+    
+    def create_character(self, show_obj):
+        if self.character and show_obj and not self._has_character(show_obj):
+            logger.log("Metadata provider "+self.name+" creating character art for "+show_obj.name, logger.DEBUG)
+            return self.save_character(show_obj)
         return False
     
     def create_episode_thumb(self, ep_obj):
@@ -400,6 +518,27 @@ class GenericMetadata():
             return False
 
         return self._write_image(fanart_data, fanart_path)
+    
+    
+    def save_extra_fanart(self, show_obj, which=None):
+        """
+        Downloads all backgrounds for the given show on fanart.tv and saves them 
+        by the naming convention outlined in get_fanart_path.
+        
+        show_obj: a TVShow object for which to download extra fanart.
+        """
+        new_images = False
+        fanart_dict_list = self._retrieve_show_image('extra_fanart', show_obj, which, True)
+        
+        if not fanart_dict_list:
+            logger.log(u"No extra fanart images were retrieved, unable to write extra fanart", logger.DEBUG)
+        
+        for fanart in fanart_dict_list:
+            fanart_path = self.get_extra_fanart_path(show_obj, fanart['id'])
+            fanart_data = fanart['data']
+            new_images = self._write_image(fanart_data, fanart_path) or new_images
+        
+        return new_images
 
 
     def save_poster(self, show_obj, which=None):
@@ -425,6 +564,101 @@ class GenericMetadata():
             return False
 
         return self._write_image(poster_data, poster_path)
+    
+    
+    def save_banner(self, show_obj, which=None):
+        """
+        Downloads a banner image and saves it to the filename specified by banner_name
+        inside the show's root folder.
+        
+        show_obj: a TVShow object for which to download banner
+        """
+        
+        # use the default banner name
+        banner_path = self.get_banner_path(show_obj)
+        banner_data = self._retrieve_show_image('banner', show_obj, which)
+        
+        if not banner_data:
+            logger.log(u"No show banner image was retrieved, unable to write banner", logger.DEBUG)
+            return False
+        
+        return self._write_image(banner_data, banner_path)
+    
+    
+    def save_landscape(self, show_obj, which=None):
+        """
+        Downloads a landscape image and saves it to the filename specified by landscape_name
+        inside the show's root folder.
+        
+        show_obj: a TVShow object for which to download landscape
+        """
+        
+        # use the default landscape name
+        landscape_path = self.get_landscape_path(show_obj)
+        landscape_data = self._retrieve_show_image('landscape', show_obj, which)
+        
+        if not landscape_data:
+            logger.log(u"No show landscape image was retrieved, unable to write landscape", logger.DEBUG)
+            return False
+        
+        return self._write_image(landscape_data, landscape_path)
+    
+    
+    def save_logo(self, show_obj, which=None):
+        """
+        Downloads a logo image and saves it to the filename specified by logo_name
+        inside the show's root folder.
+        
+        show_obj: a TVShow object for which to download logo
+        """
+        
+        # use the default logo name
+        logo_path = self.get_logo_path(show_obj)
+        logo_data = self._retrieve_show_image('logo', show_obj, which)
+        
+        if not logo_data:
+            logger.log(u"No show logo image was retrieved, unable to write logo", logger.DEBUG)
+            return False
+        
+        return self._write_image(logo_data, logo_path)
+    
+    
+    def save_clearart(self, show_obj, which=None):
+        """
+        Downloads a clearart image and saves it to the filename specified by clearart_name
+        inside the show's root folder.
+        
+        show_obj: a TVShow object for which to download clearart
+        """
+        
+        # use the default clearart name
+        clearart_path = self.get_clearart_path(show_obj)
+        clearart_data = self._retrieve_show_image('clearart', show_obj, which)
+        
+        if not clearart_data:
+            logger.log(u"No show clearart image was retrieved, unable to write clearart", logger.DEBUG)
+            return False
+        
+        return self._write_image(clearart_data, clearart_path)
+    
+    
+    def save_character(self, show_obj, which=None):
+        """
+        Downloads a character image and saves it to the filename specified by character_name
+        inside the show's root folder.
+        
+        show_obj: a TVShow object for which to download character
+        """
+        
+        # use the default character name
+        character_path = self.get_character_path(show_obj)
+        character_data = self._retrieve_show_image('character', show_obj, which)
+        
+        if not character_data:
+            logger.log(u"No show character image was retrieved, unable to write character", logger.DEBUG)
+            return False
+        
+        return self._write_image(character_data, character_path)
 
 
     def save_season_thumbs(self, show_obj):
@@ -505,40 +739,146 @@ class GenericMetadata():
     
         return True
     
-    def _retrieve_show_image(self, image_type, show_obj, which=None):
+    def _retrieve_show_image(self, image_type, show_obj, which=None, all_images=False):
         """
-        Gets an image URL from theTVDB.com, downloads it and returns the data.
+        Gets an image URL from theTVDB.com or fanart.tv (depending on type), 
+        downloads it, and returns the data.
         
-        image_type: type of image to retrieve (currently supported: poster, fanart)
+        image_type: type of image to retrieve (currently supported: poster, fanart, banner, landscape, logo, clearart, character)
         show_obj: a TVShow object to use when searching for the image
         which: optional, a specific numbered poster to look for
+        all_images: optional, if all_images is true, it will return a list of dictionary objects containing the keys 'id' and 'data' 
+                    representing all_images images of that type that could be found (only for fanart.tv images).
         
         Returns: the binary image data if available, or else None
-        """
-
-        tvdb_lang = show_obj.lang
-
-        try:
-            # There's gotta be a better way of doing this but we don't wanna
-            # change the language value elsewhere
-            ltvdb_api_parms = sickbeard.TVDB_API_PARMS.copy()
-
-            if tvdb_lang and not tvdb_lang == 'en':
-                ltvdb_api_parms['language'] = tvdb_lang
-
-            t = tvdb_api.Tvdb(banners=True, **ltvdb_api_parms)
-            tvdb_show_obj = t[show_obj.tvdbid]
-        except (tvdb_exceptions.tvdb_error, IOError), e:
-            logger.log(u"Unable to look up show on TVDB, not downloading images: "+ex(e), logger.ERROR)
+        """        
+        TVDB_TYPES = ('fanart', 'poster', 'banner')
+        FANARTTV_TYPES = ('landscape', 'logo', 'clearart', 'character', 'extra_fanart')
+        
+        if image_type in TVDB_TYPES:
+            api = 'tvdb'
+        elif image_type in FANARTTV_TYPES:
+            api = 'fanart.tv'
+        else:
+            logger.log(u"Invalid image type "+str(image_type), logger.ERROR)
             return None
+        
+        image_data = None
+        if api is 'tvdb':
+            tvdb_lang = show_obj.lang
     
-        if image_type not in ('fanart', 'poster', 'banner'):
-            logger.log(u"Invalid image type "+str(image_type)+", couldn't find it in the TVDB object", logger.ERROR)
-            return None
+            try:
+                # There's gotta be a better way of doing this but we don't wanna
+                # change the language value elsewhere
+                ltvdb_api_parms = sickbeard.TVDB_API_PARMS.copy()
     
-        image_url = tvdb_show_obj[image_type]
+                if tvdb_lang and not tvdb_lang == 'en':
+                    ltvdb_api_parms['language'] = tvdb_lang
     
-        image_data = metadata_helpers.getShowImage(image_url, which)
+                t = tvdb_api.Tvdb(banners=True, **ltvdb_api_parms)
+                tvdb_show_obj = t[show_obj.tvdbid]
+            except (tvdb_exceptions.tvdb_error, IOError), e:
+                logger.log(u"Unable to look up show on TVDB, not downloading images: "+ex(e), logger.ERROR)
+                return None
+        
+            image_url = tvdb_show_obj[image_type]
+        
+            image_data = metadata_helpers.getShowImage(image_url, which)
+            
+        elif api is 'fanart.tv':
+            try:
+                tvshow = TvShow.get(show_obj.tvdbid)
+            except (fanarttv_errors.FanartError, IOError), e:
+                logger.log(u"Unable to look up show on Fanart.tv, not downloading images: "+ex(e), logger.ERROR)
+                return None
+            
+            image_url = None
+            image_urls = None
+            if image_type is 'landscape':
+                if all_images:
+                    image_urls = [(thumb.id, thumb.url) for thumb in tvshow.thumbs if thumb.language == show_obj.lang]
+                    if len(image_urls) is 0:
+                        logger.log(u"Unable to find a suitable landscape image for "+tvshow.name+" on Fanart.tv.")
+                        return None
+                else:
+                    best = TvShow.get_best_leaf([thumb for thumb in tvshow.thumbs if thumb.language == show_obj.lang])
+                    if best is not None:
+                        image_url = best.url
+                    else:
+                        logger.log(u"Unable to find a suitable landscape image for "+tvshow.name+" on Fanart.tv.")
+                        return None
+                
+            elif image_type is 'logo':
+                if all_images:
+                    image_urls = [(logo.id, logo.url) for logo in tvshow.hdlogos if logo.language == show_obj.lang]
+                    image_urls = [(logo.id, logo.url) for logo in tvshow.logos if logo.language == show_obj.lang]
+                    if len(image_urls) is 0:
+                        logger.log(u"Unable to find a suitable logo image for "+tvshow.name+" on Fanart.tv.")
+                        return None
+                else:
+                    best = TvShow.get_best_leaf([logo for logo in tvshow.hdlogos if logo.language == show_obj.lang])
+                    if best is None:
+                        best = TvShow.get_best_leaf([logo for logo in tvshow.logos if logo.language == show_obj.lang])
+                        if best is None:
+                            logger.log(u"Unable to find a suitable logo for "+tvshow.name+" on Fanart.tv.")
+                            return None
+                    image_url = best.url
+            
+            elif image_type is 'clearart':
+                if all_images:
+                    image_urls = [(art.id, art.url) for art in tvshow.hdarts if art.language == show_obj.lang]
+                    image_urls = [(art.id, art.url) for art in tvshow.arts if art.language == show_obj.lang]
+                    if len(image_urls) is 0:
+                        logger.log(u"Unable to find a suitable ClearArt image for "+tvshow.name+" on Fanart.tv.")
+                        return None
+                else:
+                    best = TvShow.get_best_leaf([art for art in tvshow.hdarts if art.language == show_obj.lang])
+                    if best is None:
+                        best = TvShow.get_best_leaf([art for art in tvshow.arts if art.language == show_obj.lang])
+                        if best is None:
+                            logger.log(u"Unable to find a suitable ClearArt for "+tvshow.name+" on Fanart.tv.")
+                            return None
+                    image_url = best.url
+            
+            elif image_type is 'character':
+                if all_images:
+                    image_urls = [(character.id, character.url) for character in tvshow.characters if character.language == show_obj.lang]
+                    if len(image_urls) is 0:
+                        logger.log(u"Unable to find a suitable character art image for "+tvshow.name+" on Fanart.tv.")
+                        return None
+                else:
+                    best = TvShow.get_best_leaf([character for character in tvshow.characters if character.language == show_obj.lang])
+                    if best is not None:
+                        image_url = best.url
+                    else:
+                        logger.log(u"Unable to find a suitable character art image for "+tvshow.name+" on Fanart.tv.")
+                        return None
+            
+            elif image_type is 'extra_fanart':
+                for background in tvshow.backgrounds:
+                    if all_images:
+                        image_urls = [(background.id, background.url) for background in tvshow.backgrounds if background.language == show_obj.lang]
+                    if len(image_urls) is 0:
+                        logger.log(u"Unable to find any suitable extra fanart images for "+tvshow.name+" on Fanart.tv.")
+                        return None
+                    else:
+                        best = TvShow.get_best_leaf([background for background in tvshow.backgrounds if background.language == show_obj.lang])
+                        if best is not None:
+                            image_url = best.url
+                        else:
+                            logger.log(u"Unable to find any suitable extra fanart images for "+tvshow.name+" on Fanart.tv")
+                            return None
+            
+            # Build image data to return
+            if all_images:
+                image_data = []
+                for tup in image_urls:
+                    image_data.append(dict(id=tup[0], data=metadata_helpers.getShowImage(tup[1])))
+            else:
+                image_data = metadata_helpers.getShowImage(image_url)
+        else:
+            # This should be impossible
+            raise RuntimeError()
 
         return image_data
     

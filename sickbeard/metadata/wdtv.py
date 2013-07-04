@@ -48,6 +48,12 @@ class WDTVMetadata(generic.GenericMetadata):
                  episode_metadata=False,
                  poster=False,
                  fanart=False,
+                 extra_fanart=False,
+                 banner=False,
+                 landscape=False,
+                 logo=False,
+                 clearart=False,
+                 character=False,
                  episode_thumbnails=False,
                  season_thumbnails=False):
 
@@ -56,6 +62,12 @@ class WDTVMetadata(generic.GenericMetadata):
                                          episode_metadata,
                                          poster,
                                          fanart,
+                                         extra_fanart,
+                                         banner,
+                                         landscape,
+                                         logo,
+                                         clearart,
+                                         character,
                                          episode_thumbnails,
                                          season_thumbnails)
         
@@ -66,7 +78,13 @@ class WDTVMetadata(generic.GenericMetadata):
         self.eg_show_metadata = "<i>not supported</i>"
         self.eg_episode_metadata = "Season##\\<i>filename</i>.xml"
         self.eg_fanart = "<i>not supported</i>"
+        self.eg_extra_fanart = "<i>not supported</i>"
         self.eg_poster = "folder.jpg"
+        self.eg_banner = "<i>not supported</i>"
+        self.eg_landscape = "<i>not supported</i>"
+        self.eg_logo = "<i>not supported</i>"
+        self.eg_clearart = "<i>not supported</i>"
+        self.eg_character = "<i>not supported</i>"
         self.eg_episode_thumbnails = "Season##\\<i>filename</i>.metathumb"
         self.eg_season_thumbnails = "Season##\\folder.jpg"
     
