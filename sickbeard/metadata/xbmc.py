@@ -37,6 +37,7 @@ class XBMCMetadata(generic.GenericMetadata):
                  episode_metadata=False,
                  poster=False,
                  fanart=False,
+                 extra_fanart=False,
                  banner=False,
                  landscape=False,
                  logo=False,
@@ -50,6 +51,7 @@ class XBMCMetadata(generic.GenericMetadata):
                                          episode_metadata,
                                          poster,
                                          fanart,
+                                         extra_fanart,
                                          banner,
                                          landscape,
                                          logo,
@@ -63,6 +65,7 @@ class XBMCMetadata(generic.GenericMetadata):
         self.eg_show_metadata = "tvshow.nfo"
         self.eg_episode_metadata = "Season##\\<i>filename</i>.nfo"
         self.eg_fanart = "fanart.jpg"
+        self.eg_extra_fanart = "extrafanart\\<i>extrafanart_*.jpg"
         self.eg_poster = "folder.jpg"
         self.eg_banner = "banner.jpg"
         self.eg_landscape = "landscape.jpg"

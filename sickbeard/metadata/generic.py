@@ -43,6 +43,7 @@ class GenericMetadata():
     
     - show poster
     - show fanart
+    - show extra fanart
     - show banner
     - show landscape image
     - show logo
@@ -59,6 +60,7 @@ class GenericMetadata():
                  episode_metadata=False,
                  poster=False,
                  fanart=False,
+                 extra_fanart=False,
                  banner=False,
                  landscape=False,
                  logo=False,
@@ -87,6 +89,7 @@ class GenericMetadata():
         self.episode_metadata = episode_metadata
         self.poster = poster
         self.fanart = fanart
+        self.extra_fanart = extra_fanart
         self.banner = banner
         self.landscape = landscape
         self.logo = logo
@@ -96,7 +99,7 @@ class GenericMetadata():
         self.season_thumbnails = season_thumbnails
     
     def get_config(self):
-        config_list = [self.show_metadata, self.episode_metadata, self.poster, self.fanart, self.banner, self.landscape, self.logo, self.clearart, self.character, self.episode_thumbnails, self.season_thumbnails]
+        config_list = [self.show_metadata, self.episode_metadata, self.poster, self.fanart, self.extra_fanart, self.banner, self.landscape, self.logo, self.clearart, self.character, self.episode_thumbnails, self.season_thumbnails]
         return '|'.join([str(int(x)) for x in config_list])
 
     def get_id(self):
@@ -112,13 +115,14 @@ class GenericMetadata():
         self.episode_metadata = config_list[1]
         self.poster = config_list[2]
         self.fanart = config_list[3]
-        self.banner = config_list[4]
-        self.landscape = config_list[5]
-        self.logo = config_list[6]
-        self.clearart = config_list[7]
-        self.character = config_list[8]
-        self.episode_thumbnails = config_list[9]
-        self.season_thumbnails = config_list[10]
+        self.extra_fanart = config_list[4]
+        self.banner = config_list[5]
+        self.landscape = config_list[6]
+        self.logo = config_list[7]
+        self.clearart = config_list[8]
+        self.character = config_list[9]
+        self.episode_thumbnails = config_list[10]
+        self.season_thumbnails = config_list[11]
     
     def _has_show_metadata(self, show_obj):
         result = ek.ek(os.path.isfile, self.get_show_file_path(show_obj))
@@ -237,6 +241,17 @@ class GenericMetadata():
         
         return ek.ek(os.path.join, show_obj.location, season_thumb_file_path+'.tbn')
     
+    def get_extra_fanart_path(self, show_obj, image_id):
+        """
+        Returns the full path to the file for a given image_id.
+        
+        show_obj: a TVShow instance for which to generate the path
+        image_id: A unique identification number for the image. A good example 
+                  would be the fanart.tv id.
+        """
+        extra_fanart_file_path = os.path.join('extrafanart', 'extrafanart_'+str(image_id))
+        return ek.ek(os.path.join, show_obj.location, extra_fanart_file_path+'.jpg')
+    
     def _show_data(self, show_obj):
         """
         This should be overridden by the implementing class. It should
@@ -274,6 +289,11 @@ class GenericMetadata():
             logger.log("Metadata provider "+self.name+" creating fanart for "+show_obj.name, logger.DEBUG)
             return self.save_fanart(show_obj)
         return False
+    
+    def create_extra_fanart(self, show_obj):
+        if self.extra_fanart and show_obj:
+            logger.log("Metadata provider "+self.name+" creating extra fanart for "+show_obj.name, logger.DEBUG)
+            return self.save_extra_fanart(show_obj)
     
     def create_banner(self, show_obj):
         if self.banner and show_obj and not self._has_banner(show_obj):
@@ -498,6 +518,27 @@ class GenericMetadata():
             return False
 
         return self._write_image(fanart_data, fanart_path)
+    
+    
+    def save_extra_fanart(self, show_obj, which=None):
+        """
+        Downloads all backgrounds for the given show on fanart.tv and saves them 
+        by the naming convention outlined in get_fanart_path.
+        
+        show_obj: a TVShow object for which to download extra fanart.
+        """
+        new_images = False
+        fanart_dict_list = self._retrieve_show_image('extra_fanart', show_obj, which, True)
+        
+        if not fanart_dict_list:
+            logger.log(u"No extra fanart images were retrieved, unable to write extra fanart", logger.DEBUG)
+        
+        for fanart in fanart_dict_list:
+            fanart_path = self.get_extra_fanart_path(show_obj, fanart['id'])
+            fanart_data = fanart['data']
+            new_images = self._write_image(fanart_data, fanart_path) or new_images
+        
+        return new_images
 
 
     def save_poster(self, show_obj, which=None):
@@ -698,7 +739,7 @@ class GenericMetadata():
     
         return True
     
-    def _retrieve_show_image(self, image_type, show_obj, which=None):
+    def _retrieve_show_image(self, image_type, show_obj, which=None, all_images=False):
         """
         Gets an image URL from theTVDB.com or fanart.tv (depending on type), 
         downloads it, and returns the data.
@@ -706,11 +747,13 @@ class GenericMetadata():
         image_type: type of image to retrieve (currently supported: poster, fanart, banner, landscape, logo, clearart, character)
         show_obj: a TVShow object to use when searching for the image
         which: optional, a specific numbered poster to look for
+        all_images: optional, if all_images is true, it will return a list of dictionary objects containing the keys 'id' and 'data' 
+                    representing all_images images of that type that could be found (only for fanart.tv images).
         
         Returns: the binary image data if available, or else None
         """        
         TVDB_TYPES = ('fanart', 'poster', 'banner')
-        FANARTTV_TYPES = ('landscape, logo, clearart, character')
+        FANARTTV_TYPES = ('landscape', 'logo', 'clearart', 'character', 'extra_fanart')
         
         if image_type in TVDB_TYPES:
             api = 'tvdb'
@@ -750,65 +793,89 @@ class GenericMetadata():
                 return None
             
             image_url = None
+            image_urls = None
             if image_type is 'landscape':
-                highscore = -1
-                for thumb in tvshow.thumbs:
-                    if thumb.likes > highscore and thumb.language == show_obj.lang:
-                        highscore = thumb.likes
-                        image_url = thumb.url
-                        
-                if image_url is None:
-                    logger.log(u"Unable to find a suitable landscape image for "+tvshow.name+" on Fanart.tv.")
-                    return None
+                if all_images:
+                    image_urls = [(thumb.id, thumb.url) for thumb in tvshow.thumbs if thumb.language == show_obj.lang]
+                    if len(image_urls) is 0:
+                        logger.log(u"Unable to find a suitable landscape image for "+tvshow.name+" on Fanart.tv.")
+                        return None
+                else:
+                    best = TvShow.get_best_leaf([thumb for thumb in tvshow.thumbs if thumb.language == show_obj.lang])
+                    if best is not None:
+                        image_url = best.url
+                    else:
+                        logger.log(u"Unable to find a suitable landscape image for "+tvshow.name+" on Fanart.tv.")
+                        return None
                 
             elif image_type is 'logo':
-                highscore = -1
-                for logo in tvshow.hdlogos:
-                    if logo.likes > highscore and logo.language == show_obj.lang:
-                        highscore = logo.likes
-                        image_url = logo.url
-                
-                if image_url is None:
-                    highscore = -1
-                    for logo in tvshow.logos:
-                        if logo.likes > highscore and logo.language == show_obj.lang:
-                            highscore = logo.likes
-                            image_url = logo.url
-                    
-                    if image_url is None:
-                        logger.log(u"Unable to find a suitable logo for "+tvshow.name+" on Fanart.tv.")
+                if all_images:
+                    image_urls = [(logo.id, logo.url) for logo in tvshow.hdlogos if logo.language == show_obj.lang]
+                    image_urls = [(logo.id, logo.url) for logo in tvshow.logos if logo.language == show_obj.lang]
+                    if len(image_urls) is 0:
+                        logger.log(u"Unable to find a suitable logo image for "+tvshow.name+" on Fanart.tv.")
                         return None
+                else:
+                    best = TvShow.get_best_leaf([logo for logo in tvshow.hdlogos if logo.language == show_obj.lang])
+                    if best is None:
+                        best = TvShow.get_best_leaf([logo for logo in tvshow.logos if logo.language == show_obj.lang])
+                        if best is None:
+                            logger.log(u"Unable to find a suitable logo for "+tvshow.name+" on Fanart.tv.")
+                            return None
+                    image_url = best.url
             
             elif image_type is 'clearart':
-                highscore = -1
-                for art in tvshow.hdarts:
-                    if art.likes > highscore and art.language == show_obj.lang:
-                        highscore = art.likes
-                        image_url = art.url
-                
-                if image_url is None:
-                    highscore = -1
-                    for art in tvshow.arts:
-                        if art.likes > highscore and art.language == show_obj.lang:
-                            highscore = art.likes
-                            image_url = art.url
-                    
-                    if image_url is None:
-                        logger.log(u"Unable to find a suitable ClearArt for "+tvshow.name+" on Fanart.tv.")
+                if all_images:
+                    image_urls = [(art.id, art.url) for art in tvshow.hdarts if art.language == show_obj.lang]
+                    image_urls = [(art.id, art.url) for art in tvshow.arts if art.language == show_obj.lang]
+                    if len(image_urls) is 0:
+                        logger.log(u"Unable to find a suitable ClearArt image for "+tvshow.name+" on Fanart.tv.")
                         return None
+                else:
+                    best = TvShow.get_best_leaf([art for art in tvshow.hdarts if art.language == show_obj.lang])
+                    if best is None:
+                        best = TvShow.get_best_leaf([art for art in tvshow.arts if art.language == show_obj.lang])
+                        if best is None:
+                            logger.log(u"Unable to find a suitable ClearArt for "+tvshow.name+" on Fanart.tv.")
+                            return None
+                    image_url = best.url
             
             elif image_type is 'character':
-                highscore = -1
-                for character in tvshow.characters:
-                    if character.likes > highscore and character.language == show_obj.lang:
-                        highscore = character.likes
-                        image_url = character.url
-                        
-                if image_url is None:
-                    logger.log(u"Unable to find a suitable character art for "+tvshow.name+" on Fanart.tv.")
-                    return None
-                
-            image_data = metadata_helpers.getShowImage(image_url)
+                if all_images:
+                    image_urls = [(character.id, character.url) for character in tvshow.characters if character.language == show_obj.lang]
+                    if len(image_urls) is 0:
+                        logger.log(u"Unable to find a suitable character art image for "+tvshow.name+" on Fanart.tv.")
+                        return None
+                else:
+                    best = TvShow.get_best_leaf([character for character in tvshow.characters if character.language == show_obj.lang])
+                    if best is not None:
+                        image_url = best.url
+                    else:
+                        logger.log(u"Unable to find a suitable character art image for "+tvshow.name+" on Fanart.tv.")
+                        return None
+            
+            elif image_type is 'extra_fanart':
+                for background in tvshow.backgrounds:
+                    if all_images:
+                        image_urls = [(background.id, background.url) for background in tvshow.backgrounds if background.language == show_obj.lang]
+                    if len(image_urls) is 0:
+                        logger.log(u"Unable to find any suitable extra fanart images for "+tvshow.name+" on Fanart.tv.")
+                        return None
+                    else:
+                        best = TvShow.get_best_leaf([background for background in tvshow.backgrounds if background.language == show_obj.lang])
+                        if best is not None:
+                            image_url = best.url
+                        else:
+                            logger.log(u"Unable to find any suitable extra fanart images for "+tvshow.name+" on Fanart.tv")
+                            return None
+            
+            # Build image data to return
+            if all_images:
+                image_data = []
+                for tup in image_urls:
+                    image_data.append(dict(id=tup[0], data=metadata_helpers.getShowImage(tup[1])))
+            else:
+                image_data = metadata_helpers.getShowImage(image_url)
         else:
             # This should be impossible
             raise RuntimeError()

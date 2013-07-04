@@ -47,6 +47,7 @@ class TIVOMetadata(generic.GenericMetadata):
                  episode_metadata=False,
                  poster=False,
                  fanart=False,
+                 extra_fanart=False,
                  banner=False,
                  landscape=False,
                  logo=False,
@@ -60,6 +61,7 @@ class TIVOMetadata(generic.GenericMetadata):
                                          episode_metadata,
                                          poster,
                                          fanart,
+                                         extra_fanart,
                                          banner,
                                          landscape,
                                          logo,
@@ -77,6 +79,7 @@ class TIVOMetadata(generic.GenericMetadata):
         self.eg_show_metadata = "<i>not supported</i>"
         self.eg_episode_metadata = "Season##\\.meta\\<i>filename</i>.txt"
         self.eg_fanart = "<i>not supported</i>"
+        self.eg_extra_fanart = "<i>not supported</i>"
         self.eg_poster = "<i>not supported</i>"
         self.eg_banner = "<i>not supported</i>"
         self.eg_landscape = "<i>not supported</i>"

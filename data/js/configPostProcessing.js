@@ -207,6 +207,7 @@ $(document).ready(function () {
             var show_metadata = $("#" + generator_name + "_show_metadata").prop('checked');
             var episode_metadata = $("#" + generator_name + "_episode_metadata").prop('checked');
             var fanart = $("#" + generator_name + "_fanart").prop('checked');
+            var extra_fanart = $("#" + generator_name + "_extra_fanart").prop('checked');
             var poster = $("#" + generator_name + "_poster").prop('checked');
             var banner = $("#" + generator_name + "_banner").prop('checked');
             var landscape = $("#" + generator_name + "_landscape").prop('checked');
@@ -220,6 +221,7 @@ $(document).ready(function () {
             config_arr.push(episode_metadata ? '1' : '0');
             config_arr.push(poster ? '1' : '0');
             config_arr.push(fanart ? '1' : '0');
+            config_arr.push(extra_fanart ? '1' : '0');
             config_arr.push(banner ? '1' : '0');
             config_arr.push(landscape ? '1' : '0');
             config_arr.push(logo ? '1' : '0');
@@ -240,6 +242,7 @@ $(document).ready(function () {
             $("#" + generator_name + "_eg_episode_metadata").attr('class', episode_metadata ? 'enabled' : 'disabled');
             $("#" + generator_name + "_eg_poster").attr('class', poster ? 'enabled' : 'disabled');
             $("#" + generator_name + "_eg_fanart").attr('class', fanart ? 'enabled' : 'disabled');
+            $("#" + generator_name + "_eg_extra_fanart").attr('class', extra_fanart ? 'enabled' : 'disabled');
             $("#" + generator_name + "_eg_banner").attr('class', banner ? 'enabled' : 'disabled');
             $("#" + generator_name + "_eg_landscape").attr('class', landscape ? 'enabled' : 'disabled');
             $("#" + generator_name + "_eg_clearart").attr('class', clearart ? 'enabled' : 'disabled');
