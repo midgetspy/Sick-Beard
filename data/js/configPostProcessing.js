@@ -208,6 +208,11 @@ $(document).ready(function () {
             var episode_metadata = $("#" + generator_name + "_episode_metadata").prop('checked');
             var fanart = $("#" + generator_name + "_fanart").prop('checked');
             var poster = $("#" + generator_name + "_poster").prop('checked');
+            var banner = $("#" + generator_name + "_banner").prop('checked');
+            var landscape = $("#" + generator_name + "_landscape").prop('checked');
+            var logo = $("#" + generator_name + "_logo").prop('checked');
+            var clearart = $("#" + generator_name + "_clearart").prop('checked');
+            var character = $("#" + generator_name + "_character").prop('checked');
             var episode_thumbnails = $("#" + generator_name + "_episode_thumbnails").prop('checked');
             var season_thumbnails = $("#" + generator_name + "_season_thumbnails").prop('checked');
 
@@ -215,6 +220,11 @@ $(document).ready(function () {
             config_arr.push(episode_metadata ? '1' : '0');
             config_arr.push(poster ? '1' : '0');
             config_arr.push(fanart ? '1' : '0');
+            config_arr.push(banner ? '1' : '0');
+            config_arr.push(landscape ? '1' : '0');
+            config_arr.push(logo ? '1' : '0');
+            config_arr.push(clearart ? '1' : '0');
+            config_arr.push(character ? '1' : '0');
             config_arr.push(episode_thumbnails ? '1' : '0');
             config_arr.push(season_thumbnails ? '1' : '0');
 
@@ -230,6 +240,11 @@ $(document).ready(function () {
             $("#" + generator_name + "_eg_episode_metadata").attr('class', episode_metadata ? 'enabled' : 'disabled');
             $("#" + generator_name + "_eg_poster").attr('class', poster ? 'enabled' : 'disabled');
             $("#" + generator_name + "_eg_fanart").attr('class', fanart ? 'enabled' : 'disabled');
+            $("#" + generator_name + "_eg_banner").attr('class', banner ? 'enabled' : 'disabled');
+            $("#" + generator_name + "_eg_landscape").attr('class', landscape ? 'enabled' : 'disabled');
+            $("#" + generator_name + "_eg_clearart").attr('class', clearart ? 'enabled' : 'disabled');
+            $("#" + generator_name + "_eg_logo").attr('class', logo ? 'enabled' : 'disabled');
+            $("#" + generator_name + "_eg_character").attr('class', character ? 'enabled' : 'disabled');
             $("#" + generator_name + "_eg_episode_thumbnails").attr('class', episode_thumbnails ? 'enabled' : 'disabled');
             $("#" + generator_name + "_eg_season_thumbnails").attr('class', season_thumbnails ? 'enabled' : 'disabled');
             $("#" + generator_name + "_data").val(config_arr.join('|'))

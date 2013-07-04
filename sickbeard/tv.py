@@ -396,15 +396,20 @@ class TVShow(object):
 
     def getImages(self, fanart=None, poster=None):
 
-        poster_result = fanart_result = season_thumb_result = False
+        poster_result = fanart_result = banner_result = landscape_result = logo_result = clearart_result = character_result = season_thumb_result = False
 
         for cur_provider in sickbeard.metadata_provider_dict.values():
             logger.log("Running season folders for "+cur_provider.name, logger.DEBUG)
             poster_result = cur_provider.create_poster(self) or poster_result
             fanart_result = cur_provider.create_fanart(self) or fanart_result
+            banner_result = cur_provider.create_banner(self) or banner_result
+            landscape_result = cur_provider.create_landscape(self) or landscape_result
+            logo_result = cur_provider.create_logo(self) or logo_result
+            clearart_result = cur_provider.create_clearart(self) or clearart_result
+            character_result = cur_provider.create_character(self) or character_result
             season_thumb_result = cur_provider.create_season_thumbs(self) or season_thumb_result
 
-        return poster_result or fanart_result or season_thumb_result
+        return poster_result or fanart_result or banner_result or landscape_result or logo_result or clearart_result or character_result or season_thumb_result
 
     def loadLatestFromTVRage(self):
 
