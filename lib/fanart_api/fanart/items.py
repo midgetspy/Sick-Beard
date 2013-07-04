@@ -48,6 +48,15 @@ class ResourceItem(Immutable):
             ws=cls.WS
         ).response()
         return cls.from_dict(map)
+    
+    @classmethod
+    def get_best_leaf(cls, leaves):
+        highscore = -1
+        best = None
+        for leaf in leaves:
+            if leaf.likes > highscore:
+                best = leaf
+        return best
 
 
 class CollectableItem(Immutable):
