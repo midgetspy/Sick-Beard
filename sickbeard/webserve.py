@@ -1072,7 +1072,7 @@ class ConfigProviders:
                       torrentleech_key=None,
                       btn_api_key=None,
                       kerews_url=None, kerews_apikey=None, kerews_catIDs=None,
-                      provider_order=None):
+                      provider_order=None, nzbto_user=None, nzbto_pass=None, nzbto_proxy=None):
 
         results = []
 
@@ -1144,6 +1144,8 @@ class ConfigProviders:
                 sickbeard.TORRENTLEECH = curEnabled
             elif curProvider == 'btn':
                 sickbeard.BTN = curEnabled
+            elif curProvider == 'nzbto':
+                sickbeard.NZBTO == curEnabled
             elif curProvider in newznabProviderDict:
                 newznabProviderDict[curProvider].enabled = int(curEnabled)
             else:
@@ -1162,6 +1164,10 @@ class ConfigProviders:
         sickbeard.KEREWS_URL = kerews_url
         sickbeard.KEREWS_APIKEY = kerews_apikey
         sickbeard.KEREWS_CATIDS = kerews_catIDs
+
+        sickbeard.NZBTO_USER = nzbto_user.strip()
+        sickbeard.NZBTO_PASS = nzbto_pass.strip()
+        sickbeard.NZBTO_PROXY = nzbto_proxy.strip()
 
         sickbeard.OMGWTFNZBS_UID = omgwtfnzbs_uid.strip()
         sickbeard.OMGWTFNZBS_KEY = omgwtfnzbs_key.strip()

@@ -76,7 +76,7 @@ def sendNZB(nzb):
         params['mode'] = 'addfile'
         multiPartParams = {"nzbfile": (nzb.name + ".nzb", nzb.extraInfo[0])}
 
-    if nzb.resultType == "nzb" and nzb.provider.getID() in ['nzbindex','nzbclub']:
+    if nzb.resultType == "nzb" and nzb.provider.getID() in ['nzbindex','nzbclub','nzbto']:
         logger.log(u"Pretty name for SAB queue: " + nzb.name)
         params['nzbname'] = nzb.name
 

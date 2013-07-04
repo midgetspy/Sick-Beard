@@ -86,7 +86,7 @@
                                 <span class="component-title jumbo">Configure Provider:</span>
                                 <span class="component-desc">
                                     #set $provider_config_list = []
-                                    #for $cur_provider in ("nzbs_r_us", "kerews", "omgwtfnzbs", "tvtorrents", "torrentleech", "btn"):
+                                    #for $cur_provider in ("nzbs_r_us", "kerews", "omgwtfnzbs", "tvtorrents", "torrentleech", "btn", "nzbto"):
 
                                         #set $cur_provider_obj = $sickbeard.providers.getProviderClass($cur_provider)
                                         #if $cur_provider_obj.providerType == $GenericProvider.NZB and not $sickbeard.USE_NZBS:
@@ -188,6 +188,27 @@
                             </label>
                         </div>
                     </div><!-- /omgwtfnzbsDiv //-->
+
+                    <div class="providerDiv" id="nzbtoDiv">
+                        <div class="field-pair">
+                            <label class="clearfix">
+                                <span class="component-title">nzbto Username</span>
+                                <input class="component-desc" type="text" name="nzbto_user" value="$sickbeard.NZBTO_USER" size="10" />
+                            </label>
+                        </div>
+                        <div class="field-pair">
+                            <label class="clearfix">
+                                <span class="component-title">nzbto Password</span>
+                                <input class="component-desc" type="text" name="nzbto_pass" value="$sickbeard.NZBTO_PASS" size="40" />
+                            </label>
+                        </div>
+                        <div class="field-pair">
+                            <label class="clearfix">
+                                <span class="component-title">nzbto Proxy</span>
+                                <input class="component-desc" type="text" name="nzbto_proxy" value="$sickbeard.NZBTO_PROXY" size="40" />
+                            </label>
+                        </div>
+                    </div><!-- /nzbtoDiv //-->
 
                     <div class="providerDiv" id="tvtorrentsDiv">
                         <div class="field-pair">
