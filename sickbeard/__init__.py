@@ -102,6 +102,8 @@ WEB_PASSWORD = None
 WEB_HOST = None
 WEB_IPV6 = None
 
+ANON_REDIRECT = None
+
 USE_API = False
 API_KEY = None
 
@@ -148,9 +150,7 @@ DOWNLOAD_PROPERS = None
 
 SEARCH_FREQUENCY = None
 BACKLOG_SEARCH_FREQUENCY = 21
-
 MIN_SEARCH_FREQUENCY = 10
-
 DEFAULT_SEARCH_FREQUENCY = 60
 
 EZRSS = False
@@ -165,7 +165,6 @@ BTN = False
 BTN_API_KEY = None
 
 TORRENT_DIR = None
-
 ADD_SHOWS_WO_DIR = None
 CREATE_MISSING_SHOW_DIRS = None
 RENAME_EPISODES = False
@@ -355,7 +354,7 @@ def initialize(consoleLogging=True):
                 USE_BANNER, USE_LISTVIEW, METADATA_XBMC, METADATA_MEDIABROWSER, METADATA_PS3, METADATA_SYNOLOGY, metadata_provider_dict, \
                 NEWZBIN, NEWZBIN_USERNAME, NEWZBIN_PASSWORD, GIT_PATH, MOVE_ASSOCIATED_FILES, \
                 COMING_EPS_LAYOUT, COMING_EPS_SORT, COMING_EPS_DISPLAY_PAUSED, METADATA_WDTV, METADATA_TIVO, IGNORE_WORDS, CREATE_MISSING_SHOW_DIRS, \
-                ADD_SHOWS_WO_DIR
+                ADD_SHOWS_WO_DIR, ANON_REDIRECT
 
         if __INITIALIZED__:
             return False
@@ -382,6 +381,11 @@ def initialize(consoleLogging=True):
         WEB_USERNAME = check_setting_str(CFG, 'General', 'web_username', '')
         WEB_PASSWORD = check_setting_str(CFG, 'General', 'web_password', '')
         LAUNCH_BROWSER = bool(check_setting_int(CFG, 'General', 'launch_browser', 1))
+
+        ANON_REDIRECT = check_setting_str(CFG, 'General', 'anon_redirect', 'http://derefer.me/?')
+        # attempt to help prevent users from breaking links by using a bad url
+        if not ANON_REDIRECT.endswith('?'):
+            ANON_REDIRECT = ''
 
         USE_API = bool(check_setting_int(CFG, 'General', 'use_api', 0))
         API_KEY = check_setting_str(CFG, 'General', 'api_key', '')
@@ -983,11 +987,13 @@ def save_config():
     new_config['General']['web_root'] = WEB_ROOT
     new_config['General']['web_username'] = WEB_USERNAME
     new_config['General']['web_password'] = WEB_PASSWORD
+    new_config['General']['anon_redirect'] = ANON_REDIRECT
     new_config['General']['use_api'] = int(USE_API)
     new_config['General']['api_key'] = API_KEY
     new_config['General']['enable_https'] = int(ENABLE_HTTPS)
     new_config['General']['https_cert'] = HTTPS_CERT
     new_config['General']['https_key'] = HTTPS_KEY
+
     new_config['General']['use_nzbs'] = int(USE_NZBS)
     new_config['General']['use_torrents'] = int(USE_TORRENTS)
     new_config['General']['nzb_method'] = NZB_METHOD
