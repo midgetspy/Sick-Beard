@@ -4,7 +4,9 @@
 #import os.path, os
 #import datetime
 #set global $title=$show.name
-#set global $header = '<a href="http://thetvdb.com/?tab=series&amp;id=%d" target="_new">%s</a>' % ($show.tvdbid, $show.name)
+#set global $tvdb_url = 'http://thetvdb.com/?tab=series&amp;id=%d' % ($show.tvdbid)
+
+#set global $header = '<a href="%s" title="%s" rel="noreferrer" onclick="window.open(\'%s\', \'_blank\'); return false;">%s</a>' % ($tvdb_url, $tvdb_url, $sickbeard.ANON_REDIRECT + $tvdb_url, $show.name)
 
 #set global $topmenu="manageShows"#
 #include $os.path.join($sickbeard.PROG_DIR, "data/interfaces/default/inc_top.tmpl")
