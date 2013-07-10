@@ -192,8 +192,8 @@ class NNZBtoCache(tvcache.TVCache):
 
         tvcache.TVCache.__init__(self, provider)
 
-        # only poll NZBIndex every 25 minutes max
-        self.minTime = 25
+        # only poll nzb.to every 40 minutes max
+        self.minTime = 40
 
         self.session = requests.Session()
         self.session.get("http://nzb.to")
@@ -230,8 +230,15 @@ class NNZBtoCache(tvcache.TVCache):
         logger.log(u"NZBto cache update URL: "+ url, logger.DEBUG)
 
         data = self.provider._doSearch("cache")
+        if not data:
+            return
 
         #logger.log(u"{0}".format(data))
+        self.setLastUpdate()
+
+        # now that we've got the latest releases lets delete the old cache
+        logger.log(u"Clearing nzb.to cache and updating with new information")
+        self._clearCache()
 
         for item in data:
             self._parseItem(item)
