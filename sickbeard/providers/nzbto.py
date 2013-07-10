@@ -41,7 +41,7 @@ class NZBto(generic.NZBProvider):
 
         self.supportsBacklog = False
 
-        #self.cache = NNZBtoCache(self)
+        self.cache = NNZBtoCache(self)
 
         self.url = 'http://nzb.to/'
         self.searchString = ''
@@ -81,12 +81,20 @@ class NZBto(generic.NZBProvider):
 
     def _get_title_and_url(self, item):
         # (title, url) = super(NZBClubProvider, self)._get_title_and_url(item)
-        # title = item.tr.find("td", attrs={"class": "title"}).a.text
+        tmp_title = item.tr.find("td", attrs={"class": "title"}).a.text
         dl = item.find("a", attrs={"title": "NZB erstellen"})
-        tmp_url = "http://nzb.to/" + dl["href"];
-        x = self.session.get(tmp_url, stream=True)
-        filename = x.headers["Content-Disposition"].split(";")[1].replace(" filename=", "").replace('"', '')
-        title = filename.replace("TV_", "").replace(".nzb", "")
+        tmp_url = "http://nzb.to/inc/ajax/popupdetails.php?n=" + dl["href"].split("?nid=")[1]
+        x = self.session.get(tmp_url)
+        tro = BeautifulSoup(x.text)
+        pw = tro.find('span', attrs={"style": "color:#ff0000"}).strong.next.next
+        if pw:
+            title = "%s{{%s}}" % (tmp_title, pw.strip())
+        else:
+            title = tmp_title
+        #tmp_url = "http://nzb.to/" + dl["href"];
+        #x = self.session.get(tmp_url, stream=True)
+        #filename = x.headers["Content-Disposition"].split(";")[1].replace(" filename=", "").replace('"', '')
+        #title = filename.replace("TV_", "").replace(".nzb", "")
         params = {"nid": dl["href"].split("?nid=")[1], "user": sickbeard.NZBTO_USER, "pass": sickbeard.NZBTO_PASS, "rel": title}
         url = self.proxy + urllib.urlencode(params)
         # url = url.replace("_"," ").replace("/nzb view/","/nzb_get/") + ".nzb"
@@ -117,17 +125,25 @@ class NZBto(generic.NZBProvider):
         time.sleep(10)
 
         #searchResult = self.getURL(searchURL,[("User-Agent","Mozilla/5.0 (Macintosh; Intel Mac OS X 10.7; rv:5.0) Gecko/20100101 Firefox/5.0"),("Accept","text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8"),("Accept-Language","de-de,de;q=0.8,en-us;q=0.5,en;q=0.3"),("Accept-Charset","ISO-8859-1,utf-8;q=0.7,*;q=0.7"),("Connection","keep-alive"),("Cache-Control","max-age=0")])
-        searchResult = self.session.post("http://nzb.to/?p=list", data=params)
+        if curString == "cache":
+            url = "http://nzb.to/?p=list&cat=13&sa_Video-Genre=3221225407&sort=post_date&order=desc&amount=100"
+            logger.log(url)
+            searchResult = self.session.get(url)
+            #logger.log(u"{0}".format(searchResult))
+        else:
+            searchResult = self.session.post("http://nzb.to/?p=list", data=params)
 
         if not searchResult:
+            logger.log("no results...")
             return []
 
         try:
             parsedXML = BeautifulSoup(searchResult.text)
+            #logger.log(u"HTML: {0}".format(searchResult.text))
             content = parsedXML.find("table", attrs={"class": "dataTabular"})
             table_regex = re.compile(r'tbody-.*')
             items = parsedXML.findAll("tbody", attrs={"id": table_regex})
-            #logger.log(u"ITEMS: " + items)
+            #logger.log(u"ITEMS: {0}".format(items))
         except Exception, e:
             logger.log(u"Error trying to load NZBto RSS feed: "+ex(e), logger.ERROR)
             return []
@@ -178,10 +194,28 @@ class NNZBtoCache(tvcache.TVCache):
         # only poll NZBIndex every 25 minutes max
         self.minTime = 25
 
+        self.session = requests.Session()
+        self.session.get("http://nzb.to")
+        self.session.headers["Referer"] = "http://nzb.to/login"
+        self.session.headers["User-Agent"] = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.7; rv:20.0) Gecko/20100101 Firefox/20.0"
 
-    def _getRSSData(self):
+    def _parseItem(self, item):
+        title, url = self.provider._get_title_and_url(item)
+        logger.log(u"Adding item from RSS to cache: " + title, logger.DEBUG)
+        self._addCacheEntry(title, url)
+
+
+    def updateCache(self):
         # get all records since the last timestamp
-        url = "http://nzb.to/nzbfeed.aspx?"
+        #
+        if not sickbeard.NZBTO_USER or not sickbeard.NZBTO_PASS:
+            raise exceptions.AuthException("nzbto authentication details are empty, check your config")
+        else:
+            #if user and pass are ok, log us in
+            self.provider.proxy = sickbeard.NZBTO_PROXY
+            self.provider.session.post("http://nzb.to/login.php", data={"action": "login", "username": sickbeard.NZBTO_USER, "password": sickbeard.NZBTO_PASS, "bind_ip": "on", "Submit": ".%3AEinloggen%3A.", "ret_url": ""})
+
+        url = "http://nzb.to/?p=list&cat=13&sa_Video-Genre=3221225407&sort=post_date&order=desc&amount=100"
 
         urlArgs = {'q': '',
                    "rpp": 50, #max 50
@@ -190,13 +224,16 @@ class NNZBtoCache(tvcache.TVCache):
                   "sp":1 #nopass
                   }
 
-        url += urllib.urlencode(urlArgs)
+        #url += urllib.urlencode(urlArgs)
 
-        logger.log(u"NZBClub cache update URL: "+ url, logger.DEBUG)
+        logger.log(u"NZBto cache update URL: "+ url, logger.DEBUG)
 
-        data = self.provider.getURL(url)
+        data = self.provider._doSearch("cache")
 
-        return data
+        #logger.log(u"{0}".format(data))
+
+        for item in data:
+            self._parseItem(item)
 
 
 provider = NZBto()
