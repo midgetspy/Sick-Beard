@@ -142,7 +142,7 @@ class NZBto(generic.NZBProvider):
         try:
             parsedXML = BeautifulSoup(searchResult.text)
             logger.log(u"RESPONSE HEADER: {0}".format(searchResult.headers))
-            logger.log(u"Current URL: {0}".format(searchResult.url)
+            logger.log(u"Current URL: {0}".format(searchResult.url))
             content = parsedXML.find("table", attrs={"class": "dataTabular"})
             table_regex = re.compile(r'tbody-.*')
             items = parsedXML.findAll("tbody", attrs={"id": table_regex})
