@@ -87,10 +87,11 @@ class NZBto(generic.NZBProvider):
         x = self.session.get(tmp_url)
         tro = BeautifulSoup(x.text)
         pw = tro.find('span', attrs={"style": "color:#ff0000"}).strong.next.next
-        if pw:
-            title = "%s{{%s}}" % (tmp_title, pw.strip())
-        else:
+        if not pw or pw.strip() == "-":
             title = tmp_title
+        else:
+            title = "%s{{%s}}" % (tmp_title, pw.strip())
+
         #tmp_url = "http://nzb.to/" + dl["href"];
         #x = self.session.get(tmp_url, stream=True)
         #filename = x.headers["Content-Disposition"].split(";")[1].replace(" filename=", "").replace('"', '')
