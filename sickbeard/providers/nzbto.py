@@ -62,6 +62,7 @@ class NZBto(generic.NZBProvider):
             #if user and pass are ok, log us in
             self.proxy = sickbeard.NZBTO_PROXY
             self.session.post("http://nzb.to/login.php", data={"action": "login", "username": sickbeard.NZBTO_USER, "password": sickbeard.NZBTO_PASS, "bind_ip": "on", "Submit": ".%3AEinloggen%3A.", "ret_url": ""})
+            logger.log( 'sending login to nzb.to returned Cookie: {0}'.format(self.session.cookies)], logger.DEBUG)
 
     def _get_season_search_strings(self, show, season):
         # sceneSearchStrings = set(show_name_helpers.makeSceneSeasonSearchString(show, season, "NZBIndex"))
@@ -118,7 +119,7 @@ class NZBto(generic.NZBProvider):
                   "amount": 50, #min 100MB
                   }
 
-        searchURL = "http://nzb.to/?p=list" + urllib.urlencode(params)
+        searchURL = "http://nzb.to/?p=list&" + urllib.urlencode(params)
 
         logger.log(u"Search string: " + searchURL)
 
@@ -135,16 +136,17 @@ class NZBto(generic.NZBProvider):
             searchResult = self.session.post("http://nzb.to/?p=list", data=params)
 
         if not searchResult:
-            logger.log("no results...")
+            logger.log("Search gave no results...")
             return []
 
         try:
             parsedXML = BeautifulSoup(searchResult.text)
-            #logger.log(u"HTML: {0}".format(searchResult.text))
+            logger.log(u"RESPONSE HEADER: {0}".format(searchResult.headers))
+            logger.log(u"Current URL: {0}".format(searchResult.url)
             content = parsedXML.find("table", attrs={"class": "dataTabular"})
             table_regex = re.compile(r'tbody-.*')
             items = parsedXML.findAll("tbody", attrs={"id": table_regex})
-            #logger.log(u"ITEMS: {0}".format(items))
+            logger.log(u"FIRST ITEM: {0}".format(items[0]))
         except Exception, e:
             logger.log(u"Error trying to load NZBto RSS feed: "+ex(e), logger.ERROR)
             return []
