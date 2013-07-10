@@ -62,7 +62,7 @@ class NZBto(generic.NZBProvider):
             #if user and pass are ok, log us in
             self.proxy = sickbeard.NZBTO_PROXY
             self.session.post("http://nzb.to/login.php", data={"action": "login", "username": sickbeard.NZBTO_USER, "password": sickbeard.NZBTO_PASS, "bind_ip": "on", "Submit": ".%3AEinloggen%3A.", "ret_url": ""})
-            logger.log( 'sending login to nzb.to returned Cookie: {0}'.format(self.session.cookies)], logger.DEBUG)
+            logger.log( 'sending login to nzb.to returned Cookie: {0}'.format(self.session.cookies), logger.DEBUG)
 
     def _get_season_search_strings(self, show, season):
         # sceneSearchStrings = set(show_name_helpers.makeSceneSeasonSearchString(show, season, "NZBIndex"))
