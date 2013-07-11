@@ -23,12 +23,13 @@ import datetime
 
 from xml.dom.minidom import parseString
 
-import sickbeard
 import generic
+import sickbeard
 
 from sickbeard import classes, logger, show_name_helpers, helpers
 from sickbeard import tvcache
 from sickbeard.exceptions import ex
+
 
 import requests
 from bs4 import BeautifulSoup
@@ -51,8 +52,12 @@ class NZBto(generic.NZBProvider):
         self.session.headers["Referer"] = "http://nzb.to/login"
         self.session.headers["User-Agent"] = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.7; rv:20.0) Gecko/20100101 Firefox/20.0"
 
+        #self.proxy = sickbeard.NZBTO_PROXY
+        #
+        #return sickbeard.NZBTO
 
     def isEnabled(self):
+        self.proxy = sickbeard.NZBTO_PROXY
         return sickbeard.NZBTO
 
     def _checkAuth(self):
@@ -61,8 +66,6 @@ class NZBto(generic.NZBProvider):
         else:
             #if user and pass are ok, log us in
             self.proxy = sickbeard.NZBTO_PROXY
-            self.session.post("http://nzb.to/login.php", data={"action": "login", "username": sickbeard.NZBTO_USER, "password": sickbeard.NZBTO_PASS, "bind_ip": "on", "Submit": ".%3AEinloggen%3A.", "ret_url": ""})
-            logger.log( 'sending login to nzb.to returned Cookie: {0}'.format(self.session.cookies), logger.DEBUG)
 
     def _get_season_search_strings(self, show, season):
         # sceneSearchStrings = set(show_name_helpers.makeSceneSeasonSearchString(show, season, "NZBIndex"))
@@ -106,6 +109,8 @@ class NZBto(generic.NZBProvider):
         return (title, url)
 
     def _doSearch(self, curString, quotes=False, show=None):
+        self.session.post("http://nzb.to/login.php", data={"action": "login", "username": sickbeard.NZBTO_USER, "password": sickbeard.NZBTO_PASS, "bind_ip": "on", "Submit": ".%3AEinloggen%3A.", "ret_url": ""})
+        logger.log( 'sending login to nzb.to returned Cookie: {0}'.format(self.session.cookies.get_dict()), logger.DEBUG)
 
         term =  re.sub('[\.\-\:]', ' ', curString).encode('utf-8')
         self.searchString = term
@@ -126,6 +131,12 @@ class NZBto(generic.NZBProvider):
         logger.log(u"Sleeping 10 seconds to respect NZBto's rules")
         time.sleep(10)
 
+        logger.log(u"CURRENT COOKIE: {0}".format(self.session.cookies.get_dict()))
+
+        cookie_test = re.compile(r"[0-9]*-\d{1}-.*")
+        if re.match(cookie_test, self.session.cookies.get("NZB_SID") ):
+            logger.log("ERROR... COOKIE SEEMS NOT TO BE VALID", logger.ERROR)
+
         #searchResult = self.getURL(searchURL,[("User-Agent","Mozilla/5.0 (Macintosh; Intel Mac OS X 10.7; rv:5.0) Gecko/20100101 Firefox/5.0"),("Accept","text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8"),("Accept-Language","de-de,de;q=0.8,en-us;q=0.5,en;q=0.3"),("Accept-Charset","ISO-8859-1,utf-8;q=0.7,*;q=0.7"),("Connection","keep-alive"),("Cache-Control","max-age=0")])
         if curString == "cache":
             url = "http://nzb.to/?p=list&cat=13&sa_Video-Genre=3221225407&sort=post_date&order=desc&amount=100"
@@ -141,18 +152,19 @@ class NZBto(generic.NZBProvider):
 
         try:
             parsedXML = BeautifulSoup(searchResult.text)
-            logger.log(u"RESPONSE HEADER: {0}".format(searchResult.headers))
-            logger.log(u"Current URL: {0}".format(searchResult.url))
+            logger.log(u"RESPONSE COOKIE: {0}".format(self.session.cookies.get_dict()))
+            logger.log(u"CURRENT NZBto URL: {0}".format(searchResult.url))
             content = parsedXML.find("table", attrs={"class": "dataTabular"})
             table_regex = re.compile(r'tbody-.*')
             items = parsedXML.findAll("tbody", attrs={"id": table_regex})
-            logger.log(u"FIRST ITEM: {0}".format(items[0]))
+            #logger.log(u"FIRST ITEM: {0}".format(items[0]))
         except Exception, e:
             logger.log(u"Error trying to load NZBto RSS feed: "+ex(e), logger.ERROR)
             return []
 
         results = []
 
+        logger.log(u"PARSEING RESULTS FROM NZBTO")
         for curItem in items:
             (title, url) = self._get_title_and_url(curItem)
 
@@ -209,6 +221,8 @@ class NNZBtoCache(tvcache.TVCache):
 
 
     def updateCache(self):
+        if not self.shouldUpdate():
+            return
         # get all records since the last timestamp
         #
         if not sickbeard.NZBTO_USER or not sickbeard.NZBTO_PASS:
