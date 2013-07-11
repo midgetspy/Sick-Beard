@@ -152,12 +152,11 @@ class NZBto(generic.NZBProvider):
 
         try:
             parsedXML = BeautifulSoup(searchResult.text)
+            logger.log(u"{0}".format(parsedXML.find("div", attrs={"class": "user"}).text), logger.DEBUG)
             logger.log(u"RESPONSE COOKIE: {0}".format(self.session.cookies.get_dict()))
             logger.log(u"CURRENT NZBto URL: {0}".format(searchResult.url))
-            content = parsedXML.find("table", attrs={"class": "dataTabular"})
             table_regex = re.compile(r'tbody-.*')
             items = parsedXML.findAll("tbody", attrs={"id": table_regex})
-            #logger.log(u"FIRST ITEM: {0}".format(items[0]))
         except Exception, e:
             logger.log(u"Error trying to load NZBto RSS feed: "+ex(e), logger.ERROR)
             return []
