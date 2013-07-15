@@ -67,7 +67,7 @@ class NewznabProvider(generic.NZBProvider):
         self.default = False
 
     def configStr(self):
-        return '{0}|{1}|{2}|{3}|{4}'.format(self.name, self.url, self.key, self.catIDs, self.enabled)#self.name + '|' + self.url + '|' + self.key + '|' + self.catIDs + '|' + str(int(self.enabled))
+        return '{0}|{1}|{2}|{3}|{4}'.format(self.name, self.url, self.key, self.catIDs, int(self.enabled))#self.name + '|' + self.url + '|' + self.key + '|' + self.catIDs + '|' + str(int(self.enabled))
 
     def imageName(self):
         if ek.ek(os.path.isfile, ek.ek(os.path.join, sickbeard.PROG_DIR, 'data', 'images', 'providers', self.getID() + '.png')):
