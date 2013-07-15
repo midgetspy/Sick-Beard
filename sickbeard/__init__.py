@@ -31,7 +31,7 @@ from threading import Lock
 # apparently py2exe won't build these unless they're imported somewhere
 from sickbeard import providers, metadata
 from providers import ezrss, tvtorrents, btn, nzbsrus, newznab, womble, nzbx, omgwtfnzbs
-from providers import kickass, torrentz, dtt, torrentleech, thepiratebay, publichd, torrentday, sceneaccess, iptorrents
+from providers import kickass, torrentz, dtt, torrentleech, thepiratebay, publichd, torrentday, sceneaccess, iptorrents, bithdtv
 from sickbeard.config import CheckSection, check_setting_int, check_setting_str, ConfigMigrator
 
 from sickbeard import searchCurrent, searchBacklog, showUpdater, versionChecker, properFinder, autoPostProcesser
@@ -194,6 +194,10 @@ IPTORRENTS_USERNAME = None
 IPTORRENTS_PASSWORD = None
 IPTORRENTS_UID = None
 IPTORRENTS_RSSHASH = None
+
+BITHDTV = False
+BITHDTV_USERNAME = None
+BITHDTV_PASSWORD = None
 
 PUBLICHD = False
 
@@ -380,8 +384,9 @@ def initialize(consoleLogging=True):
                 KICKASS, TORRENTZ, TORRENTZ_VERIFIED, \
                 TORRENTLEECH, TORRENTLEECH_USERNAME, TORRENTLEECH_PASSWORD, \
                 TORRENTDAY, TORRENTDAY_USERNAME, TORRENTDAY_PASSWORD, TORRENTDAY_RSSHASH,TORRENTDAY_UID,\
-                SCENEACCESS,SCENEACCESS_USERNAME, SCENEACCESS_PASSWORD, SCENEACCESS_RSSHASH, \
-                IPTORRENTS,IPTORRENTS_USERNAME, IPTORRENTS_PASSWORD, IPTORRENTS_UID, IPTORRENTS_RSSHASH, \
+                SCENEACCESS, SCENEACCESS_USERNAME, SCENEACCESS_PASSWORD, SCENEACCESS_RSSHASH, \
+                IPTORRENTS, IPTORRENTS_USERNAME, IPTORRENTS_PASSWORD, IPTORRENTS_UID, IPTORRENTS_RSSHASH, \
+                BITHDTV, BITHDTV_USERNAME, BITHDTV_PASSWORD, \
                 PUBLICHD, \
                 NZBS, NZBS_UID, NZBS_HASH, EZRSS, DTT, DTT_NORAR, DTT_SINGLE, THEPIRATEBAY, THEPIRATEBAY_TRUSTED, THEPIRATEBAY_PROXY, THEPIRATEBAY_PROXY_URL, TVTORRENTS, TVTORRENTS_DIGEST, TVTORRENTS_HASH, BTN, BTN_API_KEY, TORRENT_DIR, USENET_RETENTION, SOCKET_TIMEOUT, \
                 SEARCH_FREQUENCY, DEFAULT_SEARCH_FREQUENCY, BACKLOG_SEARCH_FREQUENCY, \
@@ -558,6 +563,10 @@ def initialize(consoleLogging=True):
         IPTORRENTS_PASSWORD = check_setting_str(CFG, 'IPTORRENTS', 'iptorrents_password', '')
         IPTORRENTS_UID = check_setting_str(CFG, 'IPTORRENTS', 'iptorrents_uid', '')
         IPTORRENTS_RSSHASH = check_setting_str(CFG, 'IPTORRENTS', 'iptorrents_rsshash', '')
+        
+        BITHDTV = bool(check_setting_int(CFG, 'BITHDTV', 'bithdtv', 0))
+        BITHDTV_USERNAME = check_setting_str(CFG, 'BITHDTV', 'bithdtv_username', '')
+        BITHDTV_PASSWORD = check_setting_str(CFG, 'BITHDTV', 'bithdtv_password', '')
         
         PUBLICHD = bool(check_setting_int(CFG, 'PUBLICHD', 'publichd', 0))    
 
@@ -1171,6 +1180,11 @@ def save_config():
     new_config['IPTORRENTS']['iptorrents_password'] = IPTORRENTS_PASSWORD
     new_config['IPTORRENTS']['iptorrents_uid'] = IPTORRENTS_UID
     new_config['IPTORRENTS']['iptorrents_rsshash'] = IPTORRENTS_RSSHASH
+    
+    new_config['BITHDTV'] = {}
+    new_config['BITHDTV']['bithdtv'] = int(BITHDTV)
+    new_config['BITHDTV']['bithdtv_username'] = BITHDTV_USERNAME
+    new_config['BITHDTV']['bithdtv_password'] = BITHDTV_PASSWORD
 
     new_config['PUBLICHD'] = {}
     new_config['PUBLICHD']['publichd'] = int(PUBLICHD)

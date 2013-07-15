@@ -88,7 +88,7 @@
                                 <span class="component-title jumbo">Configure Provider:</span>
                                 <span class="component-desc">
                                     #set $provider_config_list = []
-                                    #for $cur_provider in ("nzbs_r_us", "tvtorrents", "btn", "thepiratebay","dailytvtorrents", "torrentz", "torrentleech", "torrentday","sceneaccess","iptorrents"):
+                                    #for $cur_provider in ("nzbs_r_us", "tvtorrents", "btn", "thepiratebay","dailytvtorrents", "torrentz", "torrentleech", "torrentday", "sceneaccess", "iptorrents", "bithdtv"):
                                         #set $cur_provider_obj = $sickbeard.providers.getProviderClass($cur_provider)
                                         #if $cur_provider_obj.providerType == $GenericProvider.NZB and not $sickbeard.USE_NZBS:
                                             #continue
@@ -323,6 +323,21 @@
                             <span class="component-title"><i>Note: options with (*) are optional, this is generated from </i><a href="http://www.iptorrents.com/getrss.php" target="_blank">http://www.iptorrents.com/getrss.php</a></span>
                         </div>
                     </div><!-- /iptorrentsDiv //-->
+                    
+                    <div class="providerDiv" id="bithdtvDiv">
+                        <div class="field-pair">
+                            <label class="clearfix">
+                                <span class="component-title">Username:</span>
+                                <input class="component-desc" type="text" name="bithdtv_username" value="$sickbeard.BITHDTV_USERNAME" size="40" />
+                            </label>
+                        </div>
+                        <div class="field-pair">
+                            <label class="clearfix">
+                                <span class="component-title">Password:</span>
+                                <input class="component-desc" type="password" name="bithdtv_password" value="$sickbeard.BITHDTV_PASSWORD" size="40" />
+                            </label>
+                        </div>
+                    </div><!-- /bithdtvDiv //-->
 <!-- end div for editing providers -->
 
 
