@@ -45,7 +45,7 @@ class OmgwtfnzbsProvider(generic.NZBProvider):
         return sickbeard.OMGWTFNZBS
 
     def _checkAuth(self):
-        if not sickbeard.OMGWTFNZBS_UID or not sickbeard.OMGWTFNZBS_KEY:
+        if not sickbeard.OMGWTFNZBS_USERNAME or not sickbeard.OMGWTFNZBS_APIKEY:
             raise exceptions.AuthException("omgwtfnzbs authentication details are empty, check your config")
 
     def _get_season_search_strings(self, show, season):
@@ -58,8 +58,10 @@ class OmgwtfnzbsProvider(generic.NZBProvider):
         return (item['release'], item['getnzb'])
 
     def _doSearch(self, search, show=None, retention=0):
-        params = {'user': sickbeard.OMGWTFNZBS_UID,
-                  'api': sickbeard.OMGWTFNZBS_KEY,
+        self._checkAuth()
+
+        params = {'user': sickbeard.OMGWTFNZBS_USERNAME,
+                  'api': sickbeard.OMGWTFNZBS_APIKEY,
                   'eng': 1,
                   'catid': '19,20', # SD,HD
                   'retention': sickbeard.USENET_RETENTION,
@@ -99,8 +101,13 @@ class OmgwtfnzbsProvider(generic.NZBProvider):
         for term in search_terms:
             for item in self._doSearch(term, retention=4):
                 if 'usenetage' in item:
-                    name, url = self._get_title_and_url(item)
-                    results.append(classes.Proper(name, url, datetime.fromtimestamp(item['usenetage'])))
+                    title, url = self._get_title_and_url(item)
+                    try:
+                        result_date = datetime.fromtimestamp(item['usenetage'])
+                    except TypeError:
+                        result_date = None
+                    if result_date:
+                        results.append(classes.Proper(title, url, result_date))
         return results
 
 
@@ -111,8 +118,8 @@ class OmgwtfnzbsCache(tvcache.TVCache):
         self.minTime = 20
 
     def _getRSSData(self):
-        params = {'user': sickbeard.OMGWTFNZBS_UID,
-                  'api': sickbeard.OMGWTFNZBS_KEY,
+        params = {'user': sickbeard.OMGWTFNZBS_USERNAME,
+                  'api': sickbeard.OMGWTFNZBS_APIKEY,
                   'eng': 1,
                   'catid': '19,20'} # SD,HD
 

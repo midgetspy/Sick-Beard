@@ -166,7 +166,7 @@ class NewznabProvider(generic.NZBProvider):
             elif code == '102':
                 raise exceptions.AuthException("Your account isn't allowed to use the API on " + self.name + ", contact the administrator")
             else:
-                logger.log(u"Unknown error given from " + self.name + ": "+parsedXML.documentElement.getAttribute('description'), logger.ERROR)
+                logger.log(u"Unknown error given from " + self.name + ": " + parsedXML.documentElement.getAttribute('description'), logger.ERROR)
                 return False
 
         return True
@@ -281,6 +281,9 @@ class NewznabCache(tvcache.TVCache):
         self.minTime = 15
 
     def _getRSSData(self):
+        # hack to bypass checking for apikey for SBI
+        if self.provider.getID() != 'sick_beard_index' and not self.provider.key:
+            raise exceptions.AuthException(self.provider.name + " apikey details are empty, check your config")
 
         params = {"t": "tvsearch",
                   "cat": '5040,5030'}
