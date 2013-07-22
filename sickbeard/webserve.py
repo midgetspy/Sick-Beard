@@ -1020,6 +1020,7 @@ class ConfigProviders:
                       torrentday_username = None, torrentday_password = None, torrentday_rsshash = None, torrentday_uid = None,
                       sceneaccess_username = None, sceneaccess_password = None, sceneaccess_rsshash = None,
                       iptorrents_username = None, iptorrents_password = None,iptorrents_uid = None, iptorrents_rsshash = None,
+                      bithdtv_username = None, bithdtv_password = None,
                       torrentz_verified = None,
                       provider_order=None):
 
@@ -1103,6 +1104,8 @@ class ConfigProviders:
                 sickbeard.SCENEACCESS = curEnabled
             elif curProvider == 'iptorrents':
                 sickbeard.IPTORRENTS = curEnabled
+            elif curProvider == 'bithdtv':
+                sickbeard.BITHDTV = curEnabled
             elif curProvider == 'publichd':
                 sickbeard.PUBLICHD = curEnabled
             elif curProvider == 'btn':
@@ -1161,6 +1164,9 @@ class ConfigProviders:
         sickbeard.IPTORRENTS_PASSWORD = iptorrents_password.strip()
         sickbeard.IPTORRENTS_UID = iptorrents_uid.strip()
         sickbeard.IPTORRENTS_RSSHASH = iptorrents_rsshash.strip()
+        
+        sickbeard.BITHDTV_USERNAME = bithdtv_username.strip()
+        sickbeard.BITHDTV_PASSWORD = bithdtv_password.strip()
         
         if torrentz_verified == "on":
             torrentz_verified = 1
