@@ -99,7 +99,7 @@ class TraktChecker():
             return
         else:
             helpers.chmodAsParent(showPath)
-        sickbeard.showQueueScheduler.action.addShow(int(tvdbid), showPath, status, int(sickbeard.QUALITY_DEFAULT), int(sickbeard.FLATTEN_FOLDERS_DEFAULT), "en")
+        sickbeard.showQueueScheduler.action.addShow(int(tvdbid), showPath, status, int(sickbeard.QUALITY_DEFAULT), int(sickbeard.FLATTEN_FOLDERS_DEFAULT))
 
     def setEpisodeToWanted(self, show, s, e):
         """
