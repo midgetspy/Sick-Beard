@@ -54,7 +54,7 @@ CFG = None
 CONFIG_FILE = None
 
 # this is the version of the config we EXPECT to find
-CONFIG_VERSION = 1
+CONFIG_VERSION = 3
 
 PROG_DIR = '.'
 MY_FULLNAME = None
@@ -975,6 +975,7 @@ def save_config():
     new_config.filename = CONFIG_FILE
 
     new_config['General'] = {}
+    new_config['General']['config_version'] = CONFIG_VERSION
     new_config['General']['log_dir'] = LOG_DIR
     new_config['General']['web_port'] = WEB_PORT
     new_config['General']['web_host'] = WEB_HOST
@@ -1203,8 +1204,6 @@ def save_config():
     new_config['GUI']['coming_eps_layout'] = COMING_EPS_LAYOUT
     new_config['GUI']['coming_eps_display_paused'] = int(COMING_EPS_DISPLAY_PAUSED)
     new_config['GUI']['coming_eps_sort'] = COMING_EPS_SORT
-
-    new_config['General']['config_version'] = CONFIG_VERSION
 
     new_config.write()
 
