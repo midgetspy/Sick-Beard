@@ -28,7 +28,7 @@ import sickbeard
 
 from sickbeard import classes, logger, show_name_helpers, helpers
 from sickbeard import tvcache
-from sickbeard.exceptions import ex
+from sickbeard import exceptions
 
 
 import requests
