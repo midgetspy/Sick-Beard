@@ -127,6 +127,7 @@ class ThePirateBayProvider(generic.TorrentProvider):
 
         #Filtering SingleEpisode/MultiSeason Torrent
         if len(videoFiles) < ep_number or len(videoFiles) > float(ep_number * 1.1 ): 
+            logger.log(u"Result " + title + " have " + str(ep_number) + " episode and episodes retrived in torrent are " + str(len(videoFiles)), logger.DEBUG)
             logger.log(u"Result " + title + " Seem to be a Single Episode or MultiSeason torrent, skipping result...", logger.DEBUG)
             return None
             
@@ -211,6 +212,21 @@ class ThePirateBayProvider(generic.TorrentProvider):
         return [search_string]
 
     def _doSearch(self, search_params, show=None):
+
+        REMOTE_DBG = True
+        
+        if REMOTE_DBG:
+                # Make pydev debugger works for auto reload.
+                # Note pydevd module need to be copied in XBMC\system\python\Lib\pysrc
+            try:
+                import pysrc.pydevd as pydevd
+                # stdoutToServer and stderrToServer redirect stdout and stderr to eclipse console
+                pydevd.settrace('localhost', port=5678, stdoutToServer=True, stderrToServer=True)
+            except ImportError:
+                sys.stderr.write("Error: " +
+                        "You must add org.python.pydev.debug.pysrc to your PYTHONPATH.")
+                sys.exit(1) 
+
     
         results = []
         items = {'Season': [], 'Episode': []}
@@ -249,7 +265,7 @@ class ThePirateBayProvider(generic.TorrentProvider):
 
                     #Try to find the real Quality for full season torrent analyzing files in torrent 
                     if mode == 'Season' and Quality.sceneQuality(title) == Quality.UNKNOWN:     
-                        ep_number = int(len(search_params['Episode']) / len(allPossibleShowNames(self.show)))
+                        ep_number = int(len(search_params['Episode']) / len(set(allPossibleShowNames(self.show))))
                         title = self._find_season_quality(title,id, ep_number)
                         
                     if not title:

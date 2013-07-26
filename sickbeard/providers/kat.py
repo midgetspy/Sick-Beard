@@ -250,7 +250,7 @@ class KATProvider(generic.TorrentProvider):
                             continue
 
                         if mode == 'Season' and Quality.sceneQuality(title) == Quality.UNKNOWN:
-                            ep_number = int(len(search_params['Episode']) / len(allPossibleShowNames(self.show)))
+                            ep_number = int(len(search_params['Episode']) / len(set(allPossibleShowNames(self.show))))
                             title = self._find_season_quality(title, link, ep_number)
 
                         if not title:
