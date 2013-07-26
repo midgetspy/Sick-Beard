@@ -1002,6 +1002,11 @@ class ConfigSearch:
         sickbeard.IGNORE_WORDS = ignore_words
         
         sickbeard.DOWNLOAD_PROPERS = download_propers
+        if sickbeard.DOWNLOAD_PROPERS:
+            sickbeard.properFinderScheduler.silent = False 
+        else:
+            sickbeard.properFinderScheduler.silent = True
+            
         sickbeard.ALLOW_HIGH_PRIORITY = allow_high_priority
 
         sickbeard.SAB_USERNAME = sab_username
@@ -1113,6 +1118,11 @@ class ConfigPostProcessing:
             naming_strip_year = 0
 
         sickbeard.PROCESS_AUTOMATICALLY = process_automatically
+        if sickbeard.PROCESS_AUTOMATICALLY:
+            sickbeard.autoPostProcesserScheduler.silent = False
+        else:
+            sickbeard.autoPostProcesserScheduler.silent = True
+        
         sickbeard.KEEP_PROCESSED_DIR = keep_processed_dir
         sickbeard.PROCESS_METHOD = process_method
         sickbeard.RENAME_EPISODES = rename_episodes

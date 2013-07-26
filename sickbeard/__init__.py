@@ -941,12 +941,16 @@ def initialize(consoleLogging=True):
                                                      cycleTime=properFinderInstance.updateInterval,
                                                      threadName="FINDPROPERS",
                                                      runImmediately=False)
+        if not DOWNLOAD_PROPERS:
+            properFinderScheduler.silent = True
 
         autoPostProcesserScheduler = scheduler.Scheduler(autoPostProcesser.PostProcesser(),
                                                      cycleTime=datetime.timedelta(minutes=10),
                                                      threadName="POSTPROCESSER",
                                                      runImmediately=True)
-
+        if not PROCESS_AUTOMATICALLY:
+            autoPostProcesserScheduler.silent = True
+            
         traktWatchListCheckerSchedular = scheduler.Scheduler(traktWatchListChecker.TraktChecker(),
                                                      cycleTime=datetime.timedelta(minutes=10),
                                                      threadName="TRAKTWATCHLIST",
