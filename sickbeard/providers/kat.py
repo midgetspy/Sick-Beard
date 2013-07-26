@@ -144,7 +144,7 @@ class KATProvider(generic.TorrentProvider):
             return title
             
         except Exception, e:
-            logger.log(u"Failed parsing " + self.name + (" Exceptions: "  + str(e) if e else ''), logger.ERROR)
+            logger.log(u"Failed parsing " + self.name + " Traceback: "  + traceback.format_exc(), logger.ERROR)
                 
 
     def _get_season_search_strings(self, show, season=None):
@@ -250,7 +250,7 @@ class KATProvider(generic.TorrentProvider):
                             continue
 
                         if mode == 'Season' and Quality.sceneQuality(title) == Quality.UNKNOWN:
-                            ep_number = int(len(search_params['Episode']) / len(allPossibleShowNames(self.show)))
+                            ep_number = int(len(search_params['Episode']) / len(set(allPossibleShowNames(self.show))))
                             title = self._find_season_quality(title, link, ep_number)
 
                         if not title:
