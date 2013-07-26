@@ -296,7 +296,7 @@ class PostProcessor(object):
                 helpers.chmodAsParent(new_file_path)
             except (IOError, OSError), e:
                 self._log("Unable to move file "+cur_file_path+" to "+new_file_path+": " + str(e), logger.ERROR)
-                raise str(e)
+                raise e
                 
         self._combined_file_operation(file_path, new_path, new_base_name, associated_files, action=_int_move, subtitles=subtitles)
                 
