@@ -111,6 +111,10 @@ ENABLE_HTTPS = False
 HTTPS_CERT = None
 HTTPS_KEY = None
 
+IGNORE_HIDDEN = True
+IGNORED_NAMES = None
+DEFAULT_IGNORED_NAMES = ['.AppleDouble', '.AppleDesktop', 'Temporary Items', 'Network Trash Folder', '.DS_Store']
+
 LAUNCH_BROWSER = None
 CACHE_DIR = None
 ACTUAL_CACHE_DIR = None
@@ -354,7 +358,7 @@ def initialize(consoleLogging=True):
                 USE_BANNER, USE_LISTVIEW, METADATA_XBMC, METADATA_MEDIABROWSER, METADATA_PS3, METADATA_SYNOLOGY, metadata_provider_dict, \
                 NEWZBIN, NEWZBIN_USERNAME, NEWZBIN_PASSWORD, GIT_PATH, MOVE_ASSOCIATED_FILES, \
                 COMING_EPS_LAYOUT, COMING_EPS_SORT, COMING_EPS_DISPLAY_PAUSED, METADATA_WDTV, METADATA_TIVO, IGNORE_WORDS, CREATE_MISSING_SHOW_DIRS, \
-                ADD_SHOWS_WO_DIR, ANON_REDIRECT
+                ADD_SHOWS_WO_DIR, ANON_REDIRECT, IGNORE_HIDDEN, IGNORED_NAMES
 
         if __INITIALIZED__:
             return False
@@ -386,6 +390,9 @@ def initialize(consoleLogging=True):
         # attempt to help prevent users from breaking links by using a bad url
         if not ANON_REDIRECT.endswith('?'):
             ANON_REDIRECT = ''
+
+        IGNORE_HIDDEN = bool(check_setting_int(CFG, 'General', 'ignore_hidden', 1))
+        IGNORED_NAMES = check_setting_str(CFG, 'General', 'ignored_names', ",".join(DEFAULT_IGNORED_NAMES)).split(',')
 
         USE_API = bool(check_setting_int(CFG, 'General', 'use_api', 0))
         API_KEY = check_setting_str(CFG, 'General', 'api_key', '')
@@ -1013,6 +1020,8 @@ def save_config():
     new_config['General']['naming_custom_abd'] = int(NAMING_CUSTOM_ABD)
     new_config['General']['naming_abd_pattern'] = NAMING_ABD_PATTERN
     new_config['General']['naming_multi_ep'] = int(NAMING_MULTI_EP)
+    new_config['General']['ignore_hidden'] = int(IGNORE_HIDDEN)
+    new_config['General']['ignored_names'] = ','.join(IGNORED_NAMES)
     new_config['General']['launch_browser'] = int(LAUNCH_BROWSER)
 
     new_config['General']['use_banner'] = int(USE_BANNER)

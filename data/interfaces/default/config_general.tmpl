@@ -22,6 +22,38 @@
 
             <div id="config-components">
 
+                <div id="core-component-group0" class="component-group clearfix">
+
+                    <div class="component-group-desc">
+                        <h3>Filesystem</h3>
+                        <p>Filesystem options.</p>
+                        <p><b>Some options may require a manual restart to take effect.</b></p>
+                    </div>
+
+                    <fieldset class="component-group-list">
+                        <div class="field-pair">
+                            <input type="checkbox" name="ignore_hidden" id="ignore_hidden" #if $sickbeard.IGNORE_HIDDEN then "checked=\"checked\"" else ""#/>
+                            <label class="clearfix" for="ignore_hidden">
+                                <span class="component-title">Ignore Hidden Files and Folders</span>
+                                <span class="component-desc">Should Sick Beard ignore hidden files and folders?</span>
+                            </label>
+                        </div>
+                        
+                        <div class="field-pair">
+                            <label class="clearfix" for="ignored_names">
+                                <span class="component-title">Ignored Names</span>
+                                <input type="text" name="ignored_names" id="ignored_names" value="<%=",".join(sickbeard.IGNORED_NAMES)%>" size="60" />
+                            </label>
+                            <label class="nocheck clearfix">
+                                <span class="component-title">&nbsp;</span>
+                                <span class="component-desc">Names of files and folders Sick Beard should ignore in your filesystem.</span>
+                            </label>
+                        </div>
+                        
+                        <input type="submit" class="btn config_submitter" value="Save Changes" />
+                    </fieldset>
+                </div><!-- /component-group0 //-->
+
                 <div id="core-component-group1" class="component-group clearfix">
 
                     <div class="component-group-desc">
