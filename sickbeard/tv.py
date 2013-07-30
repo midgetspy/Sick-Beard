@@ -463,16 +463,22 @@ class TVShow(object):
 
         for epNumbers in xemJson['data']:
             tvdb = epNumbers['tvdb']
-            scene = epNumbers['scene']
-            if not tvdb['season'] in epList or not tvdb['episode'] in epList[tvdb['season']]:
-                logger.log(str(self.tvdbid) + ": NOT adding scene number. tvdb: " + str(tvdb) + "| scene: " + str(scene) + " we dont have a ep with this (tvdb) sxxexx", logger.WARNING)
 
-            logger.log(str(self.tvdbid) + ": adding scene number. tvdb: " + str(tvdb) + "| scene: " + str(scene), logger.DEBUG)
-            curEp = self.getEpisode(tvdb['season'], tvdb['episode'])
-            curEp.scene_season = scene['season']
-            curEp.scene_episode = scene['episode']
-            curEp.scene_absolute_number = scene['absolute']
-            curEp.saveToDB()
+            if 'scene' in epNumbers:
+                scene = epNumbers['scene']
+                if not tvdb['season'] in epList or not tvdb['episode'] in epList[tvdb['season']]:
+                    logger.log(str(self.tvdbid) + ": NOT adding scene number. tvdb: " + str(tvdb) + "| scene: " + str(scene) + " we dont have a ep with this (tvdb) sxxexx", logger.WARNING)
+                    continue
+
+                logger.log(str(self.tvdbid) + ": adding scene number. tvdb: " + str(tvdb) + "| scene: " + str(scene), logger.DEBUG)
+                curEp = self.getEpisode(tvdb['season'], tvdb['episode'])
+                curEp.scene_season = scene['season']
+                curEp.scene_episode = scene['episode']
+                curEp.scene_absolute_number = scene['absolute']
+                curEp.saveToDB()
+            else:
+                logger.log(u"XEM didn't return scene data for season " + str(tvdb['season']) + ", episode " + str(tvdb['episode']), logger.WARNING)
+
         return True
 
     def setTVRID(self, force=False):
