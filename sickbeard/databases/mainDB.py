@@ -25,7 +25,7 @@ from sickbeard.providers.generic import GenericProvider
 from sickbeard import encodingKludge as ek
 from sickbeard.name_parser.parser import NameParser, InvalidNameException
 
-MAX_DB_VERSION = 13
+MAX_DB_VERSION = 15
 
 class MainSanityCheck(db.DBSanityCheck):
     def check(self):
@@ -581,7 +581,7 @@ class Add1080pAndRawHDQualities(RenameSeasonFolders):
     """
 
     def test(self):
-        return self.checkDBVersion() >= 12
+        return self.checkDBVersion() >= 14
 
     def _update_status(self, old_status):
         (status, quality) = common.Quality.splitCompositeStatus(old_status)
