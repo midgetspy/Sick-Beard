@@ -183,7 +183,7 @@
                                 <span class="component-desc">To bypass Country Blocking Mechanism</span>
                             </label>
                         </div>
-
+                        
                         <div class="field-pair" id="content_thepiratebay_proxy">
                             <label class="nocheck clearfix">
                                 <span class="component-title">Proxy URL:</span>
@@ -196,7 +196,22 @@
                                	</span>
                             </label>
                         </div>
-
+                        
+                        <div class="field-pair">
+                            <input type="checkbox" class="enabler" name="thepiratebay_url_override_enable" id="thepiratebay_url_override_enable" #if $sickbeard.THEPIRATEBAY_URL_OVERRIDE then "checked=\"checked\"" else ""#/>
+                            <label class="clearfix" for="thepiratebay_url_override_enable">
+                                <span class="component-title">Access TPB via Alternative URL</span>
+                                <span class="component-desc">To bypass Country Blocking Mechanism,list of examples of alternative sites at <a href="http://proxybay.info" target="_blank">http://proxybay.info</a></span>
+                            </label>
+                        </div>
+                        
+                        <div class="field-pair" id="content_thepiratebay_url_override_enable">
+                            <label class="nocheck clearfix">
+                                <span class="component-title">URL Override:</span>
+                                <span class="component-desc"><input type="text" name="thepiratebay_url_override" value="$sickbeard.THEPIRATEBAY_URL_OVERRIDE" size="40" /></span>
+                            </label>
+                        </div>
+                        
                         <div class="field-pair">
                             <input type="checkbox" name="thepiratebay_trusted" id="thepiratebay_trusted" #if $sickbeard.THEPIRATEBAY_TRUSTED then "checked=\"checked\"" else ""#/>
                             <label class="clearfix" for="thepiratebay_trusted">
@@ -204,8 +219,8 @@
                                 <span class="component-desc">Download torrent only from trusted uploaders?</span>
                             </label>
                         </div>
-		     </div><!-- /thepiratebayDiv //-->
-
+		    </div><!-- /thepiratebayDiv //-->
+                     
                     <div class="providerDiv" id="btnDiv">
                         <div class="field-pair">
                             <label class="clearfix">

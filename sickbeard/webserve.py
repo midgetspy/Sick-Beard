@@ -1014,7 +1014,7 @@ class ConfigProviders:
                       torrentleech_key=None,
                       btn_api_key=None,
                       newzbin_username=None, newzbin_password=None,
-                      thepiratebay_trusted=None, thepiratebay_proxy=None, thepiratebay_proxy_url=None,
+                      thepiratebay_trusted = None, thepiratebay_proxy = None, thepiratebay_proxy_url = None,thepiratebay_url_override = None, thepiratebay_url_override_enable = None,
                       dtt_norar = None, dtt_single = None, 
                       torrentleech_username = None, torrentleech_password = None,
                       torrentday_username = None, torrentday_password = None, torrentday_rsshash = None, torrentday_uid = None,
@@ -1132,8 +1132,18 @@ class ConfigProviders:
             thepiratebay_proxy = 0
             sickbeard.THEPIRATEBAY_PROXY_URL = ""
             
-        sickbeard.THEPIRATEBAY_PROXY = thepiratebay_proxy    
+        sickbeard.THEPIRATEBAY_PROXY = thepiratebay_proxy
         
+        if thepiratebay_url_override_enable == "on":
+            thepiratebay_url_override_enable = 1
+            thepiratebay_url_override = thepiratebay_url_override.strip()
+            if thepiratebay_url_override:
+                thepiratebay_url_override = thepiratebay_url_override if thepiratebay_url_override.endswith('/') else thepiratebay_url_override + '/'
+            sickbeard.THEPIRATEBAY_URL_OVERRIDE = thepiratebay_url_override
+        else:
+            thepiratebay_url_override_enable = 0
+            sickbeard.THEPIRATEBAY_URL_OVERRIDE = ""
+            
         if dtt_norar == "on":
             dtt_norar = 1
         else:
