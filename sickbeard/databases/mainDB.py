@@ -25,8 +25,7 @@ from sickbeard.providers.generic import GenericProvider
 from sickbeard import encodingKludge as ek
 from sickbeard.name_parser.parser import NameParser, InvalidNameException
 
-MAX_DB_VERSION = 13
-
+MAX_DB_VERSION = 15
 
 class MainSanityCheck(db.DBSanityCheck):
     def check(self):
@@ -421,44 +420,7 @@ class FixAirByDateSetting(SetNzbTorrentSettings):
 
         self.incDBVersion()
 
-class AddAbsoluteEpisodeTVShow(FixAirByDateSetting):
-    def test(self):
-        return self.hasColumn("tv_shows", "anime")
-
-    def execute(self):
-        self.addColumn("tv_shows", "anime", "NUMERIC", "0")
-        
-class AddAbsoluteEpisodeTVEpisode(AddAbsoluteEpisodeTVShow):
-    def test(self):
-        return self.hasColumn("tv_episodes", "absolute_number")
-
-    def execute(self):
-        self.addColumn("tv_episodes", "absolute_number", "NUMERIC", "NULL")
-class Blacklist(AddAbsoluteEpisodeTVShow):
-
-    def test(self):
-        return self.hasTable("blacklist")
-        #and self.hasTable("whitelist")
-
-    def execute(self):
-
-        query = "CREATE TABLE blacklist (show_id INTEGER, range TEXT, keyword TEXT);"
-        self.connection.action(query)
-        #self.incDBVersion()
-
-class Whitelist(Blacklist):
-
-    def test(self):
-        return self.hasTable("whitelist")
-        #and self.hasTable("whitelist")
-
-    def execute(self):
-
-        query = "CREATE TABLE whitelist (show_id INTEGER, range TEXT, keyword TEXT);"
-        self.connection.action(query)
-        #self.incDBVersion()
-
-class AddSceneNumbers(Whitelist):
+class AddSceneNumbers(FixAirByDateSetting):
 
     def test(self):
         return self.checkDBVersion() >= 10
@@ -619,7 +581,7 @@ class Add1080pAndRawHDQualities(RenameSeasonFolders):
     """
 
     def test(self):
-        return self.checkDBVersion() >= 12
+        return self.checkDBVersion() >= 14
 
     def _update_status(self, old_status):
         (status, quality) = common.Quality.splitCompositeStatus(old_status)
@@ -725,3 +687,35 @@ class Add1080pAndRawHDQualities(RenameSeasonFolders):
         # cleanup and reduce db if any previous data was removed
         logger.log(u"Performing a vacuum on the database.", logger.DEBUG)
         self.connection.action("VACUUM")
+
+class AddAbsoluteEpisodeTVShow(Add1080pAndRawHDQualities):
+    def test(self):
+        return self.hasColumn("tv_shows", "anime")
+
+    def execute(self):
+        self.addColumn("tv_shows", "anime", "NUMERIC", "0")
+        
+class AddAbsoluteEpisodeTVEpisode(AddAbsoluteEpisodeTVShow):
+    def test(self):
+        return self.hasColumn("tv_episodes", "absolute_number")
+
+    def execute(self):
+        self.addColumn("tv_episodes", "absolute_number", "NUMERIC", "NULL")
+
+class Blacklist(AddAbsoluteEpisodeTVShow):
+    def test(self):
+        return self.hasTable("blacklist")
+
+    def execute(self):
+        query = "CREATE TABLE blacklist (show_id INTEGER, range TEXT, keyword TEXT);"
+        self.connection.action(query)
+        #self.incDBVersion()
+
+class Whitelist(Blacklist):
+    def test(self):
+        return self.hasTable("whitelist")
+
+    def execute(self):
+        query = "CREATE TABLE whitelist (show_id INTEGER, range TEXT, keyword TEXT);"
+        self.connection.action(query)
+        self.incDBVersion()
