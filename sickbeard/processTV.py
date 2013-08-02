@@ -208,8 +208,9 @@ def validateDir(path, dirName, returnStr):
             return False
 
     # Get the videofile list for the next checks
-    files = ek.ek(os.listdir, os.path.join(path, dirName))
-    videoFiles = filter(helpers.isMediaFile, files)
+    videoFiles = []
+    for processPath, processDir, fileList in ek.ek(os.walk, ek.ek(os.path.join, path, dirName)):
+        videoFiles += filter(helpers.isMediaFile, fileList)
 
     # Avoid processing the same dir again if we use KEEP_PROCESSING_DIR    
     if sickbeard.KEEP_PROCESSED_DIR:
@@ -217,7 +218,7 @@ def validateDir(path, dirName, returnStr):
         if int(numPostProcFiles[0][0]) == len(videoFiles):
             returnStr += logHelper(u"You're trying to post process a dir that's already been processed, skipping", logger.DEBUG)
             return False
-        
+
     #check if the dir have at least one tv video file
     for video in videoFiles:
         try:
