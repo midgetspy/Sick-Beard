@@ -1,4 +1,7 @@
-# Author: Mr_Orange <mr_orange@hotmail.it>
+###################################################################################################
+# Author: Jodi Jones <venom@gen-x.co.nz>
+# Added in manual proxy override.
+# Based on work by: Mr_Orange <mr_orange@hotmail.it>
 # URL: http://code.google.com/p/sickbeard/
 #
 # This file is part of Sick Beard.
@@ -15,6 +18,7 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with Sick Beard.  If not, see <http://www.gnu.org/licenses/>.
+###################################################################################################
 
 import re
 import urllib, urllib2
@@ -40,42 +44,38 @@ proxy_dict = {'proxyfofree.com (US)' : 'http://proxyfofree.com/',
               'imspecial.me (DE)' : 'http://imspecial.me/',
               'proxite.eu (DE)' :'http://proxite.eu/',
               'shieldmagic.com (GB)' : 'http://www.shieldmagic.com/',
-              'wowspeed.co.uk (GB)' : 'http://wowspeed.co.uk/' ,             
+              'wowspeed.co.uk (GB)' : 'http://wowspeed.co.uk/' ,
               'webproxy.cz (CZ)' : 'http://webproxy.cz/',
               'freeproxy.cz (CZ)' : 'http://www.freeproxy.cz/',
              }
 
 class ThePirateBayProvider(generic.TorrentProvider):
-
+    ###################################################################################################
     def __init__(self):
-
         generic.TorrentProvider.__init__(self, "ThePirateBay")
-        
         self.supportsBacklog = True
-
         self.cache = ThePirateBayCache(self)
-        
         self.proxy = ThePirateBayWebproxy() 
-        
         self.url = 'http://thepiratebay.se/'
-
-        self.searchurl =  'http://thepiratebay.se/search/%s/0/7/200'  # order by seed       
-
+        self.searchurl =  self.url + 'search/%s/0/7/200'  # order by seed       
         self.re_title_url = '<td>.*?".*?/torrent/\d+/(?P<title>.*?)%s".*?<a href=".*?(?P<url>magnet.*?)%s".*?</td>'
  
+    ###################################################################################################
     def isEnabled(self):
         return sickbeard.THEPIRATEBAY
-        
+    
+    ###################################################################################################
     def imageName(self):
         return 'thepiratebay.png'
     
+    ###################################################################################################
     def getQuality(self, item):
         
         quality = Quality.nameQuality(item[0])
         return quality    
-
+    
+    ###################################################################################################
     def _get_airbydate_season_range(self, season):
-        
             if season == None:
                 return ()
         
@@ -88,8 +88,8 @@ class ThePirateBayProvider(generic.TorrentProvider):
 
             return (min_date, max_date)    
       
+    ###################################################################################################
     def _get_season_search_strings(self, show, season=None):
-    
         search_string = []
     
         if not show:
@@ -128,6 +128,7 @@ class ThePirateBayProvider(generic.TorrentProvider):
         
         return search_string
 
+    ###################################################################################################
     def _get_episode_search_strings(self, ep_obj):
        
         search_string = []
@@ -146,12 +147,10 @@ class ThePirateBayProvider(generic.TorrentProvider):
     
         return search_string
 
+    ###################################################################################################
     def _doSearch(self, search_params, show=None):
-    
         results = []
-
         searchURL = self.proxy._buildURL(self.searchurl %(urllib.quote(search_params)))    
-
         logger.log(u"Search string: " + searchURL, logger.DEBUG)
                     
         data = self.getURL(searchURL)
@@ -163,7 +162,6 @@ class ThePirateBayProvider(generic.TorrentProvider):
         #Extracting torrent information from searchURL                   
         match = re.compile(re_title_url, re.DOTALL ).finditer(urllib.unquote(data))
         for torrent in match:
-           
             #Accept Torrent only from Good People
             if sickbeard.THEPIRATEBAY_TRUSTED and re.search('(VIP|Trusted|Helpers)',torrent.group(0))== None:
                 logger.log(u"ThePirateBay Provider found result "+torrent.group('title')+" but that doesn't seem like a trusted result so I'm ignoring it",logger.DEBUG)
@@ -172,18 +170,17 @@ class ThePirateBayProvider(generic.TorrentProvider):
             #Do not know why but Sick Beard skip release with a '_' in name
             item = (torrent.group('title').replace('_','.'),torrent.group('url'))
             results.append(item)
-        
         return results
 
+    ###################################################################################################
     def _get_title_and_url(self, item):
         (title, url) = item
         if url:
             url = url.replace('&amp;','&')
-
         return (title, url)
 
+    ###################################################################################################
     def getURL(self, url, headers=None):
-
         if not headers:
             headers = []
 
@@ -202,6 +199,7 @@ class ThePirateBayProvider(generic.TorrentProvider):
 
         return result
 
+    ###################################################################################################
     def downloadResult(self, result):
         """
         Save the result to disk.
@@ -224,40 +222,32 @@ class ThePirateBayProvider(generic.TorrentProvider):
             return True
 
 class ThePirateBayCache(tvcache.TVCache):
-
+    ###################################################################################################
     def __init__(self, provider):
-
         tvcache.TVCache.__init__(self, provider)
-
         # only poll ThePirateBay every 10 minutes max
         self.minTime = 10
 
+    ###################################################################################################
     def updateCache(self):
-
         re_title_url = self.provider.proxy._buildRE(self.provider.re_title_url)
-                
         if not self.shouldUpdate():
             return
-
         data = self._getData()
-
         # as long as the http request worked we count this as an update
         if data:
             self.setLastUpdate()
         else:
             return []
-
         # now that we've loaded the current RSS feed lets delete the old cache
         logger.log(u"Clearing "+self.provider.name+" cache and updating with new information")
         self._clearCache()
-
         match = re.compile(re_title_url, re.DOTALL).finditer(urllib.unquote(data))
         if not match:
             logger.log(u"The Data returned from the ThePirateBay is incomplete, this result is unusable", logger.ERROR)
             return []
                 
         for torrent in match:
-           
             #accept torrent only from Trusted people
             if sickbeard.THEPIRATEBAY_TRUSTED and re.search('(VIP|Trusted|Helpers)',torrent.group(0))== None:
                 logger.log(u"ThePirateBay Provider found result "+torrent.group('title')+" but that doesn't seem like a trusted result so I'm ignoring it",logger.DEBUG)
@@ -266,56 +256,53 @@ class ThePirateBayCache(tvcache.TVCache):
             item = (torrent.group('title').replace('_','.'),torrent.group('url'))
             self._parseItem(item)
 
+    ###################################################################################################
     def _getData(self):
-       
-        url = self.provider.proxy._buildURL('http://thepiratebay.org/tv/latest/') #url for the last 50 tv-show
-
+        url = self.provider.proxy._buildURL(self.provider.url + 'tv/latest/') #url for the last 50 tv-show
         logger.log(u"ThePirateBay cache update URL: "+ url, logger.DEBUG)
-
         data = self.provider.getURL(url)
-
         return data
 
+    ###################################################################################################
     def _parseItem(self, item):
-
         (title, url) = item
-
         if not title or not url:
             return
-
         logger.log(u"Adding item to cache: "+title, logger.DEBUG)
-
         self._addCacheEntry(title, url)
 
 class ThePirateBayWebproxy:
-    
+    ###################################################################################################
     def __init__(self):
         self.Type   = 'GlypeProxy'
         self.param  = 'browse.php?u='
         self.option = '&b=32'
         
+    ###################################################################################################
     def isEnabled(self):
         """ Return True if we Choose to call TPB via Proxy """ 
         return sickbeard.THEPIRATEBAY_PROXY
     
+    ###################################################################################################
     def getProxyURL(self):
         """ Return the Proxy URL Choosen via Provider Setting """
         return str(sickbeard.THEPIRATEBAY_PROXY_URL)
     
+    ###################################################################################################
     def _buildURL(self,url):
         """ Return the Proxyfied URL of the page """ 
+        url = url.replace(provider.url,sickbeard.THEPIRATEBAY_URL_OVERRIDE) if sickbeard.THEPIRATEBAY_URL_OVERRIDE else url
         if self.isEnabled():
-            url = self.getProxyURL() + self.param + url + self.option
-        
-        return url      
+            url = self.getProxyURL() + self.param + url + self.option   
+        return url
 
+    ###################################################################################################
     def _buildRE(self,re):
         """ Return the Proxyfied RE string """
         if self.isEnabled():
             re = re %('&amp;b=32','&amp;b=32')
         else:
             re = re %('','')   
+        return re
 
-        return re    
-    
 provider = ThePirateBayProvider()
