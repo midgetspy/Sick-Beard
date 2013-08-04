@@ -30,7 +30,7 @@ import traceback
 import cherrypy
 import sickbeard
 import webserve
-from sickbeard import db, logger, exceptions, history, ui, helpers
+from sickbeard import db, logger, exceptions, history, ui, helpers, show_name_helpers, scene_exceptions
 from sickbeard.exceptions import ex
 from sickbeard import encodingKludge as ek
 from sickbeard import search_queue
@@ -38,6 +38,7 @@ from sickbeard.common import SNATCHED, SNATCHED_PROPER, DOWNLOADED, SKIPPED, UNA
 from common import Quality, qualityPresetStrings, statusStrings
 from sickbeard import image_cache
 from lib.tvdb_api import tvdb_api, tvdb_exceptions
+from sickbeard.name_parser.parser import NameParser, InvalidNameException
 try:
     import json
 except ImportError:
@@ -1608,6 +1609,96 @@ class CMD_SickBeardShutdown(ApiCall):
         return _responds(RESULT_SUCCESS, msg="SickBeard is shutting down...")
 
 
+class CMD_SickBeardAnalyzeName(ApiCall):
+    _help = {"desc": "takes a name and tries to figure out a show, season and episode from it.",
+            "requiredParameters": {"name": {"desc": "the name to lookup"}}
+            }
+
+    def __init__(self, args, kwargs):
+        # required
+        self.name, args = self.check_params(args, kwargs, "name", None, True, "string", [])
+        # optional
+        # super, missing, help
+        ApiCall.__init__(self, args, kwargs)
+
+    def run(self):
+        logger.log(u"API :: SickBeardAnalyzeName :: Analyzing name " + repr(self.name), logger.DEBUG)
+
+        to_return = {'tvdbid': None, 'season': None, 'episodes': []}
+        fixed_name = show_name_helpers.trimRelease(self.name)
+
+        # parse the name to break it into show name, season, and episode
+        np = NameParser(False)
+        try:
+            parse_result = np.parse(fixed_name)
+        except InvalidNameException, e:
+            logger.log(u"API :: SickBeardAnalyzeName :: NameParser failed with InvalidNameException: "+ repr(e), logger.DEBUG)
+            return _responds(RESULT_ERROR, msg=ex(e))
+
+        logger.log(u"API :: SickBeardAnalyzeName :: Parsed " + fixed_name + " into " + str(parse_result).decode('utf-8'), logger.DEBUG)
+
+        if parse_result.air_by_date:
+            season = -1
+            episodes = [parse_result.air_date]
+        else:
+            season = parse_result.season_number
+            episodes = parse_result.episode_numbers
+
+        to_return = {'tvdbid': None, 'season': season, 'episodes': episodes}
+
+        # do a scene reverse-lookup to get a list of all possible names
+        name_list = show_name_helpers.sceneToNormalShowNames(parse_result.series_name)
+
+        if not name_list:
+            return _responds(RESULT_ERROR, msg='No shows found in scene reverse-lookup')
+
+        # for each possible interpretation of that scene name
+        for cur_name in name_list:
+            logger.log(u"API :: SickBeardAnalyzeName :: Checking scene exceptions for a match on " + cur_name, logger.DEBUG)
+            scene_id = scene_exceptions.get_scene_exception_by_name(cur_name)
+            if scene_id:
+                logger.log(u"API :: SickBeardAnalyzeName :: Scene exception lookup got tvdb id " + str(scene_id) + u", using that", logger.DEBUG)
+                return _responds(RESULT_SUCCESS, {'tvdbid': scene_id, 'season': season, 'episodes': episodes})
+
+        # see if we can find the name directly in the DB, if so use it
+        for cur_name in name_list:
+            logger.log(u"API :: SickBeardAnalyzeName :: Looking up " + cur_name + u" in the DB", logger.DEBUG)
+            db_result = helpers.searchDBForShow(cur_name)
+            if db_result:
+                logger.log(u"API :: SickBeardAnalyzeName :: Lookup successful, using tvdb id " + str(db_result[0]), logger.DEBUG)
+                return _responds(RESULT_SUCCESS, {'tvdbid': int(db_result[0]), 'season': season, 'episodes': episodes})
+
+        # see if we can find the name with a TVDB lookup
+        for cur_name in name_list:
+            try:
+                t = tvdb_api.Tvdb(custom_ui=classes.ShowListUI, **sickbeard.TVDB_API_PARMS)
+
+                logger.log(u"API :: SickBeardAnalyzeName :: Looking up name " + cur_name + u" on TVDB", logger.DEBUG)
+                showObj = t[cur_name]
+            except (tvdb_exceptions.tvdb_exception):
+                # if none found, search on all languages
+                try:
+                    # There's gotta be a better way of doing this but we don't wanna
+                    # change the language value elsewhere
+                    ltvdb_api_parms = sickbeard.TVDB_API_PARMS.copy()
+
+                    ltvdb_api_parms['search_all_languages'] = True
+                    t = tvdb_api.Tvdb(custom_ui=classes.ShowListUI, **ltvdb_api_parms)
+
+                    logger.log(u"API :: SickBeardAnalyzeName :: Looking up name " + cur_name + u" in all languages on TVDB", logger.DEBUG)
+                    showObj = t[cur_name]
+                except (tvdb_exceptions.tvdb_exception, IOError):
+                    pass
+
+                continue
+            except (IOError):
+                continue
+
+            logger.log(u"API :: SickBeardAnalyzeName :: Lookup successful, using tvdb id " + str(showObj["id"]), logger.DEBUG)
+            return _responds(RESULT_SUCCESS, {'tvdbid': int(showObj["id"]), 'season': season, 'episodes': episodes})
+
+        return _responds(RESULT_SUCCESS, to_return)
+
 class CMD_Show(ApiCall):
     _help = {"desc": "display information for a given show",
              "requiredParameters": {"tvdbid": {"desc": "thetvdb.com unique id of a show"},
@@ -2430,6 +2521,7 @@ _functionMaper = {"help": CMD_Help,
                   "sb.searchtvdb": CMD_SickBeardSearchTVDB,
                   "sb.setdefaults": CMD_SickBeardSetDefaults,
                   "sb.shutdown": CMD_SickBeardShutdown,
+                  "sb.analyzename": CMD_SickBeardAnalyzeName,
                   "show": CMD_Show,
                   "show.addexisting": CMD_ShowAddExisting,
                   "show.addnew": CMD_ShowAddNew,
