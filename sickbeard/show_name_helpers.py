@@ -30,7 +30,7 @@ import datetime
 from name_parser.parser import NameParser, InvalidNameException
 
 resultFilters = ["sub(pack|s|bed)", "nlsub(bed|s)?", "swesub(bed)?",
-                 "(dir|sample|nfo)fix", "sample", "(dvd)?extras",
+                 "(dir|sample|sub|nfo)fix", "sample", "(dvd)?extras",
                  "dub(bed)?"]
 
 
@@ -116,7 +116,7 @@ def makeSceneShowSearchStrings(show):
     return map(sanitizeSceneName, showNames)
 
 
-def makeSceneSeasonSearchString (show, segment, extraSearchType=None):
+def makeSceneSeasonSearchString(show, segment, extraSearchType=None):
 
     myDB = db.DBConnection()
 
