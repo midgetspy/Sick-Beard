@@ -1633,7 +1633,7 @@ class CMD_SickBeardAnalyzeName(ApiCall):
             parse_result = np.parse(fixed_name)
         except InvalidNameException, e:
             logger.log(u"API :: SickBeardAnalyzeName :: NameParser failed with InvalidNameException: "+ repr(e), logger.DEBUG)
-            return _responds(RESULT_ERROR, msg=ex(e))
+            return _responds(RESULT_FAILURE, msg=ex(e))
 
         logger.log(u"API :: SickBeardAnalyzeName :: Parsed " + fixed_name + " into " + str(parse_result).decode('utf-8'), logger.DEBUG)
 
@@ -1650,7 +1650,7 @@ class CMD_SickBeardAnalyzeName(ApiCall):
         name_list = show_name_helpers.sceneToNormalShowNames(parse_result.series_name)
 
         if not name_list:
-            return _responds(RESULT_ERROR, msg='No shows found in scene reverse-lookup')
+            return _responds(RESULT_FAILURE, msg='No shows found in scene reverse-lookup')
 
         # for each possible interpretation of that scene name
         for cur_name in name_list:
