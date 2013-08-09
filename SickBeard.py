@@ -268,7 +268,7 @@ def main():
         print
         print 'If you have used other forks of SB which have'
         print 'modified your database it may now be unusable.'
-        sys.exit(1)
+        #sys.exit(1)
 
     # Initialize the config and our threads
     sickbeard.initialize(consoleLogging=consoleLogging)
