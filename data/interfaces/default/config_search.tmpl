@@ -47,6 +47,14 @@
                         </div>
                         
                         <div class="field-pair">
+                            <input type="checkbox" name="prefer_episode_releases" id="prefer_episode_releases" #if $sickbeard.PREFER_EPISODE_RELEASES == True then "checked=\"checked\"" else ""# />
+                            <label class="clearfix" for="prefer_episode_releases">
+                                <span class="component-title">Prefer episode releases</span>
+                                <span class="component-desc">Ignore full season releases.</span>
+                            </label>
+                        </div>
+                                                
+                        <div class="field-pair">
                             <label class="nocheck clearfix">
                                 <span class="component-title">Search Frequency</span>
                                 <input type="number" name="search_frequency" value="$sickbeard.SEARCH_FREQUENCY" size="5" min="10" class="input-small" />
