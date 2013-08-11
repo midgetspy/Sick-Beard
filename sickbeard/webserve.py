@@ -1072,7 +1072,7 @@ class ConfigProviders:
                       torrentleech_key=None,
                       btn_api_key=None,
                       kerews_url=None, kerews_apikey=None, kerews_catIDs=None,
-                      provider_order=None, nzbto_user=None, nzbto_pass=None, nzbto_proxy=None):
+                      provider_order=None, nzbto_user=None, nzbto_pass=None):
 
         results = []
 
@@ -1167,7 +1167,6 @@ class ConfigProviders:
 
         sickbeard.NZBTO_USER = nzbto_user.strip()
         sickbeard.NZBTO_PASS = nzbto_pass.strip()
-        sickbeard.NZBTO_PROXY = nzbto_proxy.strip()
 
         sickbeard.OMGWTFNZBS_UID = omgwtfnzbs_uid.strip()
         sickbeard.OMGWTFNZBS_KEY = omgwtfnzbs_key.strip()

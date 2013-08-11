@@ -203,7 +203,6 @@ NZBINDEX = False
 NZBTO = False
 NZBTO_USER = None
 NZBTO_PASS = None
-NZBTO_PROXY = "http//cytec.us/nzbto/index.php?"
 
 NZBCLUB = False
 
@@ -354,7 +353,7 @@ def initialize(consoleLogging=True):
                 USE_GROWL, GROWL_HOST, GROWL_PASSWORD, USE_PROWL, PROWL_NOTIFY_ONSNATCH, PROWL_NOTIFY_ONDOWNLOAD, PROWL_API, PROWL_PRIORITY, PROG_DIR, \
                 USE_PYTIVO, PYTIVO_NOTIFY_ONSNATCH, PYTIVO_NOTIFY_ONDOWNLOAD, PYTIVO_UPDATE_LIBRARY, PYTIVO_HOST, PYTIVO_SHARE_NAME, PYTIVO_TIVO_NAME, \
                 USE_NMA, NMA_NOTIFY_ONSNATCH, NMA_NOTIFY_ONDOWNLOAD, NMA_API, NMA_PRIORITY, \
-                NZBINDEX, NZBTO, NZBTO_USER, NZBTO_PASS, NZBTO_PROXY, versionCheckScheduler, VERSION_NOTIFY, PROCESS_AUTOMATICALLY, DELETE_FAILED, \
+                NZBINDEX, NZBTO, NZBTO_USER, NZBTO_PASS, versionCheckScheduler, VERSION_NOTIFY, PROCESS_AUTOMATICALLY, DELETE_FAILED, \
                 KEEP_PROCESSED_DIR, TV_DOWNLOAD_DIR, TVDB_BASE_URL, MIN_SEARCH_FREQUENCY, \
                 showQueueScheduler, searchQueueScheduler, ROOT_DIRS, CACHE_DIR, ACTUAL_CACHE_DIR, TVDB_API_PARMS, \
                 NAMING_PATTERN, NAMING_MULTI_EP, NAMING_FORCE_FOLDERS, NAMING_ABD_PATTERN, NAMING_CUSTOM_ABD, \
@@ -611,7 +610,6 @@ def initialize(consoleLogging=True):
         NZBTO = bool(check_setting_int(CFG, 'NZBTO', 'nzbto', 0))
         NZBTO_USER = check_setting_str(CFG, 'NZBTO', 'nzbto_user', '')
         NZBTO_PASS = check_setting_str(CFG, 'NZBTO', 'nzbto_pass', '')
-        NZBTO_PROXY = check_setting_str(CFG, 'NZBTO', 'nzbto_proxy', 'http://cytec.us/nzbto/index.php?')
 
         NZBCLUB = bool(check_setting_int(CFG, 'NZBClub', 'nzbclub', 0))
 
@@ -1114,8 +1112,6 @@ def save_config():
     new_config['NZBTO']['nzbto'] = int(NZBTO)
     new_config['NZBTO']['nzbto_user'] = NZBTO_USER
     new_config['NZBTO']['nzbto_pass'] = NZBTO_PASS
-    new_config['NZBTO']['nzbto_proxy'] = NZBTO_PROXY
-
 
     new_config['NZBClub'] = {}
     new_config['NZBClub']['nzbclub'] = int(NZBCLUB)
