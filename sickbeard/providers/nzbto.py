@@ -24,6 +24,7 @@ import cgi
 import os
 
 from xml.dom.minidom import parseString
+from xml.etree import ElementTree
 
 import generic
 import sickbeard
@@ -133,9 +134,6 @@ class NZBto(generic.NZBProvider):
 
         try:
             parsedXML = BeautifulSoup(searchResult.text)
-            logger.log(u"{0}".format(parsedXML.find("div", attrs={"class": "user"}).text), logger.DEBUG)
-            logger.log(u"RESPONSE COOKIE: {0}".format(self.session.cookies.get_dict()))
-            logger.log(u"CURRENT NZBto URL: {0}".format(searchResult.url))
             table_regex = re.compile(r'tbody-.*')
             items = parsedXML.findAll("tbody", attrs={"id": table_regex})
         except Exception, e:
@@ -144,7 +142,7 @@ class NZBto(generic.NZBProvider):
 
         results = []
 
-        logger.log(u"PARSING RESULTS FROM NZBTO")
+        #logger.log(u"PARSING RESULTS FROM NZBTO")
         for curItem in items:
             (title, url) = self._get_title_and_url(curItem)
 
@@ -196,7 +194,7 @@ class NZBto(generic.NZBProvider):
         So Sickbeard recognizes the episode we remove the nzb.to file prefixes.
         """
         req = self.session.get(result.url)
-        result.extraInfo = [req.content]
+        #result.extraInfo = [req.content]
         _, params = cgi.parse_header(req.headers.get('Content-Disposition', ''))
         filename = os.path.splitext(params['filename'])[0]
         logger.log('Downloaded nzb from nzb.to: "%s"' % filename, logger.DEBUG)
@@ -205,11 +203,22 @@ class NZBto(generic.NZBProvider):
             filename = filename[3:]
 
         match = re.search('(.*)\{\{(.*)\}\}', filename)
+        result.extraInfo = [req.content]
+
         if match:
             result.name = match.group(1)
             result.password = match.group(2)
+            #if there is a password, append it to the nzb file as meta tag... supported by sab > 0.7.8 AND nzbget 11
+            ElementTree.register_namespace("","http://www.newzbin.com/DTD/2003/nzb")
+            root = ElementTree.fromstring(req.content)
+            if not root.find("{http://www.newzbin.com/DTD/2003/nzb}head"):
+                head = ElementTree.SubElement(root, "head")
+                meta = ElementTree.SubElement(head, "meta", type="password")
+                meta.text = match.group(2)
+                result.extraInfo = [ElementTree.tostring(root)]
         else:
             result.name = filename
+            result.extraInfo = [req.content]
 
         return result
 
