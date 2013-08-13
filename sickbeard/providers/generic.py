@@ -189,6 +189,18 @@ class GenericProvider:
         quality = Quality.nameQuality(title)
         return quality
 
+    def getEncoding(self, item):
+        """
+        Figures out the encoding of the given RSS item node
+
+        item: An xml.dom.minidom.Node representing the <item> tag of the RSS feed
+
+        Returns an encoding value obtained from the node's data
+        """
+        (title, url) = self._get_title_and_url(item) #@UnusedVariable
+        encoding = Quality.nameEncoding(title)
+        return encoding
+
     def _doSearch(self):
         return []
 
@@ -258,9 +270,10 @@ class GenericProvider:
                 continue
 
             quality = self.getQuality(item)
+            encoding = self.getEncoding(item)
 
-            if not episode.show.wantEpisode(episode.season, episode.episode, quality, manualSearch):
-                logger.log(u"Ignoring result "+title+" because we don't want an episode that is "+Quality.qualityStrings[quality], logger.DEBUG)
+            if not episode.show.wantEpisode(episode.season, episode.episode, quality, encoding, manualSearch):
+                logger.log(u"Ignoring result "+title+" because we don't want an episode that is "+Quality.qualityStrings[quality]+"-"+Quality.encodingStrings[encoding], logger.DEBUG)
                 continue
 
             logger.log(u"Found result " + title + " at " + url, logger.DEBUG)
@@ -269,6 +282,7 @@ class GenericProvider:
             result.url = url
             result.name = title
             result.quality = quality
+            result.encoding = encoding
 
             results.append(result)
 

@@ -85,6 +85,11 @@ class Quality:
     # put these bits at the other end of the spectrum, far enough out that they shouldn't interfere
     UNKNOWN = 1 << 15     # 32768
 
+    # encodings
+    ENCODING_UNKNOWN = 0
+    X264 = 1
+    XVID = X264 << 1
+
     qualityStrings = {NONE: "N/A",
                       UNKNOWN: "Unknown",
                       SDTV: "SD TV",
@@ -96,6 +101,10 @@ class Quality:
                       FULLHDWEBDL: "1080p WEB-DL",
                       HDBLURAY: "720p BluRay",
                       FULLHDBLURAY: "1080p BluRay"}
+
+    encodingStrings = {ENCODING_UNKNOWN: "Unknown",
+                       XVID: "XviD",
+                       X264: "x264"}
 
     statusPrefixes = {DOWNLOADED: "Downloaded",
                       SNATCHED: "Snatched"}
@@ -178,6 +187,31 @@ class Quality:
             return Quality.UNKNOWN
 
     @staticmethod
+    def nameEncoding(name):
+        name = os.path.basename(name)
+
+        for e, es in Quality.encodingStrings.iteritems():
+            if e == Quality.ENCODING_UNKNOWN:
+                continue
+
+            if e == Quality.X264:
+                es = r'[hx]\.?264'
+
+            regex = es
+            regex_match = re.search(regex, name, re.I)
+            if regex_match:
+                return e
+
+    @staticmethod
+    def assumeEncoding(name):
+        if name.lower().endswith(".mp4", ".mkv"):
+            return Quality.X264
+        elif name.lower().endswith((".avi")):
+            return Quality.XVID
+        else:
+            return Quality.ENCODING_UNKNOWN
+
+    @staticmethod
     def compositeStatus(status, quality):
         return status + 100 * quality
 
@@ -228,6 +262,10 @@ qualityPresetStrings = {SD: "SD",
                         HD1080p: "HD1080p",
                         ANY: "Any"}
 
+ANY_ENCODING = Quality.combineQualities([Quality.X264, Quality.XVID], [])
+encodingPresets = (Quality.X264, Quality.XVID, ANY_ENCODING)
+encodingPresetStrings = dict((k, Quality.encodingStrings[k]) for k in Quality.encodingStrings.keys() if k not in [Quality.ENCODING_UNKNOWN])
+encodingPresetStrings[ANY_ENCODING] = "Any"
 
 class StatusStrings:
     def __init__(self):

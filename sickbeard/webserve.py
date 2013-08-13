@@ -384,6 +384,9 @@ class Manage:
         quality_all_same = True
         last_quality = None
 
+        encoding_all_same = True
+        last_encoding = None
+
         root_dir_list = []
 
         for curShow in showList:
@@ -412,17 +415,25 @@ class Manage:
                 else:
                     last_quality = curShow.quality
 
+            if encoding_all_same:
+                if last_encoding not in (None, curShow.encoding):
+                    encoding_all_same = False
+                elif last_encoding is None:
+                    last_encoding = curShow.encoding
+
+
         t.showList = toEdit
         t.paused_value = last_paused if paused_all_same else None
         t.flatten_folders_value = last_flatten_folders if flatten_folders_all_same else None
         t.quality_value = last_quality if quality_all_same else None
+        t.encoding_value = last_encoding if encoding_all_same else None
         t.root_dir_list = root_dir_list
 
         return _munge(t)
 
     @cherrypy.expose
     def massEditSubmit(self, paused=None, flatten_folders=None, quality_preset=False,
-                       anyQualities=[], bestQualities=[], toEdit=None, *args, **kwargs):
+                       anyQualities=[], bestQualities=[], encoding=None, toEdit=None, *args, **kwargs):
 
         dir_map = {}
         for cur_arg in kwargs:
@@ -463,7 +474,10 @@ class Manage:
             if quality_preset == 'keep':
                 anyQualities, bestQualities = Quality.splitQuality(showObj.quality)
 
-            curErrors += Home().editShow(curShow, new_show_dir, anyQualities, bestQualities, new_flatten_folders, new_paused, directCall=True)
+            if encoding_preset == 'keep':
+                encoding = showObj.encoding
+
+            curErrors += Home().editShow(curShow, new_show_dir, anyQualities, bestQualities, encoding, new_flatten_folders, new_paused, directCall=True)
 
             if curErrors:
                 logger.log(u"Errors: "+str(curErrors), logger.ERROR)
@@ -634,7 +648,7 @@ class ConfigGeneral:
         sickbeard.ROOT_DIRS = rootDirString
 
     @cherrypy.expose
-    def saveAddShowDefaults(self, defaultFlattenFolders, defaultStatus, anyQualities, bestQualities):
+    def saveAddShowDefaults(self, defaultFlattenFolders, defaultStatus, anyQualities, bestQualities, encoding):
 
         if anyQualities:
             anyQualities = anyQualities.split(',')
@@ -650,6 +664,8 @@ class ConfigGeneral:
 
         sickbeard.STATUS_DEFAULT = int(defaultStatus)
         sickbeard.QUALITY_DEFAULT = int(newQuality)
+
+        sickbeard.ENCODING_DEFAULT = int(encoding)
 
         if defaultFlattenFolders == "true":
             defaultFlattenFolders = 1
@@ -1720,7 +1736,7 @@ class NewHomeAddShows:
 
     @cherrypy.expose
     def addNewShow(self, whichSeries=None, tvdbLang="en", rootDir=None, defaultStatus=None,
-                   anyQualities=None, bestQualities=None, flatten_folders=None, fullShowPath=None,
+                   anyQualities=None, bestQualities=None, encoding=None, flatten_folders=None, fullShowPath=None,
                    other_shows=None, skipShow=None):
         """
         Receive tvdb id, dir, and other options and create a show from them. If extra show dirs are
@@ -1800,8 +1816,11 @@ class NewHomeAddShows:
             bestQualities = [bestQualities]
         newQuality = Quality.combineQualities(map(int, anyQualities), map(int, bestQualities))
 
+        if not encoding:
+            encoding = sickbeard.DEFAULT_ENCODING
+
         # add the show
-        sickbeard.showQueueScheduler.action.addShow(tvdb_id, show_dir, int(defaultStatus), newQuality, flatten_folders, tvdbLang) #@UndefinedVariable
+        sickbeard.showQueueScheduler.action.addShow(tvdb_id, show_dir, int(defaultStatus), newQuality, encoding, flatten_folders, tvdbLang) #@UndefinedVariable
         ui.notifications.message('Show added', 'Adding the specified show into '+show_dir)
 
         return finishAddShow()
@@ -1872,7 +1891,7 @@ class NewHomeAddShows:
             show_dir, tvdb_id, show_name = cur_show
 
             # add the show
-            sickbeard.showQueueScheduler.action.addShow(tvdb_id, show_dir, SKIPPED, sickbeard.QUALITY_DEFAULT, sickbeard.FLATTEN_FOLDERS_DEFAULT) #@UndefinedVariable
+            sickbeard.showQueueScheduler.action.addShow(tvdb_id, show_dir, SKIPPED, sickbeard.QUALITY_DEFAULT, sickbeard.ENCODING_DEFAULT, sickbeard.FLATTEN_FOLDERS_DEFAULT) #@UndefinedVariable
             num_added += 1
 
         if num_added:
@@ -2329,7 +2348,7 @@ class Home:
         return result['description'] if result else 'Episode not found.'
 
     @cherrypy.expose
-    def editShow(self, show=None, location=None, anyQualities=[], bestQualities=[], flatten_folders=None, paused=None, directCall=False, air_by_date=None, tvdbLang=None):
+    def editShow(self, show=None, location=None, anyQualities=[], bestQualities=[], encoding=None, flatten_folders=None, paused=None, directCall=False, air_by_date=None, tvdbLang=None):
 
         if show == None:
             errString = "Invalid show ID: "+str(show)
@@ -2347,7 +2366,7 @@ class Home:
             else:
                 return _genericMessage("Error", errString)
 
-        if not location and not anyQualities and not bestQualities and not flatten_folders:
+        if not location and not anyQualities and not bestQualities and not encoding and not flatten_folders:
 
             t = PageTemplate(file="editShow.tmpl")
             t.submenu = HomeMenu()
@@ -2390,10 +2409,16 @@ class Home:
         if type(bestQualities) != list:
             bestQualities = [bestQualities]
 
+        if encoding is None:
+            encoding = showObj.encoding
+
+        logger.log(u"encoding: "+str(encoding))
+
         errors = []
         with showObj.lock:
             newQuality = Quality.combineQualities(map(int, anyQualities), map(int, bestQualities))
             showObj.quality = newQuality
+            showObj.encoding = encoding
 
             # reversed for now
             if bool(showObj.flatten_folders) != bool(flatten_folders):

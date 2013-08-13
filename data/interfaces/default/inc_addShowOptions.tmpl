@@ -26,6 +26,9 @@
         #set global $bestQualities = $qualities[1]
         #include $os.path.join($sickbeard.PROG_DIR, "data/interfaces/default/inc_qualityChooser.tmpl")
 
+        #set global $encoding = $sickbeard.ENCODING_DEFAULT
+        #include $os.path.join($sickbeard.PROG_DIR, "data/interfaces/default/inc_encodingChooser.tmpl")
+
         <div class="field-pair alt">
             <label for="saveDefaultsButton" class="nocheck clearfix">
                 <span class="component-title"><input class="btn" type="button" id="saveDefaultsButton" value="Save Defaults" disabled="disabled" /></span>

@@ -59,6 +59,7 @@ class TVShow(object):
         self.genre = ""
         self.runtime = 0
         self.quality = int(sickbeard.QUALITY_DEFAULT)
+        self.encoding = int(sickbeard.ENCODING_DEFAULT)
         self.flatten_folders = int(sickbeard.FLATTEN_FOLDERS_DEFAULT)
 
         self.status = ""
@@ -603,6 +604,7 @@ class TVShow(object):
                 self.air_by_date = 0
 
             self.quality = int(sqlResults[0]["quality"])
+            self.encoding = int(sqlResults[0]["encoding"])
             self.flatten_folders = int(sqlResults[0]["flatten_folders"])
             self.paused = int(sqlResults[0]["paused"])
 
@@ -827,7 +829,8 @@ class TVShow(object):
                         "air_by_date": self.air_by_date,
                         "startyear": self.startyear,
                         "tvr_name": self.tvrname,
-                        "lang": self.lang
+                        "lang": self.lang,
+                        "encoding": self.encoding
                         }
 
         myDB.upsert("tv_shows", newValueDict, controlValueDict)
@@ -851,7 +854,7 @@ class TVShow(object):
         return toReturn
 
 
-    def wantEpisode(self, season, episode, quality, manualSearch=False):
+    def wantEpisode(self, season, episode, quality, encoding, manualSearch=False):
 
         logger.log(u"Checking if we want episode "+str(season)+"x"+str(episode)+" at quality "+Quality.qualityStrings[quality], logger.DEBUG)
 
@@ -859,7 +862,7 @@ class TVShow(object):
         anyQualities, bestQualities = Quality.splitQuality(self.quality)
         logger.log(u"any,best = "+str(anyQualities)+" "+str(bestQualities)+" and we are "+str(quality), logger.DEBUG)
 
-        if quality not in anyQualities + bestQualities:
+        if quality not in anyQualities + bestQualities or not (encoding & int(self.encoding)):
             logger.log(u"I know for sure I don't want this episode, saying no", logger.DEBUG)
             return False
 
@@ -952,6 +955,7 @@ class TVEpisode(object):
         self._hasnfo = False
         self._hastbn = False
         self._status = UNKNOWN
+        self._encoding = Quality.ENCODING_UNKNOWN
         self._tvdbid = 0
         self._file_size = 0
         self._release_name = ''
@@ -978,6 +982,7 @@ class TVEpisode(object):
     hasnfo = property(lambda self: self._hasnfo, dirty_setter("_hasnfo"))
     hastbn = property(lambda self: self._hastbn, dirty_setter("_hastbn"))
     status = property(lambda self: self._status, dirty_setter("_status"))
+    encoding = property(lambda self: self._encoding, dirty_setter("_encoding"))
     tvdbid = property(lambda self: self._tvdbid, dirty_setter("_tvdbid"))
     #location = property(lambda self: self._location, dirty_setter("_location"))
     file_size = property(lambda self: self._file_size, dirty_setter("_file_size"))
@@ -1371,7 +1376,8 @@ class TVEpisode(object):
                         "status": self.status,
                         "location": self.location,
                         "file_size": self.file_size,
-                        "release_name": self.release_name}
+                        "release_name": self.release_name,
+                        "encoding": self.encoding}
         controlValueDict = {"showid": self.show.tvdbid,
                             "season": self.season,
                             "episode": self.episode}

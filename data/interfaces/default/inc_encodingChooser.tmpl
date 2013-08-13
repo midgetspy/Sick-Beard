@@ -1,0 +1,20 @@
+#import sickbeard
+#from sickbeard.common import Quality, encodingPresets, encodingPresetStrings, ANY_ENCODING
+
+<div class="field-pair">
+    <label for="encodingPreset" class="nocheck clearfix">
+<span class="component-title">
+#set $selected = None
+#if $encoding == 0:
+#set global $encoding = ANY_ENCODING
+#end if
+<select id="encodingPreset" name="encoding">
+#for $curPreset in sorted($encodingPresets, reverse=True):
+<option value="$curPreset" #if $curPreset == $encoding then "selected=\"selected\"" else ""#>$encodingPresetStrings[$curPreset]</option>
+#end for
+</select>
+</span>
+<span class="component-desc">Preferred encoding of episodes to be downloaded</span>
+
+    </label>
+</div><br />
