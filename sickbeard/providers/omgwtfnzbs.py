@@ -57,12 +57,12 @@ class OmgwtfnzbsProvider(generic.NZBProvider):
 
         return True
 
-    def _checkAuthFromData(self, parsed_data, is_etree=True):
+    def _checkAuthFromData(self, parsed_data, is_XML=True):
 
         if parsed_data is None:
             return self._checkAuth()
 
-        if is_etree:
+        if is_XML:
             # provider doesn't return xml on error
             return True
 
@@ -75,6 +75,9 @@ class OmgwtfnzbsProvider(generic.NZBProvider):
                 if 'information is incorrect' in parsedJSON.get('notice'):
                     logger.log(u"Incorrect authentication credentials for " + self.name + " : " + str(description_text), logger.DEBUG)
                     raise AuthException("Your authentication credentials for " + self.name + " are incorrect, check your config.")
+
+                elif '0 results matched your terms' in parsedJSON.get('notice'):
+                    return True
 
                 else:
                     logger.log(u"Unknown error given from " + self.name + " : " + str(description_text), logger.DEBUG)
@@ -120,7 +123,7 @@ class OmgwtfnzbsProvider(generic.NZBProvider):
             logger.log(u"Error trying to load " + self.name + " JSON data", logger.ERROR)
             return []
 
-        if self._checkAuthFromData(parsedJSON, is_etree=False):
+        if self._checkAuthFromData(parsedJSON, is_XML=False):
 
             results = []
 

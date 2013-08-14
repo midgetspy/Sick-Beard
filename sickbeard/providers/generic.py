@@ -186,7 +186,7 @@ class GenericProvider:
         Returns a Quality value obtained from the node's data
 
         """
-        (title, url) = self._get_title_and_url(item) #@UnusedVariable
+        (title, url) = self._get_title_and_url(item)  # @UnusedVariable
         quality = Quality.nameQuality(title)
         return quality
 

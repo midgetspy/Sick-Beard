@@ -20,6 +20,7 @@
 import sickbeard
 import generic
 
+from sickbeard import classes
 from sickbeard import scene_exceptions
 from sickbeard import logger
 from sickbeard import tvcache
@@ -28,7 +29,7 @@ from sickbeard.common import Quality
 from sickbeard.exceptions import ex, AuthException
 
 from lib import jsonrpclib
-import datetime
+from datetime import datetime
 import time
 import socket
 import math
@@ -68,12 +69,16 @@ class BTNProvider(generic.TorrentProvider):
 
         return True
 
-    def _doSearch(self, search_params, show=None):
+    def _doSearch(self, search_params, show=None, age=0):
 
         self._checkAuth()
 
         params = {}
         apikey = sickbeard.BTN_API_KEY
+
+        # age in seconds
+        if age:
+            params['age'] = "<=" + str(int(age))
 
         if search_params:
             params.update(search_params)
@@ -94,11 +99,11 @@ class BTNProvider(generic.TorrentProvider):
             # We got something, we know the API sends max 1000 results at a time.
             # See if there are more than 1000 results for our query, if not we
             # keep requesting until we've got everything.
-            # max 150 requests per minute so limit at that
-            max_pages = 150
-            results_per_page = 1000.0
+            # max 150 requests per hour so limit at that. Scan every 15 minutes. 60 / 15 = 4.
+            max_pages = 35
+            results_per_page = 1000
 
-            if 'results' in parsedJSON and parsedJSON['results'] >= results_per_page:
+            if 'results' in parsedJSON and int(parsedJSON['results']) >= results_per_page:
                 pages_needed = int(math.ceil(int(parsedJSON['results']) / results_per_page))
                 if pages_needed > max_pages:
                     pages_needed = max_pages
@@ -129,7 +134,7 @@ class BTNProvider(generic.TorrentProvider):
         parsedJSON = {}
 
         try:
-            parsedJSON = server.getTorrentsSearch(apikey, params, int(results_per_page), int(offset))
+            parsedJSON = server.getTorrents(apikey, params, int(results_per_page), int(offset))
 
         except jsonrpclib.jsonrpc.ProtocolError, error:
             logger.log(u"JSON-RPC protocol error while accessing " + self.name + ": " + ex(error), logger.ERROR)
@@ -173,11 +178,15 @@ class BTNProvider(generic.TorrentProvider):
                 title += '.' + parsedJSON['Source'] if title else parsedJSON['Source']
             if 'Codec' in parsedJSON:
                 title += '.' + parsedJSON['Codec'] if title else parsedJSON['Codec']
+            if title:
+                title = title.replace(' ', '.')
 
+        url = None
         if 'DownloadURL' in parsedJSON:
             url = parsedJSON['DownloadURL']
-        else:
-            url = None
+            if url:
+                # unescaped / is valid in JSON, but it can be escaped
+                url = url.replace("\\/", "/")
 
         return (title, url)
 
@@ -273,17 +282,30 @@ class BTNProvider(generic.TorrentProvider):
 
         return to_return
 
-    def getQuality(self, item):
-        quality = None
-        (title, url) = self._get_title_and_url(item)
-        quality = Quality.nameQuality(title)
-
-        return quality
-
     def _doGeneralSearch(self, search_string):
         # 'search' looks as broad is it can find. Can contain episode overview and title for example,
         # use with caution!
         return self._doSearch({'search': search_string})
+
+    def findPropers(self, search_date=None):
+        results = []
+
+        search_terms = ['%.proper.%', '%.repack.%']
+
+        for term in search_terms:
+            for item in self._doSearch({'release': term}, age=4 * 24 * 60 * 60):
+                if item['Time']:
+                    try:
+                        result_date = datetime.fromtimestamp(float(item['Time']))
+                    except TypeError:
+                        result_date = None
+
+                    if result_date:
+                        if not search_date or result_date > search_date:
+                            title, url = self._get_title_and_url(item)
+                            results.append(classes.Proper(title, url, result_date))
+
+        return results
 
 
 class BTNCache(tvcache.TVCache):
@@ -328,18 +350,16 @@ class BTNCache(tvcache.TVCache):
         seconds_since_last_update = math.ceil(time.time() - time.mktime(self._getLastUpdate().timetuple()))
 
         # default to 15 minutes
-        if seconds_since_last_update < 15 * 60:
-            seconds_since_last_update = 15 * 60
+        seconds_minTime = self.minTime * 60
+        if seconds_since_last_update < seconds_minTime:
+            seconds_since_last_update = seconds_minTime
 
-        # Set maximum to 24 hours of "RSS" data search, older things will need to be done through backlog
-        if seconds_since_last_update > 24 * 60 * 60:
-            logger.log(u"The last known successful update on " + self.provider.name + " was more than 24 hours ago (%i hours to be precise), only trying to fetch the last 24 hours!" %(int(seconds_since_last_update) // (60 * 60)), logger.WARNING)
-            seconds_since_last_update = 24 * 60 * 60
+        # Set maximum to 24 hours (24 * 60 * 60 = 86400 seconds) of "RSS" data search, older things will need to be done through backlog
+        if seconds_since_last_update > 86400:
+            logger.log(u"The last known successful update on " + self.provider.name + " was more than 24 hours ago, only trying to fetch the last 24 hours!", logger.WARNING)
+            seconds_since_last_update = 86400
 
-        age_string = "<=%i" % seconds_since_last_update
-        search_params = {'age': age_string}
-
-        data = self.provider._doSearch(search_params)
+        data = self.provider._doSearch(search_params=None, age=seconds_since_last_update)
 
         return data
 

@@ -255,11 +255,11 @@ class NewznabProvider(generic.NZBProvider):
         results = [classes.Proper(x['name'], x['url'], datetime.datetime.fromtimestamp(x['time'])) for x in cache_results]
 
         for term in search_terms:
-            for curResult in self._doSearch({'q': term}, max_age=4):
+            for item in self._doSearch({'q': term}, max_age=4):
 
-                (title, url) = self._get_title_and_url(curResult)
+                (title, url) = self._get_title_and_url(item)
 
-                description_node = curResult.find('pubDate')
+                description_node = item.find('pubDate')
                 description_text = helpers.get_xml_text(description_node)
 
                 try:
