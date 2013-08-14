@@ -85,8 +85,8 @@ class Quality:
     # put these bits at the other end of the spectrum, far enough out that they shouldn't interfere
     UNKNOWN = 1 << 15     # 32768
 
-    # encodings
-    ENCODING_UNKNOWN = 0
+    # codecs
+    CODEC_UNKNOWN = 0
     X264 = 1
     XVID = X264 << 1
 
@@ -102,7 +102,7 @@ class Quality:
                       HDBLURAY: "720p BluRay",
                       FULLHDBLURAY: "1080p BluRay"}
 
-    encodingStrings = {ENCODING_UNKNOWN: "Unknown",
+    codecStrings = {CODEC_UNKNOWN: "Unknown",
                        XVID: "XviD",
                        X264: "x264"}
 
@@ -154,7 +154,9 @@ class Quality:
 
         checkName = lambda list, func: func([re.search(x, name, re.I) for x in list])
 
-        if checkName(["(pdtv|hdtv|dsr|tvrip|webrip).(xvid|x264)"], all) and not checkName(["(720|1080)[pi]"], all):
+        if (checkName(["(pdtv|hdtv|dsr|tvrip|webrip).(xvid|x264)"], all)
+                and not checkName(["hr.ws.pdtv.x264"], all)
+                and not checkName(["(720|1080)[pi]"], all)):
             return Quality.SDTV
         elif checkName(["(dvdrip|bdrip)(.ws)?.(xvid|divx|x264)"], any) and not checkName(["(720|1080)[pi]"], all):
             return Quality.SDDVD
@@ -187,11 +189,11 @@ class Quality:
             return Quality.UNKNOWN
 
     @staticmethod
-    def nameEncoding(name):
+    def nameCodec(name):
         name = os.path.basename(name)
 
-        for e, es in Quality.encodingStrings.iteritems():
-            if e == Quality.ENCODING_UNKNOWN:
+        for e, es in Quality.codecStrings.iteritems():
+            if e == Quality.CODEC_UNKNOWN:
                 continue
 
             if e == Quality.X264:
@@ -203,13 +205,13 @@ class Quality:
                 return e
 
     @staticmethod
-    def assumeEncoding(name):
+    def assumeCodec(name):
         if name.lower().endswith(".mp4", ".mkv"):
             return Quality.X264
         elif name.lower().endswith((".avi")):
             return Quality.XVID
         else:
-            return Quality.ENCODING_UNKNOWN
+            return Quality.CODEC_UNKNOWN
 
     @staticmethod
     def compositeStatus(status, quality):
@@ -262,10 +264,10 @@ qualityPresetStrings = {SD: "SD",
                         HD1080p: "HD1080p",
                         ANY: "Any"}
 
-ANY_ENCODING = Quality.combineQualities([Quality.X264, Quality.XVID], [])
-encodingPresets = (Quality.X264, Quality.XVID, ANY_ENCODING)
-encodingPresetStrings = dict((k, Quality.encodingStrings[k]) for k in Quality.encodingStrings.keys() if k not in [Quality.ENCODING_UNKNOWN])
-encodingPresetStrings[ANY_ENCODING] = "Any"
+ANY_CODEC = Quality.combineQualities([Quality.X264, Quality.XVID], [])
+codecPresets = (Quality.X264, Quality.XVID, ANY_CODEC)
+codecPresetStrings = dict((k, Quality.codecStrings[k]) for k in Quality.codecStrings.keys() if k not in [Quality.CODEC_UNKNOWN])
+codecPresetStrings[ANY_CODEC] = "Any"
 
 class StatusStrings:
     def __init__(self):

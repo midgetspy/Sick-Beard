@@ -9,7 +9,7 @@ $(document).ready(function () {
         $.get(sbRoot + '/config/general/saveAddShowDefaults', {defaultStatus: $('#statusSelect').val(),
                                                              anyQualities: anyQualArray.join(','),
                                                              bestQualities: bestQualArray.join(','),
-                                                             encoding: $('#encodingPreset').val(),
+                                                             codec: $('#codecPreset').val(),
                                                              defaultFlattenFolders: $('#flatten_folders').prop('checked')});
         $(this).attr('disabled', true);
         $.pnotify({

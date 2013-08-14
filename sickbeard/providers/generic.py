@@ -189,17 +189,17 @@ class GenericProvider:
         quality = Quality.nameQuality(title)
         return quality
 
-    def getEncoding(self, item):
+    def getCodec(self, item):
         """
-        Figures out the encoding of the given RSS item node
+        Figures out the codec of the given RSS item node
 
         item: An xml.dom.minidom.Node representing the <item> tag of the RSS feed
 
-        Returns an encoding value obtained from the node's data
+        Returns a codec value obtained from the node's data
         """
         (title, url) = self._get_title_and_url(item) #@UnusedVariable
-        encoding = Quality.nameEncoding(title)
-        return encoding
+        codec = Quality.nameCodec(title)
+        return codec
 
     def _doSearch(self):
         return []
@@ -270,9 +270,9 @@ class GenericProvider:
                 continue
 
             quality = self.getQuality(item)
-            encoding = self.getEncoding(item)
+            codec = self.getCodec(item)
 
-            if not episode.show.wantEpisode(episode.season, episode.episode, quality, encoding, manualSearch):
+            if not episode.show.wantEpisode(episode.season, episode.episode, quality, codec, manualSearch):
                 logger.log(u"Ignoring result "+title+" because we don't want an episode that is "+Quality.qualityStrings[quality]+"-"+Quality.encodingStrings[encoding], logger.DEBUG)
                 continue
 
@@ -282,7 +282,7 @@ class GenericProvider:
             result.url = url
             result.name = title
             result.quality = quality
-            result.encoding = encoding
+            result.codec = codec
 
             results.append(result)
 
@@ -303,6 +303,7 @@ class GenericProvider:
             (title, url) = self._get_title_and_url(item)
 
             quality = self.getQuality(item)
+            codec = self.getCodec(item)
 
             # parse the file name
             try:
@@ -340,12 +341,13 @@ class GenericProvider:
             # make sure we want the episode
             wantEp = True
             for epNo in actual_episodes:
-                if not show.wantEpisode(actual_season, epNo, quality):
+                if not show.wantEpisode(actual_season, epNo, quality, codec):
                     wantEp = False
                     break
             
             if not wantEp:
-                logger.log(u"Ignoring result "+title+" because we don't want an episode that is "+Quality.qualityStrings[quality], logger.DEBUG)
+                qs = Quality.qualityStrings[quality] + "-" + Quality.codecStrings[codec]
+                logger.log(u"Ignoring result "+title+" because we don't want an episode that is "+qs, logger.DEBUG)
                 continue
 
             logger.log(u"Found result " + title + " at " + url, logger.DEBUG)
@@ -359,6 +361,7 @@ class GenericProvider:
             result.url = url
             result.name = title
             result.quality = quality
+            result.codec = codec
 
             if len(epObj) == 1:
                 epNum = epObj[0].episode

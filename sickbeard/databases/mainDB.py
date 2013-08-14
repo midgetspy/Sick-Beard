@@ -667,12 +667,12 @@ class Add1080pAndRawHDQualities(RenameSeasonFolders):
         logger.log(u"Performing a vacuum on the database.", logger.DEBUG)
         self.connection.action("VACUUM")
 
-class AddEncodingField(Add1080pAndRawHDQualities):
+class AddCodecField(Add1080pAndRawHDQualities):
     def test(self):
         return self.checkDBVersion() >= 13
 
     def execute(self):
         backupDatabase(self.checkDBVersion())
-        self.addColumn("tv_shows", "encoding", "NUMERIC", common.ANY_ENCODING)
-        self.addColumn("tv_episodes", "encoding", "NUMERIC", common.Quality.ENCODING_UNKNOWN)
+        self.addColumn("tv_shows", "codec", "NUMERIC", common.ANY_CODEC)
+        self.addColumn("tv_episodes", "codec", "NUMERIC", common.Quality.CODEC_UNKNOWN)
         self.incDBVersion()

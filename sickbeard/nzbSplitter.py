@@ -143,8 +143,9 @@ def splitResult(result):
 
         wantEp = True
         for epNo in parse_result.episode_numbers:
-            if not result.extraInfo[0].wantEpisode(season, epNo, result.quality):
-                logger.log(u"Ignoring result "+newNZB+" because we don't want an episode that is "+Quality.qualityStrings[result.quality], logger.DEBUG)
+            if not result.extraInfo[0].wantEpisode(season, epNo, result.quality, result.codec):
+                qs = Quality.qualityStrings[result.quality] + "-" + Quality.codecStrings[result.codec]
+                logger.log(u"Ignoring result "+newNZB+" because we don't want an episode that is "+qs, logger.DEBUG)
                 wantEp = False
                 break
         if not wantEp:

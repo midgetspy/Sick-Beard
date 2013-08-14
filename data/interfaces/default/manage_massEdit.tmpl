@@ -71,13 +71,13 @@
 </div>
 
 <div class="optionWrapper clearfix alt container">
-<span class="selectTitle">Encoding</span>
+<span class="selectTitle">Codec</span>
     <div class="selectChoices">
-        <select id="encodingPreset" name="encoding">
+        <select id="codecPreset" name="codec">
             <option value="keep">&lt; keep &gt;</option>
             #set $selected = "keep"
-            #for $curPreset in sorted($common.encodingPresets):
-            <option value="$curPreset" #if $encoding_value == $curPreset then "selected=\"selected\"" else ""#>$common.encodingPresetStrings[$curPreset]</option>
+            #for $curPreset in sorted($common.codecPresets):
+            <option value="$curPreset" #if $codec_value == $curPreset then "selected=\"selected\"" else ""#>$common.codecPresetStrings[$curPreset]</option>
             #end for
         </select>
     </div>

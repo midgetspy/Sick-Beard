@@ -1,0 +1,20 @@
+#import sickbeard
+#from sickbeard.common import Quality, codecPresets, codecPresetStrings, ANY_CODEC
+
+<div class="field-pair">
+    <label for="codecPreset" class="nocheck clearfix">
+<span class="component-title">
+#set $selected = None
+#if $codec == 0:
+#set global $codec = ANY_CODEC
+#end if
+<select id="codecPreset" name="codec">
+#for $curPreset in sorted($codecPresets, reverse=True):
+<option value="$curPreset" #if $curPreset == $codec then "selected=\"selected\"" else ""#>$codecPresetStrings[$curPreset]</option>
+#end for
+</select>
+</span>
+<span class="component-desc">Preferred codec of episodes to be downloaded</span>
+
+    </label>
+</div><br />

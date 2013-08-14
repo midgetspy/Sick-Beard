@@ -35,7 +35,7 @@ from sickbeard.exceptions import ex
 from sickbeard import encodingKludge as ek
 from sickbeard import search_queue
 from sickbeard.common import SNATCHED, SNATCHED_PROPER, DOWNLOADED, SKIPPED, UNAIRED, IGNORED, ARCHIVED, WANTED, UNKNOWN
-from common import Quality, qualityPresetStrings, encodingPresetStrings, statusStrings
+from common import Quality, qualityPresetStrings, codecPresetStrings, statusStrings
 from sickbeard import image_cache
 from lib.tvdb_api import tvdb_api, tvdb_exceptions
 try:
@@ -539,13 +539,14 @@ def _get_quality_string(q):
         qualityString = Quality.qualityStrings[q]
     return qualityString
 
-def _get_encoding_string(e):
-    encodingString = "Unknown"
-    if e in encodingPresetStrings:
-        encodingString = encodingPresetStrings[e]
-    elif e in Quality.encodingStrings:
-        encodingString = Quality.encodingStrings[e]
-    return encodingString
+def _get_codec_string(e):
+    e = int(e)
+    codecString = "Unknown"
+    if e in codecPresetStrings:
+        codecString = codecPresetStrings[e]
+    elif e in Quality.codecStrings:
+        codecString = Quality.codecStrings[e]
+    return codecString
 
 def _get_status_Strings(s):
     return statusStrings[s]
@@ -719,14 +720,14 @@ class CMD_ComingEpisodes(ApiCall):
         qualList = Quality.DOWNLOADED + Quality.SNATCHED + [ARCHIVED, IGNORED]
 
         myDB = db.DBConnection(row_type="dict")
-        sql_results = myDB.select("SELECT airdate, airs, episode, name AS 'ep_name', description AS 'ep_plot', network, season, showid AS 'tvdbid', show_name, tv_shows.quality AS quality, tv_shows.encoding AS encoding, tv_shows.status AS 'show_status', tv_shows.paused AS 'paused' FROM tv_episodes, tv_shows WHERE season != 0 AND airdate >= ? AND airdate < ? AND tv_shows.tvdb_id = tv_episodes.showid AND tv_episodes.status NOT IN (" + ','.join(['?'] * len(qualList)) + ")", [today, next_week] + qualList)
+        sql_results = myDB.select("SELECT airdate, airs, episode, name AS 'ep_name', description AS 'ep_plot', network, season, showid AS 'tvdbid', show_name, tv_shows.quality AS quality, tv_shows.codec AS codec, tv_shows.status AS 'show_status', tv_shows.paused AS 'paused' FROM tv_episodes, tv_shows WHERE season != 0 AND airdate >= ? AND airdate < ? AND tv_shows.tvdb_id = tv_episodes.showid AND tv_episodes.status NOT IN (" + ','.join(['?'] * len(qualList)) + ")", [today, next_week] + qualList)
         for cur_result in sql_results:
             done_show_list.append(int(cur_result["tvdbid"]))
 
-        more_sql_results = myDB.select("SELECT airdate, airs, episode, name AS 'ep_name', description AS 'ep_plot', network, season, showid AS 'tvdbid', show_name, tv_shows.quality AS quality, tv_shows.encoding AS encoding, tv_shows.status AS 'show_status', tv_shows.paused AS 'paused' FROM tv_episodes outer_eps, tv_shows WHERE season != 0 AND showid NOT IN (" + ','.join(['?'] * len(done_show_list)) + ") AND tv_shows.tvdb_id = outer_eps.showid AND airdate = (SELECT airdate FROM tv_episodes inner_eps WHERE inner_eps.showid = outer_eps.showid AND inner_eps.airdate >= ? ORDER BY inner_eps.airdate ASC LIMIT 1) AND outer_eps.status NOT IN (" + ','.join(['?'] * len(Quality.DOWNLOADED + Quality.SNATCHED)) + ")", done_show_list + [next_week] + Quality.DOWNLOADED + Quality.SNATCHED)
+        more_sql_results = myDB.select("SELECT airdate, airs, episode, name AS 'ep_name', description AS 'ep_plot', network, season, showid AS 'tvdbid', show_name, tv_shows.quality AS quality, tv_shows.codec AS codec, tv_shows.status AS 'show_status', tv_shows.paused AS 'paused' FROM tv_episodes outer_eps, tv_shows WHERE season != 0 AND showid NOT IN (" + ','.join(['?'] * len(done_show_list)) + ") AND tv_shows.tvdb_id = outer_eps.showid AND airdate = (SELECT airdate FROM tv_episodes inner_eps WHERE inner_eps.showid = outer_eps.showid AND inner_eps.airdate >= ? ORDER BY inner_eps.airdate ASC LIMIT 1) AND outer_eps.status NOT IN (" + ','.join(['?'] * len(Quality.DOWNLOADED + Quality.SNATCHED)) + ")", done_show_list + [next_week] + Quality.DOWNLOADED + Quality.SNATCHED)
         sql_results += more_sql_results
 
-        more_sql_results = myDB.select("SELECT airdate, airs, episode, name AS 'ep_name', description AS 'ep_plot', network, season, showid AS 'tvdbid', show_name, tv_shows.quality AS quality, tv_shows.encoding AS encoding, tv_shows.status AS 'show_status', tv_shows.paused AS 'paused' FROM tv_episodes, tv_shows WHERE season != 0 AND tv_shows.tvdb_id = tv_episodes.showid AND airdate < ? AND airdate >= ? AND tv_episodes.status = ? AND tv_episodes.status NOT IN (" + ','.join(['?'] * len(qualList)) + ")", [today, recently, WANTED] + qualList)
+        more_sql_results = myDB.select("SELECT airdate, airs, episode, name AS 'ep_name', description AS 'ep_plot', network, season, showid AS 'tvdbid', show_name, tv_shows.quality AS quality, tv_shows.codec AS codec, tv_shows.status AS 'show_status', tv_shows.paused AS 'paused' FROM tv_episodes, tv_shows WHERE season != 0 AND tv_shows.tvdb_id = tv_episodes.showid AND airdate < ? AND airdate >= ? AND tv_episodes.status = ? AND tv_episodes.status NOT IN (" + ','.join(['?'] * len(qualList)) + ")", [today, recently, WANTED] + qualList)
         sql_results += more_sql_results
 
         # sort by air date
@@ -774,7 +775,7 @@ class CMD_ComingEpisodes(ApiCall):
                 ep["network"] = ""
             ep["airdate"] = _ordinal_to_dateForm(ordinalAirdate)
             ep["quality"] = _get_quality_string(ep["quality"])
-            ep["encoding"] = _get_encoding_string(ep["encoding"])
+            ep["codec"] = _get_codec_string(ep["codec"])
             # clean up tvdb horrible airs field
             ep["airs"] = str(ep["airs"]).replace('am', ' AM').replace('pm', ' PM').replace('  ', ' ')
             # start day of the week on 1 (monday)
@@ -816,7 +817,7 @@ class CMD_Episode(ApiCall):
             return _responds(RESULT_FAILURE, msg="Show not found")
 
         myDB = db.DBConnection(row_type="dict")
-        sqlResults = myDB.select("SELECT name, description, airdate, status, location, file_size, release_name FROM tv_episodes WHERE showid = ? AND episode = ? AND season = ?", [self.tvdbid, self.e, self.s])
+        sqlResults = myDB.select("SELECT name, description, airdate, status, codec, location, file_size, release_name FROM tv_episodes WHERE showid = ? AND episode = ? AND season = ?", [self.tvdbid, self.e, self.s])
         if not len(sqlResults) == 1:
             raise ApiError("Episode not found")
         episode = sqlResults[0]
@@ -838,10 +839,10 @@ class CMD_Episode(ApiCall):
             episode["location"] = ""
         # convert stuff to human form
         episode["airdate"] = _ordinal_to_dateForm(episode["airdate"])
-        status, quality, encoding = Quality.splitCompositeStatus(int(episode["status"]))
+        status, quality = Quality.splitCompositeStatus(int(episode["status"]))
         episode["status"] = _get_status_Strings(status)
         episode["quality"] = _get_quality_string(quality)
-        episode["encoding"] = _get_encoding_string(encoding)
+        episode["codec"] = _get_codec_string(episode["codec"])
         episode["file_size_human"] = _sizeof_fmt(episode["file_size"])
 
         myDB.connection.close()
@@ -886,11 +887,11 @@ class CMD_EpisodeSearch(ApiCall):
 
         # return the correct json value
         if ep_queue_item.success:
-            status, quality, encoding = Quality.splitCompositeStatus(epObj.status) #@UnusedVariable
+            status, quality = Quality.splitCompositeStatus(epObj.status) #@UnusedVariable
             # TODO: split quality and status?
             qs = _get_quality_string(quality)
-            es = _get_encoding_string(encoding)
-            return _responds(RESULT_SUCCESS, {"quality": qs}, "Snatched (" + qs + "-" + es + ")")
+            cs = _get_codec_string(epObj.codec)
+            return _responds(RESULT_SUCCESS, {"quality": qs}, "Snatched (" + qs + "-" + cs + ")")
 
         return _responds(RESULT_FAILURE, msg='Unable to find episode')
 
@@ -1069,13 +1070,13 @@ class CMD_History(ApiCall):
 
         results = []
         for row in sqlResults:
-            status, quality, encoding = Quality.splitCompositeStatus(int(row["action"]))
+            status, quality = Quality.splitCompositeStatus(int(row["action"]))
             status = _get_status_Strings(status)
             if self.type and not status == self.type:
                 continue
             row["status"] = status
             row["quality"] = _get_quality_string(quality)
-            row["encoding"] = _get_encoding_string(encoding)
+            row["codec"] = Quality.nameCodec(row["resource"])
             row["date"] = _historyDate_to_dateTimeForm(str(row["date"]))
             del row["action"]
             _rename_element(row, "showid", "tvdbid")
@@ -1651,7 +1652,7 @@ class CMD_Show(ApiCall):
                     genreList.append(genre)
         showDict["genre"] = genreList
         showDict["quality"] = _get_quality_string(showObj.quality)
-        showDict["encoding"] = _get_encoding_string(showObj.encoding)
+        showDict["codec"] = _get_codec_string(showObj.codec)
         anyQualities, bestQualities = _mapQuality(showObj.quality)
         showDict["quality_details"] = {"initial": anyQualities, "archive": bestQualities}
 
@@ -1691,7 +1692,7 @@ class CMD_ShowAddExisting(ApiCall):
              "optionalParameters": {"initial": {"desc": "initial quality for the show"},
                                     "archive": {"desc": "archive quality for the show"},
                                     "flatten_folders": {"desc": "flatten subfolders for the show"},
-                                    "encoding": {"desc": "encoding for the show"}
+                                    "codec": {"desc": "codec for the show"}
                                     }
              }
 
@@ -1703,7 +1704,7 @@ class CMD_ShowAddExisting(ApiCall):
         self.initial, args = self.check_params(args, kwargs, "initial", None, False, "list", ["sdtv", "sddvd", "hdtv", "rawhdtv", "fullhdtv", "hdwebdl", "fullhdwebdl", "hdbluray", "fullhdbluray", "unknown"])
         self.archive, args = self.check_params(args, kwargs, "archive", None, False, "list", ["sddvd", "hdtv", "rawhdtv", "fullhdtv", "hdwebdl", "fullhdwebdl", "hdbluray", "fullhdbluray"])
         self.flatten_folders, args = self.check_params(args, kwargs, "flatten_folders", str(sickbeard.FLATTEN_FOLDERS_DEFAULT), False, "bool", [])
-        self.encoding, args = self.check_params(args, kwargs, "encoding", int(sickbeard.ENCODING_DEFAULT), False, "int", [])
+        self.codec, args = self.check_params(args, kwargs, "codec", int(sickbeard.CODEC_DEFAULT), False, "int", [])
         # super, missing, help
         ApiCall.__init__(self, args, kwargs)
 
@@ -1768,7 +1769,7 @@ class CMD_ShowAddNew(ApiCall):
                                     "flatten_folders": {"desc": "flatten subfolders for the show"},
                                     "status": {"desc": "status of missing episodes"},
                                     "lang": {"desc": "the 2 letter lang abbreviation id"},
-                                    "encoding": {"desc": "encoding for the show"}
+                                    "codec": {"desc": "codec for the show"}
                                     }
              }
 
@@ -1788,7 +1789,7 @@ class CMD_ShowAddNew(ApiCall):
         self.flatten_folders, args = self.check_params(args, kwargs, "flatten_folders", str(sickbeard.FLATTEN_FOLDERS_DEFAULT), False, "bool", [])
         self.status, args = self.check_params(args, kwargs, "status", None, False, "string", ["wanted", "skipped", "archived", "ignored"])
         self.lang, args = self.check_params(args, kwargs, "lang", "en", False, "string", self.valid_languages.keys())
-        self.encoding, args = self.check_params(args, kwargs, "encoding", int(sickbeard.ENCODING_DEFAULT), False, "int", [])
+        self.codec, args = self.check_params(args, kwargs, "codec", int(sickbeard.CODEC_DEFAULT), False, "int", [])
         # super, missing, help
         ApiCall.__init__(self, args, kwargs)
 
@@ -1878,7 +1879,7 @@ class CMD_ShowAddNew(ApiCall):
             else:
                 helpers.chmodAsParent(showPath)
 
-        sickbeard.showQueueScheduler.action.addShow(int(self.tvdbid), showPath, newStatus, newQuality, int(self.flatten_folders), self.lang, self.encoding) #@UndefinedVariable
+        sickbeard.showQueueScheduler.action.addShow(int(self.tvdbid), showPath, newStatus, newQuality, int(self.flatten_folders), self.lang, self.codec) #@UndefinedVariable
         return _responds(RESULT_SUCCESS, {"name": tvdbName}, tvdbName + " has been queued to be added")
 
 
@@ -2122,13 +2123,13 @@ class CMD_ShowSeasons(ApiCall):
         myDB = db.DBConnection(row_type="dict")
 
         if self.season == None:
-            sqlResults = myDB.select("SELECT name, episode, airdate, status, season FROM tv_episodes WHERE showid = ?", [self.tvdbid])
+            sqlResults = myDB.select("SELECT name, episode, airdate, status, season, codec FROM tv_episodes WHERE showid = ?", [self.tvdbid])
             seasons = {}
             for row in sqlResults:
-                status, quality, encoding = Quality.splitCompositeStatus(int(row["status"]))
+                status, quality = Quality.splitCompositeStatus(int(row["status"]))
                 row["status"] = _get_status_Strings(status)
                 row["quality"] = _get_quality_string(quality)
-                row["encoding"] = _get_encoding_string(encoding)
+                row["codec"] = _get_codec_string(row["codec"])
                 row["airdate"] = _ordinal_to_dateForm(row["airdate"])
                 curSeason = int(row["season"])
                 curEpisode = int(row["episode"])
@@ -2139,7 +2140,7 @@ class CMD_ShowSeasons(ApiCall):
                 seasons[curSeason][curEpisode] = row
 
         else:
-            sqlResults = myDB.select("SELECT name, episode, airdate, status FROM tv_episodes WHERE showid = ? AND season = ?", [self.tvdbid, self.season])
+            sqlResults = myDB.select("SELECT name, episode, airdate, status, codec FROM tv_episodes WHERE showid = ? AND season = ?", [self.tvdbid, self.season])
             if len(sqlResults) is 0:
                 return _responds(RESULT_FAILURE, msg="Season not found")
             seasons = {}
@@ -2149,7 +2150,7 @@ class CMD_ShowSeasons(ApiCall):
                 status, quality, encoding = Quality.splitCompositeStatus(int(row["status"]))
                 row["status"] = _get_status_Strings(status)
                 row["quality"] = _get_quality_string(quality)
-                row["encoding"] = _get_encoding_string(encoding)
+                row["codec"] = _get_codec_string(row["codec"])
                 row["airdate"] = _ordinal_to_dateForm(row["airdate"])
                 if not curEpisode in seasons:
                     seasons[curEpisode] = {}
@@ -2215,8 +2216,7 @@ class CMD_ShowSetQuality(ApiCall):
         showObj.quality = newQuality
 
         qs = _get_quality_string(showObj.quality)
-        es = _get_encoding_string(showObj.encoding)
-        return _responds(RESULT_SUCCESS, msg=showObj.name + " quality has been changed to " + qs + "-" + es)
+        return _responds(RESULT_SUCCESS, msg=showObj.name + " quality has been changed to " + qs)
 
 
 class CMD_ShowStats(ApiCall):
@@ -2378,7 +2378,7 @@ class CMD_Shows(ApiCall):
 
             showDict = {"paused": curShow.paused,
                         "quality": _get_quality_string(curShow.quality),
-                        "encoding": _get_encoding_string(curShow.encoding),
+                        "codec": _get_codec_string(curShow.codec),
                         "language": curShow.lang,
                         "air_by_date": curShow.air_by_date,
                         "tvrage_id": curShow.tvrid,

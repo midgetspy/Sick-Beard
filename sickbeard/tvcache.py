@@ -363,10 +363,12 @@ class TVCache():
                 continue
             curEp = int(curEp)
             curQuality = int(curResult["quality"])
+            curCodec = int(curResult["codec"])
 
             # if the show says we want that episode then add it to the list
-            if not showObj.wantEpisode(curSeason, curEp, curQuality, manualSearch):
-                logger.log(u"Skipping "+curResult["name"]+" because we don't want an episode that's "+Quality.qualityStrings[curQuality], logger.DEBUG)
+            if not showObj.wantEpisode(curSeason, curEp, curQuality, curCodec, manualSearch):
+                qs = Quality.qualityStrings[curQuality] + "-" + Quality.codecStrings[curCodec]
+                logger.log(u"Skipping "+curResult["name"]+" because we don't want an episode that's "+qs, logger.DEBUG)
 
             else:
 
