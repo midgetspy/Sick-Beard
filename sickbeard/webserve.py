@@ -474,7 +474,7 @@ class Manage:
             if quality_preset == 'keep':
                 anyQualities, bestQualities = Quality.splitQuality(showObj.quality)
 
-            if encoding_preset == 'keep':
+            if encoding == 'keep':
                 encoding = showObj.encoding
 
             curErrors += Home().editShow(curShow, new_show_dir, anyQualities, bestQualities, encoding, new_flatten_folders, new_paused, directCall=True)
