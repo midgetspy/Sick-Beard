@@ -683,11 +683,24 @@ class ConfigGeneral:
         return m.hexdigest()
 
     @cherrypy.expose
-    def saveGeneral(self, log_dir=None, web_port=None, web_log=None, web_ipv6=None,
-                    launch_browser=None, web_username=None, use_api=None, api_key=None,
+    def saveGeneral(self, log_dir=None, web_port=None, web_log=None, web_ipv6=None, ignored_names=None,
+                    launch_browser=None, web_username=None, use_api=None, api_key=None, ignore_hidden=None,
                     web_password=None, version_notify=None, enable_https=None, https_cert=None, https_key=None):
 
         results = []
+
+        if ignore_hidden == "on":
+            ignore_hidden = 1
+        else:
+            ignore_hidden = 0
+
+        if ignored_names == "":
+            ignored_names = []
+        else:
+            ignored = []
+            for file_name in ignored_names.split(','):
+                ignored += [ file_name.strip() ]
+            ignored_names = ignored
 
         if web_ipv6 == "on":
             web_ipv6 = 1
@@ -712,6 +725,8 @@ class ConfigGeneral:
         if not config.change_LOG_DIR(log_dir):
             results += ["Unable to create directory " + os.path.normpath(log_dir) + ", log dir not changed."]
 
+        sickbeard.IGNORE_HIDDEN = ignore_hidden
+        sickbeard.IGNORED_NAMES = ignored_names
         sickbeard.LAUNCH_BROWSER = launch_browser
 
         sickbeard.WEB_PORT = int(web_port)
@@ -1640,6 +1655,13 @@ class NewHomeAddShows:
                 continue
 
             for cur_file in file_list:
+                if sickbeard.IGNORE_HIDDEN and cur_file.startswith('.', 0, 1):
+                    logger.log(u"File "+cur_file+" is hidden and will be ignored.", logger.DEBUG)
+                    continue
+
+                if cur_file in sickbeard.IGNORED_NAMES:
+                    logger.log(u"File "+cur_file+" is ignored type, skipping", logger.DEBUG)
+                    continue
 
                 cur_path = ek.ek(os.path.normpath, ek.ek(os.path.join, root_dir, cur_file))
                 if not ek.ek(os.path.isdir, cur_path):

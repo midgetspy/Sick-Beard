@@ -55,8 +55,6 @@ class PostProcessor(object):
     EXISTS_SMALLER = 3
     DOESNT_EXIST = 4
 
-    IGNORED_FILESTRINGS = [ "/.AppleDouble/", ".DS_Store" ]
-
     NZB_NAME = 1
     FOLDER_NAME = 2
     FILE_NAME = 3
@@ -703,10 +701,13 @@ class PostProcessor(object):
         if ek.ek(os.path.isdir, self.file_path):
             self._log(u"File " + self.file_path + " seems to be a directory")
             return False
-        for ignore_file in self.IGNORED_FILESTRINGS:
-            if ignore_file in self.file_path:
-                self._log(u"File " + self.file_path + " is ignored type, skipping")
-                return False
+        if sickbeard.IGNORE_HIDDEN and self.file_path.startswith('.', 0, 1):
+            self._log(u"File " + self.file_path + " is hidden and will be ignored")
+            return False
+        if self.file_path in sickbeard.IGNORED_NAMES:
+            self._log(u"File " + self.file_path + " is ignored type, skipping")
+            return False
+
         # reset per-file stuff
         self.in_history = False
 
