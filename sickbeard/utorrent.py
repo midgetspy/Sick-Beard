@@ -166,17 +166,19 @@ def _findTorrentHash(url):
         for torrent in torrent_list['torrents']:
             try:
                 #Try to match URL first
-                if url == torrent[19]:
+                if len(torrent) >= 20 and url == torrent[19]:
                     return torrent[0]
-            
+                if len(torrent) < 3: 
+                    continue
                 #If that fails try to parse the name of the torrent
                 torrent_result = myParser.parse(torrent[2])
                 if torrent_result.series_name == parse_result.series_name and torrent_result.season_number == parse_result.season_number and torrent_result.episode_numbers == parse_result.episode_numbers:
                     return torrent[0]                
             except InvalidNameException:
                 pass
-
         time.sleep(1)
+    logger.log(u"I will not be able to set label or paused to this torrent: " + url)
+    return False
 
 def testAuthentication(host=None, username=None, password=None):
     success, result = _action('', host, username, password)
