@@ -113,6 +113,7 @@ def _action(url, host, username, password):
             url = host + 'gui/?token=' + token + url
 
             try:
+                logger.log(u"Calling uTorrent with url: " + url, logger.DEBUG)
                 response = opener.open(url)
 
                 return True, json.loads(response.read())
@@ -178,15 +179,15 @@ def _findTorrentHash(url):
         time.sleep(1)
 
 def testAuthentication(host=None, username=None, password=None):
-    success, result = _action('&list=1', host, username, password)
+    success, result = _action('', host, username, password)
 
     if not success:
         return False, result
 
-    return True, result
+    return True, "Success. API Build: " + str(result["build"])
 
 def sendTORRENT(result):
-    url = '&action=add-url&s=' + quote(result.url).replace('/', '%2F') + '&t=' + str(int(time.time()))
+    url = '&action=add-url&s=' + urllib.quote_plus(result.url) #+ '&t=' + str(int(time.time()))
     if result.provider.token:
         url = url + ":COOKIE:" + result.provider.token
 
