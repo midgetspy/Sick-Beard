@@ -91,7 +91,7 @@ replace with: <b><%=", ".join([Quality.qualityStrings[x] for x in sorted(bestQua
 #if $show.codec in $codecPresetStrings:
 $codecPresetStrings[$show.codec]
 #else:
-$codecPresetStrings[Quality.CODEC_UNKNOWN]
+$Quality.codecStrings[Quality.CODEC_UNKNOWN]
 #end if
     </td></tr>
     <tr><td class="showLegend">Language:</td><td><img src="$sbRoot/images/flags/${show.lang}.png" width="16" height="11" alt="" /> $show.lang</td></tr>

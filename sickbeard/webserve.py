@@ -2438,7 +2438,7 @@ class Home:
         with showObj.lock:
             newQuality = Quality.combineQualities(map(int, anyQualities), map(int, bestQualities))
             showObj.quality = newQuality
-            showObj.codec = codec
+            showObj.codec = int(codec)
 
             # reversed for now
             if bool(showObj.flatten_folders) != bool(flatten_folders):
