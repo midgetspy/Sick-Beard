@@ -141,6 +141,7 @@ class TVShow(object):
         for cur_result in results:
             cur_ep = self.getEpisode(int(cur_result["season"]), int(cur_result["episode"]))
             if cur_ep:
+                cur_ep.relatedEps = []
                 if cur_ep.location:
                     # if there is a location, check if it's a multi-episode (share_location > 0) and put them in relatedEps
                     if cur_result["share_location"] > 0:
@@ -637,7 +638,10 @@ class TVShow(object):
 
         myEp = t[self.tvdbid]
 
-        self.name = myEp["seriesname"]
+        try:
+            self.name = myEp["seriesname"].strip()
+        except AttributeError:
+            raise tvdb_exceptions.tvdb_attributenotfound("Found %s, but attribute 'seriesname' was empty." % (self.tvdbid))
 
         self.genre = myEp['genre']
         self.network = myEp['network']
