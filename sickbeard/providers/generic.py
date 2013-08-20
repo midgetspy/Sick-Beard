@@ -274,7 +274,7 @@ class GenericProvider:
             codec = self.getCodec(item)
 
             if not episode.show.wantEpisode(episode.season, episode.episode, quality, codec, manualSearch):
-                qs = Quality.qualityStrings[quality] + "-" + Quality.encodingStrings[encoding]
+                qs = Quality.qualityStrings[quality] + "-" + Quality.codecStrings[codec]
                 logger.log(u"Ignoring result " + title + " because we don't want an episode that is " + qs, logger.DEBUG)
                 continue
 

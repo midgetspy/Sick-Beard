@@ -857,6 +857,8 @@ class TVShow(object):
 
 
     def wantEpisode(self, season, episode, quality, codec, manualSearch=False):
+	if codec is None:
+            codec = self.codec
         qs = Quality.qualityStrings[quality] + "-" + Quality.codecStrings[codec]
         logger.log(u"Checking if we want episode "+str(season)+"x"+str(episode)+" at quality "+qs, logger.DEBUG)
 

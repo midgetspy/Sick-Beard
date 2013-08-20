@@ -192,17 +192,19 @@ class Quality:
     def nameCodec(name):
         name = os.path.basename(name)
 
-        for e, es in Quality.codecStrings.iteritems():
-            if e == Quality.CODEC_UNKNOWN:
+        for c, cs in Quality.codecStrings.iteritems():
+            if c == Quality.CODEC_UNKNOWN:
                 continue
 
-            if e == Quality.X264:
-                es = r'[hx]\.?264'
+            if c == Quality.X264:
+                cs = r'[hx]\.?264'
 
-            regex = es
+            regex = cs
             regex_match = re.search(regex, name, re.I)
             if regex_match:
-                return e
+                return c
+
+        return Quality.CODEC_UNKNOWN
 
     @staticmethod
     def assumeCodec(name):
