@@ -19,7 +19,7 @@ $(document).ready(function () {
         });
     });
 
-    $('#statusSelect, #qualityPreset, #flatten_folders, #anyQualities, #bestQualities, #encodingPreset').change(function () {
+    $('#statusSelect, #qualityPreset, #flatten_folders, #anyQualities, #bestQualities, #codecPreset').change(function () {
         $('#saveDefaultsButton').attr('disabled', false);
     });
 
