@@ -81,7 +81,7 @@ class XBMCNotifier:
         # revert back to default socket timeout
         socket.setdefaulttimeout(sickbeard.SOCKET_TIMEOUT)
 
-        if result:
+        if result and "result" in result and "version" in result['result']:
             return result["result"]["version"]
         else:
             # fallback to legacy HTTPAPI method
