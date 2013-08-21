@@ -34,13 +34,14 @@ naming_ep_type = ("%(seasonnumber)dx%(episodenumber)02d",
                    "%(seasonnumber)02dx%(episodenumber)02d")
 naming_ep_type_text = ("1x02", "s01e02", "S01E02", "01x02")
 
-naming_multi_ep_type = {0: ["-%(episodenumber)02d"]*len(naming_ep_type),
+naming_multi_ep_type = {0: ["-%(episodenumber)02d"] * len(naming_ep_type),
                         1: [" - " + x for x in naming_ep_type],
                         2: [x + "%(episodenumber)02d" for x in ("x", "e", "E", "x")]}
 naming_multi_ep_type_text = ("extend", "duplicate", "repeat")
 
 naming_sep_type = (" - ", " ")
 naming_sep_type_text = (" - ", "space")
+
 
 def change_HTTPS_CERT(https_cert):
 
@@ -57,6 +58,7 @@ def change_HTTPS_CERT(https_cert):
 
     return True
 
+
 def change_HTTPS_KEY(https_key):
 
     if https_key == '':
@@ -71,6 +73,7 @@ def change_HTTPS_KEY(https_key):
             return False
 
     return True
+
 
 def change_LOG_DIR(log_dir):
 
@@ -89,6 +92,7 @@ def change_LOG_DIR(log_dir):
             return False
 
     return True
+
 
 def change_NZB_DIR(nzb_dir):
 
@@ -153,17 +157,19 @@ def change_SEARCH_FREQUENCY(freq):
     sickbeard.currentSearchScheduler.cycleTime = datetime.timedelta(minutes=sickbeard.SEARCH_FREQUENCY)
     sickbeard.backlogSearchScheduler.cycleTime = datetime.timedelta(minutes=sickbeard.get_backlog_cycle_time())
 
+
 def change_VERSION_NOTIFY(version_notify):
-   
+
     oldSetting = sickbeard.VERSION_NOTIFY
 
     sickbeard.VERSION_NOTIFY = version_notify
 
     if version_notify == False:
-        sickbeard.NEWEST_VERSION_STRING = None;
-        
+        sickbeard.NEWEST_VERSION_STRING = None
+
     if oldSetting == False and version_notify == True:
-        sickbeard.versionCheckScheduler.action.run() #@UndefinedVariable
+        sickbeard.versionCheckScheduler.action.run()  #@UndefinedVariable
+
 
 def CheckSection(CFG, sec):
     """ Check if INI section exists, if not create it """
@@ -173,6 +179,7 @@ def CheckSection(CFG, sec):
     except:
         CFG[sec] = {}
         return False
+
 
 ################################################################################
 # Check_setting_int                                                            #
@@ -188,6 +195,7 @@ def minimax(val, low, high):
     if val > high:
         return high
     return val
+
 
 ################################################################################
 # Check_setting_int                                                            #
@@ -205,6 +213,7 @@ def check_setting_int(config, cfg_name, item_name, def_val):
     logger.log(item_name + " -> " + str(my_val), logger.DEBUG)
     return my_val
 
+
 ################################################################################
 # Check_setting_float                                                          #
 ################################################################################
@@ -221,6 +230,7 @@ def check_setting_float(config, cfg_name, item_name, def_val):
 
     logger.log(item_name + " -> " + str(my_val), logger.DEBUG)
     return my_val
+
 
 ################################################################################
 # Check_setting_str                                                            #
@@ -250,35 +260,46 @@ class ConfigMigrator():
         Initializes a config migrator that can take the config from the version indicated in the config
         file up to the version required by SB
         """
-        
+
         self.config_obj = config_obj
 
         # check the version of the config
         self.config_version = check_setting_int(config_obj, 'General', 'config_version', 0)
-
-        self.migration_names = {1: 'Custom naming'}
-
+        self.expected_config_version = sickbeard.CONFIG_VERSION
+        self.migration_names = {1: 'Custom naming',
+                                2: 'Sync backup number with version number',
+                                3: 'Rename omgwtfnzb variables'
+                                }
 
     def migrate_config(self):
         """
         Calls each successive migration until the config is the same version as SB expects
         """
-        
-        while self.config_version < sickbeard.CONFIG_VERSION:
+
+        sickbeard.CONFIG_VERSION = self.config_version
+
+        while self.config_version < self.expected_config_version:
+
             next_version = self.config_version + 1
-            
+
             if next_version in self.migration_names:
                 migration_name = ': ' + self.migration_names[next_version]
             else:
                 migration_name = ''
-            
-            helpers.backupVersionedFile(sickbeard.CONFIG_FILE, next_version)
-            
+
+            helpers.backupVersionedFile(sickbeard.CONFIG_FILE, self.config_version)
+
             # do the migration, expect a method named _migrate_v<num>
-            logger.log(u"Migrating config up to version "+str(next_version)+migration_name)
-            getattr(self, '_migrate_v'+str(next_version))()
+            logger.log(u"Migrating config up to version " + str(next_version) + migration_name)
+            getattr(self, '_migrate_v' + str(next_version))()
             self.config_version = next_version
 
+            # save new config after migration
+            sickbeard.CONFIG_VERSION = self.config_version
+            logger.log(u"Saving config file to disk")
+            sickbeard.save_config()
+
+    # Migration v1: Custom naming
     def _migrate_v1(self):
         """
         Reads in the old naming settings from your config and generates a new config template from them.
@@ -385,4 +406,15 @@ class ConfigMigrator():
 
         return finalName
 
+    # Migration v2: Dummy migration to sync backup number with config version number
+    def _migrate_v2(self):
+        return
 
+    # Migration v2: Rename  omgwtfnzb variables
+    def _migrate_v3(self):
+        """
+        Reads in the old naming settings from your config and generates a new config template from them.
+        """
+        # get the old settings from the file and store them in the new variable names
+        sickbeard.OMGWTFNZBS_USERNAME = check_setting_str(self.config_obj, 'omgwtfnzbs', 'omgwtfnzbs_uid', '')
+        sickbeard.OMGWTFNZBS_APIKEY = check_setting_str(self.config_obj, 'omgwtfnzbs', 'omgwtfnzbs_key', '')
