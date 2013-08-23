@@ -18,15 +18,20 @@
 
 import urllib
 import generic
-import json
-
 import sickbeard
+
+from sickbeard import helpers
 from sickbeard import tvcache
 from sickbeard import logger
 from sickbeard import classes
 from sickbeard import show_name_helpers
 from datetime import datetime
-from lib.unidecode import unidecode
+
+try:
+    import json
+except ImportError:
+    from lib import simplejson as json
+
 
 class NzbXProvider(generic.NZBProvider):
 
@@ -46,11 +51,14 @@ class NzbXProvider(generic.NZBProvider):
         return [x for x in show_name_helpers.makeSceneSearchString(ep_obj)]
 
     def _get_title_and_url(self, item):
-        title = unidecode(item['name'])
-        url = self.url + 'nzb?' + str(item['guid']) + '*|*' + urllib.quote_plus(title)
+        title = item['name']
+        url = self.url + 'nzb?' + str(item['guid']) + '*|*' + urllib.quote_plus(title.encode("utf-8"))
         return (title, url)
 
     def _doSearch(self, search, show=None, age=0):
+
+        self._checkAuth()
+
         params = {'age': sickbeard.USENET_RETENTION,
                   'completion': sickbeard.NZBX_COMPLETION,
                   'cat': 'tv-hd|tv-sd',
@@ -63,33 +71,35 @@ class NzbXProvider(generic.NZBProvider):
         if not params['completion']:
             params['completion'] = 100
 
-        url = self.url + 'api/sickbeard?' + urllib.urlencode(params)
-        logger.log(u"nzbX search url: " + url, logger.DEBUG)
+        search_url = self.url + 'api/sickbeard?' + urllib.urlencode(params)
+        logger.log(u"Search url: " + search_url, logger.DEBUG)
 
-        data = self.getURL(url)
+        data = self.getURL(search_url)
+
         if not data:
-            logger.log(u"nzbX returned no json data", logger.DEBUG) 
+            logger.log(u"No data returned from " + search_url, logger.ERROR)
             return []
-        try:
-            items = json.loads(data)
-        except ValueError:
-            logger.log(u"Error trying to decode nzbX json data", logger.ERROR)
-            return[]
+
+        parsedJSON = helpers.parse_json(data)
+
+        if parsedJSON is None:
+            logger.log(u"Error trying to load " + self.name + " JSON data", logger.ERROR)
+            return []
 
         results = []
-        for item in items:
+        for item in parsedJSON:
             if item['name'] and item['guid']:
                 results.append(item)
-            else:
-                logger.log(u"Partial result from nzbx", logger.DEBUG)
+
         return results
 
-    def findPropers(self, date=None):
+    def findPropers(self, search_date=None):
         results = []
         for item in self._doSearch('.proper.|.repack.', age=4):
             if item['postdate']:
                 name, url = self._get_title_and_url(item)
                 results.append(classes.Proper(name, url, datetime.fromtimestamp(item['postdate'])))
+
         return results
 
 
@@ -105,6 +115,7 @@ class NzbXCache(tvcache.TVCache):
         self._addCacheEntry(title, url)
 
     def updateCache(self):
+
         if not self.shouldUpdate():
             return
 
@@ -114,7 +125,7 @@ class NzbXCache(tvcache.TVCache):
         self.setLastUpdate()
 
         # now that we've got the latest releases lets delete the old cache
-        logger.log(u"Clearing nzbX cache and updating with new information")
+        logger.log(u"Clearing " + self.provider.name + " cache and updating with new information")
         self._clearCache()
 
         for item in items:

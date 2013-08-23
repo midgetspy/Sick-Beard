@@ -20,9 +20,7 @@
 
 import datetime
 import os
-import sys
 import re
-import urllib2
 
 import sickbeard
 
@@ -105,13 +103,13 @@ class GenericProvider:
         if not headers:
             headers = []
 
-        result = helpers.getURL(url, headers)
+        data = helpers.getURL(url, headers)
 
-        if result is None:
-            logger.log(u"Error loading "+self.name+" URL: " + url, logger.ERROR)
+        if not data:
+            logger.log(u"Error loading " + self.name + " URL: " + url, logger.ERROR)
             return None
 
-        return result
+        return data
 
     def downloadResult(self, result):
         """
@@ -136,17 +134,17 @@ class GenericProvider:
             return False
 
         # use the result name as the filename
-        fileName = ek.ek(os.path.join, saveDir, helpers.sanitizeFileName(result.name) + '.' + self.providerType)
+        file_name = ek.ek(os.path.join, saveDir, helpers.sanitizeFileName(result.name) + '.' + self.providerType)
 
-        logger.log(u"Saving to " + fileName, logger.DEBUG)
+        logger.log(u"Saving to " + file_name, logger.DEBUG)
 
         try:
-            fileOut = open(fileName, writeMode)
+            fileOut = open(file_name, writeMode)
             fileOut.write(data)
             fileOut.close()
-            helpers.chmodAsParent(fileName)
+            helpers.chmodAsParent(file_name)
         except IOError, e:
-            logger.log("Unable to save the file: "+ex(e), logger.ERROR)
+            logger.log("Unable to save the file: " + ex(e), logger.ERROR)
             return False
 
         # as long as it's a valid download then consider it a successful snatch
@@ -173,6 +171,8 @@ class GenericProvider:
         return True
 
     def searchRSS(self):
+        
+        self._checkAuth() 
         self.cache.updateCache()
         return self.cache.findNeededEpisodes()
 
@@ -180,11 +180,11 @@ class GenericProvider:
         """
         Figures out the quality of the given RSS item node
         
-        item: An xml.dom.minidom.Node representing the <item> tag of the RSS feed
+        item: An elementtree.ElementTree element representing the <item> tag of the RSS feed
         
         Returns a Quality value obtained from the node's data 
         """
-        (title, url) = self._get_title_and_url(item) #@UnusedVariable
+        (title, url) = self._get_title_and_url(item) # @UnusedVariable
         quality = Quality.sceneQuality(title)
         return quality
 
@@ -201,29 +201,27 @@ class GenericProvider:
         """
         Retrieves the title and URL data from the item XML node
 
-        item: An xml.dom.minidom.Node representing the <item> tag of the RSS feed
+        item: An elementtree.ElementTree element representing the <item> tag of the RSS feed
 
         Returns: A tuple containing two strings representing title and URL respectively
         """
-        title = helpers.get_xml_text(item.getElementsByTagName('title')[0])
-        try:
-            url = helpers.get_xml_text(item.getElementsByTagName('link')[0])
-            if url:
-                url = url.replace('&amp;','&')
-        except IndexError:
-            url = None
-        
-        return (title, url)
-    
-    def findEpisode(self, episode, manualSearch=False):
+        title = helpers.get_xml_text(item.find('title'))
+        if title:
+            title = title.replace(' ', '.')
 
-        self._checkAuth()
+        url = helpers.get_xml_text(item.find('link'))
+        if url:
+            url = url.replace('&amp;', '&')
+            
+        return (title, url)
+        
+    def findEpisode(self, episode, manualSearch=False):
 
         logger.log(u"Searching "+self.name+" for " + episode.prettyName())
 
         self.cache.updateCache()
         results = self.cache.searchCache(episode, manualSearch)
-        logger.log(u"Cache results: "+str(results), logger.DEBUG)
+        logger.log(u"Cache results: " + str(results), logger.DEBUG)
 
         # if we got some results then use them no matter what.
         # OR
@@ -245,21 +243,21 @@ class GenericProvider:
                 myParser = NameParser()
                 parse_result = myParser.parse(title)
             except InvalidNameException:
-                logger.log(u"Unable to parse the filename "+title+" into a valid episode", logger.WARNING)
+                logger.log(u"Unable to parse the filename " + title + " into a valid episode", logger.WARNING)
                 continue
 
             if episode.show.air_by_date:
                 if parse_result.air_date != episode.airdate:
-                    logger.log("Episode "+title+" didn't air on "+str(episode.airdate)+", skipping it", logger.DEBUG)
+                    logger.log("Episode " + title + " didn't air on " + str(episode.airdate) + ", skipping it", logger.DEBUG)
                     continue
             elif parse_result.season_number != episode.season or episode.episode not in parse_result.episode_numbers:
-                logger.log("Episode "+title+" isn't "+str(episode.season)+"x"+str(episode.episode)+", skipping it", logger.DEBUG)
+                logger.log("Episode " + title + " isn't "+str(episode.season) + "x" + str(episode.episode) + ", skipping it", logger.DEBUG)
                 continue
 
             quality = self.getQuality(item)
 
             if not episode.show.wantEpisode(episode.season, episode.episode, quality, manualSearch):
-                logger.log(u"Ignoring result "+title+" because we don't want an episode that is "+Quality.qualityStrings[quality], logger.DEBUG)
+                logger.log(u"Ignoring result " + title + " because we don't want an episode that is " + Quality.qualityStrings[quality], logger.DEBUG)
                 continue
 
             logger.log(u"Found result " + title + " at " + url, logger.DEBUG)
@@ -294,13 +292,13 @@ class GenericProvider:
                 myParser = NameParser(False)
                 parse_result = myParser.parse(title)
             except InvalidNameException:
-                logger.log(u"Unable to parse the filename "+title+" into a valid episode", logger.WARNING)
+                logger.log(u"Unable to parse the filename " + title + " into a valid episode", logger.WARNING)
                 continue
 
             if not show.air_by_date:
                 # this check is meaningless for non-season searches
                 if (parse_result.season_number != None and parse_result.season_number != season) or (parse_result.season_number == None and season != 1):
-                    logger.log(u"The result "+title+" doesn't seem to be a valid episode for season "+str(season)+", ignoring", logger.DEBUG)
+                    logger.log(u"The result " + title + " doesn't seem to be a valid episode for season " + str(season) + ", ignoring", logger.DEBUG)
                     continue
 
                 # we just use the existing info for normal searches
@@ -330,7 +328,7 @@ class GenericProvider:
                     break
             
             if not wantEp:
-                logger.log(u"Ignoring result "+title+" because we don't want an episode that is "+Quality.qualityStrings[quality], logger.DEBUG)
+                logger.log(u"Ignoring result " + title + " because we don't want an episode that is " + Quality.qualityStrings[quality], logger.DEBUG)
                 continue
 
             logger.log(u"Found result " + title + " at " + url, logger.DEBUG)
@@ -351,7 +349,7 @@ class GenericProvider:
                 epNum = epObj[0].episode
             elif len(epObj) > 1:
                 epNum = MULTI_EP_RESULT
-                logger.log(u"Separating multi-episode result to check for later - result contains episodes: "+str(parse_result.episode_numbers), logger.DEBUG)
+                logger.log(u"Separating multi-episode result to check for later - result contains episodes: " + str(parse_result.episode_numbers), logger.DEBUG)
             elif len(epObj) == 0:
                 epNum = SEASON_RESULT
                 result.extraInfo = [show]
@@ -364,9 +362,9 @@ class GenericProvider:
 
         return results
 
-    def findPropers(self, date=None):
+    def findPropers(self, search_date=None):
 
-        results = self.cache.listPropers(date)
+        results = self.cache.listPropers(search_date)
 
         return [classes.Proper(x['name'], x['url'], datetime.datetime.fromtimestamp(x['time'])) for x in results]
 
