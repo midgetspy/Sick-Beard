@@ -298,14 +298,6 @@ TWITTER_USERNAME = None
 TWITTER_PASSWORD = None
 TWITTER_PREFIX = None
 
-USE_NOTIFO = False
-NOTIFO_NOTIFY_ONSNATCH = False
-NOTIFO_NOTIFY_ONDOWNLOAD = False
-NOTIFO_NOTIFY_ONSUBTITLEDOWNLOAD = False
-NOTIFO_USERNAME = None
-NOTIFO_APISECRET = None
-NOTIFO_PREFIX = None
-
 USE_BOXCAR = False
 BOXCAR_NOTIFY_ONSNATCH = False
 BOXCAR_NOTIFY_ONDOWNLOAD = False
@@ -444,7 +436,6 @@ def initialize(consoleLogging=True):
                 RENAME_EPISODES, properFinderScheduler, PROVIDER_ORDER, autoPostProcesserScheduler, \
                 NZBSRUS, NZBSRUS_UID, NZBSRUS_HASH, WOMBLE, NZBX, NZBX_COMPLETION, OMGWTFNZBS, OMGWTFNZBS_USERNAME, OMGWTFNZBS_APIKEY, providerList, newznabProviderList, \
                 EXTRA_SCRIPTS, USE_TWITTER, TWITTER_USERNAME, TWITTER_PASSWORD, TWITTER_PREFIX, \
-                USE_NOTIFO, NOTIFO_USERNAME, NOTIFO_APISECRET, NOTIFO_NOTIFY_ONDOWNLOAD, NOTIFO_NOTIFY_ONSUBTITLEDOWNLOAD, NOTIFO_NOTIFY_ONSNATCH, \
                 USE_BOXCAR, BOXCAR_USERNAME, BOXCAR_PASSWORD, BOXCAR_NOTIFY_ONDOWNLOAD, BOXCAR_NOTIFY_ONSUBTITLEDOWNLOAD, BOXCAR_NOTIFY_ONSNATCH, \
                 USE_PUSHOVER, PUSHOVER_USERKEY, PUSHOVER_NOTIFY_ONDOWNLOAD, PUSHOVER_NOTIFY_ONSUBTITLEDOWNLOAD, PUSHOVER_NOTIFY_ONSNATCH, \
                 USE_LIBNOTIFY, LIBNOTIFY_NOTIFY_ONSNATCH, LIBNOTIFY_NOTIFY_ONDOWNLOAD, LIBNOTIFY_NOTIFY_ONSUBTITLEDOWNLOAD, USE_NMJ, NMJ_HOST, NMJ_DATABASE, NMJ_MOUNT, USE_NMJv2, NMJv2_HOST, NMJv2_DATABASE, NMJv2_DBLOC, USE_SYNOINDEX, \
@@ -718,13 +709,6 @@ def initialize(consoleLogging=True):
         TWITTER_USERNAME = check_setting_str(CFG, 'Twitter', 'twitter_username', '')
         TWITTER_PASSWORD = check_setting_str(CFG, 'Twitter', 'twitter_password', '')
         TWITTER_PREFIX = check_setting_str(CFG, 'Twitter', 'twitter_prefix', 'Sick Beard')
-
-        USE_NOTIFO = bool(check_setting_int(CFG, 'Notifo', 'use_notifo', 0))
-        NOTIFO_NOTIFY_ONSNATCH = bool(check_setting_int(CFG, 'Notifo', 'notifo_notify_onsnatch', 0))
-        NOTIFO_NOTIFY_ONDOWNLOAD = bool(check_setting_int(CFG, 'Notifo', 'notifo_notify_ondownload', 0))
-        NOTIFO_NOTIFY_ONSUBTITLEDOWNLOAD = bool(check_setting_int(CFG, 'Notifo', 'notifo_notify_onsubtitledownload', 0))
-        NOTIFO_USERNAME = check_setting_str(CFG, 'Notifo', 'notifo_username', '')
-        NOTIFO_APISECRET = check_setting_str(CFG, 'Notifo', 'notifo_apisecret', '')
 
         USE_BOXCAR = bool(check_setting_int(CFG, 'Boxcar', 'use_boxcar', 0))
         BOXCAR_NOTIFY_ONSNATCH = bool(check_setting_int(CFG, 'Boxcar', 'boxcar_notify_onsnatch', 0))
@@ -1410,14 +1394,6 @@ def save_config():
     new_config['Twitter']['twitter_username'] = TWITTER_USERNAME
     new_config['Twitter']['twitter_password'] = TWITTER_PASSWORD
     new_config['Twitter']['twitter_prefix'] = TWITTER_PREFIX
-
-    new_config['Notifo'] = {}
-    new_config['Notifo']['use_notifo'] = int(USE_NOTIFO)
-    new_config['Notifo']['notifo_notify_onsnatch'] = int(NOTIFO_NOTIFY_ONSNATCH)
-    new_config['Notifo']['notifo_notify_ondownload'] = int(NOTIFO_NOTIFY_ONDOWNLOAD)
-    new_config['Notifo']['notifo_notify_onsubtitledownload'] = int(NOTIFO_NOTIFY_ONSUBTITLEDOWNLOAD)
-    new_config['Notifo']['notifo_username'] = NOTIFO_USERNAME
-    new_config['Notifo']['notifo_apisecret'] = NOTIFO_APISECRET
 
     new_config['Boxcar'] = {}
     new_config['Boxcar']['use_boxcar'] = int(USE_BOXCAR)

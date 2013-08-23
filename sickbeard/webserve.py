@@ -1473,7 +1473,6 @@ class ConfigNotifications:
                           use_growl=None, growl_notify_onsnatch=None, growl_notify_ondownload=None, growl_notify_onsubtitledownload=None, growl_host=None, growl_password=None, 
                           use_prowl=None, prowl_notify_onsnatch=None, prowl_notify_ondownload=None, prowl_notify_onsubtitledownload=None, prowl_api=None, prowl_priority=0, 
                           use_twitter=None, twitter_notify_onsnatch=None, twitter_notify_ondownload=None, twitter_notify_onsubtitledownload=None, 
-                          use_notifo=None, notifo_notify_onsnatch=None, notifo_notify_ondownload=None, notifo_notify_onsubtitledownload=None, notifo_username=None, notifo_apisecret=None,
                           use_boxcar=None, boxcar_notify_onsnatch=None, boxcar_notify_ondownload=None, boxcar_notify_onsubtitledownload=None, boxcar_username=None,
                           use_pushover=None, pushover_notify_onsnatch=None, pushover_notify_ondownload=None, pushover_notify_onsubtitledownload=None, pushover_userkey=None,
                           use_libnotify=None, libnotify_notify_onsnatch=None, libnotify_notify_ondownload=None, libnotify_notify_onsubtitledownload=None,
@@ -1609,26 +1608,6 @@ class ConfigNotifications:
             use_twitter = 1
         else:
             use_twitter = 0
-
-        if notifo_notify_onsnatch == "on":
-            notifo_notify_onsnatch = 1
-        else:
-            notifo_notify_onsnatch = 0
-
-        if notifo_notify_ondownload == "on":
-            notifo_notify_ondownload = 1
-        else:
-            notifo_notify_ondownload = 0
-            
-        if notifo_notify_onsubtitledownload == "on":
-            notifo_notify_onsubtitledownload = 1
-        else:
-            notifo_notify_onsubtitledownload = 0
-            
-        if use_notifo == "on":
-            use_notifo = 1
-        else:
-            use_notifo = 0
 
         if boxcar_notify_onsnatch == "on":
             boxcar_notify_onsnatch = 1
@@ -2620,16 +2599,6 @@ class Home:
             return "Test prowl notice sent successfully"
         else:
             return "Test prowl notice failed"
-
-    @cherrypy.expose
-    def testNotifo(self, username=None, apisecret=None):
-        cherrypy.response.headers['Cache-Control'] = "max-age=0,no-cache,no-store"
-
-        result = notifiers.notifo_notifier.test_notify(username, apisecret)
-        if result:
-            return "Notifo notification succeeded. Check your Notifo clients to make sure it worked"
-        else:
-            return "Error sending Notifo notification"
 
     @cherrypy.expose
     def testBoxcar(self, username=None):
