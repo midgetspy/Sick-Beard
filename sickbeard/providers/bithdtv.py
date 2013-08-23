@@ -153,8 +153,8 @@ class BITHDTVProvider(generic.TorrentProvider):
         data = self.getURL(searchUrl)
         if data:
             logger.log("[BIT-HDTV] parseResults() URL: " + searchUrl, logger.DEBUG)
-            for torrent in re.compile("<td class=detail align=center><p><a href='(?P<url>.*?)\.torrent'>.*?align=left><a title=\"(?P<title>.*?)\" href=",re.MULTILINE|re.DOTALL).finditer(data):    
-                item = (torrent.group('title').replace('.',' ').decode('utf-8', 'ignore'), torrent.group('url') + ".torrent")
+            for torrent in re.compile("<td class=detail align=left><a title=\"(?P<title>.*?)\" href.*?<font class=small></font><a href=\"/(?P<url>.*?)\.torrent\"></a>",re.MULTILINE|re.DOTALL).finditer(data):
+                item = (torrent.group('title').replace('.',' ').decode('utf-8', 'ignore'), self.url + torrent.group('url') + ".torrent")
                 self.search_results.append(item)
                 logger.log("[BIT-HDTV] parseResults() Title: " + torrent.group('title').decode('utf-8', 'ignore'), logger.DEBUG)
         else:
