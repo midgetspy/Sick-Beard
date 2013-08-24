@@ -17,7 +17,7 @@
 # along with subliminal.  If not, see <http://www.gnu.org/licenses/>.
 from . import subtitles
 from .language import Language
-from .utils import to_unicode
+from .utils import to_unicode, to_utf8
 import enzyme.core
 import guessit
 import hashlib
@@ -139,7 +139,7 @@ class Video(object):
         # startswith/endswith comparisons
         folder, basename = os.path.split(basepath)
         if folder == '':
-            folder = '.'
+            folder = u'.'
         existing = [f for f in os.listdir(folder) if f.startswith(basename)]
         if sickbeard.SUBTITLES_DIR:
             subsDir = ek.ek(os.path.join, folder, sickbeard.SUBTITLES_DIR)
