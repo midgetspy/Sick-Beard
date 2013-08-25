@@ -29,6 +29,8 @@ from sickbeard.exceptions import ex
 from sickbeard import logger
 from sickbeard.name_parser.parser import NameParser, InvalidNameException
 
+from lib.unrar2 import RarFile, RarInfo
+from lib.unrar2.rar_exceptions import *
 
 def logHelper (logMessage, logLevel=logger.MESSAGE):
     logger.log(logMessage, logLevel)
@@ -41,6 +43,8 @@ def processDir (dirName, nzbName=None, recurse=False):
     dirName: The folder name to look in
     nzbName: The NZB name which resulted in this folder being downloaded
     """
+
+    global returnStr
 
     returnStr = ''
 
@@ -76,16 +80,19 @@ def processDir (dirName, nzbName=None, recurse=False):
             dirs = [dirs]
             files = []
 
+    returnStr += logHelper(u"PostProcessing Path: " + path, logger.DEBUG)
+    returnStr += logHelper(u"PostProcessing Dirs: " + str(dirs), logger.DEBUG)
+    
+    rarFiles = filter(helpers.isRarFile, files)
+    files += unRAR(path, rarFiles)
     videoFiles = filter(helpers.isMediaFile, files)
+
+    returnStr += logHelper(u"PostProcessing Files: " + str(files), logger.DEBUG)
+    returnStr += logHelper(u"PostProcessing VideoFiles: " + str(videoFiles), logger.DEBUG)
 
     # If nzbName is set and there's more than one videofile in the folder, files will be lost (overwritten).
     if nzbName != None and len(videoFiles) >= 2:
         nzbName = None
-
-    returnStr += logHelper(u"PostProcessing Path: " + path, logger.DEBUG)
-    returnStr += logHelper(u"PostProcessing Dirs: " + str(dirs), logger.DEBUG)
-    returnStr += logHelper(u"PostProcessing Files: " + str(files), logger.DEBUG)
-    returnStr += logHelper(u"PostProcessing VideoFiles: " + str(videoFiles), logger.DEBUG)
 
     #Process Video File in the current Path
     for cur_video_file in videoFiles:
@@ -116,14 +123,15 @@ def processDir (dirName, nzbName=None, recurse=False):
             returnStr += logHelper(u"Processing failed for "+cur_video_file_path+": "+process_fail_message, logger.WARNING)
 
     #Process Video File in all TV Subdir
-    for dir in [x for x in dirs if validateDir(path, x, returnStr)]:
+    for dir in [x for x in dirs if validateDir(path, x)]:
         
         process_result = True
         
         for processPath, processDir, fileList in ek.ek(os.walk, ek.ek(os.path.join, path, dir), topdown=False):
 
             #TODO ADD some other checking
-
+            rarFiles = filter(helpers.isRarFile, fileList)
+            fileList += unRAR(path, rarFiles)
             videoFiles = filter(helpers.isMediaFile, fileList)
             notwantedFiles = [x for x in fileList if x not in videoFiles]
 
@@ -186,8 +194,10 @@ def processDir (dirName, nzbName=None, recurse=False):
 
     return returnStr
 
-def validateDir(path, dirName, returnStr):
-
+def validateDir(path, dirName):
+    
+    global returnStr
+    
     returnStr += logHelper(u"Processing folder "+dirName, logger.DEBUG)
 
     # TODO: check if it's failed and deal with it if it is
@@ -230,3 +240,33 @@ def validateDir(path, dirName, returnStr):
             pass
     
     return False
+
+def unRAR(path, rarFiles):
+    
+    global returnStr
+    
+    if sickbeard.UNPACK and rarFiles is not []:
+
+        unpacked_files = []
+
+        returnStr += logHelper(u"Packed Releases detected: " + str(rarFiles), logger.DEBUG)
+    
+        for archive in rarFiles:
+
+            returnStr += logHelper(u"Unpacking archive: " + archive, logger.DEBUG)
+    
+            try:
+                rar_handle = RarFile(ek.ek(os.path.join, path, archive), password="a")
+                rar_handle.extract(path = path, withSubpath = True, overwrite = False)
+                unpacked_files += [x.filename for x in rar_handle.infolist() if not x.isdir]
+                del rar_handle
+            except Exception, IncorrectRARPassword:
+                 returnStr += logHelper(u"Passworded Rar archive " + archive + ' impossible to Unrar', logger.ERROR)
+                 continue
+            except Exception, e:
+                 returnStr += logHelper(u"Failed Unrar archive " + archive + ': ' + ex(e), logger.ERROR)
+                 continue
+     
+        returnStr += logHelper(u"UnRar content: " + str(unpacked_files), logger.DEBUG)
+        
+    return unpacked_files

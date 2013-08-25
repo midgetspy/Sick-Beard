@@ -1074,7 +1074,7 @@ class ConfigPostProcessing:
     @cherrypy.expose
     def savePostProcessing(self, naming_pattern=None, naming_multi_ep=None,
                     xbmc_data=None, xbmc__frodo___data=None, mediabrowser_data=None, synology_data=None, sony_ps3_data=None, wdtv_data=None, tivo_data=None, mede8er_data=None,
-                    use_banner=None, keep_processed_dir=None, process_method=None, process_automatically=None, rename_episodes=None,
+                    use_banner=None, keep_processed_dir=None, process_method=None, process_automatically=None, rename_episodes=None, unpack=None,
                     move_associated_files=None, tv_download_dir=None, naming_custom_abd=None, naming_abd_pattern=None, naming_strip_year=None):
 
         results = []
@@ -1091,7 +1091,12 @@ class ConfigPostProcessing:
             process_automatically = 1
         else:
             process_automatically = 0
-
+            
+        if unpack == "on":
+            unpack = 1
+        else:
+            unpack = 0
+                        
         if rename_episodes == "on":
             rename_episodes = 1
         else:

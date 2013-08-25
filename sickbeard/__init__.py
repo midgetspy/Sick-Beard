@@ -208,6 +208,7 @@ KEEP_PROCESSED_DIR = False
 PROCESS_METHOD = None
 MOVE_ASSOCIATED_FILES = False
 TV_DOWNLOAD_DIR = None
+UNPACK = False
 
 NZBS = False
 NZBS_UID = None
@@ -243,6 +244,7 @@ SAB_APIKEY = None
 SAB_CATEGORY = None
 SAB_HOST = ''
 
+NZBGET_USERNAME = None 
 NZBGET_PASSWORD = None
 NZBGET_CATEGORY = None
 NZBGET_HOST = None
@@ -412,7 +414,7 @@ def initialize(consoleLogging=True):
         global LOG_DIR, WEB_PORT, WEB_LOG, WEB_ROOT, WEB_USERNAME, WEB_PASSWORD, WEB_HOST, WEB_IPV6, USE_API, API_KEY, ENABLE_HTTPS, HTTPS_CERT, HTTPS_KEY, \
                 USE_NZBS, USE_TORRENTS, NZB_METHOD, NZB_DIR, DOWNLOAD_PROPERS, ALLOW_HIGH_PRIORITY, TORRENT_METHOD, \
                 SAB_USERNAME, SAB_PASSWORD, SAB_APIKEY, SAB_CATEGORY, SAB_HOST, \
-                NZBGET_PASSWORD, NZBGET_CATEGORY, NZBGET_HOST, currentSearchScheduler, backlogSearchScheduler, \
+                NZBGET_USERNAME, NZBGET_PASSWORD, NZBGET_CATEGORY, NZBGET_HOST, currentSearchScheduler, backlogSearchScheduler, \
                 TORRENT_USERNAME, TORRENT_PASSWORD, TORRENT_HOST, TORRENT_PATH, TORRENT_RATIO, TORRENT_PAUSED, TORRENT_HIGH_BANDWIDTH, TORRENT_LABEL, \
                 USE_XBMC, XBMC_NOTIFY_ONSNATCH, XBMC_NOTIFY_ONDOWNLOAD, XBMC_NOTIFY_ONSUBTITLEDOWNLOAD, XBMC_UPDATE_FULL, XBMC_UPDATE_ONLYFIRST, \
                 XBMC_UPDATE_LIBRARY, XBMC_HOST, XBMC_USERNAME, XBMC_PASSWORD, \
@@ -430,7 +432,7 @@ def initialize(consoleLogging=True):
                 USE_PYTIVO, PYTIVO_NOTIFY_ONSNATCH, PYTIVO_NOTIFY_ONDOWNLOAD, PYTIVO_NOTIFY_ONSUBTITLEDOWNLOAD, PYTIVO_UPDATE_LIBRARY, PYTIVO_HOST, PYTIVO_SHARE_NAME, PYTIVO_TIVO_NAME, \
                 USE_NMA, NMA_NOTIFY_ONSNATCH, NMA_NOTIFY_ONDOWNLOAD, NMA_NOTIFY_ONSUBTITLEDOWNLOAD, NMA_API, NMA_PRIORITY, \
                 USE_PUSHALOT, PUSHALOT_NOTIFY_ONSNATCH, PUSHALOT_NOTIFY_ONDOWNLOAD, PUSHALOT_NOTIFY_ONSUBTITLEDOWNLOAD, PUSHALOT_AUTHORIZATIONTOKEN, \
-                NZBMATRIX_APIKEY, versionCheckScheduler, VERSION_NOTIFY, PROCESS_AUTOMATICALLY, \
+                NZBMATRIX_APIKEY, versionCheckScheduler, VERSION_NOTIFY, PROCESS_AUTOMATICALLY, UNPACK, \
                 KEEP_PROCESSED_DIR, PROCESS_METHOD, TV_DOWNLOAD_DIR, TVDB_BASE_URL, MIN_SEARCH_FREQUENCY, \
                 showQueueScheduler, searchQueueScheduler, ROOT_DIRS, CACHE_DIR, ACTUAL_CACHE_DIR, TVDB_API_PARMS, \
                 NAMING_PATTERN, NAMING_MULTI_EP, NAMING_FORCE_FOLDERS, NAMING_ABD_PATTERN, NAMING_CUSTOM_ABD, NAMING_STRIP_YEAR, \
@@ -584,6 +586,7 @@ def initialize(consoleLogging=True):
 
         TV_DOWNLOAD_DIR = check_setting_str(CFG, 'General', 'tv_download_dir', '')
         PROCESS_AUTOMATICALLY = check_setting_int(CFG, 'General', 'process_automatically', 0)
+        UNPACK = check_setting_int(CFG, 'General', 'unpack', 0)
         RENAME_EPISODES = check_setting_int(CFG, 'General', 'rename_episodes', 1)
         KEEP_PROCESSED_DIR = check_setting_int(CFG, 'General', 'keep_processed_dir', 1)
         PROCESS_METHOD = check_setting_str(CFG, 'General', 'process_method', 'copy' if KEEP_PROCESSED_DIR else 'move')
@@ -655,6 +658,7 @@ def initialize(consoleLogging=True):
         SAB_CATEGORY = check_setting_str(CFG, 'SABnzbd', 'sab_category', 'tv')
         SAB_HOST = check_setting_str(CFG, 'SABnzbd', 'sab_host', '')
 
+        NZBGET_USERNAME = check_setting_str(CFG, 'NZBget', 'nzbget_username', 'nzbget') 
         NZBGET_PASSWORD = check_setting_str(CFG, 'NZBget', 'nzbget_password', 'tegbzn6789')
         NZBGET_CATEGORY = check_setting_str(CFG, 'NZBget', 'nzbget_category', 'tv')
         NZBGET_HOST = check_setting_str(CFG, 'NZBget', 'nzbget_host', '')
@@ -1248,6 +1252,7 @@ def save_config():
     new_config['General']['process_method'] = PROCESS_METHOD
     new_config['General']['move_associated_files'] = int(MOVE_ASSOCIATED_FILES)
     new_config['General']['process_automatically'] = int(PROCESS_AUTOMATICALLY)
+    new_config['General']['unpack'] = int(UNPACK)
     new_config['General']['rename_episodes'] = int(RENAME_EPISODES)
     new_config['General']['create_missing_show_dirs'] = CREATE_MISSING_SHOW_DIRS
     new_config['General']['add_shows_wo_dir'] = ADD_SHOWS_WO_DIR
@@ -1339,6 +1344,8 @@ def save_config():
     new_config['SABnzbd']['sab_host'] = SAB_HOST
 
     new_config['NZBget'] = {}
+
+    new_config['NZBget']['nzbget_username'] = NZBGET_USERNAME    
     new_config['NZBget']['nzbget_password'] = NZBGET_PASSWORD
     new_config['NZBget']['nzbget_category'] = NZBGET_CATEGORY
     new_config['NZBget']['nzbget_host'] = NZBGET_HOST

@@ -119,6 +119,14 @@ def isMediaFile(filename):
     else:
         return False
 
+def isRarFile(filename):
+    archive_regex = '(?P<file>^(?P<base>(?:(?!\.part\d+\.rar$).)*)\.(?:(?:part0*1\.)?rar)$)'
+    
+    if re.search(archive_regex, filename):
+        return True
+    
+    return False
+
 def sanitizeFileName(name):
     '''
     >>> sanitizeFileName('a/b/c')

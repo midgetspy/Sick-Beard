@@ -111,9 +111,22 @@
                             </label>
                             <label class="nocheck clearfix" for="process_automatically">
                                 <span class="component-title">&nbsp;</span>
-                                <span class="component-desc"><b>NOTE:</b> Do not use if you use sabToSickbeard w/ SABnzbd+!</span>
+                                <span class="component-desc"><b>NOTE:</b> Do not use if you use PostProcesing external script (eg. uProcess w/ uTorrent, sabToSickbeard w/ SABnzbd+!)</span>
                             </label>
                         </div>
+
+                        <div class="field-pair">
+                            <input type="checkbox" name="unpack" id="unpack" #if $sickbeard.UNPACK == True then "checked=\"checked\"" else ""# />
+                            <label class="clearfix" for="unpack">
+                                <span class="component-title">Unpack</span>
+                                <span class="component-desc">Unpack any TV releases in your <i>TV Download Dir</i>?</span>
+                            </label>
+                            <label class="nocheck clearfix" for="unpack">
+                                <span class="component-title">&nbsp;</span>
+                                <span class="component-desc"><b>NOTE:</b> Only working with Scan and Process Enabled</span>
+                            </label>
+                        </div>
+
 
                         <div class="clearfix"></div>
                         <input type="submit" class="btn config_submitter" value="Save Changes" /><br/>
