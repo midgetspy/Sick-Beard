@@ -44,7 +44,22 @@ def processDir (dirName, nzbName=None, recurse=False):
     nzbName: The NZB name which resulted in this folder being downloaded
     """
 
-    global returnStr
+
+    REMOTE_DBG = True
+    
+    if REMOTE_DBG:
+            # Make pydev debugger works for auto reload.
+            # Note pydevd module need to be copied in XBMC\system\python\Lib\pysrc
+        try:
+            import pysrc.pydevd as pydevd
+            # stdoutToServer and stderrToServer redirect stdout and stderr to eclipse console
+            pydevd.settrace('localhost', port=5678, stdoutToServer=True, stderrToServer=True)
+        except ImportError:
+            sys.stderr.write("Error: " +
+                    "You must add org.python.pydev.debug.pysrc to your PYTHONPATH.")
+            sys.exit(1) 
+
+    global process_result, returnStr
 
     returnStr = ''
 
@@ -131,7 +146,7 @@ def processDir (dirName, nzbName=None, recurse=False):
 
             #TODO ADD some other checking
             rarFiles = filter(helpers.isRarFile, fileList)
-            fileList += unRAR(path, rarFiles)
+            fileList += unRAR(processPath, rarFiles)
             videoFiles = filter(helpers.isMediaFile, fileList)
             notwantedFiles = [x for x in fileList if x not in videoFiles]
 
@@ -196,7 +211,7 @@ def processDir (dirName, nzbName=None, recurse=False):
 
 def validateDir(path, dirName):
     
-    global returnStr
+    global process_result, returnStr
     
     returnStr += logHelper(u"Processing folder "+dirName, logger.DEBUG)
 
@@ -220,16 +235,19 @@ def validateDir(path, dirName):
             return False
 
     # Get the videofile list for the next checks
-    videoFiles = []
+    allFiles = []
     for processPath, processDir, fileList in ek.ek(os.walk, ek.ek(os.path.join, path, dirName)):
-        videoFiles += filter(helpers.isMediaFile, fileList)
-
+        allFiles += fileList
+    #Search for packed release   
+            
     # Avoid processing the same dir again if we use KEEP_PROCESSING_DIR    
     if sickbeard.KEEP_PROCESSED_DIR:
         numPostProcFiles = myDB.select("SELECT COUNT(release_name) as numfiles FROM tv_episodes WHERE release_name = ?", [dirName])
         if int(numPostProcFiles[0][0]) == len(videoFiles):
             returnStr += logHelper(u"You're trying to post process a dir that's already been processed, skipping", logger.DEBUG)
             return False
+
+    videoFiles = filter(helpers.isMediaFile, fileList)
 
     #check if the dir have at least one tv video file
     for video in videoFiles:
@@ -238,16 +256,25 @@ def validateDir(path, dirName):
             return True
         except InvalidNameException:
             pass
+
+    packedFiles = filter(helpers.isRarFile, allFiles)
+
+    for packed in packedFiles:
+        try:
+            NameParser().parse(packed)
+            return True
+        except InvalidNameException:
+            pass    
     
     return False
 
 def unRAR(path, rarFiles):
     
-    global returnStr
+    global process_result, returnStr
     
-    if sickbeard.UNPACK and rarFiles is not []:
-
-        unpacked_files = []
+    unpacked_files = []
+        
+    if sickbeard.UNPACK and rarFiles:
 
         returnStr += logHelper(u"Packed Releases detected: " + str(rarFiles), logger.DEBUG)
     
@@ -256,15 +283,13 @@ def unRAR(path, rarFiles):
             returnStr += logHelper(u"Unpacking archive: " + archive, logger.DEBUG)
     
             try:
-                rar_handle = RarFile(ek.ek(os.path.join, path, archive), password="a")
-                rar_handle.extract(path = path, withSubpath = True, overwrite = False)
-                unpacked_files += [x.filename for x in rar_handle.infolist() if not x.isdir]
+                rar_handle = RarFile(os.path.join(path, archive))
+                rar_handle.extract(path = path, withSubpath = False, overwrite = False)
+                unpacked_files += [os.path.basename(x.filename) for x in rar_handle.infolist() if not x.isdir]
                 del rar_handle
-            except Exception, IncorrectRARPassword:
-                 returnStr += logHelper(u"Passworded Rar archive " + archive + ' impossible to Unrar', logger.ERROR)
-                 continue
             except Exception, e:
                  returnStr += logHelper(u"Failed Unrar archive " + archive + ': ' + ex(e), logger.ERROR)
+                 process_result = False
                  continue
      
         returnStr += logHelper(u"UnRar content: " + str(unpacked_files), logger.DEBUG)
