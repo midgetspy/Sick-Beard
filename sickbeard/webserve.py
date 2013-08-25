@@ -1288,6 +1288,7 @@ class ConfigProviders:
                       torrentleech_username=None, torrentleech_password=None,
                       iptorrents_username=None, iptorrents_password=None, iptorrents_freeleech=None,
                       kat_trusted = None, kat_verified = None,
+                      scc_username=None, scc_password=None, 
                       newzbin_username=None, newzbin_password=None,
                       provider_order=None):
 
@@ -1379,7 +1380,9 @@ class ConfigProviders:
             elif curProvider == 'omgwtfnzbs':
                 sickbeard.OMGWTFNZBS = curEnabled  
             elif curProvider == 'kickasstorrents':
-                sickbeard.KAT = curEnabled                    
+                sickbeard.KAT = curEnabled
+            elif curProvider == 'scc':
+                sickbeard.SCC = curEnabled                 
             else:
                 logger.log(u"don't know what "+curProvider+" is, skipping")
 
@@ -1443,7 +1446,10 @@ class ConfigProviders:
         else:
             kat_verified = 0   
             
-        sickbeard.KAT_VERIFIED = kat_verified    
+        sickbeard.KAT_VERIFIED = kat_verified
+
+        sickbeard.SCC_USERNAME = SCC_username.strip()
+        sickbeard.SCC_PASSWORD = SCC_password.strip()
 
         sickbeard.NZBSRUS_UID = nzbs_r_us_uid.strip()
         sickbeard.NZBSRUS_HASH = nzbs_r_us_hash.strip()

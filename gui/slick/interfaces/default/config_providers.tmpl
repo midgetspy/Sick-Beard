@@ -218,6 +218,16 @@ var show_nzb_providers = #if $sickbeard.USE_NZBS then "true" else "false"#;
                         </div>
 </div>
 
+<div class="providerDiv" id="kickasstorrentsDiv">
+                        <div class="field-pair">
+                            <input type="checkbox" name="kat_verified" id="kat_verified" #if $sickbeard.KAT_VERIFIED then "checked=\"checked\"" else ""#/>
+                            <label class="clearfix" for="kat_verified">
+                                <span class="component-title">Verified Only</span>
+                                <span class="component-desc">Download only verified torrent?</span>
+                            </label>
+                        </div>
+</div>
+
 <div class="providerDiv" id="dailytvtorrentsDiv">
                         <div class="field-pair">
                             <input type="checkbox" name="dtt_norar" id="dtt_norar" #if $sickbeard.DTT_NORAR then "checked=\"checked\"" else ""#/>
@@ -281,15 +291,21 @@ var show_nzb_providers = #if $sickbeard.USE_NZBS then "true" else "false"#;
                         </div>
 </div><!-- /iptorrentsDiv //-->
 
-<div class="providerDiv" id="kickasstorrentsDiv">
+<div class="providerDiv" id="sccDiv">
                         <div class="field-pair">
-                            <input type="checkbox" name="kat_verified" id="kat_verified" #if $sickbeard.KAT_VERIFIED then "checked=\"checked\"" else ""#/>
-                            <label class="clearfix" for="kat_verified">
-                                <span class="component-title">Verified Only</span>
-                                <span class="component-desc">Download only verified torrent?</span>
+                            <label class="clearfix">
+                                <span class="component-title">Username:</span>
+                                <input class="component-desc" type="text" name="scc_username" value="$sickbeard.SCC_USERNAME" size="10" />
                             </label>
                         </div>
-</div>
+                        <div class="field-pair">
+                            <label class="clearfix">
+                                <span class="component-title">Password:</span>
+                                <input class="component-desc" type="password" name="scc_password" value="$sickbeard.SCC_PASSWORD" size="40" />
+                            </label>
+                        </div>
+</div> 
+
 <!-- end div for editing providers -->
 
                     <input type="submit" class="btn config_submitter" value="Save Changes" /><br/>
