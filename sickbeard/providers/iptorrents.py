@@ -170,9 +170,10 @@ class IPTorrentsProvider(generic.TorrentProvider):
                     
                     torrent_table = html.find('table', attrs = {'class' : 'torrents'})
                     torrents = torrent_table.find_all('tr') if torrent_table else []
-                    
-                    if not torrents:
-#                        logger.log(u"The data returned from " + self.name + " is incomplete, this result is unusable", logger.DEBUG)
+
+                    #Continue only if one Release is found                    
+                    if len(torrents)<2:
+                        logger.log(u"The Data returned from " + self.name + " do not contains any torrent", logger.WARNING)
                         continue
                     
 

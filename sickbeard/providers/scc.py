@@ -140,7 +140,7 @@ class SCCProvider(generic.TorrentProvider):
     def _doSearch(self, search_params, show=None):
 
         results = []
-        items = {'Season': [], 'Episode': []}
+        items = {'Season': [], 'Episode': [], 'RSS': []}
 
         if not self._doLogin():
             return []
@@ -162,24 +162,25 @@ class SCCProvider(generic.TorrentProvider):
                     torrent_table = html.find('table', attrs = {'id' : 'torrents-table'})
                     torrent_rows = torrent_table.find_all('tr') if torrent_table else []
 
-                    if not torrent_rows:
-#                        logger.log(u"No results found for: " + search_string + "(" + searchURL + ")", logger.DEBUG)
+                    #Continue only if one Release is found
+                    if len(torrent_rows)<2:
+                        logger.log(u"The Data returned from " + self.name + " do not contains any torrent", logger.WARNING)
                         continue
 
                     for result in torrent_table.find_all('tr')[1:]:
 
                         link = result.find('td', attrs = {'class' : 'tth_name'}).find('a')
                         url = result.find('td', attrs = {'class' : 'td_dl'}).find('a')
-
                         title = link.string
                         download_url = self.urls['download'] % url['href']
                         id = int(link['href'].replace('details?id=', ''))
                         seeders = int(result.find('td', attrs = {'class' : 'ttr_seeders'}).string)
                         leechers = int(result.find('td', attrs = {'class' : 'ttr_leechers'}).string)
 
-                        #Filter unseeded torrent
-                        if seeders == 0 or not title \
-                        or not download_url:
+                        if mode != 'RSS' and seeders == 0:
+                            continue 
+
+                        if not title:
                             continue
 
                         item = title, download_url, id, seeders, leechers
@@ -233,7 +234,7 @@ class SCCCache(tvcache.TVCache):
         tvcache.TVCache.__init__(self, provider)
 
         # only poll SCC every 10 minutes max
-        self.minTime = 10
+        self.minTime = 20
 
     def updateCache(self):
 
@@ -245,41 +246,20 @@ class SCCCache(tvcache.TVCache):
         if not data:
             return []
 
-        try: 
-            html = BeautifulSoup(data, features=["html5lib", "permissive"])
-
-            torrent_table = html.find('table', attrs = {'id' : 'torrents-table'})
-            torrent_rows = torrent_table.find_all('tr') if torrent_table else []
-
-            if not torrent_rows:
-#                logger.log(u"The Data returned from " + self.provider.name + " is incomplete, this result is unusable", logger.ERROR)
-                return []
-
-            # now that we've loaded the current feed lets delete the old cache
-            logger.log(u"Clearing " + self.provider.name + " cache and updating with new information")
+        search_params = {'RSS': ['rss']}
+        rss_results = self.provider._doSearch(search_params)
+        
+        if rss_results:
             self.setLastUpdate()
-            self._clearCache()
+        else:
+            return []
+        
+        logger.log(u"Clearing " + self.provider.name + " cache and updating with new information")
+        self._clearCache()
 
-            for result in torrent_rows[1:]:
-
-                link = result.find('td', attrs = {'class' : 'ttr_name'}).find('a')
-                url = result.find('td', attrs = {'class' : 'td_dl'}).find('a')
-                title = link.string
-                download_url = self.provider.urls['download'] % url['href']
-                id = int(link['href'].replace('details?id=', ''))
-                seeders = int(result.find('td', attrs = {'class' : 'ttr_seeders'}).string)
-                leechers = int(result.find('td', attrs = {'class' : 'ttr_leechers'}).string)
-
-                #Filter torrent
-                if not title or not download_url:
-                    continue 
-
-                item = (title, download_url)
-                
-                self._parseItem(item)
-
-        except Exception, e:
-            logger.log(u"Failed to parsing " + self.provider.name + " RSS - " + " Traceback: "  + traceback.format_exc(), logger.ERROR)
+        for result in rss_results:
+            item = (result[0], result[1])
+            self._parseItem(item)
 
     def _getData(self):
        

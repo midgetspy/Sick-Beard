@@ -232,8 +232,9 @@ class KATProvider(generic.TorrentProvider):
                     torrent_table = soup.find('table', attrs = {'class' : 'data'})
                     torrent_rows = torrent_table.find_all('tr') if torrent_table else []
 
-                    if not torrent_rows:
-#                        logger.log(u"The Data returned from " + self.name + " do not contains any torrent", logger.ERROR)
+                    #Continue only if one Release is found
+                    if len(torrent_rows)<2:
+                        logger.log(u"The Data returned from " + self.name + " do not contains any torrent", logger.WARNING)
                         continue
                     
                     for tr in torrent_rows[1:]:
