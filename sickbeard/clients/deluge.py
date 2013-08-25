@@ -42,7 +42,7 @@ class DelugeAPI(GenericClient):
         except:
             return None     
         
-        self.auth = self.response.json["result"]
+        self.auth = self.response.json()["result"]
         
         return self.auth
      
@@ -54,7 +54,7 @@ class DelugeAPI(GenericClient):
                                 })
         self._request(method='post', data=post_data)
         
-        return self.response.json['result']
+        return self.response.json()['result']
             
     def _add_torrent_file(self, result):
 
@@ -64,7 +64,7 @@ class DelugeAPI(GenericClient):
                                 })           
         self._request(method='post', data=post_data)
         
-        return self.response.json['result']
+        return self.response.json()['result']
     
     def _set_torrent_label(self, result):
         
@@ -76,7 +76,7 @@ class DelugeAPI(GenericClient):
                                     "id": 3
                                     })
             self._request(method='post', data=post_data)
-            labels = self.response.json['result']
+            labels = self.response.json()['result']
                 
             if labels != None:
                 if label not in labels:
@@ -99,7 +99,7 @@ class DelugeAPI(GenericClient):
                 logger.log(self.name + ': ' + u"label plugin not detected", logger.DEBUG)
                 return False
         
-        return not self.response.json['error']
+        return not self.response.json()['error']
 
     
     def _set_torrent_ratio(self, result):
@@ -117,7 +117,7 @@ class DelugeAPI(GenericClient):
                                     })        
             self._request(method='post', data=post_data)
 
-            return not self.response.json['error']
+            return not self.response.json()['error']
             
         return True
 
@@ -136,7 +136,7 @@ class DelugeAPI(GenericClient):
                                     })        
             self._request(method='post', data=post_data)
             
-            return not self.response.json['error']
+            return not self.response.json()['error']
         
         return True
         
@@ -149,7 +149,7 @@ class DelugeAPI(GenericClient):
                                     })
             self._request(method='post', data=post_data)
 
-            return not self.response.json['error']
+            return not self.response.json()['error']
             
         return True  
 

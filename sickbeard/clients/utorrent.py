@@ -31,7 +31,7 @@ class uTorrentAPI(GenericClient):
             
     def _request(self, method='get', params={}, files=None):
 
-        params.update({'token':self._get_auth()})
+        params.update({'token':self.auth})
         return super(uTorrentAPI, self)._request(method=method, params=params, files=files)
 
     def _get_auth(self):

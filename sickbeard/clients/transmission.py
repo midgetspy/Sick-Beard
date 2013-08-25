@@ -62,7 +62,7 @@ class TransmissionAPI(GenericClient):
                                  })        
         self._request(method='post', data=post_data)
 
-        return self.response.json['result'] == "success"
+        return self.response.json()['result'] == "success"
 
     def _add_torrent_file(self, result):
 
@@ -75,7 +75,7 @@ class TransmissionAPI(GenericClient):
                                 })
         self._request(method='post', data=post_data)
         
-        return self.response.json['result'] == "success"
+        return self.response.json()['result'] == "success"
 
     def _set_torrent_ratio(self, result):
         
@@ -101,7 +101,7 @@ class TransmissionAPI(GenericClient):
                                 })       
         self._request(method='post', data=post_data)            
         
-        return self.response.json['result'] == "success"    
+        return self.response.json()['result'] == "success"    
 
     def _set_torrent_priority(self, result):
 
@@ -126,7 +126,7 @@ class TransmissionAPI(GenericClient):
                                 })       
         self._request(method='post', data=post_data)            
         
-        return self.response.json['result'] == "success"    
+        return self.response.json()['result'] == "success"    
 	
 
 api = TransmissionAPI()
