@@ -856,7 +856,7 @@ class TVShow(object):
         return toReturn
 
 
-    def wantEpisode(self, season, episode, quality, codec, manualSearch=False):
+    def wantEpisode(self, season, episode, quality, codec=None, manualSearch=False):
 	if codec is None:
             codec = self.codec
         qs = Quality.qualityStrings[quality] + "-" + Quality.codecStrings[codec]
