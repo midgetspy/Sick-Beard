@@ -1381,7 +1381,7 @@ class ConfigProviders:
                 sickbeard.OMGWTFNZBS = curEnabled  
             elif curProvider == 'kickasstorrents':
                 sickbeard.KAT = curEnabled
-            elif curProvider == 'scc':
+            elif curProvider == 'sceneaccess':
                 sickbeard.SCC = curEnabled                 
             else:
                 logger.log(u"don't know what "+curProvider+" is, skipping")
@@ -1448,8 +1448,8 @@ class ConfigProviders:
             
         sickbeard.KAT_VERIFIED = kat_verified
 
-        sickbeard.SCC_USERNAME = SCC_username.strip()
-        sickbeard.SCC_PASSWORD = SCC_password.strip()
+        sickbeard.SCC_USERNAME = scc_username.strip()
+        sickbeard.SCC_PASSWORD = scc_password.strip()
 
         sickbeard.NZBSRUS_UID = nzbs_r_us_uid.strip()
         sickbeard.NZBSRUS_HASH = nzbs_r_us_hash.strip()
