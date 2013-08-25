@@ -384,6 +384,9 @@ class Manage:
         quality_all_same = True
         last_quality = None
 
+        codec_all_same = True
+        last_codec = None
+
         root_dir_list = []
 
         for curShow in showList:
@@ -412,17 +415,25 @@ class Manage:
                 else:
                     last_quality = curShow.quality
 
+            if codec_all_same:
+                if last_codec not in (None, curShow.codec):
+                    codec_all_same = False
+                elif last_codec is None:
+                    last_codec = curShow.codec
+
+
         t.showList = toEdit
         t.paused_value = last_paused if paused_all_same else None
         t.flatten_folders_value = last_flatten_folders if flatten_folders_all_same else None
         t.quality_value = last_quality if quality_all_same else None
+        t.codec_value = last_codec if codec_all_same else None
         t.root_dir_list = root_dir_list
 
         return _munge(t)
 
     @cherrypy.expose
     def massEditSubmit(self, paused=None, flatten_folders=None, quality_preset=False,
-                       anyQualities=[], bestQualities=[], toEdit=None, *args, **kwargs):
+                       anyQualities=[], bestQualities=[], codec=None, toEdit=None, *args, **kwargs):
 
         dir_map = {}
         for cur_arg in kwargs:
@@ -463,7 +474,10 @@ class Manage:
             if quality_preset == 'keep':
                 anyQualities, bestQualities = Quality.splitQuality(showObj.quality)
 
-            curErrors += Home().editShow(curShow, new_show_dir, anyQualities, bestQualities, new_flatten_folders, new_paused, directCall=True)
+            if codec == 'keep':
+                codec = showObj.codec
+
+            curErrors += Home().editShow(curShow, new_show_dir, anyQualities, bestQualities, codec, new_flatten_folders, new_paused, directCall=True)
 
             if curErrors:
                 logger.log(u"Errors: "+str(curErrors), logger.ERROR)
@@ -634,7 +648,7 @@ class ConfigGeneral:
         sickbeard.ROOT_DIRS = rootDirString
 
     @cherrypy.expose
-    def saveAddShowDefaults(self, defaultFlattenFolders, defaultStatus, anyQualities, bestQualities):
+    def saveAddShowDefaults(self, defaultFlattenFolders, defaultStatus, anyQualities, bestQualities, codec):
 
         if anyQualities:
             anyQualities = anyQualities.split(',')
@@ -650,6 +664,8 @@ class ConfigGeneral:
 
         sickbeard.STATUS_DEFAULT = int(defaultStatus)
         sickbeard.QUALITY_DEFAULT = int(newQuality)
+
+        sickbeard.CODEC_DEFAULT = int(codec)
 
         if defaultFlattenFolders == "true":
             defaultFlattenFolders = 1
@@ -683,11 +699,24 @@ class ConfigGeneral:
         return m.hexdigest()
 
     @cherrypy.expose
-    def saveGeneral(self, log_dir=None, web_port=None, web_log=None, web_ipv6=None,
-                    launch_browser=None, web_username=None, use_api=None, api_key=None,
+    def saveGeneral(self, log_dir=None, web_port=None, web_log=None, web_ipv6=None, ignored_names=None,
+                    launch_browser=None, web_username=None, use_api=None, api_key=None, ignore_hidden=None,
                     web_password=None, version_notify=None, enable_https=None, https_cert=None, https_key=None):
 
         results = []
+
+        if ignore_hidden == "on":
+            ignore_hidden = 1
+        else:
+            ignore_hidden = 0
+
+        if ignored_names == "":
+            ignored_names = []
+        else:
+            ignored = []
+            for file_name in ignored_names.split(','):
+                ignored += [ file_name.strip() ]
+            ignored_names = ignored
 
         if web_ipv6 == "on":
             web_ipv6 = 1
@@ -712,6 +741,8 @@ class ConfigGeneral:
         if not config.change_LOG_DIR(log_dir):
             results += ["Unable to create directory " + os.path.normpath(log_dir) + ", log dir not changed."]
 
+        sickbeard.IGNORE_HIDDEN = ignore_hidden
+        sickbeard.IGNORED_NAMES = ignored_names
         sickbeard.LAUNCH_BROWSER = launch_browser
 
         sickbeard.WEB_PORT = int(web_port)
@@ -1640,6 +1671,13 @@ class NewHomeAddShows:
                 continue
 
             for cur_file in file_list:
+                if sickbeard.IGNORE_HIDDEN and cur_file.startswith('.', 0, 1):
+                    logger.log(u"File "+cur_file+" is hidden and will be ignored.", logger.DEBUG)
+                    continue
+
+                if cur_file in sickbeard.IGNORED_NAMES:
+                    logger.log(u"File "+cur_file+" is ignored type, skipping", logger.DEBUG)
+                    continue
 
                 cur_path = ek.ek(os.path.normpath, ek.ek(os.path.join, root_dir, cur_file))
                 if not ek.ek(os.path.isdir, cur_path):
@@ -1720,7 +1758,7 @@ class NewHomeAddShows:
 
     @cherrypy.expose
     def addNewShow(self, whichSeries=None, tvdbLang="en", rootDir=None, defaultStatus=None,
-                   anyQualities=None, bestQualities=None, flatten_folders=None, fullShowPath=None,
+                   anyQualities=None, bestQualities=None, codec=None, flatten_folders=None, fullShowPath=None,
                    other_shows=None, skipShow=None):
         """
         Receive tvdb id, dir, and other options and create a show from them. If extra show dirs are
@@ -1800,8 +1838,11 @@ class NewHomeAddShows:
             bestQualities = [bestQualities]
         newQuality = Quality.combineQualities(map(int, anyQualities), map(int, bestQualities))
 
+        if not codec:
+            codec = sickbeard.CODEC_DEFAULT
+
         # add the show
-        sickbeard.showQueueScheduler.action.addShow(tvdb_id, show_dir, int(defaultStatus), newQuality, flatten_folders, tvdbLang) #@UndefinedVariable
+        sickbeard.showQueueScheduler.action.addShow(tvdb_id, show_dir, int(defaultStatus), newQuality, codec, flatten_folders, tvdbLang) #@UndefinedVariable
         ui.notifications.message('Show added', 'Adding the specified show into '+show_dir)
 
         return finishAddShow()
@@ -1872,7 +1913,7 @@ class NewHomeAddShows:
             show_dir, tvdb_id, show_name = cur_show
 
             # add the show
-            sickbeard.showQueueScheduler.action.addShow(tvdb_id, show_dir, SKIPPED, sickbeard.QUALITY_DEFAULT, sickbeard.FLATTEN_FOLDERS_DEFAULT) #@UndefinedVariable
+            sickbeard.showQueueScheduler.action.addShow(tvdb_id, show_dir, SKIPPED, sickbeard.QUALITY_DEFAULT, sickbeard.CODEC_DEFAULT, sickbeard.FLATTEN_FOLDERS_DEFAULT) #@UndefinedVariable
             num_added += 1
 
         if num_added:
@@ -2329,7 +2370,7 @@ class Home:
         return result['description'] if result else 'Episode not found.'
 
     @cherrypy.expose
-    def editShow(self, show=None, location=None, anyQualities=[], bestQualities=[], flatten_folders=None, paused=None, directCall=False, air_by_date=None, tvdbLang=None):
+    def editShow(self, show=None, location=None, anyQualities=[], bestQualities=[], codec=None, flatten_folders=None, paused=None, directCall=False, air_by_date=None, tvdbLang=None):
 
         if show == None:
             errString = "Invalid show ID: "+str(show)
@@ -2347,7 +2388,7 @@ class Home:
             else:
                 return _genericMessage("Error", errString)
 
-        if not location and not anyQualities and not bestQualities and not flatten_folders:
+        if not location and not anyQualities and not bestQualities and not codec and not flatten_folders:
 
             t = PageTemplate(file="editShow.tmpl")
             t.submenu = HomeMenu()
@@ -2390,10 +2431,14 @@ class Home:
         if type(bestQualities) != list:
             bestQualities = [bestQualities]
 
+        if codec is None:
+            codec = showObj.codec
+
         errors = []
         with showObj.lock:
             newQuality = Quality.combineQualities(map(int, anyQualities), map(int, bestQualities))
             showObj.quality = newQuality
+            showObj.codec = int(codec)
 
             # reversed for now
             if bool(showObj.flatten_folders) != bool(flatten_folders):

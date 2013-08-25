@@ -38,7 +38,7 @@ from sickbeard import helpers, db, exceptions, show_queue, search_queue, schedul
 from sickbeard import logger
 from sickbeard import naming
 
-from common import SD, SKIPPED, NAMING_REPEAT
+from common import SD, SKIPPED, NAMING_REPEAT, ANY_CODEC
 
 from sickbeard.databases import mainDB, cache_db
 
@@ -111,6 +111,10 @@ ENABLE_HTTPS = False
 HTTPS_CERT = None
 HTTPS_KEY = None
 
+IGNORE_HIDDEN = True
+IGNORED_NAMES = None
+DEFAULT_IGNORED_NAMES = ['.AppleDouble', '.AppleDesktop', 'Temporary Items', 'Network Trash Folder', '.DS_Store']
+
 LAUNCH_BROWSER = None
 CACHE_DIR = None
 ACTUAL_CACHE_DIR = None
@@ -126,6 +130,7 @@ METADATA_TIVO = None
 METADATA_SYNOLOGY = None
 
 QUALITY_DEFAULT = None
+CODEC_DEFAULT = None
 STATUS_DEFAULT = None
 FLATTEN_FOLDERS_DEFAULT = None
 PROVIDER_ORDER = []
@@ -335,7 +340,7 @@ def initialize(consoleLogging=True):
                 NZBS, NZBS_UID, NZBS_HASH, EZRSS, TVTORRENTS, TVTORRENTS_DIGEST, TVTORRENTS_HASH, BTN, BTN_API_KEY, TORRENTLEECH, TORRENTLEECH_KEY, \
                 TORRENT_DIR, USENET_RETENTION, SOCKET_TIMEOUT, \
                 SEARCH_FREQUENCY, DEFAULT_SEARCH_FREQUENCY, BACKLOG_SEARCH_FREQUENCY, \
-                QUALITY_DEFAULT, FLATTEN_FOLDERS_DEFAULT, STATUS_DEFAULT, \
+                QUALITY_DEFAULT, CODEC_DEFAULT, FLATTEN_FOLDERS_DEFAULT, STATUS_DEFAULT, \
                 GROWL_NOTIFY_ONSNATCH, GROWL_NOTIFY_ONDOWNLOAD, TWITTER_NOTIFY_ONSNATCH, TWITTER_NOTIFY_ONDOWNLOAD, \
                 USE_GROWL, GROWL_HOST, GROWL_PASSWORD, USE_PROWL, PROWL_NOTIFY_ONSNATCH, PROWL_NOTIFY_ONDOWNLOAD, PROWL_API, PROWL_PRIORITY, PROG_DIR, NZBMATRIX, NZBMATRIX_USERNAME, \
                 USE_PYTIVO, PYTIVO_NOTIFY_ONSNATCH, PYTIVO_NOTIFY_ONDOWNLOAD, PYTIVO_UPDATE_LIBRARY, PYTIVO_HOST, PYTIVO_SHARE_NAME, PYTIVO_TIVO_NAME, \
@@ -354,7 +359,7 @@ def initialize(consoleLogging=True):
                 USE_BANNER, USE_LISTVIEW, METADATA_XBMC, METADATA_MEDIABROWSER, METADATA_PS3, METADATA_SYNOLOGY, metadata_provider_dict, \
                 NEWZBIN, NEWZBIN_USERNAME, NEWZBIN_PASSWORD, GIT_PATH, MOVE_ASSOCIATED_FILES, \
                 COMING_EPS_LAYOUT, COMING_EPS_SORT, COMING_EPS_DISPLAY_PAUSED, METADATA_WDTV, METADATA_TIVO, IGNORE_WORDS, CREATE_MISSING_SHOW_DIRS, \
-                ADD_SHOWS_WO_DIR, ANON_REDIRECT
+                ADD_SHOWS_WO_DIR, ANON_REDIRECT, IGNORE_HIDDEN, IGNORED_NAMES
 
         if __INITIALIZED__:
             return False
@@ -386,6 +391,9 @@ def initialize(consoleLogging=True):
         # attempt to help prevent users from breaking links by using a bad url
         if not ANON_REDIRECT.endswith('?'):
             ANON_REDIRECT = ''
+
+        IGNORE_HIDDEN = bool(check_setting_int(CFG, 'General', 'ignore_hidden', 1))
+        IGNORED_NAMES = check_setting_str(CFG, 'General', 'ignored_names', ",".join(DEFAULT_IGNORED_NAMES)).split(',')
 
         USE_API = bool(check_setting_int(CFG, 'General', 'use_api', 0))
         API_KEY = check_setting_str(CFG, 'General', 'api_key', '')
@@ -431,6 +439,7 @@ def initialize(consoleLogging=True):
         TVDB_BASE_URL = 'http://thetvdb.com/api/' + TVDB_API_KEY
 
         QUALITY_DEFAULT = check_setting_int(CFG, 'General', 'quality_default', SD)
+        CODEC_DEFAULT = check_setting_int(CFG, 'General', 'codec_default', ANY_CODEC)
         STATUS_DEFAULT = check_setting_int(CFG, 'General', 'status_default', SKIPPED)
         VERSION_NOTIFY = check_setting_int(CFG, 'General', 'version_notify', 1)
         FLATTEN_FOLDERS_DEFAULT = bool(check_setting_int(CFG, 'General', 'flatten_folders_default', 0))
@@ -1006,6 +1015,7 @@ def save_config():
     new_config['General']['search_frequency'] = int(SEARCH_FREQUENCY)
     new_config['General']['download_propers'] = int(DOWNLOAD_PROPERS)
     new_config['General']['quality_default'] = int(QUALITY_DEFAULT)
+    new_config['General']['codec_default'] = int(CODEC_DEFAULT)
     new_config['General']['status_default'] = int(STATUS_DEFAULT)
     new_config['General']['flatten_folders_default'] = int(FLATTEN_FOLDERS_DEFAULT)
     new_config['General']['provider_order'] = ' '.join([x.getID() for x in providers.sortedProviderList()])
@@ -1014,6 +1024,8 @@ def save_config():
     new_config['General']['naming_custom_abd'] = int(NAMING_CUSTOM_ABD)
     new_config['General']['naming_abd_pattern'] = NAMING_ABD_PATTERN
     new_config['General']['naming_multi_ep'] = int(NAMING_MULTI_EP)
+    new_config['General']['ignore_hidden'] = int(IGNORE_HIDDEN)
+    new_config['General']['ignored_names'] = ','.join(IGNORED_NAMES)
     new_config['General']['launch_browser'] = int(LAUNCH_BROWSER)
 
     new_config['General']['use_banner'] = int(USE_BANNER)

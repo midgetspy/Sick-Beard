@@ -85,6 +85,11 @@ class Quality:
     # put these bits at the other end of the spectrum, far enough out that they shouldn't interfere
     UNKNOWN = 1 << 15     # 32768
 
+    # codecs
+    CODEC_UNKNOWN = 0
+    X264 = 1
+    XVID = X264 << 1
+
     qualityStrings = {NONE: "N/A",
                       UNKNOWN: "Unknown",
                       SDTV: "SD TV",
@@ -96,6 +101,10 @@ class Quality:
                       FULLHDWEBDL: "1080p WEB-DL",
                       HDBLURAY: "720p BluRay",
                       FULLHDBLURAY: "1080p BluRay"}
+
+    codecStrings = {CODEC_UNKNOWN: "Unknown",
+                       XVID: "XviD",
+                       X264: "x264"}
 
     statusPrefixes = {DOWNLOADED: "Downloaded",
                       SNATCHED: "Snatched"}
@@ -145,7 +154,9 @@ class Quality:
 
         checkName = lambda list, func: func([re.search(x, name, re.I) for x in list])
 
-        if checkName(["(pdtv|hdtv|dsr|tvrip|webrip).(xvid|x264)"], all) and not checkName(["(720|1080)[pi]"], all):
+        if (checkName(["(pdtv|hdtv|dsr|tvrip|webrip).(xvid|x264)"], all)
+                and not checkName(["hr.ws.pdtv.x264"], all)
+                and not checkName(["(720|1080)[pi]"], all)):
             return Quality.SDTV
         elif checkName(["(dvdrip|bdrip)(.ws)?.(xvid|divx|x264)"], any) and not checkName(["(720|1080)[pi]"], all):
             return Quality.SDDVD
@@ -176,6 +187,33 @@ class Quality:
             return Quality.RAWHDTV
         else:
             return Quality.UNKNOWN
+
+    @staticmethod
+    def nameCodec(name):
+        name = os.path.basename(name)
+
+        for c, cs in Quality.codecStrings.iteritems():
+            if c == Quality.CODEC_UNKNOWN:
+                continue
+
+            if c == Quality.X264:
+                cs = r'[hx]\.?264'
+
+            regex = cs
+            regex_match = re.search(regex, name, re.I)
+            if regex_match:
+                return c
+
+        return Quality.CODEC_UNKNOWN
+
+    @staticmethod
+    def assumeCodec(name):
+        if name.lower().endswith(".mp4", ".mkv"):
+            return Quality.X264
+        elif name.lower().endswith((".avi")):
+            return Quality.XVID
+        else:
+            return Quality.CODEC_UNKNOWN
 
     @staticmethod
     def compositeStatus(status, quality):
@@ -228,6 +266,10 @@ qualityPresetStrings = {SD: "SD",
                         HD1080p: "HD1080p",
                         ANY: "Any"}
 
+ANY_CODEC = Quality.combineQualities([Quality.X264, Quality.XVID], [])
+codecPresets = (Quality.X264, Quality.XVID, ANY_CODEC)
+codecPresetStrings = dict((k, Quality.codecStrings[k]) for k in Quality.codecStrings.keys() if k not in [Quality.CODEC_UNKNOWN])
+codecPresetStrings[ANY_CODEC] = "Any"
 
 class StatusStrings:
     def __init__(self):

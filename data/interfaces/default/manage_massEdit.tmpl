@@ -70,6 +70,19 @@
     </div>
 </div>
 
+<div class="optionWrapper clearfix alt container">
+<span class="selectTitle">Codec</span>
+    <div class="selectChoices">
+        <select id="codecPreset" name="codec">
+            <option value="keep">&lt; keep &gt;</option>
+            #set $selected = "keep"
+            #for $curPreset in sorted($common.codecPresets):
+            <option value="$curPreset" #if $codec_value == $curPreset then "selected=\"selected\"" else ""#>$common.codecPresetStrings[$curPreset]</option>
+            #end for
+        </select>
+    </div>
+</div>
+
 <div class="optionWrapper clearfix">
 <span class="selectTitle">Flatten Folders <span class="separator">*</span></span>
     <div class="selectChoices">
