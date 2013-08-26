@@ -18,6 +18,7 @@
 # along with Sick Beard.  If not, see <http://www.gnu.org/licenses/>.
 
 import re
+import traceback
 
 import sickbeard
 import generic
@@ -82,7 +83,7 @@ class SCCProvider(generic.TorrentProvider):
             return False
 
         if re.search('Username or password incorrect', response.text) \
-        or re.search('<title>SceneAccess | Login</title>', response.text) \
+        or re.search('<title>SceneAccess \| Login</title>', response.text) \
         or response.status_code == 401:
             logger.log(u'Invalid username or password for ' + self.name + ' Check your settings', logger.ERROR)       
             return False
