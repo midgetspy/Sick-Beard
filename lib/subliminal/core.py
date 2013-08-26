@@ -18,7 +18,7 @@
 from .exceptions import DownloadFailedError
 from .services import ServiceConfig
 from .tasks import DownloadTask, ListTask
-from .utils import get_keywords, to_utf8
+from .utils import get_keywords
 from .videos import Episode, Movie, scan
 from .language import Language
 from collections import defaultdict
@@ -65,19 +65,19 @@ def create_list_tasks(paths, languages, services, force, multi, cache_dir, max_d
         if not force and multi:
             wanted_languages -= detected_languages
             if not wanted_languages:
-                logger.debug(to_utf8(u'No need to list single subtitles %r for %r because one detected') % (languages, video))
+                logger.debug(u'No need to list multi subtitles %r for %r because %r detected' % (languages, video, detected_languages))
                 continue
         if not force and not multi and Language('Undetermined') in detected_languages:
             logger.debug(u'No need to list single subtitles %r for %r because one detected' % (languages, video))
             continue
-        logger.debug(to_utf8(u'Listing subtitles %r for %r with services %r') % (wanted_languages, video, services))
+        logger.debug(u'Listing subtitles %r for %r with services %r' % (wanted_languages, video, services))
         for service_name in services:
             mod = __import__('services.' + service_name, globals=globals(), locals=locals(), fromlist=['Service'], level=-1)
             service = mod.Service
             if not service.check_validity(video, wanted_languages):
                 continue
             task = ListTask(video, wanted_languages & service.languages, service_name, config)
-            logger.debug(to_utf8(u'Created task %r') % task)
+            logger.debug(u'Created task %r' % task)
             tasks.append(task)
     return tasks
 
@@ -100,7 +100,7 @@ def create_download_tasks(subtitles_by_video, languages, multi):
             continue
         if not multi:
             task = DownloadTask(video, list(subtitles))
-            logger.debug(to_utf8(u'Created task %r') % task)
+            logger.debug(u'Created task %r' % task)
             tasks.append(task)
             continue
         for _, by_language in groupby(subtitles, lambda s: languages.index(s.language)):
@@ -124,7 +124,7 @@ def consume_task(task, services=None):
     """
     if services is None:
         services = {}
-    logger.info(to_utf8(u'Consuming %r') % task)
+    logger.info(u'Consuming %r' % task)
     result = None
     if isinstance(task, ListTask):
         service = get_service(services, task.service, config=task.config)
@@ -185,7 +185,7 @@ def matching_confidence(video, subtitle):
         return 0.0
     logger.debug(u'Found %r' % replacement)
     confidence = float(int(matching_format.format(**replacement), 2)) / float(int(best, 2))
-    logger.info(to_utf8(u'Computed confidence %.4f for %r and %r') % (confidence, video, subtitle))
+    logger.info(u'Computed confidence %.4f for %r and %r' % (confidence, video, subtitle))
     return confidence
 
 

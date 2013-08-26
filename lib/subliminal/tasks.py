@@ -15,9 +15,6 @@
 #
 # You should have received a copy of the GNU Lesser General Public License
 # along with subliminal.  If not, see <http://www.gnu.org/licenses/>.
-
-from .utils import to_utf8 
-
 __all__ = ['Task', 'ListTask', 'DownloadTask', 'StopTask']
 
 
@@ -63,7 +60,7 @@ class DownloadTask(Task):
         self.subtitles = subtitles
 
     def __repr__(self):
-        return to_utf8(u'DownloadTask(%r, %r)') % (self.video, self.subtitles)
+        return 'DownloadTask(%r, %r)' % (self.video, self.subtitles)
 
 
 class StopTask(Task):
