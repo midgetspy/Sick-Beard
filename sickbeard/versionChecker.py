@@ -23,7 +23,7 @@ from sickbeard import scene_exceptions
 from sickbeard.exceptions import ex
 from sickbeard import network_timezones
 
-import os, platform, shutil
+import os, platform, shutil, stat
 import subprocess, re
 import urllib, urllib2
 import zipfile, tarfile
@@ -498,7 +498,13 @@ class SourceUpdateManager(GitUpdateManager):
                 new_path = os.path.join(sickbeard.PROG_DIR, dirname, curfile)
 
                 if os.path.isfile(new_path):
-                    os.remove(new_path)
+                    try:
+                        os.chmod(new_path, stat.S_IWRITE)
+                        os.remove(new_path)
+                    except Exception, e:
+                        logger.log(u"Unable to update " + new_path + ': ' + ex(e), logger.DEBUG)
+                        continue #Avoid rename error if removing it's failing
+
                 os.renames(old_path, new_path)
 
         # update version.txt with commit hash
@@ -511,4 +517,3 @@ class SourceUpdateManager(GitUpdateManager):
             return False
 
         return True
-
