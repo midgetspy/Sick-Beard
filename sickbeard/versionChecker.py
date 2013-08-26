@@ -497,13 +497,18 @@ class SourceUpdateManager(GitUpdateManager):
                 old_path = os.path.join(content_dir, dirname, curfile)
                 new_path = os.path.join(sickbeard.PROG_DIR, dirname, curfile)
 
-                if os.path.isfile(new_path):
+                if curfile in ('unrar.dll', 'unrar64.dll'):
                     try:
                         os.chmod(new_path, stat.S_IWRITE)
                         os.remove(new_path)
                     except Exception, e:
                         logger.log(u"Unable to update " + new_path + ': ' + ex(e), logger.DEBUG)
-                        continue #Avoid rename error if removing it's failing
+                        #Trash the file without moving in new path
+                        os.remove(old_path)
+                        continue
+
+                if os.path.isfile(new_path):
+                    os.remove(new_path)
 
                 os.renames(old_path, new_path)
 
