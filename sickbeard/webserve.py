@@ -800,7 +800,7 @@ class ConfigGeneral:
         sickbeard.ROOT_DIRS = rootDirString
     
     @cherrypy.expose
-    def saveAddShowDefaults(self, defaultFlattenFolders, defaultStatus, anyQualities, bestQualities, subtitles):
+    def saveAddShowDefaults(self, defaultFlattenFolders, defaultStatus, anyQualities, bestQualities, subtitles=False):
 
         if anyQualities:
             anyQualities = anyQualities.split(',')
