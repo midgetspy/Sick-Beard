@@ -20,6 +20,7 @@ from __future__ import with_statement
 
 import os
 import shutil
+import stat
 
 import sickbeard 
 from sickbeard import postProcessor
@@ -132,7 +133,7 @@ def processDir (dirName, nzbName=None, recurse=False):
             #TODO ADD some other checking
             rarFiles = filter(helpers.isRarFile, fileList)
             fileList += unRAR(processPath, rarFiles)
-            videoFiles = filter(helpers.isMediaFile, fileList)
+            videoFiles = filter(helpers.isMediaFile, set(fileList))
             notwantedFiles = [x for x in fileList if x not in videoFiles]
 
             # If nzbName is set and there's more than one videofile in the folder, files will be lost (overwritten).
@@ -161,23 +162,33 @@ def processDir (dirName, nzbName=None, recurse=False):
                 #If something fail abort the processing on dir
                 if not process_result:
                     break
-                    
+
+            returnStr += logHelper(u"Cleaning up Folder " + processPath, logger.DEBUG)
+                                
             #Delete all file not needed
             for cur_file in notwantedFiles:
                 if sickbeard.PROCESS_METHOD != "move" or not process_result:
                     break
 
                 cur_file_path = ek.ek(os.path.join, processPath, cur_file)
+
+                returnStr += logHelper(u"Deleting file " + cur_file, logger.DEBUG)
+
+                #check first the read-only attribute
+                file_attribute = ek.ek(os.stat, cur_file_path)[0]
+                if (not file_attribute & stat.S_IWRITE):
+                    # File is read-only, so make it writeable
+                    returnStr += logHelper(u"Changing ReadOnly Flag for file " + cur_file, logger.DEBUG)
+                    try:
+                        ek.ek(os.chmod,cur_file_path,stat.S_IWRITE)
+                    except OSError, e:
+                        returnStr += logHelper(u"Cannot change permissions of " + cur_file_path + ': ' + e.strerror, logger.DEBUG)
+                try:        
+                    ek.ek(os.remove, cur_file_path)
+                except OSError, e:    
+                    returnStr += logHelper(u"Unable to delete file " + cur_file + ': ' + e.strerror, logger.DEBUG)
+
                     
-                try:
-                    processor = postProcessor.PostProcessor(cur_file_path, nzbName)
-                    processor._delete(cur_file_path)
-                    returnStr += logHelper(u"Deleting succeeded for " + cur_file_path, logger.DEBUG)
-                except exceptions.PostProcessingFailed, e:
-                    process_fail_message = ex(e)
-
-                returnStr += processor.log
-
             if sickbeard.PROCESS_METHOD == "move" and \
             ek.ek(os.path.normpath, processPath) != ek.ek(os.path.normpath, sickbeard.TV_DOWNLOAD_DIR):
             
