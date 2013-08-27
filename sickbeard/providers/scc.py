@@ -170,7 +170,7 @@ class SCCProvider(generic.TorrentProvider):
 
                     for result in torrent_table.find_all('tr')[1:]:
 
-                        link = result.find('td', attrs = {'class' : 'tth_name'}).find('a')
+                        link = result.find('td', attrs = {'class' : 'ttr_name'}).find('a')
                         url = result.find('td', attrs = {'class' : 'td_dl'}).find('a')
                         title = link.string
                         download_url = self.urls['download'] % url['href']
