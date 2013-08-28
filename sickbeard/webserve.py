@@ -27,6 +27,7 @@ import threading
 import datetime
 import random
 import locale
+import logging
 
 from Cheetah.Template import Template
 import cherrypy.lib
@@ -1129,7 +1130,14 @@ class ConfigPostProcessing:
         else:
             sickbeard.autoPostProcesserScheduler.silent = True
         
-        sickbeard.UNPACK = unpack
+        if unpack:
+            if self.isRarSupported() != 'not supported':
+                sickbeard.UNPACK = unpack
+            else:
+                sickbeard.UNPACK = 0    
+                results.append("Unpacking Not Supported, disabling unpack setting")
+        else:
+            sickbeard.UNPACK = unpack
         
         sickbeard.KEEP_PROCESSED_DIR = keep_processed_dir
         sickbeard.PROCESS_METHOD = process_method
@@ -1209,6 +1217,25 @@ class ConfigPostProcessing:
         else:
             return "invalid"
 
+    @cherrypy.expose
+    def isRarSupported(self):
+        """ 
+        Test Packing Support:
+            - Simulating rar extraction in memory on test.rar file
+        """
+        
+        from lib.unrar2 import * 
+
+        try:
+            rar_path = os.path.join(sickbeard.PROG_DIR, 'lib', 'unrar2_', 'test.rar')            
+            testing = RarFile(rar_path).read_files('*test.txt')
+            if testing[0][1]=='This is only a test.':
+                return 'supported'
+            logger.log(u'Rar Not Supported: Can not read the content of test file', Logger.ERROR)
+            return 'not supported'
+        except Exception, e:
+            logger.log(u'Rar Not Supported: ' + ex(e), logger.ERROR)
+            return 'not supported'
         
 class ConfigProviders:
 

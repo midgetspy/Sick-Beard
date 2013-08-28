@@ -9,6 +9,23 @@ $(document).ready(function () {
         };
     })();
 
+	function israr_supported() {
+		var pattern = $('#naming_pattern').val();
+		$.get(sbRoot + '/config/postProcessing/isRarSupported', 
+        	function (data) {
+                if (data == "supported") {
+                } else {
+                    $('#unpack').qtip('option', {
+                        'content.text': 'Your system seem to not support Unrar.',
+                        'style.classes': 'ui-tooltip-rounded ui-tooltip-shadow ui-tooltip-red'
+				    });
+					$('#unpack').qtip('toggle', true);
+                    $('#unpack').css('background-color', '#FFFFDD');
+					
+                }
+            });
+	}
+	
     function fill_examples() {
         var pattern = $('#naming_pattern').val();
         var multi = $('#naming_multi_ep :selected').val();
@@ -123,6 +140,14 @@ $(document).ready(function () {
         }
         fill_abd_examples();
     }
+
+    $('#unpack').change(function () {
+    	if(this.checked) {
+        	israr_supported();
+        } else {
+        	$('#unpack').qtip('toggle', false);
+		}  
+    });
 
     $('#name_presets').change(function () {
         setup_naming();
@@ -267,7 +292,7 @@ $(document).ready(function () {
             classes: 'ui-tooltip-rounded ui-tooltip-shadow ui-tooltip-sb'
         }
     });
-    $('.custom-pattern').qtip( {
+    $('.custom-pattern,#unpack').qtip( {
         content: 'validating...',
         show: {
             event: false,
