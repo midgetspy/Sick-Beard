@@ -1227,7 +1227,7 @@ class ConfigPostProcessing:
         from lib.unrar2 import * 
 
         try:
-            rar_path = os.path.join(sickbeard.PROG_DIR, 'lib', 'unrar2_', 'test.rar')            
+            rar_path = os.path.join(sickbeard.PROG_DIR, 'lib', 'unrar2', 'test.rar')            
             testing = RarFile(rar_path).read_files('*test.txt')
             if testing[0][1]=='This is only a test.':
                 return 'supported'
