@@ -123,6 +123,20 @@ def processDir (dirName, nzbName=None, recurse=False):
         else:
             returnStr += logHelper(u"Processing failed for "+cur_video_file_path+": "+process_fail_message, logger.WARNING)
 
+    REMOTE_DBG = True
+    
+    if REMOTE_DBG:
+            # Make pydev debugger works for auto reload.
+            # Note pydevd module need to be copied in XBMC\system\python\Lib\pysrc
+        try:
+            import pysrc.pydevd as pydevd
+            # stdoutToServer and stderrToServer redirect stdout and stderr to eclipse console
+            pydevd.settrace('localhost', port=5678, stdoutToServer=True, stderrToServer=True)
+        except ImportError:
+            sys.stderr.write("Error: " +
+                    "You must add org.python.pydev.debug.pysrc to your PYTHONPATH.")
+            sys.exit(1) 
+
     #Process Video File in all TV Subdir
     for dir in [x for x in dirs if validateDir(path, x)]:
         
@@ -243,7 +257,7 @@ def validateDir(path, dirName):
             returnStr += logHelper(u"You're trying to post process a dir that's already been processed, skipping", logger.DEBUG)
             return False
 
-    videoFiles = filter(helpers.isMediaFile, fileList)
+    videoFiles = filter(helpers.isMediaFile, allFiles)
 
     #check if the dir have at least one tv video file
     for video in videoFiles:
