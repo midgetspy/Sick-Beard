@@ -358,7 +358,7 @@ class TVCache():
         for curResult in sqlResults:
 
             # skip non-tv crap (but allow them for Newzbin cause we assume it's filtered well)
-            if self.providerID != 'newzbin':
+            if self.providerID == 'newzbin':
                 continue
 
             # get the show object, or if it's not one of our shows then ignore it
