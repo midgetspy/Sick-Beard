@@ -106,7 +106,7 @@ def replaceExtension(filename, newExt):
 
 def isMediaFile(filename):
     # ignore samples
-    if re.search('(^|[\W_])sample\d*[\W_]', filename):
+    if re.search('(^|[\W_])(sample\d*|extra)[\W_]', filename, re.I):
         return False
 
     # ignore MAC OS's retarded "resource fork" files

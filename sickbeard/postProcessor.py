@@ -784,6 +784,7 @@ class PostProcessor(object):
 
         # if we don't have it then give up
         if not tvdb_id or season == None or not episodes:
+            self._log(u"Can't find show id from TVDB or season or episode, skipping", logger.WARNING)
             return False
 
         # retrieve/create the corresponding TVEpisode objects
