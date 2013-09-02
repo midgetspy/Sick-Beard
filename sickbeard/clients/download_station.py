@@ -40,7 +40,7 @@ class DownloadStationAPI(GenericClient):
         
         try:
             self.response = self.session.get(auth_url)
-            self.auth = self.response.json()['data']['sid']
+            self.auth = json.loads(self.response.text)['data']['sid']
         except:
             return None
         
@@ -56,7 +56,7 @@ class DownloadStationAPI(GenericClient):
                 }
         self._request(method='post', data=data)
         
-        return self.response.json()['success']
+        return json.loads(self.response.text)['success']
     
     def _add_torrent_file(self, result):
 
@@ -69,6 +69,6 @@ class DownloadStationAPI(GenericClient):
         files = {'file':(result.name + '.torrent', result.content)}
         self._request(method='post', data=data, files=files)
         
-        return self.response.json()['success']
+        return json.loads(self.response.text)['success']
 
 api = DownloadStationAPI()
