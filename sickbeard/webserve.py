@@ -32,7 +32,8 @@ import cherrypy.lib
 
 import sickbeard
 
-from sickbeard import config, sab, utorrent, transmission, downloadstation
+from sickbeard import config, sab
+from sickbeard.downloaders import utorrent, transmission, downloadstation
 from sickbeard import history, notifiers, processTV
 from sickbeard import ui
 from sickbeard import logger, helpers, exceptions, classes, db

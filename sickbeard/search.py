@@ -31,9 +31,7 @@ from sickbeard import nzbget
 from sickbeard import history
 from sickbeard import notifiers
 from sickbeard import nzbSplitter
-from sickbeard import utorrent
-from sickbeard import transmission
-from sickbeard import downloadstation
+from sickbeard.downloaders import utorrent, transmission, downloadstation
 from sickbeard import ui
 from sickbeard import encodingKludge as ek
 from sickbeard import providers
