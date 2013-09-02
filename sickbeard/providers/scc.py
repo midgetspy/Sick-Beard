@@ -247,7 +247,7 @@ class SCCCache(tvcache.TVCache):
         if not data:
             return []
 
-        search_params = {'RSS': ['rss']}
+        search_params = {'RSS': ['']}
         rss_results = self.provider._doSearch(search_params)
         
         if rss_results:
