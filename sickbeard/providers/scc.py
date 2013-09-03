@@ -148,8 +148,11 @@ class SCCProvider(generic.TorrentProvider):
 
         for mode in search_params.keys():
             for search_string in search_params[mode]:
+
+		if isinstance(search_string, unicode):
+			search_string = unidecode(search_string)
                 
-                searchURL = self.urls['search'] % (unidecode(search_string), self.categories)
+                searchURL = self.urls['search'] % (search_string, self.categories)
 
                 logger.log(u"Search string: " + searchURL, logger.DEBUG)
 
@@ -165,7 +168,7 @@ class SCCProvider(generic.TorrentProvider):
 
                     #Continue only if one Release is found
                     if len(torrent_rows)<2:
-                        logger.log(u"The Data returned from " + self.name + " do not contains any torrent", logger.WARNING)
+                        logger.log(u"The Data returned from " + self.name + " do not contains any torrent", logger.DEBUG)
                         continue
 
                     for result in torrent_table.find_all('tr')[1:]:
