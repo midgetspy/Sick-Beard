@@ -33,7 +33,7 @@ from lib.tvdb_api import tvdb_api, tvdb_exceptions
 
 import xml.etree.cElementTree as etree
 
-class XBMCFrodoMetadata(xbmc.XBMCMetadata):
+class XBMC_V12(xbmc.XBMCMetadata):
     
     def __init__(self,
                  show_metadata=False,
@@ -51,7 +51,7 @@ class XBMCFrodoMetadata(xbmc.XBMCMetadata):
                                          episode_thumbnails,
                                          season_thumbnails)
         
-        self.name = 'XBMC (Frodo+)'
+        self.name = 'XBMC v12+'
 
         self.poster_name = "poster.jpg"
         self.fanart_name = "fanart.jpg"
@@ -99,4 +99,4 @@ class XBMCFrodoMetadata(xbmc.XBMCMetadata):
 
 
 # present a standard "interface" from the module
-metadata_class = XBMCFrodoMetadata
+metadata_class = XBMC_V12
