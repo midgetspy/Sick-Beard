@@ -127,6 +127,14 @@ def isRarFile(filename):
     
     return False
 
+def isBeingWritten(filepath):
+# Return True if file was modified within 60 seconds. it might still be being written to.
+    ctime = max(ek.ek(os.path.getctime, filepath), ek.ek(os.path.getmtime, filepath))
+    if ctime > time.time() - 60:
+        return True
+    
+    return False
+
 def sanitizeFileName(name):
     '''
     >>> sanitizeFileName('a/b/c')

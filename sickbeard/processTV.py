@@ -92,11 +92,13 @@ def processDir (dirName, nzbName=None, recurse=False):
     returnStr += logHelper(u"PostProcessing VideoFiles: " + str(videoFiles), logger.DEBUG)
 
     # If nzbName is set and there's more than one videofile in the folder, files will be lost (overwritten).
-    if nzbName != None and len(videoFiles) >= 2:
+    if len(videoFiles) >= 2:
         nzbName = None
 
     #Process Video File in the current Path
     for cur_video_file in videoFiles:
+
+        cur_video_file_path = ek.ek(os.path.join, dirName, cur_video_file)
 
         # Avoid processing the same file again if we use KEEP_PROCESSING_DIR    
         if sickbeard.KEEP_PROCESSED_DIR:
@@ -106,7 +108,9 @@ def processDir (dirName, nzbName=None, recurse=False):
                 returnStr += logHelper(u"You're trying to post process the file " + cur_video_file + " that's already been processed, skipping", logger.DEBUG)
                 continue
 
-        cur_video_file_path = ek.ek(os.path.join, dirName, cur_video_file)
+        if helper.isBeingWritten(cur_video_file_path):
+            returnStr += logHelper(u"Ignoring file: " + cur_video_file_path + " for now. Modified < 60s ago, might still be being written to", logger.DEBUG)
+            continue
             
         try:
             processor = postProcessor.PostProcessor(cur_video_file_path, nzbName)
@@ -130,14 +134,13 @@ def processDir (dirName, nzbName=None, recurse=False):
         
         for processPath, processDir, fileList in ek.ek(os.walk, ek.ek(os.path.join, path, dir), topdown=False):
 
-            #TODO ADD some other checking
             rarFiles = filter(helpers.isRarFile, fileList)
             fileList += unRAR(processPath, rarFiles)
             videoFiles = filter(helpers.isMediaFile, set(fileList))
             notwantedFiles = [x for x in fileList if x not in videoFiles]
 
             # If nzbName is set and there's more than one videofile in the folder, files will be lost (overwritten).
-            if nzbName != None and len(videoFiles) >= 2:
+            if len(videoFiles) >= 2:
                 nzbName = None
 
             for cur_video_file in videoFiles:
@@ -232,9 +235,15 @@ def validateDir(path, dirName):
 
     # Get the videofile list for the next checks
     allFiles = []
-    for processPath, processDir, fileList in ek.ek(os.walk, ek.ek(os.path.join, path, dirName)):
+    for processPath, processDir, fileList in ek.ek(os.walk, ek.ek(os.path.join, path, dirName), topdown=False):
+
+        # Check if any file was modified less than 60 sec.
+        for file in fileList:
+            if helpers.isBeingWritten(ek.ek(os.path.join, processPath, file)):
+                returnStr += logHelper(u"Ignoring Dir: " + processPath + " for now. Some files were Modified < 60s ago, might still be being written to", logger.DEBUG)
+                return False
+        
         allFiles += fileList
-    #Search for packed release   
             
     # Avoid processing the same dir again if we use KEEP_PROCESSING_DIR    
     if sickbeard.KEEP_PROCESSED_DIR:
@@ -253,6 +262,7 @@ def validateDir(path, dirName):
         except InvalidNameException:
             pass
 
+    #Search for packed release   
     packedFiles = filter(helpers.isRarFile, allFiles)
 
     for packed in packedFiles:
@@ -291,3 +301,4 @@ def unRAR(path, rarFiles):
         returnStr += logHelper(u"UnRar content: " + str(unpacked_files), logger.DEBUG)
         
     return unpacked_files
+    
