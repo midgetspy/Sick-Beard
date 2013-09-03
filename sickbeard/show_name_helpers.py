@@ -35,7 +35,7 @@ resultFilters = ["sub(pack|s|bed|\.|fix)?", "nlsub(bed|s)?", "swesub(bed)?",
 mandatory = []
 
 langCodes = {
-    'de': 'german',
+    'de': 'german OR Videomann',
     'fr': 'french',
     'es': 'spanish'
 }
@@ -59,7 +59,7 @@ def filterBadReleases(name, show):
 
     #if language not english, search for mandatory
     if show.lang != "en":
-        mandatory = [langCodes[show.lang]]
+        mandatory = langCodes[show.lang].split(" OR ")
         if langCodes[show.lang] in resultFilters:
             resultFilters.remove(langCodes[show.lang])
         logger.log(u"Language for \""+show.name+"\" is "+show.lang+" so im looking for \""+langCodes[show.lang]+"\" in release names", logger.DEBUG)
@@ -95,10 +95,13 @@ def filterBadReleases(name, show):
             return False
     # if every of the mandatory words are in there, say yes
     if mandatory:
+        found = False
         for x in mandatory:
             if not re.search('(^|[\W_])'+x+'($|[\W_])', check_string, re.I):
                 logger.log(u"Mandatory string not found: "+name+" doesnt contain "+x+", ignoring it", logger.DEBUG)
-                return False
+            else:
+                found = True
+        return found
 
     return True
 
@@ -183,7 +186,8 @@ def makeSceneSeasonSearchString (show, segment, extraSearchType=None):
                     if show.lang == "en":
                         toReturn.append(curShow + "." + cur_season)
                     else:
-                        toReturn.append(curShow + "." + cur_season + " " + langCodes[show.lang])
+                        for x in langCodes[show.lang].split(" OR "):
+                            toReturn.append(curShow + "." + cur_season + " " + x)
                     # toReturn.append(curShow + "." + cur_season)
 
         # nzbmatrix is special, we build a search string just for them
@@ -237,7 +241,8 @@ def makeSceneSearchString (episode):
             if episode.show.lang == "en":
                 toReturn.append(curShow + "." + curEpString)
             else:
-                toReturn.append(curShow + "." + curEpString + " " + langCodes[episode.show.lang])
+                for x in langCodes[episode.show.lang].split(" OR "):
+                    toReturn.append(curShow + "." + curEpString + " " + x)
     return toReturn
 
 def trimRelease(name):
