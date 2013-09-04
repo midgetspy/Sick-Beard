@@ -1133,12 +1133,12 @@ class CMD_Logs(ApiCall):
         minLevel = logger.reverseNames[str(self.min_level).upper()]
 
         data = []
-        if os.path.isfile(logger.sb_log_instance.log_file):
-            f = ek.ek(open, logger.sb_log_instance.log_file)
+        if os.path.isfile(logger.sb_log_instance.log_file_path):
+            f = ek.ek(open, logger.sb_log_instance.log_file_path)
             data = f.readlines()
             f.close()
 
-        regex = "^(\w{3})\-(\d\d)\s*(\d\d)\:(\d\d):(\d\d)\s*([A-Z]+)\s*(.+?)\s*\:\:\s*(.*)$"
+        regex = "^(\d\d\d\d)\-(\d\d)\-(\d\d)\s*(\d\d)\:(\d\d):(\d\d)\s*([A-Z]+)\s*(.+?)\s*\:\:\s*(.*)$"
 
         finalData = []
 
@@ -1152,7 +1152,7 @@ class CMD_Logs(ApiCall):
             match = re.match(regex, x)
 
             if match:
-                level = match.group(6)
+                level = match.group(7)
                 if level not in logger.reverseNames:
                     lastLine = False
                     continue

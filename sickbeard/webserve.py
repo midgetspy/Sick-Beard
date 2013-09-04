@@ -709,16 +709,17 @@ class ConfigGeneral:
         else:
             version_notify = 0
 
-        if not config.change_LOG_DIR(log_dir):
-            results += ["Unable to create directory " + os.path.normpath(log_dir) + ", log dir not changed."]
-
         sickbeard.LAUNCH_BROWSER = launch_browser
+        # sickbeard.LOG_DIR is set in config.change_LOG_DIR()
 
         sickbeard.WEB_PORT = int(web_port)
         sickbeard.WEB_IPV6 = web_ipv6
-        sickbeard.WEB_LOG = web_log
+        # sickbeard.WEB_LOG is set in config.change_LOG_DIR()
         sickbeard.WEB_USERNAME = web_username
         sickbeard.WEB_PASSWORD = web_password
+
+        if not config.change_LOG_DIR(log_dir, web_log):
+            results += ["Unable to create directory " + os.path.normpath(log_dir) + ", log dir not changed."]
 
         if use_api == "on":
             use_api = 1
@@ -1924,12 +1925,12 @@ class ErrorLogs:
         minLevel = int(minLevel)
 
         data = []
-        if os.path.isfile(logger.sb_log_instance.log_file):
-            f = ek.ek(open, logger.sb_log_instance.log_file)
+        if os.path.isfile(logger.sb_log_instance.log_file_path):
+            f = ek.ek(open, logger.sb_log_instance.log_file_path)
             data = f.readlines()
             f.close()
 
-        regex =  "^(\w{3})\-(\d\d)\s*(\d\d)\:(\d\d):(\d\d)\s*([A-Z]+)\s*(.+?)\s*\:\:\s*(.*)$"
+        regex = "^(\d\d\d\d)\-(\d\d)\-(\d\d)\s*(\d\d)\:(\d\d):(\d\d)\s*([A-Z]+)\s*(.+?)\s*\:\:\s*(.*)$"
 
         finalData = []
 
@@ -1943,7 +1944,7 @@ class ErrorLogs:
             match = re.match(regex, x)
 
             if match:
-                level = match.group(6)
+                level = match.group(7)
                 if level not in logger.reverseNames:
                     lastLine = False
                     continue
