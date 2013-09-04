@@ -46,7 +46,7 @@ var show_nzb_providers = #if $sickbeard.USE_NZBS then "true" else "false"#;
 
                     <div class="component-group-desc">
                         <h3>Provider Priorities</h3>
-                        <p>Check off and drag the providers into the order you want them to be used.</p>
+                        <p>Check off, configure and drag the providers into the order you want them to be used.</p>
                         <p>At least one provider is required but two are recommended.</p>
 
                         #if not $sickbeard.USE_NZBS or not $sickbeard.USE_TORRENTS:
@@ -136,7 +136,7 @@ var show_nzb_providers = #if $sickbeard.USE_NZBS then "true" else "false"#;
                         <div class="field-pair">
                             <label class="clearfix">
                                 <span class="component-title">$curNewznabProvider.name API Key:</span>
-                                <input class="component-desc newznab_key" type="text" id="${curNewznabProvider.getID()}_hash" value="$curNewznabProvider.key" size="40" />
+                                <input class="component-desc newznab_key" type="text" id="${curNewznabProvider.getID()}_hash" value="$curNewznabProvider.key" newznab_name="${curNewznabProvider.getID()}_hash" size="40" />
                             </label>
                         </div>
 </div>
@@ -190,20 +190,20 @@ var show_nzb_providers = #if $sickbeard.USE_NZBS then "true" else "false"#;
 <div class="providerDiv" id="thepiratebayDiv">
                         <div class="field-pair">
                             <input type="checkbox" class="enabler" name="thepiratebay_proxy" id="thepiratebay_proxy" #if $sickbeard.THEPIRATEBAY_PROXY then "checked=\"checked\"" else ""#/>
-                            <label class="clearfix" for="thepiratebay_proxy">
+                            <label class="clearfix">
                                 <span class="component-title">Access TPB via Proxy</span>
                                 <span class="component-desc">To bypass Country Blocking Mechanism</span>
                             </label>
                         </div>
 
-                        <div class="field-pair" id="content_thepiratebay_proxy">
+                        <div class="field-pair content_thepiratebay_proxy" id="content_thepiratebay_proxy">
                             <label class="nocheck clearfix">
                                 <span class="component-title">Proxy URL:</span>
                                 <span class="component-desc">
 	                              <select name="thepiratebay_proxy_url" id="thepiratebay_proxy_url">
-                                #for $i in $thepiratebay.proxy_dict.keys():
-                                  <option value="$thepiratebay.proxy_dict[$i]" #if $thepiratebay.proxy_dict[$i] == $sickbeard.THEPIRATEBAY_PROXY_URL then "selected=\"selected\"" else ""#>$i</option>
-	                              #end for
+                                	#for $i in $thepiratebay.proxy_dict.keys():
+                                  	<option value="$thepiratebay.proxy_dict[$i]" #if $thepiratebay.proxy_dict[$i] == $sickbeard.THEPIRATEBAY_PROXY_URL then "selected=\"selected\"" else ""#>$i</option>
+	                              	#end for
 	                                </select>
                                 </span>
                             </label>
@@ -245,10 +245,10 @@ var show_nzb_providers = #if $sickbeard.USE_NZBS then "true" else "false"#;
                         </div>
 </div>
 
-<div class="providerDiv" id="btnDiv">
+<div class="providerDiv btn" id="btnDiv">
                         <div class="field-pair">
                             <label class="clearfix">
-                                <span class="component-title">BTN API KEY:</span>
+                                <span class="component-title">Api Key:</span>
                                 <input class="component-desc" type="text" name="btn_api_key" value="$sickbeard.BTN_API_KEY" size="40" />
                             </label>
                         </div>
@@ -257,13 +257,13 @@ var show_nzb_providers = #if $sickbeard.USE_NZBS then "true" else "false"#;
 <div class="providerDiv" id="torrentleechDiv">
                         <div class="field-pair">
                             <label class="clearfix">
-                                <span class="component-title">TorrentLeech Username</span>
-                                <input class="component-desc" type="text" name="torrentleech_username" value="$sickbeard.TORRENTLEECH_USERNAME" size="10" />
+                                <span class="component-title">Username:</span>
+                                <input class="component-desc" type="text" name="torrentleech_username" value="$sickbeard.TORRENTLEECH_USERNAME" size="40" />
                             </label>
                         </div>
                         <div class="field-pair">
                             <label class="clearfix">
-                                <span class="component-title">TorrentLeech Password</span>
+                                <span class="component-title">Password:</span>
                                 <input class="component-desc" type="password" name="torrentleech_password" value="$sickbeard.TORRENTLEECH_PASSWORD" size="40" />
                             </label>
                         </div>
@@ -295,7 +295,7 @@ var show_nzb_providers = #if $sickbeard.USE_NZBS then "true" else "false"#;
                         <div class="field-pair">
                             <label class="clearfix">
                                 <span class="component-title">Username:</span>
-                                <input class="component-desc" type="text" name="scc_username" value="$sickbeard.SCC_USERNAME" size="10" />
+                                <input class="component-desc" type="text" name="scc_username" value="$sickbeard.SCC_USERNAME" size="40" />
                             </label>
                         </div>
                         <div class="field-pair">

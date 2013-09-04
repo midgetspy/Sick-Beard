@@ -33,7 +33,7 @@ $(function () {
                     corner: true,
                     method: 'polygon'
                 },
-                classes: 'ui-tooltip-rounded ui-tooltip-shadow ui-tooltip-sb'
+                classes: 'qtip-rounded qtip-shadow ui-tooltip-sb'
             }
         });
     });
