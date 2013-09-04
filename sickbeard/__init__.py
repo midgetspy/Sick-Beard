@@ -30,7 +30,7 @@ from threading import Lock
 
 # apparently py2exe won't build these unless they're imported somewhere
 from sickbeard import providers, metadata
-from providers import ezrss, tvtorrents, btn, nzbsrus, newznab, womble, thepiratebay, dtt, torrentleech, kat, nzbx, iptorrents, omgwtfnzbs, scc
+from providers import ezrss, tvtorrents, btn, nzbsrus, newznab, womble, thepiratebay, dtt, torrentleech, kat, nzbx, iptorrents, omgwtfnzbs, scc, hdbits
 from sickbeard.config import CheckSection, check_setting_int, check_setting_str, ConfigMigrator
 
 
@@ -203,6 +203,10 @@ KAT_VERIFIED = False
 SCC = False         
 SCC_USERNAME = None 
 SCC_PASSWORD = None 
+
+HDBITS = False
+HDBITS_USERNAME = None
+HDBITS_PASSKEY = None
 
 ADD_SHOWS_WO_DIR = None
 CREATE_MISSING_SHOW_DIRS = None
@@ -428,7 +432,7 @@ def initialize(consoleLogging=True):
                 showUpdateScheduler, __INITIALIZED__, LAUNCH_BROWSER, UPDATE_SHOWS_ON_START, SORT_ARTICLE, showList, loadingShowList, \
                 NZBS, NZBS_UID, NZBS_HASH, EZRSS, TVTORRENTS, TVTORRENTS_DIGEST, TVTORRENTS_HASH, BTN, BTN_API_KEY, \
                 DTT, DTT_NORAR, DTT_SINGLE, THEPIRATEBAY, THEPIRATEBAY_TRUSTED, THEPIRATEBAY_PROXY, THEPIRATEBAY_PROXY_URL, THEPIRATEBAY_BLACKLIST, TORRENTLEECH, TORRENTLEECH_USERNAME, TORRENTLEECH_PASSWORD, \
-                IPTORRENTS, IPTORRENTS_USERNAME, IPTORRENTS_PASSWORD, IPTORRENTS_FREELEECH, KAT, KAT_VERIFIED, SCC, SCC_USERNAME, SCC_PASSWORD, \
+                IPTORRENTS, IPTORRENTS_USERNAME, IPTORRENTS_PASSWORD, IPTORRENTS_FREELEECH, KAT, KAT_VERIFIED, SCC, SCC_USERNAME, SCC_PASSWORD, HDBITS, HDBITS_USERNAME, HDBITS_PASSKEY, \
                 TORRENT_DIR, USENET_RETENTION, SOCKET_TIMEOUT, SEARCH_FREQUENCY, DEFAULT_SEARCH_FREQUENCY, BACKLOG_SEARCH_FREQUENCY, \
                 QUALITY_DEFAULT, FLATTEN_FOLDERS_DEFAULT, SUBTITLES_DEFAULT, STATUS_DEFAULT, \
                 GROWL_NOTIFY_ONSNATCH, GROWL_NOTIFY_ONDOWNLOAD, GROWL_NOTIFY_ONSUBTITLEDOWNLOAD, TWITTER_NOTIFY_ONSNATCH, TWITTER_NOTIFY_ONDOWNLOAD, TWITTER_NOTIFY_ONSUBTITLEDOWNLOAD, \
@@ -635,6 +639,10 @@ def initialize(consoleLogging=True):
         SCC_USERNAME = check_setting_str(CFG, 'SCC', 'scc_username', '')
         SCC_PASSWORD = check_setting_str(CFG, 'SCC', 'scc_password', '') 
 
+        HDBITS = bool(check_setting_int(CFG, 'HDBITS', 'hdbits', 0))
+        HDBITS_USERNAME = check_setting_str(CFG, 'HDBITS', 'hdbits_username', '')
+        HDBITS_PASSKEY = check_setting_str(CFG, 'HDBITS', 'hdbits_passkey', '')
+        
         NZBS = bool(check_setting_int(CFG, 'NZBs', 'nzbs', 0))
         NZBS_UID = check_setting_str(CFG, 'NZBs', 'nzbs_uid', '')
         NZBS_HASH = check_setting_str(CFG, 'NZBs', 'nzbs_hash', '')
@@ -1315,7 +1323,12 @@ def save_config():
     new_config['SCC'] = {}
     new_config['SCC']['scc'] = int(SCC)
     new_config['SCC']['scc_username'] = SCC_USERNAME
-    new_config['SCC']['scc_password'] = SCC_PASSWORD 
+    new_config['SCC']['scc_password'] = SCC_PASSWORD
+
+    new_config['HDBITS'] = {}
+    new_config['HDBITS']['hdbits'] = int(HDBITS)
+    new_config['HDBITS']['hdbits_username'] = HDBITS_USERNAME
+    new_config['HDBITS']['hdbits_passkey'] = HDBITS_PASSKEY
 
     new_config['NZBs'] = {}
     new_config['NZBs']['nzbs'] = int(NZBS)
