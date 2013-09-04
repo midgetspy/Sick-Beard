@@ -30,7 +30,8 @@ from threading import Lock
 
 # apparently py2exe won't build these unless they're imported somewhere
 from sickbeard import providers, metadata
-from providers import ezrss, tvtorrents, torrentleech, btn, nzbsrus, newznab, womble, nzbx, omgwtfnzbs
+
+from providers import ezrss, tvtorrents, torrentleech, btn, nzbsrus, newznab, womble, nzbx, omgwtfnzbs, hdbits
 from sickbeard.config import CheckSection, check_setting_int, check_setting_str, ConfigMigrator
 
 from sickbeard import searchCurrent, searchBacklog, showUpdater, versionChecker, properFinder, autoPostProcesser
@@ -154,6 +155,10 @@ MIN_SEARCH_FREQUENCY = 10
 DEFAULT_SEARCH_FREQUENCY = 60
 
 EZRSS = False
+
+HDBITS = False
+HDBITS_PASSKEY = None
+
 TVTORRENTS = False
 TVTORRENTS_DIGEST = None
 TVTORRENTS_HASH = None
@@ -354,7 +359,7 @@ def initialize(consoleLogging=True):
                 USE_BANNER, USE_LISTVIEW, METADATA_XBMC, METADATA_MEDIABROWSER, METADATA_PS3, METADATA_SYNOLOGY, metadata_provider_dict, \
                 NEWZBIN, NEWZBIN_USERNAME, NEWZBIN_PASSWORD, GIT_PATH, MOVE_ASSOCIATED_FILES, \
                 COMING_EPS_LAYOUT, COMING_EPS_SORT, COMING_EPS_DISPLAY_PAUSED, METADATA_WDTV, METADATA_TIVO, IGNORE_WORDS, CREATE_MISSING_SHOW_DIRS, \
-                ADD_SHOWS_WO_DIR, ANON_REDIRECT
+                ADD_SHOWS_WO_DIR, ANON_REDIRECT, HDBITS, HDBITS_USERNAME, HDBITS_PASSKEY
 
         if __INITIALIZED__:
             return False
@@ -548,6 +553,12 @@ def initialize(consoleLogging=True):
 
         CheckSection(CFG, 'TVTORRENTS')
         TVTORRENTS = bool(check_setting_int(CFG, 'TVTORRENTS', 'tvtorrents', 0))
+
+        CheckSection(CFG, 'HDBITS')
+        HDBITS = bool(check_setting_int(CFG, 'HDBITS', 'hdbits', 0))
+        HDBITS_USERNAME = check_setting_str(CFG, 'HDBITS', 'hdbits_username', '')
+        HDBITS_PASSKEY = check_setting_str(CFG, 'HDBITS', 'hdbits_passkey', '')
+
         TVTORRENTS_DIGEST = check_setting_str(CFG, 'TVTORRENTS', 'tvtorrents_digest', '')
         TVTORRENTS_HASH = check_setting_str(CFG, 'TVTORRENTS', 'tvtorrents_hash', '')
 
@@ -801,6 +812,7 @@ def start():
             # start the version checker
             versionCheckScheduler.thread.start()
 
+
             # start the queue checker
             showQueueScheduler.thread.start()
 
@@ -1045,6 +1057,11 @@ def save_config():
 
     new_config['EZRSS'] = {}
     new_config['EZRSS']['ezrss'] = int(EZRSS)
+
+    new_config['HDBITS'] = {}
+    new_config['HDBITS']['hdbits'] = int(HDBITS)
+    new_config['HDBITS']['hdbits_username'] = HDBITS_USERNAME
+    new_config['HDBITS']['hdbits_passkey'] = HDBITS_PASSKEY
 
     new_config['TVTORRENTS'] = {}
     new_config['TVTORRENTS']['tvtorrents'] = int(TVTORRENTS)
