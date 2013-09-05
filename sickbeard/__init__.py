@@ -967,7 +967,10 @@ def initialize(consoleLogging=True):
                                                      cycleTime=datetime.timedelta(minutes=10),
                                                      threadName="TRAKTWATCHLIST",
                                                      runImmediately=True)
-
+        
+        if not USE_TRAKT:
+            traktWatchListCheckerSchedular.silent = True
+        
         backlogSearchScheduler = searchBacklog.BacklogSearchScheduler(searchBacklog.BacklogSearcher(),
                                                                       cycleTime=datetime.timedelta(minutes=get_backlog_cycle_time()),
                                                                       threadName="BACKLOG",
@@ -979,6 +982,9 @@ def initialize(consoleLogging=True):
                                                      cycleTime=datetime.timedelta(hours=1),
                                                      threadName="FINDSUBTITLES",
                                                      runImmediately=True)
+
+        if not USE_SUBTITLES:
+            subtitlesFinderScheduler.silent = True
 
         showList = []
         loadingShowList = {}

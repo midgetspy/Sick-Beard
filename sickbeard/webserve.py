@@ -1930,6 +1930,11 @@ class ConfigNotifications:
         sickbeard.TRAKT_METHOD_ADD = trakt_method_add
         sickbeard.TRAKT_START_PAUSED = trakt_start_paused
 
+        if sickbeard.USE_TRAKT:
+            sickbeard.traktWatchListCheckerSchedular.silent = False
+        else:
+            sickbeard.traktWatchListCheckerSchedular.silent = True    
+
         sickbeard.USE_EMAIL = use_email
         sickbeard.EMAIL_NOTIFY_ONSNATCH = email_notify_onsnatch
         sickbeard.EMAIL_NOTIFY_ONDOWNLOAD = email_notify_ondownload
@@ -1991,10 +1996,12 @@ class ConfigSubtitles:
         if use_subtitles == "on":
             use_subtitles = 1
             if sickbeard.subtitlesFinderScheduler.thread == None or not sickbeard.subtitlesFinderScheduler.thread.isAlive():
+                sickbeard.subtitlesFinderScheduler.silent = False
                 sickbeard.subtitlesFinderScheduler.initThread()
         else:
             use_subtitles = 0
             sickbeard.subtitlesFinderScheduler.abort = True
+            sickbeard.subtitlesFinderScheduler.silent = True
             logger.log(u"Waiting for the SUBTITLESFINDER thread to exit")
             try:
                 sickbeard.subtitlesFinderScheduler.thread.join(5)
