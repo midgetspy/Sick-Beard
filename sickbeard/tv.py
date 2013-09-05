@@ -1683,7 +1683,8 @@ class TVEpisode(object):
 
         proper_path = self.proper_path()
         absolute_proper_path = ek.ek(os.path.join, self.show.location, proper_path)
-        absolute_current_path_no_ext, file_ext = os.path.splitext(self.location)
+        absolute_current_path_no_ext, file_ext = ek.ek(os.path.splitext, self.location)
+        absolute_current_path_no_ext_length = len(absolute_current_path_no_ext)
 
         current_path = absolute_current_path_no_ext
 
@@ -1701,11 +1702,11 @@ class TVEpisode(object):
         logger.log(u"Files associated to " + self.location + ": " + str(related_files), logger.DEBUG)
 
         # move the ep file
-        result = helpers.rename_ep_file(self.location, absolute_proper_path)
+        result = helpers.rename_ep_file(self.location, absolute_proper_path, absolute_current_path_no_ext_length)
 
         # move related files
         for cur_related_file in related_files:
-            cur_result = helpers.rename_ep_file(cur_related_file, absolute_proper_path)
+            cur_result = helpers.rename_ep_file(cur_related_file, absolute_proper_path, absolute_current_path_no_ext_length)
             if cur_result == False:
                 logger.log(str(self.tvdbid) + u": Unable to rename file " + cur_related_file, logger.ERROR)
 
