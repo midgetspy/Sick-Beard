@@ -262,15 +262,16 @@ def validateDir(path, dirName):
         except InvalidNameException:
             pass
 
-    #Search for packed release   
-    packedFiles = filter(helpers.isRarFile, allFiles)
-
-    for packed in packedFiles:
-        try:
-            NameParser().parse(packed)
-            return True
-        except InvalidNameException:
-            pass    
+    if sickbeard.UNPACK:
+        #Search for packed release   
+        packedFiles = filter(helpers.isRarFile, allFiles)
+    
+        for packed in packedFiles:
+            try:
+                NameParser().parse(packed)
+                return True
+            except InvalidNameException:
+                pass    
     
     return False
 
