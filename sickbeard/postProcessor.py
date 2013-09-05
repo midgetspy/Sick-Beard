@@ -154,7 +154,6 @@ class PostProcessor(object):
             return []
 
         file_path_list = []
-
         base_name = file_path.rpartition('.')[0] + '.'
 
         # don't strip it all and use cwd by accident
@@ -168,10 +167,6 @@ class PostProcessor(object):
             # only add associated to list
             if associated_file_path == file_path:
                 continue
-            # only list it if the only non-shared part is the extension
-            if '.' in associated_file_path[len(base_name):]:
-                continue
-
             file_path_list.append(associated_file_path)
 
         return file_path_list
@@ -228,13 +223,15 @@ class PostProcessor(object):
             self._log(u"There were no files associated with " + file_path + ", not moving anything", logger.DEBUG)
             return
 
+        # create base name with file_path (media_file without .extension)
+        old_base_name = file_path.rpartition('.')[0]
+        old_base_name_length = len(old_base_name)
+
         # deal with all files
         for cur_file_path in file_list:
-
             cur_file_name = ek.ek(os.path.basename, cur_file_path)
-
-            # get the extension
-            cur_extension = cur_file_path.rpartition('.')[-1]
+            # get the extension without .
+            cur_extension = cur_file_path[old_base_name_length + 1:]
 
             # replace .nfo with .nfo-orig to avoid conflicts
             if cur_extension == 'nfo':
