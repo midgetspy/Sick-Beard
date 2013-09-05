@@ -75,21 +75,34 @@ def change_HTTPS_KEY(https_key):
     return True
 
 
-def change_LOG_DIR(log_dir):
+def change_LOG_DIR(log_dir, web_log):
 
-    if os.path.normpath(sickbeard.LOG_DIR) != os.path.normpath(log_dir):
-        if helpers.makeDir(log_dir):
-            sickbeard.LOG_DIR = os.path.normpath(log_dir)
+    log_dir_changed = False
+    abs_log_dir = os.path.normpath(os.path.join(sickbeard.DATA_DIR, log_dir))
+
+    if os.path.normpath(sickbeard.LOG_DIR) != abs_log_dir:
+        if helpers.makeDir(abs_log_dir):
+            sickbeard.ACTUAL_LOG_DIR = os.path.normpath(log_dir)
+            sickbeard.LOG_DIR = abs_log_dir
+
             logger.sb_log_instance.initLogging()
-            logger.log(u"Initialized new log file in " + log_dir)
-
-            cherry_log = os.path.join(sickbeard.LOG_DIR, "cherrypy.log")
-            cherrypy.config.update({'log.access_file': cherry_log})
-
-            logger.log(u"Changed cherry log file to " + cherry_log)
+            logger.log(u"Initialized new log file in " + sickbeard.LOG_DIR)
+            log_dir_changed = True
 
         else:
             return False
+
+    if sickbeard.WEB_LOG != web_log or log_dir_changed == True:
+        sickbeard.WEB_LOG = web_log
+
+        if sickbeard.WEB_LOG == 1:
+            cherry_log = os.path.join(sickbeard.LOG_DIR, "cherrypy.log")
+            logger.log(u"Change cherry log file to " + cherry_log)
+        else:
+            cherry_log = None
+            logger.log(u"Disable cherry logging")
+
+        cherrypy.config.update({'log.access_file': cherry_log})
 
     return True
 
