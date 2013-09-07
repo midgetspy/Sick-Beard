@@ -240,7 +240,7 @@ def validateDir(path, dirName):
         # Check if any file was modified less than 60 sec.
         for file in filter(helpers.isMediaFile, fileList) + filter(helpers.isRarFile,fileList):
             if helpers.isBeingWritten(ek.ek(os.path.join, processPath, file)):
-                returnStr += logHelper(u"Ignoring Dir: " + processPath + " for now. Some files were Modified < 60s ago, might still be being written to", logger.DEBUG)
+                returnStr += logHelper(u"Ignoring Dir: " + processPath + " for now. File " + file + "was Modified < 60s ago, might still be being written to", logger.DEBUG)
                 return False
         
         allFiles += fileList
