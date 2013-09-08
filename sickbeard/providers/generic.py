@@ -148,7 +148,7 @@ class GenericProvider:
             return False
 
         # as long as it's a valid download then consider it a successful snatch
-        return self._verify_download(fileName)
+        return self._verify_download(file_name)
 
     def _verify_download(self, file_name=None):
         """
