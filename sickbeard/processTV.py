@@ -103,8 +103,8 @@ def processDir (dirName, nzbName=None, recurse=False):
         # Avoid processing the same file again if we use KEEP_PROCESSING_DIR    
         if sickbeard.PROCESS_METHOD != "move":
             myDB = db.DBConnection()
-            sqlresult = myDB.select("SELECT * FROM tv_episodes WHERE release_name = ?", [cur_video_file.rpartition('.')[0]])
-            if sqlresult:
+            sqlResult = myDB.select("SELECT * FROM tv_episodes WHERE release_name = ?", [cur_video_file.rpartition('.')[0]])
+            if sqlResult:
                 returnStr += logHelper(u"You're trying to post process the file " + cur_video_file + " that's already been processed, skipping", logger.DEBUG)
                 continue
 
@@ -247,7 +247,7 @@ def validateDir(path, dirName):
         for video in videoFiles:
             processed_video = 0
             sqlResult = myDB.select("SELECT * FROM tv_episodes WHERE release_name = ?", [video.rpartition('.')[0]])
-            if sqlresult:
+            if sqlResult:
                 processed_video += 1
         
         if videoFiles and len(videoFiles) == processed_video:
