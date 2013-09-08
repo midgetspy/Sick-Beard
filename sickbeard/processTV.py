@@ -101,17 +101,13 @@ def processDir (dirName, nzbName=None, recurse=False):
         cur_video_file_path = ek.ek(os.path.join, dirName, cur_video_file)
 
         # Avoid processing the same file again if we use KEEP_PROCESSING_DIR    
-        if sickbeard.KEEP_PROCESSED_DIR:
+        if sickbeard.PROCESS_METHOD != "move":
             myDB = db.DBConnection()
             sqlresult = myDB.select("SELECT * FROM tv_episodes WHERE release_name = ?", [cur_video_file.rpartition('.')[0]])
             if sqlresult:
                 returnStr += logHelper(u"You're trying to post process the file " + cur_video_file + " that's already been processed, skipping", logger.DEBUG)
                 continue
 
-        if helpers.isBeingWritten(cur_video_file_path):
-            returnStr += logHelper(u"Ignoring file: " + cur_video_file_path + " for now. Modified < 60s ago, might still be being written to", logger.DEBUG)
-            continue
-            
         try:
             processor = postProcessor.PostProcessor(cur_video_file_path, nzbName)
             process_result = processor.process()
@@ -236,23 +232,27 @@ def validateDir(path, dirName):
     # Get the videofile list for the next checks
     allFiles = []
     for processPath, processDir, fileList in ek.ek(os.walk, ek.ek(os.path.join, path, dirName), topdown=False):
-
-        # Check if any file was modified less than 60 sec.
-        for file in filter(helpers.isMediaFile, fileList) + filter(helpers.isRarFile,fileList):
-            if helpers.isBeingWritten(ek.ek(os.path.join, processPath, file)):
-                returnStr += logHelper(u"Ignoring Dir: " + processPath + " for now. File " + file + "was Modified < 60s ago, might still be being written to", logger.DEBUG)
-                return False
-        
         allFiles += fileList
+
+    videoFiles = filter(helpers.isMediaFile, allFiles)
             
     # Avoid processing the same dir again if we use KEEP_PROCESSING_DIR    
-    if sickbeard.KEEP_PROCESSED_DIR:
+    if sickbeard.PROCESS_METHOD != "move":
         numPostProcFiles = myDB.select("SELECT COUNT(release_name) as numfiles FROM tv_episodes WHERE release_name = ?", [dirName])
-        if int(numPostProcFiles[0][0]) == len(videoFiles):
+        if videoFiles and int(numPostProcFiles[0][0]) == len(videoFiles):
             returnStr += logHelper(u"You're trying to post process a dir that's already been processed, skipping", logger.DEBUG)
             return False
 
-    videoFiles = filter(helpers.isMediaFile, allFiles)
+        # This is needed for video whose name differ from dirName
+        for video in videoFiles:
+            processed_video = 0
+            sqlResult = myDB.select("SELECT * FROM tv_episodes WHERE release_name = ?", [video.rpartition('.')[0]])
+            if sqlresult:
+                processed_video += 1
+        
+        if videoFiles and len(videoFiles) == processed_video:
+            returnStr += logHelper(u"You're trying to post process a dir that's already been processed, skipping", logger.DEBUG)
+            return False
 
     #check if the dir have at least one tv video file
     for video in videoFiles:
