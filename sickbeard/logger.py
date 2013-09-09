@@ -119,7 +119,7 @@ class SBRotatingLogHandler(object):
         Configure a file handler to log at file_name and return it.
         """
     
-        file_handler = logging.FileHandler(self.log_file_path)
+        file_handler = logging.FileHandler(self.log_file_path, encoding='utf-8')
         file_handler.setLevel(DB)
         file_handler.setFormatter(DispatchingFormatter({'sickbeard'  : logging.Formatter('%(asctime)s %(levelname)-8s %(message)s', '%b-%d %H:%M:%S'),
                                                         'subliminal' : logging.Formatter('%(asctime)s %(levelname)-8s SUBLIMINAL :: %(message)s', '%b-%d %H:%M:%S'),
