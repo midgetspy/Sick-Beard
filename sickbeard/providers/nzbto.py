@@ -29,7 +29,7 @@ import sickbeard
 
 from sickbeard import classes, logger, show_name_helpers, helpers
 from sickbeard import tvcache
-from sickbeard import exceptions
+from sickbeard.exceptions import ex
 
 
 import requests
@@ -53,9 +53,6 @@ class NZBto(generic.NZBProvider):
         self.session.headers["Referer"] = "http://nzb.to/login"
         self.session.headers["User-Agent"] = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.7; rv:20.0) Gecko/20100101 Firefox/20.0"
 
-        #self.proxy = sickbeard.NZBTO_PROXY
-        #
-        #return sickbeard.NZBTO
 
     def isEnabled(self):
         self.proxy = sickbeard.NZBTO_PROXY
@@ -69,24 +66,13 @@ class NZBto(generic.NZBProvider):
             self.proxy = sickbeard.NZBTO_PROXY
 
     def _get_season_search_strings(self, show, season):
-        # sceneSearchStrings = set(show_name_helpers.makeSceneSeasonSearchString(show, season, "NZBIndex"))
-
-        # # search for all show names and episode numbers like ("a","b","c") in a single search
-        # return [' '.join(sceneSearchStrings)]
         return [x for x in show_name_helpers.makeSceneSeasonSearchString(show, season)]
 
     def _get_episode_search_strings(self, ep_obj):
-        # # tvrname is better for most shows
-        # if ep_obj.show.tvrname:
-        #     searchStr = ep_obj.show.tvrname + " S%02dE%02d"%(ep_obj.season, ep_obj.episode)
-        # else:
-        #     searchStr = ep_obj.show.name + " S%02dE%02d"%(ep_obj.season, ep_obj.episode)
-        # return [searchStr]
         return [x for x in show_name_helpers.makeSceneSearchString(ep_obj)]
 
     def _get_title_and_url(self, item):
-        # (title, url) = super(NZBClubProvider, self)._get_title_and_url(item)
-        tmp_title = item.tr.find("td", attrs={"class": "title"}).a.text
+        tmp_title = item.tr.find("td", attrs={"class": "title"}).find("a").text
         dl = item.find("a", attrs={"title": "NZB erstellen"})
         tmp_url = "http://nzb.to/inc/ajax/popupdetails.php?n=" + dl["href"].split("?nid=")[1]
         x = self.session.get(tmp_url)
@@ -97,13 +83,9 @@ class NZBto(generic.NZBProvider):
         else:
             title = "%s{{%s}}" % (tmp_title, pw.strip())
 
-        #tmp_url = "http://nzb.to/" + dl["href"];
-        #x = self.session.get(tmp_url, stream=True)
-        #filename = x.headers["Content-Disposition"].split(";")[1].replace(" filename=", "").replace('"', '')
-        #title = filename.replace("TV_", "").replace(".nzb", "")
         params = {"nid": dl["href"].split("?nid=")[1], "user": sickbeard.NZBTO_USER, "pass": sickbeard.NZBTO_PASS, "rel": title}
         url = self.proxy + urllib.urlencode(params)
-        # url = url.replace("_"," ").replace("/nzb view/","/nzb_get/") + ".nzb"
+
         logger.log( '_get_title_and_url(), returns (%s, %s)' %(title, url), logger.DEBUG)
         logger.log( 'self.searchString=%s' %(self.searchString), logger.DEBUG)
 
@@ -132,7 +114,7 @@ class NZBto(generic.NZBProvider):
         logger.log(u"Sleeping 10 seconds to respect NZBto's rules")
         time.sleep(10)
 
-        logger.log(u"CURRENT COOKIE: {0}".format(self.session.cookies.get_dict()))
+        #logger.log(u"CURRENT COOKIE: {0}".format(self.session.cookies.get_dict()))
 
         cookie_test = re.compile(r"[0-9]*-\d{1}-.*")
         if re.match(cookie_test, self.session.cookies.get("NZB_SID") ):
@@ -156,7 +138,7 @@ class NZBto(generic.NZBProvider):
             table_regex = re.compile(r'tbody-.*')
             items = parsedXML.findAll("tbody", attrs={"id": table_regex})
         except Exception, e:
-            logger.log(u"Error trying to load NZBto RSS feed: "+ex(e), logger.ERROR)
+            logger.log(u"Error trying to load NZBto HTML feed: "+ex(e), logger.ERROR)
             return []
 
         results = []
@@ -165,7 +147,7 @@ class NZBto(generic.NZBProvider):
             (title, url) = self._get_title_and_url(curItem)
 
             if not title or not url:
-                logger.log(u"The XML returned from the NZBClub RSS feed is incomplete, this result is unusable", logger.ERROR)
+                logger.log(u"The XML returned from the NZBto HTML feed is incomplete, this result is unusable", logger.ERROR)
                 continue
             if not title == 'Not_Valid':
                 results.append(curItem)
@@ -222,7 +204,7 @@ class NNZBtoCache(tvcache.TVCache):
         # get all records since the last timestamp
         #
         if not sickbeard.NZBTO_USER or not sickbeard.NZBTO_PASS:
-            raise exceptions.AuthException("nzbto authentication details are empty, check your config")
+            raise exceptions.AuthException("nzb.to authentication details are empty, check your config")
         else:
             #if user and pass are ok, log us in
             self.provider.proxy = sickbeard.NZBTO_PROXY
