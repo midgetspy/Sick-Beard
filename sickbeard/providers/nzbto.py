@@ -29,7 +29,7 @@ import sickbeard
 
 from sickbeard import classes, logger, show_name_helpers, helpers
 from sickbeard import tvcache
-from sickbeard.exceptions import ex
+from sickbeard import exceptions
 
 
 import requests
@@ -60,9 +60,8 @@ class NZBto(generic.NZBProvider):
 
     def _checkAuth(self):
         if not sickbeard.NZBTO_USER or not sickbeard.NZBTO_PASS:
-            raise exceptions.AuthException("nzbto authentication details are empty, check your config")
+            raise exceptions.AuthException("nzb.to authentication details are empty, check your config")
         else:
-            #if user and pass are ok, log us in
             self.proxy = sickbeard.NZBTO_PROXY
 
     def _get_season_search_strings(self, show, season):
@@ -72,9 +71,11 @@ class NZBto(generic.NZBProvider):
         return [x for x in show_name_helpers.makeSceneSearchString(ep_obj)]
 
     def _get_title_and_url(self, item):
-        tmp_title = item.tr.find("td", attrs={"class": "title"}).find("a").text
+        cur_el = item.tr.find("td", attrs={"class": "title"}).find("a")
+        tmp_title = cur_el.text
         dl = item.find("a", attrs={"title": "NZB erstellen"})
-        tmp_url = "http://nzb.to/inc/ajax/popupdetails.php?n=" + dl["href"].split("?nid=")[1]
+        dl = cur_el
+        tmp_url = "http://nzb.to/inc/ajax/popupdetails.php?n=" + cur_el["href"].split("nid=")[1]
         x = self.session.get(tmp_url)
         tro = BeautifulSoup(x.text)
         pw = tro.find('span', attrs={"style": "color:#ff0000"}).strong.next.next
@@ -83,7 +84,7 @@ class NZBto(generic.NZBProvider):
         else:
             title = "%s{{%s}}" % (tmp_title, pw.strip())
 
-        params = {"nid": dl["href"].split("?nid=")[1], "user": sickbeard.NZBTO_USER, "pass": sickbeard.NZBTO_PASS, "rel": title}
+        params = {"nid": dl["href"].split("nid=")[1], "user": sickbeard.NZBTO_USER, "pass": sickbeard.NZBTO_PASS, "rel": title}
         url = self.proxy + urllib.urlencode(params)
 
         logger.log( '_get_title_and_url(), returns (%s, %s)' %(title, url), logger.DEBUG)
@@ -138,7 +139,7 @@ class NZBto(generic.NZBProvider):
             table_regex = re.compile(r'tbody-.*')
             items = parsedXML.findAll("tbody", attrs={"id": table_regex})
         except Exception, e:
-            logger.log(u"Error trying to load NZBto HTML feed: "+ex(e), logger.ERROR)
+            logger.log(u"Error trying to load NZBto HTML feed: "+exceptions.ex(e), logger.ERROR)
             return []
 
         results = []
@@ -159,18 +160,23 @@ class NZBto(generic.NZBProvider):
 
         results = []
 
-        for curResult in self._doSearch("(PROPER,REPACK)"):
+        for curResult in self._doSearch("REPACK"):
 
             (title, url) = self._get_title_and_url(curResult)
 
-            pubDate_node = curResult.getElementsByTagName('pubDate')[0]
-            pubDate = helpers.get_xml_text(pubDate_node)
-            dateStr = re.search('(\w{3}, \d{1,2} \w{3} \d{4} \d\d:\d\d:\d\d) [\+\-]\d{4}', pubDate)
+            pubDate_node = curResult.find('td', attrs={'class':'final'}).span
+            if not pubDate_node:
+                logger.log(u"Unable to figure out the date for entry "+title+", skipping it")
+                continue
+            pubDate = pubDate_node['title']
+            #Genaues Datum/Zeit: 09-09-2013 10:41:47
+            dateStr = re.search('.*:\s(\d{2}-\d{2}-\d{4}\s\d{2}:\d{2}:\d{2})', pubDate)
             if not dateStr:
                 logger.log(u"Unable to figure out the date for entry "+title+", skipping it")
                 continue
             else:
-                resultDate = datetime.datetime.strptime(match.group(1), "%a, %d %b %Y %H:%M:%S")
+                logger.log(u"Proper date for %s is %s" % (title, dateStr.group(1)))
+                resultDate = datetime.datetime.strptime(dateStr.group(1), "%d-%m-%Y %H:%M:%S")
 
             if date == None or resultDate > date:
                 results.append(classes.Proper(title, url, resultDate))
