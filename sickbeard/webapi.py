@@ -1622,15 +1622,19 @@ class CMD_SickBeardAnalyzeName(ApiCall):
         ApiCall.__init__(self, args, kwargs)
 
     def run(self):
-        processor = postProcessor.PostProcessor('', self.name)
+
         try:
-            analyzed_name = processor._analyze_name(self.name, file=False)
+            processor = postProcessor.PostProcessor('', self.name)
+            (tvdb, season, episode) = processor._find_info()
+
         except InvalidNameException, e:
             logger.log(u"API :: SickBeardAnalyzeName :: NameParser failed with InvalidNameException: " + repr(e), logger.DEBUG)
             return _responds(RESULT_FAILURE, msg=ex(e))
-        return _responds(RESULT_SUCCESS, data={'tvdbid': analyzed_name[0],
-                                                'season': analyzed_name[1],
-                                                'episodes': analyzed_name[2]})
+
+        return _responds(RESULT_SUCCESS, data={'tvdbid': tvdb,
+                                                'season': season,
+                                                'episodes': episode
+                                                })
 
 
 class CMD_Show(ApiCall):
