@@ -41,7 +41,7 @@ class NZBto(generic.NZBProvider):
 
         generic.NZBProvider.__init__(self, "NZBto")
 
-        self.supportsBacklog = False
+        self.supportsBacklog = True
 
         self.cache = NNZBtoCache(self)
 
@@ -175,7 +175,7 @@ class NZBto(generic.NZBProvider):
                 logger.log(u"Unable to figure out the date for entry "+title+", skipping it")
                 continue
             else:
-                logger.log(u"Proper date for %s is %s" % (title, dateStr.group(1)))
+                #logger.log(u"Proper date for %s is %s" % (title, dateStr.group(1)))
                 resultDate = datetime.datetime.strptime(dateStr.group(1), "%d-%m-%Y %H:%M:%S")
 
             if date == None or resultDate > date:
