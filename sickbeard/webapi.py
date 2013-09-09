@@ -26,7 +26,6 @@ import datetime
 import threading
 import re
 import traceback
-
 import cherrypy
 import sickbeard
 import webserve
@@ -38,8 +37,7 @@ from sickbeard.common import SNATCHED, SNATCHED_PROPER, DOWNLOADED, SKIPPED, UNA
 from common import Quality, qualityPresetStrings, statusStrings
 from sickbeard import image_cache
 from lib.tvdb_api import tvdb_api, tvdb_exceptions
-from sickbeard import postProcessor
-from sickbeard.name_parser.parser import InvalidNameException
+
 try:
     import json
 except ImportError:
@@ -69,7 +67,7 @@ result_type_map = {RESULT_SUCCESS: "success",
 
 class Api:
     """ api class that returns json results """
-    version = 5 # use an int since float-point is unpredictible
+    version = 4 # use an int since float-point is unpredictible
     intent = 4
 
     @cherrypy.expose
@@ -1609,34 +1607,6 @@ class CMD_SickBeardShutdown(ApiCall):
         return _responds(RESULT_SUCCESS, msg="SickBeard is shutting down...")
 
 
-class CMD_SickBeardAnalyzeName(ApiCall):
-    _help = {"desc": "takes a name and tries to figure out a show, season and episode from it.",
-            "requiredParameters": {"name": {"desc": "the name to lookup"}}
-            }
-
-    def __init__(self, args, kwargs):
-        # required
-        self.name, args = self.check_params(args, kwargs, "name", None, True, "string", [])
-        # optional
-        # super, missing, help
-        ApiCall.__init__(self, args, kwargs)
-
-    def run(self):
-
-        try:
-            processor = postProcessor.PostProcessor('', self.name)
-            (tvdb, season, episode) = processor._find_info()
-
-        except InvalidNameException, e:
-            logger.log(u"API :: SickBeardAnalyzeName :: NameParser failed with InvalidNameException: " + repr(e), logger.DEBUG)
-            return _responds(RESULT_FAILURE, msg=ex(e))
-
-        return _responds(RESULT_SUCCESS, data={'tvdbid': tvdb,
-                                                'season': season,
-                                                'episodes': episode
-                                                })
-
-
 class CMD_Show(ApiCall):
     _help = {"desc": "display information for a given show",
              "requiredParameters": {"tvdbid": {"desc": "thetvdb.com unique id of a show"},
@@ -2447,7 +2417,6 @@ _functionMaper = {"help": CMD_Help,
                   "logs": CMD_Logs,
                   "sb": CMD_SickBeard,
                   "sb.addrootdir": CMD_SickBeardAddRootDir,
-                  "sb.analyzename": CMD_SickBeardAnalyzeName,
                   "sb.checkscheduler": CMD_SickBeardCheckScheduler,
                   "sb.deleterootdir": CMD_SickBeardDeleteRootDir,
                   "sb.forcesearch": CMD_SickBeardForceSearch,

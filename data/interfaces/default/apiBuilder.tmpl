@@ -32,7 +32,6 @@ addListGroup("api", "Command");
 
 addOption("Command", "SickBeard", "?cmd=sb", 1); //make default
 addList("Command", "SickBeard.AddRootDir", "?cmd=sb.addrootdir", "sb.addrootdir", "", "", "action");
-addList("Command", "SickBeard.AnalyzeName", "?cmd=sb.analyzename", "sb.analyzename", "", "", "action");
 addOption("Command", "SickBeard.CheckScheduler", "?cmd=sb.checkscheduler", "", "", "action");
 addList("Command", "SickBeard.DeleteRootDir", "?cmd=sb.deleterootdir", "sb.deleterootdir", "", "", "action");
 addOption("Command", "SickBeard.ForceSearch", "?cmd=sb.forcesearch", "", "", "action");
@@ -339,12 +338,6 @@ addList("sb.addrootdir", "S:\\Invalid_Location", "&location=S:\\Invalid_Location
 addOption("sb.addrootdir-opt", "Optional Param", "", 1);
 addOption("sb.addrootdir-opt", "Default", "&default=1");
 addOption("sb.addrootdir-opt", "Not Default", "&default=0");
-
-addOption("sb.analyzename", "Burn.Notice.S07E12.1080p.WEB-DL.DD5.1.H.264-NTb", "&name=Burn.Notice.S07E12.1080p.WEB-DL.DD5.1.H.264-NTb", 1);
-addOption("sb.analyzename", "Burn.Notice.S07E12.720p.HDTV.x264-EVOLVE", "&name=Burn.Notice.S07E12.720p.HDTV.x264-EVOLVE");
-addOption("sb.analyzename", "Battlestar.Galactica.S01E01.E02.E03.DVDRip.XviD-SFM", "&name=Battlestar.Galactica.S01E01.E02.E03.DVDRip.XviD-SFM");
-addOption("sb.analyzename", "Neighbours.S28E101-E105.WS.PDTV.XviD-FQM", "&name=Neighbours.S28E101-E105.WS.PDTV.XviD-FQM");
-addOption("sb.analyzename", "Jimmy.Fallon.2012.06.07.Chris.Rock.REPACK.720p.HDTV.x264-2HD", "&name=Jimmy.Fallon.2012.06.07.Chris.Rock.REPACK.720p.HDTV.x264-2HD");
 
 addOption("sb.deleterootdir", "C:\\Temp", "&location=C:\\Temp", "", 1);
 addOption("sb.deleterootdir", "/usr/bin", "&location=/usr/bin/");
