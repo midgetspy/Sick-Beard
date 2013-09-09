@@ -154,23 +154,23 @@ class PostProcessor(object):
             return []
 
         file_path_list = []
-    
+
         base_name = file_path.rpartition('.')[0]+'.'
         
         # don't strip it all and use cwd by accident
         if not base_name:
             return []
-        
+
         # don't confuse glob with chars we didn't mean to use
         base_name = re.sub(r'[\[\]\*\?]', r'[\g<0>]', base_name)
-    
+
         for associated_file_path in ek.ek(glob.glob, base_name+'*'):
             # only add associated to list
             if associated_file_path == file_path:
                 continue
-            # only list it if the only non-shared part is the extension or if it is a subtitle
-            if '.' in associated_file_path[len(base_name):] and not associated_file_path[len(associated_file_path)-3:] in common.subtitleExtensions:
-                continue
+#            # only list it if the only non-shared part is the extension or if it is a subtitle
+#            if '.' in associated_file_path[len(base_name):] and not associated_file_path[len(associated_file_path)-3:] in common.subtitleExtensions:
+#                continue
             if subtitles_only and not associated_file_path[len(associated_file_path)-3:] in common.subtitleExtensions:
                 continue
 
@@ -241,14 +241,18 @@ class PostProcessor(object):
         if not file_list:
             self._log(u"There were no files associated with " + file_path + ", not moving anything", logger.DEBUG)
             return
-        
+
+        # create base name with file_path (media_file without .extension)
+        old_base_name = file_path.rpartition('.')[0]
+        old_base_name_length = len(old_base_name)
+
         # deal with all files
         for cur_file_path in file_list:
 
             cur_file_name = ek.ek(os.path.basename, cur_file_path)
             
-            # get the extension
-            cur_extension = ek.ek(os.path.splitext, cur_file_path)[1][1:]
+            # get the extension without .
+            cur_extension = cur_file_path[old_base_name_length + 1:]
             
             # check if file have subtitles language
             if cur_extension in common.subtitleExtensions:
