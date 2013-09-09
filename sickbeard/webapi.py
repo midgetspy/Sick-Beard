@@ -69,7 +69,7 @@ result_type_map = {RESULT_SUCCESS: "success",
 
 class Api:
     """ api class that returns json results """
-    version = 4 # use an int since float-point is unpredictible
+    version = 5 # use an int since float-point is unpredictible
     intent = 4
 
     @cherrypy.expose
@@ -207,7 +207,6 @@ def call_dispatcher(args, kwargs):
     """
     logger.log(u"API :: all args: '" + str(args) + "'", logger.DEBUG)
     logger.log(u"API :: all kwargs: '" + str(kwargs) + "'", logger.DEBUG)
-    #logger.log(u"API :: dateFormat: '" + str(dateFormat) + "'", logger.DEBUG)
 
     cmds = None
     if args:
@@ -1627,10 +1626,10 @@ class CMD_SickBeardAnalyzeName(ApiCall):
         try:
             analyzed_name = processor._analyze_name(self.name, file=False)
         except InvalidNameException, e:
-            logger.log(u"API :: SickBeardAnalyzeName :: NameParser failed with InvalidNameException: "+ repr(e), logger.DEBUG)
+            logger.log(u"API :: SickBeardAnalyzeName :: NameParser failed with InvalidNameException: " + repr(e), logger.DEBUG)
             return _responds(RESULT_FAILURE, msg=ex(e))
         return _responds(RESULT_SUCCESS, data={'tvdbid': analyzed_name[0],
-                                                'season':  analyzed_name[1],
+                                                'season': analyzed_name[1],
                                                 'episodes': analyzed_name[2]})
 
 
@@ -2444,6 +2443,7 @@ _functionMaper = {"help": CMD_Help,
                   "logs": CMD_Logs,
                   "sb": CMD_SickBeard,
                   "sb.addrootdir": CMD_SickBeardAddRootDir,
+                  "sb.analyzename": CMD_SickBeardAnalyzeName,
                   "sb.checkscheduler": CMD_SickBeardCheckScheduler,
                   "sb.deleterootdir": CMD_SickBeardDeleteRootDir,
                   "sb.forcesearch": CMD_SickBeardForceSearch,
@@ -2456,7 +2456,6 @@ _functionMaper = {"help": CMD_Help,
                   "sb.searchtvdb": CMD_SickBeardSearchTVDB,
                   "sb.setdefaults": CMD_SickBeardSetDefaults,
                   "sb.shutdown": CMD_SickBeardShutdown,
-                  "sb.analyzename": CMD_SickBeardAnalyzeName,
                   "show": CMD_Show,
                   "show.addexisting": CMD_ShowAddExisting,
                   "show.addnew": CMD_ShowAddNew,
