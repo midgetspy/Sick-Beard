@@ -57,6 +57,7 @@ def change_HTTPS_CERT(https_cert):
 
     return True
 
+
 def change_HTTPS_KEY(https_key):
 
     if https_key == '':
@@ -72,13 +73,18 @@ def change_HTTPS_KEY(https_key):
 
     return True
 
+
 def change_LOG_DIR(log_dir):
 
-    if os.path.normpath(sickbeard.LOG_DIR) != os.path.normpath(log_dir):
-        if helpers.makeDir(log_dir):
-            sickbeard.LOG_DIR = os.path.normpath(log_dir)
+    abs_log_dir = os.path.normpath(os.path.join(sickbeard.DATA_DIR, log_dir))
+
+    if os.path.normpath(sickbeard.LOG_DIR) != abs_log_dir:
+        if helpers.makeDir(abs_log_dir):
+            sickbeard.ACTUAL_LOG_DIR = os.path.normpath(log_dir)
+            sickbeard.LOG_DIR = abs_log_dir
+
             logger.sb_log_instance.initLogging()
-            logger.log(u"Initialized new log file in " + log_dir)
+            logger.log(u"Initialized new log file in " + sickbeard.LOG_DIR)
 
             cherry_log = os.path.join(sickbeard.LOG_DIR, "cherrypy.log")
             cherrypy.config.update({'log.access_file': cherry_log})
@@ -89,6 +95,7 @@ def change_LOG_DIR(log_dir):
             return False
 
     return True
+
 
 def change_NZB_DIR(nzb_dir):
 
@@ -153,6 +160,7 @@ def change_SEARCH_FREQUENCY(freq):
     sickbeard.currentSearchScheduler.cycleTime = datetime.timedelta(minutes=sickbeard.SEARCH_FREQUENCY)
     sickbeard.backlogSearchScheduler.cycleTime = datetime.timedelta(minutes=sickbeard.get_backlog_cycle_time())
 
+
 def change_VERSION_NOTIFY(version_notify):
    
     oldSetting = sickbeard.VERSION_NOTIFY
@@ -164,6 +172,7 @@ def change_VERSION_NOTIFY(version_notify):
         
     if oldSetting == False and version_notify == True:
         sickbeard.versionCheckScheduler.action.run() #@UndefinedVariable
+
 
 def CheckSection(CFG, sec):
     """ Check if INI section exists, if not create it """
@@ -189,6 +198,7 @@ def minimax(val, low, high):
         return high
     return val
 
+
 ################################################################################
 # Check_setting_int                                                            #
 ################################################################################
@@ -204,6 +214,7 @@ def check_setting_int(config, cfg_name, item_name, def_val):
             config[cfg_name][item_name] = my_val
     logger.log(item_name + " -> " + str(my_val), logger.DEBUG)
     return my_val
+
 
 ################################################################################
 # Check_setting_float                                                          #
@@ -221,6 +232,7 @@ def check_setting_float(config, cfg_name, item_name, def_val):
 
     logger.log(item_name + " -> " + str(my_val), logger.DEBUG)
     return my_val
+
 
 ################################################################################
 # Check_setting_str                                                            #
