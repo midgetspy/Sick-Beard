@@ -31,7 +31,7 @@ from sickbeard import nzbget
 from sickbeard import history
 from sickbeard import notifiers
 from sickbeard import nzbSplitter
-from sickbeard.downloaders import utorrent, transmission, downloadstation
+from sickbeard.downloaders import utorrent, transmission, downloadstation, deluge
 from sickbeard import ui
 from sickbeard import encodingKludge as ek
 from sickbeard import providers
@@ -142,6 +142,8 @@ def snatchEpisode(result, endStatus=SNATCHED):
             dlResult = transmission.sendTORRENT(result)
         elif sickbeard.TORRENT_METHOD == "downloadstation":
             dlResult = downloadstation.sendDownload(result)
+        elif sickbeard.TORRENT_METHOD == "deluge":
+            dlResult = deluge.sendTORRENT(result)
     else:
         logger.log(u"Unknown result type, unable to download it", logger.ERROR)
         dlResult = False
