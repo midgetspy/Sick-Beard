@@ -15,7 +15,13 @@ function goListGroup(apikey, L7, L6, L5, L4, L3, L2, L1){
     $('.global').each(function(){
         var checked = $(this).prop('checked');
         if(checked) {
-            GlobalOptions = GlobalOptions + "&" + $(this).attr('id') + "=1";
+            var globalID = $(this).attr('id');
+            // handle jsonp/callback global option differently
+            if(globalID == "jsonp") {
+                GlobalOptions = GlobalOptions + "&" + globalID + "=foo";
+            } else {
+                GlobalOptions = GlobalOptions + "&" + globalID + "=1";
+            }
         }
     });
 
