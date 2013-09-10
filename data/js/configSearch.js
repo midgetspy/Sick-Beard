@@ -50,6 +50,7 @@ $(document).ready(function(){
             $('#host_desc').text('uTorrent Host');
             $('#username_desc').text('uTorrent Username');
             $('#password_desc').text('uTorrent Password');
+            $('#Torrent_username').show();
         } else if (selectedProvider == "transmission"){
             $('#t_blackhole_settings').hide();
             $('#torrent_settings').show();
@@ -61,6 +62,7 @@ $(document).ready(function(){
             $('#username_desc').text('Transmission Username');
             $('#password_desc').text('Transmission Password');
             $('#directory_desc').text('Transmission Directory');
+            $('#Torrent_username').show();
 		} else if (selectedProvider == "downloadstation") {
 			$('#t_blackhole_settings').hide();
 			$('#torrent_settings').show();
@@ -72,7 +74,20 @@ $(document).ready(function(){
 			$('#username_desc').text('Synology Username');
 			$('#password_desc').text('Synology Password');
 			$('#directory_desc').text('Download Station Directory');
-        }
+            $('#Torrent_username').show();
+		} else if (selectedProvider == "deluge") {
+			$('#t_blackhole_settings').hide();
+			$('#torrent_settings').show();
+			$('#torrent_directory').show();
+	        $('#torrent_directory label').last().show();
+	        $('#torrent_directory .fileBrowser').show();
+	        $('#directory_desc').text('Torrent Directory');
+			$('#host_desc').html('Deluge Host');
+			$('#username_desc').text('Deluge Username');
+			$('#password_desc').text('Deluge Password');
+			$('#directory_desc').text('Deluge Directory');
+            $('#Torrent_username').hide();
+	    }
     }
     $('#nzb_method').change($(this).nzb_method_handler);
 
