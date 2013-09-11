@@ -1310,7 +1310,6 @@ class ConfigProviders:
                       omgwtfnzbs_username=None, omgwtfnzbs_apikey=None,
                       tvtorrents_digest=None, tvtorrents_hash=None, 
                       btn_api_key=None,
-                      dtt_norar = None, dtt_single = None,
                       thepiratebay_trusted=None, thepiratebay_proxy=None, thepiratebay_proxy_url=None,
                       torrentleech_username=None, torrentleech_password=None,
                       iptorrents_username=None, iptorrents_password=None, iptorrents_freeleech=None,
@@ -1389,8 +1388,6 @@ class ConfigProviders:
                 sickbeard.BTN = curEnabled
             elif curProvider in newznabProviderDict:
                 newznabProviderDict[curProvider].enabled = bool(curEnabled)
-            elif curProvider == 'dailytvtorrents':
-                sickbeard.DTT = curEnabled                
             elif curProvider == 'thepiratebay':
                 sickbeard.THEPIRATEBAY = curEnabled
             elif curProvider == 'torrentleech':
@@ -1412,20 +1409,6 @@ class ConfigProviders:
         sickbeard.TVTORRENTS_HASH = tvtorrents_hash.strip()
 
         sickbeard.BTN_API_KEY = btn_api_key.strip()
-
-        if dtt_norar == "on":
-            dtt_norar = 1
-        else:
-            dtt_norar = 0
-
-        sickbeard.DTT_NORAR = dtt_norar
-            
-        if dtt_single == "on":
-            dtt_single = 1
-        else:
-            dtt_single = 0
-
-        sickbeard.DTT_SINGLE = dtt_single  
 
         if thepiratebay_trusted == "on":
             thepiratebay_trusted = 1

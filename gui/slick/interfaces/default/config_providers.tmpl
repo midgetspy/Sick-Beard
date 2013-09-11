@@ -76,8 +76,7 @@ var show_nzb_providers = #if $sickbeard.USE_NZBS then "true" else "false"#;
                             <a href="$curProvider.url" class="imgLink" rel="noreferrer" onclick="window.open('${sickbeard.ANON_REDIRECT}' + this.href, '_blank'); return false;"><img src="$sbRoot/images/providers/$curProvider.imageName()" alt="$curProvider.name" title="$curProvider.name" width="16" height="16" /></a>
                             $curProvider.name
                             #if not $curProvider.supportsBacklog then "*" else ""#
-                            #if $curProvider.name == "EZRSS" or $curProvider.name == "DailyTvTorrents" then "**" else ""#
-                            #if $curProvider.name == "DailyTvTorrents" then "!" else ""
+                            #if $curProvider.name == "EZRSS" then "**" else ""#
                             <span class="ui-icon ui-icon-arrowthick-2-n-s pull-right"></span>
                           </li>
                         #end for
@@ -100,7 +99,7 @@ var show_nzb_providers = #if $sickbeard.USE_NZBS then "true" else "false"#;
                                 <span class="component-title jumbo">Configure Provider:</span>
                                 <span class="component-desc">
                                     #set $provider_config_list = []
-                                    #for $cur_provider in ("thepiratebay", "dailytvtorrents", "tvtorrents", "btn", "torrentleech", "iptorrents", "omgwtfnzbs", "kickasstorrents", "sceneaccess", "hdbits"):
+                                    #for $cur_provider in ("thepiratebay", "tvtorrents", "btn", "torrentleech", "iptorrents", "omgwtfnzbs", "kickasstorrents", "sceneaccess", "hdbits"):
                                         #set $cur_provider_obj = $sickbeard.providers.getProviderClass($cur_provider)
                                         #if $cur_provider_obj.providerType == $GenericProvider.NZB and not $sickbeard.USE_NZBS:
                                         	#continue
@@ -209,23 +208,6 @@ var show_nzb_providers = #if $sickbeard.USE_NZBS then "true" else "false"#;
                             <label class="clearfix" for="kat_verified">
                                 <span class="component-title">Verified Only</span>
                                 <span class="component-desc">Download only verified torrent?</span>
-                            </label>
-                        </div>
-</div>
-
-<div class="providerDiv" id="dailytvtorrentsDiv">
-                        <div class="field-pair">
-                            <input type="checkbox" name="dtt_norar" id="dtt_norar" #if $sickbeard.DTT_NORAR then "checked=\"checked\"" else ""#/>
-                            <label class="clearfix" for="dtt_norar">
-                                <span class="component-title">No Rar</span>
-                                <span class="component-desc">Download only uncompressed release?</span>
-                            </label>
-                        </div>
-                        <div class="field-pair">
-                            <input type="checkbox" name="dtt_single" id="dtt_single" #if $sickbeard.DTT_SINGLE then "checked=\"checked\"" else ""#/>
-                            <label class="clearfix" for="dtt_single">
-                                <span class="component-title">Single File</span>
-                                <span class="component-desc">Download only single file release?</span>
                             </label>
                         </div>
 </div>
