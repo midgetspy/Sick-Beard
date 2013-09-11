@@ -1939,7 +1939,7 @@ class ConfigNotifications:
         sickbeard.USE_EMAIL = use_email
         sickbeard.EMAIL_NOTIFY_ONSNATCH = email_notify_onsnatch
         sickbeard.EMAIL_NOTIFY_ONDOWNLOAD = email_notify_ondownload
-        sickbeard.EMAIL_NOTIFY_ONSUBTITLEDOWNLOAD = email_notify_ondownload
+        sickbeard.EMAIL_NOTIFY_ONSUBTITLEDOWNLOAD = email_notify_onsubtitledownload
         sickbeard.EMAIL_HOST = email_host
         sickbeard.EMAIL_PORT = email_port
         sickbeard.EMAIL_FROM = email_from
