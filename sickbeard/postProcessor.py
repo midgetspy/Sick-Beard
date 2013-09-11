@@ -470,7 +470,7 @@ class PostProcessor(object):
                 else:
                     logger.log(u"Nothing was good, found "+repr(test_name)+" and wanted either "+repr(self.nzb_name)+", "+repr(self.folder_name)+", or "+repr(self.file_name))
             else:
-                logger.log("Parse result not suficent(all folowing have to be set). will not save release name", logger.DEBUG)
+                logger.log(u"Parse result not sufficient(all following have to be set). Will not save release name", logger.DEBUG)
                 logger.log("Parse result(series_name): " + str(parse_result.series_name), logger.DEBUG)
                 logger.log("Parse result(season_number): " + str(parse_result.season_number), logger.DEBUG)
                 logger.log("Parse result(episode_numbers): " + str(parse_result.episode_numbers), logger.DEBUG)
