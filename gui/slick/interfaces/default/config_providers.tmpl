@@ -100,7 +100,7 @@ var show_nzb_providers = #if $sickbeard.USE_NZBS then "true" else "false"#;
                                 <span class="component-title jumbo">Configure Provider:</span>
                                 <span class="component-desc">
                                     #set $provider_config_list = []
-                                    #for $cur_provider in ("thepiratebay", "dailytvtorrents", "tvtorrents", "btn", "torrentleech", "iptorrents", "nzbs_r_us", "omgwtfnzbs", "kickasstorrents", "sceneaccess", "hdbits"):
+                                    #for $cur_provider in ("thepiratebay", "dailytvtorrents", "tvtorrents", "btn", "torrentleech", "iptorrents", "omgwtfnzbs", "kickasstorrents", "sceneaccess", "hdbits"):
                                         #set $cur_provider_obj = $sickbeard.providers.getProviderClass($cur_provider)
                                         #if $cur_provider_obj.providerType == $GenericProvider.NZB and not $sickbeard.USE_NZBS:
                                         	#continue
@@ -141,21 +141,6 @@ var show_nzb_providers = #if $sickbeard.USE_NZBS then "true" else "false"#;
                         </div>
 </div>
 #end for
-
-<div class="providerDiv" id="nzbs_r_usDiv">
-                        <div class="field-pair">
-                            <label class="clearfix">
-                                <span class="component-title">NZBs'R'US User ID:</span>
-                                <input class="component-desc" type="text" name="nzbs_r_us_uid" value="$sickbeard.NZBSRUS_UID" size="10" />
-                            </label>
-                        </div>
-                        <div class="field-pair">
-                            <label class="clearfix">
-                                <span class="component-title">NZBs'R'US API Key:</span>
-                                <input class="component-desc" type="text" name="nzbs_r_us_hash" value="$sickbeard.NZBSRUS_HASH" size="40" />
-                            </label>
-                        </div>
-</div>
 
                     <div class="providerDiv" id="omgwtfnzbsDiv">
                         <div class="field-pair">
