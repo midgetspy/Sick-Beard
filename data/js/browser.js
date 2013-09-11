@@ -13,7 +13,7 @@
 
     function browse(path, endpoint) {
 
-        if (currentBrowserPath === path) {
+        if (currentBrowserPath == path) {
             return;
         }
 
