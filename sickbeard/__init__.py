@@ -30,7 +30,7 @@ from threading import Lock
 
 # apparently py2exe won't build these unless they're imported somewhere
 from sickbeard import providers, metadata
-from providers import ezrss, tvtorrents, btn, nzbsrus, newznab, womble, thepiratebay, dtt, torrentleech, kat, nzbx, iptorrents, omgwtfnzbs, scc, hdbits
+from providers import ezrss, tvtorrents, btn, nzbsrus, newznab, womble, thepiratebay, dtt, torrentleech, kat, iptorrents, omgwtfnzbs, scc, hdbits
 from sickbeard.config import CheckSection, check_setting_int, check_setting_str, ConfigMigrator
 
 
@@ -225,9 +225,6 @@ NZBS_HASH = None
 
 WOMBLE = False
 
-NZBX = False
-NZBX_COMPLETION = 100
-
 OMGWTFNZBS = False
 OMGWTFNZBS_USERNAME = None
 OMGWTFNZBS_APIKEY = None
@@ -239,9 +236,6 @@ NZBSRUS_HASH = None
 NEWZBIN = False
 NEWZBIN_USERNAME = None
 NEWZBIN_PASSWORD = None
-
-NZBX = False
-NZBX_COMPLETION = 100
 
 SAB_USERNAME = None
 SAB_PASSWORD = None
@@ -442,7 +436,7 @@ def initialize(consoleLogging=True):
                 showQueueScheduler, searchQueueScheduler, ROOT_DIRS, CACHE_DIR, ACTUAL_CACHE_DIR, TVDB_API_PARMS, \
                 NAMING_PATTERN, NAMING_MULTI_EP, NAMING_FORCE_FOLDERS, NAMING_ABD_PATTERN, NAMING_CUSTOM_ABD, NAMING_STRIP_YEAR, \
                 RENAME_EPISODES, properFinderScheduler, PROVIDER_ORDER, autoPostProcesserScheduler, \
-                NZBSRUS, NZBSRUS_UID, NZBSRUS_HASH, WOMBLE, NZBX, NZBX_COMPLETION, OMGWTFNZBS, OMGWTFNZBS_USERNAME, OMGWTFNZBS_APIKEY, providerList, newznabProviderList, \
+                NZBSRUS, NZBSRUS_UID, NZBSRUS_HASH, WOMBLE, OMGWTFNZBS, OMGWTFNZBS_USERNAME, OMGWTFNZBS_APIKEY, providerList, newznabProviderList, \
                 EXTRA_SCRIPTS, USE_TWITTER, TWITTER_USERNAME, TWITTER_PASSWORD, TWITTER_PREFIX, \
                 USE_BOXCAR, BOXCAR_USERNAME, BOXCAR_PASSWORD, BOXCAR_NOTIFY_ONDOWNLOAD, BOXCAR_NOTIFY_ONSUBTITLEDOWNLOAD, BOXCAR_NOTIFY_ONSNATCH, \
                 USE_PUSHOVER, PUSHOVER_USERKEY, PUSHOVER_NOTIFY_ONDOWNLOAD, PUSHOVER_NOTIFY_ONSUBTITLEDOWNLOAD, PUSHOVER_NOTIFY_ONSNATCH, \
@@ -656,9 +650,6 @@ def initialize(consoleLogging=True):
         NEWZBIN_PASSWORD = check_setting_str(CFG, 'Newzbin', 'newzbin_password', '')
 
         WOMBLE = bool(check_setting_int(CFG, 'Womble', 'womble', 0))
-
-        NZBX = bool(check_setting_int(CFG, 'nzbX', 'nzbx', 0))
-        NZBX_COMPLETION = check_setting_int(CFG, 'nzbX', 'nzbx_completion', 100)
 
         OMGWTFNZBS = bool(check_setting_int(CFG, 'omgwtfnzbs', 'omgwtfnzbs', 0))
         OMGWTFNZBS_USERNAME = check_setting_str(CFG, 'omgwtfnzbs', 'omgwtfnzbs_username', '')
@@ -1349,10 +1340,6 @@ def save_config():
 
     new_config['Womble'] = {}
     new_config['Womble']['womble'] = int(WOMBLE)
-
-    new_config['nzbX'] = {}
-    new_config['nzbX']['nzbx'] = int(NZBX)
-    new_config['nzbX']['nzbx_completion'] = int(NZBX_COMPLETION)
 
     new_config['omgwtfnzbs'] = {}
     new_config['omgwtfnzbs']['omgwtfnzbs'] = int(OMGWTFNZBS)
