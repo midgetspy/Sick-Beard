@@ -1604,7 +1604,7 @@ class TVEpisode(object):
             "Ep Name" and "Other Ep Name" becomes "Ep Name & Other Ep Name"
         """
 
-        multiNameRegex = "(.*) \(\d\)"
+        multiNameRegex = "(.*) \(\d{1,2}\)" 
 
         self.relatedEps = sorted(self.relatedEps, key=lambda x: x.episode)
 
