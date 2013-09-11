@@ -18,14 +18,13 @@
 
 __all__ = ['ezrss',
            'tvtorrents',
-           'nzbsrus',
            'womble',
            'btn',
            'thepiratebay',
-           'dtt',
            'torrentleech',
            'kat',
-           'nzbx',
+           'scc',
+           'hdbits',
            'iptorrents',
            'omgwtfnzbs'
            ]

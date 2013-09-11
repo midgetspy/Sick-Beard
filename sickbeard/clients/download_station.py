@@ -20,10 +20,6 @@
 #
 # Uses the Synology Download Station API: http://download.synology.com/download/other/Synology_Download_Station_Official_API_V3.pdf.
 
-import requests
-import json
-import time
-
 import sickbeard
 from sickbeard.clients.generic import GenericClient
 
@@ -31,17 +27,8 @@ class DownloadStationAPI(GenericClient):
     
     def __init__(self, host=None, username=None, password=None):
                 
-        self.name = 'DownloadStation'
-        self.username = sickbeard.TORRENT_USERNAME if username is None else username
-        self.password = sickbeard.TORRENT_PASSWORD if password is None else password
-        self.host = sickbeard.TORRENT_HOST if host is None else host
-        
-        self.url = None
-        self.response = None
-        self.auth = None
-        self.last_time = time.time()
-        self.session = requests.session()
-        
+        super(DownloadStationAPI, self).__init__('DownloadStation', host, username, password)
+
         self.url = self.host + 'webapi/DownloadStation/task.cgi'
     
     def _get_auth(self):
@@ -50,7 +37,7 @@ class DownloadStationAPI(GenericClient):
         
         try:
             self.response = self.session.get(auth_url)
-            self.auth = json.loads(self.response.text)['data']['sid']
+            self.auth = self.response.json()['data']['sid']
         except:
             return None
         
@@ -66,7 +53,7 @@ class DownloadStationAPI(GenericClient):
                 }
         self._request(method='post', data=data)
         
-        return json.loads(self.response.text)['success']
+        return self.response.json()['success']
     
     def _add_torrent_file(self, result):
 
@@ -79,6 +66,6 @@ class DownloadStationAPI(GenericClient):
         files = {'file':(result.name + '.torrent', result.content)}
         self._request(method='post', data=data, files=files)
         
-        return json.loads(self.response.text)['success']
+        return self.response.json()['success']
 
 api = DownloadStationAPI()

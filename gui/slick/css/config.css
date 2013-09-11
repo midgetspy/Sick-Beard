@@ -125,6 +125,38 @@
     padding-top: 3px;
 }
 
+#config .tip_scale {
+margin-left: -9px;
+margin-top: -10px !important;
+margin-right: 5px;
+margin-bottom: -20px;
+line-height: 18px;
+font-size: 0.5 em !important;
+
+text-align: left;
+
+}
+
+#config .tip_scale label span.component-title{
+width: 85px !important;
+font-size: 12px !important;
+margin-top: 2px !important;
+
+}	
+
+#config .tip_scale label span.component-desc {
+margin-left: 90px !important;
+}	
+
+#config .tip_scale input[type="text"], #config .tip_scale input[type="password"], #config .tip_scale select{
+transform: scale(0.8) !important;
+-ms-transform: scale(0.8) !important;
+-webkit-transform: scale(0.8) !important;
+margin-left: -35px !important;
+margin-top: 3px !important;
+}
+
+
 /* =======================================================================
 config_postProcessing.tmpl
 ========================================================================== */

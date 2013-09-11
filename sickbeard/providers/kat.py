@@ -232,15 +232,17 @@ class KATProvider(generic.TorrentProvider):
                     torrent_table = soup.find('table', attrs = {'class' : 'data'})
                     torrent_rows = torrent_table.find_all('tr') if torrent_table else []
 
-                    if not torrent_rows:
-#                        logger.log(u"The Data returned from " + self.name + " do not contains any torrent", logger.ERROR)
+                    #Continue only if one Release is found
+                    if len(torrent_rows)<2:
+                        logger.log(u"The Data returned from " + self.name + " do not contains any torrent", logger.WARNING)
                         continue
                     
                     for tr in torrent_rows[1:]:
+
                         link = self.url + (tr.find('div', {'class': 'torrentname'}).find_all('a')[1])['href']
                         id = tr.get('id')[-7:]
                         title = (tr.find('div', {'class': 'torrentname'}).find_all('a')[1]).text
-                        url = tr.find('a', 'imagnet')['href']
+                        url = tr.find('a', 'imagnet')['href'] if hasattr(tr.find('a', 'imagnet'), "__getitem__") else None
                         verified = True if tr.find('a', 'iverify') else False
                         trusted =  True if tr.find('img', {'alt': 'verified'}) else False
                         seeders = int(tr.find_all('td')[-2].text)
@@ -266,7 +268,7 @@ class KATProvider(generic.TorrentProvider):
                         items[mode].append(item)
 
                 except Exception, e:
-                    logger.log(u"Failed to parsing " + self.name + (" Exceptions: "  + str(e) if e else ''), logger.ERROR)
+                    logger.log(u"Failed to parsing " + self.name + " Traceback: "  + traceback.format_exc(), logger.ERROR)
                     
             #For each search mode sort all the items by seeders
             items[mode].sort(key=lambda tup: tup[3], reverse=True)        

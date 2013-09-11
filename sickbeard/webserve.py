@@ -27,6 +27,7 @@ import threading
 import datetime
 import random
 import locale
+import logging
 
 from Cheetah.Template import Template
 import cherrypy.lib
@@ -800,7 +801,7 @@ class ConfigGeneral:
         sickbeard.ROOT_DIRS = rootDirString
     
     @cherrypy.expose
-    def saveAddShowDefaults(self, defaultFlattenFolders, defaultStatus, anyQualities, bestQualities, subtitles):
+    def saveAddShowDefaults(self, defaultFlattenFolders, defaultStatus, anyQualities, bestQualities, subtitles=False):
 
         if anyQualities:
             anyQualities = anyQualities.split(',')
@@ -891,18 +892,19 @@ class ConfigGeneral:
         else:
             version_notify = 0
 
-        if not config.change_LOG_DIR(log_dir):
-            results += ["Unable to create directory " + os.path.normpath(log_dir) + ", log dir not changed."]
-
         sickbeard.UPDATE_SHOWS_ON_START = update_shows_on_start
         sickbeard.LAUNCH_BROWSER = launch_browser
         sickbeard.SORT_ARTICLE = sort_article
+        # sickbeard.LOG_DIR is set in config.change_LOG_DIR()
 
         sickbeard.WEB_PORT = int(web_port)
         sickbeard.WEB_IPV6 = web_ipv6
-        sickbeard.WEB_LOG = web_log
+        # sickbeard.WEB_LOG is set in config.change_LOG_DIR()
         sickbeard.WEB_USERNAME = web_username
         sickbeard.WEB_PASSWORD = web_password
+
+        if not config.change_LOG_DIR(log_dir, web_log):
+            results += ["Unable to create directory " + os.path.normpath(log_dir) + ", log dir not changed."]
 
         if use_api == "on":
             use_api = 1
@@ -951,10 +953,10 @@ class ConfigSearch:
 
     @cherrypy.expose
     def saveSearch(self, use_nzbs=None, use_torrents=None, nzb_dir=None, sab_username=None, sab_password=None,
-                       sab_apikey=None, sab_category=None, sab_host=None, nzbget_password=None, nzbget_category=None, nzbget_host=None,
-                       nzb_method=None, torrent_method=None, usenet_retention=None, search_frequency=None, download_propers=None, allow_high_priority=None,
-                       torrent_dir=None, torrent_username=None, torrent_password=None, torrent_host=None, torrent_label=None, torrent_path=None, 
-                       torrent_ratio=None, torrent_paused=None, torrent_high_bandwidth=None, ignore_words=None):
+                    sab_apikey=None, sab_category=None, sab_host=None, nzbget_username=None, nzbget_password=None, nzbget_category=None, nzbget_host=None,
+                    nzb_method=None, torrent_method=None, usenet_retention=None, search_frequency=None, download_propers=None, allow_high_priority=None,
+                    torrent_dir=None, torrent_username=None, torrent_password=None, torrent_host=None, torrent_label=None, torrent_path=None, 
+                    torrent_ratio=None, torrent_paused=None, torrent_high_bandwidth=None, ignore_words=None):
 
         results = []
 
@@ -987,7 +989,7 @@ class ConfigSearch:
             use_torrents = 0
 
         if usenet_retention == None:
-            usenet_retention = 200
+            usenet_retention = 500
 
         if ignore_words == None:
             ignore_words = ""
@@ -1002,6 +1004,11 @@ class ConfigSearch:
         sickbeard.IGNORE_WORDS = ignore_words
         
         sickbeard.DOWNLOAD_PROPERS = download_propers
+        if sickbeard.DOWNLOAD_PROPERS:
+            sickbeard.properFinderScheduler.silent = False 
+        else:
+            sickbeard.properFinderScheduler.silent = True
+            
         sickbeard.ALLOW_HIGH_PRIORITY = allow_high_priority
 
         sickbeard.SAB_USERNAME = sab_username
@@ -1017,6 +1024,7 @@ class ConfigSearch:
 
         sickbeard.SAB_HOST = sab_host
 
+        sickbeard.NZBGET_USERNAME = nzbget_username
         sickbeard.NZBGET_PASSWORD = nzbget_password
         sickbeard.NZBGET_CATEGORY = nzbget_category
         sickbeard.NZBGET_HOST = nzbget_host
@@ -1068,8 +1076,8 @@ class ConfigPostProcessing:
 
     @cherrypy.expose
     def savePostProcessing(self, naming_pattern=None, naming_multi_ep=None,
-                    xbmc_data=None, mediabrowser_data=None, synology_data=None, sony_ps3_data=None, wdtv_data=None, tivo_data=None, mede8er_data=None,
-                    use_banner=None, keep_processed_dir=None, process_automatically=None, rename_episodes=None,
+                    xbmc_data=None, xbmc_v12__data=None, mediabrowser_data=None, synology_data=None, sony_ps3_data=None, wdtv_data=None, tivo_data=None, mede8er_data=None,
+                    use_banner=None, keep_processed_dir=None, process_method=None, process_automatically=None, rename_episodes=None, unpack=None,
                     move_associated_files=None, tv_download_dir=None, naming_custom_abd=None, naming_abd_pattern=None, naming_strip_year=None):
 
         results = []
@@ -1086,7 +1094,12 @@ class ConfigPostProcessing:
             process_automatically = 1
         else:
             process_automatically = 0
-
+            
+        if unpack == "on":
+            unpack = 1
+        else:
+            unpack = 0
+                        
         if rename_episodes == "on":
             rename_episodes = 1
         else:
@@ -1113,13 +1126,29 @@ class ConfigPostProcessing:
             naming_strip_year = 0
 
         sickbeard.PROCESS_AUTOMATICALLY = process_automatically
+        if sickbeard.PROCESS_AUTOMATICALLY:
+            sickbeard.autoPostProcesserScheduler.silent = False
+        else:
+            sickbeard.autoPostProcesserScheduler.silent = True
+        
+        if unpack:
+            if self.isRarSupported() != 'not supported':
+                sickbeard.UNPACK = unpack
+            else:
+                sickbeard.UNPACK = 0    
+                results.append("Unpacking Not Supported, disabling unpack setting")
+        else:
+            sickbeard.UNPACK = unpack
+        
         sickbeard.KEEP_PROCESSED_DIR = keep_processed_dir
+        sickbeard.PROCESS_METHOD = process_method
         sickbeard.RENAME_EPISODES = rename_episodes
         sickbeard.MOVE_ASSOCIATED_FILES = move_associated_files
         sickbeard.NAMING_CUSTOM_ABD = naming_custom_abd
         sickbeard.NAMING_STRIP_YEAR = naming_strip_year
 
         sickbeard.metadata_provider_dict['XBMC'].set_config(xbmc_data)
+        sickbeard.metadata_provider_dict['XBMC v12+'].set_config(xbmc_v12__data)
         sickbeard.metadata_provider_dict['MediaBrowser'].set_config(mediabrowser_data)
         sickbeard.metadata_provider_dict['Synology'].set_config(synology_data)
         sickbeard.metadata_provider_dict['Sony PS3'].set_config(sony_ps3_data)
@@ -1189,6 +1218,25 @@ class ConfigPostProcessing:
         else:
             return "invalid"
 
+    @cherrypy.expose
+    def isRarSupported(self):
+        """ 
+        Test Packing Support:
+            - Simulating rar extraction in memory on test.rar file
+        """
+        
+        from lib.unrar2 import * 
+
+        try:
+            rar_path = os.path.join(sickbeard.PROG_DIR, 'lib', 'unrar2', 'test.rar')            
+            testing = RarFile(rar_path).read_files('*test.txt')
+            if testing[0][1]=='This is only a test.':
+                return 'supported'
+            logger.log(u'Rar Not Supported: Can not read the content of test file', Logger.ERROR)
+            return 'not supported'
+        except Exception, e:
+            logger.log(u'Rar Not Supported: ' + ex(e), logger.ERROR)
+            return 'not supported'
         
 class ConfigProviders:
 
@@ -1258,16 +1306,16 @@ class ConfigProviders:
 
 
     @cherrypy.expose
-    def saveProviders(self, nzbmatrix_username=None, nzbmatrix_apikey=None,
-                      nzbs_r_us_uid=None, nzbs_r_us_hash=None, newznab_string='',
-                      omgwtfnzbs_uid=None, omgwtfnzbs_key=None,
+    def saveProviders(self, newznab_string='',
+                      omgwtfnzbs_username=None, omgwtfnzbs_apikey=None,
                       tvtorrents_digest=None, tvtorrents_hash=None, 
                       btn_api_key=None,
-                      dtt_norar = None, dtt_single = None,
                       thepiratebay_trusted=None, thepiratebay_proxy=None, thepiratebay_proxy_url=None,
                       torrentleech_username=None, torrentleech_password=None,
                       iptorrents_username=None, iptorrents_password=None, iptorrents_freeleech=None,
                       kat_trusted = None, kat_verified = None,
+                      scc_username=None, scc_password=None,
+                      hdbits_username=None, hdbits_passkey=None,
                       newzbin_username=None, newzbin_password=None,
                       provider_order=None):
 
@@ -1320,20 +1368,14 @@ class ConfigProviders:
 
             provider_list.append(curProvider)
 
-            if curProvider == 'nzbs_r_us':
-                sickbeard.NZBSRUS = curEnabled
-            elif curProvider == 'nzbs_org_old':
+            if curProvider == 'nzbs_org_old':
                 sickbeard.NZBS = curEnabled
-            elif curProvider == 'nzbmatrix':
-                sickbeard.NZBMATRIX = curEnabled
             elif curProvider == 'newzbin':
                 sickbeard.NEWZBIN = curEnabled
             elif curProvider == 'bin_req':
                 sickbeard.BINREQ = curEnabled
             elif curProvider == 'womble_s_index':
                 sickbeard.WOMBLE = curEnabled
-            elif curProvider == 'nzbx':
-                sickbeard.NZBX = curEnabled
             elif curProvider == 'omgwtfnzbs':
                 sickbeard.OMGWTFNZBS = curEnabled
             elif curProvider == 'ezrss':
@@ -1346,20 +1388,20 @@ class ConfigProviders:
                 sickbeard.BTN = curEnabled
             elif curProvider in newznabProviderDict:
                 newznabProviderDict[curProvider].enabled = bool(curEnabled)
-            elif curProvider == 'dailytvtorrents':
-                sickbeard.DTT = curEnabled                
             elif curProvider == 'thepiratebay':
                 sickbeard.THEPIRATEBAY = curEnabled
             elif curProvider == 'torrentleech':
                 sickbeard.TORRENTLEECH = curEnabled
-            elif curProvider == 'nzbx':
-                sickbeard.NZBX = curEnabled
             elif curProvider == 'iptorrents':
                 sickbeard.IPTORRENTS = curEnabled
             elif curProvider == 'omgwtfnzbs':
                 sickbeard.OMGWTFNZBS = curEnabled  
             elif curProvider == 'kickasstorrents':
-                sickbeard.KAT = curEnabled                    
+                sickbeard.KAT = curEnabled
+            elif curProvider == 'sceneaccess':
+                sickbeard.SCC = curEnabled
+            elif curProvider == 'hdbits':
+                sickbeard.HDBITS = curEnabled               
             else:
                 logger.log(u"don't know what "+curProvider+" is, skipping")
 
@@ -1367,20 +1409,6 @@ class ConfigProviders:
         sickbeard.TVTORRENTS_HASH = tvtorrents_hash.strip()
 
         sickbeard.BTN_API_KEY = btn_api_key.strip()
-
-        if dtt_norar == "on":
-            dtt_norar = 1
-        else:
-            dtt_norar = 0
-
-        sickbeard.DTT_NORAR = dtt_norar
-            
-        if dtt_single == "on":
-            dtt_single = 1
-        else:
-            dtt_single = 0
-
-        sickbeard.DTT_SINGLE = dtt_single  
 
         if thepiratebay_trusted == "on":
             thepiratebay_trusted = 1
@@ -1423,13 +1451,16 @@ class ConfigProviders:
         else:
             kat_verified = 0   
             
-        sickbeard.KAT_VERIFIED = kat_verified    
+        sickbeard.KAT_VERIFIED = kat_verified
 
-        sickbeard.NZBSRUS_UID = nzbs_r_us_uid.strip()
-        sickbeard.NZBSRUS_HASH = nzbs_r_us_hash.strip()
+        sickbeard.SCC_USERNAME = scc_username.strip()
+        sickbeard.SCC_PASSWORD = scc_password.strip()
         
-        sickbeard.OMGWTFNZBS_UID = omgwtfnzbs_uid.strip()
-        sickbeard.OMGWTFNZBS_KEY = omgwtfnzbs_key.strip()
+        sickbeard.HDBITS_USERNAME = hdbits_username.strip()
+        sickbeard.HDBITS_PASSKEY = hdbits_passkey.strip()
+        
+        sickbeard.OMGWTFNZBS_USERNAME = omgwtfnzbs_username.strip()
+        sickbeard.OMGWTFNZBS_APIKEY = omgwtfnzbs_apikey.strip()
 
         sickbeard.PROVIDER_ORDER = provider_list
 
@@ -1462,7 +1493,6 @@ class ConfigNotifications:
                           use_growl=None, growl_notify_onsnatch=None, growl_notify_ondownload=None, growl_notify_onsubtitledownload=None, growl_host=None, growl_password=None, 
                           use_prowl=None, prowl_notify_onsnatch=None, prowl_notify_ondownload=None, prowl_notify_onsubtitledownload=None, prowl_api=None, prowl_priority=0, 
                           use_twitter=None, twitter_notify_onsnatch=None, twitter_notify_ondownload=None, twitter_notify_onsubtitledownload=None, 
-                          use_notifo=None, notifo_notify_onsnatch=None, notifo_notify_ondownload=None, notifo_notify_onsubtitledownload=None, notifo_username=None, notifo_apisecret=None,
                           use_boxcar=None, boxcar_notify_onsnatch=None, boxcar_notify_ondownload=None, boxcar_notify_onsubtitledownload=None, boxcar_username=None,
                           use_pushover=None, pushover_notify_onsnatch=None, pushover_notify_ondownload=None, pushover_notify_onsubtitledownload=None, pushover_userkey=None,
                           use_libnotify=None, libnotify_notify_onsnatch=None, libnotify_notify_ondownload=None, libnotify_notify_onsubtitledownload=None,
@@ -1598,26 +1628,6 @@ class ConfigNotifications:
             use_twitter = 1
         else:
             use_twitter = 0
-
-        if notifo_notify_onsnatch == "on":
-            notifo_notify_onsnatch = 1
-        else:
-            notifo_notify_onsnatch = 0
-
-        if notifo_notify_ondownload == "on":
-            notifo_notify_ondownload = 1
-        else:
-            notifo_notify_ondownload = 0
-            
-        if notifo_notify_onsubtitledownload == "on":
-            notifo_notify_onsubtitledownload = 1
-        else:
-            notifo_notify_onsubtitledownload = 0
-            
-        if use_notifo == "on":
-            use_notifo = 1
-        else:
-            use_notifo = 0
 
         if boxcar_notify_onsnatch == "on":
             boxcar_notify_onsnatch = 1
@@ -1849,13 +1859,6 @@ class ConfigNotifications:
         sickbeard.TWITTER_NOTIFY_ONDOWNLOAD = twitter_notify_ondownload
         sickbeard.TWITTER_NOTIFY_ONSUBTITLEDOWNLOAD = twitter_notify_onsubtitledownload
 
-        sickbeard.USE_NOTIFO = use_notifo
-        sickbeard.NOTIFO_NOTIFY_ONSNATCH = notifo_notify_onsnatch
-        sickbeard.NOTIFO_NOTIFY_ONDOWNLOAD = notifo_notify_ondownload
-        sickbeard.NOTIFO_NOTIFY_ONSUBTITLEDOWNLOAD = notifo_notify_onsubtitledownload
-        sickbeard.NOTIFO_USERNAME = notifo_username
-        sickbeard.NOTIFO_APISECRET = notifo_apisecret
-
         sickbeard.USE_BOXCAR = use_boxcar
         sickbeard.BOXCAR_NOTIFY_ONSNATCH = boxcar_notify_onsnatch
         sickbeard.BOXCAR_NOTIFY_ONDOWNLOAD = boxcar_notify_ondownload
@@ -1899,10 +1902,15 @@ class ConfigNotifications:
         sickbeard.TRAKT_METHOD_ADD = trakt_method_add
         sickbeard.TRAKT_START_PAUSED = trakt_start_paused
 
+        if sickbeard.USE_TRAKT:
+            sickbeard.traktWatchListCheckerSchedular.silent = False
+        else:
+            sickbeard.traktWatchListCheckerSchedular.silent = True    
+
         sickbeard.USE_EMAIL = use_email
         sickbeard.EMAIL_NOTIFY_ONSNATCH = email_notify_onsnatch
         sickbeard.EMAIL_NOTIFY_ONDOWNLOAD = email_notify_ondownload
-        sickbeard.EMAIL_NOTIFY_ONSUBTITLEDOWNLOAD = email_notify_ondownload
+        sickbeard.EMAIL_NOTIFY_ONSUBTITLEDOWNLOAD = email_notify_onsubtitledownload
         sickbeard.EMAIL_HOST = email_host
         sickbeard.EMAIL_PORT = email_port
         sickbeard.EMAIL_FROM = email_from
@@ -1960,10 +1968,12 @@ class ConfigSubtitles:
         if use_subtitles == "on":
             use_subtitles = 1
             if sickbeard.subtitlesFinderScheduler.thread == None or not sickbeard.subtitlesFinderScheduler.thread.isAlive():
+                sickbeard.subtitlesFinderScheduler.silent = False
                 sickbeard.subtitlesFinderScheduler.initThread()
         else:
             use_subtitles = 0
             sickbeard.subtitlesFinderScheduler.abort = True
+            sickbeard.subtitlesFinderScheduler.silent = True
             logger.log(u"Waiting for the SUBTITLESFINDER thread to exit")
             try:
                 sickbeard.subtitlesFinderScheduler.thread.join(5)
@@ -2484,12 +2494,12 @@ class ErrorLogs:
         minLevel = int(minLevel)
 
         data = []
-        if os.path.isfile(logger.sb_log_instance.log_file):
-            f = ek.ek(open, logger.sb_log_instance.log_file)
+        if os.path.isfile(logger.sb_log_instance.log_file_path):
+            f = ek.ek(open, logger.sb_log_instance.log_file_path)
             data = f.readlines()
             f.close()
 
-        regex =  "^(\w{3})\\.?-(\d\d)\s*(\d\d)\:(\d\d):(\d\d)\s*([A-Z]+)\s*(.+?)\s*\:\:\s*(.*)$"
+        regex = "^(\d\d\d\d)\-(\d\d)\-(\d\d)\s*(\d\d)\:(\d\d):(\d\d)\s*([A-Z]+)\s*(.+?)\s*\:\:\s*(.*)$"
 
         finalData = []
 
@@ -2503,7 +2513,7 @@ class ErrorLogs:
             match = re.match(regex, x)
 
             if match:
-                level = match.group(6)
+                level = match.group(7)
                 if level not in logger.reverseNames:
                     lastLine = False
                     continue
@@ -2609,16 +2619,6 @@ class Home:
             return "Test prowl notice sent successfully"
         else:
             return "Test prowl notice failed"
-
-    @cherrypy.expose
-    def testNotifo(self, username=None, apisecret=None):
-        cherrypy.response.headers['Cache-Control'] = "max-age=0,no-cache,no-store"
-
-        result = notifiers.notifo_notifier.test_notify(username, apisecret)
-        if result:
-            return "Notifo notification succeeded. Check your Notifo clients to make sure it worked"
-        else:
-            return "Error sending Notifo notification"
 
     @cherrypy.expose
     def testBoxcar(self, username=None):
@@ -3363,11 +3363,13 @@ class Home:
             # this is probably the worst possible way to deal with double eps but I've kinda painted myself into a corner here with this stupid database
             ep_result = myDB.select("SELECT * FROM tv_episodes WHERE showid = ? AND season = ? AND episode = ? AND 5=5", [show, epInfo[0], epInfo[1]])
             if not ep_result:
-                logger.log(u"Unable to find an episode for "+curEp+", skipping", logger.WARNING)
+                logger.log(u"Unable to find an episode for " + curEp + ", skipping", logger.WARNING)
                 continue
             related_eps_result = myDB.select("SELECT * FROM tv_episodes WHERE location = ? AND episode != ?", [ep_result[0]["location"], epInfo[1]])
             
             root_ep_obj = show_obj.getEpisode(int(epInfo[0]), int(epInfo[1]))
+            root_ep_obj.relatedEps = []
+            
             for cur_related_ep in related_eps_result:
                 related_ep_obj = show_obj.getEpisode(int(cur_related_ep["season"]), int(cur_related_ep["episode"]))
                 if related_ep_obj not in root_ep_obj.relatedEps:
@@ -3494,6 +3496,12 @@ class UI:
 
    
 class WebInterface:
+
+    @cherrypy.expose
+    def robots_txt(self):
+        """ Keep web crawlers out """
+        cherrypy.response.headers['Content-Type'] = 'text/plain'
+        return 'User-agent: *\nDisallow: /\n'
 
     @cherrypy.expose
     def index(self):

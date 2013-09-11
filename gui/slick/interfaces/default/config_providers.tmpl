@@ -46,7 +46,7 @@ var show_nzb_providers = #if $sickbeard.USE_NZBS then "true" else "false"#;
 
                     <div class="component-group-desc">
                         <h3>Provider Priorities</h3>
-                        <p>Check off and drag the providers into the order you want them to be used.</p>
+                        <p>Check off, configure and drag the providers into the order you want them to be used.</p>
                         <p>At least one provider is required but two are recommended.</p>
 
                         #if not $sickbeard.USE_NZBS or not $sickbeard.USE_TORRENTS:
@@ -73,11 +73,10 @@ var show_nzb_providers = #if $sickbeard.USE_NZBS then "true" else "false"#;
                             #set $curName = $curProvider.getID()
                           <li class="ui-state-default" id="$curName">
                             <input type="checkbox" id="enable_$curName" class="provider_enabler" #if $curProvider.isEnabled() then "checked=\"checked\"" else ""#/>
-                            <a href="$curProvider.url" class="imgLink" target="_new"><img src="$sbRoot/images/providers/$curProvider.imageName()" alt="$curProvider.name" title="$curProvider.name" width="16" height="16" /></a>
+                            <a href="$curProvider.url" class="imgLink" rel="noreferrer" onclick="window.open('${sickbeard.ANON_REDIRECT}' + this.href, '_blank'); return false;"><img src="$sbRoot/images/providers/$curProvider.imageName()" alt="$curProvider.name" title="$curProvider.name" width="16" height="16" /></a>
                             $curProvider.name
                             #if not $curProvider.supportsBacklog then "*" else ""#
-                            #if $curProvider.name == "EZRSS" or $curProvider.name == "DailyTvTorrents" then "**" else ""#
-                            #if $curProvider.name == "DailyTvTorrents" then "!" else ""
+                            #if $curProvider.name == "EZRSS" then "**" else ""#
                             <span class="ui-icon ui-icon-arrowthick-2-n-s pull-right"></span>
                           </li>
                         #end for
@@ -100,7 +99,7 @@ var show_nzb_providers = #if $sickbeard.USE_NZBS then "true" else "false"#;
                                 <span class="component-title jumbo">Configure Provider:</span>
                                 <span class="component-desc">
                                     #set $provider_config_list = []
-                                    #for $cur_provider in ("thepiratebay", "dailytvtorrents", "tvtorrents", "btn", "torrentleech", "iptorrents", "nzbs_r_us", "omgwtfnzbs", "kickasstorrents"):
+                                    #for $cur_provider in ("thepiratebay", "tvtorrents", "btn", "torrentleech", "iptorrents", "omgwtfnzbs", "kickasstorrents", "sceneaccess", "hdbits"):
                                         #set $cur_provider_obj = $sickbeard.providers.getProviderClass($cur_provider)
                                         #if $cur_provider_obj.providerType == $GenericProvider.NZB and not $sickbeard.USE_NZBS:
                                         	#continue
@@ -129,45 +128,30 @@ var show_nzb_providers = #if $sickbeard.USE_NZBS then "true" else "false"#;
 <div class="providerDiv" id="${curNewznabProvider.getID()}Div">
                         <div class="field-pair">
                             <label class="clearfix">
-                                <span class="component-title">$curNewznabProvider.name URL</span>
+                                <span class="component-title">$curNewznabProvider.name URL:</span>
                                 <input class="component-desc" type="text" id="${curNewznabProvider.getID()}_url" value="$curNewznabProvider.url" size="40" disabled/>
                             </label>
                         </div>
                         <div class="field-pair">
                             <label class="clearfix">
-                                <span class="component-title">$curNewznabProvider.name API Key</span>
-                                <input class="component-desc newznab_key" type="text" id="${curNewznabProvider.getID()}_hash" value="$curNewznabProvider.key" size="40" />
+                                <span class="component-title">$curNewznabProvider.name API Key:</span>
+                                <input class="component-desc newznab_key" type="text" id="${curNewznabProvider.getID()}_hash" value="$curNewznabProvider.key" newznab_name="${curNewznabProvider.getID()}_hash" size="40" />
                             </label>
                         </div>
 </div>
 #end for
 
-<div class="providerDiv" id="nzbs_r_usDiv">
-                        <div class="field-pair">
-                            <label class="clearfix">
-                                <span class="component-title">NZBs'R'US User ID</span>
-                                <input class="component-desc" type="text" name="nzbs_r_us_uid" value="$sickbeard.NZBSRUS_UID" size="10" />
-                            </label>
-                        </div>
-                        <div class="field-pair">
-                            <label class="clearfix">
-                                <span class="component-title">NZBs'R'US API Key</span>
-                                <input class="component-desc" type="text" name="nzbs_r_us_hash" value="$sickbeard.NZBSRUS_HASH" size="40" />
-                            </label>
-                        </div>
-</div>
-
                     <div class="providerDiv" id="omgwtfnzbsDiv">
                         <div class="field-pair">
                             <label class="clearfix">
-                                <span class="component-title">omgwtfnzbs User ID</span>
-                                <input class="component-desc" type="text" name="omgwtfnzbs_uid" value="$sickbeard.OMGWTFNZBS_UID" size="10" />
+                                <span class="component-title">omgwtfnzbs User Name:</span>
+                                <input class="component-desc" type="text" name="omgwtfnzbs_username" value="$sickbeard.OMGWTFNZBS_USERNAME" size="10" />
                             </label>
                         </div>
                         <div class="field-pair">
                             <label class="clearfix">
-                                <span class="component-title">omgwtfnzbs API Key</span>
-                                <input class="component-desc" type="text" name="omgwtfnzbs_key" value="$sickbeard.OMGWTFNZBS_KEY" size="40" />
+                                <span class="component-title">omgwtfnzbs API Key:</span>
+                                <input class="component-desc" type="text" name="omgwtfnzbs_apikey" value="$sickbeard.OMGWTFNZBS_APIKEY" size="40" />
                             </label>
                         </div>
                     </div><!-- /omgwtfnzbsDiv //-->
@@ -190,20 +174,20 @@ var show_nzb_providers = #if $sickbeard.USE_NZBS then "true" else "false"#;
 <div class="providerDiv" id="thepiratebayDiv">
                         <div class="field-pair">
                             <input type="checkbox" class="enabler" name="thepiratebay_proxy" id="thepiratebay_proxy" #if $sickbeard.THEPIRATEBAY_PROXY then "checked=\"checked\"" else ""#/>
-                            <label class="clearfix" for="thepiratebay_proxy">
+                            <label class="clearfix">
                                 <span class="component-title">Access TPB via Proxy</span>
                                 <span class="component-desc">To bypass Country Blocking Mechanism</span>
                             </label>
                         </div>
 
-                        <div class="field-pair" id="content_thepiratebay_proxy">
+                        <div class="field-pair content_thepiratebay_proxy" id="content_thepiratebay_proxy">
                             <label class="nocheck clearfix">
                                 <span class="component-title">Proxy URL:</span>
                                 <span class="component-desc">
 	                              <select name="thepiratebay_proxy_url" id="thepiratebay_proxy_url">
-                                #for $i in $thepiratebay.proxy_dict.keys():
-                                  <option value="$thepiratebay.proxy_dict[$i]" #if $thepiratebay.proxy_dict[$i] == $sickbeard.THEPIRATEBAY_PROXY_URL then "selected=\"selected\"" else ""#>$i</option>
-	                              #end for
+                                	#for $i in $thepiratebay.proxy_dict.keys():
+                                  	<option value="$thepiratebay.proxy_dict[$i]" #if $thepiratebay.proxy_dict[$i] == $sickbeard.THEPIRATEBAY_PROXY_URL then "selected=\"selected\"" else ""#>$i</option>
+	                              	#end for
 	                                </select>
                                 </span>
                             </label>
@@ -218,27 +202,20 @@ var show_nzb_providers = #if $sickbeard.USE_NZBS then "true" else "false"#;
                         </div>
 </div>
 
-<div class="providerDiv" id="dailytvtorrentsDiv">
+<div class="providerDiv" id="kickasstorrentsDiv">
                         <div class="field-pair">
-                            <input type="checkbox" name="dtt_norar" id="dtt_norar" #if $sickbeard.DTT_NORAR then "checked=\"checked\"" else ""#/>
-                            <label class="clearfix" for="dtt_norar">
-                                <span class="component-title">No Rar</span>
-                                <span class="component-desc">Download only uncompressed release?</span>
-                            </label>
-                        </div>
-                        <div class="field-pair">
-                            <input type="checkbox" name="dtt_single" id="dtt_single" #if $sickbeard.DTT_SINGLE then "checked=\"checked\"" else ""#/>
-                            <label class="clearfix" for="dtt_single">
-                                <span class="component-title">Single File</span>
-                                <span class="component-desc">Download only single file release?</span>
+                            <input type="checkbox" name="kat_verified" id="kat_verified" #if $sickbeard.KAT_VERIFIED then "checked=\"checked\"" else ""#/>
+                            <label class="clearfix" for="kat_verified">
+                                <span class="component-title">Verified Only</span>
+                                <span class="component-desc">Download only verified torrent?</span>
                             </label>
                         </div>
 </div>
 
-<div class="providerDiv" id="btnDiv">
+<div class="providerDiv btn" id="btnDiv">
                         <div class="field-pair">
                             <label class="clearfix">
-                                <span class="component-title">BTN API KEY:</span>
+                                <span class="component-title">Api Key:</span>
                                 <input class="component-desc" type="text" name="btn_api_key" value="$sickbeard.BTN_API_KEY" size="40" />
                             </label>
                         </div>
@@ -247,13 +224,13 @@ var show_nzb_providers = #if $sickbeard.USE_NZBS then "true" else "false"#;
 <div class="providerDiv" id="torrentleechDiv">
                         <div class="field-pair">
                             <label class="clearfix">
-                                <span class="component-title">TorrentLeech Username</span>
-                                <input class="component-desc" type="text" name="torrentleech_username" value="$sickbeard.TORRENTLEECH_USERNAME" size="10" />
+                                <span class="component-title">Username:</span>
+                                <input class="component-desc" type="text" name="torrentleech_username" value="$sickbeard.TORRENTLEECH_USERNAME" size="40" />
                             </label>
                         </div>
                         <div class="field-pair">
                             <label class="clearfix">
-                                <span class="component-title">TorrentLeech Password</span>
+                                <span class="component-title">Password:</span>
                                 <input class="component-desc" type="password" name="torrentleech_password" value="$sickbeard.TORRENTLEECH_PASSWORD" size="40" />
                             </label>
                         </div>
@@ -281,15 +258,36 @@ var show_nzb_providers = #if $sickbeard.USE_NZBS then "true" else "false"#;
                         </div>
 </div><!-- /iptorrentsDiv //-->
 
-<div class="providerDiv" id="kickasstorrentsDiv">
+<div class="providerDiv" id="sceneaccessDiv">
                         <div class="field-pair">
-                            <input type="checkbox" name="kat_verified" id="kat_verified" #if $sickbeard.KAT_VERIFIED then "checked=\"checked\"" else ""#/>
-                            <label class="clearfix" for="kat_verified">
-                                <span class="component-title">Verified Only</span>
-                                <span class="component-desc">Download only verified torrent?</span>
+                            <label class="clearfix">
+                                <span class="component-title">Username:</span>
+                                <input class="component-desc" type="text" name="scc_username" value="$sickbeard.SCC_USERNAME" size="40" />
                             </label>
                         </div>
-</div>
+                        <div class="field-pair">
+                            <label class="clearfix">
+                                <span class="component-title">Password:</span>
+                                <input class="component-desc" type="password" name="scc_password" value="$sickbeard.SCC_PASSWORD" size="40" />
+                            </label>
+                        </div>
+</div><!-- /sceneaccessDiv //-->
+
+<div class="providerDiv" id="hdbitsDiv">
+                        <div class="field-pair">
+                            <label class="clearfix">
+                                <span class="component-title">HDBits Username:</span>
+                                <input class="component-desc" type="text" name="hdbits_username" value="$sickbeard.HDBITS_USERNAME" size="40" />
+                            </label>
+                        </div>
+                        <div class="field-pair">
+                            <label class="clearfix">
+                                <span class="component-title">HDBits Passkey:</span>
+                                <input class="component-desc" type="text" name="hdbits_passkey" value="$sickbeard.HDBITS_PASSKEY" size="40" />
+                            </label>
+                        </div>
+                    </div><!-- /hdbitsDiv //-->   
+
 <!-- end div for editing providers -->
 
                     <input type="submit" class="btn config_submitter" value="Save Changes" /><br/>

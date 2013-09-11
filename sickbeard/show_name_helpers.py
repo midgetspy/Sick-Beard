@@ -30,7 +30,7 @@ from lib.unidecode import unidecode
 
 
 resultFilters = ["sub(pack|s|bed)", "nlsub(bed|s)?", "swesub(bed)?",
-                 "(dir|sample|nfo)fix", "sample", "(dvd)?extras", 
+                 "(dir|sample|sub|nfo)fix", "sample", "(dvd)?extras", 
                  "dub(bed)?"]
 
 def filterBadReleases(name):
@@ -47,7 +47,7 @@ def filterBadReleases(name):
         fp = NameParser()
         parse_result = fp.parse(name)
     except InvalidNameException:
-        logger.log(u"Unable to parse the filename "+name+" into a valid episode", logger.WARNING)
+        logger.log(u"Unable to parse the filename " + name + " into a valid episode", logger.WARNING)
         return False
 
 #    # use the extra info and the scene group to filter against
@@ -66,7 +66,7 @@ def filterBadReleases(name):
 
     # if any of the bad strings are in the name then say no
     for x in resultFilters + sickbeard.IGNORE_WORDS.split(','):
-        if re.search('(^|[\W_])'+x+'($|[\W_])', name, re.I):
+        if re.search('(^|[\W_])' + x + '($|[\W_])', name, re.I):
             logger.log(u"Invalid scene release: "+name+" contains "+x+", ignoring it", logger.DEBUG)
             return False
 
@@ -99,7 +99,7 @@ def sceneToNormalShowNames(name):
     
         # add brackets around the country
         country_match_str = '|'.join(countryList.values())
-        results.append(re.sub('(?i)([. _-])('+country_match_str+')$', '\\1(\\2)', cur_name))
+        results.append(re.sub('(?i)([. _-])(' + country_match_str + ')$', '\\1(\\2)', cur_name))
 
     results += name_list
 
@@ -113,7 +113,7 @@ def makeSceneShowSearchStrings(show):
     return map(sanitizeSceneName, showNames)
 
 
-def makeSceneSeasonSearchString (show, segment, extraSearchType=None):
+def makeSceneSeasonSearchString(show, segment, extraSearchType=None):
 
     myDB = db.DBConnection()
 
@@ -152,24 +152,24 @@ def makeSceneSeasonSearchString (show, segment, extraSearchType=None):
         # nzbmatrix is special, we build a search string just for them
         elif extraSearchType == "nzbmatrix":
             if numseasons == 1:
-                toReturn.append('"'+curShow+'"')
+                toReturn.append('"' + curShow + '"')
             elif numseasons == 0:
-                toReturn.append('"'+curShow+' '+str(segment).replace('-',' ')+'"')
+                toReturn.append('"' + curShow + ' '+str(segment).replace('-',' ') + '"')
             else:
-                term_list = [x+'*' for x in seasonStrings]
+                term_list = [x +'*' for x in seasonStrings]
                 if show.air_by_date:
-                    term_list = ['"'+x+'"' for x in term_list]
+                    term_list = ['"' + x + '"' for x in term_list]
 
-                toReturn.append('"'+curShow+'"')
+                toReturn.append('"' + curShow + '"')
     
     if extraSearchType == "nzbmatrix":     
-        toReturn = ['+('+','.join(toReturn)+')']
+        toReturn = ['+(' + ','.join(toReturn) + ')']
         if term_list:
-            toReturn.append('+('+','.join(term_list)+')')
+            toReturn.append('+(' + ','.join(term_list) + ')')
     return toReturn
 
 
-def makeSceneSearchString (episode):
+def makeSceneSearchString(episode):
 
     myDB = db.DBConnection()
     numseasonsSQlResult = myDB.select("SELECT COUNT(DISTINCT season) as numseasons FROM tv_episodes WHERE showid = ? and season != 0", [episode.show.tvdbid])
@@ -211,19 +211,19 @@ def isGoodResult(name, show, log=True):
     for curName in set(showNames):
         escaped_name = re.sub('\\\\[\\s.-]', '\W+', re.escape(curName))
         if show.startyear:
-            escaped_name += "(?:\W+"+str(show.startyear)+")?"
+            escaped_name += "(?:\W+" + str(show.startyear) + ")?"
         curRegex = '^' + escaped_name + '\W+(?:(?:S\d[\dE._ -])|(?:\d\d?x)|(?:\d{4}\W\d\d\W\d\d)|(?:(?:part|pt)[\._ -]?(\d|[ivx]))|Season\W+\d+\W+|E\d+\W+)'
         if log:
-            logger.log(u"Checking if show "+name+" matches " + curRegex, logger.DEBUG)
+            logger.log(u"Checking if show " + name + " matches " + curRegex, logger.DEBUG)
 
         match = re.search(curRegex, name, re.I)
 
         if match:
-            logger.log(u"Matched "+curRegex+" to "+name, logger.DEBUG)
+            logger.log(u"Matched " + curRegex + " to " + name, logger.DEBUG)
             return True
 
     if log:
-        logger.log(u"Provider gave result "+name+" but that doesn't seem like a valid result for "+show.name+" so I'm ignoring it")
+        logger.log(u"Provider gave result " + name + " but that doesn't seem like a valid result for "+show.name+" so I'm ignoring it")
     return False
 
 def allPossibleShowNames(show):
@@ -255,12 +255,11 @@ def allPossibleShowNames(show):
         if not curName:
             continue
         for curCountry in country_list:
-            if curName.endswith(' '+curCountry):
-                newShowNames.append(curName.replace(' '+curCountry, ' ('+country_list[curCountry]+')'))
-            elif curName.endswith(' ('+curCountry+')'):
-                newShowNames.append(curName.replace(' ('+curCountry+')', ' ('+country_list[curCountry]+')'))
+            if curName.endswith(' ' + curCountry):
+                newShowNames.append(curName.replace(' ' + curCountry, ' (' + country_list[curCountry] + ')'))
+            elif curName.endswith(' (' + curCountry + ')'):
+                newShowNames.append(curName.replace(' (' + curCountry + ')', ' (' + country_list[curCountry] + ')'))
 
     showNames += newShowNames
 
     return showNames
-

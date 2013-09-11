@@ -22,8 +22,9 @@ class GenericClient(object):
         self.response = None
         self.auth = None
         self.last_time = time.time()
-        self.session = requests.session(auth=(self.username, self.password),timeout=60)
-
+        self.session = requests.session()
+        self.session.auth = (self.username, self.password)
+        
     def _request(self, method='get', params={}, data=None, files=None):
 
         if time.time() > self.last_time + 1800 or not self.auth:

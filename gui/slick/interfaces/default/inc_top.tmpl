@@ -28,7 +28,7 @@
     <link rel="stylesheet" type="text/css" href="$sbRoot/css/lib/jquery-ui-1.8.17.custom.css?$sbPID" />
     <link rel="stylesheet" type="text/css" href="$sbRoot/css/superfish.css?$sbPID" />
     <link rel="stylesheet" type="text/css" href="$sbRoot/css/lib/tablesorter.css?$sbPID"/>
-    <link rel="stylesheet" type="text/css" href="$sbRoot/css/lib/jquery.qtip2.css?$sbPID"/>
+    <link rel="stylesheet" type="text/css" href="$sbRoot/css/lib/jquery.qtip-2.0.1.min.css?$sbPID"/>
     <link rel="stylesheet" type="text/css" media="only screen and (max-device-width: 480px)" href="$sbRoot/css/iphone.css?$sbPID" />
 
 
@@ -52,10 +52,10 @@
     <script type="text/javascript" src="$sbRoot/js/lib/jquery.selectboxes.min.js?$sbPID"></script>
     <script type="text/javascript" src="$sbRoot/js/lib/jquery.tablesorter-2.1.19.min.js?$sbPID"></script>
     <script type="text/javascript" src="$sbRoot/js/lib/jquery.tablesorter.widgets.min.js?$sbPID"></script>
-    <script type="text/javascript" src="$sbRoot/js/lib/jquery.qtip-2012-04-26.min.js?$sbPID"></script>
+    <script type="text/javascript" src="$sbRoot/js/lib/jquery.qtip-2.0.1.min.js?$sbPID"></script>
     <script type="text/javascript" src="$sbRoot/js/lib/jquery.pnotify-1.0.2.min.js"></script>
-	<script type="text/javascript" src="$sbRoot/js/lib/jquery.expand-1.3.8.js?$sbPID"></script>
-    <script type="text/javascript" src="$sbRoot/js/lib/jquery.form-2.92.js?$sbPID"></script>
+    <script type="text/javascript" src="$sbRoot/js/lib/jquery.form-3.35.js?$sbPID"></script>
+    <script type="text/javascript" src="$sbRoot/js/lib/jquery.ui.touch-punch-0.2.2.min.js?$sbPID"></script>
 	<script type="text/javascript" src="$sbRoot/js/script.js?$sbPID"></script>
 
     <script type="text/javascript" charset="utf-8">
@@ -203,7 +203,7 @@
                     </ul>
                 </li>
                 
-                <li id="donate"><a href="https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=mr_orange%40hotmail%2eit&lc=IT&item_name=Sickbeard%20TPB&currency_code=EUR&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHosted" onclick="window.open(this.href); return false;"><img src="$sbRoot/images/paypal/btn_donate_LG.gif" alt="[donate]" /></a></li>
+                <li id="donate"><a href="https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=mr_orange%40hotmail%2eit&lc=IT&item_name=Sickbeard%20TPB&currency_code=EUR&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHosted" rel="noreferrer" onclick="window.open('${sickbeard.ANON_REDIRECT}' + this.href); return false;"><img src="$sbRoot/images/paypal/btn_donate_LG.gif" alt="[donate]" /></a></li>
     </ul>
     
     </div>
