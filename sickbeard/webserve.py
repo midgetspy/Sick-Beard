@@ -1023,6 +1023,7 @@ class ConfigProviders:
                       sceneaccess_username = None, sceneaccess_password = None, sceneaccess_rsshash = None,
                       iptorrents_username = None, iptorrents_password = None,iptorrents_uid = None, iptorrents_rsshash = None,
                       bithdtv_username = None, bithdtv_password = None,
+                      fucklimits_username = None, fucklimits_password = None,
                       torrentz_verified = None,
                       provider_order=None):
 
@@ -1108,6 +1109,8 @@ class ConfigProviders:
                 sickbeard.IPTORRENTS = curEnabled
             elif curProvider == 'bithdtv':
                 sickbeard.BITHDTV = curEnabled
+            elif curProvider == 'fucklimits':
+                sickbeard.FUCKLIMITS = curEnabled
             elif curProvider == 'publichd':
                 sickbeard.PUBLICHD = curEnabled
             elif curProvider == 'btn':
@@ -1179,6 +1182,9 @@ class ConfigProviders:
         
         sickbeard.BITHDTV_USERNAME = bithdtv_username.strip()
         sickbeard.BITHDTV_PASSWORD = bithdtv_password.strip()
+        
+        sickbeard.FUCKLIMITS_USERNAME = fucklimits_username.strip()
+        sickbeard.FUCKLIMITS_PASSWORD = fucklimits_password.strip()
         
         if torrentz_verified == "on":
             torrentz_verified = 1

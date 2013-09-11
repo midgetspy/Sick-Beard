@@ -76,7 +76,6 @@
                 </div><!-- /component-group1 //-->
 
                 <div id="core-component-group2" class="component-group clearfix">
-
                     <div class="component-group-desc">
                         <h3>Configure Built-In Providers</h3>
                         <p>Check with provider's website on how to obtain an API key if needed.</p>
@@ -88,7 +87,7 @@
                                 <span class="component-title jumbo">Configure Provider:</span>
                                 <span class="component-desc">
                                     #set $provider_config_list = []
-                                    #for $cur_provider in ("nzbs_r_us", "tvtorrents", "btn", "thepiratebay","dailytvtorrents", "torrentz", "torrentleech", "torrentday", "sceneaccess", "iptorrents", "bithdtv"):
+                                    #for $cur_provider in ("nzbs_r_us", "tvtorrents", "btn", "thepiratebay","dailytvtorrents", "torrentz", "torrentleech", "torrentday", "sceneaccess", "iptorrents", "bithdtv", "fucklimits"):
                                         #set $cur_provider_obj = $sickbeard.providers.getProviderClass($cur_provider)
                                         #if $cur_provider_obj.providerType == $GenericProvider.NZB and not $sickbeard.USE_NZBS:
                                             #continue
@@ -353,9 +352,22 @@
                             </label>
                         </div>
                     </div><!-- /bithdtvDiv //-->
+                    
+                    <div class="providerDiv" id="fucklimitsDiv">
+                        <div class="field-pair">
+                            <label class="clearfix">
+                                <span class="component-title">Username:</span>
+                                <input class="component-desc" type="text" name="fucklimits_username" value="$sickbeard.FUCKLIMITS_USERNAME" size="40" />
+                            </label>
+                        </div>
+                        <div class="field-pair">
+                            <label class="clearfix">
+                                <span class="component-title">Password:</span>
+                                <input class="component-desc" type="password" name="fucklimits_password" value="$sickbeard.FUCKLIMITS_PASSWORD" size="40" />
+                            </label>
+                        </div>
+                    </div><!-- /fucklimits //-->
 <!-- end div for editing providers -->
-
-
             
                     </fieldset>
 #if $sickbeard.USE_NZBS:
