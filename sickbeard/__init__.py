@@ -31,7 +31,8 @@ from threading import Lock
 # apparently py2exe won't build these unless they're imported somewhere
 from sickbeard import providers, metadata
 from providers import ezrss, tvtorrents, btn, nzbsrus, newznab, womble, nzbx, omgwtfnzbs
-from providers import kickass, torrentz, dtt, torrentleech, thepiratebay, publichd, torrentday, sceneaccess, iptorrents, bithdtv
+from providers import kickass, torrentz, dtt, torrentleech, thepiratebay, publichd, torrentday
+from providers import sceneaccess, iptorrents, bithdtv, fucklimits
 from sickbeard.config import CheckSection, check_setting_int, check_setting_str, ConfigMigrator
 
 from sickbeard import searchCurrent, searchBacklog, showUpdater, versionChecker, properFinder, autoPostProcesser
@@ -203,6 +204,10 @@ IPTORRENTS_RSSHASH = None
 BITHDTV = False
 BITHDTV_USERNAME = None
 BITHDTV_PASSWORD = None
+
+FUCKLIMITS = False
+FUCKLIMITS_USERNAME = None
+FUCKLIMITS_PASSWORD = None
 
 PUBLICHD = False
 
@@ -392,6 +397,7 @@ def initialize(consoleLogging=True):
                 SCENEACCESS, SCENEACCESS_USERNAME, SCENEACCESS_PASSWORD, SCENEACCESS_RSSHASH, \
                 IPTORRENTS, IPTORRENTS_USERNAME, IPTORRENTS_PASSWORD, IPTORRENTS_UID, IPTORRENTS_RSSHASH, \
                 BITHDTV, BITHDTV_USERNAME, BITHDTV_PASSWORD, \
+                FUCKLIMITS, FUCKLIMITS_USERNAME, FUCKLIMITS_PASSWORD, \
                 PUBLICHD, \
                 NZBS, NZBS_UID, NZBS_HASH, EZRSS, DTT, DTT_NORAR, DTT_SINGLE, \
                 THEPIRATEBAY, THEPIRATEBAY_TRUSTED, THEPIRATEBAY_PROXY, THEPIRATEBAY_PROXY_URL, THEPIRATEBAY_URL_OVERRIDE, \
@@ -578,6 +584,10 @@ def initialize(consoleLogging=True):
         BITHDTV = bool(check_setting_int(CFG, 'BITHDTV', 'bithdtv', 0))
         BITHDTV_USERNAME = check_setting_str(CFG, 'BITHDTV', 'bithdtv_username', '')
         BITHDTV_PASSWORD = check_setting_str(CFG, 'BITHDTV', 'bithdtv_password', '')
+        
+        FUCKLIMITS = bool(check_setting_int(CFG, 'FUCKLIMITS', 'fucklimits', 0))
+        FUCKLIMITS_USERNAME = check_setting_str(CFG, 'FUCKLIMITS', 'fucklimits_username', '')
+        FUCKLIMITS_PASSWORD = check_setting_str(CFG, 'FUCKLIMITS', 'fucklimits_password', '')
         
         PUBLICHD = bool(check_setting_int(CFG, 'PUBLICHD', 'publichd', 0))    
 
@@ -1219,6 +1229,11 @@ def save_config():
     new_config['BITHDTV']['bithdtv_username'] = BITHDTV_USERNAME
     new_config['BITHDTV']['bithdtv_password'] = BITHDTV_PASSWORD
 
+    new_config['FUCKLIMITS'] = {}
+    new_config['FUCKLIMITS']['fucklimits'] = int(FUCKLIMITS)
+    new_config['FUCKLIMITS']['fucklimits_username'] = FUCKLIMITS_USERNAME
+    new_config['FUCKLIMITS']['fucklimits_password'] = FUCKLIMITS_PASSWORD
+    
     new_config['PUBLICHD'] = {}
     new_config['PUBLICHD']['publichd'] = int(PUBLICHD)
     
