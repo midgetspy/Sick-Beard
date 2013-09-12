@@ -66,7 +66,10 @@
                 maxWidth:    $(document).width() - 80,
                 modal:       true,
                 autoOpen:    false,
-                buttons: [
+            });
+        }
+
+        fileBrowserDialog.dialog('option', 'buttons', [
                     {
                         text: "Ok",
                         "class": "btn btn-large",
@@ -83,9 +86,7 @@
                             $(this).dialog("close");
                         }
                     }
-                ]
-            });
-        }
+        ]);
 
         // set up the browser and launch the dialog
         var initialDir = '';
@@ -149,7 +150,7 @@
         if (ls && options.key) {
             path = localStorage['fileBrowser-' + options.key];
         }
-        if (options.key && options.field.val().length === 0 && (path)) {
+        if (options.key && options.field.val().length == 0 && (path)) {
             options.field.val(path);
         }
 
