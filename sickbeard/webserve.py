@@ -55,9 +55,9 @@ from sickbeard.webapi import Api
 
 from lib.tvdb_api import tvdb_api
 from lib.dateutil import tz
+from lib.unrar2 import RarFile, RarInfo
 
 import subliminal
-
 import network_timezones
 
 try:
@@ -1222,10 +1222,8 @@ class ConfigPostProcessing:
     def isRarSupported(self):
         """ 
         Test Packing Support:
-            - Simulating rar extraction in memory on test.rar file
+            - Simulating in memory rar extraction on test.rar file
         """
-        
-        from lib.unrar2 import * 
 
         try:
             rar_path = os.path.join(sickbeard.PROG_DIR, 'lib', 'unrar2', 'test.rar')            
