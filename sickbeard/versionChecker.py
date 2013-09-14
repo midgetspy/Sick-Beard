@@ -1,4 +1,4 @@
-# Author: Nic Wolfe <nic@wolfeden.ca>
+r# Author: Nic Wolfe <nic@wolfeden.ca>
 # URL: http://code.google.com/p/sickbeard/
 #
 # This file is part of Sick Beard.
@@ -639,7 +639,7 @@ class SourceUpdateManager(UpdateManager):
                         except Exception, e:
                             logger.log(u"Unable to update " + new_path + ': ' + ex(e), logger.DEBUG)
                             os.remove(old_path)#Trash the updated file without moving in new path
-                            continue
+                        continue
 
                     if os.path.isfile(new_path):
                         os.remove(new_path)
