@@ -14,17 +14,34 @@ configFilename = os.path.join(sickbeardPath, "config.ini")
 
 import requests
 
+config = ConfigParser.ConfigParser()
+
+try:
+    fp = open(configFilename, "r")
+    config.readfp(fp)
+    fp.close()
+except IOError, e:
+    print "Could not find/read Sickbeard config.ini: " + str(e)
+    print 'Possibly wrong mediaToSickbeard.py location. Ensure the file is in the autoProcessTV subdir of your Sickbeard installation'
+    time.sleep(3)
+    sys.exit(1)
+
 scriptlogger = logging.getLogger('mediaToSickbeard')
 formatter = logging.Formatter('%(asctime)s %(levelname)-8s MEDIATOSICKBEARD :: %(message)s', '%b-%d %H:%M:%S')
 
+# Get the log dir setting from SB config
+logdirsetting = config.get("General", "log_dir") if config.get("General", "log_dir") else 'Logs'
+# put the log dir inside the SickBeard dir, unless an absolute path
+logdir = os.path.normpath(os.path.join(sickbeardPath, logdirsetting))
+logfile = os.path.join(logdir, 'sickbeard.log')
+
 try:
-    handler = logging.FileHandler(os.path.join(sickbeardPath, 'Logs', 'sickbeard.log'))
+    handler = logging.FileHandler(logfile)
 except:
-    scriptlogger.error('Wrong MediaToSickbeard Location, the file need to be in autoProcessTV subdir of your Sickbeard installation')
-    print 'Wrong MediaToSickbeard Location, the file need to be in autoProcessTV subdir of your Sickbeard installation'
+    print 'Unable to open/create the log file at ' + logfile
     time.sleep(3)
     sys.exit()
-    
+
 handler.setFormatter(formatter)
 scriptlogger.addHandler(handler)
 scriptlogger.setLevel(logging.DEBUG)
@@ -103,19 +120,7 @@ def blackhole():
 def main():
 
     scriptlogger.info(u'Starting external PostProcess script ' + __file__)
-    
-    config = ConfigParser.ConfigParser()
-    
-    try:
-        fp = open(configFilename, "r")
-        config.readfp(fp)
-        fp.close()
-    except IOError, e:
-        scriptlogger.debug(u'Could not find/read Sickbeard config.ini: ' + str(e))
-        print "Could not find/read Sickbeard config.ini: " + str(e)
-        time.sleep(3)
-        sys.exit(1)
-    
+
     host = config.get("General", "web_host")
     port = config.get("General", "web_port")
     username = config.get("General", "web_username")
