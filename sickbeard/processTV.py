@@ -29,6 +29,7 @@ from sickbeard import encodingKludge as ek
 from sickbeard.exceptions import ex
 from sickbeard import logger
 from sickbeard.name_parser.parser import NameParser, InvalidNameException
+from sickbeard import common
 
 from lib.unrar2 import RarFile, RarInfo
 from lib.unrar2.rar_exceptions import *
