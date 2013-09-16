@@ -173,13 +173,16 @@ class SCCProvider(generic.TorrentProvider):
 
                     for result in torrent_table.find_all('tr')[1:]:
 
-                        link = result.find('td', attrs = {'class' : 'ttr_name'}).find('a')
-                        url = result.find('td', attrs = {'class' : 'td_dl'}).find('a')
-                        title = link.string
-                        download_url = self.urls['download'] % url['href']
-                        id = int(link['href'].replace('details?id=', ''))
-                        seeders = int(result.find('td', attrs = {'class' : 'ttr_seeders'}).string)
-                        leechers = int(result.find('td', attrs = {'class' : 'ttr_leechers'}).string)
+			try:
+			    link = result.find('td', attrs = {'class' : 'ttr_name'}).find('a')
+			    url = result.find('td', attrs = {'class' : 'td_dl'}).find('a')
+			    title = link.string
+			    download_url = self.urls['download'] % url['href']
+			    id = int(link['href'].replace('details?id=', ''))
+			    seeders = int(result.find('td', attrs = {'class' : 'ttr_seeders'}).string)
+			    leechers = int(result.find('td', attrs = {'class' : 'ttr_leechers'}).string)
+			except AttributeError:
+			    continue
 
                         if mode != 'RSS' and seeders == 0:
                             continue 
