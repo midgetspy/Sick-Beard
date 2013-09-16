@@ -82,14 +82,22 @@ def deluge():
 
 def blackhole():
 
-    if len(sys.argv) < 2:
-        scriptlogger.error('No folder supplied - Your client should invoke the script with a Dir and a Relese Name')
-        print "No folder supplied - Your client should invoke the script with a Dir and a Relese Name"
-        time.sleep(3)
-        sys.exit()
+    if None != os.getenv('TR_TORRENT_DIR'):
+        scriptlogger.debug('Processing script triggered by Transmission')
+        print "Processing script triggered by Transmission"
+        scriptlogger.debug(u'TR_TORRENT_DIR: ' + os.getenv('TR_TORRENT_DIR'))
+        scriptlogger.debug(u'TR_TORRENT_NAME: ' + os.getenv('TR_TORRENT_NAME'))
+        dirName = os.getenv('TR_TORRENT_DIR')
+        nzbName = os.getenv('TR_TORRENT_NAME')
+    else:
+        if len(sys.argv) < 2:
+            scriptlogger.error('No folder supplied - Your client should invoke the script with a Dir and a Relese Name')
+            print "No folder supplied - Your client should invoke the script with a Dir and a Relese Name"
+            time.sleep(3)
+            sys.exit()
 
-    dirName = sys.argv[1]
-    nzbName = sys.argv[2]
+        dirName = sys.argv[1]
+        nzbName = sys.argv[2]
 
     return (dirName, nzbName)
 
