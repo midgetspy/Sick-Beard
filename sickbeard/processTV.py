@@ -261,7 +261,7 @@ def validateDir(path, dirName):
             search_sql += " WHERE history.season=tv_episodes.season and history.episode=tv_episodes.episode"
             search_sql += " and tv_episodes.status IN (" + ",".join([str(x) for x in common.Quality.DOWNLOADED]) + ")"
             search_sql += " and history.resource LIKE ?"
-            sqlResult = myDB.select(search_sql, [u'% ' + video])
+            sqlResult = myDB.select(search_sql, [u'%' + video])
             if sqlResult:
                 returnStr += logHelper(u"You're trying to post process a dir that's already been processed, skipping", logger.DEBUG)
                 return False
