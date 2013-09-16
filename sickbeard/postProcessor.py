@@ -168,10 +168,12 @@ class PostProcessor(object):
             # only add associated to list
             if associated_file_path == file_path:
                 continue
-#            # only list it if the only non-shared part is the extension or if it is a subtitle
-#            if '.' in associated_file_path[len(base_name):] and not associated_file_path[len(associated_file_path)-3:] in common.subtitleExtensions:
-#                continue
+            # only list it if the only non-shared part is the extension or if it is a subtitle
             if subtitles_only and not associated_file_path[len(associated_file_path)-3:] in common.subtitleExtensions:
+                continue
+
+            #Exclude .rar files from associated list
+            if re.search('(^.+\.(rar|r\d+)$)', associated_file_path):
                 continue
 
             file_path_list.append(associated_file_path)
@@ -255,10 +257,10 @@ class PostProcessor(object):
             cur_extension = cur_file_path[old_base_name_length + 1:]
             
             # check if file have subtitles language
-            if cur_extension in common.subtitleExtensions:
-                cur_lang = ek.ek(os.path.splitext, ek.ek(os.path.splitext, cur_file_path)[0])[1][1:]
+            if os.path.splitext(cur_extension)[1][1:] in common.subtitleExtensions:
+                cur_lang = os.path.splitext(cur_extension)[0]
                 if cur_lang in sickbeard.SUBTITLES_LANGUAGES:
-                    cur_extension = cur_lang + '.' + cur_extension
+                    cur_extension = cur_lang + os.path.splitext(cur_extension)[1]
         
             # replace .nfo with .nfo-orig to avoid conflicts
             if cur_extension == 'nfo':

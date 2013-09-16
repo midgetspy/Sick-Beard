@@ -132,7 +132,6 @@ def main():
     
     tv_dir = config.get("General", "tv_download_dir")
     use_torrents = int(config.get("General", "use_torrents"))
-    blackhole = config.get("Blackhole", "torrent_dir")
     torrent_method = config.get("General", "torrent_method")
     
     if not use_torrents:

@@ -16,6 +16,17 @@
 # You should have received a copy of the GNU General Public License
 # along with Sick Beard.  If not, see <http://www.gnu.org/licenses/>.
 
+import os
+import platform
+import shutil
+import subprocess
+import re
+import urllib
+import zipfile
+import tarfile
+import traceback
+import gh_api as github
+
 import sickbeard
 from sickbeard import helpers
 from sickbeard import version, ui
@@ -23,19 +34,6 @@ from sickbeard import logger
 from sickbeard import scene_exceptions
 from sickbeard.exceptions import ex
 from sickbeard import encodingKludge as ek
-
-import os
-import platform
-import shutil
-import subprocess
-import re
-
-import urllib
-
-import zipfile
-import tarfile
-
-import gh_api as github
 
 
 class CheckVersion():
@@ -656,6 +654,7 @@ class SourceUpdateManager(UpdateManager):
 
         except Exception, e:
             logger.log(u"Error while trying to update: " + ex(e), logger.ERROR)
+            logger.log(u"Traceback: "  + traceback.format_exc(), logger.ERROR)
             return False
 
         return True
