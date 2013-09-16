@@ -174,6 +174,9 @@ class PostProcessor(object):
             if subtitles_only and not associated_file_path[len(associated_file_path)-3:] in common.subtitleExtensions:
                 continue
 
+            if helpers.isRarFile(ek.ek(os.path.basename, associated_file_path)):
+                continue
+
             file_path_list.append(associated_file_path)
             
         return file_path_list
