@@ -257,10 +257,10 @@ class PostProcessor(object):
             cur_extension = cur_file_path[old_base_name_length + 1:]
             
             # check if file have subtitles language
-            if cur_extension in common.subtitleExtensions:
-                cur_lang = ek.ek(os.path.splitext, ek.ek(os.path.splitext, cur_file_path)[0])[1][1:]
+            if os.path.splitext(cur_extension)[1][1:] in common.subtitleExtensions:
+                cur_lang = os.path.splitext(cur_extension)[0]
                 if cur_lang in sickbeard.SUBTITLES_LANGUAGES:
-                    cur_extension = cur_lang + '.' + cur_extension
+                    cur_extension = cur_lang + os.path.splitext(cur_extension)[1]
         
             # replace .nfo with .nfo-orig to avoid conflicts
             if cur_extension == 'nfo':
