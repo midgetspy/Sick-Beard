@@ -235,6 +235,9 @@ def validateDir(path, dirName):
         allFiles += fileList
 
     videoFiles = filter(helpers.isMediaFile, allFiles)
+ 
+    if not isinstance(dirName, unicode):
+        dirName = unicode(dirName, 'utf_8')
             
     # Avoid processing the same dir again if we use KEEP_PROCESSING_DIR    
     if sickbeard.PROCESS_METHOD != "move":
