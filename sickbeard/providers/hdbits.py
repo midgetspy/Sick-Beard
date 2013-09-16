@@ -14,23 +14,12 @@
 # along with Sick Beard.  If not, see <http://www.gnu.org/licenses/>.
 
 import urllib
-import urllib2
-import StringIO
-import zlib
-import gzip
-import socket
-from httplib import BadStatusLine
-
-import traceback
 import generic
 import sickbeard
 
 from sickbeard import logger, tvcache, exceptions
 from sickbeard import helpers
 from sickbeard.exceptions import ex, AuthException
-from sickbeard.name_parser.parser import NameParser, InvalidNameException
-from sickbeard.common import Quality, USER_AGENT
-
 
 try:
     import json
@@ -48,7 +37,8 @@ class HDBitsProvider(generic.TorrentProvider):
 
         self.cache = HDBitsCache(self)
 
-        self.url = 'https://hdbits.org/api/torrents'
+        self.url = 'https://hdbits.org'
+        self.rss_url = 'https://hdbits.org/api/torrents'
         self.download_url = 'http://hdbits.org/download.php?'
 
     def isEnabled(self):
@@ -73,70 +63,16 @@ class HDBitsProvider(generic.TorrentProvider):
 
         return True
 
-    def findEpisode(self, episode, manualSearch=False):
-
-        logger.log(u"Searching " + self.name + " for " + episode.prettyName())
-
-        self.cache.updateCache()
-        results = self.cache.searchCache(episode, manualSearch)
-        logger.log(u"Cache results: " + str(results), logger.DEBUG)
-
-        # if we got some results then use them no matter what.
-        # OR
-        # return anyway unless we're doing a manual search
-        if results or not manualSearch:
-            return results
-
-        response = json.loads(
-            self.getURL(self.url, self._make_JSON(show=episode.show, episode=episode)))
-
-        itemList = response['data']
-
-        for item in itemList:
-
-            (title, url) = self._get_title_and_url(item)
-
-            # parse the file name
-            try:
-                myParser = NameParser()
-                parse_result = myParser.parse(title)
-            except InvalidNameException:
-                logger.log(u"Unable to parse the filename " + title + " into a valid episode", logger.WARNING)
-                continue
-
-            if episode.show.air_by_date:
-                if parse_result.air_date != episode.airdate:
-                    logger.log("Episode " + title + " didn't air on " + str(episode.airdate) + ", skipping it", logger.DEBUG)
-                    continue
-            elif parse_result.season_number != episode.season or episode.episode not in parse_result.episode_numbers:
-                logger.log("Episode " + title + " isn't " + str(episode.season) + "x" + str(episode.episode) + ", skipping it", logger.DEBUG)
-                continue
-
-            quality = self.getQuality(item)
-
-            if not episode.show.wantEpisode(episode.season, episode.episode, quality, manualSearch):
-                logger.log(u"Ignoring result " + title + " because we don't want an episode that is " + Quality.qualityStrings[quality], logger.DEBUG)
-                continue
-
-            logger.log(u"Found result " + title + " at " + url, logger.DEBUG)
-
-            result = self.getResult([episode])
-            result.url = url
-            result.name = title
-            result.quality = quality
-
-            results.append(result)
-
-        return results
-
     def _get_title_and_url(self, item):
+
         title = item['name']
         url = self.download_url + urllib.urlencode({'id': item['id'], 'passkey': sickbeard.HDBITS_PASSKEY})
+
         return (title, url)
 
-    def _make_JSON(self, show=None, episode=None, season=None):
+    def _make_post_data_JSON(self, show=None, episode=None, season=None):
 
-        body = {
+        post_data = {
             'username': sickbeard.HDBITS_USERNAME,
             'passkey': sickbeard.HDBITS_PASSKEY,
             'category': [2],  # TV Category
@@ -144,66 +80,19 @@ class HDBitsProvider(generic.TorrentProvider):
         }
 
         if episode:
-            body['tvdb'] = {
+            post_data['tvdb'] = {
                 'id': show.tvdbid,
                 'season': episode.season,
                 'episode': episode.episode
             }
 
         if season:
-            body['tvdb'] = {
+            post_data['tvdb'] = {
                 'id': show.tvdbid,
                 'season': season,
             }
 
-        return json.dumps(body)
-
-    def getURL(self, url=None, json=None):
-        """
-        Returns a byte-string retrieved from the url provider.
-        """
-
-        opener = urllib2.build_opener()
-        opener.addheaders = [('User-Agent', USER_AGENT), ('Accept-Encoding', 'gzip,deflate')]
-
-        try:
-            usock = opener.open(url, json)
-            url = usock.geturl()
-            encoding = usock.info().get("Content-Encoding")
-
-            if encoding in ('gzip', 'x-gzip', 'deflate'):
-                content = usock.read()
-                if encoding == 'deflate':
-                    data = StringIO.StringIO(zlib.decompress(content))
-                else:
-                    data = gzip.GzipFile('', 'rb', 9, StringIO.StringIO(content))
-                result = data.read()
-
-            else:
-                result = usock.read()
-
-            usock.close()
-
-        except urllib2.HTTPError, e:
-            logger.log(u"HTTP error " + str(e.code) + " while loading URL " + self.url, logger.WARNING)
-            return None
-        except urllib2.URLError, e:
-            logger.log(u"URL error " + str(e.reason) + " while loading URL " + self.url, logger.WARNING)
-            return None
-        except BadStatusLine:
-            logger.log(u"BadStatusLine error while loading URL " + self.url, logger.WARNING)
-            return None
-        except socket.timeout:
-            logger.log(u"Timed out while loading URL " + self.url, logger.WARNING)
-            return None
-        except ValueError:
-            logger.log(u"Unknown error while loading URL " + self.url, logger.WARNING)
-            return None
-        except Exception:
-            logger.log(u"Unknown exception while loading URL " + self.url + ": " + traceback.format_exc(), logger.WARNING)
-            return None
-
-        return result
+        return json.dumps(post_data)
 
 
 class HDBitsCache(tvcache.TVCache):
@@ -236,11 +125,12 @@ class HDBitsCache(tvcache.TVCache):
             parsedJSON = helpers.parse_json(data)
 
             if parsedJSON is None:
-                logger.log(u"Error trying to load " + self.provider.name + " RSS feed", logger.ERROR)
+                logger.log(u"Error trying to load " + self.provider.name + " JSON feed", logger.ERROR)
                 return []
 
             if self._checkAuth(parsedJSON):
                 if parsedJSON and 'data' in parsedJSON:
+
                     items = parsedJSON['data']
 
                 else:
@@ -257,7 +147,7 @@ class HDBitsCache(tvcache.TVCache):
             return []
 
     def _getRSSData(self):
-        return self.provider.getURL(self.provider.url, self.provider._make_JSON())
+        return self.provider.getURL(self.provider.rss_url, post_data=self.provider._make_post_data_JSON())
 
     def _parseItem(self, item):
 
