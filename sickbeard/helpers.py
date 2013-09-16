@@ -157,7 +157,7 @@ def sanitizeFileName(name):
     return name
 
 
-def getURL(url, post_data=None, headers=[]):
+def getURL(url, headers=[]):
     """
     Returns a byte-string retrieved from the url provider.
     """
@@ -168,7 +168,7 @@ def getURL(url, post_data=None, headers=[]):
         opener.addheaders.append(cur_header)
 
     try:
-        usock = opener.open(url, post_data)
+        usock = opener.open(url)
         url = usock.geturl()
         encoding = usock.info().get("Content-Encoding")
 

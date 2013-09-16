@@ -94,7 +94,7 @@ class GenericProvider:
             
         return result
 
-    def getURL(self, url, post_data=None, headers=None):
+    def getURL(self, url, headers=None):
         """
         By default this is just a simple urlopen call but this method should be overridden
         for providers with special URL requirements (like cookies)
@@ -103,7 +103,7 @@ class GenericProvider:
         if not headers:
             headers = []
 
-        data = helpers.getURL(url, post_data, headers)
+        data = helpers.getURL(url, headers)
 
         if not data:
             logger.log(u"Error loading " + self.name + " URL: " + url, logger.ERROR)
