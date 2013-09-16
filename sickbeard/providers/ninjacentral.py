@@ -52,13 +52,13 @@ class NINJACENTRALProvider(generic.NZBProvider):
 
 	#These parameters need to reflect in the api
     def _doSearch(self, search, show=None):
-        params = {'uid': sickbeard.NINJACENTRAL_UID, #8179
-                  'passkey': sickbeard.NINJACENTRAL_HASH, #FSDG34gsdfG$Gsdfg4SDF
+        params = {'uid': sickbeard.NINJACENTRAL_UID,
+                  'passkey': sickbeard.NINJACENTRAL_HASH,
                   'xml': 1,
                   'maxage': sickbeard.USENET_RETENTION,
-                  '5040': 1,     # TV:HD
-                  '5030': 1,    # TV:SD-x264
-                  '5050': 1,     # TV:XviD
+                  'cat': '5030,5040,5050,5060',     # TV:HD
+                  'limit': 100,
+                  't': 'tv',
                   'q': search}
 
         if not params['maxage']:
@@ -81,7 +81,7 @@ class NINJACENTRALProvider(generic.NZBProvider):
             logger.log(u"Error trying to parse Ninjacentral XML data.", logger.ERROR)
             logger.log(u"RSS data: " + data, logger.DEBUG)
             return []
-        return root.findall('./rss/channel/item')
+        return root.findall('./rss/channel')
 
 	
     def _get_title_and_url(self, element):
@@ -100,10 +100,13 @@ class NINJACENTRALCache(tvcache.TVCache):
 	
     def _getRSSData(self):
         url = self.provider.url + 'api.php?'
-        urlArgs = {'cat': '5030,5040,5050,5060',  # HD,XviD,SD-x264
-                   'uid': sickbeard.NINJACENTRAL_UID,
-                   'passkey': sickbeard.NINJACENTRAL_HASH,
-				   't' : 'tvsearch'}
+        urlArgs = {'uid': sickbeard.NINJACENTRAL_UID,
+                  'passkey': sickbeard.NINJACENTRAL_HASH,
+                  'xml': 1,
+                  'maxage': sickbeard.USENET_RETENTION,
+                  'cat': '5030,5040,5050,5060',     # TV:HD
+                  'limit': 500,
+                  't': 'tv'}
 
         url += urllib.urlencode(urlArgs)
         logger.log(u"Ninjacentral's cache update URL: " + url, logger.DEBUG)

@@ -24,7 +24,7 @@ __all__ = ['ezrss',
            'btn',
            'nzbx',
            'omgwtfnzbs',
-           'ninjacentral,
+           'ninjacentral',
            ]
 
 import sickbeard

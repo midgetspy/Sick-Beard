@@ -86,7 +86,7 @@
                                 <span class="component-title jumbo">Configure Provider:</span>
                                 <span class="component-desc">
                                     #set $provider_config_list = []
-                                    #for $cur_provider in ("nzbs_r_us", "omgwtfnzbs", "tvtorrents", "torrentleech", "btn"):
+                                    #for $cur_provider in ("nzbs_r_us", "omgwtfnzbs", "tvtorrents", "torrentleech", "btn", "ninjacentral"):
                                         #set $cur_provider_obj = $sickbeard.providers.getProviderClass($cur_provider)
                                         #if $cur_provider_obj.providerType == $GenericProvider.NZB and not $sickbeard.USE_NZBS:
                                             #continue
@@ -157,6 +157,21 @@
                             </label>
                         </div>
                     </div><!-- /omgwtfnzbsDiv //-->
+					
+					<div class="providerDiv" id="ninjacentralDiv">
+                        <div class="field-pair">
+                            <label class="clearfix">
+                                <span class="component-title">Ninjacentral User ID</span>
+                                <input class="component-desc" type="text" name="ninjacentral_uid" value="$sickbeard.NINJACENTRAL_UID" size="10" />
+                            </label>
+                        </div>
+                        <div class="field-pair">
+                            <label class="clearfix">
+                                <span class="component-title">Ninjacentral Passkey</span>
+                                <input class="component-desc" type="text" name="ninjacentral_key" value="$sickbeard.NINJACENTRAL_HASH" size="40" />
+                            </label>
+                        </div>
+                    </div><!-- /ninjacentral //-->
 
                     <div class="providerDiv" id="tvtorrentsDiv">
                         <div class="field-pair">
