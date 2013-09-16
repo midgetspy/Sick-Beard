@@ -229,33 +229,29 @@ def validateDir(path, dirName):
             returnStr += logHelper(u"You're trying to post process an episode that's already been moved to its show dir, skipping", logger.ERROR)
             return False
 
+    if not isinstance(dirName, unicode):
+        dirName = unicode(dirName, 'utf_8')
+
     # Get the videofile list for the next checks
     allFiles = []
     for processPath, processDir, fileList in ek.ek(os.walk, ek.ek(os.path.join, path, dirName), topdown=False):
         allFiles += fileList
 
     videoFiles = filter(helpers.isMediaFile, allFiles)
- 
-    if not isinstance(dirName, unicode):
-        dirName = unicode(dirName, 'utf_8')
-            
+                
     # Avoid processing the same dir again if we use KEEP_PROCESSING_DIR    
     if sickbeard.PROCESS_METHOD != "move":
-        numPostProcFiles = myDB.select("SELECT COUNT(release_name) as numfiles FROM tv_episodes WHERE release_name = ?", [dirName])
-        if videoFiles and int(numPostProcFiles[0][0]) == len(videoFiles):
+        sqlResult = myDB.select("SELECT * FROM tv_episodes WHERE release_name = ?", [dirName])
+        if sqlResult:
             returnStr += logHelper(u"You're trying to post process a dir that's already been processed, skipping", logger.DEBUG)
             return False
 
         # This is needed for video whose name differ from dirName
         for video in videoFiles:
-            processed_video = 0
             sqlResult = myDB.select("SELECT * FROM tv_episodes WHERE release_name = ?", [video.rpartition('.')[0]])
             if sqlResult:
-                processed_video += 1
-        
-        if videoFiles and len(videoFiles) == processed_video:
-            returnStr += logHelper(u"You're trying to post process a dir that's already been processed, skipping", logger.DEBUG)
-            return False
+                returnStr += logHelper(u"You're trying to post process a dir that's already been processed, skipping", logger.DEBUG)
+                return False
 
     #check if the dir have at least one tv video file
     for video in videoFiles:
