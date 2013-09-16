@@ -229,6 +229,7 @@ def validateDir(path, dirName):
             returnStr += logHelper(u"You're trying to post process an episode that's already been moved to its show dir, skipping", logger.ERROR)
             return False
 
+    #Needed for accessing DB with a unicode DirName
     if not isinstance(dirName, unicode):
         dirName = unicode(dirName, 'utf_8')
 
@@ -239,8 +240,9 @@ def validateDir(path, dirName):
 
     videoFiles = filter(helpers.isMediaFile, allFiles)
                 
-    # Avoid processing the same dir again if we use KEEP_PROCESSING_DIR    
+    # Avoid processing the same dir again if we use a process method <> move    
     if sickbeard.PROCESS_METHOD != "move":
+        
         sqlResult = myDB.select("SELECT * FROM tv_episodes WHERE release_name = ?", [dirName])
         if sqlResult:
             returnStr += logHelper(u"You're trying to post process a dir that's already been processed, skipping", logger.DEBUG)
@@ -249,6 +251,16 @@ def validateDir(path, dirName):
         # This is needed for video whose name differ from dirName
         for video in videoFiles:
             sqlResult = myDB.select("SELECT * FROM tv_episodes WHERE release_name = ?", [video.rpartition('.')[0]])
+            if sqlResult:
+                returnStr += logHelper(u"You're trying to post process a dir that's already been processed, skipping", logger.DEBUG)
+                return False
+
+            #Needed if we have downloaded the same episode @ different quality
+            search_sql = "SELECT tv_episodes.tvdbid, history.resource FROM tv_episodes INNER JOIN history ON history.showid=tv_episodes.showid"
+            search_sql += " WHERE history.season=tv_episodes.season and history.episode=tv_episodes.episode"
+            search_sql += " and tv_episodes.status IN (" + ",".join([str(x) for x in common.Quality.DOWNLOADED]) + ")"
+            search_sql += " and history.resource LIKE ?"
+            sqlResult = myDB.select(search_sql, [u'% ' + video])
             if sqlResult:
                 returnStr += logHelper(u"You're trying to post process a dir that's already been processed, skipping", logger.DEBUG)
                 return False

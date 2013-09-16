@@ -168,13 +168,12 @@ class PostProcessor(object):
             # only add associated to list
             if associated_file_path == file_path:
                 continue
-#            # only list it if the only non-shared part is the extension or if it is a subtitle
-#            if '.' in associated_file_path[len(base_name):] and not associated_file_path[len(associated_file_path)-3:] in common.subtitleExtensions:
-#                continue
+            # only list it if the only non-shared part is the extension or if it is a subtitle
             if subtitles_only and not associated_file_path[len(associated_file_path)-3:] in common.subtitleExtensions:
                 continue
 
-            if helpers.isRarFile(ek.ek(os.path.basename, associated_file_path)):
+            #Exclude .rar files from associated list
+            if re.search('(^.+\.(rar|r\d+)$)', associated_file_path):
                 continue
 
             file_path_list.append(associated_file_path)
