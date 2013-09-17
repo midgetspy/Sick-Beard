@@ -901,11 +901,6 @@ class PostProcessor(object):
         # create any folders we need
         helpers.make_dirs(dest_path)
 
-        # download subtitles
-        if sickbeard.USE_SUBTITLES and ep_obj.show.subtitles:
-            cur_ep.location = self.file_path
-            cur_ep.downloadSubtitles(force=True)
-
         # figure out the base name of the resulting episode file
         if sickbeard.RENAME_EPISODES:
             orig_extension = self.file_name.rpartition('.')[-1]
@@ -932,6 +927,11 @@ class PostProcessor(object):
               raise exceptions.PostProcessingFailed("Unable to move the files to their new home")
         except (OSError, IOError):
             raise exceptions.PostProcessingFailed("Unable to move the files to their new home")
+
+        # download subtitles
+        if sickbeard.USE_SUBTITLES and ep_obj.show.subtitles:
+            cur_ep.location = ek.ek(os.path.join, dest_path, new_file_name)
+            cur_ep.downloadSubtitles(force=True)
 
         # put the new location in the database
         for cur_ep in [ep_obj] + ep_obj.relatedEps:
