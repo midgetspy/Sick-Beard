@@ -131,15 +131,15 @@ $(document).ready(function(){
 
     $.fn.showProvidersConfig = function () {
 
-    $("#provider_order_list li").each(function( index ) {
+        $("#provider_order_list li").each(function( index ) {
   
-      if ($(this).find("input").attr("checked")) {
-        $(this).addTip();
-        } else {
-          $(this).qtip('destroy');
-        }
-      }); 
-  };
+            if ($(this).find("input").attr("checked")) {
+                $(this).addTip();
+            } else {
+                $(this).qtip('destroy');
+            }
+        }); 
+    };
 
   $.fn.addTip = function() {
     
@@ -196,14 +196,14 @@ $(document).ready(function(){
 
     var newznabProviders = new Array();
 
-     $("#provider_order_list li").on('change', function() {
-    if ($(this).find("input").attr("checked")) {
-      $(this).addTip();  
-      $(this).qtip('show');       
-      } else {
-          $(this).qtip('destroy');
-      }
-      });   
+    $("#provider_order_list li").on('change', function() {
+        if ($(this).find("input").attr("checked")) {
+            $(this).addTip();  
+            $(this).qtip('show');       
+        } else {
+            $(this).qtip('destroy');
+        }
+    });   
 
     $('.newznab_key').change(function(){
 
@@ -260,8 +260,7 @@ $(document).ready(function(){
 
                 $(this).addProvider(data.success, name, url, key, 0);
         });
-
-
+    
     });
 
     $('.newznab_delete').click(function(){
@@ -273,41 +272,41 @@ $(document).ready(function(){
     });
 
     $("[class='providerDiv_tip'] input").live('change', function(){
-    $('div .providerDiv ' + "[name=" + $(this).attr('name') + "]").replaceWith($(this).clone());
-    $('div .providerDiv ' + "[newznab_name=" + $(this).attr('id') + "]").replaceWith($(this).clone());
-  });
+        $('div .providerDiv ' + "[name=" + $(this).attr('name') + "]").replaceWith($(this).clone());
+        $('div .providerDiv ' + "[newznab_name=" + $(this).attr('id') + "]").replaceWith($(this).clone());
+    });
     
     $("[class='providerDiv_tip'] select").live('change', function(){
 
     $(this).find('option').each( function() {
-      if ($(this).is(':selected')) {
-        $(this).prop('defaultSelected', true)
-      } else {
-        $(this).prop('defaultSelected', false);
-      }
+        if ($(this).is(':selected')) {
+            $(this).prop('defaultSelected', true)
+        } else {
+            $(this).prop('defaultSelected', false);
+        }
     }); 
       
     $('div .providerDiv ' + "[name=" + $(this).attr('name') + "]").empty().replaceWith($(this).clone())
   });    
     
     $(".enabler").live('change', function(){
-      if ($(this).is(':checked')) {
-      $('.content_'+$(this).attr('id')).each( function() {
-        $(this).show()
-      })  
+        if ($(this).is(':checked')) {
+            $('.content_'+$(this).attr('id')).each( function() {
+                $(this).show()
+            })  
         } else {
-          $('.content_'+$(this).attr('id')).each( function() {
-        $(this).hide()
-      })
-    }
+            $('.content_'+$(this).attr('id')).each( function() {
+                $(this).hide()
+            })
+        }
     });
     
     $(".enabler").each(function(){
         if (!$(this).is(':checked')) {
-          $('.content_'+$(this).attr('id')).hide();
+            $('.content_'+$(this).attr('id')).hide();
         } else {
-          $('.content_'+$(this).attr('id')).show(); 
-      }
+            $('.content_'+$(this).attr('id')).show(); 
+        }
     });   
      
     // initialization stuff
