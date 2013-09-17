@@ -138,7 +138,7 @@ class IPTorrentsProvider(generic.TorrentProvider):
     def _doSearch(self, search_params):
     
         results = []
-        items = {'Season': [], 'Episode': []}
+        items = {'Season': [], 'Episode': [], 'RSS': []}
 
         freeleech = '&free=on' if sickbeard.IPTORRENTS_FREELEECH else ''
         
@@ -149,8 +149,9 @@ class IPTorrentsProvider(generic.TorrentProvider):
             for search_string in search_params[mode]:
 
                 # URL with 50 tv-show results, or max 150 if adjusted in IPTorrents profile
-                searchURL = self.urls['search'] % (self.categorie, freeleech, unidecode(search_string)) + ';o=seeders'
-
+                searchURL = self.urls['search'] % (self.categorie, freeleech, unidecode(search_string))
+                searchURL += ';o=seeders' if mode != 'RSS' else ''
+                
                 logger.log(u"" + self.name + " search page URL: " + searchURL, logger.DEBUG)
         
                 data = self.getURL(searchURL)
@@ -178,20 +179,24 @@ class IPTorrentsProvider(generic.TorrentProvider):
 
                     for result in torrents[1:]:
 
-                        torrent = result.find_all('td')[1].find('a')
-                        
-                        torrent_name = torrent.string
-                        torrent_download_url = self.urls['base_url'] + (result.find_all('td')[3].find('a'))['href']
-                        torrent_details_url = self.urls['base_url'] + torrent['href']
-                        torrent_seeders = int(result.find('td', attrs = {'class' : 'ac t_seeders'}).string)
-
-                        ## Not used, perhaps in the future ##
-                        #torrent_id = int(torrent['href'].replace('/details.php?id=', ''))
-                        #torrent_leechers = int(result.find('td', attrs = {'class' : 'ac t_leechers'}).string)
+                        try:
+                            torrent = result.find_all('td')[1].find('a')
+                            torrent_name = torrent.string
+                            torrent_download_url = self.urls['base_url'] + (result.find_all('td')[3].find('a'))['href']
+                            torrent_details_url = self.urls['base_url'] + torrent['href']
+                            torrent_seeders = int(result.find('td', attrs = {'class' : 'ac t_seeders'}).string)
+                            ## Not used, perhaps in the future ##
+                            #torrent_id = int(torrent['href'].replace('/details.php?id=', ''))
+                            #torrent_leechers = int(result.find('td', attrs = {'class' : 'ac t_leechers'}).string)
+                        except AttributeError:
+                            continue    
 
                         # Filter unseeded torrent and torrents with no name/url
-                        if torrent_seeders == 0 or not torrent_name or not torrent_download_url:
-                            continue 
+                        if mode != 'RSS' and seeders == 0:
+                            continue
+                        
+                        if not torrent_name or not torrent_download_url:
+                            continue
 
                         item = torrent_name, torrent_download_url
                         logger.log(u"Found result: " + torrent_name + " (" + torrent_details_url + ")", logger.DEBUG)
@@ -247,48 +252,30 @@ class IPTorrentsCache(tvcache.TVCache):
         if not self.shouldUpdate():
             return
 
-        freeleech = '&free=on' if sickbeard.IPTORRENTS_FREELEECH else ''
-       
-        # URL for the last 50 tv-show, or max 150 if adjusted in IPTorrents profile
-        cacheURL = self.provider.urls['search'] % (self.provider.categorie, freeleech, "")
-
-        logger.log(u"" + self.provider.name + " cache page URL: " + cacheURL, logger.DEBUG)
-
-        data = self.provider.getURL(cacheURL)
-
-        if not data:
-            return []
-
-        try:
-            html = BeautifulSoup(data, features=["html5lib", "permissive"])
-
-            torrent_table = html.find('table', attrs = {'class' : 'torrents'})
-            torrents = torrent_table.find_all('tr') if torrent_table else []
-    
-            if not torrents:
-#                logger.log(u"The data returned from " + self.provider.name + " is incomplete, this result is unusable", logger.DEBUG)
-                return []
-
-            logger.log(u"Clearing " + self.provider.name + " cache and updating with new information")
+        search_params = {'RSS': ['']}
+        rss_results = self.provider._doSearch(search_params)
+        
+        if rss_results:
             self.setLastUpdate()
-            self._clearCache()
-    
-            for result in torrents[1:]:
-    
-                torrent = result.find_all('td')[1].find('a')
-    
-                torrent_name = torrent.string
-                torrent_download_url = self.provider.urls['base_url'] + (result.find_all('td')[3].find('a'))['href']
-                torrent_details_url = self.provider.urls['base_url'] + torrent['href']
+        else:
+            return []
+        
+        logger.log(u"Clearing " + self.provider.name + " cache and updating with new information")
+        self._clearCache()
 
-                # Filter torrents with no name/url
-                if not torrent_name or not torrent_download_url:
-                    continue 
+        for result in rss_results:
+            item = (result[0], result[1])
+            self._parseItem(item)
+            
+    def _parseItem(self, item):
 
-                logger.log(u"Adding item to cache: " + torrent_name + " (" + torrent_details_url + ")", logger.DEBUG)
-                self._addCacheEntry(torrent_name, torrent_download_url)
+        (title, url) = item
 
-        except Exception, e:
-            logger.log(u"Failed parsing " + self.provider.name + " RSS - " + " Traceback: "  + traceback.format_exc(), logger.ERROR)
+        if not title or not url:
+            return
+
+        logger.log(u"Adding item to cache: " + title, logger.DEBUG)
+
+        self._addCacheEntry(title, url)            
 
 provider = IPTorrentsProvider()
