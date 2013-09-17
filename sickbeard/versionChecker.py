@@ -24,6 +24,7 @@ import re
 import urllib
 import zipfile
 import tarfile
+import stat
 import traceback
 import gh_api as github
 
@@ -654,7 +655,7 @@ class SourceUpdateManager(UpdateManager):
 
         except Exception, e:
             logger.log(u"Error while trying to update: " + ex(e), logger.ERROR)
-            logger.log(u"Traceback: "  + traceback.format_exc(), logger.ERROR)
+            logger.log(u"Traceback: "  + traceback.format_exc(), logger.DEBUG)
             return False
 
         return True
