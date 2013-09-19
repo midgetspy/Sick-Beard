@@ -141,7 +141,7 @@ class TorrentLeechProvider(generic.TorrentProvider):
     def _doSearch(self, search_params, show=None):
     
         results = []
-        items = {'Season': [], 'Episode': []}
+        items = {'Season': [], 'Episode': [], 'RSS': []}
         
         if not self._doLogin():
             return []
@@ -149,7 +149,10 @@ class TorrentLeechProvider(generic.TorrentProvider):
         for mode in search_params.keys():
             for search_string in search_params[mode]:
                 
-                searchURL = self.urls['search'] % (unidecode(search_string), self.categories)
+                if isinstance(search_string, unicode):
+                    search_string = unidecode(search_string)
+                
+                searchURL = self.urls['search'] % (search_string, self.categories)
 
                 logger.log(u"Search string: " + searchURL, logger.DEBUG)
         
@@ -165,23 +168,27 @@ class TorrentLeechProvider(generic.TorrentProvider):
 
                     #Continue only if one Release is found                    
                     if len(torrent_rows)<2:
-                        logger.log(u"The Data returned from " + self.name + " do not contains any torrent", logger.WARNING)
+                        logger.log(u"The Data returned from " + self.name + " do not contains any torrent", logger.DEBUG)
                         continue
 
                     for result in torrent_table.find_all('tr')[1:]:
 
-                        link = result.find('td', attrs = {'class' : 'name'}).find('a')
-                        url = result.find('td', attrs = {'class' : 'quickdownload'}).find('a')
-
-                        title = link.string
-                        download_url = self.urls['download'] % url['href']
-                        id = int(link['href'].replace('/torrent/', ''))
-                        seeders = int(result.find('td', attrs = {'class' : 'seeders'}).string)
-                        leechers = int(result.find('td', attrs = {'class' : 'leechers'}).string)
+                        try:
+                            link = result.find('td', attrs = {'class' : 'name'}).find('a')
+                            url = result.find('td', attrs = {'class' : 'quickdownload'}).find('a')
+                            title = link.string
+                            download_url = self.urls['download'] % url['href']
+                            id = int(link['href'].replace('/torrent/', ''))
+                            seeders = int(result.find('td', attrs = {'class' : 'seeders'}).string)
+                            leechers = int(result.find('td', attrs = {'class' : 'leechers'}).string)
+                        except AttributeError:
+                            continue
 
                         #Filter unseeded torrent
-                        if seeders == 0 or not title \
-                        or not download_url:
+                        if mode != 'RSS' and seeders == 0:
+                            continue 
+
+                        if not title or not download_url:
                             continue
 
                         item = title, download_url, id, seeders, leechers
@@ -242,57 +249,20 @@ class TorrentLeechCache(tvcache.TVCache):
         if not self.shouldUpdate():
             return
 
-        data = self._getData()
-        
-        if not data:
+        search_params = {'RSS': ['']}
+        rss_results = self.provider._doSearch(search_params)
+
+        if rss_results:
+            self.setLastUpdate()
+        else:
             return []
 
-        try: 
-            html = BeautifulSoup(data, features=["html5lib", "permissive"])
+        logger.log(u"Clearing " + self.provider.name + " cache and updating with new information")
+        self._clearCache()
 
-            torrent_table = html.find('table', attrs = {'id' : 'torrenttable'})
-            torrent_rows = torrent_table.find_all('tr') if torrent_table else []
-
-            if not torrent_rows:
-#                logger.log(u"The Data returned from " + self.provider.name + " is incomplete, this result is unusable", logger.ERROR)
-                return []
-
-            # now that we've loaded the current feed lets delete the old cache
-            logger.log(u"Clearing " + self.provider.name + " cache and updating with new information")
-            self.setLastUpdate()
-            self._clearCache()
-        
-            for result in torrent_rows[1:]:
-
-                link = result.find('td', attrs = {'class' : 'name'}).find('a')
-                url = result.find('td', attrs = {'class' : 'quickdownload'}).find('a')
-                title = link.string
-                download_url = self.provider.urls['download'] % url['href']
-                id = int(link['href'].replace('/torrent/', ''))
-                seeders = int(result.find('td', attrs = {'class' : 'seeders'}).string)
-                leechers = int(result.find('td', attrs = {'class' : 'leechers'}).string)
-
-                #Filter torrent
-                if not title or not download_url:
-                    continue 
-
-                item = (title, download_url)
-                
-                self._parseItem(item)
-
-        except Exception, e:
-            logger.log(u"Failed to parsing " + self.provider.name + " RSS - " + " Traceback: "  + traceback.format_exc(), logger.ERROR)
-
-    def _getData(self):
-       
-        #url for the last 50 tv-show
-        url = self.provider.urls['search'] % ("", self.provider.categories)
-
-        logger.log(u"TorrentLeech cache update URL: "+ url, logger.DEBUG)
-
-        data = self.provider.getURL(url)
-
-        return data
+        for result in rss_results:
+            item = (result[0], result[1])
+            self._parseItem(item)
 
     def _parseItem(self, item):
 
@@ -301,7 +271,7 @@ class TorrentLeechCache(tvcache.TVCache):
         if not title or not url:
             return
 
-        logger.log(u"Adding item to cache: "+title, logger.DEBUG)
+        logger.log(u"Adding item to cache: " + title, logger.DEBUG)
 
         self._addCacheEntry(title, url)
 

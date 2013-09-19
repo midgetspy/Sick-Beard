@@ -77,7 +77,7 @@ class SCCProvider(generic.TorrentProvider):
         self.session = requests.Session()
 
         try:
-            response = self.session.post(self.urls['login'], data=login_params, timeout=30)
+            response = self.session.post(self.urls['login'], data=login_params, timeout=30, verify=False)
         except (requests.exceptions.ConnectionError, requests.exceptions.HTTPError), e:
             logger.log(u'Unable to connect to ' + self.name + ' provider: ' +ex(e), logger.ERROR)
             return False
@@ -149,9 +149,9 @@ class SCCProvider(generic.TorrentProvider):
         for mode in search_params.keys():
             for search_string in search_params[mode]:
 
-		if isinstance(search_string, unicode):
-			search_string = unidecode(search_string)
-                
+                if isinstance(search_string, unicode):
+                    search_string = unidecode(search_string)
+
                 searchURL = self.urls['search'] % (search_string, self.categories)
 
                 logger.log(u"Search string: " + searchURL, logger.DEBUG)
@@ -173,21 +173,21 @@ class SCCProvider(generic.TorrentProvider):
 
                     for result in torrent_table.find_all('tr')[1:]:
 
-			try:
-			    link = result.find('td', attrs = {'class' : 'ttr_name'}).find('a')
-			    url = result.find('td', attrs = {'class' : 'td_dl'}).find('a')
-			    title = link.string
-			    download_url = self.urls['download'] % url['href']
-			    id = int(link['href'].replace('details?id=', ''))
-			    seeders = int(result.find('td', attrs = {'class' : 'ttr_seeders'}).string)
-			    leechers = int(result.find('td', attrs = {'class' : 'ttr_leechers'}).string)
-			except AttributeError:
-			    continue
+                        try:
+                            link = result.find('td', attrs = {'class' : 'ttr_name'}).find('a')
+                            url = result.find('td', attrs = {'class' : 'td_dl'}).find('a')
+                            title = link.string
+                            download_url = self.urls['download'] % url['href']
+                            id = int(link['href'].replace('details?id=', ''))
+                            seeders = int(result.find('td', attrs = {'class' : 'ttr_seeders'}).string)
+                            leechers = int(result.find('td', attrs = {'class' : 'ttr_leechers'}).string)
+                        except AttributeError:
+                            continue
 
                         if mode != 'RSS' and seeders == 0:
                             continue 
 
-                        if not title:
+                        if not title or not download_url:
                             continue
 
                         item = title, download_url, id, seeders, leechers
@@ -223,7 +223,7 @@ class SCCProvider(generic.TorrentProvider):
             headers = []
 
         try:
-            response = self.session.get(url)
+            response = self.session.get(url, verify=False)
         except (requests.exceptions.ConnectionError, requests.exceptions.HTTPError), e:
             logger.log(u"Error loading "+self.name+" URL: " + ex(e), logger.ERROR)
             return None
@@ -248,11 +248,6 @@ class SCCCache(tvcache.TVCache):
         if not self.shouldUpdate():
             return
 
-        data = self._getData()
-        
-        if not data:
-            return []
-
         search_params = {'RSS': ['']}
         rss_results = self.provider._doSearch(search_params)
         
@@ -268,17 +263,6 @@ class SCCCache(tvcache.TVCache):
             item = (result[0], result[1])
             self._parseItem(item)
 
-    def _getData(self):
-       
-        #url for the last 50 tv-show
-        url = self.provider.urls['search'] % ("", self.provider.categories)
-
-        logger.log(u"SCC cache update URL: "+ url, logger.DEBUG)
-
-        data = self.provider.getURL(url)
-
-        return data
-
     def _parseItem(self, item):
 
         (title, url) = item
@@ -286,7 +270,7 @@ class SCCCache(tvcache.TVCache):
         if not title or not url:
             return
 
-        logger.log(u"Adding item to cache: "+title, logger.DEBUG)
+        logger.log(u"Adding item to cache: " + title, logger.DEBUG)
 
         self._addCacheEntry(title, url)
 

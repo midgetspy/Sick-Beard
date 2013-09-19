@@ -930,8 +930,10 @@ class PostProcessor(object):
 
         # download subtitles
         if sickbeard.USE_SUBTITLES and ep_obj.show.subtitles:
-            cur_ep.location = ek.ek(os.path.join, dest_path, new_file_name)
-            cur_ep.downloadSubtitles(force=True)
+            for curEp in [ep_obj]:
+                with cur_ep.lock:
+                    cur_ep.location = ek.ek(os.path.join, dest_path, new_file_name)
+                    cur_ep.downloadSubtitles(force=True)
 
         # put the new location in the database
         for cur_ep in [ep_obj] + ep_obj.relatedEps:

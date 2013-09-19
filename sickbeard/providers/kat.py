@@ -239,14 +239,17 @@ class KATProvider(generic.TorrentProvider):
                     
                     for tr in torrent_rows[1:]:
 
-                        link = self.url + (tr.find('div', {'class': 'torrentname'}).find_all('a')[1])['href']
-                        id = tr.get('id')[-7:]
-                        title = (tr.find('div', {'class': 'torrentname'}).find_all('a')[1]).text
-                        url = tr.find('a', 'imagnet')['href'] if hasattr(tr.find('a', 'imagnet'), "__getitem__") else None
-                        verified = True if tr.find('a', 'iverify') else False
-                        trusted =  True if tr.find('img', {'alt': 'verified'}) else False
-                        seeders = int(tr.find_all('td')[-2].text)
-                        leechers = int(tr.find_all('td')[-1].text)
+                        try:
+                            link = self.url + (tr.find('div', {'class': 'torrentname'}).find_all('a')[1])['href']
+                            id = tr.get('id')[-7:]
+                            title = (tr.find('div', {'class': 'torrentname'}).find_all('a')[1]).text
+                            url = tr.find('a', 'imagnet')['href']
+                            verified = True if tr.find('a', 'iverify') else False
+                            trusted =  True if tr.find('img', {'alt': 'verified'}) else False
+                            seeders = int(tr.find_all('td')[-2].text)
+                            leechers = int(tr.find_all('td')[-1].text)
+                        except AttributeError:
+                            continue
 
                         if mode != 'RSS' and seeders == 0:
                             continue 
@@ -260,7 +263,7 @@ class KATProvider(generic.TorrentProvider):
                             ep_number = int(len(search_params['Episode']) / len(set(allPossibleShowNames(self.show))))
                             title = self._find_season_quality(title, link, ep_number)
 
-                        if not title:
+                        if not title or not url:
                             continue
 
                         item = title, url, id, seeders, leechers
@@ -371,7 +374,7 @@ class KATCache(tvcache.TVCache):
         if not title or not url:
             return
 
-        logger.log(u"Adding item to cache: "+title, logger.DEBUG)
+        logger.log(u"Adding item to cache: " + title, logger.DEBUG)
 
         self._addCacheEntry(title, url)
     
