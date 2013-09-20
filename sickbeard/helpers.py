@@ -614,8 +614,9 @@ def rename_ep_file(cur_path, new_path, old_path_length=0):
         cur_file_name, cur_file_ext = os.path.splitext(cur_path)  # @UnusedVariable
     else:
         # approach from the left
-        cur_file_ext = cur_path[old_path_length:]
-    
+        cur_file_ext  = cur_path[old_path_length:]
+        cur_file_name = cur_path[:old_path_length]
+        
     if cur_file_ext[1:] in subtitleExtensions:
         #Extract subtitle language from filename
         sublang = os.path.splitext(cur_file_name)[1][1:]
