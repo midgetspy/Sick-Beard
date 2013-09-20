@@ -1033,6 +1033,9 @@ h1.title {
   text-rendering: optimizeLegibility;
   border-bottom: 1px solid #888;
 }
+h1.anime {
+  padding-top: 13px;
+}
 .h2footer {
   margin: -45px 5px 8px 0;
   line-height: 18px;
