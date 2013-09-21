@@ -371,6 +371,27 @@ option.flag {
   background-repeat: no-repeat;
 }
 
+div.blackwhitelist{
+  float: left;
+  text-align: center;
+}
+div.blackwhitelist input {
+  margin: 5px 0px;
+}
+div.blackwhitelist.pool select {
+  min-width: 230px;
+}
+div.blackwhitelist.white select, div.blackwhitelist.black select {
+  min-width: 150px;
+}
+div.blackwhitelist span {
+  display: block;
+  text-align: center;
+}
+div.blackwhitelist.anidb, div.blackwhitelist.manual{
+  margin: 7px 0px;
+}
+
 /* =======================================================================
 manage_massEdit.tmpl
 ========================================================================== */

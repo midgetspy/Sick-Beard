@@ -86,48 +86,63 @@ Needed words: <input type="text" name="whiteWords" value="$whiteWords"><br />
 (Results must contain all of these words. Comma seperated.)<br />
 <br />
 #if $show.is_anime
-<p>
-Realease Groups:
-</p>
-<input type="text" id="addToPoolText"/>
-<input type="button" value="Add to White" id="addToWhite">
-<input type="button" value="Add to Black" id="addToBlack"><br/>
-<div class="blackwhiteliste white">
-	<span>White:</span>
-	<select multiple id="white">
-			#for $keyword in $whitelist:
-				<option value="$keyword">$keyword</option>
-			#end for
-	</select>
-	<br/>
-	<input id="removeW" value="Remove &gt;&gt;" type="button"/>
-</div>
 
-<div class="blackwhiteliste pool">
-	<span>Pool (Name|Rating|Subed Ep):</span>
-	<select multiple id="pool">
-	#for $group in $groups
-		#if $group not in $whitelist and $group['name'] not in $blacklist:
-			<option value="$group['name']">$group['name'] | $group['rating'] | $group['range']</option>
-		#end if
-	#end for
-	</select>
-	<br/>
-	<input id="addW" value="&lt;&lt; Add" type="button"/>
-	<input id="addB" value="Add &gt;&gt;" type="button"/>
+Fansub Groups:
+<div class="fieldpair alt">
+	Preferred fansub groups of anime episodes to be downloaded
 </div>
-
-<div class="blackwhiteliste black">
-	<span>Black:</span>
-	<select multiple id="black">
-		#for $keyword in $blacklist:
-			<option value="$keyword">$keyword</option>
-		#end for
-	</select>
-	<br/>
-	<input id="removeB" value="&lt;&lt; Remove" type="button"/>
+<div class="bwlWrapper">
+	<div class="component-group-desc">
+		<p>Select your preferred fansub groups from the <b>Available Groups</b> and add them to the <b>Whitelist</b>. Add groups to the <b>Blacklist</b> to ignore them.</p>
+		<p>The <b>Whitelist</b> is checked <i>before</i> the <b>Blacklist</b>.</p>
+		<p>Groups are shown as <b>Name</b> | <b>Rating</b> | <b>Number of subbed episodes</b>.</p>
+		<p>You may also add any fansub group not listed to either list manually.</p>
+	</div>
+	<div class="blackwhitelist all">
+		<div class="blackwhitelist anidb">
+			<div class="blackwhitelist white">
+				<span><h4>Whitelist</h4></span>
+				<select id="white" multiple="multiple" size="6">
+					#for $keyword in $whitelist:
+						<option value="$keyword">$keyword</option>
+					#end for
+				</select>
+				<br/>
+				<input class="btn" style="float: left;" id="removeW" value="Remove" type="button"/>
+			</div>
+			<div class="blackwhitelist pool">
+				<span><h4>Available Groups</h4></span>
+				<select id="pool" multiple="multiple" size="6">
+				#for $group in $groups
+					#if $group not in $whitelist and $group['name'] not in $blacklist:
+						<option value="$group['name']">$group['name'] | $group['rating'] | $group['range']</option>
+					#end if
+				#end for
+				</select>
+				<br/>
+				<input class="btn" style="float: left;" id="addW" value="Add to Whitelist" type="button"/>
+				<input class="btn" style="float: right;" id="addB" value="Add to Blacklist" type="button"/>
+			</div>
+			<div class="blackwhitelist black">
+				<span><h4>Blacklist</h4></span>
+				<select id="black" multiple="multiple" size="6">
+					#for $keyword in $blacklist:
+						<option value="$keyword">$keyword</option>
+					#end for
+				</select>
+				<br/>
+				<input class="btn" style="float: right;" id="removeB" value="Remove" type="button"/>
+			</div>
+		</div>
+		<br style="clear:both" />
+		<div class="blackwhitelist manual">
+			<input type="text" id="addToPoolText" size="30" />
+			<input class="btn" type="button" value="Add to Whitelist" id="addToWhite">
+			<input class="btn" type="button" value="Add to Blacklist" id="addToBlack">
+		</div>
+	</div>
+	<br style="clear:both" />
 </div>
-<br style="clear:both;"/>
 #end if
 <input type="hidden" name="whitelist" id="whitelist"/>
 <input type="hidden" name="blacklist" id="blacklist"/>
