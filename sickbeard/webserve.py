@@ -29,6 +29,7 @@ import random
 
 from Cheetah.Template import Template
 import cherrypy.lib
+import cherrypy.lib.caching
 
 import sickbeard
 
@@ -2725,55 +2726,27 @@ class WebInterface:
 
     @cherrypy.expose
     def showPoster(self, show=None, which=None):
+        if show is not None:
+            showObj = sickbeard.helpers.findCertainShow(sickbeard.showList, int(show))
+
+            if showObj is not None:
+                cache_obj = image_cache.ImageCache()
+
+                if which == 'poster':
+                    image_file_name = cache_obj.poster_path(showObj.tvdbid)
+                # this is for 'banner' but also the default case
+                else:
+                    image_file_name = cache_obj.banner_path(showObj.tvdbid)
+
+                if ek.ek(os.path.isfile, image_file_name):
+                    cherrypy.lib.caching.expires(secs=60 * 60)
+                    return cherrypy.lib.static.serve_file(image_file_name, content_type="image/jpeg")
 
         if which == 'poster':
             default_image_name = 'poster.png'
         else:
             default_image_name = 'banner.png'
-
-        default_image_path = ek.ek(os.path.join, sickbeard.PROG_DIR, 'data', 'images', default_image_name)
-        if show is None:
-            return cherrypy.lib.static.serve_file(default_image_path, content_type="image/png")
-        else:
-            showObj = sickbeard.helpers.findCertainShow(sickbeard.showList, int(show))
-
-        if showObj is None:
-            return cherrypy.lib.static.serve_file(default_image_path, content_type="image/png")
-
-        cache_obj = image_cache.ImageCache()
-
-        if which == 'poster':
-            image_file_name = cache_obj.poster_path(showObj.tvdbid)
-        # this is for 'banner' but also the default case
-        else:
-            image_file_name = cache_obj.banner_path(showObj.tvdbid)
-
-        if ek.ek(os.path.isfile, image_file_name):
-            # use startup argument to prevent using PIL even if installed
-            if sickbeard.NO_RESIZE:
-                return cherrypy.lib.static.serve_file(image_file_name, content_type="image/jpeg")
-            try:
-                from PIL import Image
-                from cStringIO import StringIO
-            except ImportError:  # PIL isn't installed
-                return cherrypy.lib.static.serve_file(image_file_name, content_type="image/jpeg")
-            else:
-                im = Image.open(image_file_name)
-                if im.mode == 'P':  # Convert GIFs to RGB
-                    im = im.convert('RGB')
-                if which == 'banner':
-                    size = 606, 112
-                elif which == 'poster':
-                    size = 136, 200
-                else:
-                    return cherrypy.lib.static.serve_file(image_file_name, content_type="image/jpeg")
-                im = im.resize(size, Image.ANTIALIAS)
-                imgbuffer = StringIO()
-                im.save(imgbuffer, 'JPEG', quality=85)
-                cherrypy.response.headers['Content-Type'] = 'image/jpeg'
-                return imgbuffer.getvalue()
-        else:
-            return cherrypy.lib.static.serve_file(default_image_path, content_type="image/png")
+        return redirect('/images/' + default_image_name)
 
     @cherrypy.expose
     def setComingEpsLayout(self, layout):
