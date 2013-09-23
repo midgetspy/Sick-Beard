@@ -1033,6 +1033,7 @@ class ConfigProviders:
     def saveProviders(self, nzbmatrix_username=None, nzbmatrix_apikey=None,
                       nzbs_r_us_uid=None, nzbs_r_us_hash=None, newznab_string='',
                       omgwtfnzbs_uid=None, omgwtfnzbs_key=None,
+                      ninjacentral_uid=None, ninjacentral_hash=None,
                       tvtorrents_digest=None, tvtorrents_hash=None,
                       torrentleech_key=None,
                       btn_api_key=None,
@@ -1040,8 +1041,9 @@ class ConfigProviders:
                       provider_order=None):
 
         results = []
-
+        
         provider_str_list = provider_order.split()
+        
         provider_list = []
 
         newznabProviderDict = dict(zip([x.getID() for x in sickbeard.newznabProviderList], sickbeard.newznabProviderList))
@@ -1099,6 +1101,8 @@ class ConfigProviders:
                 sickbeard.NZBX = curEnabled
             elif curProvider == 'omgwtfnzbs':
                 sickbeard.OMGWTFNZBS = curEnabled
+            elif curProvider == 'ninjacentral':
+                sickbeard.NINJACENTRAL = curEnabled
             elif curProvider == 'ezrss':
                 sickbeard.EZRSS = curEnabled
             elif curProvider == 'tvtorrents':
@@ -1124,6 +1128,9 @@ class ConfigProviders:
 
         sickbeard.OMGWTFNZBS_UID = omgwtfnzbs_uid.strip()
         sickbeard.OMGWTFNZBS_KEY = omgwtfnzbs_key.strip()
+
+        sickbeard.NINJACENTRAL_UID = ninjacentral_uid.strip()
+        sickbeard.NINJACENTRAL_HASH = ninjacentral_hash.strip()
 
         sickbeard.PROVIDER_ORDER = provider_list
 

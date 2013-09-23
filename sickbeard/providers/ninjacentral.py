@@ -28,13 +28,17 @@ except ImportError:
 from sickbeard import exceptions, logger
 from sickbeard import tvcache, show_name_helpers
 
+try:
+    import json
+except ImportError:
+    from lib import simplejson as json
 
 class NINJACENTRALProvider(generic.NZBProvider):
 
     def __init__(self):
         generic.NZBProvider.__init__(self, "ninjacentral")
         self.cache = NINJACENTRALCache(self)
-        self.url = 'http://127.0.0.1/'
+        self.url = 'http://www.ninjacentral.za.net/'
         self.supportsBacklog = True
 
     def isEnabled(self):
@@ -50,13 +54,12 @@ class NINJACENTRALProvider(generic.NZBProvider):
     def _get_episode_search_strings(self, ep_obj):
         return [x for x in show_name_helpers.makeSceneSearchString(ep_obj)]
 
-	#These parameters need to reflect in the api
+    #These parameters need to reflect in the api, this is used to search for a specific episode
     def _doSearch(self, search, show=None):
         params = {'uid': sickbeard.NINJACENTRAL_UID,
                   'passkey': sickbeard.NINJACENTRAL_HASH,
-                  'xml': 1,
+                  'xml': 0,
                   'maxage': sickbeard.USENET_RETENTION,
-                  'cat': '5030,5040,5050,5060',     # TV:HD
                   'limit': 100,
                   't': 'tv',
                   'q': search}
@@ -68,44 +71,53 @@ class NINJACENTRALProvider(generic.NZBProvider):
         logger.log(u"Ninjacentral's search url: " + searchURL, logger.DEBUG)
 
         data = self.getURL(searchURL)
-        if not data:
-            return []
-		
-		#if data is not an xml document, return error displayed if it's a single line
-        if not data.startswith('<?xml'):  # Error will be a single line of text
+        if '<error code=' in data:
             logger.log(u"Ninjacentral error: " + data, logger.ERROR)
             return []
+        
+        try:
+            items = json.loads(data)
+        except ValueError:
+            logger.log(u"Error trying to decode ninjacentral json data", logger.ERROR)
+            return[]
 
-        root = etree.fromstring(data)
-        if root is None:
-            logger.log(u"Error trying to parse Ninjacentral XML data.", logger.ERROR)
-            logger.log(u"RSS data: " + data, logger.DEBUG)
-            return []
-        return root.findall('./rss/channel')
+        results = []
+        for item in items:
+            if item['id'] and item['name']:
+                results.append(item)
+            else:
+                logger.log(u"Partial result from ninjacentral", logger.DEBUG)
+        return results
 
-	
-    def _get_title_and_url(self, element):
-        if element.find('title'):  # RSS feed
-            title = element.find('title').text
-            url = element.find('link').text.replace('&amp;', '&')
+
+    #This is the data used to download the nzb
+    def _get_title_and_url(self, item):
+        title = item['name']
+        url = self.url + 'api.php?'
+        urlArgs = {'xml': 0,
+        'uid': sickbeard.NINJACENTRAL_UID,
+        'passkey': sickbeard.NINJACENTRAL_HASH,
+        't': 'get',
+        'nzbid': item['id']}
+        url += urllib.urlencode(urlArgs)
         return (title, url)
-
 
 class NINJACENTRALCache(tvcache.TVCache):
 
     def __init__(self, provider):
         tvcache.TVCache.__init__(self, provider)
+        
         # only poll NC every 15 minutes max
         self.minTime = 15
-	
+
+    
     def _getRSSData(self):
         url = self.provider.url + 'api.php?'
         urlArgs = {'uid': sickbeard.NINJACENTRAL_UID,
                   'passkey': sickbeard.NINJACENTRAL_HASH,
                   'xml': 1,
                   'maxage': sickbeard.USENET_RETENTION,
-                  'cat': '5030,5040,5050,5060',     # TV:HD
-                  'limit': 500,
+                  'limit': 125,
                   't': 'tv'}
 
         url += urllib.urlencode(urlArgs)
