@@ -191,7 +191,7 @@ class SBRotatingLogHandler(object):
 
             # check the size and see if we need to rotate
             if self.writes_since_check >= 10:
-                if os.path.isfile(self.log_file) and os.path.getsize(self.log_file) >= LOG_SIZE:
+                if os.path.isfile(self.log_file_path) and os.path.getsize(self.log_file_path) >= LOG_SIZE:
                     self._rotate_logs()
                 self.writes_since_check = 0
             else:
@@ -215,9 +215,12 @@ class SBRotatingLogHandler(object):
                     sb_logger.info(out_line)
                 elif logLevel == WARNING:
                     sb_logger.warning(out_line)
+                    subli_logger.error(out_line)
+                    imdb_logger.error(out_line)                    
                 elif logLevel == ERROR:
                     sb_logger.error(out_line)
-
+                    subli_logger.error(out_line)
+                    imdb_logger.error(out_line)
                     # add errors to the UI logger
                     classes.ErrorViewer.add(classes.UIError(message))
                 elif logLevel == DB:
