@@ -215,21 +215,14 @@ class SBRotatingLogHandler(object):
                     sb_logger.info(out_line)
                 elif logLevel == WARNING:
                     sb_logger.warning(out_line)
-                    subli_logger.error(out_line)
-                    imdb_logger.error(out_line)                    
                 elif logLevel == ERROR:
                     sb_logger.error(out_line)
-                    subli_logger.error(out_line)
-                    imdb_logger.error(out_line)
                     # add errors to the UI logger
                     classes.ErrorViewer.add(classes.UIError(message))
                 elif logLevel == DB:
                     sb_logger.db(out_line)
-
                 else:
                     sb_logger.log(logLevel, out_line)
-                    subli_logger.log(logLevel, out_line)
-                    imdb_logger.log(logLevel, out_line)
             except ValueError:
                 pass
 
