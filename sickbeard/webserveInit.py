@@ -70,7 +70,7 @@ def initWebServer(options = {}):
         <br/>
     </body>
 </html>
-''' % '/'
+''' % options['web_root']
 
         # cherrypy setup
         enable_https = options['enable_https']
