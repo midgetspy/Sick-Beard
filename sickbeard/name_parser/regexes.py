@@ -23,13 +23,13 @@ ep_regexes = [
                # Show.Name.S01E02.S01E03.Source.Quality.Etc-Group
                # Show Name - S01E02 - S01E03 - S01E04 - Ep Name 
                '''
-               ^(?P<series_name>.+?)[. _-]+                # Show_Name and separator
-               s(?P<season_num>\d+)[. _-]*                 # S01 and optional separator
-               e(?P<ep_num>\d+)                            # E02 and separator
-               ([. _-]+s(?P=season_num)[. _-]*             # S01 and optional separator
-               e(?P<extra_ep_num>\d+))+                    # E03/etc and separator
-               [. _-]*((?P<extra_info>.+?)                 # Source_Quality_Etc-
-               ((?<![. _-])(?<!WEB)                        # Make sure this is really the release group
+               ^(?P<series_name>.+?)[. _-]+                 # Show_Name and separator
+               s(?P<season_num>\d+)[. _-]*                  # S01 and optional separator
+               e(?P<ep_num>\d+)                             # E02 and separator
+               ([. _-]+s(?P=season_num)[. _-]*              # S01 and optional separator
+               e(?P<extra_ep_num>\d+))+                     # E03/etc and separator
+               [. _-]*((?P<extra_info>.+?)                  # Source_Quality_Etc-
+               ((?<![. _-])(?<!WEB)                         # Make sure this is really the release group
                -(?P<release_group>[^- ]+))?)?$              # Group
                '''),
               
@@ -37,13 +37,13 @@ ep_regexes = [
                # Show.Name.1x02.1x03.Source.Quality.Etc-Group
                # Show Name - 1x02 - 1x03 - 1x04 - Ep Name
                '''
-               ^(?P<series_name>.+?)[. _-]+                # Show_Name and separator
-               (?P<season_num>\d+)x                        # 1x
-               (?P<ep_num>\d+)                             # 02 and separator
-               ([. _-]+(?P=season_num)x                    # 1x
-               (?P<extra_ep_num>\d+))+                     # 03/etc and separator
-               [. _-]*((?P<extra_info>.+?)                 # Source_Quality_Etc-
-               ((?<![. _-])(?<!WEB)                        # Make sure this is really the release group
+               ^(?P<series_name>.+?)[. _-]+                 # Show_Name and separator
+               (?P<season_num>\d+)x                         # 1x
+               (?P<ep_num>\d+)                              # 02 and separator
+               ([. _-]+(?P=season_num)x                     # 1x
+               (?P<extra_ep_num>\d+))+                      # 03/etc and separator
+               [. _-]*((?P<extra_info>.+?)                  # Source_Quality_Etc-
+               ((?<![. _-])(?<!WEB)                         # Make sure this is really the release group
                -(?P<release_group>[^- ]+))?)?$              # Group
                '''),
               
@@ -55,13 +55,13 @@ ep_regexes = [
                # Show Name - S01E02-03 - My Ep Name
                # Show.Name.S01.E02.E03
                '''
-               ^((?P<series_name>.+?)[. _-]+)?             # Show_Name and separator
-               s(?P<season_num>\d+)[. _-]*                 # S01 and optional separator
-               e(?P<ep_num>\d+)                            # E02 and separator
-               (([. _-]*e|-)                               # linking e/- char
-               (?P<extra_ep_num>(?!(1080|720)[pi])\d+))*   # additional E03/etc
-               [. _-]*((?P<extra_info>.+?)                 # Source_Quality_Etc-
-               ((?<![. _-])(?<!WEB)                        # Make sure this is really the release group
+               ^((?P<series_name>.+?)[. _-]+)?              # Show_Name and separator
+               s(?P<season_num>\d+)[. _-]*                  # S01 and optional separator
+               e(?P<ep_num>\d+)                             # E02 and separator
+               (([. _-]*e|-)                                # linking e/- char
+               (?P<extra_ep_num>(?!(1080|720)[pi])\d+))*    # additional E03/etc
+               [. _-]*((?P<extra_info>.+?)                  # Source_Quality_Etc-
+               ((?<![. _-])(?<!WEB)                         # Make sure this is really the release group
                -(?P<release_group>[^- ]+))?)?$              # Group
                '''),
 
@@ -71,15 +71,15 @@ ep_regexes = [
                # Show_Name.1x02x03x04.Source_Quality_Etc-Group
                # Show Name - 1x02-03-04 - My Ep Name
                '''
-               ^((?P<series_name>.+?)[\[. _-]+)?           # Show_Name and separator
-               (?P<season_num>\d+)x                        # 1x
-               (?P<ep_num>\d+)                             # 02 and separator
-               (([. _-]*x|-)                               # linking x/- char
+               ^((?P<series_name>.+?)[\[. _-]+)?            # Show_Name and separator
+               (?P<season_num>\d+)x                         # 1x
+               (?P<ep_num>\d+)                              # 02 and separator
+               (([. _-]*x|-)                                # linking x/- char
                (?P<extra_ep_num>
-               (?!(1080|720)[pi])(?!(?<=x)264)             # ignore obviously wrong multi-eps
-               \d+))*                                      # additional x03/etc
-               [\]. _-]*((?P<extra_info>.+?)               # Source_Quality_Etc-
-               ((?<![. _-])(?<!WEB)                        # Make sure this is really the release group
+               (?!(1080|720)[pi])(?!(?<=x)264)              # ignore obviously wrong multi-eps
+               \d+))*                                       # additional x03/etc
+               [\]. _-]*((?P<extra_info>.+?)                # Source_Quality_Etc-
+               ((?<![. _-])(?<!WEB)                         # Make sure this is really the release group
                -(?P<release_group>[^- ]+))?)?$              # Group
                '''),
         
@@ -87,43 +87,43 @@ ep_regexes = [
                # Show.Name.2010.11.23.Source.Quality.Etc-Group
                # Show Name - 2010-11-23 - Ep Name
                '''
-               ^((?P<series_name>.+?)[. _-]+)?             # Show_Name and separator
-               (?P<air_year>\d{4})[. _-]+                  # 2010 and separator
-               (?P<air_month>\d{2})[. _-]+                 # 11 and separator
-               (?P<air_day>\d{2})                          # 23 and separator
-               [. _-]*((?P<extra_info>.+?)                 # Source_Quality_Etc-
-               ((?<![. _-])(?<!WEB)                        # Make sure this is really the release group
+               ^((?P<series_name>.+?)[. _-]+)?              # Show_Name and separator
+               (?P<air_year>\d{4})[. _-]+                   # 2010 and separator
+               (?P<air_month>\d{2})[. _-]+                  # 11 and separator
+               (?P<air_day>\d{2})                           # 23 and separator
+               [. _-]*((?P<extra_info>.+?)                  # Source_Quality_Etc-
+               ((?<![. _-])(?<!WEB)                         # Make sure this is really the release group
                -(?P<release_group>[^- ]+))?)?$              # Group
                '''),
               
               ('stupid',
                # tpz-abc102
                '''
-               (?P<release_group>.+?)-\w+?[\. ]?           # tpz-abc
-               (?!264)                                     # don't count x264
-               (?P<season_num>\d{1,2})                     # 1
-               (?P<ep_num>\d{2})$                          # 02
+               (?P<release_group>.+?)-\w+?[\. ]?            # tpz-abc
+               (?!264)                                      # don't count x264
+               (?P<season_num>\d{1,2})                      # 1
+               (?P<ep_num>\d{2})$                           # 02
                '''),
               
               ('verbose',
                # Show Name Season 1 Episode 2 Ep Name
                '''
-               ^(?P<series_name>.+?)[. _-]+                # Show Name and separator
-               season[. _-]+                               # season and separator
-               (?P<season_num>\d+)[. _-]+                  # 1
-               episode[. _-]+                              # episode and separator
-               (?P<ep_num>\d+)[. _-]+                      # 02 and separator
-               (?P<extra_info>.+)$                         # Source_Quality_Etc-
+               ^(?P<series_name>.+?)[. _-]+                 # Show Name and separator
+               season[. _-]+                                # season and separator
+               (?P<season_num>\d+)[. _-]+                   # 1
+               episode[. _-]+                               # episode and separator
+               (?P<ep_num>\d+)[. _-]+                       # 02 and separator
+               (?P<extra_info>.+)$                          # Source_Quality_Etc-
                '''),
               
               ('season_only',
                # Show.Name.S01.Source.Quality.Etc-Group
                '''
-               ^((?P<series_name>.+?)[. _-]+)?             # Show_Name and separator
-               s(eason[. _-])?                             # S01/Season 01
-               (?P<season_num>\d+)[. _-]*                  # S01 and optional separator
-               [. _-]*((?P<extra_info>.+?)                 # Source_Quality_Etc-
-               ((?<![. _-])(?<!WEB)                        # Make sure this is really the release group
+               ^((?P<series_name>.+?)[. _-]+)?              # Show_Name and separator
+               s(eason[. _-])?                              # S01/Season 01
+               (?P<season_num>\d+)[. _-]*                   # S01 and optional separator
+               [. _-]*((?P<extra_info>.+?)                  # Source_Quality_Etc-
+               ((?<![. _-])(?<!WEB)                         # Make sure this is really the release group
                -(?P<release_group>[^- ]+))?)?$              # Group
                '''
                ),
@@ -132,13 +132,13 @@ ep_regexes = [
                # Show.Name.E02-03
                # Show.Name.E02.2010
                '''
-               ^((?P<series_name>.+?)[. _-]+)?             # Show_Name and separator
-               (e(p(isode)?)?|part|pt)[. _-]?              # e, ep, episode, or part
-               (?P<ep_num>(\d+|[ivx]+))                    # first ep num
-               ((([. _-]+(and|&|to)[. _-]+)|-)             # and/&/to joiner
+               ^((?P<series_name>.+?)[. _-]+)?              # Show_Name and separator
+               (e(p(isode)?)?|part|pt)[. _-]?               # e, ep, episode, or part
+               (?P<ep_num>(\d+|[ivx]+))                     # first ep num
+               ((([. _-]+(and|&|to)[. _-]+)|-)              # and/&/to joiner
                (?P<extra_ep_num>(?!(1080|720)[pi])(\d+|[ivx]+))[. _-])            # second ep num
-               ([. _-]*(?P<extra_info>.+?)                 # Source_Quality_Etc-
-               ((?<![. _-])(?<!WEB)                        # Make sure this is really the release group
+               ([. _-]*(?P<extra_info>.+?)                  # Source_Quality_Etc-
+               ((?<![. _-])(?<!WEB)                         # Make sure this is really the release group
                -(?P<release_group>[^- ]+))?)?$              # Group
                '''
                ),
@@ -148,15 +148,15 @@ ep_regexes = [
                # Show.Name.Part.3.Source.Quality.Etc-Group
                # Show.Name.Part.1.and.Part.2.Blah-Group
                '''
-               ^((?P<series_name>.+?)[. _-]+)?             # Show_Name and separator
-               (e(p(isode)?)?|part|pt)[. _-]?              # e, ep, episode, or part
-               (?P<ep_num>(\d+|([ivx]+(?=[. _-]))))                    # first ep num
-               ([. _-]+((and|&|to)[. _-]+)?                # and/&/to joiner
-               ((e(p(isode)?)?|part|pt)[. _-]?)           # e, ep, episode, or part
+               ^((?P<series_name>.+?)[. _-]+)?              # Show_Name and separator
+               (e(p(isode)?)?|part|pt)[. _-]?               # e, ep, episode, or part
+               (?P<ep_num>(\d+|([ivx]+(?=[. _-]))))         # first ep num
+               ([. _-]+((and|&|to)[. _-]+)?                 # and/&/to joiner
+               ((e(p(isode)?)?|part|pt)[. _-]?)             # e, ep, episode, or part
                (?P<extra_ep_num>(?!(1080|720)[pi])
                (\d+|([ivx]+(?=[. _-]))))[. _-])*            # second ep num
-               ([. _-]*(?P<extra_info>.+?)                 # Source_Quality_Etc-
-               ((?<![. _-])(?<!WEB)                        # Make sure this is really the release group
+               ([. _-]*(?P<extra_info>.+?)                  # Source_Quality_Etc-
+               ((?<![. _-])(?<!WEB)                         # Make sure this is really the release group
                -(?P<release_group>[^- ]+))?)?$              # Group
                '''
                ),
@@ -164,11 +164,11 @@ ep_regexes = [
               ('bare',
                # Show.Name.102.Source.Quality.Etc-Group
                '''
-               ^(?P<series_name>.+?)[. _-]+                # Show_Name and separator
-               (?P<season_num>\d{1,2})                     # 1
-               (?P<ep_num>\d{2})                           # 02 and separator
-               ([. _-]+(?P<extra_info>(?!\d{3}[. _-]+)[^-]+) # Source_Quality_Etc-
-               (-(?P<release_group>.+))?)?$                # Group
+               ^(?P<series_name>.+?)[. _-]+                     # Show_Name and separator
+               (?P<season_num>\d{1,2})                          # 1
+               (?P<ep_num>\d{2})                                # 02 and separator
+               ([. _-]+(?P<extra_info>(?!\d{3}[. _-]+)[^-]+)    # Source_Quality_Etc-
+               (-(?P<release_group>.+))?)?$                     # Group
                '''),
               
               ('no_season',
@@ -176,11 +176,11 @@ ep_regexes = [
                # 01 - Ep Name
                # 01 - Ep Name
                '''
-               ^((?P<series_name>.+?)(?:[. _-]{2,}|[. _]))?             # Show_Name and separator
-               (?P<ep_num>\d{1,2})                           # 02
-               (?:-(?P<extra_ep_num>\d{1,2}))*               # 02
-               [. _-]+((?P<extra_info>.+?)                 # Source_Quality_Etc-
-               ((?<![. _-])(?<!WEB)                        # Make sure this is really the release group
+               ^((?P<series_name>.+?)(?:[. _-]{2,}|[. _]))? # Show_Name and separator
+               (?P<ep_num>\d{1,2})                          # 02
+               (?:-(?P<extra_ep_num>\d{1,2}))*              # 02
+               [. _-]+((?P<extra_info>.+?)                  # Source_Quality_Etc-
+               ((?<![. _-])(?<!WEB)                         # Make sure this is really the release group
                -(?P<release_group>[^- ]+))?)?$              # Group
                '''
                ),
@@ -210,11 +210,11 @@ anime_ep_regexes = [
                # Show Name 13
                '''
                ^(\[(?P<release_group>.+?)\][ ._-]*)?                        # Release Group and separator
-               (?P<series_name>.+?)[ ._-]+                                 # Show_Name and separator
+               (?P<series_name>.+?)[ ._-]+                                  # Show_Name and separator
                (?P<ep_ab_num>\d{1,3})                                       # E01
                (-(?P<extra_ab_ep_num>\d{1,3}))?                             # E02
                (v(?P<version>[0-9]))?                                       # version
-               [ ._-]+\[(?P<extra_info>\d{3,4}[xp]?\d{0,4}[\.\w\s-]*)\]       # Source_Quality_Etc-
+               [ ._-]+\[(?P<extra_info>\d{3,4}[xp]?\d{0,4}[\.\w\s-]*)\]     # Source_Quality_Etc-
                (\[(?P<crc>\w{8})\])?                                        # CRC
                .*?                                                          # Separator and EOL
                '''),
@@ -258,8 +258,8 @@ anime_ep_regexes = [
                (?P<ep_ab_num>\d{1,3})                                       # E01
                (-(?P<extra_ab_ep_num>\d{1,3}))?                             # E02
                (v(?P<version>[0-9]))?                                       # version
-               ([ ._-](\[\w{1,2}\])?\[[a-z][.]?\w{2,4}\])?                        #codec
-               [ ._-]*\[(?P<extra_info>(\d{3,4}[xp]?\d{0,4})?[\.\w\s-]*)\]    # Source_Quality_Etc-
+               ([ ._-](\[\w{1,2}\])?\[[a-z][.]?\w{2,4}\])?                  # codec
+               [ ._-]*\[(?P<extra_info>(\d{3,4}[xp]?\d{0,4})?[\.\w\s-]*)\]  # Source_Quality_Etc-
                (\[(?P<crc>\w{8})\])?
                .*?                                                          # Separator and EOL
                '''),
@@ -288,7 +288,7 @@ anime_ep_regexes = [
                # Bleach s16e03e04 313-314
                '''
                ^(?P<series_name>.+?)[ ._-]+                 # start of string and series name and non optinal separator
-               (?P<season_num>\d+)[. _-]*               # S01 and optional separator
+               (?P<season_num>\d+)[. _-]*                   # S01 and optional separator
                [xX](?P<ep_num>\d+)                          # epipisode E02
                (([. _-]*e|-)                                # linking e/- char
                (?P<extra_ep_num>\d+))*                      # additional E03/etc
@@ -320,13 +320,13 @@ anime_ep_regexes = [
                ('anime_and_normal_front',
                # 165.Naruto Shippuuden.s08e014
                '''
-               ^(?P<ep_ab_num>\d{1,3})                       # start of string and absolute number
-               (-(?P<extra_ab_ep_num>\d{1,3}))*              # "-" as separator and anditional absolute number, all optinal
-               (v(?P<version>[0-9]))?[ ._-]+                 # the version e.g. "v2"
+               ^(?P<ep_ab_num>\d{1,3})                      # start of string and absolute number
+               (-(?P<extra_ab_ep_num>\d{1,3}))*             # "-" as separator and anditional absolute number, all optinal
+               (v(?P<version>[0-9]))?[ ._-]+                # the version e.g. "v2"
                (?P<series_name>.+?)[ ._-]+
-               [sS](?P<season_num>\d+)[. _-]*                 # S01 and optional separator
+               [sS](?P<season_num>\d+)[. _-]*               # S01 and optional separator
                [eE](?P<ep_num>\d+) 
-               (([. _-]*e|-)                               # linking e/- char
+               (([. _-]*e|-)                                # linking e/- char
                (?P<extra_ep_num>\d+))*                      # additional E03/etc
                .*?
                '''
@@ -349,10 +349,10 @@ anime_ep_regexes = [
                # [ACX]_Wolf's_Spirit_001.mkv
                '''
                ^(\[(?P<release_group>.+?)\][ ._-]*)?
-               (?P<series_name>.+?)[ ._-]+                         # Show_Name and separator
-               (?P<ep_ab_num>\d{3})                                      # E01
-               (-(?P<extra_ab_ep_num>\d{3}))*                            # E02
-               (v(?P<version>[0-9]))?                                     # v2
-               .*?                                                         # Separator and EOL
+               (?P<series_name>.+?)[ ._-]+                  # Show_Name and separator
+               (?<!H.)(?P<ep_ab_num>\d{3})(?!0p)            # E01, while avoiding H.264 and 1080p from being matched
+               (-(?P<extra_ab_ep_num>\d{3}))*               # E02
+               (v(?P<version>[0-9]))?                       # v2
+               .*?                                          # Separator and EOL
                ''')
                ]
