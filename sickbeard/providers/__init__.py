@@ -24,7 +24,7 @@ __all__ = ['ezrss',
            'womble',
            'btn',
            'nzbx',
-           'omgwtfnzbs',
+           'omgwtfnzbs'
            ]
 
 import sickbeard
