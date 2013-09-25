@@ -192,7 +192,7 @@ class IPTorrentsProvider(generic.TorrentProvider):
                             continue    
 
                         # Filter unseeded torrent and torrents with no name/url
-                        if mode != 'RSS' and seeders == 0:
+                        if mode != 'RSS' and torrent_seeders == 0:
                             continue
                         
                         if not torrent_name or not torrent_download_url:
