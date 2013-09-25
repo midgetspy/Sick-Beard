@@ -827,6 +827,23 @@ class Tvdb:
                 seas_no = int(cur_ep.find('SeasonNumber').text)
                 ep_no = int(cur_ep.find('EpisodeNumber').text)
 
+            useDVD = False
+
+            if (self.config['dvdorder']):
+                log().debug('DVD Order?  Yes')
+                useDVD = (cur_ep.find('DVD_season').text != None and cur_ep.find('DVD_episodenumber').text != None)
+            else:
+                log().debug('DVD Order? No')
+
+            if (useDVD):
+                log().debug('Use DVD Order? Yes')
+                seas_no = int(cur_ep.find('DVD_season').text)
+                ep_no   = int(float(cur_ep.find('DVD_episodenumber').text))
+            else:
+                log().debug('Use DVD Order? No')
+                seas_no = int(cur_ep.find('SeasonNumber').text)
+                ep_no = int(cur_ep.find('EpisodeNumber').text)
+
             for cur_item in cur_ep.getchildren():
                 tag = cur_item.tag.lower()
                 value = cur_item.text
