@@ -158,6 +158,7 @@ DEFAULT_SEARCH_FREQUENCY = 60
 EZRSS = False
 
 HDBITS = False
+HDBITS_USERNAME = None
 HDBITS_PASSKEY = None
 
 TVTORRENTS = False
@@ -338,7 +339,7 @@ def initialize(consoleLogging=True):
                 USE_PLEX, PLEX_NOTIFY_ONSNATCH, PLEX_NOTIFY_ONDOWNLOAD, PLEX_UPDATE_LIBRARY, \
                 PLEX_SERVER_HOST, PLEX_HOST, PLEX_USERNAME, PLEX_PASSWORD, \
                 showUpdateScheduler, __INITIALIZED__, LAUNCH_BROWSER, showList, loadingShowList, \
-                NZBS, NZBS_UID, NZBS_HASH, EZRSS, TVTORRENTS, TVTORRENTS_DIGEST, TVTORRENTS_HASH, BTN, BTN_API_KEY, TORRENTLEECH, TORRENTLEECH_KEY, \
+                NZBS, NZBS_UID, NZBS_HASH, EZRSS, HDBITS, HDBITS_USERNAME, HDBITS_PASSKEY, TVTORRENTS, TVTORRENTS_DIGEST, TVTORRENTS_HASH, BTN, BTN_API_KEY, TORRENTLEECH, TORRENTLEECH_KEY, \
                 TORRENT_DIR, USENET_RETENTION, SOCKET_TIMEOUT, \
                 SEARCH_FREQUENCY, DEFAULT_SEARCH_FREQUENCY, BACKLOG_SEARCH_FREQUENCY, \
                 QUALITY_DEFAULT, FLATTEN_FOLDERS_DEFAULT, STATUS_DEFAULT, \
@@ -360,7 +361,7 @@ def initialize(consoleLogging=True):
                 USE_BANNER, USE_LISTVIEW, METADATA_XBMC, METADATA_MEDIABROWSER, METADATA_PS3, METADATA_SYNOLOGY, metadata_provider_dict, \
                 NEWZBIN, NEWZBIN_USERNAME, NEWZBIN_PASSWORD, GIT_PATH, MOVE_ASSOCIATED_FILES, \
                 COMING_EPS_LAYOUT, COMING_EPS_SORT, COMING_EPS_DISPLAY_PAUSED, METADATA_WDTV, METADATA_TIVO, IGNORE_WORDS, CREATE_MISSING_SHOW_DIRS, \
-                ADD_SHOWS_WO_DIR, ANON_REDIRECT, HDBITS, HDBITS_USERNAME, HDBITS_PASSKEY
+                ADD_SHOWS_WO_DIR, ANON_REDIRECT
 
         if __INITIALIZED__:
             return False
@@ -556,14 +557,13 @@ def initialize(consoleLogging=True):
         NZB_DIR = check_setting_str(CFG, 'Blackhole', 'nzb_dir', '')
         TORRENT_DIR = check_setting_str(CFG, 'Blackhole', 'torrent_dir', '')
 
-        CheckSection(CFG, 'TVTORRENTS')
-        TVTORRENTS = bool(check_setting_int(CFG, 'TVTORRENTS', 'tvtorrents', 0))
-
         CheckSection(CFG, 'HDBITS')
         HDBITS = bool(check_setting_int(CFG, 'HDBITS', 'hdbits', 0))
         HDBITS_USERNAME = check_setting_str(CFG, 'HDBITS', 'hdbits_username', '')
         HDBITS_PASSKEY = check_setting_str(CFG, 'HDBITS', 'hdbits_passkey', '')
 
+        CheckSection(CFG, 'TVTORRENTS')
+        TVTORRENTS = bool(check_setting_int(CFG, 'TVTORRENTS', 'tvtorrents', 0))
         TVTORRENTS_DIGEST = check_setting_str(CFG, 'TVTORRENTS', 'tvtorrents_digest', '')
         TVTORRENTS_HASH = check_setting_str(CFG, 'TVTORRENTS', 'tvtorrents_hash', '')
 
