@@ -26,7 +26,10 @@ except ImportError:
 
 try: # Compiled with SSL?
     HTTPSConnection = object
-    BaseSSLError = None
+
+    class BaseSSLError(BaseException):
+        pass
+
     ssl = None
 
     try: # Python 3
@@ -110,7 +113,7 @@ class VerifiedHTTPSConnection(HTTPSConnection):
             if self.assert_fingerprint:
                 assert_fingerprint(self.sock.getpeercert(binary_form=True),
                                    self.assert_fingerprint)
-            else:
+            elif self.assert_hostname is not False:
                 match_hostname(self.sock.getpeercert(),
                                self.assert_hostname or self.host)
 
@@ -152,8 +155,8 @@ class HTTPConnectionPool(ConnectionPool, RequestMethods):
         :class:`httplib.HTTPConnection`.
 
     :param timeout:
-        Socket timeout for each individual connection, can be a float. None
-        disables timeout.
+        Socket timeout in seconds for each individual connection, can be
+        a float. None disables timeout.
 
     :param maxsize:
         Number of connections to save that can be reused. More than 1 is useful
@@ -376,6 +379,7 @@ class HTTPConnectionPool(ConnectionPool, RequestMethods):
 
         :param timeout:
             If specified, overrides the default timeout for this one request.
+            It may be a float (in seconds).
 
         :param pool_timeout:
             If set and the pool is set to block=True, then this method will
@@ -410,10 +414,6 @@ class HTTPConnectionPool(ConnectionPool, RequestMethods):
 
         # Check host
         if assert_same_host and not self.is_same_host(url):
-            host = "%s://%s" % (self.scheme, self.host)
-            if self.port:
-                host = "%s:%d" % (host, self.port)
-
             raise HostChangedError(self, url, retries - 1)
 
         conn = None
@@ -513,6 +513,7 @@ class HTTPSConnectionPool(HTTPConnectionPool):
 
     :class:`.VerifiedHTTPSConnection` uses one of ``assert_fingerprint``,
     ``assert_hostname`` and ``host`` in this order to verify connections.
+    If ``assert_hostname`` is False, no verification is done.
 
     The ``key_file``, ``cert_file``, ``cert_reqs``, ``ca_certs`` and
     ``ssl_version`` are only used if :mod:`ssl` is available and are fed into

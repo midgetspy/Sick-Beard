@@ -118,7 +118,7 @@ class HTTPAdapter(BaseAdapter):
         :param verify: Whether we should actually verify the certificate.
         :param cert: The SSL certificate to verify.
         """
-        if url.startswith('https') and verify:
+        if url.lower().startswith('https') and verify:
 
             cert_loc = None
 
@@ -184,19 +184,19 @@ class HTTPAdapter(BaseAdapter):
     def get_connection(self, url, proxies=None):
         """Returns a urllib3 connection for the given URL. This should not be
         called from user code, and is only exposed for use when subclassing the
-        :class:`HTTPAdapter <reqeusts.adapters.HTTPAdapter>`.
+        :class:`HTTPAdapter <requests.adapters.HTTPAdapter>`.
 
         :param url: The URL to connect to.
         :param proxies: (optional) A Requests-style dictionary of proxies used on this request.
         """
         proxies = proxies or {}
-        proxy = proxies.get(urlparse(url).scheme)
+        proxy = proxies.get(urlparse(url.lower()).scheme)
 
         if proxy:
-            proxy = prepend_scheme_if_needed(proxy, urlparse(url).scheme)
+            proxy = prepend_scheme_if_needed(proxy, urlparse(url.lower()).scheme)
             conn = ProxyManager(self.poolmanager.connection_from_url(proxy))
         else:
-            conn = self.poolmanager.connection_from_url(url)
+            conn = self.poolmanager.connection_from_url(url.lower())
 
         return conn
 
@@ -214,7 +214,7 @@ class HTTPAdapter(BaseAdapter):
         If the message is being sent through a proxy, the full URL has to be
         used. Otherwise, we should only use the path portion of the URL.
 
-        This shoudl not be called from user code, and is only exposed for use
+        This should not be called from user code, and is only exposed for use
         when subclassing the
         :class:`HTTPAdapter <requests.adapters.HTTPAdapter>`.
 
