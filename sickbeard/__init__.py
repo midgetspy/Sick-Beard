@@ -32,7 +32,7 @@ from threading import Lock
 from sickbeard import providers, metadata
 from providers import ezrss, tvtorrents, btn, nzbsrus, newznab, womble, nzbx, omgwtfnzbs
 from providers import kickass, torrentz, dtt, torrentleech, thepiratebay, publichd, torrentday
-from providers import sceneaccess, iptorrents, bithdtv, fucklimits
+from providers import sceneaccess, iptorrents, bithdtv, fucklimits, btdigg
 from sickbeard.config import CheckSection, check_setting_int, check_setting_str, ConfigMigrator
 
 from sickbeard import searchCurrent, searchBacklog, showUpdater, versionChecker, properFinder, autoPostProcesser
@@ -205,6 +205,8 @@ BITHDTV_PASSWORD = None
 FUCKLIMITS = False
 FUCKLIMITS_USERNAME = None
 FUCKLIMITS_PASSWORD = None
+
+BTDIGG = False
 
 PUBLICHD = False
 
@@ -395,6 +397,7 @@ def initialize(consoleLogging=True):
                 IPTORRENTS, IPTORRENTS_USERNAME, IPTORRENTS_PASSWORD, IPTORRENTS_UID, IPTORRENTS_RSSHASH, \
                 BITHDTV, BITHDTV_USERNAME, BITHDTV_PASSWORD, \
                 FUCKLIMITS, FUCKLIMITS_USERNAME, FUCKLIMITS_PASSWORD, \
+                BTDIGG, \
                 PUBLICHD, \
                 NZBS, NZBS_UID, NZBS_HASH, EZRSS, DTT, DTT_NORAR, DTT_SINGLE, \
                 THEPIRATEBAY, THEPIRATEBAY_TRUSTED, THEPIRATEBAY_PROXY, THEPIRATEBAY_PROXY_URL, THEPIRATEBAY_URL_OVERRIDE, \
@@ -584,6 +587,8 @@ def initialize(consoleLogging=True):
         FUCKLIMITS = bool(check_setting_int(CFG, 'FUCKLIMITS', 'fucklimits', 0))
         FUCKLIMITS_USERNAME = check_setting_str(CFG, 'FUCKLIMITS', 'fucklimits_username', '')
         FUCKLIMITS_PASSWORD = check_setting_str(CFG, 'FUCKLIMITS', 'fucklimits_password', '')
+        
+        BTDIGG = bool(check_setting_int(CFG, 'BTDIGG', 'btdigg', 0))
         
         PUBLICHD = bool(check_setting_int(CFG, 'PUBLICHD', 'publichd', 0))    
 
@@ -1208,6 +1213,9 @@ def save_config():
     new_config['FUCKLIMITS']['fucklimits'] = int(FUCKLIMITS)
     new_config['FUCKLIMITS']['fucklimits_username'] = FUCKLIMITS_USERNAME
     new_config['FUCKLIMITS']['fucklimits_password'] = FUCKLIMITS_PASSWORD
+    
+    new_config['BTDIGG'] = {}
+    new_config['BTDIGG']['btdigg'] = int(BTDIGG)
     
     new_config['PUBLICHD'] = {}
     new_config['PUBLICHD']['publichd'] = int(PUBLICHD)
