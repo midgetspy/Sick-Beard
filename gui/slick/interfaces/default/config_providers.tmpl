@@ -16,10 +16,10 @@
 #end if
 <script type="text/javascript" src="$sbRoot/js/configProviders.js?$sbPID"></script>
 <script type="text/javascript" src="$sbRoot/js/config.js?$sbPID"></script>
+#if $sickbeard.USE_NZBS
 <script type="text/javascript" charset="utf-8">
 <!--
 \$(document).ready(function(){
-
 var show_nzb_providers = #if $sickbeard.USE_NZBS then "true" else "false"#;
 #for $curNewznabProvider in $sickbeard.newznabProviderList:
 \$(this).addProvider('$curNewznabProvider.getID()', '$curNewznabProvider.name', '$curNewznabProvider.url', '$curNewznabProvider.key', $int($curNewznabProvider.default), show_nzb_providers);
@@ -27,6 +27,19 @@ var show_nzb_providers = #if $sickbeard.USE_NZBS then "true" else "false"#;
 });
 //-->
 </script>
+#end if
+
+#if $sickbeard.USE_TORRENTS
+<script type="text/javascript" charset="utf-8">
+<!--
+\$(document).ready(function(){
+#for $curTorrentRssProvider in $sickbeard.torrentRssProviderList:
+    \$(this).addTorrentRssProvider('$curTorrentRssProvider.getID()', '$curTorrentRssProvider.name', '$curTorrentRssProvider.url');
+#end for
+});
+//-->
+</script>
+#end if
 
 <div id="config">
 <div id="config-content">
@@ -40,6 +53,9 @@ var show_nzb_providers = #if $sickbeard.USE_NZBS then "true" else "false"#;
                   #if $sickbeard.USE_NZBS
                 	<li><a href="#core-component-group3">Configure Custom Newznab Providers</a></li>
                   #end if
+                  #if $sickbeard.USE_TORRENTS
+                	<li><a href="#core-component-group4">Configure Custom Torrent Providers</a></li>
+                  #end if                  
                 </ul>
                 
                 <div id="core-component-group1" class="component-group clearfix">
@@ -351,7 +367,55 @@ var show_nzb_providers = #if $sickbeard.USE_NZBS then "true" else "false"#;
                     </fieldset>
                 </div><!-- /component-group3 //-->
 #end if
-                    
+
+#if $sickbeard.USE_TORRENTS:
+
+                <div id="core-component-group4" class="component-group clearfix">
+
+                    <div class="component-group-desc">
+                        <h3>Configure Custom Torrent RSS Providers</h3>
+                        <p>Add and setup custom RSS providers.</p>
+                        <p>&nbsp;</p>
+                    </div>
+
+                    <fieldset class="component-group-list">
+                        <div class="field-pair">
+                            <label class="clearfix">
+                                <span class="component-title jumbo">Select Provider:</span>
+                                <span class="component-desc">
+                                    <input type="hidden" name="torrentrss_string" id="torrentrss_string" />
+                                    <select id="editATorrentRssProvider">
+                                        <option value="addTorrentRss">-- add new provider --</option>
+                                    </select>
+                                </span>
+                            </label>
+                        </div>
+
+<div class="torrentRssProviderDiv" id="addTorrentRss">
+                        <div class="field-pair">
+                            <label class="nocheck clearfix">
+                                <span class="component-title">Provider Name:</span>
+                                <input class="component-desc" type="text" id="torrentrss_name" size="20" />
+                            </label>
+                        </div>
+                        <div class="field-pair">
+                            <label class="nocheck clearfix">
+                                <span class="component-title">RSS URL:</span>
+                                <input class="component-desc" type="text" id="torrentrss_url" size="40" />
+                            </label>
+                        </div>
+                        
+            <div id="torrentrss_add_div">
+                <input type="button" class="btn torrentrss_save" id="torrentrss_add" value="Add" />
+            </div>
+            <div id="torrentrss_update_div" style="display: none;">
+                <input type="button" class="btn btn-danger torrentrss_delete" id="torrentrss_delete" value="Delete" />
+            </div>
+</div>
+                    </fieldset>
+                </div><!-- /component-group4 //-->
+#end if
+
             <br/><input type="submit" class="btn config_submitter" value="Save Changes" /><br/>
                 
             </div><!-- /config-components //-->
