@@ -1,4 +1,4 @@
-# Author: Dermot Buckley <dermot@buckley.ie>
+# Author: Mr_Orange
 #
 # This file is part of Sick Beard.
 #
