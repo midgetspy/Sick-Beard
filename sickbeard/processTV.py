@@ -251,6 +251,10 @@ def validateDir(path, dirName):
 
         # This is needed for video whose name differ from dirName
         for video in videoFiles:
+
+            if not isinstance(video, unicode):
+                video = unicode(video, 'utf_8')            
+
             sqlResult = myDB.select("SELECT * FROM tv_episodes WHERE release_name = ?", [video.rpartition('.')[0]])
             if sqlResult:
                 returnStr += logHelper(u"You're trying to post process a dir that's already been processed, skipping", logger.DEBUG)
