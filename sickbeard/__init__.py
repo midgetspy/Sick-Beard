@@ -898,7 +898,7 @@ def initialize(consoleLogging=True):
         migrator = ConfigMigrator(CFG)
         migrator.migrate_config()
         
-		ga.GA()
+        ga.GA()
 
         currentSearchScheduler = scheduler.Scheduler(searchCurrent.CurrentSearcher(),
                                                      cycleTime=datetime.timedelta(minutes=SEARCH_FREQUENCY),
