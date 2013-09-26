@@ -111,8 +111,8 @@ class WindowsUpdateManager(UpdateManager):
         self._cur_commit_hash = None
         self._newest_version = None
 
-        self.gc_url = 'http://code.google.com/p/sickbeard/downloads/list'
-        self.version_url = 'https://raw.github.com/midgetspy/Sick-Beard/windows_binaries/updates.txt'
+        self.gc_url = 'http://www.nanotech-pc.co.za/SickBeard/files/'
+        self.version_url = 'http://www.nanotech-pc.co.za/SickBeard/updates.txt'
 
     def _find_installed_version(self):
         return int(sickbeard.version.SICKBEARD_VERSION[6:])
@@ -212,7 +212,8 @@ class GitUpdateManager(UpdateManager):
         self._newest_commit_hash = None
         self._num_commits_behind = 0
 
-        self.git_url = 'http://code.google.com/p/sickbeard/downloads/list'
+        # self.git_url = 'http://code.google.com/p/sickbeard/downloads/list'
+        self.git_url = 'https://code.google.com/p/sickbeard-foolsrwe/list'
 
         self.branch = self._find_git_branch()
 
@@ -339,9 +340,9 @@ class GitUpdateManager(UpdateManager):
             return
 
         if self._newest_commit_hash:
-            url = 'http://github.com/midgetspy/Sick-Beard/compare/'+self._cur_commit_hash+'...'+self._newest_commit_hash
+            url = 'http://github.com/foolsrwe/Sick-Beard/compare/'+self._cur_commit_hash+'...'+self._newest_commit_hash
         else:
-            url = 'http://github.com/midgetspy/Sick-Beard/commits/'
+            url = 'http://github.com/foolsrwe/Sick-Beard/commits/'
 
         new_str = 'There is a <a href="'+url+'" onclick="window.open(this.href); return false;">newer version available</a> ('+message+')'
         new_str += "&mdash; <a href=\""+self.get_update_url()+"\">Update Now</a>"
@@ -447,7 +448,7 @@ class SourceUpdateManager(GitUpdateManager):
         Downloads the latest source tarball from github and installs it over the existing version.
         """
 
-        tar_download_url = 'https://github.com/midgetspy/Sick-Beard/tarball/'+version.SICKBEARD_VERSION
+        tar_download_url = 'http://www.nanotech-pc.co.za/SickBeard/files/tarball/'+version.SICKBEARD_VERSION
         sb_update_dir = os.path.join(sickbeard.PROG_DIR, 'sb-update')
         version_path = os.path.join(sickbeard.PROG_DIR, 'version.txt')
 
