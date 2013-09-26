@@ -83,20 +83,6 @@ class TorrentRssProvider(generic.TorrentProvider):
 
     def validateRSS(self):
 
-        REMOTE_DBG = True
-        
-        if REMOTE_DBG:
-                # Make pydev debugger works for auto reload.
-                # Note pydevd module need to be copied in XBMC\system\python\Lib\pysrc
-            try:
-                import pysrc.pydevd as pydevd
-                # stdoutToServer and stderrToServer redirect stdout and stderr to eclipse console
-                pydevd.settrace('localhost', port=5678, stdoutToServer=True, stderrToServer=True)
-            except ImportError:
-                sys.stderr.write("Error: " +
-                        "You must add org.python.pydev.debug.pysrc to your PYTHONPATH.")
-                sys.exit(1) 
-
         try:        
             
             data = self.cache._getRSSData()
@@ -187,7 +173,9 @@ class TorrentRssCache(tvcache.TVCache):
 
     def _parseItem(self, item):
         
-        (title, url) = self.provider._get_title_and_url(self._remove_namespace(item))
+        self._remove_namespace(item)
+        
+        (title, url) = self.provider._get_title_and_url(item)
         if not title or not url:
             logger.log(u"The XML returned from the RSS feed is incomplete, this result is unusable", logger.ERROR)
             return
