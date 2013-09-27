@@ -2423,6 +2423,8 @@ class Home:
                 elif not do_update:
                     # change it
                     try:
+                        if location.endswith(os.sep):
+                            location = location[:len(location) - 1]
                         showObj.location = location
                         try:
                             sickbeard.showQueueScheduler.action.refreshShow(showObj) #@UndefinedVariable
