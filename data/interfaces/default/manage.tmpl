@@ -49,7 +49,8 @@
             7: { sorter: false},
             8: { sorter: false},
             9: { sorter: false},
-            10: { sorter: false}
+            10: { sorter: false},
+            11: { sorter: false}
         }
     }); 
 });
@@ -89,7 +90,7 @@
 <tfoot>
   <tr>
     <td rowspan="1" colspan="1" class="align-center"><input type="button" class="btn" value="Edit Selected" id="submitMassEdit" /></td>
-    <td rowspan="1" colspan="10" class="align-right"><input type="button" class="btn btn-primary" value="Submit" id="submitMassUpdate" /></td>
+    <td rowspan="1" colspan="11" class="align-right"><input type="button" class="btn btn-primary" value="Submit" id="submitMassUpdate" /></td>
   </tr>
 </tfoot>
   <tbody>
@@ -131,7 +132,6 @@ $myShowList.sort(lambda x, y: cmp(x.name, y.name))
 #end if 
     <td align="center"><img src="$sbRoot/images/#if int($curShow.is_anime) == 1 then "yes16.png\" alt=\"Y\"" else "no16.png\" alt=\"N\""# width="16" height="16" /></td>
     <td align="center"><img src="$sbRoot/images/#if int($curShow.flatten_folders) == 1 then "yes16.png\" alt=\"Y\"" else "no16.png\" alt=\"N\""# width="16" height="16" /></td>
-    <td align="center"><img src="$sbRoot/images/#if int($curShow.paused) == 1 then "yes16.png\" alt=\"Y\"" else "no16.png\" alt=\"N\""# width="16" height="16" /></td>
     <td align="center">$curShow.status</td>
     <td align="center">$curUpdate</td>
     <td align="center">$curRefresh</td>
