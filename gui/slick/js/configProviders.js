@@ -15,14 +15,20 @@ $(document).ready(function(){
 
     $.fn.addProvider = function (id, name, url, key, isDefault, showProvider) {
 
+		url = $.trim(url);
+		if (!url)
+			return;
+			
+		if (!/^https?:\/\//i.test(url))
+			url = "http://" + url;
+		
         if (url.match('/$') == null)
-            url = url + '/'
+            url = url + '/';
 
         var newData = [isDefault, [name, url, key]];
         newznabProviders[id] = newData;
 
-        if (!isDefault)
-        {
+        if (!isDefault){
             $('#editANewznabProvider').addOption(id, name);
             $(this).populateNewznabSection();
         }
