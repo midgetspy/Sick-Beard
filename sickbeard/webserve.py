@@ -3684,14 +3684,14 @@ class WebInterface:
         done_show_list = []
         qualList = Quality.DOWNLOADED + Quality.SNATCHED + [ARCHIVED, IGNORED]
         sql_results = myDB.select("SELECT *, tv_shows.status as show_status FROM tv_episodes, tv_shows WHERE season != 0 AND airdate >= ? AND airdate < ? AND tv_shows.tvdb_id = tv_episodes.showid AND tv_episodes.status NOT IN (" + ','.join(['?'] * len(qualList)) + ")", [today, next_week] + qualList)
-        for cur_result in sql_results1:
+        for cur_result in sql_results:
             done_show_list.append(helpers.tryInt(cur_result["showid"]))
 
         more_sql_results = myDB.select("SELECT *, tv_shows.status as show_status FROM tv_episodes outer_eps, tv_shows WHERE season != 0 AND showid NOT IN (" + ','.join(['?'] * len(done_show_list)) + ") AND tv_shows.tvdb_id = outer_eps.showid AND airdate = (SELECT airdate FROM tv_episodes inner_eps WHERE inner_eps.season != 0 AND inner_eps.showid = outer_eps.showid AND inner_eps.airdate >= ? ORDER BY inner_eps.airdate ASC LIMIT 1) AND outer_eps.status NOT IN (" + ','.join(['?'] * len(Quality.DOWNLOADED + Quality.SNATCHED)) + ")", done_show_list + [next_week] + Quality.DOWNLOADED + Quality.SNATCHED)
-        sql_results1 += more_sql_results
+        sql_results += more_sql_results
 
         more_sql_results = myDB.select("SELECT *, tv_shows.status as show_status FROM tv_episodes, tv_shows WHERE season != 0 AND tv_shows.tvdb_id = tv_episodes.showid AND airdate < ? AND airdate >= ? AND tv_episodes.status = ? AND tv_episodes.status NOT IN (" + ','.join(['?'] * len(qualList)) + ")", [today, recently, WANTED] + qualList)
-        sql_results1 += more_sql_results
+        sql_results += more_sql_results
 
         # sort by localtime
         sorts = {
@@ -3701,13 +3701,13 @@ class WebInterface:
         }
 
         # make a dict out of the sql results
-        sql_results = [dict(row) for row in sql_results1]
+        sql_results = [dict(row) for row in sql_results]
         
         # regex to parse time (12/24 hour format)
         time_regex = re.compile(r"(\d{1,2}):(\d{2,2})( [PA]M)?\b", flags=re.IGNORECASE)
         
         # add localtime to the dict
-        for index, item in enumerate(sql_results1):
+        for index, item in enumerate(sql_results):
             mo = time_regex.search(item['airs'])
             if mo != None and len(mo.groups()) >= 2:
                 try:
