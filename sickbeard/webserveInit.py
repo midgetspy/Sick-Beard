@@ -70,7 +70,7 @@ def initWebServer(options = {}):
         <br/>
     </body>
 </html>
-''' % '/'
+''' % options['web_root']
 
         # cherrypy setup
         enable_https = options['enable_https']
@@ -90,10 +90,26 @@ def initWebServer(options = {}):
                 sickbeard.ENABLE_HTTPS = False
                 enable_https = False
 
+        mime_gzip = ('text/html',
+                     'text/plain',
+                     'text/css',
+                     'text/javascript',
+                     'application/javascript',
+                     'text/x-javascript',
+                     'application/x-javascript',
+                     'text/x-json',
+                     'application/json'
+                     ) 
+
         options_dict = {
                         'server.socket_port': options['port'],
                         'server.socket_host': options['host'],
                         'log.screen':         False,
+                        'engine.autoreload.on': False,
+                        'engine.autoreload.frequency': 100,
+                        'engine.reexec_retry': 100,
+                        'tools.gzip.on': True,
+                        'tools.gzip.mime_types': mime_gzip,                         
                         'error_page.401':     http_error_401_hander,
                         'error_page.404':     http_error_404_hander,
         }
