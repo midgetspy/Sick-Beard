@@ -87,7 +87,7 @@
                                 <span class="component-title jumbo">Configure Provider:</span>
                                 <span class="component-desc">
                                     #set $provider_config_list = []
-                                    #for $cur_provider in ("nzbs_r_us", "tvtorrents", "btn", "thepiratebay","dailytvtorrents", "torrentz", "torrentleech", "torrentday", "sceneaccess", "iptorrents", "bithdtv", "fucklimits"):
+                                    #for $cur_provider in ("nzbs_r_us", "tvtorrents", "btn", "thepiratebay","dailytvtorrents", "torrentz", "torrentleech", "torrentday", "sceneaccess", "iptorrents", "bithdtv", "fucklimits", "torrentshack"):
                                         #set $cur_provider_obj = $sickbeard.providers.getProviderClass($cur_provider)
                                         #if $cur_provider_obj.providerType == $GenericProvider.NZB and not $sickbeard.USE_NZBS:
                                             #continue
@@ -367,6 +367,48 @@
                             </label>
                         </div>
                     </div><!-- /fucklimits //-->
+                    
+                    <div class="providerDiv" id="torrentshackDiv">
+                        <div class="field-pair">
+                            <label class="clearfix">
+                                <span class="component-title">Username:</span>
+                                <input class="component-desc" type="text" name="torrentshack_username" value="$sickbeard.TORRENTSHACK_USERNAME" size="40" />
+                            </label>
+                        </div>
+                        <div class="field-pair">
+                            <label class="clearfix">
+                                <span class="component-title">Password:</span>
+                                <input class="component-desc" type="password" name="torrentshack_password" value="$sickbeard.TORRENTSHACK_PASSWORD" size="40" />
+                            </label>
+                        </div>
+                        <div class="field-pair">
+                            <label class="clearfix">
+                                <span class="component-title">RSS USER (*):</span>
+                                <input class="component-desc" type="text" name="torrentshack_uid" value="$sickbeard.TORRENTSHACK_UID" size="40" /></b>
+                            </label>
+                        </div>
+                        <div class="field-pair">
+                            <label class="clearfix">
+                                <span class="component-title">RSS Auth (*):</span>
+                                <input class="component-desc" type="text" name="torrentshack_auth" value="$sickbeard.TORRENTSHACK_AUTH" size="40" /></b>
+                            </label>
+                        </div>
+                        <div class="field-pair">
+                            <label class="clearfix">
+                                <span class="component-title">RSS Pass Key (*):</span>
+                                <input class="component-desc" type="text" name="torrentshack_pass_key" value="$sickbeard.TORRENTSHACK_PASS_KEY" size="40" /></b>
+                            </label>
+                        </div>
+                        <div class="field-pair">
+                            <label class="clearfix">
+                                <span class="component-title">RSS Auth Key (*):</span>
+                                <input class="component-desc" type="text" name="torrentshack_auth_key" value="$sickbeard.TORRENTSHACK_AUTH_KEY" size="40" /></b>
+                            </label>
+                        </div>
+                        <div class="field-pair">
+                            <span class="component-title"><i>Note: options with (*) are optional, these variables can gathered from </i><a href="http://torrentshack.net/rss.php" target="_blank">http://torrentshack.net/rss.php</a> and clicking on a link</span>
+                        </div>
+                    </div><!-- /iptorrentsDiv //-->
 <!-- end div for editing providers -->
             
                     </fieldset>

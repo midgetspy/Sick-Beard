@@ -32,7 +32,7 @@ from threading import Lock
 from sickbeard import providers, metadata
 from providers import ezrss, tvtorrents, btn, nzbsrus, newznab, womble, nzbx, omgwtfnzbs
 from providers import kickass, torrentz, dtt, torrentleech, thepiratebay, publichd, torrentday
-from providers import sceneaccess, iptorrents, bithdtv, fucklimits, btdigg
+from providers import sceneaccess, iptorrents, bithdtv, fucklimits, btdigg, torrentshack
 from sickbeard.config import CheckSection, check_setting_int, check_setting_str, ConfigMigrator
 
 from sickbeard import searchCurrent, searchBacklog, showUpdater, versionChecker, properFinder, autoPostProcesser
@@ -207,6 +207,14 @@ FUCKLIMITS_USERNAME = None
 FUCKLIMITS_PASSWORD = None
 
 BTDIGG = False
+
+TORRENTSHACK = False
+TORRENTSHACK_USERNAME = None
+TORRENTSHACK_PASSWORD = None
+TORRENTSHACK_UID = None
+TORRENTSHACK_AUTH = None
+TORRENTSHACK_PASS_KEY = None
+TORRENTSHACK_AUTH_KEY = None
 
 PUBLICHD = False
 
@@ -397,6 +405,7 @@ def initialize(consoleLogging=True):
                 IPTORRENTS, IPTORRENTS_USERNAME, IPTORRENTS_PASSWORD, IPTORRENTS_UID, IPTORRENTS_RSSHASH, \
                 BITHDTV, BITHDTV_USERNAME, BITHDTV_PASSWORD, \
                 FUCKLIMITS, FUCKLIMITS_USERNAME, FUCKLIMITS_PASSWORD, \
+                TORRENTSHACK, TORRENTSHACK_USERNAME, TORRENTSHACK_PASSWORD, TORRENTSHACK_UID, TORRENTSHACK_AUTH, TORRENTSHACK_PASS_KEY ,TORRENTSHACK_AUTH_KEY, \
                 BTDIGG, \
                 PUBLICHD, \
                 NZBS, NZBS_UID, NZBS_HASH, EZRSS, DTT, DTT_NORAR, DTT_SINGLE, \
@@ -587,6 +596,14 @@ def initialize(consoleLogging=True):
         FUCKLIMITS = bool(check_setting_int(CFG, 'FUCKLIMITS', 'fucklimits', 0))
         FUCKLIMITS_USERNAME = check_setting_str(CFG, 'FUCKLIMITS', 'fucklimits_username', '')
         FUCKLIMITS_PASSWORD = check_setting_str(CFG, 'FUCKLIMITS', 'fucklimits_password', '')
+        
+        TORRENTSHACK = bool(check_setting_int(CFG, 'TORRENTSHACK', 'torrentshack', 0))
+        TORRENTSHACK_USERNAME = check_setting_str(CFG, 'TORRENTSHACK', 'torrentshack_username', '')
+        TORRENTSHACK_PASSWORD = check_setting_str(CFG, 'TORRENTSHACK', 'torrentshack_password', '')
+        TORRENTSHACK_UID = check_setting_str(CFG, 'TORRENTSHACK', 'torrentshack_uid', '')
+        TORRENTSHACK_AUTH = check_setting_str(CFG, 'TORRENTSHACK', 'torrentshack_auth', '')
+        TORRENTSHACK_PASS_KEY = check_setting_str(CFG, 'TORRENTSHACK', 'torrentshack_pass_key', '')
+        TORRENTSHACK_AUTH_KEY = check_setting_str(CFG, 'TORRENTSHACK', 'torrentshack_auth_key', '')
         
         BTDIGG = bool(check_setting_int(CFG, 'BTDIGG', 'btdigg', 0))
         
@@ -1213,6 +1230,15 @@ def save_config():
     new_config['FUCKLIMITS']['fucklimits'] = int(FUCKLIMITS)
     new_config['FUCKLIMITS']['fucklimits_username'] = FUCKLIMITS_USERNAME
     new_config['FUCKLIMITS']['fucklimits_password'] = FUCKLIMITS_PASSWORD
+    
+    new_config['TORRENTSHACK'] = {}
+    new_config['TORRENTSHACK']['torrentshack'] = int(TORRENTSHACK)
+    new_config['TORRENTSHACK']['torrentshack_username'] = TORRENTSHACK_USERNAME
+    new_config['TORRENTSHACK']['torrentshack_password'] = TORRENTSHACK_PASSWORD
+    new_config['TORRENTSHACK']['torrentshack_uid'] = TORRENTSHACK_UID
+    new_config['TORRENTSHACK']['torrentshack_auth'] = TORRENTSHACK_AUTH
+    new_config['TORRENTSHACK']['torrentshack_pass_key'] = TORRENTSHACK_PASS_KEY
+    new_config['TORRENTSHACK']['torrentshack_auth_key'] = TORRENTSHACK_AUTH_KEY
     
     new_config['BTDIGG'] = {}
     new_config['BTDIGG']['btdigg'] = int(BTDIGG)
