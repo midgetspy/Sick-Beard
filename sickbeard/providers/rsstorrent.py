@@ -61,6 +61,8 @@ class TorrentRssProvider(generic.TorrentProvider):
         
         title, url = None, None
 
+        self.cache._remove_namespace(item)
+
         title = helpers.get_xml_text(item.find('title'))
         
         attempt_list = [lambda: helpers.get_xml_text(item.find('magnetURI')),
@@ -99,8 +101,6 @@ class TorrentRssProvider(generic.TorrentProvider):
     
             if not items:
                 return (False, 'No items found in the RSS feed ' + self.url)
-            
-            self.cache._remove_namespace(items[0])
             
             (title, url) = self._get_title_and_url(items[0])
             
@@ -172,8 +172,6 @@ class TorrentRssCache(tvcache.TVCache):
         return data
 
     def _parseItem(self, item):
-        
-        self._remove_namespace(item)
         
         (title, url) = self.provider._get_title_and_url(item)
         if not title or not url:
