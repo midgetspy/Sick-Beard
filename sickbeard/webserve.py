@@ -161,6 +161,7 @@ def _getEpisode(show, season, episode):
 ManageMenu = [
     { 'title': 'Backlog Overview',          'path': 'manage/backlogOverview' },
     { 'title': 'Manage Searches',           'path': 'manage/manageSearches'  },
+    { 'title': 'Manage Torrents',           'path': 'manage/manageTorrents'  },    
     { 'title': 'Episode Status Management', 'path': 'manage/episodeStatuses' },
 ]
 if sickbeard.USE_SUBTITLES:
@@ -735,7 +736,13 @@ class Manage:
 
         redirect("/manage")
 
+    @cherrypy.expose
+    def manageTorrents(self):
 
+        t = PageTemplate(file="manage_torrents.tmpl")
+        t.submenu = ManageMenu
+        return _munge(t)
+        
 class History:
 
     @cherrypy.expose
