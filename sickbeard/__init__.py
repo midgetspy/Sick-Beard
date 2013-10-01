@@ -38,7 +38,6 @@ from sickbeard import searchCurrent, searchBacklog, showUpdater, versionChecker,
 from sickbeard import helpers, db, exceptions, show_queue, search_queue, scheduler
 from sickbeard import logger
 from sickbeard import naming
-from sickbeard import ga
 
 from common import SD, SKIPPED, NAMING_REPEAT
 
@@ -897,8 +896,6 @@ def initialize(consoleLogging=True):
         # migrate the config if it needs it
         migrator = ConfigMigrator(CFG)
         migrator.migrate_config()
-        
-        ga.GA()
 
         currentSearchScheduler = scheduler.Scheduler(searchCurrent.CurrentSearcher(),
                                                      cycleTime=datetime.timedelta(minutes=SEARCH_FREQUENCY),
