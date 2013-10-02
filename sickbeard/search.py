@@ -19,6 +19,7 @@
 from __future__ import with_statement
 
 import os
+import re
 import traceback
 
 import sickbeard
@@ -196,18 +197,28 @@ def pickBestResult(results, quality_list=None):
 
     logger.log(u"Picking the best result out of "+str([x.name for x in results]), logger.DEBUG)
 
+    releasers = sickbeard.BEST_RELEASER.split(',')
     # find the best result for the current episode
     bestResult = None
+    bestReleaser = -1
     for cur_result in results:
         logger.log("Quality of "+cur_result.name+" is "+Quality.qualityStrings[cur_result.quality])
-        
+        releaser = -1
+        for idx, val in enumerate(releasers):
+			if re.search('-' + val + '$',cur_result.name):
+				releaser = idx
+
         if quality_list and cur_result.quality not in quality_list:
             logger.log(cur_result.name+" is a quality we know we don't want, rejecting it", logger.DEBUG)
             continue
         
-        if not bestResult or bestResult.quality < cur_result.quality and cur_result.quality != Quality.UNKNOWN:
+        if not bestResult or bestReleaser < releaser:
             bestResult = cur_result
-        elif bestResult.quality == cur_result.quality:
+            bestReleaser = releaser
+        elif releaser == bestReleaser and (bestResult.quality < cur_result.quality and cur_result.quality != Quality.UNKNOWN):
+            bestResult = cur_result
+            bestReleaser = releaser
+        elif releaser == bestReleaser and bestResult.quality == cur_result.quality:
             if "proper" in cur_result.name.lower() or "repack" in cur_result.name.lower():
                 bestResult = cur_result
             elif "internal" in bestResult.name.lower() and "internal" not in cur_result.name.lower():
