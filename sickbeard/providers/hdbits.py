@@ -33,10 +33,7 @@ from sickbeard.exceptions import ex
 try:
     import json
 except ImportError:
-    try:
-        import simplejson as json
-    except ImportError:
-        logger.log('No supported json module')
+    from lib import simplejson as json
 
 
 class HDBitsProvider(generic.TorrentProvider):
@@ -49,22 +46,21 @@ class HDBitsProvider(generic.TorrentProvider):
 
         self.cache = HDBitsCache(self)
 
-        self.url = 'https://hdbits.org/api/torrents'
+        self.url = 'https://hdbits.org'
+        self.search_url = 'https://hdbits.org/api/torrents'
+        self.rss_url = 'https://hdbits.org/api/torrents'
         self.dl_url = 'http://hdbits.org/download.php?'
 
     def isEnabled(self):
         return sickbeard.HDBITS
 
-    def imageName(self):
-        return 'hdbits.png'
-
     def findEpisode(self, episode, manualSearch=False):
 
-        logger.log(u"Searching "+self.name+" for " + episode.prettyName())
+        logger.log(u"Searching " + self.name + " for " + episode.prettyName())
 
         self.cache.updateCache()
         results = self.cache.searchCache(episode, manualSearch)
-        logger.log(u"Cache results: "+str(results), logger.DEBUG)
+        logger.log(u"Cache results: " + str(results), logger.DEBUG)
 
         # if we got some results then use them no matter what.
         # OR
@@ -73,7 +69,7 @@ class HDBitsProvider(generic.TorrentProvider):
             return results
 
         response = json.loads(
-            self.getURL(self.url, self._make_JSON(show=episode.show, episode=episode)))
+            self.getURL(self.search_url, self._make_JSON(show=episode.show, episode=episode)))
 
         itemList = response['data']
 
@@ -86,21 +82,21 @@ class HDBitsProvider(generic.TorrentProvider):
                 myParser = NameParser()
                 parse_result = myParser.parse(title)
             except InvalidNameException:
-                logger.log(u"Unable to parse the filename "+title+" into a valid episode", logger.WARNING)
+                logger.log(u"Unable to parse the filename " + title + " into a valid episode", logger.WARNING)
                 continue
 
             if episode.show.air_by_date:
                 if parse_result.air_date != episode.airdate:
-                    logger.log("Episode "+title+" didn't air on "+str(episode.airdate)+", skipping it", logger.DEBUG)
+                    logger.log("Episode " + title + " didn't air on " + str(episode.airdate) + ", skipping it", logger.DEBUG)
                     continue
             elif parse_result.season_number != episode.season or episode.episode not in parse_result.episode_numbers:
-                logger.log("Episode "+title+" isn't "+str(episode.season)+"x"+str(episode.episode)+", skipping it", logger.DEBUG)
+                logger.log("Episode " + title + " isn't " + str(episode.season) + "x" + str(episode.episode) + ", skipping it", logger.DEBUG)
                 continue
 
             quality = self.getQuality(item)
 
             if not episode.show.wantEpisode(episode.season, episode.episode, quality, manualSearch):
-                logger.log(u"Ignoring result "+title+" because we don't want an episode that is "+Quality.qualityStrings[quality], logger.DEBUG)
+                logger.log(u"Ignoring result " + title + " because we don't want an episode that is " + Quality.qualityStrings[quality], logger.DEBUG)
                 continue
 
             logger.log(u"Found result " + title + " at " + url, logger.DEBUG)
@@ -171,22 +167,22 @@ class HDBitsProvider(generic.TorrentProvider):
             usock.close()
 
         except urllib2.HTTPError, e:
-            logger.log(u"HTTP error " + str(e.code) + " while loading URL " + self.url, logger.WARNING)
+            logger.log(u"HTTP error " + str(e.code) + " while loading URL " + url, logger.WARNING)
             return None
         except urllib2.URLError, e:
-            logger.log(u"URL error " + str(e.reason) + " while loading URL " + self.url, logger.WARNING)
+            logger.log(u"URL error " + str(e.reason) + " while loading URL " + url, logger.WARNING)
             return None
         except BadStatusLine:
-            logger.log(u"BadStatusLine error while loading URL " + self.url, logger.WARNING)
+            logger.log(u"BadStatusLine error while loading URL " + url, logger.WARNING)
             return None
         except socket.timeout:
-            logger.log(u"Timed out while loading URL " + self.url, logger.WARNING)
+            logger.log(u"Timed out while loading URL " + url, logger.WARNING)
             return None
         except ValueError:
-            logger.log(u"Unknown error while loading URL " + self.url, logger.WARNING)
+            logger.log(u"Unknown error while loading URL " + url, logger.WARNING)
             return None
         except Exception:
-            logger.log(u"Unknown exception while loading URL " + self.url + ": " + traceback.format_exc(), logger.WARNING)
+            logger.log(u"Unknown exception while loading URL " + url + ": " + traceback.format_exc(), logger.WARNING)
             return None
 
         return result
@@ -215,18 +211,18 @@ class HDBitsCache(tvcache.TVCache):
             return []
 
         # now that we've loaded the current RSS feed lets delete the old cache
-        logger.log(u"Clearing "+self.provider.name+" cache and updating with new information")
+        logger.log(u"Clearing " + self.provider.name + " cache and updating with new information")
         self._clearCache()
 
         if not self._checkAuth(data):
-            raise exceptions.AuthException("Your authentication info for "+self.provider.name+" is incorrect, check your config")
+            raise exceptions.AuthException("Your authentication info for " + self.provider.name + " is incorrect, check your config")
 
         try:
             parsedJSON = json.loads(data)
             items = parsedJSON['data']
         except Exception, e:
-            logger.log(u"Error trying to load "+self.provider.name+" RSS feed: "+ex(e), logger.ERROR)
-            logger.log(u"Feed contents: "+repr(data), logger.DEBUG)
+            logger.log(u"Error trying to load " + self.provider.name + " RSS feed: " + ex(e), logger.ERROR)
+            logger.log(u"Feed contents: " + repr(data), logger.DEBUG)
             return []
 
         for item in items:
@@ -239,14 +235,14 @@ class HDBitsCache(tvcache.TVCache):
         url = self.provider._make_download_url(item)
 
         if not title or not url:
-            logger.log(u"The XML returned from the "+self.provider.name+" feed is incomplete, this result is unusable", logger.ERROR)
+            logger.log(u"The XML returned from the " + self.provider.name + " feed is incomplete, this result is unusable", logger.ERROR)
             return
 
-        logger.log(u"Adding item from RSS to cache: "+title, logger.DEBUG)
+        logger.log(u"Adding item from RSS to cache: " + title, logger.DEBUG)
 
         self._addCacheEntry(title, url)
 
     def _getRSSData(self):
-        return self.provider.getURL(self.provider.url, self.provider._make_JSON())
+        return self.provider.getURL(self.provider.rss_url, self.provider._make_JSON())
 
 provider = HDBitsProvider()
