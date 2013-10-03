@@ -16,7 +16,7 @@
         <b>$numShows shows</b> ($numGoodShows active) | <b>$numDLEpisodes/$numEpisodes</b> episodes downloaded 
         <br />
         <b>Search</b>: <%=str(sickbeard.currentSearchScheduler.timeLeft()).split('.')[0]%> |
-        <b>Backlog</b>: $sickbeard.backlogSearchScheduler.nextRun().strftime("%a %b %d").decode($sickbeard.SYS_ENCODING)
+        <b>Backlog</b>: $sickbeard.backlogSearchScheduler.nextRun().strftime("%Y-%m-%d").decode($sickbeard.SYS_ENCODING)
     </div> <!-- /container footer -->
 </footer>
 

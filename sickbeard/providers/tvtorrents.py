@@ -16,21 +16,26 @@
 # You should have received a copy of the GNU General Public License
 # along with Sick Beard.  If not, see <http://www.gnu.org/licenses/>.
 
-from xml.dom.minidom import parseString
+try:
+    import xml.etree.cElementTree as etree
+except ImportError:
+    import elementtree.ElementTree as etree
 
 import sickbeard
 import generic
 
+from sickbeard.exceptions import ex, AuthException
 from sickbeard import helpers
 from sickbeard import logger
 from sickbeard import tvcache
+
 
 class TvTorrentsProvider(generic.TorrentProvider):
 
     def __init__(self):
 
         generic.TorrentProvider.__init__(self, "TvTorrents")
-        
+
         self.supportsBacklog = False
 
         self.cache = TvTorrentsCache(self)
@@ -39,9 +44,30 @@ class TvTorrentsProvider(generic.TorrentProvider):
 
     def isEnabled(self):
         return sickbeard.TVTORRENTS
-        
+
     def imageName(self):
         return 'tvtorrents.png'
+
+    def _checkAuth(self):
+
+        if not sickbeard.TVTORRENTS_DIGEST or not sickbeard.TVTORRENTS_HASH:
+            raise AuthException("Your authentication credentials for " + self.name + " are missing, check your config.")
+
+        return True
+
+    def _checkAuthFromData(self, parsedXML):
+
+        if parsedXML is None:
+            return self._checkAuth()
+
+        description_text = helpers.get_xml_text(parsedXML.find('.//channel/description'))
+
+        if "User can't be found" in description_text or "Invalid Hash" in description_text:
+            logger.log(u"Incorrect authentication credentials for " + self.name + " : " + str(description_text), logger.DEBUG)
+            raise AuthException(u"Your authentication credentials for " + self.name + " are incorrect, check your config")
+
+        return True
+
 
 class TvTorrentsCache(tvcache.TVCache):
 
@@ -52,40 +78,23 @@ class TvTorrentsCache(tvcache.TVCache):
         # only poll TvTorrents every 15 minutes max
         self.minTime = 15
 
-
     def _getRSSData(self):
+
         # These will be ignored on the serverside.
         ignore_regex = "all.month|month.of|season[\s\d]*complete"
-    
-        url = 'http://www.tvtorrents.com/RssServlet?digest='+ sickbeard.TVTORRENTS_DIGEST +'&hash='+ sickbeard.TVTORRENTS_HASH +'&fname=true&exclude=(' + ignore_regex + ')'
-        logger.log(u"TvTorrents cache update URL: "+ url, logger.DEBUG)
 
-        data = self.provider.getURL(url)
-        
-        parsedXML = parseString(data)
-        channel = parsedXML.getElementsByTagName('channel')[0]
-        description = channel.getElementsByTagName('description')[0]
+        rss_url = self.provider.url + 'RssServlet?digest=' + sickbeard.TVTORRENTS_DIGEST + '&hash=' + sickbeard.TVTORRENTS_HASH + '&fname=true&exclude=(' + ignore_regex + ')'
+        logger.log(self.provider.name + u" cache update URL: " + rss_url, logger.DEBUG)
 
-        description_text = helpers.get_xml_text(description)
+        data = self.provider.getURL(rss_url)
 
-        if "User can't be found" in description_text:
-            logger.log(u"TvTorrents invalid digest, check your config", logger.ERROR)
-
-        if "Invalid Hash" in description_text:
-            logger.log(u"TvTorrents invalid hash, check your config", logger.ERROR)
+        if not data:
+            logger.log(u"No data returned from " + rss_url, logger.ERROR)
+            return None
 
         return data
 
-    def _parseItem(self, item):
-
-        (title, url) = self.provider._get_title_and_url(item)
-
-        if not title or not url:
-            logger.log(u"The XML returned from the TvTorrents RSS feed is incomplete, this result is unusable", logger.ERROR)
-            return
-
-        logger.log(u"Adding item from RSS to cache: "+title, logger.DEBUG)
-
-        self._addCacheEntry(title, url)
+    def _checkAuth(self, parsedXML):
+            return self.provider._checkAuthFromData(parsedXML)
 
 provider = TvTorrentsProvider()

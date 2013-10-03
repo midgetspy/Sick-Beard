@@ -30,7 +30,8 @@ from threading import Lock
 
 # apparently py2exe won't build these unless they're imported somewhere
 from sickbeard import providers, metadata
-from providers import ezrss, tvtorrents, torrentleech, btn, nzbsrus, newznab, womble, nzbx, omgwtfnzbs
+
+from providers import ezrss, tvtorrents, torrentleech, btn, nzbsrus, newznab, womble, nzbx, omgwtfnzbs, hdbits
 from sickbeard.config import CheckSection, check_setting_int, check_setting_str, ConfigMigrator
 
 from sickbeard import searchCurrent, searchBacklog, showUpdater, versionChecker, properFinder, autoPostProcesser
@@ -54,7 +55,7 @@ CFG = None
 CONFIG_FILE = None
 
 # this is the version of the config we EXPECT to find
-CONFIG_VERSION = 1
+CONFIG_VERSION = 3
 
 PROG_DIR = '.'
 MY_FULLNAME = None
@@ -92,6 +93,7 @@ INIT_LOCK = Lock()
 __INITIALIZED__ = False
 started = False
 
+ACTUAL_LOG_DIR = None
 LOG_DIR = None
 
 WEB_PORT = None
@@ -101,6 +103,8 @@ WEB_USERNAME = None
 WEB_PASSWORD = None
 WEB_HOST = None
 WEB_IPV6 = None
+
+ANON_REDIRECT = None
 
 USE_API = False
 API_KEY = None
@@ -148,12 +152,15 @@ DOWNLOAD_PROPERS = None
 
 SEARCH_FREQUENCY = None
 BACKLOG_SEARCH_FREQUENCY = 21
-
 MIN_SEARCH_FREQUENCY = 10
-
 DEFAULT_SEARCH_FREQUENCY = 60
 
 EZRSS = False
+
+HDBITS = False
+HDBITS_USERNAME = None
+HDBITS_PASSKEY = None
+
 TVTORRENTS = False
 TVTORRENTS_DIGEST = None
 TVTORRENTS_HASH = None
@@ -165,7 +172,6 @@ BTN = False
 BTN_API_KEY = None
 
 TORRENT_DIR = None
-
 ADD_SHOWS_WO_DIR = None
 CREATE_MISSING_SHOW_DIRS = None
 RENAME_EPISODES = False
@@ -184,8 +190,8 @@ NZBX = False
 NZBX_COMPLETION = 100
 
 OMGWTFNZBS = False
-OMGWTFNZBS_UID = None
-OMGWTFNZBS_KEY = None
+OMGWTFNZBS_USERNAME = None
+OMGWTFNZBS_APIKEY = None
 
 NZBSRUS = False
 NZBSRUS_UID = None
@@ -323,7 +329,7 @@ def initialize(consoleLogging=True):
 
     with INIT_LOCK:
 
-        global LOG_DIR, WEB_PORT, WEB_LOG, WEB_ROOT, WEB_USERNAME, WEB_PASSWORD, WEB_HOST, WEB_IPV6, USE_API, API_KEY, ENABLE_HTTPS, HTTPS_CERT, HTTPS_KEY, \
+        global ACTUAL_LOG_DIR, LOG_DIR, WEB_PORT, WEB_LOG, WEB_ROOT, WEB_USERNAME, WEB_PASSWORD, WEB_HOST, WEB_IPV6, USE_API, API_KEY, ENABLE_HTTPS, HTTPS_CERT, HTTPS_KEY, \
                 USE_NZBS, USE_TORRENTS, NZB_METHOD, NZB_DIR, DOWNLOAD_PROPERS, \
                 SAB_USERNAME, SAB_PASSWORD, SAB_APIKEY, SAB_CATEGORY, SAB_HOST, \
                 NZBGET_PASSWORD, NZBGET_CATEGORY, NZBGET_HOST, currentSearchScheduler, backlogSearchScheduler, \
@@ -333,7 +339,7 @@ def initialize(consoleLogging=True):
                 USE_PLEX, PLEX_NOTIFY_ONSNATCH, PLEX_NOTIFY_ONDOWNLOAD, PLEX_UPDATE_LIBRARY, \
                 PLEX_SERVER_HOST, PLEX_HOST, PLEX_USERNAME, PLEX_PASSWORD, \
                 showUpdateScheduler, __INITIALIZED__, LAUNCH_BROWSER, showList, loadingShowList, \
-                NZBS, NZBS_UID, NZBS_HASH, EZRSS, TVTORRENTS, TVTORRENTS_DIGEST, TVTORRENTS_HASH, BTN, BTN_API_KEY, TORRENTLEECH, TORRENTLEECH_KEY, \
+                NZBS, NZBS_UID, NZBS_HASH, EZRSS, HDBITS, HDBITS_USERNAME, HDBITS_PASSKEY, TVTORRENTS, TVTORRENTS_DIGEST, TVTORRENTS_HASH, BTN, BTN_API_KEY, TORRENTLEECH, TORRENTLEECH_KEY, \
                 TORRENT_DIR, USENET_RETENTION, SOCKET_TIMEOUT, \
                 SEARCH_FREQUENCY, DEFAULT_SEARCH_FREQUENCY, BACKLOG_SEARCH_FREQUENCY, \
                 QUALITY_DEFAULT, FLATTEN_FOLDERS_DEFAULT, STATUS_DEFAULT, \
@@ -346,7 +352,7 @@ def initialize(consoleLogging=True):
                 showQueueScheduler, searchQueueScheduler, ROOT_DIRS, CACHE_DIR, ACTUAL_CACHE_DIR, TVDB_API_PARMS, \
                 NAMING_PATTERN, NAMING_MULTI_EP, NAMING_FORCE_FOLDERS, NAMING_ABD_PATTERN, NAMING_CUSTOM_ABD, \
                 RENAME_EPISODES, properFinderScheduler, PROVIDER_ORDER, autoPostProcesserScheduler, \
-                NZBSRUS, NZBSRUS_UID, NZBSRUS_HASH, WOMBLE, NZBX, NZBX_COMPLETION, OMGWTFNZBS, OMGWTFNZBS_UID, OMGWTFNZBS_KEY, providerList, newznabProviderList, \
+                NZBSRUS, NZBSRUS_UID, NZBSRUS_HASH, WOMBLE, NZBX, NZBX_COMPLETION, OMGWTFNZBS, OMGWTFNZBS_USERNAME, OMGWTFNZBS_APIKEY, providerList, newznabProviderList, \
                 EXTRA_SCRIPTS, USE_TWITTER, TWITTER_USERNAME, TWITTER_PASSWORD, TWITTER_PREFIX, \
                 USE_NOTIFO, NOTIFO_USERNAME, NOTIFO_APISECRET, NOTIFO_NOTIFY_ONDOWNLOAD, NOTIFO_NOTIFY_ONSNATCH, \
                 USE_BOXCAR, BOXCAR_USERNAME, BOXCAR_PASSWORD, BOXCAR_NOTIFY_ONDOWNLOAD, BOXCAR_NOTIFY_ONSNATCH, \
@@ -355,7 +361,7 @@ def initialize(consoleLogging=True):
                 USE_BANNER, USE_LISTVIEW, METADATA_XBMC, METADATA_MEDIABROWSER, METADATA_PS3, METADATA_SYNOLOGY, metadata_provider_dict, \
                 NEWZBIN, NEWZBIN_USERNAME, NEWZBIN_PASSWORD, GIT_PATH, MOVE_ASSOCIATED_FILES, \
                 COMING_EPS_LAYOUT, COMING_EPS_SORT, COMING_EPS_DISPLAY_PAUSED, METADATA_WDTV, METADATA_TIVO, IGNORE_WORDS, CREATE_MISSING_SHOW_DIRS, \
-                ADD_SHOWS_WO_DIR
+                ADD_SHOWS_WO_DIR, ANON_REDIRECT
 
         if __INITIALIZED__:
             return False
@@ -363,7 +369,11 @@ def initialize(consoleLogging=True):
         socket.setdefaulttimeout(SOCKET_TIMEOUT)
 
         CheckSection(CFG, 'General')
-        LOG_DIR = check_setting_str(CFG, 'General', 'log_dir', 'Logs')
+
+        ACTUAL_LOG_DIR = check_setting_str(CFG, 'General', 'log_dir', 'Logs')
+        # put the log dir inside the data dir, unless an absolute path
+        LOG_DIR = os.path.normpath(os.path.join(DATA_DIR, ACTUAL_LOG_DIR))
+
         if not helpers.makeDir(LOG_DIR):
             logger.log(u"!!! No log folder, logging to screen only!", logger.ERROR)
 
@@ -382,6 +392,11 @@ def initialize(consoleLogging=True):
         WEB_USERNAME = check_setting_str(CFG, 'General', 'web_username', '')
         WEB_PASSWORD = check_setting_str(CFG, 'General', 'web_password', '')
         LAUNCH_BROWSER = bool(check_setting_int(CFG, 'General', 'launch_browser', 1))
+
+        ANON_REDIRECT = check_setting_str(CFG, 'General', 'anon_redirect', 'http://derefer.me/?')
+        # attempt to help prevent users from breaking links by using a bad url
+        if not ANON_REDIRECT.endswith('?'):
+            ANON_REDIRECT = ''
 
         USE_API = bool(check_setting_int(CFG, 'General', 'use_api', 0))
         API_KEY = check_setting_str(CFG, 'General', 'api_key', '')
@@ -542,6 +557,11 @@ def initialize(consoleLogging=True):
         NZB_DIR = check_setting_str(CFG, 'Blackhole', 'nzb_dir', '')
         TORRENT_DIR = check_setting_str(CFG, 'Blackhole', 'torrent_dir', '')
 
+        CheckSection(CFG, 'HDBITS')
+        HDBITS = bool(check_setting_int(CFG, 'HDBITS', 'hdbits', 0))
+        HDBITS_USERNAME = check_setting_str(CFG, 'HDBITS', 'hdbits_username', '')
+        HDBITS_PASSKEY = check_setting_str(CFG, 'HDBITS', 'hdbits_passkey', '')
+
         CheckSection(CFG, 'TVTORRENTS')
         TVTORRENTS = bool(check_setting_int(CFG, 'TVTORRENTS', 'tvtorrents', 0))
         TVTORRENTS_DIGEST = check_setting_str(CFG, 'TVTORRENTS', 'tvtorrents_digest', '')
@@ -584,8 +604,8 @@ def initialize(consoleLogging=True):
 
         CheckSection(CFG, 'omgwtfnzbs')
         OMGWTFNZBS = bool(check_setting_int(CFG, 'omgwtfnzbs', 'omgwtfnzbs', 0))
-        OMGWTFNZBS_UID = check_setting_str(CFG, 'omgwtfnzbs', 'omgwtfnzbs_uid', '')
-        OMGWTFNZBS_KEY = check_setting_str(CFG, 'omgwtfnzbs', 'omgwtfnzbs_key', '')
+        OMGWTFNZBS_USERNAME = check_setting_str(CFG, 'omgwtfnzbs', 'omgwtfnzbs_username', '')
+        OMGWTFNZBS_APIKEY = check_setting_str(CFG, 'omgwtfnzbs', 'omgwtfnzbs_apikey', '')
 
         CheckSection(CFG, 'SABnzbd')
         SAB_USERNAME = check_setting_str(CFG, 'SABnzbd', 'sab_username', '')
@@ -676,7 +696,7 @@ def initialize(consoleLogging=True):
         USE_NMJv2 = bool(check_setting_int(CFG, 'NMJv2', 'use_nmjv2', 0))
         NMJv2_HOST = check_setting_str(CFG, 'NMJv2', 'nmjv2_host', '')
         NMJv2_DATABASE = check_setting_str(CFG, 'NMJv2', 'nmjv2_database', '')
-        NMJ_DBLOC = check_setting_str(CFG, 'NMJv2', 'nmjv2_dbloc', '')
+        NMJv2_DBLOC = check_setting_str(CFG, 'NMJv2', 'nmjv2_dbloc', '')
 
         CheckSection(CFG, 'Synology')
         USE_SYNOINDEX = bool(check_setting_int(CFG, 'Synology', 'use_synoindex', 0))
@@ -751,11 +771,15 @@ def initialize(consoleLogging=True):
                                                      cycleTime=properFinderInstance.updateInterval,
                                                      threadName="FINDPROPERS",
                                                      runImmediately=False)
+        if not DOWNLOAD_PROPERS:
+            properFinderScheduler.silent = True
 
         autoPostProcesserScheduler = scheduler.Scheduler(autoPostProcesser.PostProcesser(),
                                                      cycleTime=datetime.timedelta(minutes=10),
                                                      threadName="POSTPROCESSER",
                                                      runImmediately=True)
+        if not PROCESS_AUTOMATICALLY:
+            autoPostProcesserScheduler.silent = True
 
         backlogSearchScheduler = searchBacklog.BacklogSearchScheduler(searchBacklog.BacklogSearcher(),
                                                                       cycleTime=datetime.timedelta(minutes=get_backlog_cycle_time()),
@@ -792,6 +816,7 @@ def start():
 
             # start the version checker
             versionCheckScheduler.thread.start()
+
 
             # start the queue checker
             showQueueScheduler.thread.start()
@@ -975,7 +1000,8 @@ def save_config():
     new_config.filename = CONFIG_FILE
 
     new_config['General'] = {}
-    new_config['General']['log_dir'] = LOG_DIR
+    new_config['General']['config_version'] = CONFIG_VERSION
+    new_config['General']['log_dir'] = ACTUAL_LOG_DIR if ACTUAL_LOG_DIR else 'Logs'
     new_config['General']['web_port'] = WEB_PORT
     new_config['General']['web_host'] = WEB_HOST
     new_config['General']['web_ipv6'] = int(WEB_IPV6)
@@ -983,11 +1009,13 @@ def save_config():
     new_config['General']['web_root'] = WEB_ROOT
     new_config['General']['web_username'] = WEB_USERNAME
     new_config['General']['web_password'] = WEB_PASSWORD
+    new_config['General']['anon_redirect'] = ANON_REDIRECT
     new_config['General']['use_api'] = int(USE_API)
     new_config['General']['api_key'] = API_KEY
     new_config['General']['enable_https'] = int(ENABLE_HTTPS)
     new_config['General']['https_cert'] = HTTPS_CERT
     new_config['General']['https_key'] = HTTPS_KEY
+
     new_config['General']['use_nzbs'] = int(USE_NZBS)
     new_config['General']['use_torrents'] = int(USE_TORRENTS)
     new_config['General']['nzb_method'] = NZB_METHOD
@@ -1035,6 +1063,11 @@ def save_config():
     new_config['EZRSS'] = {}
     new_config['EZRSS']['ezrss'] = int(EZRSS)
 
+    new_config['HDBITS'] = {}
+    new_config['HDBITS']['hdbits'] = int(HDBITS)
+    new_config['HDBITS']['hdbits_username'] = HDBITS_USERNAME
+    new_config['HDBITS']['hdbits_passkey'] = HDBITS_PASSKEY
+
     new_config['TVTORRENTS'] = {}
     new_config['TVTORRENTS']['tvtorrents'] = int(TVTORRENTS)
     new_config['TVTORRENTS']['tvtorrents_digest'] = TVTORRENTS_DIGEST
@@ -1077,8 +1110,8 @@ def save_config():
 
     new_config['omgwtfnzbs'] = {}
     new_config['omgwtfnzbs']['omgwtfnzbs'] = int(OMGWTFNZBS)
-    new_config['omgwtfnzbs']['omgwtfnzbs_uid'] = OMGWTFNZBS_UID
-    new_config['omgwtfnzbs']['omgwtfnzbs_key'] = OMGWTFNZBS_KEY
+    new_config['omgwtfnzbs']['omgwtfnzbs_username'] = OMGWTFNZBS_USERNAME
+    new_config['omgwtfnzbs']['omgwtfnzbs_apikey'] = OMGWTFNZBS_APIKEY
 
     new_config['SABnzbd'] = {}
     new_config['SABnzbd']['sab_username'] = SAB_USERNAME
@@ -1203,8 +1236,6 @@ def save_config():
     new_config['GUI']['coming_eps_layout'] = COMING_EPS_LAYOUT
     new_config['GUI']['coming_eps_display_paused'] = int(COMING_EPS_DISPLAY_PAUSED)
     new_config['GUI']['coming_eps_sort'] = COMING_EPS_SORT
-
-    new_config['General']['config_version'] = CONFIG_VERSION
 
     new_config.write()
 

@@ -16,18 +16,33 @@
 # You should have received a copy of the GNU General Public License
 # along with Sick Beard.  If not, see <http://www.gnu.org/licenses/>.
 
-import StringIO, zlib, gzip
+import gzip
 import os
-import stat
-import urllib, urllib2
-import re, socket
+import re
 import shutil
+import socket
+import stat
+import StringIO
+import sys
+import time
 import traceback
-import time, sys
+import urllib
+import urllib2
+import zlib
 
 from httplib import BadStatusLine
 
+try:
+    import json
+except ImportError:
+    from lib import simplejson as json
+
 from xml.dom.minidom import Node
+
+try:
+    import xml.etree.cElementTree as etree
+except ImportError:
+    import elementtree.ElementTree as etree
 
 import sickbeard
 
@@ -41,22 +56,21 @@ from sickbeard import notifiers
 
 from lib.tvdb_api import tvdb_api, tvdb_exceptions
 
-import xml.etree.cElementTree as etree
-
 urllib._urlopener = classes.SickBeardURLopener()
+
 
 def indentXML(elem, level=0):
     '''
     Does our pretty printing, makes Matt very happy
     '''
-    i = "\n" + level*"  "
+    i = "\n" + level * "  "
     if len(elem):
         if not elem.text or not elem.text.strip():
             elem.text = i + "  "
         if not elem.tail or not elem.tail.strip():
             elem.tail = i
         for elem in elem:
-            indentXML(elem, level+1)
+            indentXML(elem, level + 1)
         if not elem.tail or not elem.tail.strip():
             elem.tail = i
     else:
@@ -66,7 +80,8 @@ def indentXML(elem, level=0):
         if level and (not elem.tail or not elem.tail.strip()):
             elem.tail = i
 
-def replaceExtension(file, newExt):
+
+def replaceExtension(filename, newExt):
     '''
     >>> replaceExtension('foo.avi', 'mkv')
     'foo.mkv'
@@ -79,28 +94,30 @@ def replaceExtension(file, newExt):
     >>> replaceExtension('foo.bar', '')
     'foo.'
     '''
-    sepFile = file.rpartition(".")
+    sepFile = filename.rpartition(".")
     if sepFile[0] == "":
-        return file
+        return filename
     else:
         return sepFile[0] + "." + newExt
 
-def isMediaFile (file):
+
+def isMediaFile(filename):
     # ignore samples
-    if re.search('(^|[\W_])sample\d*[\W_]', file):
+    if re.search('(^|[\W_])sample\d*[\W_]', filename.lower()):
         return False
 
     # ignore MAC OS's retarded "resource fork" files
-    if file.startswith('._'):
+    if filename.startswith('._'):
         return False
 
-    sepFile = file.rpartition(".")
+    sepFile = filename.rpartition(".")
     if sepFile[2].lower() in mediaExtensions:
         return True
     else:
         return False
 
-def sanitizeFileName (name):
+
+def sanitizeFileName(name):
     '''
     >>> sanitizeFileName('a/b/c')
     'a-b-c'
@@ -111,18 +128,18 @@ def sanitizeFileName (name):
     >>> sanitizeFileName('.a.b..')
     'a.b'
     '''
-    
+
     # remove bad chars from the filename
     name = re.sub(r'[\\/\*]', '-', name)
     name = re.sub(r'[:"<>|?]', '', name)
-    
+
     # remove leading/trailing periods and spaces
     name = name.strip(' .')
-    
+
     return name
 
 
-def getURL (url, headers=[]):
+def getURL(url, headers=[]):
     """
     Returns a byte-string retrieved from the url provider.
     """
@@ -153,25 +170,31 @@ def getURL (url, headers=[]):
     except urllib2.HTTPError, e:
         logger.log(u"HTTP error " + str(e.code) + " while loading URL " + url, logger.WARNING)
         return None
+
     except urllib2.URLError, e:
         logger.log(u"URL error " + str(e.reason) + " while loading URL " + url, logger.WARNING)
         return None
+
     except BadStatusLine:
         logger.log(u"BadStatusLine error while loading URL " + url, logger.WARNING)
         return None
+
     except socket.timeout:
         logger.log(u"Timed out while loading URL " + url, logger.WARNING)
         return None
+
     except ValueError:
         logger.log(u"Unknown error while loading URL " + url, logger.WARNING)
         return None
+
     except Exception:
         logger.log(u"Unknown exception while loading URL " + url + ": " + traceback.format_exc(), logger.WARNING)
         return None
 
     return result
 
-def findCertainShow (showList, tvdbid):
+
+def findCertainShow(showList, tvdbid):
     results = filter(lambda x: x.tvdbid == tvdbid, showList)
     if len(results) == 0:
         return None
@@ -180,7 +203,8 @@ def findCertainShow (showList, tvdbid):
     else:
         return results[0]
 
-def findCertainTVRageShow (showList, tvrid):
+
+def findCertainTVRageShow(showList, tvrid):
 
     if tvrid == 0:
         return None
@@ -195,19 +219,20 @@ def findCertainTVRageShow (showList, tvrid):
         return results[0]
 
 
-def makeDir (dir):
-    if not ek.ek(os.path.isdir, dir):
+def makeDir(path):
+    if not ek.ek(os.path.isdir, path):
         try:
-            ek.ek(os.makedirs, dir)
+            ek.ek(os.makedirs, path)
             # do the library update for synoindex
-            notifiers.synoindex_notifier.addFolder(dir)
+            notifiers.synoindex_notifier.addFolder(path)
         except OSError:
             return False
     return True
 
+
 def makeShowNFO(showID, showDir):
 
-    logger.log(u"Making NFO for show "+str(showID)+" in dir "+showDir, logger.DEBUG)
+    logger.log(u"Making NFO for show " + str(showID) + " in dir " + showDir, logger.DEBUG)
 
     if not makeDir(showDir):
         logger.log(u"Unable to create show dir, can't make NFO", logger.ERROR)
@@ -251,15 +276,16 @@ def makeShowNFO(showID, showDir):
 
     tvNode = buildNFOXML(myShow)
     # Make it purdy
-    indentXML( tvNode )
-    nfo = etree.ElementTree( tvNode )
+    indentXML(tvNode)
+    nfo = etree.ElementTree(tvNode)
 
-    logger.log(u"Writing NFO to "+os.path.join(showDir, "tvshow.nfo"), logger.DEBUG)
+    logger.log(u"Writing NFO to " + os.path.join(showDir, "tvshow.nfo"), logger.DEBUG)
     nfo_filename = os.path.join(showDir, "tvshow.nfo").encode('utf-8')
     nfo_fh = open(nfo_filename, 'w')
-    nfo.write( nfo_fh, encoding="utf-8" )
+    nfo.write(nfo_fh, encoding="utf-8")
 
     return True
+
 
 def buildNFOXML(myShow):
     '''
@@ -281,61 +307,61 @@ def buildNFOXML(myShow):
     >>> tostring(buildNFOXML(show))
     '<tvshow xsd="http://www.w3.org/2001/XMLSchema" xsi="http://www.w3.org/2001/XMLSchema-instance"><title>Peaches</title><rating /><plot /><episodeguide><url /></episodeguide><mpaa>PG</mpaa><id /><genre>Fruit / Edibles</genre><premiered /><studio /></tvshow>'
     '''
-    tvNode = etree.Element( "tvshow" )
+    tvNode = etree.Element("tvshow")
     for ns in XML_NSMAP.keys():
         tvNode.set(ns, XML_NSMAP[ns])
 
-    title = etree.SubElement( tvNode, "title" )
+    title = etree.SubElement(tvNode, "title")
     if myShow["seriesname"] != None:
         title.text = myShow["seriesname"]
 
-    rating = etree.SubElement( tvNode, "rating" )
+    rating = etree.SubElement(tvNode, "rating")
     if myShow["rating"] != None:
         rating.text = myShow["rating"]
 
-    plot = etree.SubElement( tvNode, "plot" )
+    plot = etree.SubElement(tvNode, "plot")
     if myShow["overview"] != None:
         plot.text = myShow["overview"]
 
-    episodeguide = etree.SubElement( tvNode, "episodeguide" )
-    episodeguideurl = etree.SubElement( episodeguide, "url" )
+    episodeguide = etree.SubElement(tvNode, "episodeguide")
+    episodeguideurl = etree.SubElement(episodeguide, "url")
     if myShow["id"] != None:
         showurl = sickbeard.TVDB_BASE_URL + '/series/' + myShow["id"] + '/all/en.zip'
         episodeguideurl.text = showurl
 
-    mpaa = etree.SubElement( tvNode, "mpaa" )
+    mpaa = etree.SubElement(tvNode, "mpaa")
     if myShow["contentrating"] != None:
         mpaa.text = myShow["contentrating"]
 
-    tvdbid = etree.SubElement( tvNode, "id" )
+    tvdbid = etree.SubElement(tvNode, "id")
     if myShow["id"] != None:
         tvdbid.text = myShow["id"]
 
-    genre = etree.SubElement( tvNode, "genre" )
+    genre = etree.SubElement(tvNode, "genre")
     if myShow["genre"] != None:
         genre.text = " / ".join([x for x in myShow["genre"].split('|') if x != ''])
 
-    premiered = etree.SubElement( tvNode, "premiered" )
+    premiered = etree.SubElement(tvNode, "premiered")
     if myShow["firstaired"] != None:
         premiered.text = myShow["firstaired"]
 
-    studio = etree.SubElement( tvNode, "studio" )
+    studio = etree.SubElement(tvNode, "studio")
     if myShow["network"] != None:
         studio.text = myShow["network"]
 
     for actor in myShow['_actors']:
 
-        cur_actor = etree.SubElement( tvNode, "actor" )
+        cur_actor = etree.SubElement(tvNode, "actor")
 
-        cur_actor_name = etree.SubElement( cur_actor, "name" )
+        cur_actor_name = etree.SubElement(cur_actor, "name")
         cur_actor_name.text = actor['name']
-        cur_actor_role = etree.SubElement( cur_actor, "role" )
+        cur_actor_role = etree.SubElement(cur_actor, "role")
         cur_actor_role_text = actor['role']
 
         if cur_actor_role_text != None:
             cur_actor_role.text = cur_actor_role_text
 
-        cur_actor_thumb = etree.SubElement( cur_actor, "thumb" )
+        cur_actor_thumb = etree.SubElement(cur_actor, "thumb")
         cur_actor_thumb_text = actor['image']
 
         if cur_actor_thumb_text != None:
@@ -365,19 +391,19 @@ def searchDBForShow(regShowName):
             match = re.match(yearRegex, showName)
             if match and match.group(1):
                 logger.log(u"Unable to match original name but trying to manually strip and specify show year", logger.DEBUG)
-                sqlResults = myDB.select("SELECT * FROM tv_shows WHERE (show_name LIKE ? OR tvr_name LIKE ?) AND startyear = ?", [match.group(1)+'%', match.group(1)+'%', match.group(3)])
+                sqlResults = myDB.select("SELECT * FROM tv_shows WHERE (show_name LIKE ? OR tvr_name LIKE ?) AND startyear = ?", [match.group(1) + '%', match.group(1) + '%', match.group(3)])
 
             if len(sqlResults) == 0:
-                logger.log(u"Unable to match a record in the DB for "+showName, logger.DEBUG)
+                logger.log(u"Unable to match a record in the DB for " + showName, logger.DEBUG)
                 continue
             elif len(sqlResults) > 1:
-                logger.log(u"Multiple results for "+showName+" in the DB, unable to match show name", logger.DEBUG)
+                logger.log(u"Multiple results for " + showName + " in the DB, unable to match show name", logger.DEBUG)
                 continue
             else:
                 return (int(sqlResults[0]["tvdb_id"]), sqlResults[0]["show_name"])
 
-
     return None
+
 
 def sizeof_fmt(num):
     '''
@@ -392,21 +418,22 @@ def sizeof_fmt(num):
     >>> sizeof_fmt(1234567)
     '1.2 MB'
     '''
-    for x in ['bytes','KB','MB','GB','TB']:
+    for x in ['bytes', 'KB', 'MB', 'GB', 'TB']:
         if num < 1024.0:
             return "%3.1f %s" % (num, x)
         num /= 1024.0
 
-def listMediaFiles(dir):
 
-    if not dir or not ek.ek(os.path.isdir, dir):
+def listMediaFiles(path):
+
+    if not path or not ek.ek(os.path.isdir, path):
         return []
 
     files = []
-    for curFile in ek.ek(os.listdir, dir):
-        fullCurFile = ek.ek(os.path.join, dir, curFile)
+    for curFile in ek.ek(os.listdir, path):
+        fullCurFile = ek.ek(os.path.join, path, curFile)
 
-        # if it's a dir do it recursively
+        # if it's a folder do it recursively
         if ek.ek(os.path.isdir, fullCurFile) and not curFile.startswith('.') and not curFile == 'Extras':
             files += listMediaFiles(fullCurFile)
 
@@ -415,12 +442,14 @@ def listMediaFiles(dir):
 
     return files
 
+
 def copyFile(srcFile, destFile):
     ek.ek(shutil.copyfile, srcFile, destFile)
     try:
         ek.ek(shutil.copymode, srcFile, destFile)
     except OSError:
         pass
+
 
 def moveFile(srcFile, destFile):
     try:
@@ -429,6 +458,7 @@ def moveFile(srcFile, destFile):
     except OSError:
         copyFile(srcFile, destFile)
         ek.ek(os.unlink, srcFile)
+
 
 def make_dirs(path):
     """
@@ -455,7 +485,7 @@ def make_dirs(path):
 
             # look through each subfolder and make sure they all exist
             for cur_folder in folder_list:
-                sofar += cur_folder + os.path.sep;
+                sofar += cur_folder + os.path.sep
 
                 # if it exists then just keep walking down the line
                 if ek.ek(os.path.isdir, sofar):
@@ -475,17 +505,23 @@ def make_dirs(path):
     return True
 
 
-def rename_ep_file(cur_path, new_path):
+def rename_ep_file(cur_path, new_path, old_path_length=0):
     """
     Creates all folders needed to move a file to its new location, renames it, then cleans up any folders
     left that are now empty.
 
     cur_path: The absolute path to the file you want to move/rename
     new_path: The absolute path to the destination for the file WITHOUT THE EXTENSION
+    old_path_length: The length of media file path (old name) WITHOUT THE EXTENSION
     """
 
-    new_dest_dir, new_dest_name = os.path.split(new_path) #@UnusedVariable
-    cur_file_name, cur_file_ext = os.path.splitext(cur_path) #@UnusedVariable
+    new_dest_dir, new_dest_name = os.path.split(new_path)  # @UnusedVariable
+    if old_path_length == 0 or old_path_length > len(cur_path):
+        # approach from the right
+        cur_file_name, cur_file_ext = os.path.splitext(cur_path)  # @UnusedVariable
+    else:
+        # approach from the left
+        cur_file_ext = cur_path[old_path_length:]
 
     # put the extension on the incoming file
     new_path += cur_file_ext
@@ -532,7 +568,7 @@ def delete_empty_folders(check_empty_dir, keep_dir=None):
                 ek.ek(os.rmdir, check_empty_dir)
                 # do the library update for synoindex
                 notifiers.synoindex_notifier.deleteFolder(check_empty_dir)
-            except (WindowsError, OSError), e:
+            except OSError, e:
                 logger.log(u"Unable to delete " + check_empty_dir + ": " + repr(e) + " / " + str(e), logger.WARNING)
                 break
             check_empty_dir = ek.ek(os.path.dirname, check_empty_dir)
@@ -545,13 +581,13 @@ def chmodAsParent(childPath):
         return
 
     parentPath = ek.ek(os.path.dirname, childPath)
-    
+
     if not parentPath:
-        logger.log(u"No parent path provided in "+childPath+", unable to get permissions from it", logger.DEBUG)
+        logger.log(u"No parent path provided in " + childPath + ", unable to get permissions from it", logger.DEBUG)
         return
-    
+
     parentMode = stat.S_IMODE(os.stat(parentPath)[stat.ST_MODE])
-    
+
     childPathStat = ek.ek(os.stat, childPath)
     childPath_mode = stat.S_IMODE(childPathStat[stat.ST_MODE])
 
@@ -564,10 +600,10 @@ def chmodAsParent(childPath):
         return
 
     childPath_owner = childPathStat.st_uid
-    user_id = os.geteuid()
+    user_id = os.geteuid()  #only available on UNIX
 
-    if user_id !=0 and user_id != childPath_owner:
-        logger.log(u"Not running as root or owner of "+childPath+", not trying to set permissions", logger.DEBUG)
+    if user_id != 0 and user_id != childPath_owner:
+        logger.log(u"Not running as root or owner of " + childPath + ", not trying to set permissions", logger.DEBUG)
         return
 
     try:
@@ -576,12 +612,14 @@ def chmodAsParent(childPath):
     except OSError:
         logger.log(u"Failed to set permission for %s to %o" % (childPath, childMode), logger.ERROR)
 
+
 def fileBitFilter(mode):
     for bit in [stat.S_IXUSR, stat.S_IXGRP, stat.S_IXOTH, stat.S_ISUID, stat.S_ISGID]:
         if mode & bit:
             mode -= bit
 
     return mode
+
 
 def fixSetGroupID(childPath):
     if os.name == 'nt' or os.name == 'ce':
@@ -600,10 +638,10 @@ def fixSetGroupID(childPath):
             return
 
         childPath_owner = childStat.st_uid
-        user_id = os.geteuid()
+        user_id = os.geteuid()  #only available on UNIX
 
-        if user_id !=0 and user_id != childPath_owner:
-            logger.log(u"Not running as root or owner of "+childPath+", not trying to set the set-group-ID", logger.DEBUG)
+        if user_id != 0 and user_id != childPath_owner:
+            logger.log(u"Not running as root or owner of " + childPath + ", not trying to set the set-group-ID", logger.DEBUG)
             return
 
         try:
@@ -612,12 +650,13 @@ def fixSetGroupID(childPath):
         except OSError:
             logger.log(u"Failed to respect the set-group-ID bit on the parent directory for %s (setting group ID %i)" % (childPath, parentGID), logger.ERROR)
 
-def sanitizeSceneName (name, ezrss=False):
+
+def sanitizeSceneName(name, ezrss=False):
     """
     Takes a show name and returns the "scenified" version of it.
-    
+
     ezrss: If true the scenified version will follow EZRSS's cracksmoker rules as best as possible
-    
+
     Returns: A string containing the scene version of the show name given.
     """
 
@@ -632,7 +671,7 @@ def sanitizeSceneName (name, ezrss=False):
         name = name.replace(x, "")
 
     # tidy up stuff that doesn't belong in scene names
-    name = name.replace("- ", ".").replace(" ", ".").replace("&", "and").replace('/','.')
+    name = name.replace("- ", ".").replace(" ", ".").replace("&", "and").replace('/', '.')
     name = re.sub("\.\.*", ".", name)
 
     if name.endswith('.'):
@@ -640,13 +679,14 @@ def sanitizeSceneName (name, ezrss=False):
 
     return name
 
+
 def create_https_certificates(ssl_cert, ssl_key):
     """
     Create self-signed HTTPS certificares and store in paths 'ssl_cert' and 'ssl_key'
     """
     try:
-        from OpenSSL import crypto #@UnresolvedImport
-        from lib.certgen import createKeyPair, createCertRequest, createCertificate, TYPE_RSA, serial #@UnresolvedImport
+        from OpenSSL import crypto  #@UnresolvedImport
+        from lib.certgen import createKeyPair, createCertRequest, createCertificate, TYPE_RSA, serial  #@UnresolvedImport
     except:
         logger.log(u"pyopenssl module missing, please install for https access", logger.WARNING)
         return False
@@ -654,12 +694,12 @@ def create_https_certificates(ssl_cert, ssl_key):
     # Create the CA Certificate
     cakey = createKeyPair(TYPE_RSA, 1024)
     careq = createCertRequest(cakey, CN='Certificate Authority')
-    cacert = createCertificate(careq, (careq, cakey), serial, (0, 60*60*24*365*10)) # ten years
+    cacert = createCertificate(careq, (careq, cakey), serial, (0, 60 * 60 * 24 * 365 * 10))  # ten years
 
     cname = 'SickBeard'
     pkey = createKeyPair(TYPE_RSA, 1024)
     req = createCertRequest(pkey, CN=cname)
-    cert = createCertificate(req, (cacert, cakey), serial, (0, 60*60*24*365*10)) # ten years
+    cert = createCertificate(req, (cacert, cakey), serial, (0, 60 * 60 * 24 * 365 * 10))  # ten years
 
     # Save the key and certificate to disk
     try:
@@ -675,33 +715,93 @@ if __name__ == '__main__':
     import doctest
     doctest.testmod()
 
-def get_xml_text(node):
+
+def parse_json(data):
+    """
+    Parse json data into a python object
+
+    data: data string containing json
+
+    Returns: parsed data as json or None
+    """
+
+    try:
+        parsedJSON = json.loads(data)
+    except ValueError:
+        logger.log(u"Error trying to decode json data:" + data, logger.ERROR)
+        return None
+
+    return parsedJSON
+
+
+def parse_xml(data, del_xmlns=False):
+    """
+    Parse data into an xml elementtree.ElementTree
+
+    data: data string containing xml
+    del_xmlns: if True, removes xmlns namesspace from data before parsing
+
+    Returns: parsed data as elementtree or None
+    """
+
+    if del_xmlns:
+        data = re.sub(' xmlns="[^"]+"', '', data)
+
+    try:
+        parsedXML = etree.fromstring(data)
+    except Exception, e:
+        logger.log(u"Error trying to parse xml data: " + data + " to Elementtree, Error: " + ex(e), logger.DEBUG)
+        parsedXML = None
+
+    return parsedXML
+
+
+def get_xml_text(element, mini_dom=False):
+    """
+    Get all text inside a xml element
+
+    element: A xml element either created with elementtree.ElementTree or xml.dom.minidom
+    mini_dom: Default False use elementtree, True use minidom
+
+    Returns: text
+    """
+
     text = ""
-    for child_node in node.childNodes:
-        if child_node.nodeType in (Node.CDATA_SECTION_NODE, Node.TEXT_NODE):
-            text += child_node.data
+
+    if mini_dom:
+        node = element
+        for child in node.childNodes:
+            if child.nodeType in (Node.CDATA_SECTION_NODE, Node.TEXT_NODE):
+                text += child.data
+    else:
+        if element is not None:
+            for child in [element] + element.findall('.//*'):
+                if child.text:
+                    text += child.text
+
     return text.strip()
+
 
 def backupVersionedFile(oldFile, version):
     numTries = 0
-    
-    newFile = oldFile + '.' + 'v'+str(version)
-    
+
+    newFile = oldFile + '.' + 'v' + str(version)
+
     while not ek.ek(os.path.isfile, newFile):
         if not ek.ek(os.path.isfile, oldFile):
             break
 
         try:
-            logger.log(u"Attempting to back up "+oldFile+" before migration...")
+            logger.log(u"Attempting to back up " + oldFile + " before migration...")
             shutil.copy(oldFile, newFile)
             logger.log(u"Done backup, proceeding with migration.")
             break
         except Exception, e:
-            logger.log(u"Error while trying to back up "+oldFile+": "+ex(e))
+            logger.log(u"Error while trying to back up " + oldFile + ": " + ex(e))
             numTries += 1
             time.sleep(1)
             logger.log(u"Trying again.")
 
         if numTries >= 10:
-            logger.log(u"Unable to back up "+oldFile+", please do it manually.")
+            logger.log(u"Unable to back up " + oldFile + ", please do it manually.")
             sys.exit(1)
