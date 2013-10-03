@@ -289,7 +289,7 @@ $(document).ready(function(){
         }
       });
 
-    $('.newznab_key').change(function(){
+    $(this).on('change', '.newznab_key', function(){
 
         var provider_id = $(this).attr('id');
         provider_id = provider_id.substring(0, provider_id.length-'_hash'.length);
@@ -340,7 +340,7 @@ $(document).ready(function(){
         $(this).populateTorrentRssSection();
     });
 
-    $('.provider_enabler').live('click', function(){
+    $(this).on('click', '.provider_enabler', function(){
         $(this).refreshProviderList();
     });
 
@@ -400,12 +400,12 @@ $(document).ready(function(){
     });
 
 
-    $("[class='providerDiv_tip'] input").live('change', function(){
+    $(this).on('change', "[class='providerDiv_tip'] input", function(){
         $('div .providerDiv ' + "[name=" + $(this).attr('name') + "]").replaceWith($(this).clone());
         $('div .providerDiv ' + "[newznab_name=" + $(this).attr('id') + "]").replaceWith($(this).clone());
     });
 
-    $("[class='providerDiv_tip'] select").live('change', function(){
+    $(this).on('change', "[class='providerDiv_tip'] select", function(){
 
     $(this).find('option').each( function() {
       if ($(this).is(':selected')) {
@@ -417,7 +417,7 @@ $(document).ready(function(){
 
     $('div .providerDiv ' + "[name=" + $(this).attr('name') + "]").empty().replaceWith($(this).clone())});
 
-    $(".enabler").live('change', function(){
+    $(this).on('change', '.enabler', function(){
       if ($(this).is(':checked')) {
           $('.content_'+$(this).attr('id')).each( function() {
               $(this).show()
