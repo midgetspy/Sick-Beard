@@ -741,6 +741,12 @@ class Manage:
 
         t = PageTemplate(file="manage_torrents.tmpl")
         t.submenu = ManageMenu
+        
+        t.webui_url = sickbeard.TORRENT_HOST
+        
+        if sickbeard.TORRENT_METHOD == 'utorrent':
+            t.webui_url += '/gui'
+
         return _munge(t)
         
 class History:
