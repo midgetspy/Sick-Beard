@@ -742,11 +742,18 @@ class Manage:
         t = PageTemplate(file="manage_torrents.tmpl")
         t.submenu = ManageMenu
         
-        t.webui_url = sickbeard.TORRENT_HOST
+        if re.search('localhost', sickbeard.TORRENT_HOST):
         
-        if sickbeard.TORRENT_METHOD == 'utorrent':
-            t.webui_url += '/gui'
+            if sickbeard.LOCALHOST_IP == '':
+                t.webui_url = re.sub('localhost', helpers.get_lan_ip(), sickbeard.TORRENT_HOST)
+            else:
+                t.webui_url = re.sub('localhost', sickbeard.LOCALHOST_IP, sickbeard.TORRENT_HOST)
+        else:
+            t.webui_url = sickbeard.TORRENT_HOST
 
+        if sickbeard.TORRENT_METHOD == 'utorrent':
+            t.webui_url = '/'.join(s.strip('/') for s in (t.webui_url, 'gui/'))
+            
         return _munge(t)
         
 class History:
