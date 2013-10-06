@@ -38,12 +38,13 @@ def logHelper (logMessage, logLevel=logger.MESSAGE):
     logger.log(logMessage, logLevel)
     return logMessage + u"\n"
 
-def processDir (dirName, nzbName=None, recurse=False):
+def processDir (dirName, nzbName=None, recurse=False, force=False):
     """
     Scans through the files in dirName and processes whatever media files it finds
     
     dirName: The folder name to look in
     nzbName: The NZB name which resulted in this folder being downloaded
+    force: True to postprocess already postprocessed files
     """
 
     global process_result, returnStr
@@ -101,13 +102,8 @@ def processDir (dirName, nzbName=None, recurse=False):
 
         cur_video_file_path = ek.ek(os.path.join, dirName, cur_video_file)
 
-        # Avoid processing the same file again if we use KEEP_PROCESSING_DIR    
-        if sickbeard.PROCESS_METHOD != "move":
-            myDB = db.DBConnection()
-            sqlResult = myDB.select("SELECT * FROM tv_episodes WHERE release_name = ?", [cur_video_file.rpartition('.')[0]])
-            if sqlResult:
-                returnStr += logHelper(u"You're trying to post process the file " + cur_video_file + " that's already been processed, skipping", logger.DEBUG)
-                continue
+        if _already_postprocessed(dirName, cur_video_file, force):
+            continue   
 
         try:
             processor = postProcessor.PostProcessor(cur_video_file_path, nzbName)
@@ -142,6 +138,9 @@ def processDir (dirName, nzbName=None, recurse=False):
 
             for cur_video_file in videoFiles:
 
+                if _already_postprocessed(processPath, cur_video_file, force):
+                    continue
+
                 cur_video_file_path = ek.ek(os.path.join, processPath, cur_video_file)
             
                 try:
@@ -163,7 +162,7 @@ def processDir (dirName, nzbName=None, recurse=False):
                 if not process_result:
                     break
 
-            returnStr += logHelper(u"Cleaning up Folder " + processPath, logger.DEBUG)
+#            returnStr += logHelper(u"Cleaning up Folder " + processPath, logger.DEBUG)
                                 
             #Delete all file not needed
             for cur_file in notwantedFiles:
@@ -230,45 +229,12 @@ def validateDir(path, dirName):
             returnStr += logHelper(u"You're trying to post process an episode that's already been moved to its show dir, skipping", logger.ERROR)
             return False
 
-    #Needed for accessing DB with a unicode DirName
-    if not isinstance(dirName, unicode):
-        dirName = unicode(dirName, 'utf_8')
-
     # Get the videofile list for the next checks
     allFiles = []
     for processPath, processDir, fileList in ek.ek(os.walk, ek.ek(os.path.join, path, dirName), topdown=False):
         allFiles += fileList
 
     videoFiles = filter(helpers.isMediaFile, allFiles)
-                
-    # Avoid processing the same dir again if we use a process method <> move    
-    if sickbeard.PROCESS_METHOD != "move":
-        
-        sqlResult = myDB.select("SELECT * FROM tv_episodes WHERE release_name = ?", [dirName])
-        if sqlResult:
-            returnStr += logHelper(u"You're trying to post process a dir that's already been processed, skipping", logger.DEBUG)
-            return False
-
-        # This is needed for video whose name differ from dirName
-        for video in videoFiles:
-
-            if not isinstance(video, unicode):
-                video = unicode(video, 'utf_8')            
-
-            sqlResult = myDB.select("SELECT * FROM tv_episodes WHERE release_name = ?", [video.rpartition('.')[0]])
-            if sqlResult:
-                returnStr += logHelper(u"You're trying to post process a dir that's already been processed, skipping", logger.DEBUG)
-                return False
-
-            #Needed if we have downloaded the same episode @ different quality
-            search_sql = "SELECT tv_episodes.tvdbid, history.resource FROM tv_episodes INNER JOIN history ON history.showid=tv_episodes.showid"
-            search_sql += " WHERE history.season=tv_episodes.season and history.episode=tv_episodes.episode"
-            search_sql += " and tv_episodes.status IN (" + ",".join([str(x) for x in common.Quality.DOWNLOADED]) + ")"
-            search_sql += " and history.resource LIKE ?"
-            sqlResult = myDB.select(search_sql, [u'%' + video])
-            if sqlResult:
-                returnStr += logHelper(u"You're trying to post process a dir that's already been processed, skipping", logger.DEBUG)
-                return False
 
     #check if the dir have at least one tv video file
     for video in videoFiles:
@@ -318,4 +284,42 @@ def unRAR(path, rarFiles):
         returnStr += logHelper(u"UnRar content: " + str(unpacked_files), logger.DEBUG)
         
     return unpacked_files
+
+def _already_postprocessed(dirName, videofile, force):
+
+    global returnStr
+
+    if force:
+        return False
+
+    #Needed for accessing DB with a unicode DirName
+    if not isinstance(dirName, unicode):
+        dirName = unicode(dirName, 'utf_8')
+                
+    # Avoid processing the same dir again if we use a process method <> move    
+    myDB = db.DBConnection()
+    sqlResult = myDB.select("SELECT * FROM tv_episodes WHERE release_name = ?", [dirName])
+    if sqlResult:
+        returnStr += logHelper(u"You're trying to post process a dir that's already been processed, skipping", logger.DEBUG)
+        return True
     
+    # This is needed for video whose name differ from dirName
+    if not isinstance(videofile, unicode):
+        videofile = unicode(videofile, 'utf_8')            
+    
+    sqlResult = myDB.select("SELECT * FROM tv_episodes WHERE release_name = ?", [videofile.rpartition('.')[0]])
+    if sqlResult:
+        returnStr += logHelper(u"You're trying to post process a video that's already been processed, skipping", logger.DEBUG)
+        return True
+    
+    #Needed if we have downloaded the same episode @ different quality
+    search_sql = "SELECT tv_episodes.tvdbid, history.resource FROM tv_episodes INNER JOIN history ON history.showid=tv_episodes.showid"
+    search_sql += " WHERE history.season=tv_episodes.season and history.episode=tv_episodes.episode"
+    search_sql += " and tv_episodes.status IN (" + ",".join([str(x) for x in common.Quality.DOWNLOADED]) + ")"
+    search_sql += " and history.resource LIKE ?"
+    sqlResult = myDB.select(search_sql, [u'%' + videofile])
+    if sqlResult:
+        returnStr += logHelper(u"You're trying to post process a video that's already been processed, skipping", logger.DEBUG)
+        return True
+    
+    return False
