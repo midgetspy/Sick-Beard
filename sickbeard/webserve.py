@@ -753,6 +753,8 @@ class Manage:
 
         if sickbeard.TORRENT_METHOD == 'utorrent':
             t.webui_url = '/'.join(s.strip('/') for s in (t.webui_url, 'gui/'))
+        if sickbeard.TORRENT_METHOD == 'download_station':
+            t.webui_url = t.webui_url + 'download/'
             
         return _munge(t)
         
