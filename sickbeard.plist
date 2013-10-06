@@ -1,0 +1,44 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN"
+"http://www.apple.com/DTDs/PropertyList-1.0.dtd" >
+
+<!--
+Sick-Beard startup script for use by OS X launchd.
+daemon argument is not used due to OS X python issues; launchd is responsible for keeping the process alive.
+Once launched, Sick-Beard may be restarted via the web front end. If shut down by the web front end, it will automatically be relaunched.
+
+1) Set the user who will own the Sick-Beard process and files e.g. sickbeard
+2) Set the location of the Sick-Beard installation e.g. /usr/local/Sick-Beard or /opt/local/Sick-Beard or /Users/midgetspy/Sick-Beard
+3) Copy the script as root to the local launch daemon area:
+    sudo cp sickbeard.plist /Library/LaunchDaemons
+4) Launch Sick-Beard forever:
+    sudo launchctl load /Library/LaunchDaemons/sickbeard.plist
+
+To resolve any startup issues, most likely involving permissions, check the following logs:
+    /var/log/system.log
+    Sick-Beard/Logs/sickbeard.log
+
+To stop Sick-Beard and prevent future launch:
+    sudo launchctl unload /Library/LaunchDaemons/sickbeard.plist
+-->
+
+<plist version='1.0'>
+<dict>
+	<key>Label</key>
+	<string>sickbeard</string>
+	<key>UserName</key>
+	<!-- 1) replace with the user who owns the sickbeard files and will own the process -->
+	<string>SICKBEARD_USER</string>
+	<key>ProgramArguments</key>
+	<array>
+		<string>/usr/bin/python</string>
+		<string>SickBeard.py</string>
+		<string>-q</string>
+	</array>
+	<key>KeepAlive</key>
+	<true/>
+	<key>WorkingDirectory</key>
+	<!-- 2) replace with the directory in which sickbeard is installed -->
+	<string>/PATH/TO/Sick-Beard</string>
+</dict>
+</plist>
