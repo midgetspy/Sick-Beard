@@ -34,7 +34,7 @@ class GenericClient(object):
         logger.log(self.name + u': Requested a ' + method.upper() + ' connection to url '+ self.url + ' with Params= ' + str(params) + ' Data=' + str(data if data else 'None')[0:99] + ('...' if len(data if data else 'None') > 100 else ''), logger.DEBUG)
         
         if not self.auth:
-            logger.log(self.name + u': Autenthication Failed' , logger.ERROR)
+            logger.log(self.name + u': Authentication Failed' , logger.ERROR)
             return False
         
         try:
@@ -136,7 +136,7 @@ class GenericClient(object):
         logger.log(u'Calling ' + self.name + ' Client', logger.DEBUG)
 
         if not self._get_auth():
-            logger.log(self.name + u': Autenthication Failed' , logger.ERROR)
+            logger.log(self.name + u': Authentication Failed' , logger.ERROR)
             return r_code
         
         try:
