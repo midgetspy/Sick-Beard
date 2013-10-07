@@ -28,6 +28,9 @@ def _logHistoryItem(action, showid, season, episode, quality, resource, provider
 
     logDate = datetime.datetime.today().strftime(dateFormat)
 
+    if not isinstance(resource, unicode):
+        resource = unicode(resource, 'utf-8')
+
     myDB = db.DBConnection()
     myDB.action("INSERT INTO history (action, date, showid, season, episode, quality, resource, provider) VALUES (?,?,?,?,?,?,?,?)",
                 [action, logDate, showid, season, episode, quality, resource, provider])
