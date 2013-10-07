@@ -37,7 +37,7 @@ class EmailNotifier:
         
     def test_notify(self, host, port, smtp_from, use_tls, user, pwd, to):
         msg = MIMEText('This is a test message from Sick Beard.  If you\'re reading this, the test succeeded.')
-        msg['Subject'] = 'Sick Beard: Test Message '
+        msg['Subject'] = 'Sick Beard: Test Message'
         msg['From'] = smtp_from
         msg['To'] = to
         return self._sendmail(host, port, smtp_from, use_tls, user, pwd, [to], msg, True)
@@ -115,7 +115,7 @@ class EmailNotifier:
             	except:
 	            	msg = MIMEText(ep_name + ": " + lang)
 	            
-                msg['Subject'] = lang + 'Subtitle Downloaded: ' + ep_name
+                msg['Subject'] = lang + ' Subtitle Downloaded: ' + ep_name
                 msg['From'] = sickbeard.EMAIL_FROM
                 msg['To'] = ','.join(to)
                 if self._sendmail(sickbeard.EMAIL_HOST, sickbeard.EMAIL_PORT, sickbeard.EMAIL_FROM, sickbeard.EMAIL_TLS, sickbeard.EMAIL_USER, sickbeard.EMAIL_PASSWORD, to, msg):
