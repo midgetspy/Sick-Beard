@@ -76,23 +76,23 @@ function initFancybox() {
 
 function initTabs() {
   $("#config-components").tabs({
-        show: function(event, ui) {
+        activate: function(event, ui) {
 
             var lastOpenedPanel = $(this).data("lastOpenedPanel");
             var selected = $(this).tabs('option', 'selected');
 
             if (lastOpenedPanel) {
             } else {
-             lastOpenedPanel = $(this).tabs("option", "panel").find('.ui-tabs-panel').eq('0');
+            	lastOpenedPanel = $(ui.oldPanel)
             }
 
             if (!$(this).data("topPositionTab")) {
-                $(this).data("topPositionTab", $(ui.panel).position().top)
-            }         
+                $(this).data("topPositionTab", $(ui.newPanel).position()['top'])
+            }
 
             //Dont use the builtin fx effects. This will fade in/out both tabs, we dont want that
             //Fadein the new tab yourself            
-            $(ui.panel).hide().fadeIn(400);
+            $(ui.newPanel).hide().fadeIn(700);
 
             if (lastOpenedPanel) {
 
@@ -104,7 +104,7 @@ function initTabs() {
                     .toggleClass("ui-tabs-hide")
                     .css("position", "absolute")
                     .css("top", $(this).data("topPositionTab") + "px")
-                    .fadeOut(400, function() {
+                    .fadeOut(700, function() {
                         $(this)
                         .css("position", "");
                     });
@@ -112,7 +112,7 @@ function initTabs() {
             }
 
             //Saving the last tab has been opened
-            $(this).data("lastOpenedPanel", $(ui.panel));
+            $(this).data("lastOpenedPanel", $(ui.newPanel));
 
         }
 
