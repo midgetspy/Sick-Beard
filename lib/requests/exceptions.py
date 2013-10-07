@@ -9,14 +9,18 @@ This module contains the set of Requests' exceptions.
 """
 
 
-class RequestException(RuntimeError):
+class RequestException(IOError):
     """There was an ambiguous exception that occurred while handling your
     request."""
 
 
 class HTTPError(RequestException):
     """An HTTP error occurred."""
-    response = None
+
+    def __init__(self, *args, **kwargs):
+        """ Initializes HTTPError with optional `response` object. """
+        self.response = kwargs.pop('response', None)
+        super(HTTPError, self).__init__(*args, **kwargs)
 
 
 class ConnectionError(RequestException):
@@ -49,3 +53,7 @@ class InvalidSchema(RequestException, ValueError):
 
 class InvalidURL(RequestException, ValueError):
     """ The URL provided was somehow invalid. """
+
+
+class ChunkedEncodingError(RequestException):
+    """The server declared chunked encoding but sent an invalid chunk."""
