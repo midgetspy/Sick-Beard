@@ -51,7 +51,7 @@ def processDir (dirName, nzbName=None, recurse=False, force=False):
 
     returnStr = ''
 
-    returnStr += logHelper(u"Processing folder "+dirName, logger.DEBUG)
+    returnStr += logHelper(u"Processing folder " + dirName, logger.DEBUG)
 
     returnStr += logHelper(u"TV_DOWNLOAD_DIR: " + sickbeard.TV_DOWNLOAD_DIR, logger.DEBUG)
 
@@ -116,9 +116,9 @@ def processDir (dirName, nzbName=None, recurse=False, force=False):
         returnStr += processor.log
 
         if process_result:
-            returnStr += logHelper(u"Processing succeeded for "+cur_video_file_path)
+            returnStr += logHelper(u"Processing succeeded for " + cur_video_file_path)
         else:
-            returnStr += logHelper(u"Processing failed for "+cur_video_file_path+": "+process_fail_message, logger.WARNING)
+            returnStr += logHelper(u"Processing failed for " + cur_video_file_path+": "+process_fail_message, logger.WARNING)
 
     #Process Video File in all TV Subdir
     for dir in [x for x in dirs if validateDir(path, x)]:
@@ -154,9 +154,9 @@ def processDir (dirName, nzbName=None, recurse=False, force=False):
                 returnStr += processor.log
                     
                 if process_result:
-                    returnStr += logHelper(u"Processing succeeded for "+cur_video_file_path)
+                    returnStr += logHelper(u"Processing succeeded for " + cur_video_file_path)
                 else:
-                    returnStr += logHelper(u"Processing failed for "+cur_video_file_path+": "+process_fail_message, logger.WARNING)
+                    returnStr += logHelper(u"Processing failed for " + cur_video_file_path + ": " + process_fail_message, logger.WARNING)
                 
                 #If something fail abort the processing on dir
                 if not process_result:
@@ -170,6 +170,9 @@ def processDir (dirName, nzbName=None, recurse=False, force=False):
                     break
 
                 cur_file_path = ek.ek(os.path.join, processPath, cur_file)
+                
+                if not ek.ek(os.path.isfile, cur_file_path):
+                    continue #Prevent error when a notwantedfiles is an associated files
 
                 returnStr += logHelper(u"Deleting file " + cur_file, logger.DEBUG)
 
@@ -208,7 +211,7 @@ def validateDir(path, dirName):
     
     global process_result, returnStr
     
-    returnStr += logHelper(u"Processing folder "+dirName, logger.DEBUG)
+    returnStr += logHelper(u"Processing folder " + dirName, logger.DEBUG)
 
     # TODO: check if it's failed and deal with it if it is
     if ek.ek(os.path.basename, dirName).startswith('_FAILED_'):
