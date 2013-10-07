@@ -21,7 +21,13 @@
 import sickbeard
 import generic
 
-from sickbeard import helpers, logger, exceptions, tvcache
+try:
+    import xml.etree.cElementTree as etree
+except ImportError:
+    import elementtree.ElementTree as etree
+
+from sickbeard import helpers, logger, tvcache
+from sickbeard.exceptions import ex, AuthException
 
 
 class TorrentLeechProvider(generic.TorrentProvider):
@@ -39,6 +45,25 @@ class TorrentLeechProvider(generic.TorrentProvider):
     def imageName(self):
         return 'torrentleech.png'
 
+    def _checkAuth(self):
+
+        if not sickbeard.TORRENTLEECH_KEY:
+            raise AuthException("Your authentication credentials for " + self.name + " are missing, check your config.")
+        return True
+
+    def _checkAuthFromData(self, parsedXML):
+
+        if parsedXML is None:
+            return self._checkAuth()
+
+        description_text = helpers.get_xml_text(parsedXML.find('.//channel/item/description'))
+
+        if "Your RSS key is invalid" in description_text:
+            logger.log(u"Incorrect authentication credentials for " + self.name + " : " + str(description_text), logger.DEBUG)
+            raise AuthException(u"Your authentication credentials for " + self.name + " are incorrect, check your config")
+
+        return True
+
 
 class TorrentLeechCache(tvcache.TVCache):
 
@@ -50,33 +75,18 @@ class TorrentLeechCache(tvcache.TVCache):
 
     def _getRSSData(self):
 
-        if not sickbeard.TORRENTLEECH_KEY:
-            raise exceptions.AuthException("TorrentLeech requires an API key to work correctly")
+        rss_url = 'http://rss.torrentleech.org/' + sickbeard.TORRENTLEECH_KEY
+        logger.log(self.provider.name + u" cache update URL: " + rss_url, logger.DEBUG)
 
-        url = 'http://rss.torrentleech.org/' + sickbeard.TORRENTLEECH_KEY
-        logger.log(u"TorrentLeech cache update URL: " + url, logger.DEBUG)
+        data = self.provider.getURL(rss_url)
 
-        data = self.provider.getURL(url)
+        if not data:
+            logger.log(u"No data returned from " + rss_url, logger.ERROR)
+            return None
 
         return data
 
-    def _parseItem(self, item):
-        description = helpers.get_xml_text(item.getElementsByTagName('description')[0])
-
-        if "Your RSS key is invalid" in description:
-            raise exceptions.AuthException("TorrentLeech key invalid")
-
-        (title, url) = self.provider._get_title_and_url(item)
-
-        # torrentleech converts dots to spaces, undo this
-        title = title.replace(' ', '.')
-
-        if not title or not url:
-            logger.log(u"The XML returned from the TorrentLeech RSS feed is incomplete, this result is unusable", logger.ERROR)
-            return
-
-        logger.log(u"Adding item from RSS to cache: " + title, logger.DEBUG)
-
-        self._addCacheEntry(title, url)
+    def _checkAuth(self, parsedXML):
+            return self.provider._checkAuthFromData(parsedXML)
 
 provider = TorrentLeechProvider()

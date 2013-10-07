@@ -178,10 +178,11 @@ class ErrorViewer():
     def clear():
         ErrorViewer.errors = []
 
+
 class UIError():
     """
     Represents an error to be displayed in the web UI.
     """
     def __init__(self, message):
         self.message = message
-        self.time = datetime.datetime.now()
+        self.time = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')

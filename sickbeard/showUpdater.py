@@ -17,6 +17,7 @@
 # along with Sick Beard.  If not, see <http://www.gnu.org/licenses/>.
 
 import datetime
+import os
 
 import sickbeard
 
@@ -24,6 +25,8 @@ from sickbeard import logger
 from sickbeard import exceptions
 from sickbeard import ui
 from sickbeard.exceptions import ex
+from sickbeard import encodingKludge as ek
+
 
 class ShowUpdater():
 
@@ -40,10 +43,36 @@ class ShowUpdater():
         hourDiff = datetime.datetime.today().time().hour - updateTime.hour
 
         # if it's less than an interval after the update time then do an update (or if we're forcing it)
-        if hourDiff >= 0 and hourDiff < self.updateInterval.seconds/3600 or force:
+        if hourDiff >= 0 and hourDiff < self.updateInterval.seconds / 3600 or force:
             logger.log(u"Doing full update on all shows")
         else:
             return
+
+        if sickbeard.CACHE_DIR:
+            cache_dir = sickbeard.TVDB_API_PARMS['cache']
+            logger.log(u"Trying to clean cache folder " + cache_dir)
+
+            # Does our cache_dir exists
+            if not ek.ek(os.path.isdir, cache_dir):
+                logger.log(u"Can't clean " + cache_dir + " if it doesn't exist", logger.WARNING)
+            else:
+                now = datetime.datetime.now()
+                max_age = datetime.timedelta(hours=12)
+                # Get all our cache files
+                cache_files = ek.ek(os.listdir, cache_dir)
+
+                for cache_file in cache_files:
+                    cache_file_path = ek.ek(os.path.join, cache_dir, cache_file)
+
+                    if ek.ek(os.path.isfile, cache_file_path):
+                        cache_file_modified = datetime.datetime.fromtimestamp(ek.ek(os.path.getmtime, cache_file_path))
+
+                        if now - cache_file_modified > max_age:
+                            try:
+                                ek.ek(os.remove, cache_file_path)
+                            except OSError, e:
+                                logger.log(u"Unable to clean " + cache_dir + ": " + repr(e) + " / " + str(e), logger.WARNING)
+                                break
 
         piList = []
 

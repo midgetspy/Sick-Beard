@@ -17,14 +17,19 @@
 # along with Sick Beard.  If not, see <http://www.gnu.org/licenses/>.
 
 __all__ = ['ezrss',
+           'hdbits',
            'tvtorrents',
            'torrentleech',
            'nzbsrus',
            'womble',
            'btn',
            'nzbx',
+<<<<<<< HEAD
            'omgwtfnzbs',
            'ninjacentral',
+=======
+           'omgwtfnzbs'
+>>>>>>> upstream/master
            ]
 
 import sickbeard
