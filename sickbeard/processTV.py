@@ -118,7 +118,7 @@ def processDir (dirName, nzbName=None, recurse=False, force=False):
         if process_result:
             returnStr += logHelper(u"Processing succeeded for " + cur_video_file_path)
         else:
-            returnStr += logHelper(u"Processing failed for " + cur_video_file_path+": "+process_fail_message, logger.WARNING)
+            returnStr += logHelper(u"Processing failed for " + cur_video_file_path+": " + process_fail_message, logger.WARNING)
 
     #Process Video File in all TV Subdir
     for dir in [x for x in dirs if validateDir(path, x)]:
@@ -156,7 +156,7 @@ def processDir (dirName, nzbName=None, recurse=False, force=False):
                 if process_result:
                     returnStr += logHelper(u"Processing succeeded for " + cur_video_file_path)
                 else:
-                    returnStr += logHelper(u"Processing failed for " + cur_video_file_path + ": " + process_fail_message, logger.WARNING)
+                    returnStr += logHelper(u"Processing failed for " + cur_video_file_path + ": " + process_fail_message, logger.ERROR)
                 
                 #If something fail abort the processing on dir
                 if not process_result:
