@@ -329,6 +329,11 @@ def main():
     # Fire up all our threads
     sickbeard.start()
 
+    # TODO: remove once python 2.5 support is dropped
+    if sys.version_info < (2, 6):
+        logger.log(u"We are planning on removing python 2.5 support soon! Reach out to us if you are unable to upgrade to 2.6 or 2.7.", logger.ERROR)
+        sickbeard.ui.notifications.error('Heads up!', 'We are planning on removing python 2.5 support soon! Reach out to us if you are unable to upgrade to 2.6 or 2.7.')
+
     # Launch browser if we're supposed to
     if sickbeard.LAUNCH_BROWSER and not noLaunch and not sickbeard.DAEMON:
         sickbeard.launchBrowser(startPort)
