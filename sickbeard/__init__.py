@@ -30,12 +30,7 @@ from threading import Lock
 
 # apparently py2exe won't build these unless they're imported somewhere
 from sickbeard import providers, metadata
-<<<<<<< HEAD
-from providers import ezrss, tvtorrents, torrentleech, btn, nzbsrus, newznab, womble, nzbx, omgwtfnzbs, ninjacentral
-=======
-
-from providers import ezrss, tvtorrents, torrentleech, btn, nzbsrus, newznab, womble, nzbx, omgwtfnzbs, hdbits
->>>>>>> upstream/master
+from providers import ezrss, tvtorrents, torrentleech, btn, nzbsrus, newznab, womble, nzbx, omgwtfnzbs, hdbits, ninjacentral
 from sickbeard.config import CheckSection, check_setting_int, check_setting_str, ConfigMigrator
 
 from sickbeard import searchCurrent, searchBacklog, showUpdater, versionChecker, properFinder, autoPostProcesser
@@ -360,11 +355,7 @@ def initialize(consoleLogging=True):
                 showQueueScheduler, searchQueueScheduler, ROOT_DIRS, CACHE_DIR, ACTUAL_CACHE_DIR, TVDB_API_PARMS, \
                 NAMING_PATTERN, NAMING_MULTI_EP, NAMING_FORCE_FOLDERS, NAMING_ABD_PATTERN, NAMING_CUSTOM_ABD, \
                 RENAME_EPISODES, properFinderScheduler, PROVIDER_ORDER, autoPostProcesserScheduler, \
-<<<<<<< HEAD
-                NZBSRUS, NZBSRUS_UID, NZBSRUS_HASH, WOMBLE, NINJACENTRAL, NINJACENTRAL_UID, NINJACENTRAL_HASH, NZBX, NZBX_COMPLETION, OMGWTFNZBS, OMGWTFNZBS_UID, OMGWTFNZBS_KEY, providerList, newznabProviderList, \
-=======
-                NZBSRUS, NZBSRUS_UID, NZBSRUS_HASH, WOMBLE, NZBX, NZBX_COMPLETION, OMGWTFNZBS, OMGWTFNZBS_USERNAME, OMGWTFNZBS_APIKEY, providerList, newznabProviderList, \
->>>>>>> upstream/master
+                NZBSRUS, NZBSRUS_UID, NZBSRUS_HASH, WOMBLE, NINJACENTRAL, NINJACENTRAL_UID, NINJACENTRAL_HASH, NZBX, NZBX_COMPLETION, OMGWTFNZBS, OMGWTFNZBS_USERNAME, OMGWTFNZBS_APIKEY, providerList, newznabProviderList, \
                 EXTRA_SCRIPTS, USE_TWITTER, TWITTER_USERNAME, TWITTER_PASSWORD, TWITTER_PREFIX, \
                 USE_NOTIFO, NOTIFO_USERNAME, NOTIFO_APISECRET, NOTIFO_NOTIFY_ONDOWNLOAD, NOTIFO_NOTIFY_ONSNATCH, \
                 USE_BOXCAR, BOXCAR_USERNAME, BOXCAR_PASSWORD, BOXCAR_NOTIFY_ONDOWNLOAD, BOXCAR_NOTIFY_ONSNATCH, \

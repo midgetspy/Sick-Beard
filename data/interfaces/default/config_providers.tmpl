@@ -86,11 +86,7 @@
                                 <span class="component-title jumbo">Configure Provider:</span>
                                 <span class="component-desc">
                                     #set $provider_config_list = []
-<<<<<<< HEAD
-                                    #for $cur_provider in ("nzbs_r_us", "omgwtfnzbs", "tvtorrents", "torrentleech", "btn", "ninjacentral"):
-=======
-                                    #for $cur_provider in ("btn", "hdbits", "nzbs_r_us", "omgwtfnzbs", "tvtorrents", "torrentleech"):
->>>>>>> upstream/master
+                                    #for $cur_provider in ("btn", "hdbits", "nzbs_r_us", "omgwtfnzbs", "tvtorrents", "torrentleech", "ninjacentral"):
                                         #set $cur_provider_obj = $sickbeard.providers.getProviderClass($cur_provider)
                                         #if $cur_provider_obj.providerType == $GenericProvider.NZB and not $sickbeard.USE_NZBS:
                                             #continue

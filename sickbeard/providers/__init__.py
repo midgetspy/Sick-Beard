@@ -24,13 +24,8 @@ __all__ = ['ezrss',
            'womble',
            'btn',
            'nzbx',
-<<<<<<< HEAD
-           'omgwtfnzbs',
            'ninjacentral',
-=======
-           'omgwtfnzbs'
->>>>>>> upstream/master
-           ]
+           'omgwtfnzbs']
 
 import sickbeard
 

@@ -1042,12 +1042,8 @@ class ConfigProviders:
     @cherrypy.expose
     def saveProviders(self, nzbmatrix_username=None, nzbmatrix_apikey=None,
                       nzbs_r_us_uid=None, nzbs_r_us_hash=None, newznab_string='',
-<<<<<<< HEAD
-                      omgwtfnzbs_uid=None, omgwtfnzbs_key=None,
                       ninjacentral_uid=None, ninjacentral_hash=None,
-=======
                       omgwtfnzbs_username=None, omgwtfnzbs_apikey=None,
->>>>>>> upstream/master
                       tvtorrents_digest=None, tvtorrents_hash=None,
                       torrentleech_key=None,
                       btn_api_key=None, hdbits_username=None, hdbits_passkey=None,
