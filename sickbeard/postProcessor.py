@@ -61,7 +61,7 @@ class PostProcessor(object):
     FOLDER_NAME = 2
     FILE_NAME = 3
 
-    def __init__(self, file_path, nzb_name = None):
+    def __init__(self, file_path, nzb_name=None, process_method=None, is_priority=None):
         """
         Creates a new post processor with the given file path and optionally an NZB name.
         
@@ -83,9 +83,13 @@ class PostProcessor(object):
         # name of the NZB that resulted in this folder
         self.nzb_name = nzb_name
     
+        self.process_method = process_method if process_method else sickbeard.PROCESS_METHOD
+    
         self.in_history = False
         self.release_group = None
         self.is_proper = False
+        
+        self.is_priority = is_priority
 
         self.good_results = {self.NZB_NAME: False,
                              self.FOLDER_NAME: False,
@@ -750,6 +754,9 @@ class PostProcessor(object):
         Returns: True if the episode is priority, False otherwise.
         """
         
+        if self.is_priority:
+            return True
+        
         # if SB downloaded this on purpose then this is a priority download
         if self.in_history or ep_obj.status in common.Quality.SNATCHED + common.Quality.SNATCHED_PROPER:
             self._log(u"SB snatched this episode so I'm marking it as priority", logger.DEBUG)
@@ -914,13 +921,13 @@ class PostProcessor(object):
 
         try:
             # move the episode and associated files to the show dir
-            if sickbeard.PROCESS_METHOD == "copy":
+            if self.process_method == "copy":
                 self._copy(self.file_path, dest_path, new_base_name, sickbeard.MOVE_ASSOCIATED_FILES, sickbeard.USE_SUBTITLES and ep_obj.show.subtitles)
-            elif sickbeard.PROCESS_METHOD == "move":
+            elif self.process_method == "move":
                 self._move(self.file_path, dest_path, new_base_name, sickbeard.MOVE_ASSOCIATED_FILES, sickbeard.USE_SUBTITLES and ep_obj.show.subtitles)
-            elif sickbeard.PROCESS_METHOD == "hardlink":
+            elif self.process_method == "hardlink":
               self._hardlink(self.file_path, dest_path, new_base_name, sickbeard.MOVE_ASSOCIATED_FILES, sickbeard.USE_SUBTITLES and ep_obj.show.subtitles)
-            elif sickbeard.PROCESS_METHOD == "symlink":
+            elif self.process_method == "symlink":
               self._moveAndSymlink(self.file_path, dest_path, new_base_name, sickbeard.MOVE_ASSOCIATED_FILES, sickbeard.USE_SUBTITLES and ep_obj.show.subtitles)
             else:
               logger.log(u"Unknown process method: " + sickbeard.PROCESS_METHOD, logger.ERROR)
