@@ -54,6 +54,8 @@ class DelugeAPI(GenericClient):
                                 })
         self._request(method='post', data=post_data)
         
+        result.hash = self.response.json()['result']
+        
         return self.response.json()['result']
             
     def _add_torrent_file(self, result):
@@ -63,6 +65,8 @@ class DelugeAPI(GenericClient):
                                 "id": 2
                                 })           
         self._request(method='post', data=post_data)
+        
+        result.hash = self.response.json()['result']
         
         return self.response.json()['result']
     
