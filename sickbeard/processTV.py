@@ -47,8 +47,6 @@ def processDir(dirName, nzbName=None, process_method=None, force=False, is_prior
     force: True to postprocess already postprocessed files
     """
 
-    global process_result, returnStr
-
     returnStr = ''
 
     returnStr += logHelper(u"Processing folder " + dirName, logger.DEBUG)
@@ -76,8 +74,10 @@ def processDir(dirName, nzbName=None, process_method=None, force=False, is_prior
     returnStr += logHelper(u"PostProcessing Dirs: " + str(dirs), logger.DEBUG)
 
     rarFiles = filter(helpers.isRarFile, files)
-    files += unRAR(path, rarFiles)
+    rarContent = unRAR(path, rarFiles)
+    files += rarContent
     videoFiles = filter(helpers.isMediaFile, files)
+    videoInRar = filter(helpers.isMediaFile, rarContent)
 
     returnStr += logHelper(u"PostProcessing Files: " + str(files), logger.DEBUG)
     returnStr += logHelper(u"PostProcessing VideoFiles: " + str(videoFiles), logger.DEBUG)
@@ -89,7 +89,13 @@ def processDir(dirName, nzbName=None, process_method=None, force=False, is_prior
     if not process_method:
         process_method = sickbeard.PROCESS_METHOD
 
-    process_media(path, videoFiles, nzbName, process_method, force, is_priority)
+    #Don't Link media when the media is extracted from a rar in the same path
+    if process_method in ('hardlink', 'symlink') and videoInRar:
+        process_media(path, videoInRar, nzbName, 'move', force, is_priority)
+        process_media(path, set(videoFiles) - set(videoInRar), nzbName, process_method, force, is_priority)
+        delete_files(path, rarContent) 
+    else:
+        process_media(path, videoFiles, nzbName, process_method, force, is_priority)
 
     #Process Video File in all TV Subdir
     for dir in [x for x in dirs if validateDir(path, x)]:
@@ -99,25 +105,29 @@ def processDir(dirName, nzbName=None, process_method=None, force=False, is_prior
         for processPath, processDir, fileList in ek.ek(os.walk, ek.ek(os.path.join, path, dir), topdown=False):
 
             rarFiles = filter(helpers.isRarFile, fileList)
-            fileList += unRAR(processPath, rarFiles)
-            videoFiles = filter(helpers.isMediaFile, set(fileList))
+            rarContent = unRAR(processPath, rarFiles)
+            fileList = set(fileList + rarContent)
+            videoFiles = filter(helpers.isMediaFile, fileList)
+            videoInRar = filter(helpers.isMediaFile, rarContent)
             notwantedFiles = [x for x in fileList if x not in videoFiles]
 
-            # If nzbName is set and there's more than one videofile in the folder, files will be lost (overwritten).
-            if len(videoFiles) >= 2:
-                nzbName = None
+            #Don't Link media when the media is extracted from a rar in the same path
+            if process_method in ('hardlink', 'symlink') and videoInRar:
+                process_media(processPath, videoInRar, nzbName, 'move', force, is_priority)
+                process_media(processPath, set(videoFiles) - set(videoInRar), nzbName, process_method, force, is_priority)
+                delete_files(processPath, rarContent) 
+            else:
+                process_media(processPath, videoFiles, nzbName, process_method, force, is_priority)
 
-            process_media(processPath, videoFiles, nzbName, process_method, force, is_priority)
-
-            #Delete all file not needed
-            if process_method != "move" or not process_result:
-                break
-
-            delete_files(processPath, notwantedFiles)
-
-            if process_method == "move" and \
-            ek.ek(os.path.normpath, processPath) != ek.ek(os.path.normpath, sickbeard.TV_DOWNLOAD_DIR):
-                delete_dir(processPath)
+                #Delete all file not needed
+                if process_method != "move" or not process_result:
+                    break
+    
+                delete_files(processPath, notwantedFiles)
+    
+                if process_method == "move" and \
+                ek.ek(os.path.normpath, processPath) != ek.ek(os.path.normpath, sickbeard.TV_DOWNLOAD_DIR):
+                    delete_dir(processPath)
 
     return returnStr
 
@@ -273,7 +283,10 @@ def process_media(processPath, videoFiles, nzbName, process_method, force, is_pr
 
 def delete_files(processPath, notwantedFiles):
 
-    global returnStr
+    global returnStr, process_result
+
+    if not process_result:
+        return
 
     #Delete all file not needed
     for cur_file in notwantedFiles:
@@ -294,10 +307,10 @@ def delete_files(processPath, notwantedFiles):
                 ek.ek(os.chmod,cur_file_path,stat.S_IWRITE)
             except OSError, e:
                 returnStr += logHelper(u"Cannot change permissions of " + cur_file_path + ': ' + e.strerror, logger.DEBUG)
-            try:
-                ek.ek(os.remove, cur_file_path)
-            except OSError, e:
-                    returnStr += logHelper(u"Unable to delete file " + cur_file + ': ' + e.strerror, logger.DEBUG)
+        try:
+            ek.ek(os.remove, cur_file_path)
+        except OSError, e:
+            returnStr += logHelper(u"Unable to delete file " + cur_file + ': ' + e.strerror, logger.DEBUG)
 
 def delete_dir(processPath):
 
