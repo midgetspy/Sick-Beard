@@ -46,7 +46,9 @@ def processDir(dirName, nzbName=None, process_method=None, force=False, is_prior
     nzbName: The NZB name which resulted in this folder being downloaded
     force: True to postprocess already postprocessed files
     """
-
+    
+    global process_result, returnStr 
+    
     returnStr = ''
 
     returnStr += logHelper(u"Processing folder " + dirName, logger.DEBUG)
