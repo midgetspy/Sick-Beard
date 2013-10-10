@@ -115,7 +115,7 @@ def isMediaFile(filename):
 
     sepFile = filename.rpartition(".")
     
-    if re.search('extras?$', sepFile[2], re.I):
+    if re.search('extras?$', sepFile[0], re.I):
         return False
         
     if sepFile[2].lower() in mediaExtensions:
