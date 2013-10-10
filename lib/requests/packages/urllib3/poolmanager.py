@@ -6,11 +6,6 @@
 
 import logging
 
-try:  # Python 3
-    from urllib.parse import urljoin
-except ImportError:
-    from urlparse import urljoin
-
 from ._collections import RecentlyUsedContainer
 from .connectionpool import HTTPConnectionPool, HTTPSConnectionPool
 from .connectionpool import connection_from_url, port_by_scheme
@@ -104,16 +99,15 @@ class PoolManager(RequestMethods):
 
         pool_key = (scheme, host, port)
 
-        with self.pools.lock:
-          # If the scheme, host, or port doesn't match existing open connections,
-          # open a new ConnectionPool.
-          pool = self.pools.get(pool_key)
-          if pool:
-              return pool
+        # If the scheme, host, or port doesn't match existing open connections,
+        # open a new ConnectionPool.
+        pool = self.pools.get(pool_key)
+        if pool:
+            return pool
 
-          # Make a fresh ConnectionPool of the desired type
-          pool = self._new_pool(scheme, host, port)
-          self.pools[pool_key] = pool
+        # Make a fresh ConnectionPool of the desired type
+        pool = self._new_pool(scheme, host, port)
+        self.pools[pool_key] = pool
         return pool
 
     def connection_from_url(self, url):
@@ -151,10 +145,6 @@ class PoolManager(RequestMethods):
         if not redirect_location:
             return response
 
-        # Support relative URLs for redirecting.
-        redirect_location = urljoin(url, redirect_location)
-
-        # RFC 2616, Section 10.3.4
         if response.status == 303:
             method = 'GET'
 
@@ -181,9 +171,9 @@ class ProxyManager(RequestMethods):
         """
         headers_ = {'Accept': '*/*'}
 
-        netloc = parse_url(url).netloc
-        if netloc:
-            headers_['Host'] = netloc
+        host = parse_url(url).host
+        if host:
+            headers_['Host'] = host
 
         if headers:
             headers_.update(headers)
