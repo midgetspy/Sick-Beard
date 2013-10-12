@@ -201,6 +201,138 @@ $(document).ready(function(){
 
     });
 
+    // torrent rss
+
+    var torrentRSSProviders = new Array();
+
+    $.fn.addTorrentRSSProvider = function (id, name, url, isDefault) {
+        url = $.trim(url);
+        if (!url)
+            return;
+
+        if (!/^https?:\/\//i.test(url))
+            url = "http://" + url;
+
+        var newData = [isDefault, [name, url]];
+        torrentRSSProviders[id] = newData;
+
+        if (!isDefault) {
+            $('#editTorrentRSSProvider').addOption(id, name);
+            $(this).populateTorrentRSSSection();
+        }
+
+        if ($('#providerOrderList > #'+id).length == 0) {
+            var toAdd = '<li class="ui-state-default" id="'+id+'"> <input type="checkbox" id="enable_'+id+'" class="provider_enabler" CHECKED> <a href="'+url+'" class="imgLink" target="_new"><img src="'+sbRoot+'/images/providers/torrentrss.png" alt="'+name+'" width="16" height="16"></a> '+name+'</li>';
+
+            $('#providerOrderList').append(toAdd);
+            $('#providerOrderList').sortable("refresh");
+        }
+
+        $(this).makeTorrentRSSProviderString();
+    }
+
+    $.fn.updateTorrentRSSProvider = function (id, url) {
+        torrentRSSProviders[id][1][1] = url;
+        $(this).populateTorrentRSSSection();
+        $(this).makeTorrentRSSProviderString();
+    }
+
+    $.fn.deleteTorrentRSSProvider = function (id) {
+        $('#editTorrentRSSProvider').removeOption(id);
+        delete torrentRSSProviders[id];
+        $(this).populateTorrentRSSSection();
+
+        $('#providerOrderList > #'+id).remove();
+
+        $(this).makeTorrentRSSProviderString();
+    }
+
+    $.fn.populateTorrentRSSSection = function() {
+        var selectedProvider = $('#editTorrentRSSProvider :selected').val();
+
+        if (selectedProvider == 'addTorrentRSS') {
+            var data = ['','',''];
+            var isDefault = 0;
+            $('#torrentrss_add_div').show();
+            $('#torrentrss_update_div').hide();
+        } else {
+            var data = torrentRSSProviders[selectedProvider][1];
+            var isDefault = torrentRSSProviders[selectedProvider][0];
+            $('#torrentrss_add_div').hide();
+            $('#torrentrss_update_div').show();
+        }
+
+        $('#torrentrss_name').val(data[0]);
+        $('#torrentrss_url').val(data[1]);
+
+        if (selectedProvider == 'addTorrentRSS') {
+            $('#torrentrss_name').removeAttr("disabled");
+            $('#torrentrss_url').removeAttr("disabled");
+        } else {
+            $('#torrentrss_name').attr("disabled", "disabled");
+
+            if (isDefault) {
+                $('#torrentrss_url').attr("disabled", "disabled");
+                $('#torrentrss_delete').attr("disabled", "disabled");
+            } else {
+                $('#torrentrss_url').removeAttr("disabled");
+                $('#torrentrss_delete').removeAttr("disabled");
+            }
+        }
+    }
+
+    $.fn.makeTorrentRSSProviderString = function() {
+        var provStrings = new Array();
+
+        for (var id in torrentRSSProviders) {
+            provStrings.push(torrentRSSProviders[id][1].join('|'));
+        }
+
+        $('#torrentrss_string').val(provStrings.join('!!!'));
+    }
+
+    $('#torrentrss_url').change(function(){
+        var selectedProvider = $('#editTorrentRSSProvider :selected').val();
+
+        if (selectedProvider == "addTorrentRSS")
+            return;
+
+        var url = $('#torrentrss_url').val();
+
+        $(this).updateTorrentRSSProvider(selectedProvider, url);
+    });
+
+    $('#editTorrentRSSProvider').change(function(){
+        $(this).populateTorrentRSSSection();
+    });
+
+    $('#torrentrss_add').click(function(){
+        var selectedProvider = $('#editTorrentRSSProvider :selected').val();
+
+        var name = $('#torrentrss_name').val();
+        var url = $('#torrentrss_url').val();
+
+        var params = { name: name };
+
+        // send to the form with ajax, get a return value
+        $.getJSON(sbRoot + '/config/providers/canAddTorrentRSSProvider', params,
+            function(data){
+                if (data.error != undefined) {
+                    alert(data.error);
+                    return;
+                }
+
+                $(this).addTorrentRSSProvider(data.success, name, url, 0);
+        });
+
+
+    });
+
+    $('.torrentrss_delete').click(function(){
+        var selectedProvider = $('#editTorrentRSSProvider :selected').val();
+        $(this).deleteTorrentRSSProvider(selectedProvider);
+    });
+
     // initialization stuff
 
     $(this).showHideProviders();

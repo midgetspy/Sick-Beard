@@ -83,6 +83,7 @@ loadingShowList = None
 
 providerList = []
 newznabProviderList = []
+torrentRSSProviderList = []
 metadata_provider_dict = {}
 
 NEWEST_VERSION = None
@@ -352,7 +353,8 @@ def initialize(consoleLogging=True):
                 showQueueScheduler, searchQueueScheduler, ROOT_DIRS, CACHE_DIR, ACTUAL_CACHE_DIR, TVDB_API_PARMS, \
                 NAMING_PATTERN, NAMING_MULTI_EP, NAMING_FORCE_FOLDERS, NAMING_ABD_PATTERN, NAMING_CUSTOM_ABD, \
                 RENAME_EPISODES, properFinderScheduler, PROVIDER_ORDER, autoPostProcesserScheduler, \
-                NZBSRUS, NZBSRUS_UID, NZBSRUS_HASH, WOMBLE, NZBX, NZBX_COMPLETION, OMGWTFNZBS, OMGWTFNZBS_USERNAME, OMGWTFNZBS_APIKEY, providerList, newznabProviderList, \
+                NZBSRUS, NZBSRUS_UID, NZBSRUS_HASH, WOMBLE, NZBX, NZBX_COMPLETION, OMGWTFNZBS, OMGWTFNZBS_USERNAME, OMGWTFNZBS_APIKEY, \
+                providerList, newznabProviderList, torrentRSSProviderList, \
                 EXTRA_SCRIPTS, USE_TWITTER, TWITTER_USERNAME, TWITTER_PASSWORD, TWITTER_PREFIX, \
                 USE_NOTIFO, NOTIFO_USERNAME, NOTIFO_APISECRET, NOTIFO_NOTIFY_ONDOWNLOAD, NOTIFO_NOTIFY_ONSNATCH, \
                 USE_BOXCAR, BOXCAR_USERNAME, BOXCAR_PASSWORD, BOXCAR_NOTIFY_ONDOWNLOAD, BOXCAR_NOTIFY_ONSNATCH, \
@@ -551,6 +553,11 @@ def initialize(consoleLogging=True):
         CheckSection(CFG, 'Newznab')
         newznabData = check_setting_str(CFG, 'Newznab', 'newznab_data', '')
         newznabProviderList = providers.getNewznabProviderList(newznabData)
+
+        CheckSection(CFG, 'TorrentRSS')
+        torrentRSSData = check_setting_str(CFG, 'TorrentRSS', 'torrentrss_data', '')
+        torrentRSSProviderList = providers.getTorrentRSSProviderList(torrentRSSData)
+
         providerList = providers.makeProviderList()
 
         CheckSection(CFG, 'Blackhole')
@@ -1231,6 +1238,9 @@ def save_config():
 
     new_config['Newznab'] = {}
     new_config['Newznab']['newznab_data'] = '!!!'.join([x.configStr() for x in newznabProviderList])
+
+    new_config['TorrentRSS'] = {}
+    new_config['TorrentRSS']['torrentrss_data'] = '!!!'.join([x.configStr() for x in torrentRSSProviderList])
 
     new_config['GUI'] = {}
     new_config['GUI']['coming_eps_layout'] = COMING_EPS_LAYOUT
