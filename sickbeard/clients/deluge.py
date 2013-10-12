@@ -32,8 +32,6 @@ class DelugeAPI(GenericClient):
         self.url = self.host + 'json'
            
     def _get_auth(self):
-
-        logger.log(self.name + u': _get_auth', logger.DEBUG)
         
         post_data = json.dumps({"method": "auth.login",
                                 "params": [self.password],
@@ -47,7 +45,6 @@ class DelugeAPI(GenericClient):
         self.auth = self.response.json()["result"]
         
         
-        # check connected using .connected () = boolean
         post_data = json.dumps({"method": "web.connected",
                                 "params": [],
                                 "id": 10
@@ -58,8 +55,7 @@ class DelugeAPI(GenericClient):
             return None
         
         connected = self.response.json()['result']
-        # connect if not connected
-        # using .get_hosts () = [%id,%ip,%port,%status]
+        
         if not connected:
             post_data = json.dumps({"method": "web.get_hosts",
                                     "params": [],
@@ -72,9 +68,8 @@ class DelugeAPI(GenericClient):
             hosts = self.response.json()['result']
             if len(hosts) == 0:
                 logger.log(self.name + u': WebUI does not contain daemons', logger.ERROR)
-                return None # give error msg?
+                return None
             
-            # .connect (%id) = null
             post_data = json.dumps({"method": "web.connect",
                                     "params": [hosts[0][0]],
                                     "id": 11
@@ -97,7 +92,7 @@ class DelugeAPI(GenericClient):
             connected = self.response.json()['result']
             if not connected:
                 logger.log(self.name + u': WebUI could not connect to daemon', logger.ERROR)
-                return None # give error msg?
+                return None
         
         return self.auth
      
