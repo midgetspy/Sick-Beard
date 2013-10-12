@@ -18,6 +18,9 @@
 #for $curNewznabProvider in $sickbeard.newznabProviderList:
     \$(this).addProvider('$curNewznabProvider.getID()', '$curNewznabProvider.name', '$curNewznabProvider.url', '$curNewznabProvider.key', $int($curNewznabProvider.default));
 #end for
+#for $curTorrentRSSProvider in $sickbeard.torrentRSSProviderList:
+    \$(this).addTorrentRSSProvider('$curTorrentRSSProvider.getID()', '$curTorrentRSSProvider.name', '$curTorrentRSSProvider.url', $int($curTorrentRSSProvider.default));
+#end for
 });
 //-->
 </script>
@@ -265,6 +268,53 @@
                 <input type="button" class="btn btn-danger newznab_delete" id="newznab_delete" value="Delete" />
             </div>
 </div>
+
+                    </fieldset>
+                </div><!-- /component-group3 //-->
+#end if
+#if $sickbeard.USE_TORRENTS:
+
+                <div id="core-component-group3" class="component-group clearfix">
+
+                    <div class="component-group-desc">
+                        <h3>Configure Custom Torrent RSS Providers</h3>
+                        <p>Add and setup custom Torrent RSS providers.</p>
+                        <p>Provider does not support backlog searches at this time.</p>
+                    </div>
+
+                    <fieldset class="component-group-list">
+                        <div class="field-pair">
+                            <label class="clearfix">
+                                <span class="component-title jumbo">Select Provider:</span>
+                                <span class="component-desc">
+                                    <input type="hidden" name="torrentrss_string" id="torrentrss_string" />
+                                    <select id="editTorrentRSSProvider">
+                                        <option value="addTorrentRSS">-- add new provider --</option>
+                                    </select>
+                                </span>
+                            </label>
+                        </div>
+
+                        <div class="torrentRSSProviderDiv" id="addTorrentRSS">
+                            <div class="field-pair">
+                                <label class="nocheck clearfix">
+                                    <span class="component-title">Provider Name</span>
+                                    <input class="component-desc" type="text" id="torrentrss_name" size="40" />
+                                </label>
+                            </div>
+                            <div class="field-pair">
+                                <label class="nocheck clearfix">
+                                    <span class="component-title">Torrent RSS feed URL</span>
+                                    <input class="component-desc" type="text" id="torrentrss_url" size="40" />
+                                </label>
+                            </div>
+                            <div id="torrentrss_add_div">
+                                <input type="button" class="btn torrentrss_save" id="torrentrss_add" value="Add" />
+                            </div>
+                            <div id="torrentrss_update_div" style="display: none;">
+                                <input type="button" class="btn btn-danger torrentrss_delete" id="torrentrss_delete" value="Delete" />
+                            </div>
+                        </div>
 
                     </fieldset>
                 </div><!-- /component-group3 //-->

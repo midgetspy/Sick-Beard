@@ -34,7 +34,7 @@ from os import sys
 
 def sortedProviderList():
 
-    initialList = sickbeard.providerList + sickbeard.newznabProviderList
+    initialList = sickbeard.providerList + sickbeard.newznabProviderList + sickbeard.torrentRSSProviderList
     providerDict = dict(zip([x.getID() for x in initialList], initialList))
 
     newList = []
@@ -103,6 +103,47 @@ def makeNewznabProvider(configString):
 
 def getDefaultNewznabProviders():
     return 'Sick Beard Index|http://lolo.sickbeard.com/|0|0!!!NZBs.org|http://nzbs.org/||0!!!Usenet-Crawler|http://www.usenet-crawler.com/||0'
+
+
+def getTorrentRSSProviderList(data):
+
+    defaultList = [makeTorrentRSSProvider(x) for x in getDefaultTorrentRSSProviders().split('!!!')]
+    providerList = filter(lambda x: x, [makeTorrentRSSProvider(x) for x in data.split('!!!')])
+
+    providerDict = dict(zip([x.name for x in providerList], providerList))
+
+    for curDefault in defaultList:
+        if not curDefault:
+            continue
+
+        if curDefault.name not in providerDict:
+            curDefault.default = True
+            providerList.append(curDefault)
+        else:
+            providerDict[curDefault.name].default = True
+            providerDict[curDefault.name].name = curDefault.name
+            providerDict[curDefault.name].url = curDefault.url
+
+    return filter(lambda x: x, providerList)
+
+
+def makeTorrentRSSProvider(configString):
+
+    if not configString:
+        return None
+
+    name, url, enabled = configString.split('|')
+
+    torrentRSS = sys.modules['sickbeard.providers.torrentrss']
+
+    newProvider = torrentRSS.TorrentRSSProvider(name, url)
+    newProvider.enabled = enabled == '1'
+
+    return newProvider
+
+
+def getDefaultTorrentRSSProviders():
+    return ''
 
 
 def getProviderModule(name):
