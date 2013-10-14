@@ -580,65 +580,6 @@
 
                 <div class="component-group clearfix">
                     <div class="component-group-desc">
-                        <img class="notifier-icon" src="$sbRoot/images/notifiers/notifo.png" alt="" title="Notifo" />
-                        <h3><a href="http://notifo.com/" rel="noreferrer" onclick="window.open('${sickbeard.ANON_REDIRECT}' + this.href, '_blank'); return false;">Notifo</a></h3>
-                        <p>A platform for push-notifications to either mobile or desktop clients</p>
-                    </div>
-                    <fieldset class="component-group-list">
-                        <div class="field-pair">
-                            <input type="checkbox" class="enabler" name="use_notifo" id="use_notifo" #if $sickbeard.USE_NOTIFO then "checked=\"checked\"" else ""# />
-                            <label class="clearfix" for="use_notifo">
-                                <span class="component-title">Enable</span>
-                                <span class="component-desc">Should Sick Beard send notifications through Notifo?</span>
-                            </label>
-                        </div>
-
-                        <div id="content_use_notifo">
-                            <div class="field-pair">
-                                <input type="checkbox" name="notifo_notify_onsnatch" id="notifo_notify_onsnatch" #if $sickbeard.NOTIFO_NOTIFY_ONSNATCH then "checked=\"checked\"" else ""# />
-                                <label class="clearfix" for="notifo_notify_onsnatch">
-                                    <span class="component-title">Notify on Snatch</span>
-                                    <span class="component-desc">Send notification when we start a download?</span>
-                                </label>
-                            </div>
-                            <div class="field-pair">
-                                <input type="checkbox" name="notifo_notify_ondownload" id="notifo_notify_ondownload" #if $sickbeard.NOTIFO_NOTIFY_ONDOWNLOAD then "checked=\"checked\"" else ""# />
-                                <label class="clearfix" for="notifo_notify_ondownload">
-                                    <span class="component-title">Notify on Download</span>
-                                    <span class="component-desc">Send notification when we finish a download?</span>
-                                </label>
-                            </div>
-                            <div class="field-pair">
-                                <label class="nocheck clearfix">
-                                    <span class="component-title">Notifo Username</span>
-                                    <input type="text" name="notifo_username" id="notifo_username" value="$sickbeard.NOTIFO_USERNAME" size="35" />
-                                </label>
-                                <label class="nocheck clearfix">
-                                    <span class="component-title">&nbsp;</span>
-                                    <span class="component-desc">Username of your Notifo account</span>
-                                </label>
-                            </div>
-                            <div class="field-pair">
-                                <label class="nocheck clearfix">
-                                    <span class="component-title">Notifo API secret</span>
-                                    <input type="password" name="notifo_apisecret" id="notifo_apisecret" value="$sickbeard.NOTIFO_APISECRET" size="35" />
-                                </label>
-                                <label class="nocheck clearfix">
-                                    <span class="component-title">&nbsp;</span>
-                                    <span class="component-desc">Get your key at:  <a href="http://notifo.com/user/settings" rel="noreferrer" onclick="window.open('${sickbeard.ANON_REDIRECT}' + this.href, '_blank'); return false;">http://notifo.com/user/settings</a></span>
-                                </label>
-                            </div>
-                            <div class="testNotification" id="testNotifo-result">Click below to test.</div>
-                            <input type="button" class="btn" value="Test Notifo" id="testNotifo" />
-                            <input type="submit" class="btn config_submitter" value="Save Changes" />
-                        </div><!-- /content_use_notifo //-->
-
-                    </fieldset>
-                </div><!-- /notifo component-group //-->
-
-
-                <div class="component-group clearfix">
-                    <div class="component-group-desc">
                         <img class="notifier-icon" src="$sbRoot/images/notifiers/libnotify.png" alt="" title="Libnotify" />
                         <h3><a href="http://library.gnome.org/devel/libnotify/" rel="noreferrer" onclick="window.open('${sickbeard.ANON_REDIRECT}' + this.href, '_blank'); return false;">Libnotify</a></h3>
                         <p>The standard desktop notification API for Linux/*nix systems.  This notifier will only function if the pynotify module is installed (Ubuntu/Debian package <a href="apt:python-notify">python-notify</a>).</p>
