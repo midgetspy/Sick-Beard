@@ -228,6 +228,7 @@ $(document).ready(function(){
 
       var config_id = $(this).find("input").attr('id').replace("enable_", "") + "Div";
       var config_form = '<div id="config"><form id="configForm_tip" action="saveProviders" method="post"><fieldset class="component-group-list tip_scale"><div class="providerDiv_tip">' + $("div[id*="+config_id+"]").html() + '</div></fieldset></form></div>'
+      var provider_name =  $.trim($(this).text()).replace('*','')
   
       if ($("div[id*="+config_id+"]").length == 0) {
         return false
@@ -257,7 +258,7 @@ $(document).ready(function(){
           content: {
           text: config_form,
                 title: {
-                    text: 'Config Provider',
+                    text: provider_name + ' Config',
                     button: true
                 }
           },
@@ -439,11 +440,11 @@ $(document).ready(function(){
 
     // initialization stuff
 
-  $(this).hideConfigTab();
+    $(this).hideConfigTab();
 
-  $(this).showHideProviders();
+    $(this).showHideProviders();
 
-  $(this).showProvidersConfig();
+    $(this).showProvidersConfig();
 
     $("#provider_order_list").sortable({
         placeholder: 'ui-state-highlight',

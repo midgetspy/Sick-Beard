@@ -167,29 +167,6 @@ class Quality:
             if regex_match:
                 return x
         
-#        checkName = lambda list, func: func([re.search(x, name, re.I) for x in list])
-#
-#        if checkName(["(pdtv|hdtv|dsr|tvrip|web.dl|webrip).(xvid|x264|h.?264)"], all) and not checkName(["(720|1080)[pi]"], all):
-#            return Quality.SDTV
-#        elif checkName(["(dvdrip|bdrip)(.ws)?.(xvid|divx|x264)"], any) and not checkName(["(720|1080)[pi]"], all):
-#            return Quality.SDDVD
-#        elif checkName(["720p", "hdtv", "x264"], all) or checkName(["hr.ws.pdtv.x264"], any) and not checkName(["(1080)[pi]"], all):          
-#            return Quality.HDTV                                                                        
-#        elif checkName(["720p|1080i", "hdtv", "mpeg2"], all):
-#            return Quality.RAWHDTV                                                                     
-#        elif checkName(["1080p", "hdtv", "x264"], all):         
-#            return Quality.FULLHDTV                                                                    
-#        elif checkName(["720p", "web.dl|webrip", "h.?264"], all) or checkName(["720p", "itunes", "h.?264"], all):
-#            return Quality.HDWEBDL                                                                     
-#        elif checkName(["1080p", "web.dl|webrip", "h.?264"], all) or checkName(["1080p", "itunes", "h.?264"], all):     
-#            return Quality.FULLHDWEBDL                                                                 
-#        elif checkName(["720p", "bluray|hddvd", "x264"], all):
-#            return Quality.HDBLURAY                                                                    
-#        elif checkName(["1080p", "bluray|hddvd", "x264"], all):
-#            return Quality.FULLHDBLURAY
-#        else:
-#            return Quality.UNKNOWN
-
     @staticmethod
     def sceneQuality(name):
         """

@@ -5,7 +5,7 @@
 # the MIT License: http://www.opensource.org/licenses/mit-license.php
 
 from collections import MutableMapping
-from threading import RLock
+from threading import Lock
 
 try: # Python 2.7+
     from collections import OrderedDict
@@ -40,18 +40,18 @@ class RecentlyUsedContainer(MutableMapping):
         self.dispose_func = dispose_func
 
         self._container = self.ContainerCls()
-        self.lock = RLock()
+        self._lock = Lock()
 
     def __getitem__(self, key):
         # Re-insert the item, moving it to the end of the eviction line.
-        with self.lock:
+        with self._lock:
             item = self._container.pop(key)
             self._container[key] = item
             return item
 
     def __setitem__(self, key, value):
         evicted_value = _Null
-        with self.lock:
+        with self._lock:
             # Possibly evict the existing value of 'key'
             evicted_value = self._container.get(key, _Null)
             self._container[key] = value
@@ -65,21 +65,21 @@ class RecentlyUsedContainer(MutableMapping):
             self.dispose_func(evicted_value)
 
     def __delitem__(self, key):
-        with self.lock:
+        with self._lock:
             value = self._container.pop(key)
 
         if self.dispose_func:
             self.dispose_func(value)
 
     def __len__(self):
-        with self.lock:
+        with self._lock:
             return len(self._container)
 
     def __iter__(self):
         raise NotImplementedError('Iteration over this class is unlikely to be threadsafe.')
 
     def clear(self):
-        with self.lock:
+        with self._lock:
             # Copy pointers to all values, then wipe the mapping
             # under Python 2, this copies the list of values twice :-|
             values = list(self._container.values())
@@ -90,5 +90,5 @@ class RecentlyUsedContainer(MutableMapping):
                 self.dispose_func(value)
 
     def keys(self):
-        with self.lock:
+        with self._lock:
             return self._container.keys()

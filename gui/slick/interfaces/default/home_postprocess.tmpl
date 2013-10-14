@@ -12,10 +12,26 @@
 #else 
 	<h1 class="title">$title</h1>
 #end if
-<form name="processForm" method="post" action="processEpisode">
-Enter the folder containing the episode: <input type="text" name="dir" id="episodeDir" size="50" /> <input class="btn" type="submit" value="Process" />
+<form name="processForm" method="post" action="processEpisode" style="line-height: 44px">
+<b>Enter the folder containing the episode:</b> <input type="text" name="dir" id="episodeDir" size="50" /><br/>
+<b>Process Method to be used:</b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;    
+<select name="process_method" id="process_method" class="input-medium" >
+    #set $process_method_text = {'copy': "Copy", 'move': "Move", 'hardlink': "Hard Link", 'symlink' : "Symbolic Link"}
+    #for $curAction in ('copy', 'move', 'hardlink', 'symlink'):
+      #if $sickbeard.PROCESS_METHOD == $curAction:
+        #set $process_method = "selected=\"selected\""
+      #else
+        #set $process_method = ""
+      #end if
+    <option value="$curAction" $process_method>$process_method_text[$curAction]</option>
+    #end for
+</select><br/>
+<b>Force already Post Processed Dir/Files:</b> &nbsp <input id="force" name="force" type="checkbox"><br/>
+<b>Mark Dir/Files as priority download:</b> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<input id="is_priority" name="is_priority" type="checkbox"><br/>
+<span style="line-height: 0; font-size: 12px;"><i>(Check it to replace the file even if it exists at higher quality)</i></span><br/><br/>
+<input id="submit" class="btn btn-primary" type="submit" value="Process" />
 </form>
-<br />
+
 
 <script type="text/javascript" charset="utf-8">
 <!--
