@@ -32,7 +32,7 @@ class DelugeAPI(GenericClient):
         self.url = self.host + 'json'
            
     def _get_auth(self):
-
+        
         post_data = json.dumps({"method": "auth.login",
                                 "params": [self.password],
                                 "id": 1
@@ -43,6 +43,56 @@ class DelugeAPI(GenericClient):
             return None     
         
         self.auth = self.response.json()["result"]
+        
+        
+        post_data = json.dumps({"method": "web.connected",
+                                "params": [],
+                                "id": 10
+                                })
+        try:
+            self.response = self.session.post(self.url, data=post_data.encode('utf-8'))
+        except:
+            return None
+        
+        connected = self.response.json()['result']
+        
+        if not connected:
+            post_data = json.dumps({"method": "web.get_hosts",
+                                    "params": [],
+                                    "id": 11
+                                    })
+            try:
+                self.response = self.session.post(self.url, data=post_data.encode('utf-8'))
+            except:
+                return None
+            hosts = self.response.json()['result']
+            if len(hosts) == 0:
+                logger.log(self.name + u': WebUI does not contain daemons', logger.ERROR)
+                return None
+            
+            post_data = json.dumps({"method": "web.connect",
+                                    "params": [hosts[0][0]],
+                                    "id": 11
+                                    })
+            try:
+                self.response = self.session.post(self.url, data=post_data.encode('utf-8'))
+            except:
+                return None
+            
+            
+            post_data = json.dumps({"method": "web.connected",
+                                    "params": [],
+                                    "id": 10
+                                    })
+            try:
+                self.response = self.session.post(self.url, data=post_data.encode('utf-8'))
+            except:
+                return None
+
+            connected = self.response.json()['result']
+            if not connected:
+                logger.log(self.name + u': WebUI could not connect to daemon', logger.ERROR)
+                return None
         
         return self.auth
      
