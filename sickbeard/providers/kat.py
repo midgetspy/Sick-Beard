@@ -248,7 +248,7 @@ class KATProvider(generic.TorrentProvider):
                             trusted =  True if tr.find('img', {'alt': 'verified'}) else False
                             seeders = int(tr.find_all('td')[-2].text)
                             leechers = int(tr.find_all('td')[-1].text)
-                        except AttributeError:
+                        except AttributeError, TypeError:
                             continue
 
                         if mode != 'RSS' and seeders == 0:
