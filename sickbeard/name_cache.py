@@ -27,7 +27,7 @@ def addNameToCache(name, tvdb_id):
     tvdb_id: The tvdb id that this show should be cached with (can be None/0 for unknown)
     """
     
-    # standardize the name we're using to account for small differences in providers (aka NZBMatrix sucks)
+    # standardize the name we're using to account for small differences in providers
     name = sanitizeSceneName(name)
     
     if not tvdb_id:
@@ -45,7 +45,7 @@ def retrieveNameFromCache(name):
     Returns: the tvdb id that resulted from the cache lookup or None if the show wasn't found in the cache
     """
     
-    # standardize the name we're using to account for small differences in providers (aka NZBMatrix sucks)
+    # standardize the name we're using to account for small differences in providers
     name = sanitizeSceneName(name)
     
     cacheDB = db.DBConnection('cache.db')
