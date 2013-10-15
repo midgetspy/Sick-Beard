@@ -81,6 +81,8 @@ class Quality:
     FULLHDWEBDL = 1 << 6  # 64 -- 1080p web-dl
     HDBLURAY = 1 << 7     # 128
     FULLHDBLURAY = 1 << 8 # 256
+    HD10BIT = 1 << 9      # 512
+    FULLHD10BIT = 1 << 10 # 1024
 
     # put these bits at the other end of the spectrum, far enough out that they shouldn't interfere
     UNKNOWN = 1 << 15     # 32768
@@ -95,7 +97,9 @@ class Quality:
                       HDWEBDL: "720p WEB-DL",
                       FULLHDWEBDL: "1080p WEB-DL",
                       HDBLURAY: "720p BluRay",
-                      FULLHDBLURAY: "1080p BluRay"}
+                      FULLHDBLURAY: "1080p BluRay",
+                      HD10BIT: "720p 10bit",
+                      FULLHD10BIT: "1080p 10bit"}
 
     statusPrefixes = {DOWNLOADED: "Downloaded",
                       SNATCHED: "Snatched"}
@@ -163,6 +167,10 @@ class Quality:
             return Quality.HDBLURAY
         elif checkName(["1080p", "bluray|hddvd", "x264"], all):
             return Quality.FULLHDBLURAY
+        elif checkName(["720p", "1280x720"], any) and checkName(["10b"], all):
+            return Quality.HD10BIT
+        elif checkName(["1080p", "1920x1080"], any) and checkName(["10b"], all):
+            return Quality.FULLHD10BIT
         else:
             return Quality.UNKNOWN
 
@@ -213,19 +221,21 @@ Quality.SNATCHED = [Quality.compositeStatus(SNATCHED, x) for x in Quality.qualit
 Quality.SNATCHED_PROPER = [Quality.compositeStatus(SNATCHED_PROPER, x) for x in Quality.qualityStrings.keys()]
 
 SD = Quality.combineQualities([Quality.SDTV, Quality.SDDVD], [])
-HD = Quality.combineQualities([Quality.HDTV, Quality.FULLHDTV, Quality.HDWEBDL, Quality.FULLHDWEBDL, Quality.HDBLURAY, Quality.FULLHDBLURAY], []) # HD720p + HD1080p
+HD = Quality.combineQualities([Quality.HDTV, Quality.FULLHDTV, Quality.HDWEBDL, Quality.FULLHDWEBDL, Quality.HDBLURAY, Quality.FULLHDBLURAY, Quality.HD10BIT, Quality.FULLHD10BIT], []) # HD720p + HD1080p
 HD720p = Quality.combineQualities([Quality.HDTV, Quality.HDWEBDL, Quality.HDBLURAY], [])
 HD1080p = Quality.combineQualities([Quality.FULLHDTV, Quality.FULLHDWEBDL, Quality.FULLHDBLURAY], [])
-ANY = Quality.combineQualities([Quality.SDTV, Quality.SDDVD, Quality.HDTV, Quality.FULLHDTV, Quality.HDWEBDL, Quality.FULLHDWEBDL, Quality.HDBLURAY, Quality.FULLHDBLURAY, Quality.UNKNOWN], []) # SD + HD
+HD10bit = Quality.combineQualities([Quality.HD10BIT, Quality.FULLHD10BIT], [])
+ANY = Quality.combineQualities([Quality.SDTV, Quality.SDDVD, Quality.HDTV, Quality.FULLHDTV, Quality.HDWEBDL, Quality.FULLHDWEBDL, Quality.HDBLURAY, Quality.FULLHDBLURAY, Quality.HD10BIT, Quality.FULLHD10BIT, Quality.UNKNOWN], []) # SD + HD
 
 # legacy template, cant remove due to reference in mainDB upgrade?
 BEST = Quality.combineQualities([Quality.SDTV, Quality.HDTV, Quality.HDWEBDL], [Quality.HDTV])
 
-qualityPresets = (SD, HD, HD720p, HD1080p, ANY)
+qualityPresets = (SD, HD, HD720p, HD1080p, HD10bit, ANY)
 qualityPresetStrings = {SD: "SD",
                         HD: "HD",
                         HD720p: "HD720p",
                         HD1080p: "HD1080p",
+                        HD10bit: "HD10bit",
                         ANY: "Any"}
 
 

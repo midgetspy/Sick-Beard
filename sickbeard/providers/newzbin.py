@@ -106,6 +106,10 @@ class NewzbinProvider(generic.NZBProvider):
             quality = Quality.HDBLURAY
         elif self._is_1080pBluRay(attr_dict):
             quality = Quality.FULLHDBLURAY
+        # elif self._is_720p10bit(attr_dict):
+        #     quality = Quality.HD10BIT
+        # elif self._is_1080p10bit(attr_dict):
+        #     quality = Quality.FULLHD10BIT
         else:
             quality = Quality.UNKNOWN
 
