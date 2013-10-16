@@ -181,7 +181,7 @@ class SCCProvider(generic.TorrentProvider):
                             id = int(link['href'].replace('details?id=', ''))
                             seeders = int(result.find('td', attrs = {'class' : 'ttr_seeders'}).string)
                             leechers = int(result.find('td', attrs = {'class' : 'ttr_leechers'}).string)
-                        except AttributeError:
+                        except AttributeError, TypeError:
                             continue
 
                         if mode != 'RSS' and seeders == 0:

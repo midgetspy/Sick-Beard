@@ -54,6 +54,7 @@ class NameParser(object):
         series_name = re.sub("\.(?!\s)(\D)", " \\1", series_name)
         series_name = series_name.replace("_", " ")
         series_name = re.sub("-$", "", series_name)
+        series_name = re.sub("^\[.*\]", "",  series_name)
         return series_name.strip()
 
     def _compile_regexes(self):
