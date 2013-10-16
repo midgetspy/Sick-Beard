@@ -60,6 +60,32 @@ from lib.unrar2 import RarFile, RarInfo
 import subliminal
 import network_timezones
 
+import httplib
+import urlparse
+ 
+def get_server_status_code(url):
+    """
+    Download just the header of a URL and
+    return the server's status code.
+    """
+    # http://stackoverflow.com/questions/1140661
+    host, path = urlparse.urlparse(url)[1:3]    # elems [1] and [2]
+    try:
+        conn = httplib.HTTPConnection(host)
+        conn.request('HEAD', path)
+        return conn.getresponse().status
+    except StandardError:
+        return None
+ 
+def check_url(url):
+    """
+    Check if a URL exists without downloading the whole file.
+    We only check the URL header.
+    """
+    # see also http://stackoverflow.com/questions/2924422
+    good_codes = [httplib.OK, httplib.FOUND, httplib.MOVED_PERMANENTLY]
+    return get_server_status_code(url) in good_codes
+
 try:
     import json
 except ImportError:
@@ -740,6 +766,7 @@ class Manage:
     def manageTorrents(self):
 
         t = PageTemplate(file="manage_torrents.tmpl")
+        t.info_download_station = ''
         t.submenu = ManageMenu
         
         if re.search('localhost', sickbeard.TORRENT_HOST):
@@ -753,8 +780,11 @@ class Manage:
 
         if sickbeard.TORRENT_METHOD == 'utorrent':
             t.webui_url = '/'.join(s.strip('/') for s in (t.webui_url, 'gui/'))
-        if sickbeard.TORRENT_METHOD == 'download_station':
-            t.webui_url = t.webui_url + 'download/'
+        if sickbeard.TORRENT_METHOD == 'download_station': 
+            if check_url(t.webui_url + 'download/'):
+                t.webui_url = t.webui_url + 'download/'
+            else:
+                t.info_download_station = '<p>To have a better experience please set the Download Station alias as <code>download</code>, you can check this setting in the Synology DSM <b>Control Panel</b> > <b>Application Portal</b>. Make sure you allow DSM to be embedded with iFrames too in <b>Control Panel</b> > <b>DSM Settings</b> > <b>Security</b>.</p><br/><p>There is more information about this available <a href="https://github.com/mr-orange/Sick-Beard/pull/338">here</a>.</p><br/>' 
             
         return _munge(t)
         
