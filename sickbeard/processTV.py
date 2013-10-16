@@ -125,7 +125,7 @@ def processDir(dirName, nzbName=None, process_method=None, force=False, is_prior
 
                 #Delete all file not needed
                 if process_method != "move" or not process_result:
-                    break
+                    continue
     
                 delete_files(processPath, notwantedFiles)
     
