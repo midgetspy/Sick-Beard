@@ -19,11 +19,11 @@ from .core import (SERVICES, LANGUAGE_INDEX, SERVICE_INDEX, SERVICE_CONFIDENCE,
     MATCHING_CONFIDENCE, create_list_tasks, consume_task, create_download_tasks,
     group_by_video, key_subtitles)
 from .language import language_set, language_list, LANGUAGES
-import logging
-
+#import logging
+from sickbeard import logger
 
 __all__ = ['list_subtitles', 'download_subtitles']
-logger = logging.getLogger(__name__)
+#logger = logging.getLogger(__name__)
 
 
 def list_subtitles(paths, languages=None, services=None, force=True, multi=False, cache_dir=None, max_depth=3, scan_filter=None):
@@ -56,8 +56,9 @@ def list_subtitles(paths, languages=None, services=None, force=True, multi=False
         try:
             result = consume_task(task, service_instances)
             results.append((task.video, result))
-        except:
-            logger.error(u'Error consuming task %r' % task, exc_info=True)
+        except Exception,e:
+            logger.log("Error while downloading using %s subtitles for %s: %s" % (task.service, task.video, str(e)), logger.ERROR)
+            #logger.error(u'Error consuming task %r' % task, exc_info=True)
     for service_instance in service_instances.itervalues():
         service_instance.terminate()
     return group_by_video(results)
