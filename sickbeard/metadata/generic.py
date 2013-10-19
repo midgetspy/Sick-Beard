@@ -240,6 +240,16 @@ class GenericMetadata():
             return all(result)
         return False
 
+    def create_subtitles(self, ep_obj, force=False):
+        if self.subtitles and ep_obj and not self._has_episode_subtitle(ep_obj):
+            logger.log("Metadata provider "+self.name+" added to SUBTITLE-QUEUE: "+ep_obj.prettyName(), logger.DEBUG)
+            # make a queue item for it and put it on the queue
+            sub_queue_item = subtitle_queue.SubtitleQueueItem(ep_obj, force)
+            sickbeard.subtitleQueueScheduler.action.add_item(sub_queue_item) 
+
+            return True
+        return  False
+
     def _get_episode_thumb_url(self, ep_obj):
         """
         Returns the URL to use for downloading an episode's thumbnail. Uses
