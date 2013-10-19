@@ -1502,10 +1502,12 @@ class ConfigProviders:
                 sickbeard.OMGWTFNZBS = curEnabled  
             elif curProvider == 'kickasstorrents':
                 sickbeard.KAT = curEnabled
+            elif curProvider == 'publichd':
+                sickbeard.PUBLICHD = curEnabled
             elif curProvider == 'sceneaccess':
                 sickbeard.SCC = curEnabled
             elif curProvider == 'hdbits':
-                sickbeard.HDBITS = curEnabled               
+                sickbeard.HDBITS = curEnabled 
             elif curProvider in newznabProviderDict:
                 newznabProviderDict[curProvider].enabled = bool(curEnabled)
             elif curProvider in torrentRssProviderDict:
