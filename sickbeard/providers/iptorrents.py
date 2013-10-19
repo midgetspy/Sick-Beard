@@ -188,8 +188,8 @@ class IPTorrentsProvider(generic.TorrentProvider):
                             ## Not used, perhaps in the future ##
                             #torrent_id = int(torrent['href'].replace('/details.php?id=', ''))
                             #torrent_leechers = int(result.find('td', attrs = {'class' : 'ac t_leechers'}).string)
-                        except AttributeError, TypeError:
-                            continue    
+                        except (AttributeError, TypeError):
+                            continue
 
                         # Filter unseeded torrent and torrents with no name/url
                         if mode != 'RSS' and torrent_seeders == 0:
