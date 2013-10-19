@@ -181,7 +181,7 @@ class TorrentLeechProvider(generic.TorrentProvider):
                             id = int(link['href'].replace('/torrent/', ''))
                             seeders = int(result.find('td', attrs = {'class' : 'seeders'}).string)
                             leechers = int(result.find('td', attrs = {'class' : 'leechers'}).string)
-                        except AttributeError, TypeError:
+                        except (AttributeError, TypeError):
                             continue
 
                         #Filter unseeded torrent
