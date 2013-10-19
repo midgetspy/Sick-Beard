@@ -18,7 +18,10 @@
 
 import urllib
 import re
-from xml.dom.minidom import parseString
+try:
+    import xml.etree.cElementTree as etree
+except ImportError:
+    import elementtree.ElementTree as etree
 
 import sickbeard
 import generic
@@ -26,15 +29,15 @@ import generic
 from sickbeard.common import Quality
 from sickbeard import logger
 from sickbeard import tvcache
-from sickbeard.helpers import sanitizeSceneName, get_xml_text
-from sickbeard.exceptions import ex
+from sickbeard import helpers
+
 
 class EZRSSProvider(generic.TorrentProvider):
 
     def __init__(self):
 
         generic.TorrentProvider.__init__(self, "EZRSS")
-        
+
         self.supportsBacklog = True
 
         self.cache = EZRSSCache(self)
@@ -43,117 +46,115 @@ class EZRSSProvider(generic.TorrentProvider):
 
     def isEnabled(self):
         return sickbeard.EZRSS
-        
+
     def imageName(self):
         return 'ezrss.png'
-      
-    def getQuality(self, item):
-        
-        torrent_node = item.getElementsByTagName('torrent')[0]
-        filename_node = torrent_node.getElementsByTagName('fileName')[0]
-        filename = get_xml_text(filename_node)
 
+    def getQuality(self, item):
+
+        filename = helpers.get_xml_text(item.find('{http://xmlns.ezrss.it/0.1/}torrent/{http://xmlns.ezrss.it/0.1/}fileName'))
         quality = Quality.nameQuality(filename)
-        
+
         return quality
 
     def findSeasonResults(self, show, season):
-        
+
         results = {}
-        
+
         if show.air_by_date:
-            logger.log(u"EZRSS doesn't support air-by-date backlog because of limitations on their RSS search.", logger.WARNING)
+            logger.log(self.name + u" doesn't support air-by-date backlog because of limitations on their RSS search.", logger.WARNING)
             return results
-        
+
         results = generic.TorrentProvider.findSeasonResults(self, show, season)
-        
+
         return results
+
     def _get_season_search_strings(self, show, season=None):
-    
+
         params = {}
-    
+
         if not show:
             return params
-        
-        params['show_name'] = sanitizeSceneName(show.name, ezrss=True).replace('.',' ').encode('utf-8')
-          
+
+        params['show_name'] = helpers.sanitizeSceneName(show.name, ezrss=True).replace('.', ' ').encode('utf-8')
+
         if season != None:
             params['season'] = season
-    
+
         return [params]
 
     def _get_episode_search_strings(self, ep_obj):
-    
+
         params = {}
-        
+
         if not ep_obj:
             return params
-                   
-        params['show_name'] = sanitizeSceneName(ep_obj.show.name, ezrss=True).replace('.',' ').encode('utf-8')
-        
+
+        params['show_name'] = helpers.sanitizeSceneName(ep_obj.show.name, ezrss=True).replace('.', ' ').encode('utf-8')
+
         if ep_obj.show.air_by_date:
             params['date'] = str(ep_obj.airdate)
         else:
             params['season'] = ep_obj.season
             params['episode'] = ep_obj.episode
-    
+
         return [params]
 
     def _doSearch(self, search_params, show=None):
-    
+
         params = {"mode": "rss"}
-    
+
         if search_params:
             params.update(search_params)
-      
-        searchURL = self.url + 'search/index.php?' + urllib.urlencode(params)
 
-        logger.log(u"Search string: " + searchURL, logger.DEBUG)
+        search_url = self.url + 'search/index.php?' + urllib.urlencode(params)
 
-        data = self.getURL(searchURL)
+        logger.log(u"Search string: " + search_url, logger.DEBUG)
+
+        data = self.getURL(search_url)
 
         if not data:
+            logger.log(u"No data returned from " + search_url, logger.ERROR)
             return []
-        
-        try:
-            parsedXML = parseString(data)
-            items = parsedXML.getElementsByTagName('item')
-        except Exception, e:
-            logger.log(u"Error trying to load EZRSS RSS feed: "+ex(e), logger.ERROR)
-            logger.log(u"RSS data: "+data, logger.DEBUG)
+
+        parsedXML = helpers.parse_xml(data)
+
+        if parsedXML is None:
+            logger.log(u"Error trying to load " + self.name + " RSS feed", logger.ERROR)
             return []
-        
+
+        items = parsedXML.findall('.//item')
+
         results = []
 
         for curItem in items:
-            
+
             (title, url) = self._get_title_and_url(curItem)
-            
-            if not title or not url:
-                logger.log(u"The XML returned from the EZRSS RSS feed is incomplete, this result is unusable: "+data, logger.ERROR)
-                continue
-    
-            results.append(curItem)
+
+            if title and url:
+                logger.log(u"Adding item from RSS to results: " + title, logger.DEBUG)
+                results.append(curItem)
+            else:
+                logger.log(u"The XML returned from the " + self.name + " RSS feed is incomplete, this result is unusable", logger.ERROR)
 
         return results
 
     def _get_title_and_url(self, item):
         (title, url) = generic.TorrentProvider._get_title_and_url(self, item)
-        
-        torrent_node = item.getElementsByTagName('torrent')[0]
-        filename_node = torrent_node.getElementsByTagName('fileName')[0]
-        filename = get_xml_text(filename_node)
-        
-        new_title = self._extract_name_from_filename(filename)
-        if new_title:
-            title = new_title
-            logger.log(u"Extracted the name "+title+" from the torrent link", logger.DEBUG)
+
+        filename = helpers.get_xml_text(item.find('{http://xmlns.ezrss.it/0.1/}torrent/{http://xmlns.ezrss.it/0.1/}fileName'))
+
+        if filename:
+            new_title = self._extract_name_from_filename(filename)
+            if new_title:
+                title = new_title
+                logger.log(u"Extracted the name " + title + " from the torrent link", logger.DEBUG)
 
         return (title, url)
 
     def _extract_name_from_filename(self, filename):
         name_regex = '(.*?)\.?(\[.*]|\d+\.TPB)\.torrent$'
-        logger.log(u"Comparing "+name_regex+" against "+filename, logger.DEBUG)
+        logger.log(u"Comparing " + name_regex + " against " + filename, logger.DEBUG)
         match = re.match(name_regex, filename, re.I)
         if match:
             return match.group(1)
@@ -169,13 +170,16 @@ class EZRSSCache(tvcache.TVCache):
         # only poll EZRSS every 15 minutes max
         self.minTime = 15
 
-
     def _getRSSData(self):
-        url = self.provider.url + 'feed/'
 
-        logger.log(u"EZRSS cache update URL: "+ url, logger.DEBUG)
+        rss_url = self.provider.url + 'feed/'
+        logger.log(self.provider.name + " cache update URL: " + rss_url, logger.DEBUG)
 
-        data = self.provider.getURL(url)
+        data = self.provider.getURL(rss_url)
+
+        if not data:
+            logger.log(u"No data returned from " + rss_url, logger.ERROR)
+            return None
 
         return data
 
@@ -183,12 +187,13 @@ class EZRSSCache(tvcache.TVCache):
 
         (title, url) = self.provider._get_title_and_url(item)
 
-        if not title or not url:
-            logger.log(u"The XML returned from the EZRSS RSS feed is incomplete, this result is unusable", logger.ERROR)
+        if title and url:
+            logger.log(u"Adding item from RSS to cache: " + title, logger.DEBUG)
+            url = self._translateLinkURL(url)
+            self._addCacheEntry(title, url)
+
+        else:
+            logger.log(u"The XML returned from the " + self.provider.name + " feed is incomplete, this result is unusable", logger.ERROR)
             return
-
-        logger.log(u"Adding item from RSS to cache: "+title, logger.DEBUG)
-
-        self._addCacheEntry(title, url)
 
 provider = EZRSSProvider()

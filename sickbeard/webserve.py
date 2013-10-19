@@ -711,16 +711,17 @@ class ConfigGeneral:
         else:
             version_notify = 0
 
-        if not config.change_LOG_DIR(log_dir):
-            results += ["Unable to create directory " + os.path.normpath(log_dir) + ", log dir not changed."]
-
         sickbeard.LAUNCH_BROWSER = launch_browser
+        # sickbeard.LOG_DIR is set in config.change_LOG_DIR()
 
         sickbeard.WEB_PORT = int(web_port)
         sickbeard.WEB_IPV6 = web_ipv6
-        sickbeard.WEB_LOG = web_log
+        # sickbeard.WEB_LOG is set in config.change_LOG_DIR()
         sickbeard.WEB_USERNAME = web_username
         sickbeard.WEB_PASSWORD = web_password
+
+        if not config.change_LOG_DIR(log_dir, web_log):
+            results += ["Unable to create directory " + os.path.normpath(log_dir) + ", log dir not changed."]
 
         if use_api == "on":
             use_api = 1
@@ -799,7 +800,47 @@ class ConfigSearch:
         # this substitution combined with above regex will return a '/' terminated url from given url or host
         regex_sub = r'http\g<s>://\g<addr>/'
 
-        sab_host = re.sub(regex, regex_sub, postData.get('sab_host', ''))
+        if download_propers == "on":
+            download_propers = 1
+        else:
+            download_propers = 0
+
+        if use_nzbs == "on":
+            use_nzbs = 1
+        else:
+            use_nzbs = 0
+
+        if use_torrents == "on":
+            use_torrents = 1
+        else:
+            use_torrents = 0
+
+        if usenet_retention == None:
+            usenet_retention = 500
+
+        sickbeard.USE_NZBS = use_nzbs
+        sickbeard.USE_TORRENTS = use_torrents
+
+        sickbeard.NZB_METHOD = nzb_method
+        sickbeard.USENET_RETENTION = int(usenet_retention)
+
+        sickbeard.DOWNLOAD_PROPERS = download_propers
+        if sickbeard.DOWNLOAD_PROPERS:
+            sickbeard.properFinderScheduler.silent = False
+        else:
+            sickbeard.properFinderScheduler.silent = True
+
+        sickbeard.SAB_USERNAME = sab_username
+        sickbeard.SAB_PASSWORD = sab_password
+        sickbeard.SAB_APIKEY = sab_apikey.strip()
+        sickbeard.SAB_CATEGORY = sab_category
+
+        if sab_host and not re.match('https?://.*', sab_host):
+            sab_host = 'http://' + sab_host
+
+        if not sab_host.endswith('/'):
+            sab_host = sab_host + '/'
+
         sickbeard.SAB_HOST = sab_host
         sickbeard.TORRENT_HOST = re.sub(regex, regex_sub, postData.get('torrent_host', ''))
 
@@ -867,6 +908,11 @@ class ConfigPostProcessing:
             naming_custom_abd = 0
 
         sickbeard.PROCESS_AUTOMATICALLY = process_automatically
+        if sickbeard.PROCESS_AUTOMATICALLY:
+            sickbeard.autoPostProcesserScheduler.silent = False
+        else:
+            sickbeard.autoPostProcesserScheduler.silent = True
+
         sickbeard.KEEP_PROCESSED_DIR = keep_processed_dir
         sickbeard.RENAME_EPISODES = rename_episodes
         sickbeard.MOVE_ASSOCIATED_FILES = move_associated_files
@@ -1012,10 +1058,10 @@ class ConfigProviders:
     @cherrypy.expose
     def saveProviders(self, nzbmatrix_username=None, nzbmatrix_apikey=None,
                       nzbs_r_us_uid=None, nzbs_r_us_hash=None, newznab_string='',
-                      omgwtfnzbs_uid=None, omgwtfnzbs_key=None,
+                      omgwtfnzbs_username=None, omgwtfnzbs_apikey=None,
                       tvtorrents_digest=None, tvtorrents_hash=None,
                       torrentleech_key=None,
-                      btn_api_key=None,
+                      btn_api_key=None, hdbits_username=None, hdbits_passkey=None,
                       newzbin_username=None, newzbin_password=None,
                       thepiratebay_trusted = None, thepiratebay_proxy = None, thepiratebay_proxy_url = None,thepiratebay_url_override = None, thepiratebay_url_override_enable = None,
                       dtt_norar = None, dtt_single = None, 
@@ -1091,6 +1137,8 @@ class ConfigProviders:
                 sickbeard.OMGWTFNZBS = curEnabled
             elif curProvider == 'ezrss':
                 sickbeard.EZRSS = curEnabled
+            elif curProvider == 'hdbits':
+                sickbeard.HDBITS = curEnabled
             elif curProvider == 'kickass':
                 sickbeard.KICKASS = curEnabled
             elif curProvider == 'torrentz':
@@ -1125,6 +1173,9 @@ class ConfigProviders:
                 newznabProviderDict[curProvider].enabled = bool(curEnabled)
             else:
                 logger.log(u"don't know what " + curProvider + " is, skipping")
+
+        sickbeard.HDBITS_USERNAME = hdbits_username.strip()
+        sickbeard.HDBITS_PASSKEY = hdbits_passkey.strip()
 
         sickbeard.TVTORRENTS_DIGEST = tvtorrents_digest.strip()
         sickbeard.TVTORRENTS_HASH = tvtorrents_hash.strip()
@@ -1211,8 +1262,8 @@ class ConfigProviders:
         sickbeard.NZBSRUS_UID = nzbs_r_us_uid.strip()
         sickbeard.NZBSRUS_HASH = nzbs_r_us_hash.strip()
 
-        sickbeard.OMGWTFNZBS_UID = omgwtfnzbs_uid.strip()
-        sickbeard.OMGWTFNZBS_KEY = omgwtfnzbs_key.strip()
+        sickbeard.OMGWTFNZBS_USERNAME = omgwtfnzbs_username.strip()
+        sickbeard.OMGWTFNZBS_APIKEY = omgwtfnzbs_apikey.strip()
 
         sickbeard.PROVIDER_ORDER = provider_list
 
@@ -1999,12 +2050,12 @@ class ErrorLogs:
         minLevel = int(minLevel)
 
         data = []
-        if os.path.isfile(logger.sb_log_instance.log_file):
-            f = ek.ek(open, logger.sb_log_instance.log_file)
+        if os.path.isfile(logger.sb_log_instance.log_file_path):
+            f = ek.ek(open, logger.sb_log_instance.log_file_path)
             data = f.readlines()
             f.close()
 
-        regex =  "^(\w{3})\-(\d\d)\s*(\d\d)\:(\d\d):(\d\d)\s*([A-Z]+)\s*(.+?)\s*\:\:\s*(.*)$"
+        regex = "^(\d\d\d\d)\-(\d\d)\-(\d\d)\s*(\d\d)\:(\d\d):(\d\d)\s*([A-Z]+)\s*(.+?)\s*\:\:\s*(.*)$"
 
         finalData = []
 
@@ -2018,7 +2069,7 @@ class ErrorLogs:
             match = re.match(regex, x)
 
             if match:
-                level = match.group(6)
+                level = match.group(7)
                 if level not in logger.reverseNames:
                     lastLine = False
                     continue
@@ -2790,11 +2841,14 @@ class Home:
             # this is probably the worst possible way to deal with double eps but I've kinda painted myself into a corner here with this stupid database
             ep_result = myDB.select("SELECT * FROM tv_episodes WHERE showid = ? AND season = ? AND episode = ? AND 5=5", [show, epInfo[0], epInfo[1]])
             if not ep_result:
-                logger.log(u"Unable to find an episode for "+curEp+", skipping", logger.WARNING)
+                logger.log(u"Unable to find an episode for " + curEp + ", skipping", logger.WARNING)
                 continue
+
             related_eps_result = myDB.select("SELECT * FROM tv_episodes WHERE location = ? AND episode != ?", [ep_result[0]["location"], epInfo[1]])
 
             root_ep_obj = show_obj.getEpisode(int(epInfo[0]), int(epInfo[1]))
+            root_ep_obj.relatedEps = []
+
             for cur_related_ep in related_eps_result:
                 related_ep_obj = show_obj.getEpisode(int(cur_related_ep["season"]), int(cur_related_ep["episode"]))
                 if related_ep_obj not in root_ep_obj.relatedEps:
@@ -2951,14 +3005,14 @@ class WebInterface:
 
         done_show_list = []
         qualList = Quality.DOWNLOADED + Quality.SNATCHED + [ARCHIVED, IGNORED]
-        sql_results = myDB.select("SELECT *, tv_shows.status as show_status FROM tv_episodes, tv_shows WHERE season != 0 AND airdate >= ? AND airdate < ? AND tv_shows.tvdb_id = tv_episodes.showid AND tv_episodes.status NOT IN ("+','.join(['?']*len(qualList))+")", [today, next_week] + qualList)
+        sql_results = myDB.select("SELECT *, tv_shows.status as show_status FROM tv_episodes, tv_shows WHERE season != 0 AND airdate >= ? AND airdate < ? AND tv_shows.tvdb_id = tv_episodes.showid AND tv_episodes.status NOT IN (" + ','.join(['?'] * len(qualList)) + ")", [today, next_week] + qualList)
         for cur_result in sql_results:
             done_show_list.append(int(cur_result["showid"]))
 
-        more_sql_results = myDB.select("SELECT *, tv_shows.status as show_status FROM tv_episodes outer_eps, tv_shows WHERE season != 0 AND showid NOT IN ("+','.join(['?']*len(done_show_list))+") AND tv_shows.tvdb_id = outer_eps.showid AND airdate = (SELECT airdate FROM tv_episodes inner_eps WHERE inner_eps.showid = outer_eps.showid AND inner_eps.airdate >= ? ORDER BY inner_eps.airdate ASC LIMIT 1) AND outer_eps.status NOT IN ("+','.join(['?']*len(Quality.DOWNLOADED+Quality.SNATCHED))+")", done_show_list + [next_week] + Quality.DOWNLOADED + Quality.SNATCHED)
+        more_sql_results = myDB.select("SELECT *, tv_shows.status as show_status FROM tv_episodes outer_eps, tv_shows WHERE season != 0 AND showid NOT IN (" + ','.join(['?'] * len(done_show_list)) + ") AND tv_shows.tvdb_id = outer_eps.showid AND airdate = (SELECT airdate FROM tv_episodes inner_eps WHERE inner_eps.season != 0 AND inner_eps.showid = outer_eps.showid AND inner_eps.airdate >= ? ORDER BY inner_eps.airdate ASC LIMIT 1) AND outer_eps.status NOT IN (" + ','.join(['?'] * len(Quality.DOWNLOADED + Quality.SNATCHED)) + ")", done_show_list + [next_week] + Quality.DOWNLOADED + Quality.SNATCHED)
         sql_results += more_sql_results
 
-        more_sql_results = myDB.select("SELECT *, tv_shows.status as show_status FROM tv_episodes, tv_shows WHERE season != 0 AND tv_shows.tvdb_id = tv_episodes.showid AND airdate < ? AND airdate >= ? AND tv_episodes.status = ? AND tv_episodes.status NOT IN ("+','.join(['?']*len(qualList))+")", [today, recently, WANTED] + qualList)
+        more_sql_results = myDB.select("SELECT *, tv_shows.status as show_status FROM tv_episodes, tv_shows WHERE season != 0 AND tv_shows.tvdb_id = tv_episodes.showid AND airdate < ? AND airdate >= ? AND tv_episodes.status = ? AND tv_episodes.status NOT IN (" + ','.join(['?'] * len(qualList)) + ")", [today, recently, WANTED] + qualList)
         sql_results += more_sql_results
 
         #epList = sickbeard.comingList
