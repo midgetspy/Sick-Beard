@@ -28,6 +28,7 @@ from common import SNATCHED, Quality, SEASON_RESULT, MULTI_EP_RESULT
 from sickbeard import logger, db, show_name_helpers, exceptions, helpers
 from sickbeard import sab
 from sickbeard import nzbget
+from sickbeard import rtorrent
 from sickbeard import history
 from sickbeard import notifiers
 from sickbeard import nzbSplitter
@@ -113,7 +114,14 @@ def snatchEpisode(result, endStatus=SNATCHED):
 
     # torrents are always saved to disk
     elif result.resultType == "torrent":
-        dlResult = _downloadResult(result)
+        if sickbeard.TORRENT_METHOD == "blackhole":
+            dlResult = _downloadResult(result)
+        elif sickbeard.TORRENT_METHOD == "rtorrent":
+            dlResult = rtorrent.sendTorrent(result)
+        else:
+            logger.log(u"Unknown Torrent action specified in config: " + sickbeard.TORRENT_METHOD, logger.ERROR)
+            dlResult = False
+
     else:
         logger.log(u"Unknown result type, unable to download it", logger.ERROR)
         dlResult = False
