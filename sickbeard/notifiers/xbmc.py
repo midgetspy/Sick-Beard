@@ -385,9 +385,12 @@ class XBMCNotifier:
             # get tvshowid by showName
             showsCommand = '{"jsonrpc":"2.0","method":"VideoLibrary.GetTVShows","id":1}'
             showsResponse = self._send_to_xbmc_json(showsCommand, host)
-            if (showsResponse == False):
+
+            if showsResponse and "result" in showsResponse and "tvshows" in showsResponse["result"]:
+                shows = showsResponse["result"]["tvshows"]
+            else:
+                logger.log(u'No tvshows in XBMC TV show list', logger.DEBUG)
                 return False
-            shows = showsResponse["result"]["tvshows"]
 
             for show in shows:
                 if (show["label"] == showName):
@@ -488,14 +491,20 @@ class XBMCNotifier:
                 if xbmcapi:
                     if (xbmcapi <= 4):
                         # try to update for just the show, if it fails, do full update if enabled
-                        if not self._update_library(curHost, showName) and sickbeard.XBMC_UPDATE_FULL:
-                            logger.log(u"Single show update failed, falling back to full update", logger.WARNING)
-                            self._update_library(curHost)
+                        if not self._update_library(curHost, showName):
+                            if showName:
+                                logger.log(u"XBMC single show update failed", logger.WARNING)
+                                if  sickbeard.XBMC_UPDATE_FULL:
+                                    logger.log(u"Falling back to XBMC full update")
+                                    self._update_library(curHost)
                     else:
                         # try to update for just the show, if it fails, do full update if enabled
-                        if not self._update_library_json(curHost, showName) and sickbeard.XBMC_UPDATE_FULL:
-                            logger.log(u"Single show update failed, falling back to full update", logger.WARNING)
-                            self._update_library_json(curHost)
+                        if not self._update_library_json(curHost, showName):
+                            if showName:
+                                logger.log(u"XBMC single show update failed", logger.WARNING)
+                                if  sickbeard.XBMC_UPDATE_FULL:
+                                    logger.log(u"Falling back to XBMC full update")
+                                    self._update_library_json(curHost)
                 else:
                     logger.log(u"Failed to detect XBMC version for '" + curHost + "', check configuration and try again.", logger.ERROR)
                     result = result + 1

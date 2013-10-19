@@ -4,7 +4,9 @@
 #import os.path, os
 #import datetime
 #set global $title=$show.name
-#set global $header = '<a href="http://thetvdb.com/?tab=series&amp;id=%d" target="_new">%s</a>' % ($show.tvdbid, $show.name)
+#set global $tvdb_url = 'http://thetvdb.com/?tab=series&amp;id=%d' % ($show.tvdbid)
+
+#set global $header = '<a href="%s" title="%s" rel="noreferrer" onclick="window.open(\'%s\', \'_blank\'); return false;">%s</a>' % ($tvdb_url, $tvdb_url, $sickbeard.ANON_REDIRECT + $tvdb_url, $show.name)
 
 #set global $topmenu="manageShows"#
 #include $os.path.join($sickbeard.PROG_DIR, "data/interfaces/default/inc_top.tmpl")
@@ -152,7 +154,7 @@ Change selected episodes to
     <td>
     $epResult["name"]
     #if $epResult["description"] != "" and $epResult["description"] != None:
-    <img src="$sbRoot/images/info32.png" height="16" class="plotInfo" alt="" id="plot_info_$show.tvdbid<%="_"+str(epResult["season"])+"_"+str(epResult["episode"])%>" />
+    <img src="$sbRoot/images/info32.png" width="16" height="16" class="plotInfo" alt="" id="plot_info_$show.tvdbid<%="_"+str(epResult["season"])+"_"+str(epResult["episode"])%>" />
     #end if
     </td>
     <td align="center" class="nowrap">#if int($epResult["airdate"]) == 1 then "never" else $datetime.date.fromordinal(int($epResult["airdate"]))#</td>
@@ -167,7 +169,7 @@ $epLoc
     <td class="status_column">$statusStrings[int($epResult["status"])]</td>
     <td align="center">
     #if int($epResult["season"]) != 0:
-      <a class="epSearch" href="searchEpisode?show=$show.tvdbid&amp;season=$epResult["season"]&amp;episode=$epResult["episode"]"><img src="$sbRoot/images/search16.png" height="16" alt="search" title="Manual Search" /></a>
+      <a class="epSearch" href="searchEpisode?show=$show.tvdbid&amp;season=$epResult["season"]&amp;episode=$epResult["episode"]"><img src="$sbRoot/images/search16.png" width="16" height="16" alt="search" title="Manual Search" /></a>
     #end if
     </td>
    </tr>

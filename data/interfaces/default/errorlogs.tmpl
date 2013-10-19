@@ -10,9 +10,11 @@
 #include $os.path.join($sickbeard.PROG_DIR, "data/interfaces/default/inc_top.tmpl")
 
 <div class="align-left"><pre>
-#for $curError in $classes.ErrorViewer.errors[:30]:
+#if $classes.ErrorViewer.errors:
+#for $curError in sorted($classes.ErrorViewer.errors[:30], key=lambda error: error.time, reverse=True):
 $curError.time $curError.message
 #end for
+#end if
 </pre>
 </div>
 
