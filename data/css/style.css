@@ -46,13 +46,21 @@ browser.css
 .ui-menu .ui-menu-item {
   background-color: #eee;
 }
-.ui-menu .ui-menu-item-alternate{
+.ui-menu .ui-menu-item-alternate {
   background-color: #fff;
 }
-.ui-menu a.ui-state-hover{
+.ui-autocomplete .ui-menu-item .ui-state-focus {
   color: #fff;
   background: none;
   background-color: #0a246a;
+}
+/* restore 1.8.x resize handle on dialog button pane */
+.ui-dialog .ui-resizable-se {
+  width: 14px;
+  height: 14px;
+  right: 3px;
+  bottom: 3px;
+  background-position: -80px -224px;
 }
 
 /* =======================================================================
@@ -1081,7 +1089,7 @@ span.Any {
   /* black */
 }
 span.RawHD {
-  background: none repeat scroll 0 0 #999944;
+  background: none repeat scroll 0 0 #994;
   /* dark orange */
 }
 /* unused boolean tags */
@@ -1100,8 +1108,10 @@ Lib overrides -- global (except jui/bootstrap)
 /* pines notify related */
 div.ui-pnotify {
   width: auto !important;
-  max-width: 550px;
-  min-width: 340px;
+  max-width: 600px;
+  min-width: 400px;
+  top: 10px;
+  right: 15px;
 }
 /* qTip2 related */
 .ui-tooltip-sb .ui-tooltip-titlebar a {
