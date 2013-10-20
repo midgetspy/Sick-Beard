@@ -74,19 +74,6 @@ multiEpStrings[NAMING_EXTEND] = "Extend"
 multiEpStrings[NAMING_LIMITED_EXTEND] = "Extend (Limited)"
 multiEpStrings[NAMING_LIMITED_EXTEND_E_PREFIXED] = "Extend (Limited, E-prefixed)"
 
-NAMING_REPEAT = 1
-NAMING_EXTEND = 2
-NAMING_DUPLICATE = 4
-NAMING_LIMITED_EXTEND = 8
-NAMING_SEPARATED_REPEAT = 16
-
-multiEpStrings = {}
-multiEpStrings[NAMING_REPEAT] = "Repeat"
-multiEpStrings[NAMING_SEPARATED_REPEAT] = "Repeat (Separated)"
-multiEpStrings[NAMING_DUPLICATE] = "Duplicate"
-multiEpStrings[NAMING_EXTEND] = "Extend"
-multiEpStrings[NAMING_LIMITED_EXTEND] = "Extend (Limited)"
-
 class Quality:                                                        
     NONE = 0              # 0                                         
     SDTV = 1              # 1                                         
