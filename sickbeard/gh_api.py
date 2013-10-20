@@ -21,39 +21,53 @@ try:
 except ImportError:
     from lib import simplejson as json
 
-import urllib
+import helpers
+
 
 class GitHub(object):
     """
     Simple api wrapper for the Github API v3. Currently only supports the small thing that SB
-    needs it for - list of cimmots.
+    needs it for - list of commits.
     """
-    
+
+    def __init__(self, github_repo_user, github_repo, branch='master'):
+
+        self.github_repo_user = github_repo_user
+        self.github_repo = github_repo
+        self.branch = branch
+
     def _access_API(self, path, params=None):
         """
         Access the API at the path given and with the optional params given.
-        
+
         path: A list of the path elements to use (eg. ['repos', 'midgetspy', 'Sick-Beard', 'commits'])
         params: Optional dict of name/value pairs for extra params to send. (eg. {'per_page': 10})
-        
+
         Returns a deserialized json object of the result. Doesn't do any error checking (hope it works).
         """
-        
+
         url = 'https://api.github.com/' + '/'.join(path)
-        
+
         if params and type(params) is dict:
             url += '?' + '&'.join([str(x) + '=' + str(params[x]) for x in params.keys()])
-        
-        return json.load(urllib.urlopen(url)) 
-    
-    def commits(self, user, repo, branch='master'):
+
+        data = helpers.getURL(url)
+
+        if data:
+            json_data = json.loads(data)
+            return json_data
+        else:
+            return []
+
+    def commits(self):
         """
         Uses the API to get a list of the 100 most recent commits from the specified user/repo/branch, starting from HEAD.
-        
+
         user: The github username of the person whose repo you're querying
         repo: The repo name to query
         branch: Optional, the branch name to show commits from
-        
+
         Returns a deserialized json object containing the commit info. See http://developer.github.com/v3/repos/commits/
         """
-        return self._access_API(['repos', user, repo, 'commits'], {'per_page': 100, 'sha': branch})
+        access_API = self._access_API(['repos', self.github_repo_user, self.github_repo, 'commits'], {'per_page': 100, 'sha': self.branch})
+        return access_API

@@ -1,0 +1,57 @@
+# Sickbeard systemd service unit file
+#
+# Configuration Notes
+#
+#    - Option names (e.g. ExecStart=, Type=) are case-sensitive)
+#
+#    - Adjust User= and Group= to the user/group you want Sickbeard to run as.
+#
+#    - Optional adjust EnvironmentFile= path to configuration file
+#        Can ONLY be used for configuring extra options used in ExecStart.
+#        Putting a minus (-) in front of file means no error warning if the file doesn't exist
+#
+#    - Adjust ExecStart= to point to your python and SickBeard executables.
+#       The FIRST token of the command line must be an ABSOLUTE FILE NAME,
+#       then followed by arguments for the process.
+#       If no --datadir is given, data is stored in same dir as SickBeard.py
+#       Arguments can also be set in EnvironmentFile (except python)
+#
+#    - WantedBy= specifies which target (i.e. runlevel) to start Sickbeard for.
+#        multi-user.target equates to runlevel 3 (multi-user text mode)
+#        graphical.target  equates to runlevel 5 (multi-user X11 graphical mode)
+#
+
+### Example Using SickBeard as daemon with pid file
+# Type=forking
+# PIDFile=/var/run/sickbeard/sickbeard.pid
+# ExecStart=/usr/bin/python /opt/sickbeard/SickBeard.py -q --daemon --nolaunch --pidfile=/var/run/sickbeard/sickbeard.pid --datadir=/opt/sickbeard
+
+## Example Using SickBeard as daemon without pid file
+# Type=forking
+# GuessMainPID=no
+# ExecStart=/usr/bin/python /opt/sickbeard/SickBeard.py -q --daemon --nolaunch --datadir=/opt/sickbeard
+
+### Example Using simple
+# Type=simple
+# ExecStart=/usr/bin/python /opt/sickbeard/SickBeard.py -q --nolaunch
+
+### Example Using simple with EnvironmentFile where SB_DATA=/home/sickbeard/.sickbeard in /etc/sickbeard.conf
+# Type=simple
+# EnvironmentFile=/etc/sickbeard.conf
+# ExecStart=/usr/bin/python /opt/sickbeard/SickBeard.py -q --nolaunch --datadir=${SB_DATA}
+
+### Configuration
+
+[Unit]
+Description=SickBeard Daemon
+
+[Service]
+User=sickbeard
+Group=sickbeard
+
+Type=forking
+GuessMainPID=no
+ExecStart=/usr/bin/python /opt/sickbeard/SickBeard.py -q --daemon --nolaunch --datadir=/opt/sickbeard
+
+[Install]
+WantedBy=multi-user.target
