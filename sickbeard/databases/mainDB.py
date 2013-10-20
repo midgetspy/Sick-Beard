@@ -18,13 +18,14 @@
 
 import sickbeard
 import os.path
+import sys
 
 from sickbeard import db, common, helpers, logger
 
 from sickbeard import encodingKludge as ek
 from sickbeard.name_parser.parser import NameParser, InvalidNameException
 
-MIN_DB_VERSION = 9 # oldest db version we support migrating from
+MIN_DB_VERSION = 9  # oldest db version we support migrating from
 MAX_DB_VERSION = 12
 
 
@@ -94,20 +95,32 @@ def backupDatabase(version):
 # schema is based off v12 - build 501
 class InitialSchema (db.SchemaUpgrade):
     def test(self):
-        return self.hasTable("db_version")
+        return self.hasTable("tv_shows") and self.hasTable("db_version") and self.checkDBVersion() >= MIN_DB_VERSION and self.checkDBVersion() <= MAX_DB_VERSION
 
     def execute(self):
-        queries = [
-            "CREATE TABLE db_version (db_version INTEGER);",
-            "CREATE TABLE history (action NUMERIC, date NUMERIC, showid NUMERIC, season NUMERIC, episode NUMERIC, quality NUMERIC, resource TEXT, provider TEXT);",
-            "CREATE TABLE info (last_backlog NUMERIC, last_tvdb NUMERIC);",
-            "CREATE TABLE tv_episodes (episode_id INTEGER PRIMARY KEY, showid NUMERIC, tvdbid NUMERIC, name TEXT, season NUMERIC, episode NUMERIC, description TEXT, airdate NUMERIC, hasnfo NUMERIC, hastbn NUMERIC, status NUMERIC, location TEXT, file_size NUMERIC, release_name TEXT);",
-            "CREATE TABLE tv_shows (show_id INTEGER PRIMARY KEY, location TEXT, show_name TEXT, tvdb_id NUMERIC, network TEXT, genre TEXT, runtime NUMERIC, quality NUMERIC, airs TEXT, status TEXT, flatten_folders NUMERIC, paused NUMERIC, startyear NUMERIC, tvr_id NUMERIC, tvr_name TEXT, air_by_date NUMERIC, lang TEXT);",
-            "CREATE INDEX idx_tv_episodes_showid_airdate ON tv_episodes(showid,airdate);",
-            "INSERT INTO db_version (db_version) VALUES (12);"
-        ]
-        for query in queries:
-            self.connection.action(query)
+        if not self.hasTable("tv_shows") and not self.hasTable("db_version"):
+            queries = [
+                "CREATE TABLE db_version (db_version INTEGER);",
+                "CREATE TABLE history (action NUMERIC, date NUMERIC, showid NUMERIC, season NUMERIC, episode NUMERIC, quality NUMERIC, resource TEXT, provider TEXT);",
+                "CREATE TABLE info (last_backlog NUMERIC, last_tvdb NUMERIC);",
+                "CREATE TABLE tv_episodes (episode_id INTEGER PRIMARY KEY, showid NUMERIC, tvdbid NUMERIC, name TEXT, season NUMERIC, episode NUMERIC, description TEXT, airdate NUMERIC, hasnfo NUMERIC, hastbn NUMERIC, status NUMERIC, location TEXT, file_size NUMERIC, release_name TEXT);",
+                "CREATE TABLE tv_shows (show_id INTEGER PRIMARY KEY, location TEXT, show_name TEXT, tvdb_id NUMERIC, network TEXT, genre TEXT, runtime NUMERIC, quality NUMERIC, airs TEXT, status TEXT, flatten_folders NUMERIC, paused NUMERIC, startyear NUMERIC, tvr_id NUMERIC, tvr_name TEXT, air_by_date NUMERIC, lang TEXT);",
+                "CREATE INDEX idx_tv_episodes_showid_airdate ON tv_episodes(showid,airdate);",
+                "INSERT INTO db_version (db_version) VALUES (12);"
+            ]
+            for query in queries:
+                self.connection.action(query)
+
+        else:
+            cur_db_version = self.checkDBVersion()
+
+            if cur_db_version < MIN_DB_VERSION:
+                sys.exit("Your database version (" + str(cur_db_version) + ") is too old to migrate from what this version of Sick Beard supports (" + str(MIN_DB_VERSION) + ").\n" + \
+                                 "Upgrade using a previous version (tag) build 496 to build 501 of Sick Beard first or remove database file to begin fresh.")
+
+            if cur_db_version > MAX_DB_VERSION:
+                sys.exit("Your database version (" + str(cur_db_version) + ") has been incremented past what this version of Sick Beard supports (" + str(MAX_DB_VERSION) + ").\n" + \
+                                  "If you have used other forks of Sick Beard, your database may be unusable due to their modifications.")
 
 
 # included in build 496 (2012-06-28)

@@ -214,17 +214,18 @@ def prettyName(class_name):
 
 def _processUpgrade(connection, upgradeClass):
     instance = upgradeClass(connection)
-    logger.log(u"Checking " + prettyName(upgradeClass.__name__) + " database upgrade", logger.DEBUG)
+    pretty_class_name = prettyName(upgradeClass.__name__)
+    logger.log(u"Checking " + pretty_class_name + " database upgrade", logger.DEBUG)
     if not instance.test():
-        logger.log(u"Database upgrade required: " + prettyName(upgradeClass.__name__), logger.MESSAGE)
+        logger.log(u"Database upgrade required: " + pretty_class_name, logger.MESSAGE)
         try:
             instance.execute()
         except sqlite3.DatabaseError, e:
-            print "Error in " + str(upgradeClass.__name__) + ": " + ex(e)
+            print "Error in " + str(pretty_class_name) + ": " + ex(e)
             raise
-        logger.log(upgradeClass.__name__ + " upgrade completed", logger.DEBUG)
+        logger.log(pretty_class_name + u" upgrade completed", logger.DEBUG)
     else:
-        logger.log(upgradeClass.__name__ + " upgrade not required", logger.DEBUG)
+        logger.log(pretty_class_name + u" upgrade not required", logger.DEBUG)
 
     for upgradeSubClass in upgradeClass.__subclasses__():
         _processUpgrade(connection, upgradeSubClass)

@@ -218,9 +218,6 @@ HD720p = Quality.combineQualities([Quality.HDTV, Quality.HDWEBDL, Quality.HDBLUR
 HD1080p = Quality.combineQualities([Quality.FULLHDTV, Quality.FULLHDWEBDL, Quality.FULLHDBLURAY], [])
 ANY = Quality.combineQualities([Quality.SDTV, Quality.SDDVD, Quality.HDTV, Quality.FULLHDTV, Quality.HDWEBDL, Quality.FULLHDWEBDL, Quality.HDBLURAY, Quality.FULLHDBLURAY, Quality.UNKNOWN], []) # SD + HD
 
-# legacy template, cant remove due to reference in mainDB upgrade?
-BEST = Quality.combineQualities([Quality.SDTV, Quality.HDTV, Quality.HDWEBDL], [Quality.HDTV])
-
 qualityPresets = (SD, HD, HD720p, HD1080p, ANY)
 qualityPresetStrings = {SD: "SD",
                         HD: "HD",
