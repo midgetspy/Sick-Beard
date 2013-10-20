@@ -42,7 +42,7 @@ def initWebServer(options={}):
         if status != "401 Unauthorized":
             logger.log(u"CherryPy caught an error: %s %s" % (status, message), logger.ERROR)
             logger.log(traceback, logger.DEBUG)
-        return r'''
+        return r'''<!DOCTYPE html>
 <html>
     <head>
         <title>%s</title>
@@ -56,7 +56,11 @@ def initWebServer(options={}):
 
     def http_error_404_hander(status, message, traceback, version):
         """ Custom handler for 404 error, redirect back to main page """
-        return r'''
+        if sickbeard.WEB_ROOT:
+            webroot = sickbeard.WEB_ROOT
+        else:
+            webroot = '/'
+        return r'''<!DOCTYPE html>
 <html>
     <head>
         <title>404</title>
@@ -70,7 +74,7 @@ def initWebServer(options={}):
         <br/>
     </body>
 </html>
-''' % options['web_root']
+''' % webroot
 
     # cherrypy setup
     enable_https = options['enable_https']
