@@ -28,7 +28,11 @@
 </select><br/>
 <b>Force already Post Processed Dir/Files:</b> &nbsp <input id="force" name="force" type="checkbox"><br/>
 <b>Mark Dir/Files as priority download:</b> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<input id="is_priority" name="is_priority" type="checkbox"><br/>
-<span style="line-height: 0; font-size: 12px;"><i>(Check it to replace the file even if it exists at higher quality)</i></span><br/><br/>
+<span style="line-height: 0; font-size: 12px;"><i>(Check it to replace the file even if it exists at higher quality)</i></span><br/>
+#if $sickbeard.USE_FAILED_DOWNLOADS:
+	<b>Mark download as failed:</b> &nbsp <input id="failed" name="failed" type="checkbox"><br />
+#end if
+<br/>
 <input id="submit" class="btn btn-primary" type="submit" value="Process" />
 </form>
 

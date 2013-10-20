@@ -5,6 +5,7 @@ cache.db*
 config.ini*
 Logs/*
 sickbeard.db*
+failed.db*
 autoProcessTV/autoProcessTV.cfg
 server.crt
 server.key

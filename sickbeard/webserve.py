@@ -45,6 +45,8 @@ from sickbeard import image_cache
 from sickbeard import naming
 from sickbeard import scene_exceptions
 from sickbeard import subtitles
+from sickbeard import failed_history
+from sickbeard import failedProcessor
 
 from sickbeard.providers import newznab, rsstorrent
 from sickbeard.common import Quality, Overview, statusStrings, qualityPresetStrings
@@ -166,6 +168,9 @@ ManageMenu = [
 ]
 if sickbeard.USE_SUBTITLES:
     ManageMenu.append({ 'title': 'Missed Subtitle Management', 'path': 'manage/subtitleMissed' })
+
+if sickbeard.USE_FAILED_DOWNLOADS:
+    ManageMenu.append({ 'title': 'Failed Downloads', 'path': 'manage/failedDownloads' })
 
 class ManageSearches:
 
@@ -761,7 +766,38 @@ class Manage:
                 t.info_download_station = '<p>To have a better experience please set the Download Station alias as <code>download</code>, you can check this setting in the Synology DSM <b>Control Panel</b> > <b>Application Portal</b>. Make sure you allow DSM to be embedded with iFrames too in <b>Control Panel</b> > <b>DSM Settings</b> > <b>Security</b>.</p><br/><p>There is more information about this available <a href="https://github.com/mr-orange/Sick-Beard/pull/338">here</a>.</p><br/>' 
             
         return _munge(t)
-        
+
+    @cherrypy.expose
+    def failedDownloads(self, limit=100, toRemove=None, add=None):
+
+        myDB = db.DBConnection("failed.db")
+
+        if toRemove != None:
+            toRemove = toRemove.split("|")
+        else:
+            toRemove = []
+
+        if add != None and not myDB.select("SELECT * FROM failed WHERE release = ?", [failed_history.prepareFailedName(add)]):
+            failed_history.logFailed(add)
+
+        for release in toRemove:
+            myDB.action('DELETE FROM failed WHERE release = ?', [release])
+
+        if toRemove or add:
+            raise cherrypy.HTTPRedirect('/manage/failedDownloads/')
+
+        if limit == "0":
+            sqlResults = myDB.select("SELECT * FROM failed")
+        else:
+            sqlResults = myDB.select("SELECT * FROM failed LIMIT ?", [limit])
+
+        t = PageTemplate(file="manage_failedDownloads.tmpl")
+        t.failedResults = sqlResults
+        t.limit = limit
+        t.submenu = ManageMenu
+
+        return _munge(t)
+
 class History:
 
     @cherrypy.expose
@@ -1104,7 +1140,8 @@ class ConfigPostProcessing:
     def savePostProcessing(self, naming_pattern=None, naming_multi_ep=None,
                     xbmc_data=None, xbmc_v12__data=None, mediabrowser_data=None, synology_data=None, sony_ps3_data=None, wdtv_data=None, tivo_data=None, mede8er_data=None,
                     use_banner=None, keep_processed_dir=None, process_method=None, process_automatically=None, rename_episodes=None, unpack=None,
-                    move_associated_files=None, tv_download_dir=None, naming_custom_abd=None, naming_abd_pattern=None, naming_strip_year=None):
+                    move_associated_files=None, tv_download_dir=None, naming_custom_abd=None, naming_abd_pattern=None, naming_strip_year=None, use_failed_downloads=None, 
+                    delete_failed=None, treat_empty_as_failed=None):
 
         results = []
 
@@ -1151,6 +1188,21 @@ class ConfigPostProcessing:
         else:
             naming_strip_year = 0
 
+        if use_failed_downloads == "on":
+            use_failed_downloads = 1
+        else:
+            use_failed_downloads = 0
+
+        if delete_failed == "on":
+            delete_failed = 1
+        else:
+            delete_failed = 0
+            
+        if treat_empty_as_failed == "on":
+            treat_empty_as_failed = 1
+        else:
+            treat_empty_as_failed = 0
+
         sickbeard.PROCESS_AUTOMATICALLY = process_automatically
         if sickbeard.PROCESS_AUTOMATICALLY:
             sickbeard.autoPostProcesserScheduler.silent = False
@@ -1172,6 +1224,9 @@ class ConfigPostProcessing:
         sickbeard.MOVE_ASSOCIATED_FILES = move_associated_files
         sickbeard.NAMING_CUSTOM_ABD = naming_custom_abd
         sickbeard.NAMING_STRIP_YEAR = naming_strip_year
+        sickbeard.USE_FAILED_DOWNLOADS = use_failed_downloads
+        sickbeard.DELETE_FAILED = delete_failed
+        sickbeard.TREAT_EMPTY_AS_FAILED = treat_empty_as_failed
 
         sickbeard.metadata_provider_dict['XBMC'].set_config(xbmc_data)
         sickbeard.metadata_provider_dict['XBMC v12+'].set_config(xbmc_v12__data)
@@ -2192,7 +2247,12 @@ class HomePostProcess:
         return _munge(t)
 
     @cherrypy.expose
-    def processEpisode(self, dir=None, nzbName=None, jobName=None, quiet=None, process_method=None, force=None, is_priority=None):
+    def processEpisode(self, dir=None, nzbName=None, jobName=None, quiet=None, process_method=None, force=None, is_priority=None, failed="0"):
+
+        if failed == "0":
+            failed = False
+        else:
+            failed = True
 
         if force=="on":
             force=True
@@ -2207,7 +2267,7 @@ class HomePostProcess:
         if not dir:
             redirect("/home/postprocess")
         else:
-            result = processTV.processDir(dir, nzbName, process_method=process_method, force=force, is_priority=is_priority)
+            result = processTV.processDir(dir, nzbName, process_method=process_method, force=force, is_priority=is_priority, failed=failed)
             if quiet != None and int(quiet) == 1:
                 return result
 
@@ -3591,6 +3651,31 @@ class Home:
         status = 'Subtitles merged successfully '
         ui.notifications.message('Merge Subtitles', status)
         return json.dumps({'result': 'ok'})
+
+    @cherrypy.expose
+    def retryEpisode(self, show, season, episode):
+        try:
+            release = failed_history.findRelease(show, season, episode)
+            pp = failedProcessor.FailedProcessor(dirName=None, nzbName=release + '.nzb')
+            pp.process()
+            if pp.log:
+                ui.notifications.message('Info', pp.log)
+        except exceptions.FailedHistoryNotFoundException:
+            ui.notifications.error('Not Found Error', 'Couldn\'t find release in history. (Has it been over 30 days?)\n'
+                                   'Can\'t mark it as bad.')
+            return json.dumps({'result': 'failure'})
+        except exceptions.FailedHistoryMultiSnatchException:
+            ui.notifications.error('Multi-Snatch Error', 'The same episode was snatched again before the first one was done.\n'
+                                   'Please cancel any downloads of this episode and then set it back to wanted.\n Can\'t continue.')
+            return json.dumps({'result': 'failure'})
+        except exceptions.FailedProcessingFailed:
+            ui.notifications.error('Processing Failed', pp.log)
+            return json.dumps({'result': 'failure'})
+        except Exception as e:
+            ui.notifications.error('Unknown Error', 'Unknown exception: ' + str(e))
+            return json.dumps({'result': 'failure'})
+
+        return json.dumps({'result': 'success'})
 
 class UI:
     

@@ -130,7 +130,45 @@
                                 <span class="component-desc"><b>NOTE:</b> Only working with RAR archive</span>
                             </label>
                         </div>
+                        
+                        <div class="field-pair">
+                            <input id="use_failed_downloads" type="checkbox" class="enabler" name="use_failed_downloads" #if $sickbeard.USE_FAILED_DOWNLOADS == True then "checked=\"checked\"" else ""# />
+                            <label class="clearfix" for="use_failed_downloads">
+                                <span class="component-title">Use Failed Downloads</span>
+                                <span class="component-desc">Use Failed Download Handling for NZBs?</span>
+                            </label>
+                            <label class="nocheck clearfix" for="use_failed_downloads">
+                                <span class="component-title">&nbsp;</span>
+                                <span class="component-desc"><b>NOTE:</b> See readme-FailedDownloads.md before enabling.</span>
+                            </label>
+                        </div>
+						
+                        <div id="content_use_failed_downloads">
+                            <div class="field-pair">
+                                <input id="delete_failed" type="checkbox" name="delete_failed" #if $sickbeard.DELETE_FAILED == True then "checked=\"checked\"" else ""# />
+                                <label class="clearfix" for="delete_failed">
+                                    <span class="component-title">Delete Failed</span>
+                                    <span class="component-desc">Delete files left over from a failed download?</span>
+                                </label>
+                                <label class="nocheck clearfix" for="delete_failed">
+                                    <span class="component-title">&nbsp;</span>
+                                    <span class="component-desc"><b>NOTE:</b> This only works if Use Failed Downloads is enabled.</span>
+                                </label>
+                            </div>
 
+                            <div class="field-pair">
+                                <input id="treat_empty_as_failed" type="checkbox" name="treat_empty_as_failed" #if $sickbeard.TREAT_EMPTY_AS_FAILED == True then "checked=\"checked\"" else ""# />
+                                <label class="clearfix" for="treat_empty_as_failed">
+                                    <span class="component-title">Treat Empty as Failed</span>
+                                    <span class="component-desc">Treat directories where no videos are found as failed downloads?</span>
+                                </label>
+                                <label class="nocheck clearfix" for="treat_empty_as_failed">
+                                    <span class="component-title">&nbsp;</span>
+                                    <span class="component-desc"><b>NOTE:</b> This only works if Use Failed Downloads is enabled.</span>
+                                </label>
+                            </div>
+                        </div>
+                        
                         <div class="clearfix"></div>
                         <input type="submit" class="btn config_submitter" value="Save Changes" /><br/>
 
