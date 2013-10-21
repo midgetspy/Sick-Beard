@@ -26,7 +26,7 @@ import sickbeard
 
 from sickbeard import helpers, classes, logger, db
 
-from sickbeard.common import Quality, MULTI_EP_RESULT, SEASON_RESULT
+from sickbeard.common import Quality, MULTI_EP_RESULT, SEASON_RESULT#, SEED_POLICY_TIME, SEED_POLICY_RATIO
 from sickbeard import tvcache
 from sickbeard import encodingKludge as ek
 from sickbeard.exceptions import ex
@@ -384,3 +384,15 @@ class TorrentProvider(GenericProvider):
         GenericProvider.__init__(self, name)
 
         self.providerType = GenericProvider.TORRENT
+        
+#        self.option = {SEED_POLICY_TIME : '',
+#                       SEED_POLICY_RATIO: '',
+#                       'PROCESS_METHOD': ''
+#                       }
+    
+#    def get_provider_options(self):
+#        pass
+#    
+#    def set_provider_options(self):
+#        self.option[SEED_POLICY_TIME] + '|' + self.option[SEED_POLICY_RATIO] + '|' + self.option['PROCESS_METHOD']
+        

@@ -251,10 +251,10 @@ $(document).ready(function(){
                delay: 90,
                effect: true,
           },
-          hide: {
-                     fixed: true,
-                     delay: 900,
-          },
+          hide: false, // {
+               //fixed: true,
+               //delay: 900,
+          //},
           content: {
           text: config_form,
                 title: {
@@ -436,6 +436,25 @@ $(document).ready(function(){
         } else {
           $('.content_'+$(this).attr('id')).show();
       }
+    });
+
+    $.fn.makeTorrentOptionString = function(provider_id) {
+
+	    var seed_ratio  = $('.providerDiv_tip #'+provider_id+'_seed_ratio').prop('value');
+	    var seed_time   = $('.providerDiv_tip #'+provider_id+'_seed_time').prop('value');
+	    var process_met = $('.providerDiv_tip #'+provider_id+'_process_method').prop('value');
+		var option_string = $('.providerDiv_tip #'+provider_id+'_option_string');	
+
+        option_string.val([seed_ratio, seed_time, process_met].join('|'))
+
+    }
+
+    $(this).on('change', '.seed_option', function(){
+
+        var provider_id = $(this).attr('id').split('_')[0];
+
+		$(this).makeTorrentOptionString(provider_id);
+
     });
 
     // initialization stuff
