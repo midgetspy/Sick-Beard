@@ -52,7 +52,7 @@ class PublicHDProvider(generic.TorrentProvider):
 
         self.searchurl = self.url + 'index.php?page=torrents&search=%s&active=1&category=%s&order=5&by=2'  #order by seed
 
-        self.category = {'Season': ['23'], 'Episode': ['7', '14', '24'], 'RSS': ['7', '14', '23', '24']}
+        self.categories = {'Season': ['23'], 'Episode': ['7', '14', '24'], 'RSS': ['7', '14', '23', '24']}
 
     def isEnabled(self):
         return sickbeard.PUBLICHD
@@ -127,10 +127,10 @@ class PublicHDProvider(generic.TorrentProvider):
             for search_string in search_params[mode]:
 
                 if mode == 'RSS':
-                    searchURL = self.url + 'index.php?page=torrents&active=1&category=%s' %(';'.join(self.category[mode]))
+                    searchURL = self.url + 'index.php?page=torrents&active=1&category=%s' %(';'.join(self.categories[mode]))
                     logger.log(u"PublicHD cache update URL: "+ searchURL, logger.DEBUG)
                 else:
-                    searchURL = self.searchurl %(urllib.quote(unidecode(search_string)), ';'.join(self.category[mode]))
+                    searchURL = self.searchurl %(urllib.quote(unidecode(search_string)), ';'.join(self.categories[mode]))
                     logger.log(u"Search string: " + searchURL, logger.DEBUG)
 
                 html = self.getURL(searchURL)
@@ -145,7 +145,7 @@ class PublicHDProvider(generic.TorrentProvider):
 
                     #Continue only if one Release is found
                     if len(torrent_rows)<2:
-                        logger.log(u"The Data returned from " + self.name + " do not contains any torrent", logger.WARNING)
+#                        logger.log(u"The Data returned from " + self.name + " do not contains any torrent", logger.WARNING)
                         continue
 
                     for tr in torrent_rows[1:]:
