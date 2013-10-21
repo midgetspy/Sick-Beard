@@ -175,13 +175,13 @@ var show_nzb_providers = #if $sickbeard.USE_NZBS then "true" else "false"#;
 <div class="providerDiv" id="tvtorrentsDiv">
                         <div class="field-pair">
                             <label class="clearfix">
-                                <span class="component-title">TvTorrents Digest:</span>
+                                <span class="component-title">Digest:</span>
                                 <input class="component-desc" type="text" name="tvtorrents_digest" value="$sickbeard.TVTORRENTS_DIGEST" size="40" />
                             </label>
                         </div>
                         <div class="field-pair">
                             <label class="clearfix">
-                                <span class="component-title">TvTorrents Hash:</span>
+                                <span class="component-title">Hash:</span>
                                 <input class="component-desc" type="text" name="tvtorrents_hash" value="$sickbeard.TVTORRENTS_HASH" size="40" />
                             </label>
                         </div>
@@ -288,6 +288,28 @@ var show_nzb_providers = #if $sickbeard.USE_NZBS then "true" else "false"#;
                             </label>
                         </div>
 </div><!-- /sceneaccessDiv //-->
+
+<div class="providerDiv" id="torrentdayDiv">
+                        <div class="field-pair">
+                            <label class="clearfix">
+                                <span class="component-title">Username:</span>
+                                <input class="component-desc" type="text" name="torrentday_username" value="$sickbeard.TORRENTDAY_USERNAME" size="40" />
+                            </label>
+                        </div>
+                        <div class="field-pair">
+                            <label class="clearfix">
+                                <span class="component-title">Password:</span>
+                                <input class="component-desc" type="password" name="torrentday_password" value="$sickbeard.TORRENTDAY_PASSWORD" size="40" />
+                            </label>
+                        </div>
+                        <div class="field-pair">
+                            <input type="checkbox" name="torrentday_freeleech" id="torrentday_freeleech" #if $sickbeard.TORRENTDAY_FREELEECH then "checked=\"checked\"" else ""#/>
+                            <label class="clearfix" for="torrentday_freeleech">
+                                <span class="component-title">FreeLeech</span>
+                                <span class="component-desc">This will only download <b>[FreeLeech]</b> torrents.</span>
+                            </label>
+                        </div>
+</div><!-- /iptorrentsDiv //-->
 
 <div class="providerDiv" id="hdbitsDiv">
                         <div class="field-pair">
