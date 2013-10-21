@@ -588,10 +588,6 @@ config*.tmpl
   margin: 10px 0;
   color: #666;
 }
-.component-group-list {
-  float: left;
-  width: 590px;
-}
 #config div.field-pair {
   padding: 8px 4px;
 }

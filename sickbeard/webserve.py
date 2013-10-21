@@ -47,7 +47,7 @@ from sickbeard.common import SNATCHED, SKIPPED, UNAIRED, IGNORED, ARCHIVED, WANT
 from sickbeard.exceptions import ex
 from sickbeard.webapi import Api
 
-from lib.tvdb_api import tvdb_api
+from lib.tvdb_api import tvdb_api, tvdb_exceptions
 
 try:
     import json
@@ -1430,6 +1430,113 @@ class ConfigNotifications:
         redirect("/config/notifications/")
 
 
+class ConfigHidden:
+
+    @cherrypy.expose
+    def index(self):
+
+        t = PageTemplate(file="config_hidden.tmpl")
+        t.submenu = ConfigMenu
+        return _munge(t)
+
+    @cherrypy.expose
+    def saveHidden(self, anon_redirect=None, git_path=None, extra_scripts=None, create_missing_show_dirs=None, add_shows_wo_dir=None, ignore_words=None ):
+
+        results = []
+
+        if create_missing_show_dirs == "on":
+            create_missing_show_dirs = 1
+        else:
+            create_missing_show_dirs = 0
+
+        if add_shows_wo_dir == "on":
+            add_shows_wo_dir = 1
+        else:
+            add_shows_wo_dir = 0
+
+        sickbeard.ANON_REDIRECT = anon_redirect
+        sickbeard.GIT_PATH = git_path
+        sickbeard.EXTRA_SCRIPTS = extra_scripts.split('|')
+        sickbeard.CREATE_MISSING_SHOW_DIRS = create_missing_show_dirs
+        sickbeard.ADD_SHOWS_WO_DIR = add_shows_wo_dir
+        sickbeard.IGNORE_WORDS = ignore_words
+
+        sickbeard.save_config()
+
+        if len(results) > 0:
+            for x in results:
+                logger.log(x, logger.ERROR)
+            ui.notifications.error('Error(s) Saving Configuration',
+                        '<br />\n'.join(results))
+        else:
+            ui.notifications.message('Configuration Saved', ek.ek(os.path.join, sickbeard.CONFIG_FILE) )
+
+        redirect("/config/hidden/")
+
+    @cherrypy.expose
+    def sbEnded(self, username=None):
+        cherrypy.response.headers['Cache-Control'] = "max-age=0,no-cache,no-store"
+
+        ltvdb_api_parms = sickbeard.TVDB_API_PARMS.copy()
+        t = tvdb_api.Tvdb(**ltvdb_api_parms)
+
+        results = []
+        errMatch = []
+        changeState = []
+
+        myDB = db.DBConnection()
+        sql_result = myDB.select("SELECT tvdb_id,show_name,status FROM tv_shows WHERE status != 'Continuing' ORDER BY show_id DESC LIMIT 400")
+        myDB.connection.close()
+
+        if (len(sql_result)) > 1:
+            logger.log(u"There were " + str(len(sql_result)) + " shows in your database that need checking (limited to 400).", logger.MESSAGE)
+            results.append("There were <b>" + str(len(sql_result)) + "</b> shows in your database that need checking (limited to 400).<br>")
+        else:
+            logger.log(u"There were no shows that needed to be checked at this time.", logger.MESSAGE)
+            results.append("There were no shows that needed to be checked at this time.<br>")
+
+        for ended_show in sql_result:
+
+            tvdb_id = ended_show['tvdb_id']
+            show_name = ended_show['show_name']
+            status = ended_show['status']
+
+            try:
+                show = t[show_name]
+            except:
+                logger.log(u"Issue found when looking up \"%s\"" % (show_name), logger.ERROR)
+                continue
+
+            logger.log(u"Checking \"%s\" with local status \"%s\" against thetvdb" % (show_name, status), logger.MESSAGE)
+
+            show_id = show['id']
+            if int(tvdb_id) != int(show_id):
+                logger.log("Warning: Issue matching \"%s\" on tvdb. Got \"%s\" and \"%s\"" % (show_name, tvdb_id, show_id), logger.ERROR)
+                errMatch.append("<tr><td class='tvShow'><a href='/home/displayShow?show=%s'>%s</a></td><td>%s</td><td>%s</td>" % (tvdb_id, show_name, tvdb_id, show_id))
+            else:
+                show_status = show['status']
+
+                if not show_status:
+                    show_status = ""
+
+                if show_status != status:
+                    changeState.append("<tr><td class='tvShow'><a href='/home/displayShow?show=%s'>%s</a></td><td>%s</td><td>%s</td>" % (tvdb_id, show_name, status, show_status))
+
+            show.clear()  # needed to free up memory since python's garbage collection would keep this around
+
+        if len(errMatch):
+            errMatch.insert(0, "<br><table class='tablesorter'><thead><tr><th>show name</th><th>local tvdbid</th><th>remote tvdbid</th></tr></thead>")
+            errMatch.append("</table>")
+            results += errMatch
+
+        if len(changeState):
+            changeState.insert(0, "<br><table class='tablesorter'><thead><tr><th>show name</th><th>local status</th><th>remote status</th></tr></thead>")
+            changeState.append("</table>")
+            results += changeState
+
+        return results
+
+
 class Config:
 
     @cherrypy.expose
@@ -1448,6 +1555,8 @@ class Config:
     providers = ConfigProviders()
 
     notifications = ConfigNotifications()
+
+    hidden = ConfigHidden()
 
 
 def haveXBMC():
