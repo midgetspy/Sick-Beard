@@ -35,6 +35,7 @@ from sickbeard import logger
 from sickbeard import scene_exceptions
 from sickbeard.exceptions import ex
 from sickbeard import encodingKludge as ek
+from sickbeard import failed_history
 
 
 class CheckVersion():
@@ -59,6 +60,10 @@ class CheckVersion():
 
         # refresh scene exceptions too
         scene_exceptions.retrieve_exceptions()
+
+        # sure, why not?
+        if sickbeard.USE_FAILED_DOWNLOADS:
+            failed_history.trimHistory()
 
     def find_install_type(self):
         """

@@ -41,7 +41,7 @@ from sickbeard import naming
 
 from common import SD, SKIPPED, NAMING_REPEAT
 
-from sickbeard.databases import mainDB, cache_db
+from sickbeard.databases import mainDB, cache_db, failed_db
 
 from lib.configobj import ConfigObj
 
@@ -397,6 +397,10 @@ SUBTITLES_SERVICES_LIST = []
 SUBTITLES_SERVICES_ENABLED = []
 SUBTITLES_HISTORY = False
 
+USE_FAILED_DOWNLOADS = False
+DELETE_FAILED = False
+TREAT_EMPTY_AS_FAILED = False
+
 EXTRA_SCRIPTS = []
 
 GIT_PATH = None
@@ -449,7 +453,8 @@ def initialize(consoleLogging=True):
                 USE_BANNER, USE_LISTVIEW, METADATA_XBMC, METADATA_XBMC_V12, METADATA_MEDIABROWSER, METADATA_PS3, METADATA_SYNOLOGY, METADATA_MEDE8ER, metadata_provider_dict, \
                 NEWZBIN, NEWZBIN_USERNAME, NEWZBIN_PASSWORD, GIT_PATH, MOVE_ASSOCIATED_FILES, \
                 GUI_NAME, HOME_LAYOUT, DISPLAY_SHOW_SPECIALS, COMING_EPS_LAYOUT, COMING_EPS_SORT, COMING_EPS_DISPLAY_PAUSED, COMING_EPS_MISSED_RANGE, METADATA_WDTV, METADATA_TIVO, IGNORE_WORDS, CREATE_MISSING_SHOW_DIRS, \
-                ADD_SHOWS_WO_DIR, USE_SUBTITLES, SUBTITLES_LANGUAGES, SUBTITLES_DIR, SUBTITLES_SERVICES_LIST, SUBTITLES_SERVICES_ENABLED, SUBTITLES_HISTORY, subtitlesFinderScheduler, ANON_REDIRECT, LOCALHOST_IP
+                ADD_SHOWS_WO_DIR, USE_SUBTITLES, SUBTITLES_LANGUAGES, SUBTITLES_DIR, SUBTITLES_SERVICES_LIST, SUBTITLES_SERVICES_ENABLED, SUBTITLES_HISTORY, subtitlesFinderScheduler, \
+                USE_FAILED_DOWNLOADS, DELETE_FAILED, TREAT_EMPTY_AS_FAILED, ANON_REDIRECT, LOCALHOST_IP
 
         if __INITIALIZED__:
             return False
@@ -819,6 +824,10 @@ def initialize(consoleLogging=True):
         SUBTITLES_DEFAULT = bool(check_setting_int(CFG, 'Subtitles', 'subtitles_default', 0))
         SUBTITLES_HISTORY = bool(check_setting_int(CFG, 'Subtitles', 'subtitles_history', 0))
 
+        USE_FAILED_DOWNLOADS = bool(check_setting_int(CFG, 'FailedDownloads', 'use_failed_downloads', 0))
+        DELETE_FAILED = bool(check_setting_int(CFG, 'FailedDownloads', 'delete_failed', 0))
+        TREAT_EMPTY_AS_FAILED = bool(check_setting_int(CFG, 'FailedDownloads', 'treat_empty_as_failed', 0))
+
         GIT_PATH = check_setting_str(CFG, 'General', 'git_path', '')
 
         IGNORE_WORDS = check_setting_str(CFG, 'General', 'ignore_words', IGNORE_WORDS)
@@ -917,6 +926,9 @@ def initialize(consoleLogging=True):
 
         # initialize the cache database
         db.upgradeDatabase(db.DBConnection("cache.db"), cache_db.InitialSchema)
+
+        # initalize the failed downloads database
+        db.upgradeDatabase(db.DBConnection("failed.db"), failed_db.InitialSchema)
 
         # fix up any db problems
         db.sanityCheckDatabase(db.DBConnection(), mainDB.MainSanityCheck)
@@ -1557,6 +1569,11 @@ def save_config():
     new_config['Subtitles']['subtitles_dir'] = SUBTITLES_DIR
     new_config['Subtitles']['subtitles_default'] = int(SUBTITLES_DEFAULT)
     new_config['Subtitles']['subtitles_history'] = int(SUBTITLES_HISTORY)
+
+    new_config['FailedDownloads']= {}
+    new_config['FailedDownloads']['use_failed_downloads'] = int(USE_FAILED_DOWNLOADS)
+    new_config['FailedDownloads']['delete_failed'] = int(DELETE_FAILED)
+    new_config['FailedDownloads']['treat_empty_as_failed'] = int(TREAT_EMPTY_AS_FAILED)
 
     new_config.write()
 

@@ -31,6 +31,8 @@ from sickbeard import logger
 from sickbeard.name_parser.parser import NameParser, InvalidNameException
 from sickbeard import common
 
+from sickbeard import failedProcessor
+
 from lib.unrar2 import RarFile, RarInfo
 from lib.unrar2.rar_exceptions import *
 
@@ -38,13 +40,14 @@ def logHelper (logMessage, logLevel=logger.MESSAGE):
     logger.log(logMessage, logLevel)
     return logMessage + u"\n"
 
-def processDir(dirName, nzbName=None, process_method=None, force=False, is_priority=None):
+def processDir(dirName, nzbName=None, process_method=None, force=False, is_priority=None, failed=False):
     """
     Scans through the files in dirName and processes whatever media files it finds
 
     dirName: The folder name to look in
     nzbName: The NZB name which resulted in this folder being downloaded
     force: True to postprocess already postprocessed files
+    failed: Boolean for whether or not the download failed
     """
     
     global process_result, returnStr 
@@ -87,22 +90,25 @@ def processDir(dirName, nzbName=None, process_method=None, force=False, is_prior
     returnStr += logHelper(u"PostProcessing VideoInRar: " + str(videoInRar), logger.DEBUG)
 
     # If nzbName is set and there's more than one videofile in the folder, files will be lost (overwritten).
+    nzbNameOriginal = nzbName
     if len(videoFiles) >= 2:
         nzbName = None
 
     if not process_method:
         process_method = sickbeard.PROCESS_METHOD
+        
+    countMediaProcessed = 0
 
     #Don't Link media when the media is extracted from a rar in the same path
     if process_method in ('hardlink', 'symlink') and videoInRar:
-        process_media(path, videoInRar, nzbName, 'move', force, is_priority)
-        process_media(path, set(videoFiles) - set(videoInRar), nzbName, process_method, force, is_priority)
+        countMediaProcessed += process_media(path, videoInRar, nzbName, 'move', force, is_priority)
+        countMediaProcessed += process_media(path, set(videoFiles) - set(videoInRar), nzbName, process_method, force, is_priority)
         delete_files(path, rarContent) 
     else:
-        process_media(path, videoFiles, nzbName, process_method, force, is_priority)
+        countMediaProcessed += process_media(path, videoFiles, nzbName, process_method, force, is_priority)
 
     #Process Video File in all TV Subdir
-    for dir in [x for x in dirs if validateDir(path, x)]:
+    for dir in [x for x in dirs if validateDir(path, x, nzbNameOriginal, failed)]:
 
         process_result = True
 
@@ -117,11 +123,11 @@ def processDir(dirName, nzbName=None, process_method=None, force=False, is_prior
 
             #Don't Link media when the media is extracted from a rar in the same path
             if process_method in ('hardlink', 'symlink') and videoInRar:
-                process_media(processPath, videoInRar, nzbName, 'move', force, is_priority)
-                process_media(processPath, set(videoFiles) - set(videoInRar), nzbName, process_method, force, is_priority)
-                delete_files(processPath, rarContent) 
+                countMediaProcessed += process_media(processPath, videoInRar, nzbName, 'move', force, is_priority)
+                countMediaProcessed += process_media(processPath, set(videoFiles) - set(videoInRar), nzbName, process_method, force, is_priority)
+                countMediaProcessed += delete_files(processPath, rarContent) 
             else:
-                process_media(processPath, videoFiles, nzbName, process_method, force, is_priority)
+                countMediaProcessed += process_media(processPath, videoFiles, nzbName, process_method, force, is_priority)
 
                 #Delete all file not needed
                 if process_method != "move" or not process_result:
@@ -132,24 +138,31 @@ def processDir(dirName, nzbName=None, process_method=None, force=False, is_prior
                 if process_method == "move" and \
                 ek.ek(os.path.normpath, processPath) != ek.ek(os.path.normpath, sickbeard.TV_DOWNLOAD_DIR):
                     delete_dir(processPath)
-
+    
+    if sickbeard.USE_FAILED_DOWNLOADS and sickbeard.TREAT_EMPTY_AS_FAILED and not failed and not nzbNameOriginal is None and countMediaProcessed == 0:
+        returnStr += logHelper(u"No media files were found, treating this as failed.", logger.DEBUG)
+        returnStr += process_failed(dirName, nzbNameOriginal)
+        
     return returnStr
 
-def validateDir(path, dirName):
+def validateDir(path, dirName, nzbNameOriginal, failed):
 
     global process_result, returnStr
 
     returnStr += logHelper(u"Processing folder " + dirName, logger.DEBUG)
 
-    # TODO: check if it's failed and deal with it if it is
     if ek.ek(os.path.basename, dirName).startswith('_FAILED_'):
-        returnStr += logHelper(u"The directory name indicates it failed to extract, cancelling", logger.DEBUG)
-        return False
+        returnStr += logHelper(u"The directory name indicates it failed to extract.", logger.DEBUG)
+        failed = True
     elif ek.ek(os.path.basename, dirName).startswith('_UNDERSIZED_'):
-        returnStr += logHelper(u"The directory name indicates that it was previously rejected for being undersized, cancelling", logger.DEBUG)
-        return False
+        returnStr += logHelper(u"The directory name indicates that it was previously rejected for being undersized.", logger.DEBUG)
+        failed = True
     elif ek.ek(os.path.basename, dirName).startswith('_UNPACK_'):
-        returnStr += logHelper(u"The directory name indicates that this release is in the process of being unpacked, skipping", logger.DEBUG)
+        returnStr += logHelper(u"The directory name indicates that this release is in the process of being unpacked.", logger.DEBUG)
+        failed = True
+
+    if failed:
+        returnStr += process_failed(os.path.join(path, dirName), nzbNameOriginal)
         return False
 
     # make sure the dir isn't inside a show dir
@@ -255,12 +268,42 @@ def already_postprocessed(dirName, videofile, force):
 
     return False
 
+def process_failed(dirName, nzbName):
+    """Process a download that did not complete correctly"""
+
+    failedReturnStr = u""
+
+    if sickbeard.USE_FAILED_DOWNLOADS:
+        try:
+            processor = failedProcessor.FailedProcessor(dirName, nzbName)
+            process_result = processor.process()
+            process_fail_message = ""
+        except exceptions.FailedProcessingFailed, e:
+            process_result = False
+            process_fail_message = ex(e)
+
+        failedReturnStr += processor.log
+
+        if sickbeard.DELETE_FAILED and process_result:
+            failedReturnStr += logHelper(u"Deleting folder of failed download " + dirName, logger.DEBUG)
+            try:
+                shutil.rmtree(dirName)
+            except (OSError, IOError), e:
+                failedReturnStr += logHelper(u"Warning: Unable to remove the failed folder " + dirName + ": " + ex(e), logger.WARNING)
+
+        if process_result:
+            failedReturnStr += logHelper(u"Failed Download Processing succeeded: (" + str(nzbName) + ", " + dirName + ")")
+        else:
+            failedReturnStr += logHelper(u"Failed Download Processing failed: (" + str(nzbName) + ", " + dirName + "): " + process_fail_message, logger.WARNING)
+
+    return failedReturnStr
+
 def process_media(processPath, videoFiles, nzbName, process_method, force, is_priority):
 
     global process_result, returnStr
-
+    curCountMediaProcessed = 0
     for cur_video_file in videoFiles:
-
+        curCountMediaProcessed += 1
         if already_postprocessed(processPath, cur_video_file, force):
             continue
 
@@ -271,6 +314,8 @@ def process_media(processPath, videoFiles, nzbName, process_method, force, is_pr
             process_result = processor.process()
             process_fail_message = ""
         except exceptions.PostProcessingFailed, e:
+            # TODO: Add option to treat failure in processing as a failed download (the following line should do it)
+            # curCountMediaProcessed -= 1
             process_result = False
             process_fail_message = ex(e)
 
@@ -284,6 +329,7 @@ def process_media(processPath, videoFiles, nzbName, process_method, force, is_pr
         #If something fail abort the processing on dir
         if not process_result:
             break
+    return curCountMediaProcessed
 
 def delete_files(processPath, notwantedFiles):
 

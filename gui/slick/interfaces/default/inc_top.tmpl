@@ -240,6 +240,9 @@
                             #if $sickbeard.USE_SUBTITLES:
                             	<li><a href="$sbRoot/manage/subtitleMissed/"><img src="$sbRoot/images/menu/backlog16.png" alt="" width="16" height="16" />Missed Subtitle Management</a></li>
                             #end if
+							#if $sickbeard.USE_FAILED_DOWNLOADS:
+                                <li><a href="$sbRoot/manage/failedDownloads/"><img src="$sbRoot/images/menu/backlog16.png" alt="" width="16" height="16" />Failed Downloads</a></li>
+							#end if
                     </ul>
                 </li>                
                 <li id="NAVerrorlogs"><a href="$sbRoot/errorlogs/" class="log">$logPageTitle</a>

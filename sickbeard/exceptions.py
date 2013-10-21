@@ -98,3 +98,12 @@ class CantUpdateException(SickBeardException):
 
 class PostProcessingFailed(SickBeardException):
 	"Post-processing the episode failed"
+	
+class FailedProcessingFailed(SickBeardException):
+    "Post-processing the failed release failed"
+
+class FailedHistoryMultiSnatchException(SickBeardException):
+    "Episode was snatched again before the first one was done"
+
+class FailedHistoryNotFoundException(SickBeardException):
+    "The release was not found in the failed download history tracker"
