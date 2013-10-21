@@ -30,7 +30,7 @@ from threading import Lock
 
 # apparently py2exe won't build these unless they're imported somewhere
 from sickbeard import providers, metadata
-from providers import ezrss, tvtorrents, btn, newznab, womble, thepiratebay, torrentleech, kat, publichd, iptorrents, omgwtfnzbs, scc, hdbits
+from providers import ezrss, tvtorrents, btn, newznab, womble, thepiratebay, torrentleech, kat, publichd, iptorrents, omgwtfnzbs, scc, torrentday, hdbits
 from sickbeard.config import CheckSection, check_setting_int, check_setting_str, ConfigMigrator
 
 
@@ -204,6 +204,13 @@ PUBLICHD = None
 SCC = False         
 SCC_USERNAME = None 
 SCC_PASSWORD = None 
+
+TORRENTDAY = None
+TORRENTDAY_USERNAME = None
+TORRENTDAY_PASSWORD = None
+TORRENTDAY_UID = None
+TORRENTDAY_HASH = None
+TORRENTDAY_FREELEECH = None
 
 HDBITS = False
 HDBITS_USERNAME = None
@@ -419,8 +426,8 @@ def initialize(consoleLogging=True):
                 showUpdateScheduler, __INITIALIZED__, LAUNCH_BROWSER, UPDATE_SHOWS_ON_START, SORT_ARTICLE, showList, loadingShowList, \
                 NZBS, NZBS_UID, NZBS_HASH, EZRSS, TVTORRENTS, TVTORRENTS_DIGEST, TVTORRENTS_HASH, TVTORRENTS_OPTIONS, BTN, BTN_API_KEY, BTN_OPTIONS, \
                 THEPIRATEBAY, THEPIRATEBAY_TRUSTED, THEPIRATEBAY_PROXY, THEPIRATEBAY_PROXY_URL, THEPIRATEBAY_BLACKLIST, THEPIRATEBAY_OPTIONS, TORRENTLEECH, TORRENTLEECH_USERNAME, TORRENTLEECH_PASSWORD, TORRENTLEECH_OPTIONS, \
-                IPTORRENTS, IPTORRENTS_USERNAME, IPTORRENTS_PASSWORD, IPTORRENTS_FREELEECH, IPTORRENTS_OPTIONS, KAT, KAT_VERIFIED, KAT_OPTIONS, PUBLICHD, PUBLICHD_OPTIONS, SCC, SCC_USERNAME, SCC_PASSWORD, SCC_OPTIONS, HDBITS, HDBITS_USERNAME, HDBITS_PASSKEY, HDBITS_OPTIONS, \
-                TORRENT_DIR, USENET_RETENTION, SOCKET_TIMEOUT, SEARCH_FREQUENCY, DEFAULT_SEARCH_FREQUENCY, BACKLOG_SEARCH_FREQUENCY, \
+                IPTORRENTS, IPTORRENTS_USERNAME, IPTORRENTS_PASSWORD, IPTORRENTS_FREELEECH, IPTORRENTS_OPTIONS, KAT, KAT_VERIFIED, KAT_OPTIONS, PUBLICHD, PUBLICHD_OPTIONS, SCC, SCC_USERNAME, SCC_PASSWORD, SCC_OPTIONS, TORRENTDAY, TORRENTDAY_USERNAME, TORRENTDAY_PASSWORD, TORRENTDAY_UID, TORRENTDAY_HASH, TORRENTDAY_FREELEECH, TORRENTDAY_OPTIONS, \
+                HDBITS, HDBITS_USERNAME, HDBITS_PASSKEY, HDBITS_OPTIONS, TORRENT_DIR, USENET_RETENTION, SOCKET_TIMEOUT, SEARCH_FREQUENCY, DEFAULT_SEARCH_FREQUENCY, BACKLOG_SEARCH_FREQUENCY, \
                 QUALITY_DEFAULT, FLATTEN_FOLDERS_DEFAULT, SUBTITLES_DEFAULT, STATUS_DEFAULT, \
                 GROWL_NOTIFY_ONSNATCH, GROWL_NOTIFY_ONDOWNLOAD, GROWL_NOTIFY_ONSUBTITLEDOWNLOAD, TWITTER_NOTIFY_ONSNATCH, TWITTER_NOTIFY_ONDOWNLOAD, TWITTER_NOTIFY_ONSUBTITLEDOWNLOAD, \
                 USE_GROWL, GROWL_HOST, GROWL_PASSWORD, USE_PROWL, PROWL_NOTIFY_ONSNATCH, PROWL_NOTIFY_ONDOWNLOAD, PROWL_NOTIFY_ONSUBTITLEDOWNLOAD, PROWL_API, PROWL_PRIORITY, PROG_DIR, \
@@ -635,6 +642,12 @@ def initialize(consoleLogging=True):
         SCC_USERNAME = check_setting_str(CFG, 'SCC', 'scc_username', '')
         SCC_PASSWORD = check_setting_str(CFG, 'SCC', 'scc_password', '')
         SCC_OPTIONS = check_setting_str(CFG, 'SCC', 'scc_options', '')
+
+        TORRENTDAY = bool(check_setting_int(CFG, 'TORRENTDAY', 'torrentday', 0))
+        TORRENTDAY_USERNAME = check_setting_str(CFG, 'TORRENTDAY', 'torrentday_username', '')
+        TORRENTDAY_PASSWORD = check_setting_str(CFG, 'TORRENTDAY', 'torrentday_password', '')
+        TORRENTDAY_FREELEECH = bool(check_setting_int(CFG, 'TORRENTDAY', 'torrentday_freeleech', 0))
+        TORRENTDAY_OPTIONS = check_setting_str(CFG, 'TORRENTDAY', 'torrentday_options', '')
 
         HDBITS = bool(check_setting_int(CFG, 'HDBITS', 'hdbits', 0))
         HDBITS_USERNAME = check_setting_str(CFG, 'HDBITS', 'hdbits_username', '')
@@ -1328,6 +1341,13 @@ def save_config():
     new_config['SCC']['scc_username'] = SCC_USERNAME
     new_config['SCC']['scc_password'] = SCC_PASSWORD
     new_config['SCC']['scc_options'] = SCC_OPTIONS
+
+    new_config['TORRENTDAY'] = {}
+    new_config['TORRENTDAY']['torrentday'] = int(TORRENTDAY)
+    new_config['TORRENTDAY']['torrentday_username'] = TORRENTDAY_USERNAME
+    new_config['TORRENTDAY']['torrentday_password'] = TORRENTDAY_PASSWORD
+    new_config['TORRENTDAY']['torrentday_freeleech'] = int(TORRENTDAY_FREELEECH)
+    new_config['TORRENTDAY']['torrentday_options'] = TORRENTDAY_OPTIONS
 
     new_config['HDBITS'] = {}
     new_config['HDBITS']['hdbits'] = int(HDBITS)

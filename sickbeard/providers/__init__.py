@@ -25,6 +25,7 @@ __all__ = ['ezrss',
            'publichd', 
            'torrentleech',
            'scc',
+           'torrentday',
            'hdbits',
            'iptorrents',
            'omgwtfnzbs'

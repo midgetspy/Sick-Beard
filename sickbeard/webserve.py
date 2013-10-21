@@ -1391,6 +1391,7 @@ class ConfigProviders:
                       iptorrents_username=None, iptorrents_password=None, iptorrents_freeleech=None,
                       kat_trusted = None, kat_verified = None,
                       scc_username=None, scc_password=None,
+                      torrentday_username=None, torrentday_password=None, torrentday_freeleech=None,
                       hdbits_username=None, hdbits_passkey=None,
                       newzbin_username=None, newzbin_password=None,
                       provider_order=None):
@@ -1506,6 +1507,8 @@ class ConfigProviders:
                 sickbeard.PUBLICHD = curEnabled
             elif curProvider == 'sceneaccess':
                 sickbeard.SCC = curEnabled
+            elif curProvider == 'torrentday':
+                sickbeard.TORRENTDAY = curEnabled
             elif curProvider == 'hdbits':
                 sickbeard.HDBITS = curEnabled 
             elif curProvider in newznabProviderDict:
@@ -1560,8 +1563,18 @@ class ConfigProviders:
             kat_verified = 1
         else:
             kat_verified = 0   
-            
+
         sickbeard.KAT_VERIFIED = kat_verified
+
+        sickbeard.TORRENTDAY_USERNAME = torrentday_username.strip()
+        sickbeard.TORRENTDAY_PASSWORD = torrentday_password.strip()
+
+        if torrentday_freeleech == "on":
+            torrentday_freeleech = 1
+        else:
+            torrentday_freeleech = 0
+
+        sickbeard.TORRENTDAY_FREELEECH = torrentday_freeleech
 
         sickbeard.SCC_USERNAME = scc_username.strip()
         sickbeard.SCC_PASSWORD = scc_password.strip()
