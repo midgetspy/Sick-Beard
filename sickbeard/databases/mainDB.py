@@ -84,7 +84,13 @@ class MainSanityCheck(db.DBSanityCheck):
 
 
 def backupDatabase(version):
-    helpers.backupVersionedFile(db.dbFilename(), version)
+    logger.log(u"Backing up database before upgrade")
+
+    if not helpers.backupVersionedFile(db.dbFilename(), version):
+        logger.log(u"Database backup failed, abort upgrading database")
+        sys.exit("Database backup failed, abort upgrading database")
+    else:
+        logger.log(u"Proceeding with upgrade")
 
 # ======================
 # = Main DB Migrations =
