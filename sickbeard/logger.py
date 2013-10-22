@@ -59,6 +59,13 @@ class SBRotatingLogHandler(object):
 
         self.log_lock = threading.Lock()
 
+    def close(self):
+        if self.cur_handler:
+            self.cur_handler.flush()
+            self.cur_handler.close()
+            sb_logger = logging.getLogger('sickbeard')
+            sb_logger.removeHandler(self.cur_handler)
+
     def initLogging(self, consoleLogging=True):
 
         old_handler = None
@@ -189,3 +196,6 @@ sb_log_instance = SBRotatingLogHandler('sickbeard.log', NUM_LOGS, LOG_SIZE)
 
 def log(toLog, logLevel=MESSAGE):
     sb_log_instance.log(toLog, logLevel)
+
+def close():
+    sb_log_instance.close()
