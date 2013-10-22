@@ -1485,17 +1485,22 @@ class ConfigHidden:
         changeState = []
 
         myDB = db.DBConnection()
-        shows = myDB.select("SELECT tvdb_id,show_name,status FROM tv_shows WHERE status != 'Continuing' ORDER BY show_id DESC LIMIT 400")
+        sql_result = myDB.select("SELECT tvdb_id,show_name,status FROM tv_shows WHERE status != 'Continuing' ORDER BY show_id DESC LIMIT 400")
         myDB.connection.close()
 
-        if (len(shows)) > 1:
-            logger.log(u"There were " + str(len(shows)) + " shows in your database that need checking (limited to 400).", logger.MESSAGE)
-            results.append("There were <b>" + str(len(shows)) + "</b> shows in your database that need checking (limited to 400).<br>")
+        if (len(sql_result)) > 1:
+            logger.log(u"There were " + str(len(sql_result)) + " shows in your database that need checking (limited to 400).", logger.MESSAGE)
+            results.append("There were <b>" + str(len(sql_result)) + "</b> shows in your database that need checking (limited to 400).<br>")
         else:
             logger.log(u"There were no shows that needed to be checked at this time.", logger.MESSAGE)
             results.append("There were no shows that needed to be checked at this time.<br>")
 
-        for (tvdb_id, show_name, status) in shows:
+        for ended_show in sql_result:
+
+            tvdb_id = ended_show['tvdb_id']
+            show_name = ended_show['show_name']
+            status = ended_show['status']
+
             try:
                 show = t[show_name]
             except:
@@ -1514,7 +1519,7 @@ class ConfigHidden:
                     if not (show_status == None and status == ""):
                         changeState.append("<tr><td class='tvShow'><a href='/home/displayShow?show=%s'>%s</a></td><td>%s</td><td>%s</td>" % (tvdb_id, show_name, status, show_status))
 
-            show.clear() # needed to free up memory since python's garbage collection would keep this around
+            show.clear()  # needed to free up memory since python's garbage collection would keep this around
 
         if len(errMatch):
             errMatch.insert(0, "<br><table class='tablesorter'><thead><tr><th>show name</th><th>local tvdbid</th><th>remote tvdbid</th></tr></thead>")
