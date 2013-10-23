@@ -770,7 +770,7 @@ class TVShow(object):
 
         logger.log(str(self.tvdbid) + u": Loading show info from NFO")
 
-        xmlFile = os.path.join(self._location, "tvshow.nfo")
+        xmlFile = ek.ek(os.path.join, self._location, "tvshow.nfo")
 
         try:
             xmlFileObj = open(xmlFile, 'r')
@@ -1328,7 +1328,7 @@ class TVEpisode(object):
                 myEp = cachedSeason[episode]
 
         except (tvdb_exceptions.tvdb_error, IOError), e:
-            logger.log(u"TVDB threw up an error: "+ex(e), logger.DEBUG)
+            logger.log(u"TVDB threw up an error: " + ex(e), logger.DEBUG)
             # if the episode is already valid just log it, if not throw it up
             if self.name:
                 logger.log(u"TVDB timed out but we have enough info from other sources, allowing the error", logger.DEBUG)
@@ -1347,13 +1347,13 @@ class TVEpisode(object):
             myEp["firstaired"] = str(datetime.date.fromordinal(1))
 
         if myEp["episodename"] == None or myEp["episodename"] == "":
-            logger.log(u"This episode (" + self.show.name + " - "+str(season) + "x" + str(episode) + ") has no name on TVDB")
+            logger.log(u"This episode (" + self.show.name + " - " + str(season) + "x" + str(episode) + ") has no name on TVDB")
             # if I'm incomplete on TVDB but I once was complete then just delete myself from the DB for now
             if self.tvdbid != -1:
                 self.deleteEpisode()
             return False
 
-        #NAMEIT logger.log(u"BBBBBBBB from " + str(self.season)+"x"+str(self.episode) + " -" +self.name+" to "+myEp["episodename"])
+        #NAMEIT logger.log(u"BBBBBBBB from " + str(self.season) + "x" + str(self.episode) + " -" +self.name+" to " + myEp["episodename"])
         self.name = myEp["episodename"]
         self.season = season
         self.episode = episode
@@ -1657,7 +1657,7 @@ class TVEpisode(object):
             return helpers.sanitizeSceneName(name)
 
         def us(name):
-            return re.sub('[ -]','_', name)
+            return re.sub('[ -]', '_', name)
 
         def release_name(name):
             if name and name.lower().endswith('.nzb'):
@@ -1909,6 +1909,10 @@ class TVEpisode(object):
         Renames an episode file and all related files to the location and filename as specified
         in the naming settings.
         """
+
+        if not ek.ek(os.path.isfile, self.location):
+            logger.log(u"Can't perform rename on " + self.location + " when it doesn't exist, skipping", logger.WARNING)
+            return
 
         proper_path = self.proper_path()
         absolute_proper_path = ek.ek(os.path.join, self.show.location, proper_path)
