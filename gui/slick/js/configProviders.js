@@ -251,10 +251,10 @@ $(document).ready(function(){
                delay: 90,
                effect: true,
           },
-          hide: false, // {
-               //fixed: true,
-               //delay: 900,
-          //},
+          hide: {
+               fixed: true,
+               delay: 900,
+          },
           content: {
           text: config_form,
                 title: {
@@ -271,7 +271,7 @@ $(document).ready(function(){
               width: 350,
               background: '#FFF',
               padding: 15,
-  //            tip: true, // Give it a speech bubble tip with automatic corner detection
+              tip: true, // Give it a speech bubble tip with automatic corner detection
               classes: 'qtip-dark qtip-shadow',
           },
       });
