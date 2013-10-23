@@ -804,20 +804,6 @@ class PostProcessor(object):
         # retrieve/create the corresponding TVEpisode objects
         ep_obj = self._get_ep_obj(tvdb_id, season, episodes)
 
-        # find the destination folder
-        try:
-            proper_path = ep_obj.proper_path()
-            proper_absolute_path = ek.ek(os.path.join, ep_obj.show.location, proper_path)
-
-            dest_path = ek.ek(os.path.dirname, proper_absolute_path)
-        except exceptions.ShowDirNotFoundException:
-            raise exceptions.PostProcessingFailed(u"Unable to post-process an episode if the show dir doesn't exist, quitting")
-
-        self._log(u"Destination folder for this episode: " + dest_path, logger.DEBUG)
-
-        # create any folders we need
-        helpers.make_dirs(dest_path)
-
         # get the quality of the episode we're processing
         new_ep_quality = self._get_quality(ep_obj)
         logger.log(u"Quality of the episode we're processing: " + str(new_ep_quality), logger.DEBUG)
@@ -915,6 +901,20 @@ class PostProcessor(object):
                     failed_history.logSuccess(releaseName)
                 else:
                     self._log(u"Couldn't find release in snatch history", logger.WARNING)
+
+        # find the destination folder
+        try:
+            proper_path = ep_obj.proper_path()
+            proper_absolute_path = ek.ek(os.path.join, ep_obj.show.location, proper_path)
+
+            dest_path = ek.ek(os.path.dirname, proper_absolute_path)
+        except exceptions.ShowDirNotFoundException:
+            raise exceptions.PostProcessingFailed(u"Unable to post-process an episode if the show dir doesn't exist, quitting")
+
+        self._log(u"Destination folder for this episode: " + dest_path, logger.DEBUG)
+
+        # create any folders we need
+        helpers.make_dirs(dest_path)
 
         # figure out the base name of the resulting episode file
         if sickbeard.RENAME_EPISODES:
