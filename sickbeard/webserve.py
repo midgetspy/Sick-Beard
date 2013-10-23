@@ -1505,7 +1505,7 @@ class ConfigHidden:
                 show = t[show_name]
             except:
                 logger.log(u"Issue found when looking up \"%s\"" % (show_name), logger.ERROR)
-                break
+                continue
 
             logger.log(u"Checking \"%s\" with local status \"%s\" against thetvdb" % (show_name, status), logger.MESSAGE)
 
