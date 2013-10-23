@@ -131,6 +131,7 @@
                             </label>
                         </div>
                         
+                    #if $sickbeard.USE_NZBS
                         <div class="field-pair">
                             <input id="use_failed_downloads" type="checkbox" class="enabler" name="use_failed_downloads" #if $sickbeard.USE_FAILED_DOWNLOADS == True then "checked=\"checked\"" else ""# />
                             <label class="clearfix" for="use_failed_downloads">
@@ -139,7 +140,7 @@
                             </label>
                             <label class="nocheck clearfix" for="use_failed_downloads">
                                 <span class="component-title">&nbsp;</span>
-                                <span class="component-desc"><b>NOTE:</b> See readme-FailedDownloads.md before enabling.</span>
+                                <span class="component-desc"><b>NOTE:</b> See <i>readme-FailedDownloads.md</i> before enabling.</span>
                             </label>
                         </div>
 						
@@ -164,11 +165,15 @@
                                 </label>
                                 <label class="nocheck clearfix" for="treat_empty_as_failed">
                                     <span class="component-title">&nbsp;</span>
-                                    <span class="component-desc"><b>NOTE:</b> This only works if Use Failed Downloads is enabled.</span>
+                                    <span class="component-desc"><b>NOTE:</b> This only works if Use Failed Downloads is enabled</span>
                                 </label>
+	                            <label class="nocheck clearfix">
+	                                <span class="component-title">&nbsp;</span>
+	                                <span class="component-desc">and PostProcessing is triggered via external script.</span>
+	                            </label>                                  
                             </div>
                         </div>
-                        
+                    #end if    
                         <div class="clearfix"></div>
                         <input type="submit" class="btn config_submitter" value="Save Changes" /><br/>
 

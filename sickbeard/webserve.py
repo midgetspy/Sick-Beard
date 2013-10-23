@@ -1190,19 +1190,21 @@ class ConfigPostProcessing:
 
         if use_failed_downloads == "on":
             use_failed_downloads = 1
+
+            if delete_failed == "on":
+                delete_failed = 1
+            else:
+                delete_failed = 0
+            if treat_empty_as_failed == "on":
+                treat_empty_as_failed = 1
+            else:
+                treat_empty_as_failed = 0
+
         else:
             use_failed_downloads = 0
-
-        if delete_failed == "on":
-            delete_failed = 1
-        else:
             delete_failed = 0
-            
-        if treat_empty_as_failed == "on":
-            treat_empty_as_failed = 1
-        else:
             treat_empty_as_failed = 0
-
+            
         sickbeard.PROCESS_AUTOMATICALLY = process_automatically
         if sickbeard.PROCESS_AUTOMATICALLY:
             sickbeard.autoPostProcesserScheduler.silent = False
