@@ -1515,9 +1515,12 @@ class ConfigHidden:
                 errMatch.append("<tr><td class='tvShow'><a href='/home/displayShow?show=%s'>%s</a></td><td>%s</td><td>%s</td>" % (tvdb_id, show_name, tvdb_id, show_id))
             else:
                 show_status = show['status']
+
+                if not show_status:
+                    show_status = ""
+
                 if show_status != status:
-                    if not (show_status == None and status == ""):
-                        changeState.append("<tr><td class='tvShow'><a href='/home/displayShow?show=%s'>%s</a></td><td>%s</td><td>%s</td>" % (tvdb_id, show_name, status, show_status))
+                    changeState.append("<tr><td class='tvShow'><a href='/home/displayShow?show=%s'>%s</a></td><td>%s</td><td>%s</td>" % (tvdb_id, show_name, status, show_status))
 
             show.clear()  # needed to free up memory since python's garbage collection would keep this around
 
