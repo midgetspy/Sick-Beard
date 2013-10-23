@@ -59,6 +59,16 @@ class SBRotatingLogHandler(object):
 
         self.log_lock = threading.Lock()
 
+    def close_log(self, handler=None):
+        if not handler:
+            handler = self.cur_handler
+
+        if handler:
+            sb_logger = logging.getLogger('sickbeard')
+            sb_logger.removeHandler(handler)
+            handler.flush()
+            handler.close()
+
     def initLogging(self, consoleLogging=True):
 
         old_handler = None
@@ -86,10 +96,7 @@ class SBRotatingLogHandler(object):
 
         # already logging in new log folder, close the old handler
         if old_handler:
-            old_handler.flush()
-            old_handler.close()
-            sb_logger = logging.getLogger('sickbeard')
-            sb_logger.removeHandler(old_handler)
+            self.close_log(old_handler)
 
     def _config_handler(self):
         """
@@ -126,9 +133,7 @@ class SBRotatingLogHandler(object):
 
         # delete the old handler
         if self.cur_handler:
-            self.cur_handler.flush()
-            self.cur_handler.close()
-            sb_logger.removeHandler(self.cur_handler)
+            self.close_log()
 
         # rename or delete all the old log files
         for i in range(self._num_logs(), -1, -1):
@@ -189,3 +194,7 @@ sb_log_instance = SBRotatingLogHandler('sickbeard.log', NUM_LOGS, LOG_SIZE)
 
 def log(toLog, logLevel=MESSAGE):
     sb_log_instance.log(toLog, logLevel)
+
+
+def close():
+    sb_log_instance.close_log()
