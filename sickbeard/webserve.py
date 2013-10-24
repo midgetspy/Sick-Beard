@@ -3952,8 +3952,8 @@ class WebInterface:
                 try:
                     network_zone = network_timezones.get_network_timezone(show['network'], network_timezones.load_network_dict(), local_zone)
                 except:
-          # Dummy network_zone for exceptions
-            network_zone = None
+                  # Dummy network_zone for exceptions
+                    network_zone = None
 
         # Get the air date and time
                 air_date = datetime.datetime.fromordinal(int(episode['airdate']))

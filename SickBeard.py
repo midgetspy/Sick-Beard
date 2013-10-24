@@ -54,6 +54,8 @@ from sickbeard import db
 from sickbeard.tv import TVShow
 from sickbeard import logger
 from sickbeard.version import SICKBEARD_VERSION
+from sickbeard.databases.mainDB import MIN_DB_VERSION 
+from sickbeard.databases.mainDB import MAX_DB_VERSION
 
 from sickbeard.webserveInit import initWebServer
 
@@ -259,6 +261,15 @@ def main():
 
     sickbeard.CFG = ConfigObj(sickbeard.CONFIG_FILE)
 
+    CUR_DB_VERSION = db.DBConnection().checkDBVersion() 
+    if CUR_DB_VERSION > 0:
+        if CUR_DB_VERSION < MIN_DB_VERSION:
+            raise SystemExit("Your database version (" + str(db.DBConnection().checkDBVersion()) + ") is too old to migrate from with this version of Sick Beard (" + str(MIN_DB_VERSION) + ").\n" + \
+                             "Upgrade using a previous version of SB first, or start with no database file to begin fresh.")
+        if CUR_DB_VERSION > MAX_DB_VERSION:
+            raise SystemExit("Your database version (" + str(db.DBConnection().checkDBVersion()) + ") has been incremented past what this version of Sick Beard supports (" + str(MAX_DB_VERSION) + ").\n" + \
+                             "If you have used other forks of SB, your database may be unusable due to their modifications.")    
+            
     # Initialize the config and our threads
     sickbeard.initialize(consoleLogging=consoleLogging)
 
