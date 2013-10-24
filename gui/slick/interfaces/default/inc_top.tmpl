@@ -238,13 +238,13 @@ a > i.icon-question-sign { background-image: url("$sbRoot/images/glyphicons-half
                             #if $sickbeard.USE_TORRENTS and $sickbeard.TORRENT_METHOD != 'blackhole':
                             	<li><a href="$sbRoot/manage/manageTorrents/"><img src="$sbRoot/images/menu/bittorrent.png" alt="" width="16" height="16" />Manage Torrents</a></li>
                             #end if
+							#if $sickbeard.USE_FAILED_DOWNLOADS:
+                                <li><a href="$sbRoot/manage/failedDownloads/"><img src="$sbRoot/images/menu/failed_download.png" alt="" width="16" height="16" />Failed Downloads</a></li>
+							#end if
                             <li><a href="$sbRoot/manage/episodeStatuses/"><img src="$sbRoot/images/menu/backlog16.png" alt="" width="16" height="16" />Episode Status Management</a></li>
                             #if $sickbeard.USE_SUBTITLES:
                             	<li><a href="$sbRoot/manage/subtitleMissed/"><img src="$sbRoot/images/menu/backlog16.png" alt="" width="16" height="16" />Missed Subtitle Management</a></li>
                             #end if
-							#if $sickbeard.USE_FAILED_DOWNLOADS:
-                                <li><a href="$sbRoot/manage/failedDownloads/"><img src="$sbRoot/images/menu/failed_download.png" alt="" width="16" height="16" />Failed Downloads</a></li>
-							#end if
                     </ul>
                 </li>                
                 <li id="NAVerrorlogs"><a href="$sbRoot/errorlogs/" class="log">$logPageTitle</a>
