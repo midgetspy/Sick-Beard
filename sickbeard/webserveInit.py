@@ -42,7 +42,7 @@ def initWebServer(options = {}):
             if status != "401 Unauthorized":
                 logger.log(u"CherryPy caught an error: %s %s" % (status, message), logger.ERROR)
                 logger.log(traceback, logger.DEBUG)
-            return r'''
+            return r'''<!DOCTYPE html>
 <html>
     <head>
         <title>%s</title>
@@ -56,13 +56,13 @@ def initWebServer(options = {}):
 
         def http_error_404_hander(status, message, traceback, version):
             """ Custom handler for 404 error, redirect back to main page """
-            return r'''
+            return r'''<!DOCTYPE html>
 <html>
     <head>
         <title>404</title>
         <script type="text/javascript" charset="utf-8">
           <!--
-          location.href = "%s"
+          location.href = "%s/"
           //-->
         </script>
     </head>
