@@ -144,13 +144,13 @@ var show_nzb_providers = #if $sickbeard.USE_NZBS then "true" else "false"#;
 <div class="providerDiv" id="${curNewznabProvider.getID()}Div">
                         <div class="field-pair">
                             <label class="clearfix">
-                                <span class="component-title">$curNewznabProvider.name URL:</span>
+                                <span class="component-title">URL:</span>
                                 <input class="component-desc" type="text" id="${curNewznabProvider.getID()}_url" value="$curNewznabProvider.url" size="40" disabled/>
                             </label>
                         </div>
                         <div class="field-pair">
                             <label class="clearfix">
-                                <span class="component-title">$curNewznabProvider.name API Key:</span>
+                                <span class="component-title">API Key:</span>
                                 <input class="component-desc newznab_key" type="text" id="${curNewznabProvider.getID()}_hash" value="$curNewznabProvider.key" newznab_name="${curNewznabProvider.getID()}_hash" size="40" />
                             </label>
                         </div>
@@ -160,13 +160,13 @@ var show_nzb_providers = #if $sickbeard.USE_NZBS then "true" else "false"#;
                     <div class="providerDiv" id="omgwtfnzbsDiv">
                         <div class="field-pair">
                             <label class="clearfix">
-                                <span class="component-title">omgwtfnzbs User Name:</span>
+                                <span class="component-title">UserName:</span>
                                 <input class="component-desc" type="text" name="omgwtfnzbs_username" value="$sickbeard.OMGWTFNZBS_USERNAME" size="10" />
                             </label>
                         </div>
                         <div class="field-pair">
                             <label class="clearfix">
-                                <span class="component-title">omgwtfnzbs API Key:</span>
+                                <span class="component-title">API Key:</span>
                                 <input class="component-desc" type="text" name="omgwtfnzbs_apikey" value="$sickbeard.OMGWTFNZBS_APIKEY" size="40" />
                             </label>
                         </div>
@@ -344,13 +344,13 @@ var show_nzb_providers = #if $sickbeard.USE_NZBS then "true" else "false"#;
 <div class="providerDiv" id="hdbitsDiv">
                         <div class="field-pair">
                             <label class="clearfix">
-                                <span class="component-title">HDBits Username:</span>
+                                <span class="component-title">Username:</span>
                                 <input class="component-desc" type="text" name="hdbits_username" value="$sickbeard.HDBITS_USERNAME" size="40" />
                             </label>
                         </div>
                         <div class="field-pair">
                             <label class="clearfix">
-                                <span class="component-title">HDBits Passkey:</span>
+                                <span class="component-title">Passkey:</span>
                                 <input class="component-desc" type="text" name="hdbits_passkey" value="$sickbeard.HDBITS_PASSKEY" size="40" />
                             </label>
                         </div>
