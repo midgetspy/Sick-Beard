@@ -1293,8 +1293,8 @@ def save_config():
     new_config['General']['process_automatically'] = int(PROCESS_AUTOMATICALLY)
     new_config['General']['unpack'] = int(UNPACK)
     new_config['General']['rename_episodes'] = int(RENAME_EPISODES)
-    new_config['General']['create_missing_show_dirs'] = CREATE_MISSING_SHOW_DIRS
-    new_config['General']['add_shows_wo_dir'] = ADD_SHOWS_WO_DIR
+    new_config['General']['create_missing_show_dirs'] = int(CREATE_MISSING_SHOW_DIRS)
+    new_config['General']['add_shows_wo_dir'] = int(ADD_SHOWS_WO_DIR)
 
     new_config['General']['extra_scripts'] = '|'.join(EXTRA_SCRIPTS)
     new_config['General']['git_path'] = GIT_PATH
