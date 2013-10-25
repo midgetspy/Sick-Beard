@@ -920,7 +920,8 @@ class ConfigGeneral:
     @cherrypy.expose
     def saveGeneral(self, log_dir=None, web_port=None, web_log=None, web_ipv6=None,
                     update_shows_on_start=None, launch_browser=None, web_username=None, use_api=None, api_key=None,
-                    web_password=None, version_notify=None, enable_https=None, https_cert=None, https_key=None, sort_article=None):
+                    web_password=None, version_notify=None, enable_https=None, https_cert=None, https_key=None, sort_article=None,
+                    anon_redirect=None, git_path=None):
 
         results = []
 
@@ -957,6 +958,8 @@ class ConfigGeneral:
         sickbeard.UPDATE_SHOWS_ON_START = update_shows_on_start
         sickbeard.LAUNCH_BROWSER = launch_browser
         sickbeard.SORT_ARTICLE = sort_article
+        sickbeard.ANON_REDIRECT = anon_redirect
+        sickbeard.GIT_PATH = git_path         
         # sickbeard.LOG_DIR is set in config.change_LOG_DIR()
 
         sickbeard.WEB_PORT = int(web_port)
@@ -1141,7 +1144,7 @@ class ConfigPostProcessing:
                     xbmc_data=None, xbmc_v12__data=None, mediabrowser_data=None, synology_data=None, sony_ps3_data=None, wdtv_data=None, tivo_data=None, mede8er_data=None,
                     use_banner=None, keep_processed_dir=None, process_method=None, process_automatically=None, rename_episodes=None, unpack=None,
                     move_associated_files=None, tv_download_dir=None, naming_custom_abd=None, naming_abd_pattern=None, naming_strip_year=None, use_failed_downloads=None,
-                    delete_failed=None, treat_empty_as_failed=None):
+                    delete_failed=None, treat_empty_as_failed=None, extra_scripts=None):
 
         results = []
 
@@ -1220,6 +1223,7 @@ class ConfigPostProcessing:
 
         sickbeard.KEEP_PROCESSED_DIR = keep_processed_dir
         sickbeard.PROCESS_METHOD = process_method
+        sickbeard.EXTRA_SCRIPTS = extra_scripts.split('|')
         sickbeard.RENAME_EPISODES = rename_episodes
         sickbeard.MOVE_ASSOCIATED_FILES = move_associated_files
         sickbeard.NAMING_CUSTOM_ABD = naming_custom_abd

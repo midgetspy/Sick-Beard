@@ -20,7 +20,7 @@
 #config .component-group-desc h3{font-size:1.5em;}
 #config .component-group-desc p{width:85%;font-size:1.0em;color:#666;margin:.8em 0;}
 #config .component-group-desc p.note{width:90%;/*font-size:1.2em*/;color:#333;margin:.8em 0;}
-#config .component-group-list{float:left;width:605px;margin-top:16px;}
+#config .component-group-list{float:left;width:610px;margin-top:16px;}
 
 #config fieldset{border:0;outline:0;}
 #config div.field-pair{margin:.9em 0 1.4em;}

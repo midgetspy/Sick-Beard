@@ -78,9 +78,31 @@
                         <div class="field-pair">
                             <label class="nocheck clearfix" for="log_dir">
                                 <span class="component-title">Logging Directory</span>
-                                <input type="text" name="log_dir" id="log_dir" value="$sickbeard.ACTUAL_LOG_DIR" size="35" />
+                                <input type="text" name="log_dir" id="log_dir" value="$sickbeard.ACTUAL_LOG_DIR" size="40" />
                             </label>
                         </div>
+
+                        <div class="field-pair">
+                            <label class="nocheck clearfix">
+                                <span class="component-title">Anonymous Redirect</span>
+                                <input type="text" name="anon_redirect" value="$sickbeard.ANON_REDIRECT" size="40" />
+                            </label>
+                            <label class="nocheck clearfix">
+                                <span class="component-title">&nbsp;</span>
+                                <span class="component-desc">Backlink protection via anonymizer service, must end in <b>?</b></span>
+                            </label>
+                        </div>
+
+                        <div class="field-pair">
+                            <label class="nocheck clearfix">
+                                <span class="component-title">Git Path</span>
+                                <input type="text" name="git_path" value="$sickbeard.GIT_PATH" size="40" />
+                            </label>
+                            <label class="nocheck clearfix">
+                                <span class="component-title">&nbsp;</span>
+                                <span class="component-desc">Specify path to Git binary, only use if OS is unable to find the path.</span>
+                            </label>
+                        </div>                        
 
                         <input type="submit" class="btn config_submitter" value="Save Changes" />
                     </fieldset>
