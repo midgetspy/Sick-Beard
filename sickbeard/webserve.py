@@ -1512,7 +1512,7 @@ class ConfigHidden:
             show_id = show['id']
             if int(tvdb_id) != int(show_id):
                 logger.log("Warning: Issue matching \"%s\" on tvdb. Got \"%s\" and \"%s\"" % (show_name, tvdb_id, show_id), logger.ERROR)
-                errMatch.append("<tr><td class='tvShow'><a href='/home/displayShow?show=%s'>%s</a></td><td>%s</td><td>%s</td>" % (tvdb_id, show_name, tvdb_id, show_id))
+                errMatch.append("<tr><td class='tvShow'><a href='%s/home/displayShow?show=%s'>%s</a></td><td>%s</td><td>%s</td>" % (sickbeard.WEB_ROOT, tvdb_id, show_name, tvdb_id, show_id))
             else:
                 show_status = show['status']
 
@@ -1520,17 +1520,17 @@ class ConfigHidden:
                     show_status = ""
 
                 if show_status != status:
-                    changeState.append("<tr><td class='tvShow'><a href='/home/displayShow?show=%s'>%s</a></td><td>%s</td><td>%s</td>" % (tvdb_id, show_name, status, show_status))
+                    changeState.append("<tr><td class='tvShow'><a href='%s/home/displayShow?show=%s'>%s</a></td><td>%s</td><td>%s</td>" % (sickbeard.WEB_ROOT, tvdb_id, show_name, status, show_status))
 
             show.clear()  # needed to free up memory since python's garbage collection would keep this around
 
         if len(errMatch):
-            errMatch.insert(0, "<br><table class='tablesorter'><thead><tr><th>show name</th><th>local tvdbid</th><th>remote tvdbid</th></tr></thead>")
+            errMatch.insert(0, "<br>These shows need to be removed then added back to Sick Beard to correct their TVDBID.<br><table class='tablesorter'><thead><tr><th>show name</th><th>local tvdbid</th><th>remote tvdbid</th></tr></thead>")
             errMatch.append("</table>")
             results += errMatch
 
         if len(changeState):
-            changeState.insert(0, "<br><table class='tablesorter'><thead><tr><th>show name</th><th>local status</th><th>remote status</th></tr></thead>")
+            changeState.insert(0, "<br>These shows need to have 'force full update' ran on them to correct their status.<br><table class='tablesorter'><thead><tr><th>show name</th><th>local status</th><th>remote status</th></tr></thead>")
             changeState.append("</table>")
             results += changeState
 
