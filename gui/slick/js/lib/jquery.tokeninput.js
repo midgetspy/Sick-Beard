@@ -43,8 +43,8 @@ var DEFAULT_SETTINGS = {
     idPrefix: "token-input-",
 
 	// Formatters
-    resultsFormatter: function(item){ return "<li><img src='/images/flags/"+item["id"]+".png' /> " + item[this.propertyToSearch]+ "</li>" },
-    tokenFormatter: function(item) { return "<li><img src='/images/flags/"+item["id"]+".png' /> <p>" + item[this.propertyToSearch] + "</p></li>" },
+    resultsFormatter: function(item){ return "<li><img src='"+sbRoot+"/images/flags/"+item["id"]+".png' /> " + item[this.propertyToSearch]+ "</li>" },
+    tokenFormatter: function(item) { return "<li><img src='"+sbRoot+"/images/flags/"+item["id"]+".png' /> <p>" + item[this.propertyToSearch] + "</p></li>" },
     flag: "flag",
 
 	// Callbacks
