@@ -768,28 +768,22 @@ class Manage:
         return _munge(t)
 
     @cherrypy.expose
-    def failedDownloads(self, limit=100, toRemove=None, add=None):
+    def failedDownloads(self, limit=100, toRemove=None):
 
         myDB = db.DBConnection("failed.db")
-
-        if toRemove != None:
-            toRemove = toRemove.split("|")
-        else:
-            toRemove = []
-
-        if add != None and not myDB.select("SELECT * FROM failed WHERE release = ?", [failed_history.prepareFailedName(add)]):
-            failed_history.logFailed(add)
-
-        for release in toRemove:
-            myDB.action('DELETE FROM failed WHERE release = ?', [release])
-
-        if toRemove or add:
-            raise cherrypy.HTTPRedirect('/manage/failedDownloads/')
 
         if limit == "0":
             sqlResults = myDB.select("SELECT * FROM failed")
         else:
             sqlResults = myDB.select("SELECT * FROM failed LIMIT ?", [limit])
+
+        toRemove = toRemove.split("|") if toRemove != None else []   
+
+        for release in toRemove:
+            myDB.action('DELETE FROM failed WHERE release = ?', [release])
+
+        if toRemove:
+            raise cherrypy.HTTPRedirect('/manage/failedDownloads/')
 
         t = PageTemplate(file="manage_failedDownloads.tmpl")
         t.failedResults = sqlResults
