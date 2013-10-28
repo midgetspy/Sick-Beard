@@ -81,7 +81,7 @@ class ShowUpdater():
         def lookup_latest(cur_tvdbid):
             myDB = db.DBConnection()
 
-            sqlResults = {}
+            sqlResults = None
             latest_aired = False
             next_upcoming = False
 
@@ -101,6 +101,16 @@ class ShowUpdater():
             if sqlResults is not None and len(sqlResults) > 0:
                 next_upcoming = (sqlResults[0]['airdate'] <= (datetime.date.today() + graceperiod).toordinal())
 
+            # get last backlog date to compare against
+            try:
+                sqlResults = myDB.select("SELECT * FROM info")
+            except:
+                pass
+            if sqlResults is not None and len(sqlResults) > 0:
+                # if it is time for the full backlog, then just bypass 'ended' check
+                if (sqlResults[0]['last_backlog'] <= (datetime.date.today() - datetime.timedelta(days=20)).toordinal()):
+                    latest_aired = True
+
             myDB.connection.close()
 
             return (latest_aired, next_upcoming)
@@ -112,7 +122,7 @@ class ShowUpdater():
                 if curShow.status != "Ended":
                     curQueueItem = sickbeard.showQueueScheduler.action.updateShow(curShow, True)  # @UndefinedVariable
                 else:
-                    # fetch current shows latest aired and next unraid data to compare again
+                    # run logic against the current show latest aired and next unaired data to see if we should bypass 'ended' status
                     latest_aired, next_upcoming = lookup_latest(curShow.tvdbid)
                     # if either check is True then we go ahead and update, otherwise just refresh
                     if latest_aired or next_upcoming:
