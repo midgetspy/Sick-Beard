@@ -1222,10 +1222,10 @@ class ConfigProviders:
         sickbeard.TORRENTLEECH_USERNAME = torrentleech_username
         sickbeard.TORRENTLEECH_PASSWORD = torrentleech_password
         
-        sickbeard.TORRENTDAY_USERNAME = torrentday_username
-        sickbeard.TORRENTDAY_PASSWORD = torrentday_password
-        sickbeard.TORRENTDAY_RSSHASH = torrentday_rsshash
-        sickbeard.TORRENTDAY_UID = torrentday_uid
+        sickbeard.TORRENTDAY_USERNAME = torrentday_username.strip()
+        sickbeard.TORRENTDAY_PASSWORD = torrentday_password.strip()
+        sickbeard.TORRENTDAY_RSSHASH = torrentday_rsshash.strip()
+        sickbeard.TORRENTDAY_UID = torrentday_uid.strip()
         
         sickbeard.SCENEACCESS_USERNAME = sceneaccess_username.strip()
         sickbeard.SCENEACCESS_PASSWORD = sceneaccess_password.strip()
