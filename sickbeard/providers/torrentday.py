@@ -244,7 +244,7 @@ class TorrentDayCache(tvcache.TVCache):
             logger.log("[" + provider.name + "] WARNING: RSS construction via browse since no RSS variables provided.") 
             xml = "<rss xmlns:atom=\"http://www.w3.org/2005/Atom\" version=\"2.0\">" + \
             "<channel>" + \
-            "<title>TorrentShack</title>" + \
+            "<title>" + provider.name + "</title>" + \
             "<link>" + provider.url + "</link>" + \
             "<description>torrent search</description>" + \
             "<language>en-us</language>" + \
