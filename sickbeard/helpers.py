@@ -889,30 +889,33 @@ def get_xml_text(element, mini_dom=False):
     return text.strip()
 
  
-
-def backupVersionedFile(oldFile, version):
+def backupVersionedFile(old_file, version):
     numTries = 0
-    
-    newFile = oldFile + '.' + 'v' + str(version)
 
-    while not ek.ek(os.path.isfile, newFile):
-        if not ek.ek(os.path.isfile, oldFile):
+    new_file = old_file + '.' + 'v' + str(version)
+
+    while not ek.ek(os.path.isfile, new_file):
+        if not ek.ek(os.path.isfile, old_file):
+            logger.log(u"Not creating backup, " + old_file + " doesn't exist", logger.DEBUG)
             break
 
         try:
-            logger.log(u"Attempting to back up " + oldFile + " before migration...")
-            shutil.copy(oldFile, newFile)
-            logger.log(u"Done backup, proceeding with migration.")
+            logger.log(u"Trying to back up " + old_file + " to " + new_file, logger.DEBUG)
+            shutil.copy(old_file, new_file)
+            logger.log(u"Backup done", logger.DEBUG)
             break
         except Exception, e:
-            logger.log(u"Error while trying to back up " + oldFile + ": " + ex(e))
+            logger.log(u"Error while trying to back up " + old_file + " to " + new_file + " : " + ex(e), logger.WARNING)
             numTries += 1
             time.sleep(1)
-            logger.log(u"Trying again.")
+            logger.log(u"Trying again.", logger.DEBUG)
 
         if numTries >= 10:
-            logger.log(u"Unable to back up " + oldFile + ", please do it manually.")
-            sys.exit(1)
+            logger.log(u"Unable to back up " + old_file + " to " + new_file + " please do it manually.", logger.ERROR)
+            return False
+
+    return True
+
 
 # try to convert to int, if it fails the default will be returned
 def tryInt(s, s_default = 0):
