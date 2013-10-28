@@ -1195,6 +1195,7 @@ def saveAndShutdown(restart=False):
             if '--nolaunch' not in popen_list:
                 popen_list += ['--nolaunch']
             logger.log(u"Restarting Sick Beard with " + str(popen_list))
+            logger.close()
             subprocess.Popen(popen_list, cwd=os.getcwd())
 
     os._exit(0)
