@@ -237,8 +237,7 @@ class TorrentDayCache(tvcache.TVCache):
         
     def _getRSSData(self):
         if sickbeard.TORRENTDAY_UID and sickbeard.TORRENTDAY_RSSHASH:
-            
-            self.rss_url = "{0}torrents/rss?download;l24;l14;l26;l7;l2;u={1};tp={2}".format(provider.url,repr(sickbeard.TORRENTDAY_UID), repr(sickbeard.TORRENTDAY_RSSHASH))
+            self.rss_url = "{0}torrents/rss?download;l24;l14;l26;l7;l2;u={1};tp={2}".format(provider.url,sickbeard.TORRENTDAY_UID, sickbeard.TORRENTDAY_RSSHASH)
             logger.log("[" + provider.name + "] RSS URL - {0}".format(self.rss_url))
             xml = provider.getURL(self.rss_url)
         else:
