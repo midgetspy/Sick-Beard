@@ -41,7 +41,7 @@ from sickbeard import postProcessor
 
 from sickbeard import encodingKludge as ek
 
-from common import Quality, Overview
+from common import Quality, Overview, statusStrings
 from common import DOWNLOADED, SNATCHED, SNATCHED_PROPER, ARCHIVED, IGNORED, UNAIRED, WANTED, SKIPPED, UNKNOWN
 from common import NAMING_DUPLICATE, NAMING_EXTEND, NAMING_LIMITED_EXTEND, NAMING_SEPARATED_REPEAT, NAMING_LIMITED_EXTEND_E_PREFIXED
 
@@ -839,51 +839,54 @@ class TVShow(object):
 
     def wantEpisode(self, season, episode, quality, manualSearch=False):
 
-        logger.log(u"Checking if we want episode " + str(season) + "x" + str(episode) + " at quality " + Quality.qualityStrings[quality], logger.DEBUG)
+        logger.log(u"Checking if found episode " + str(season) + "x" + str(episode) + " is wanted at quality " + Quality.qualityStrings[quality], logger.DEBUG)
 
         # if the quality isn't one we want under any circumstances then just say no
         anyQualities, bestQualities = Quality.splitQuality(self.quality)
-        logger.log(u"any,best = " + str(anyQualities) + " " + str(bestQualities) + " and we are " + str(quality), logger.DEBUG)
+        logger.log(u"any,best = " + str(anyQualities) + " " + str(bestQualities) + " and found " + str(quality), logger.DEBUG)
 
         if quality not in anyQualities + bestQualities:
-            logger.log(u"I know for sure I don't want this episode, saying no", logger.DEBUG)
+            logger.log(u"Don't want this quality, ignoring found episode", logger.DEBUG)
             return False
 
         myDB = db.DBConnection()
         sqlResults = myDB.select("SELECT status FROM tv_episodes WHERE showid = ? AND season = ? AND episode = ?", [self.tvdbid, season, episode])
 
         if not sqlResults or not len(sqlResults):
-            logger.log(u"Unable to find the episode", logger.DEBUG)
+            logger.log(u"Unable to find a matching episode in database, ignoring found episode", logger.DEBUG)
             return False
 
         epStatus = int(sqlResults[0]["status"])
+        epStatus_text = statusStrings[epStatus]
 
-        logger.log(u"current episode status: " + str(epStatus), logger.DEBUG)
+        logger.log(u"Existing episode status: " + str(epStatus) + " (" + epStatus_text + ")", logger.DEBUG)
 
         # if we know we don't want it then just say no
         if epStatus in (SKIPPED, IGNORED, ARCHIVED) and not manualSearch:
-            logger.log(u"Ep is skipped, not bothering", logger.DEBUG)
+            logger.log(u"Existing episode status is skipped/ignored/archived, ignoring found episode", logger.DEBUG)
             return False
 
         # if it's one of these then we want it as long as it's in our allowed initial qualities
         if quality in anyQualities + bestQualities:
             if epStatus in (WANTED, UNAIRED, SKIPPED):
-                logger.log(u"Ep is wanted/unaired/skipped, definitely get it", logger.DEBUG)
+                logger.log(u"Existing episode status is wanted/unaired/skipped, getting found episode", logger.DEBUG)
                 return True
             elif manualSearch:
-                logger.log(u"Usually I would ignore this ep but because you forced the search I'm overriding the default and allowing the quality", logger.DEBUG)
+                logger.log(u"Usually ignoring found episode, but forced search allows the quality, getting found episode", logger.DEBUG)
                 return True
             else:
-                logger.log(u"This quality looks like something we might want but I don't know for sure yet", logger.DEBUG)
+                logger.log(u"Quality is on wanted list, need to check if it's better than existing quality", logger.DEBUG)
 
         curStatus, curQuality = Quality.splitCompositeStatus(epStatus)
 
         # if we are re-downloading then we only want it if it's in our bestQualities list and better than what we have
         if curStatus in Quality.DOWNLOADED + Quality.SNATCHED + Quality.SNATCHED_PROPER and quality in bestQualities and quality > curQuality:
-            logger.log(u"We already have this ep but the new one is better quality, saying yes", logger.DEBUG)
+            logger.log(u"Episode already exists but the found episode has better quality, getting found episode", logger.DEBUG)
             return True
+        else:
+            logger.log(u"Episode already exists and the found episode has same/lower quality, ignoring found episode", logger.DEBUG)
 
-        logger.log(u"None of the conditions were met so I'm just saying no", logger.DEBUG)
+        logger.log(u"None of the conditions were met, ignoring found episode", logger.DEBUG)
         return False
 
     def getOverview(self, epStatus):
