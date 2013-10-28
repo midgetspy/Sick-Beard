@@ -44,11 +44,11 @@ class TorrentDayProvider(generic.TorrentProvider):
     ###################################################################################################
     def __init__(self):
         generic.TorrentProvider.__init__(self, "TorrentDay")
-        self.name = "TorrentDay"
-        self.supportsBacklog = True
         self.cache = TorrentDayCache(self)     
-        self.url = 'http://www.torrentday.com/'
+        self.name = "TorrentDay"
         self.session = None
+        self.supportsBacklog = True
+        self.url = 'http://www.torrentday.com/'
         logger.log('[' + self.name + '] initializing...')
     
     ###################################################################################################
@@ -115,8 +115,7 @@ class TorrentDayProvider(generic.TorrentProvider):
 
     ###################################################################################################
 
-    def _get_episode_search_strings(self, ep_obj):
-        
+    def _get_episode_search_strings(self, ep_obj):  
         search_string = []
        
         if not ep_obj:
@@ -218,7 +217,6 @@ class TorrentDayProvider(generic.TorrentProvider):
         
         if re.search("Password not correct|<title>Torrentday :: Login|User not found</title>",response.text) \
         or response.status_code in [401,403]:
-            logger.log(response.content)
             raise Exception("[" + self.name + "] Login Failed, Invalid username or password for " + self.name + ". Check your settings.")
             return False
         return True

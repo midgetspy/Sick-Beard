@@ -1,6 +1,6 @@
 ###################################################################################################
 # Author: Jodi Jones <venom@gen-x.co.nz>
-# URL: http://code.google.com/p/sickbeard/
+# URL: https://github.com/VeNoMouS/Sick-Beard
 #
 # This file is part of Sick Beard.
 #
@@ -26,6 +26,7 @@ import generic
 import datetime
 import sickbeard
 import exceptions
+
 from lib import requests
 from xml.sax.saxutils import escape
 
@@ -42,11 +43,12 @@ class TorrentShackProvider(generic.TorrentProvider):
     ###################################################################################################
     def __init__(self):
         generic.TorrentProvider.__init__(self, "TorrentShack")
-        self.supportsBacklog = True
         self.cache = TorrentShackCache(self)     
-        self.url = 'https://torrentshack.net/'
+        self.name = "TorrentShack"
         self.session = None
-        logger.log('[TorrentShack] Loading TorrentShack')
+        self.supportsBacklog = True
+        self.url = 'https://torrentshack.net/'
+        logger.log("[" + self.name + "] initializing...")
     
     ###################################################################################################
     
@@ -64,6 +66,11 @@ class TorrentShackProvider(generic.TorrentProvider):
         quality = Quality.nameQuality(item[0])
         return quality 
     
+    ###################################################################################################
+
+    def _get_title_and_url(self, item):
+        return item
+
     ###################################################################################################
 
     def _get_airbydate_season_range(self, season):        
@@ -107,8 +114,7 @@ class TorrentShackProvider(generic.TorrentProvider):
 
     ###################################################################################################
 
-    def _get_episode_search_strings(self, ep_obj):
-        
+    def _get_episode_search_strings(self, ep_obj):    
         search_string = []
        
         if not ep_obj:
@@ -127,34 +133,29 @@ class TorrentShackProvider(generic.TorrentProvider):
 
     def _doSearch(self, search_params, show=None):
         search_params = search_params.replace('.',' ')
-        logger.log("[TorrentShack] Performing Search: {0}".format(search_params))
+        logger.log("[" + self.name + "] Performing Search: {0}".format(search_params))
         searchUrl = self.url + "torrents.php?searchstr=" + urllib.quote(search_params) + "&filter_cat[600]=1&filter_cat[620]=1&filter_cat[700]=1&filter_cat[980]=1&filter_cat[981]=1"
         return self.parseResults(searchUrl)
     
     ################################################################################################### 
-
-    def _get_title_and_url(self, item):
-        return item
-
-    ###################################################################################################
     
     def parseResults(self, searchUrl):
         data = self.getURL(searchUrl)
         results = []
 
         if data:
-            logger.log("[TorrentShack] parseResults() URL: " + searchUrl, logger.DEBUG)
+            logger.log("[" + self.name + "] parseResults() URL: " + searchUrl, logger.DEBUG)
 
             for torrent in re.compile('torrent_handle_links">\[<a href="(?P<url>.*?)" title="Download".*?class="torrent_name_link">(?P<title>.*?)</span>',re.MULTILINE|re.DOTALL).finditer(data):
                 item = (torrent.group('title').replace('.',' '), self.url + torrent.group('url').replace('&amp;','&'))
                 results.append(item)                        
-                logger.log("[TorrentShack] parseResults() Title: " + torrent.group('title'), logger.DEBUG)
+                logger.log("[" + self.name + "] parseResults() Title: " + torrent.group('title'), logger.DEBUG)
             if len(results):
-                logger.log("[TorrentShack] parseResults() Some results found.")
+                logger.log("[" + self.name + "] parseResults() Some results found.")
             else:
-                logger.log("[TorrentShack] parseResults() No results found.")
+                logger.log("[" + self.name + "] parseResults() No results found.")
         else:
-            logger.log("[TorrentShack] parseResults() Error no data returned!!")
+            logger.log("[" + self.name + "] parseResults() Error no data returned!!")
         return results
     
     ###################################################################################################
@@ -163,7 +164,8 @@ class TorrentShackProvider(generic.TorrentProvider):
         response = None
         
         if not self.session:
-            self._doLogin()
+             if not self._doLogin():
+                return response
             
         if not headers:
             headers = []
@@ -171,13 +173,13 @@ class TorrentShackProvider(generic.TorrentProvider):
         try:
             response = self.session.get(url, verify=False)
         except (requests.exceptions.ConnectionError, requests.exceptions.HTTPError), e:
-            logger.log("[TorrentShack] getURL() Error loading " + self.name + " URL: " + ex(e), logger.ERROR)
+            logger.log("[" + self.name + "] getURL() Error loading " + self.name + " URL: " + ex(e), logger.ERROR)
             return None
         
         if response.status_code not in [200,302,303]:
-            logger.log("[TorrentShack] getURL() requested URL - " + url +" returned status code is " + str(response.status_code) + ': ' + clients.http_error_code[response.status_code], logger.WARNING)
+            logger.log("[" + self.name + "] getURL() requested URL - " + url +" returned status code is " + str(response.status_code), logger.ERROR)
             return None
-        
+
         return response.content
     
     ###################################################################################################
@@ -191,18 +193,18 @@ class TorrentShackProvider(generic.TorrentProvider):
         }
 
         self.session = requests.Session()
-        logger.log("[TorrentShack] Attempting to Login")
+        logger.log("[" + self.name + "] Attempting to Login")
+        
         try:
             response = self.session.post(self.url + "login.php", data=login_params, timeout=30, verify=False)
         except (requests.exceptions.ConnectionError, requests.exceptions.HTTPError), e:
-            raise Exception("[TorrentShack] _doLogin() Error: " + str(e.code) + " " + str(e.reason), logger.ERROR)
+            raise Exception("[" + self.name + "] _doLogin() Error: " + str(e.code) + " " + str(e.reason))
             return False
         
         if re.search("Your username or password was incorrect|<title>Login :: Torrent Shack</title>",response.text) \
         or response.status_code in [401,403]:
-            logger.log("[TorrentShack] Login Failed ")
-            raise Exception("[TorrentShack] Invalid username or password for " + self.name + ". Check your settings.")
-            return None
+            raise Exception("[" + self.name + "] Login Failed, Invalid username or password for " + self.name + ". Check your settings.")
+            return False
         return True
     
     ###################################################################################################
@@ -220,13 +222,13 @@ class TorrentShackCache(tvcache.TVCache):
     def _getRSSData(self):
         if sickbeard.TORRENTSHACK_UID and sickbeard.TORRENTSHACK_AUTH and sickbeard.TORRENTSHACK_PASS_KEY and sickbeard.TORRENTSHACK_AUTH_KEY:
             self.rss_url = "{0}feeds.php?feed=torrents&cat=600,620,700,980,981&user={1}&auth={2}&passkey={3}&authkey={4}".format(provider.url,sickbeard.TORRENTSHACK_UID, sickbeard.TORRENTSHACK_AUTH, sickbeard.TORRENTSHACK_PASS_KEY, sickbeard.TORRENTSHACK_AUTH_KEY)
-            logger.log("[TorrentShack] RSS URL - {0}".format(self.rss_url))
+            logger.log("[" + provider.name + "] RSS URL - {0}".format(self.rss_url))
             xml = provider.getURL(self.rss_url)
         else:
-            logger.log("[TorrentShack] WARNING: RSS construction via browse since no RSS variables provided.") 
+            logger.log("[" + provider.name + "] WARNING: RSS construction via browse since no RSS variables provided.") 
             xml = "<rss xmlns:atom=\"http://www.w3.org/2005/Atom\" version=\"2.0\">" + \
             "<channel>" + \
-            "<title>TorrentShack</title>" + \
+            "<title>" + provider.name + "</title>" + \
             "<link>" + provider.url + "</link>" + \
             "<description>torrent search</description>" + \
             "<language>en-us</language>" + \
