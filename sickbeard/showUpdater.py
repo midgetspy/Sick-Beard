@@ -26,6 +26,7 @@ from sickbeard import exceptions
 from sickbeard import ui
 from sickbeard.exceptions import ex
 from sickbeard import encodingKludge as ek
+from sickbeard import db
 
 
 class ShowUpdater():
@@ -75,17 +76,50 @@ class ShowUpdater():
                                 break
 
         piList = []
+        graceperiod = datetime.timedelta(days=30)
+
+        def lookup_latest(cur_tvdbid):
+            myDB = db.DBConnection()
+
+            sqlResults = {}
+            latest_aired = False
+            next_upcoming = False
+
+            # get latest aired episode to compare against today-graceperiod and today+graceperiod
+            try:
+                sqlResults = myDB.select("SELECT * FROM tv_episodes WHERE showid = ? AND season > '0' AND airdate > '1' AND status > '1' ORDER BY airdate DESC LIMIT 1", [cur_tvdbid])
+            except:
+                pass
+            if sqlResults is not None and len(sqlResults) > 0:
+                latest_aired = (sqlResults[0]['airdate'] >= (datetime.date.today() - graceperiod).toordinal() and sqlResults[0]['airdate'] <= (datetime.date.today() + graceperiod).toordinal())
+
+            # get next upcoming UNAIRED episode to compare against today+graceperiod
+            try:
+                sqlResults = myDB.select("SELECT * FROM tv_episodes WHERE showid = ? AND season > '0' AND airdate > '1' AND status = '1' ORDER BY airdate ASC LIMIT 1", [cur_tvdbid])
+            except:
+                pass
+            if sqlResults is not None and len(sqlResults) > 0:
+                next_upcoming = (sqlResults[0]['airdate'] <= (datetime.date.today() + graceperiod).toordinal())
+
+            myDB.connection.close()
+
+            return (latest_aired, next_upcoming)
 
         for curShow in sickbeard.showList:
 
             try:
 
                 if curShow.status != "Ended":
-                    curQueueItem = sickbeard.showQueueScheduler.action.updateShow(curShow, True) #@UndefinedVariable
+                    curQueueItem = sickbeard.showQueueScheduler.action.updateShow(curShow, True)  # @UndefinedVariable
                 else:
-                    #TODO: maybe I should still update specials?
-                    logger.log(u"Not updating episodes for show "+curShow.name+" because it's marked as ended.", logger.DEBUG)
-                    curQueueItem = sickbeard.showQueueScheduler.action.refreshShow(curShow, True) #@UndefinedVariable
+                    # fetch current shows latest aired and next unraid data to compare again
+                    latest_aired, next_upcoming = lookup_latest(curShow.tvdbid)
+                    # if either check is True then we go ahead and update, otherwise just refresh
+                    if latest_aired or next_upcoming:
+                        curQueueItem = sickbeard.showQueueScheduler.action.updateShow(curShow, True)  # @UndefinedVariable
+                    else:
+                        logger.log(u"Not updating episodes for show " + curShow.name + " because it's marked as ended and last/next episode is not within the grace period.", logger.DEBUG)
+                        curQueueItem = sickbeard.showQueueScheduler.action.refreshShow(curShow, True)  # @UndefinedVariable
 
                 piList.append(curQueueItem)
 
