@@ -113,7 +113,7 @@ class CheckVersion():
 class UpdateManager():
 
     def get_github_repo_user(self):
-        return 'mr-orange'
+        return 'nivong'
 
     def get_github_repo(self):
         return 'Sick-Beard'
