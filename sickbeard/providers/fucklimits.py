@@ -184,7 +184,7 @@ class FuckLimitsProvider(generic.TorrentProvider):
     
     ###################################################################################################
     
-    def doLogin(self):
+    def _doLogin(self):
         login_params  = {
             'username': sickbeard.FUCKLIMITS_USERNAME,
             'password': sickbeard.FUCKLIMITS_PASSWORD,
