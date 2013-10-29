@@ -1347,7 +1347,7 @@ def save_config():
 
     new_config['PUBLICHD'] = {}
     new_config['PUBLICHD']['publichd'] = int(PUBLICHD)
-    new_config['PUBLICHD']['publichd'] = PUBLICHD_OPTIONS
+    new_config['PUBLICHD']['publichd_options'] = PUBLICHD_OPTIONS
 
     new_config['SCC'] = {}
     new_config['SCC']['scc'] = int(SCC)
