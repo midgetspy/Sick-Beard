@@ -38,7 +38,7 @@ from sickbeard.common import Quality
 from sickbeard.common import Overview
 from sickbeard import show_name_helpers
 
-class FUCKLIMITSProvider(generic.TorrentProvider):
+class FuckLimitsProvider(generic.TorrentProvider):
     ###################################################################################################
     def __init__(self):
         generic.TorrentProvider.__init__(self, "FuckLimits")
@@ -208,7 +208,7 @@ class FUCKLIMITSProvider(generic.TorrentProvider):
     
     ###################################################################################################
     
-class FUCKLIMITSCache(tvcache.TVCache):
+class FuckLimitsCache(tvcache.TVCache):
     
     ###################################################################################################
     
@@ -236,4 +236,4 @@ class FUCKLIMITSCache(tvcache.TVCache):
         
     ###################################################################################################    
 
-provider = FUCKLIMITSProvider()
+provider = FuckLimitsProvider()
