@@ -715,7 +715,7 @@ class TVShow(object):
             logger.log(str(self.tvdbid) + u": Loading show info from IMDb")
     
             i = imdb.IMDb()
-            imdbTv = i.get_movie(str(self.imdbid[2:]))
+            imdbTv = i.get_movie(str(re.sub("[^0-9]", "", self.imdbid)))
             
             for key in filter(lambda x: x in imdbTv.keys(), imdb_info.keys()):
                 # Store only the first value for string type
