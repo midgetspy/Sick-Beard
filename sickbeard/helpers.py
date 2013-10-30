@@ -783,6 +783,7 @@ def get_xml_text(element, mini_dom=False):
 
 
 def backupVersionedFile(old_file, version):
+
     numTries = 0
 
     new_file = old_file + '.' + 'v' + str(version)
