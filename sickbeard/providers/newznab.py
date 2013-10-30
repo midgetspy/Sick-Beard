@@ -52,11 +52,8 @@ class NewznabProvider(generic.NZBProvider):
         self.key = key
 
         # if a provider doesn't need an api key then this can be false
-        if key:
-            self.needs_auth = True
-        else:
-            self.needs_auth = False
-
+        self.needs_auth = True
+        
         self.enabled = True
         self.supportsBacklog = True
 
