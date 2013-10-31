@@ -217,10 +217,10 @@ class SceneAccessCache(tvcache.TVCache):
         xml = ''
         if sickbeard.SCENEACCESS_RSSHASH:
             self.rss_url = "https://sceneaccess.eu/rss?feed=dl&cat=27,17,11&passkey={0}".format(sickbeard.SCENEACCESS_RSSHASH)
-            logger.log("[" + self.name + "] RSS URL - {0}".format(self.rss_url))
+            logger.log("[" + provider.name + "] RSS URL - {0}".format(self.rss_url))
             xml = helpers.getURL(self.rss_url)
         else:
-            logger.log("[" + self.name + "] WARNING: RSS construction via browse since no hash provided.")
+            logger.log("[" + provider.name + "] WARNING: RSS construction via browse since no hash provided.")
             url = provider.url + "browse?search=&method=2&c27=27&c17=17&c11=11"
             data = provider.parseResults(url)
             xml = "<rss xmlns:atom=\"http://www.w3.org/2005/Atom\" version=\"2.0\">" + \
