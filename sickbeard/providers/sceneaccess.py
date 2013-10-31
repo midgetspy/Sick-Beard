@@ -179,7 +179,7 @@ class SceneAccessProvider(generic.TorrentProvider):
     
     ###################################################################################################
     
-    def doLogin(self):
+    def _doLogin(self):
         login_params  = {
             'username': sickbeard.SCENEACCESS_USERNAME,
             'password': sickbeard.SCENEACCESS_PASSWORD,
