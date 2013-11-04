@@ -980,7 +980,7 @@ def initialize(consoleLogging=True):
             autoPostProcesserScheduler.silent = True
             
         traktWatchListCheckerSchedular = scheduler.Scheduler(traktWatchListChecker.TraktChecker(),
-                                                     cycleTime=datetime.timedelta(minutes=10),
+                                                     cycleTime=datetime.timedelta(hours=1),
                                                      threadName="TRAKTWATCHLIST",
                                                      runImmediately=True)
         
