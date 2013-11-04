@@ -232,7 +232,7 @@ def pickBestResult(results, quality_list=None):
             logger.log(cur_result.name+" is a quality we know we don't want, rejecting it", logger.DEBUG)
             continue
 
-        if sickbeard.USE_FAILED_DOWNLOADS and cur_result.provider.providerType != GenericProvider.TORRENT and failed_history.hasFailed(cur_result.name, cur_result.size):
+        if sickbeard.USE_FAILED_DOWNLOADS and failed_history.hasFailed(cur_result.name, cur_result.size):
             logger.log(cur_result.name + u" has previously failed, rejecting it")
             continue
 
