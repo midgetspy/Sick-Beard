@@ -47,8 +47,6 @@ from lib.configobj import ConfigObj
 
 invoked_command = None
 
-SOCKET_TIMEOUT = 30
-
 PID = None
 
 CFG = None
@@ -97,6 +95,8 @@ started = False
 
 ACTUAL_LOG_DIR = None
 LOG_DIR = None
+
+SOCKET_TIMEOUT = None
 
 WEB_PORT = None
 WEB_LOG = None
@@ -459,8 +459,6 @@ def initialize(consoleLogging=True):
         if __INITIALIZED__:
             return False
 
-        socket.setdefaulttimeout(SOCKET_TIMEOUT)
-
         CheckSection(CFG, 'General')
         CheckSection(CFG, 'Blackhole')
         CheckSection(CFG, 'Newzbin')
@@ -486,7 +484,10 @@ def initialize(consoleLogging=True):
         
         if not helpers.makeDir(LOG_DIR):
             logger.log(u"!!! No log folder, logging to screen only!", logger.ERROR)
-
+        
+        SOCKET_TIMEOUT = check_setting_int(CFG, 'General', 'socket_timeout', 30)
+        socket.setdefaulttimeout(SOCKET_TIMEOUT)
+        
         try:
             WEB_PORT = check_setting_int(CFG, 'General', 'web_port', 8081)
         except:
@@ -502,6 +503,7 @@ def initialize(consoleLogging=True):
         WEB_USERNAME = check_setting_str(CFG, 'General', 'web_username', '')
         WEB_PASSWORD = check_setting_str(CFG, 'General', 'web_password', '')
         LAUNCH_BROWSER = bool(check_setting_int(CFG, 'General', 'launch_browser', 1))
+        
         
         LOCALHOST_IP = check_setting_str(CFG, 'General', 'localhost_ip', '')
         ANON_REDIRECT = check_setting_str(CFG, 'General', 'anon_redirect', 'http://derefer.me/?')
@@ -1238,6 +1240,7 @@ def save_config():
     new_config['General'] = {}
     new_config['General']['config_version'] = CONFIG_VERSION
     new_config['General']['log_dir'] = ACTUAL_LOG_DIR if ACTUAL_LOG_DIR else 'Logs'
+    new_config['General']['socket_timeout'] = SOCKET_TIMEOUT
     new_config['General']['web_port'] = WEB_PORT
     new_config['General']['web_host'] = WEB_HOST
     new_config['General']['web_ipv6'] = int(WEB_IPV6)
