@@ -1,6 +1,7 @@
 import re
 import time
 from hashlib import sha1
+from base64 import b16encode, b32decode
 
 import sickbeard
 from sickbeard import logger
@@ -126,6 +127,8 @@ class GenericClient(object):
         
         if result.url.startswith('magnet'):
             torrent_hash = re.findall('urn:btih:([\w]{32,40})', result.url)[0]
+            if len(torrent_hash) == 32:
+                torrent_hash = b16encode(b32decode(torrent_hash)).lower()
         else:
             info = bdecode(result.content)["info"]
             torrent_hash = sha1(bencode(info)).hexdigest()
