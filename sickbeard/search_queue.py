@@ -24,15 +24,16 @@ import time
 import sickbeard
 from sickbeard import db, logger, common, exceptions, helpers
 from sickbeard import generic_queue
-from sickbeard import search
+from sickbeard import search, failed_history
 from sickbeard import ui
 
 BACKLOG_SEARCH = 10
 RSS_SEARCH = 20
 MANUAL_SEARCH = 30
 
+
 class SearchQueue(generic_queue.GenericQueue):
-    
+
     def __init__(self):
         generic_queue.GenericQueue.__init__(self)
         self.queue_name = "SEARCHQUEUE"
@@ -73,6 +74,8 @@ class SearchQueue(generic_queue.GenericQueue):
             generic_queue.GenericQueue.add_item(self, item)
         elif isinstance(item, ManualSearchQueueItem) and not self.is_ep_in_queue(item.ep_obj):
             generic_queue.GenericQueue.add_item(self, item)
+        elif isinstance(item, FailedQueueItem) and not self.is_in_queue(item.show, item.segment):
+            generic_queue.GenericQueue.add_item(self, item)
         else:
             logger.log(u"Not adding item, it's already in the queue", logger.DEBUG)
 
@@ -80,9 +83,9 @@ class ManualSearchQueueItem(generic_queue.QueueItem):
     def __init__(self, ep_obj):
         generic_queue.QueueItem.__init__(self, 'Manual Search', MANUAL_SEARCH)
         self.priority = generic_queue.QueuePriorities.HIGH
-        
+
         self.ep_obj = ep_obj
-        
+
         self.success = None
 
     def execute(self):
@@ -172,7 +175,7 @@ class BacklogQueueItem(generic_queue.QueueItem):
         generic_queue.QueueItem.__init__(self, 'Backlog', BACKLOG_SEARCH)
         self.priority = generic_queue.QueuePriorities.LOW
         self.thread_name = 'BACKLOG-' + str(show.tvdbid)
-        
+
         self.show = show
         self.segment = segment
 
@@ -195,12 +198,12 @@ class BacklogQueueItem(generic_queue.QueueItem):
 
             statusResults = myDB.select("SELECT status FROM tv_episodes WHERE showid = ? AND airdate >= ? AND airdate <= ?",
                                         [self.show.tvdbid, min_date.toordinal(), max_date.toordinal()])
-            
+
         anyQualities, bestQualities = common.Quality.splitQuality(self.show.quality) #@UnusedVariable
         self.wantSeason = self._need_any_episodes(statusResults, bestQualities)
 
     def execute(self):
-        
+
         generic_queue.QueueItem.execute(self)
 
         results = search.findSeason(self.show, self.segment)
@@ -215,7 +218,7 @@ class BacklogQueueItem(generic_queue.QueueItem):
     def _need_any_episodes(self, statusResults, bestQualities):
 
         wantSeason = False
-        
+
         # check through the list of statuses to see if we want any
         for curStatusResult in statusResults:
             curCompositeStatus = int(curStatusResult["status"])
@@ -232,3 +235,75 @@ class BacklogQueueItem(generic_queue.QueueItem):
                 break
 
         return wantSeason
+
+class FailedQueueItem(generic_queue.QueueItem):
+
+    def __init__(self, show, segment=None, ep_obj=None):
+        generic_queue.QueueItem.__init__(self, 'Retry', MANUAL_SEARCH)
+        self.priority = generic_queue.QueuePriorities.HIGH
+        self.thread_name = 'RETRY-' + str(show.tvdbid)
+
+        self.show = show
+        self.segment = segment
+        self.ep_obj = ep_obj
+        
+        self.success = None
+
+    def execute(self):
+
+        generic_queue.QueueItem.execute(self)
+
+        if self.ep_obj:
+
+            failed_history.revertEpisodes(self.show, self.ep_obj.season, [self.ep_obj.episode])
+            failed_history.logFailed(self.ep_obj.release_name)
+
+            foundEpisode = search.findEpisode(self.ep_obj, manualSearch=True)
+            result = False
+
+            if not foundEpisode:
+                ui.notifications.message('No downloads were found', "Couldn't find a download for <i>%s</i>" % self.ep_obj.prettyName())
+                logger.log(u"Unable to find a download for " + self.ep_obj.prettyName())
+            else:
+                # just use the first result for now
+                logger.log(u"Downloading episode from " + foundEpisode.url)
+                result = search.snatchEpisode(foundEpisode)
+                providerModule = foundEpisode.provider
+                if not result:
+                    ui.notifications.error('Error while attempting to snatch ' + foundEpisode.name+', check your logs')
+                elif providerModule == None:
+                    ui.notifications.error('Provider is configured incorrectly, unable to download')
+    
+            self.success = result
+
+        else:    
+            
+            myDB = db.DBConnection()
+    
+            if not self.show.air_by_date:
+                sqlResults = myDB.select("SELECT episode, release_name FROM tv_episodes WHERE showid = ? AND season = ? AND status IN (" + ",".join([str(x) for x in common.Quality.FAILED]) + ")", [self.show.tvdbid, self.segment])
+            else:
+                segment_year, segment_month = map(int, self.segment.split('-'))
+                min_date = datetime.date(segment_year, segment_month, 1)
+    
+                # it's easier to just hard code this than to worry about rolling the year over or making a month length map
+                if segment_month == 12:
+                    max_date = datetime.date(segment_year, 12, 31)
+                else:
+                    max_date = datetime.date(segment_year, segment_month + 1, 1) - datetime.timedelta(days=1)
+    
+                sqlResults = myDB.select("SELECT episode, release_name FROM tv_episodes WHERE showid = ? AND airdate >= ? AND airdate <= ? AND status IN (" + ",".join([str(x) for x in common.Quality.FAILED]) + ")",
+                                            [self.show.tvdbid, min_date.toordinal(), max_date.toordinal()])
+            
+            for result in sqlResults:
+                failed_history.revertEpisodes(self.show, self.segment, [result["episode"]])
+                failed_history.logFailed(result["release_name"])
+
+                results = search.findSeason(self.show, self.segment)
+
+            # download whatever we find
+            for curResult in results:
+                search.snatchEpisode(curResult)
+                time.sleep(5)
+
+        self.finish()

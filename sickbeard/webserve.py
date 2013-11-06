@@ -50,7 +50,7 @@ from sickbeard import failedProcessor
 
 from sickbeard.providers import newznab, rsstorrent
 from sickbeard.common import Quality, Overview, statusStrings, qualityPresetStrings
-from sickbeard.common import SNATCHED, SKIPPED, UNAIRED, IGNORED, ARCHIVED, WANTED
+from sickbeard.common import SNATCHED, SKIPPED, UNAIRED, IGNORED, ARCHIVED, WANTED, FAILED
 from sickbeard.common import SD, HD720p, HD1080p
 from sickbeard.exceptions import ex
 from sickbeard.webapi import Api
@@ -787,8 +787,55 @@ class History:
         else:
             sqlResults = myDB.select("SELECT h.*, show_name FROM history h, tv_shows s WHERE h.showid=s.tvdb_id ORDER BY date DESC LIMIT ?", [limit])
 
+        history = { 'show_id': 0, 'season': 0, 'episode': 0, 'quality': 0, 'actions': [{'time': '', 'action': '', 'provider': ''}]}
+        compact=[]
+        
+        for sql_result in sqlResults:
+           
+            if not any((history['show_id'] == sql_result['showid'] \
+                        and history['season'] == sql_result['season'] \
+                        and history['episode'] == sql_result['episode'] \
+                        and history['quality'] == sql_result['quality'])\
+                        for history in compact):
+
+                history = {}            
+                history['show_id'] = sql_result['showid']
+                history['season'] = sql_result['season']
+                history['episode'] = sql_result['episode']
+                history['quality'] = sql_result['quality']
+                history['show_name'] = sql_result['show_name']
+                history['resource'] = sql_result['resource']
+                
+                action = {}
+                history['actions'] = []
+                
+                action['time'] = sql_result['date']
+                action['action'] = sql_result['action']
+                action['provider'] = sql_result['provider']
+                action['resource'] = sql_result['resource']
+                history['actions'].append(action)
+                history['actions'].sort(key=lambda x: x['time'])
+                compact.append(history)
+            else:
+                index = [i for i, dict in enumerate(compact) \
+                 if dict['show_id'] == sql_result['showid'] \
+                 and dict['season'] == sql_result['season'] \
+                 and dict['episode'] == sql_result['episode']
+                 and dict['quality'] == sql_result['quality']][0]
+                
+                action = {}
+                history = compact[index]
+
+                action['time'] = sql_result['date']
+                action['action'] = sql_result['action']
+                action['provider'] = sql_result['provider']
+                action['resource'] = sql_result['resource']
+                history['actions'].append(action)
+                history['actions'].sort(key=lambda x: x['time'])
+
         t = PageTemplate(file="history.tmpl")
         t.historyResults = sqlResults
+        t.compactResults = compact
         t.limit = limit
         t.submenu = [
             { 'title': 'Clear History', 'path': 'history/clearHistory' },
@@ -3095,7 +3142,7 @@ class Home:
         epCounts[Overview.SNATCHED] = 0
 
         for curResult in sqlResults:
-
+                
             curEpCat = showObj.getOverview(int(curResult["status"]))
             epCats[str(curResult["season"])+"x"+str(curResult["episode"])] = curEpCat
             epCounts[curEpCat] += 1
@@ -3407,7 +3454,8 @@ class Home:
                 return _genericMessage("Error", errMsg)
 
         segment_list = []
-
+        fail_segment = {}
+        
         if eps != None:
 
             for curEp in eps.split('|'):
@@ -3418,7 +3466,10 @@ class Home:
 
                 epObj = showObj.getEpisode(int(epInfo[0]), int(epInfo[1]))
 
-                if int(status) == WANTED:
+                if epObj == None:
+                    return _genericMessage("Error", "Episode couldn't be retrieved")
+
+                if int(status) in (WANTED, FAILED):
                     # figure out what segment the episode is in and remember it so we can backlog it
                     if epObj.show.air_by_date:
                         ep_segment = str(epObj.airdate)[:7]
@@ -3427,9 +3478,6 @@ class Home:
 
                     if ep_segment not in segment_list:
                         segment_list.append(ep_segment)
-
-                if epObj == None:
-                    return _genericMessage("Error", "Episode couldn't be retrieved")
 
                 with epObj.lock:
                     # don't let them mess up UNAIRED episodes
@@ -3441,20 +3489,43 @@ class Home:
                         logger.log(u"Refusing to change status of "+curEp+" to DOWNLOADED because it's not SNATCHED/DOWNLOADED", logger.ERROR)
                         continue
 
+                    if int(status) == FAILED and epObj.status not in Quality.SNATCHED + Quality.SNATCHED_PROPER + Quality.DOWNLOADED:
+                        logger.log(u"Refusing to change status of "+curEp+" to FAILED because it's not SNATCHED/DOWNLOADED", logger.ERROR)
+                        continue
+                   
+                    if int(status) == FAILED:
+                        quality = Quality.splitCompositeStatus(epObj.status)[1]
+                        epObj.status = Quality.compositeStatus(FAILED, quality)
+                        epObj.saveToDB()
+                        continue
+                   
                     epObj.status = int(status)
                     epObj.saveToDB()
+                
+        if int(status) == WANTED:           
+            msg = "Backlog was automatically started for the following seasons of <b>"+showObj.name+"</b>:<br />"
+            for cur_segment in segment_list:
+                msg += "<li>Season "+str(cur_segment)+"</li>"
+                logger.log(u"Sending backlog for "+showObj.name+" season "+str(cur_segment)+" because some eps were set to wanted")
+                cur_backlog_queue_item = search_queue.BacklogQueueItem(showObj, cur_segment)
+                sickbeard.searchQueueScheduler.action.add_item(cur_backlog_queue_item) #@UndefinedVariable
+            msg += "</ul>"
 
-        msg = "Backlog was automatically started for the following seasons of <b>"+showObj.name+"</b>:<br />"
-        for cur_segment in segment_list:
-            msg += "<li>Season "+str(cur_segment)+"</li>"
-            logger.log(u"Sending backlog for "+showObj.name+" season "+str(cur_segment)+" because some eps were set to wanted")
-            cur_backlog_queue_item = search_queue.BacklogQueueItem(showObj, cur_segment)
-            sickbeard.searchQueueScheduler.action.add_item(cur_backlog_queue_item) #@UndefinedVariable
-        msg += "</ul>"
+            if segment_list:
+                ui.notifications.message("Backlog started", msg)
 
-        if segment_list:
-            ui.notifications.message("Backlog started", msg)
+        if int(status) == FAILED:
+            msg = "Retring Search was automatically started for the following season of <b>"+showObj.name+"</b>:<br />"
+            for cur_segment in segment_list:
+                msg += "<li>Season "+str(cur_segment)+"</li>"
+                logger.log(u"Retrying Search for "+showObj.name+" season "+str(cur_segment)+" because some eps were set to failed")
+                cur_failed_queue_item = search_queue.FailedQueueItem(showObj, cur_segment)
+                sickbeard.searchQueueScheduler.action.add_item(cur_failed_queue_item) #@UndefinedVariable
+            msg += "</ul>"
 
+            if segment_list:
+                ui.notifications.message("Retry Search started", msg)
+            
         if direct:
             return json.dumps({'result': 'success'})
         else:
@@ -3609,48 +3680,62 @@ class Home:
         return json.dumps({'result': status, 'subtitles': ','.join([x for x in ep_obj.subtitles])})
 
     @cherrypy.expose
-    def mergeEpisodeSubtitles(self, show=None, season=None, episode=None):
-
+    def retryEpisode(self, show, season, episode):
+        
         # retrieve the episode object and fail if we can't get one
         ep_obj = _getEpisode(show, season, episode)
         if isinstance(ep_obj, str):
             return json.dumps({'result': 'failure'})
 
-        # try do merge subtitles for that episode
-        try:
-            ep_obj.mergeSubtitles()
-        except Exception as e:
-            return json.dumps({'result': 'failure', 'exception': str(e)})
+        with ep_obj.lock:
+            quality = Quality.splitCompositeStatus(ep_obj.status)[1]
+            ep_obj.status = Quality.compositeStatus(FAILED, quality)
+            ep_obj.saveToDB()
+
+        # make a queue item for it and put it on the queue
+        ep_queue_item = search_queue.FailedQueueItem(ep_obj.show, [], ep_obj)
+        sickbeard.searchQueueScheduler.action.add_item(ep_queue_item) #@UndefinedVariable
+
+        # wait until the queue item tells us whether it worked or not
+        while ep_queue_item.success == None: #@UndefinedVariable
+            time.sleep(1)
 
         # return the correct json value
-        status = 'Subtitles merged successfully '
-        ui.notifications.message('Merge Subtitles', status)
-        return json.dumps({'result': 'ok'})
+        if ep_queue_item.success:
+            #Find the quality class for the episode
+            quality_class = Quality.qualityStrings[Quality.UNKNOWN]
+            ep_status, ep_quality = Quality.splitCompositeStatus(ep_obj.status)
+            for x in (SD, HD720p, HD1080p):
+                if ep_quality in Quality.splitQuality(x)[0]:
+                    quality_class = qualityPresetStrings[x]
+                    break
 
-    @cherrypy.expose
-    def retryEpisode(self, show, season, episode):
-        try:
-            release = failed_history.findRelease(show, season, episode)
-            pp = failedProcessor.FailedProcessor(dirName=None, nzbName=release + '.nzb')
-            pp.process()
-            if pp.log:
-                ui.notifications.message('Info', pp.log)
-        except exceptions.FailedHistoryNotFoundException:
-            ui.notifications.error('Not Found Error', 'Couldn\'t find release in history. (Has it been over 30 days?)\n'
-                                   'Can\'t mark it as bad.')
-            return json.dumps({'result': 'failure'})
-        except exceptions.FailedHistoryMultiSnatchException:
-            ui.notifications.error('Multi-Snatch Error', 'The same episode was snatched again before the first one was done.\n'
-                                   'Please cancel any downloads of this episode and then set it back to wanted.\n Can\'t continue.')
-            return json.dumps({'result': 'failure'})
-        except exceptions.FailedProcessingFailed:
-            ui.notifications.error('Processing Failed', pp.log)
-            return json.dumps({'result': 'failure'})
-        except Exception as e:
-            ui.notifications.error('Unknown Error', 'Unknown exception: ' + str(e))
-            return json.dumps({'result': 'failure'})
+            return json.dumps({'result': statusStrings[ep_obj.status],
+                               'quality': quality_class
+                               })
 
-        return json.dumps({'result': 'success'})
+        return json.dumps({'result': 'failure'})
+            
+#        try:
+#            
+#                
+#            ui.notifications.message('Info', pp.log)
+#        except exceptions.FailedHistoryNotFoundException:
+#            ui.notifications.error('Not Found Error', 'Couldn\'t find release in history. (Has it been over 30 days?)\n'
+#                                   'Can\'t mark it as bad.')
+#            return json.dumps({'result': 'failure'})
+#        except exceptions.FailedHistoryMultiSnatchException:
+#            ui.notifications.error('Multi-Snatch Error', 'The same episode was snatched again before the first one was done.\n'
+#                                   'Please cancel any downloads of this episode and then set it back to wanted.\n Can\'t continue.')
+#            return json.dumps({'result': 'failure'})
+#        except exceptions.FailedProcessingFailed:
+#            ui.notifications.error('Processing Failed', pp.log)
+#            return json.dumps({'result': 'failure'})
+#        except Exception as e:
+#            ui.notifications.error('Unknown Error', 'Unknown exception: ' + str(e))
+#            return json.dumps({'result': 'failure'})
+#
+#        return json.dumps({'result': 'success'})
 
 class UI:
 

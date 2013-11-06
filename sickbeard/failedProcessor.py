@@ -85,7 +85,7 @@ class FailedProcessor(object):
         self._log(u"Marking release as bad: " + releaseName)
         self.log += failed_history.logFailed(releaseName)
 
-        cur_backlog_queue_item = search_queue.BacklogQueueItem(self._show_obj, parsed.season_number)
+        cur_backlog_queue_item = search_queue.FailedQueueItem(self._show_obj, parsed.season_number)
         sickbeard.searchQueueScheduler.action.add_item(cur_backlog_queue_item)
 
         return True

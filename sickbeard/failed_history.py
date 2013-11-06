@@ -221,3 +221,5 @@ def findRelease(showtvdbid, season, episode):
         raise exceptions.FailedHistoryMultiSnatchException()
     else:
         return sql_results[0]["release"]
+
+    
