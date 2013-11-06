@@ -145,13 +145,12 @@
                                 <span class="component-desc"><b>NOTE:</b> Only working with RAR archive</span>
                             </label>
                         </div>
-
-                    #if $sickbeard.USE_NZBS
+                    
                         <div class="field-pair">
                             <input id="use_failed_downloads" type="checkbox" class="enabler" name="use_failed_downloads" #if $sickbeard.USE_FAILED_DOWNLOADS == True then "checked=\"checked\"" else ""# />
                             <label class="clearfix" for="use_failed_downloads">
                                 <span class="component-title">Use Failed Downloads</span>
-                                <span class="component-desc">Use Failed Download Handling for NZBs?</span>
+                                <span class="component-desc">Use Failed Download Handling?</span>
                             </label>
                             <label class="nocheck clearfix" for="use_failed_downloads">
                                 <span class="component-title">&nbsp;</span>
@@ -188,7 +187,7 @@
 	                            </label>                                  
                             </div>
                         </div>
-                    #end if    
+
                         <div class="clearfix"></div>
                         <input type="submit" class="btn config_submitter" value="Save Changes" /><br/>
 
