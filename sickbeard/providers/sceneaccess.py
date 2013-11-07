@@ -192,7 +192,7 @@ class SceneAccessProvider(generic.TorrentProvider):
         try:
             response = self.session.post(self.url + "login", data=login_params, timeout=30, verify=False)
         except (requests.exceptions.ConnectionError, requests.exceptions.HTTPError), e:
-            raise Exception("[" + self.name + "] _doLogin() Error: " + str(e.code) + " " + str(e.reason))
+            raise Exception("[" + self.name + "] _doLogin() Error: " + ex(e))
             return False
         
         if re.search("Invalid Username/password|<title>SceneAccess \| Login</title>",response.text) \

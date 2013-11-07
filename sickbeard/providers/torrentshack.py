@@ -198,7 +198,7 @@ class TorrentShackProvider(generic.TorrentProvider):
         try:
             response = self.session.post(self.url + "login.php", data=login_params, timeout=30, verify=False)
         except (requests.exceptions.ConnectionError, requests.exceptions.HTTPError), e:
-            raise Exception("[" + self.name + "] _doLogin() Error: " + str(e.code) + " " + str(e.reason))
+            raise Exception("[" + self.name + "] _doLogin() Error: " + ex(e))
             return False
         
         if re.search("Your username or password was incorrect|<title>Login :: Torrent Shack</title>",response.text) \

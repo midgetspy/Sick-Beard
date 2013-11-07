@@ -212,7 +212,7 @@ class TorrentDayProvider(generic.TorrentProvider):
         try:
             response = self.session.post(self.url + "torrents/", data=login_params, timeout=30, verify=False)
         except (requests.exceptions.ConnectionError, requests.exceptions.HTTPError), e:
-            raise Exception("[" + self.name + "] _doLogin() Error: " + str(e.code) + " " + str(e.reason))
+            raise Exception("[" + self.name + "] _doLogin() Error: " + ex(e))
             return False
         
         if re.search("Password not correct|<title>Torrentday :: Login|User not found</title>",response.text) \
