@@ -67,8 +67,21 @@
 #set $curRemove  = "<input type=\"checkbox\" class=\"removeCheck\" id=\"remove-"+$hItem["release"]+"\" />"
   <tr>
     <td class="nowrap">$hItem["release"]</td>
-    <td>$hItem["size"]</td>
-    <td>$hItem["provider"]</td>
+    <td align="center">
+    #if $hItem["size"] != -1
+    	$hItem["size"]
+    #else
+    	?
+    #end if	
+    </td>
+   	<td align="center">
+	#set $provider = $providers.getProviderClass($generic.GenericProvider.makeID($hItem["provider"]))
+	#if $provider != None: 
+		<img src="$sbRoot/images/providers/<%=provider.imageName()%>" width="16" height="16" alt="$provider.name" title="$provider.name"/>
+	#else:
+	    <img src="$sbRoot/images/providers/missing.png" width="16" height="16" alt="missing provider" title="missing provider"/>
+	#end if
+    </td>
     <td align="center">$curRemove</td>
   </tr>
 #end for
