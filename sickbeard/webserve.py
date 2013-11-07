@@ -831,7 +831,7 @@ class History:
                 action['provider'] = sql_result['provider']
                 action['resource'] = sql_result['resource']
                 history['actions'].append(action)
-                history['actions'].sort(key=lambda x: x['time'])
+                history['actions'].sort(key=lambda x: x['time'], reverse=True)
 
         t = PageTemplate(file="history.tmpl")
         t.historyResults = sqlResults

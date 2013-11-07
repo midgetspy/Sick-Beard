@@ -1849,6 +1849,7 @@ pre {
 .vertical {
 	-webkit-transform: rotate(90deg);
 	-moz-transform: rotate(90deg);
+	-ms-transform: rotate(90deg);
     filter: flipv fliph;
     display: inline-block;
     margin: 8px 0px 0px -8px !important;
