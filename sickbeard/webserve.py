@@ -862,7 +862,6 @@ class History:
         ui.notifications.message('Removed history entries greater than 30 days old')
         redirect("/history")
 
-
 ConfigMenu = [
     { 'title': 'General',           'path': 'config/general/'          },
     { 'title': 'Search Settings',   'path': 'config/search/'           },
@@ -3816,6 +3815,16 @@ class WebInterface:
         sickbeard.HOME_LAYOUT = layout
 
         redirect("/home")
+
+    @cherrypy.expose
+    def setHistoryLayout(self, layout):
+
+        if layout not in ('compact', 'detailed'):
+            layout = 'detailed'
+
+        sickbeard.HISTORY_LAYOUT = layout
+
+        redirect("/history")
 
     @cherrypy.expose
     def toggleDisplayShowSpecials(self, show):
