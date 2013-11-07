@@ -109,6 +109,10 @@ def retrieve_exceptions():
                 if cur_exception not in existing_exceptions:
                     myDB.action("INSERT INTO scene_exceptions (tvdb_id, show_name) VALUES (?,?)", [cur_tvdb_id, cur_exception])
                     changed_exceptions = True
+                # check if there are entries with the same show name but a different tvdb_id
+                # remove all duplicate entries, except the one with the tvdb_id you retrieved from the net
+                if myDB.select("SELECT COUNT(tvdb_id) FROM scene_exceptions WHERE show_name = ?", [cur_exception]) > 1:
+                    myDB.action("DELETE FROM scene_exceptions WHERE show_name = ? AND tvdb_id != ?", [cur_exception, cur_tvdb_id])
 
         # since this could invalidate the results of the cache we clear it out after updating
         if changed_exceptions:
