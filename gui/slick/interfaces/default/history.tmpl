@@ -110,12 +110,11 @@
 	    <td class="nowrap">$datetime.datetime.strptime(str($hItem["actions"][0]["time"]), $history.dateFormat)</td>
 	    <td width="25%">
 	    <div style="display:inline-block; overflow:hidden;">
-			<img style="width: 200px; height: 37px; border-radius: 4px 0px 0px 4px; border-width: 2px 0 2px 2px ; border-style: solid; border-color: #FFFFFF;" src="$sbRoot/showPoster/?show=$hItem["show_id"]&amp;which=banner" class="banner" alt="$hItem["show_id"]"/>
+			<img style="width: 200px; height: 37px; border-radius: 4px 0px 0px 4px; border-width: 3px 0 3px 3px ; border-style: solid; border-color: #B7B7B7;" src="$sbRoot/showPoster/?show=$hItem["show_id"]&amp;which=banner" class="banner" alt="$hItem["show_id"]"/>
 		</div>
 		<div class="vertical"><%=str(hItem["season"]) +"x"+ "%02i" % int(hItem["episode"]) %></div>
-	
 		<td align="left">
-			#for $action in $hItem["actions"]:
+			#for $action in sorted($hItem["actions"]):
 				#set $curStatus, $curQuality = $Quality.splitCompositeStatus(int($action["action"]))
 				<span style="cursor: help;" title="$os.path.basename($action["resource"])">$statusStrings[$curStatus]</span>
 			    #if $curStatus == DOWNLOADED:
