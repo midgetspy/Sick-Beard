@@ -1132,7 +1132,9 @@ class ConfigSearch:
             torrent_high_bandwidth = 0
         sickbeard.TORRENT_HIGH_BANDWIDTH = torrent_high_bandwidth
 
-        if torrent_host and not re.match('https?://.*', torrent_host):
+        if torrent_host \
+        and not re.match('https?://.*', torrent_host) \
+        and not re.match ('scgi://.*', torrent_host):
             torrent_host = 'http://' + torrent_host
 
         if not torrent_host.endswith('/'):
