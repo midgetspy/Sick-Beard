@@ -76,7 +76,7 @@ class rTorrentAPI(GenericClient):
                 torrent.set_custom(1, sickbeard.TORRENT_LABEL.lower())
 
             if sickbeard.TV_DOWNLOAD_DIR:
-                torrent.set_directory(os.path.join(sickbeard.TV_DOWNLOAD_DIR, sickbeard.TORRENT_LABEL.lower()))
+                torrent.set_directory(sickbeard.TV_DOWNLOAD_DIR)
 
             # Set Ratio Group
             torrent.set_visible(group_name)
