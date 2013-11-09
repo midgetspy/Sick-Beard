@@ -940,7 +940,7 @@ class ConfigGeneral:
         return m.hexdigest()
 
     @cherrypy.expose
-    def saveGeneral(self, log_dir=None, web_port=None, web_log=None, web_ipv6=None,
+    def saveGeneral(self, log_dir=None, web_port=None, web_log=None, encryption_version=None, web_ipv6=None,
                     update_shows_on_start=None, launch_browser=None, web_username=None, use_api=None, api_key=None,
                     web_password=None, version_notify=None, enable_https=None, https_cert=None, https_key=None, sort_article=None,
                     anon_redirect=None, git_path=None):
@@ -956,6 +956,12 @@ class ConfigGeneral:
             web_log = 1
         else:
             web_log = 0
+            
+        if encryption_version == "on":
+            # Update to the last encryption_version available:
+            encryption_version = 1
+        else:
+            encryption_version = 0
 
         if update_shows_on_start == "on":
             update_shows_on_start = 1
@@ -987,6 +993,7 @@ class ConfigGeneral:
         sickbeard.WEB_PORT = int(web_port)
         sickbeard.WEB_IPV6 = web_ipv6
         # sickbeard.WEB_LOG is set in config.change_LOG_DIR()
+        sickbeard.ENCRYPTION_VERSION = encryption_version
         sickbeard.WEB_USERNAME = web_username
         sickbeard.WEB_PASSWORD = web_password
 

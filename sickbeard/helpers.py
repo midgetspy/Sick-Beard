@@ -33,8 +33,11 @@ import zlib
 import hashlib
 import httplib
 import urlparse
+import uuid
+import base64
 
 from httplib import BadStatusLine
+from itertools import izip, cycle
 
 try:
     import json
@@ -991,3 +994,37 @@ def check_url(url):
         return conn.getresponse().status in good_codes
     except StandardError:
         return None
+        
+
+"""
+Encryption
+==========
+By Pedro Jose Pereira Vieito <pvieito@gmail.com> (@pvieito)
+
+* If encryption_version==0 then return data without encryption
+* The keys should be unique for each device
+
+To add a new encryption_version:
+  1) Code your new encryption_version        
+  2) Update the last encryption_version available in webserve.py
+  3) Remember to maintain old encryption versions and key generators for retrocompatibility
+"""
+
+# Key Generators
+unique_key1 = hex(uuid.getnode()**2) # Used in encryption v1
+
+# Encryption Functions
+def encrypt(data, encryption_version=0, decrypt=False):
+    
+    # Version 1: Simple XOR encryption (this is not very secure, but works)
+    if encryption_version == 1:
+    	if decrypt:
+        	return ''.join(chr(ord(x) ^ ord(y)) for (x,y) in izip(base64.decodestring(data), cycle(unique_key1)))
+        else:
+        	return base64.encodestring(''.join(chr(ord(x) ^ ord(y)) for (x,y) in izip(data, cycle(unique_key1)))).strip()
+    # Version 0: Plain text
+    else:
+        return data
+        
+def decrypt(data, encryption_version=0):
+	return encrypt(data, encryption_version, decrypt=True)
