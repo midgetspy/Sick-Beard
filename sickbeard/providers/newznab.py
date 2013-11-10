@@ -50,6 +50,7 @@ class NewznabProvider(generic.NZBProvider):
 
         self.url = url
         self.key = key
+        self.catIDs = '5030,5040'
 
         # if a provider doesn't need an api key then this can be false
         self.needs_auth = True
@@ -60,7 +61,8 @@ class NewznabProvider(generic.NZBProvider):
         self.default = False
 
     def configStr(self):
-        return self.name + '|' + self.url + '|' + self.key + '|' + str(int(self.enabled))
+        #return self.name + '|' + self.url + '|' + self.key + '|' + str(int(self.enabled))
+        return '{0}|{1}|{2}|{3}|{4}'.format(self.name, self.url, self.key, self.catIDs, int(self.enabled))
 
     def imageName(self):
         if ek.ek(os.path.isfile, ek.ek(os.path.join, sickbeard.PROG_DIR, 'data', 'images', 'providers', self.getID() + '.png')):
@@ -187,15 +189,11 @@ class NewznabProvider(generic.NZBProvider):
         params = {"t": "tvsearch",
                   "maxage": sickbeard.USENET_RETENTION,
                   "limit": 100,
-                  "cat": '5030,5040'}
+                  "cat": self.catIDs}
 
         # if max_age is set, use it, don't allow it to be missing
         if max_age or not params['maxage']:
             params['maxage'] = max_age
-
-        # hack this in for now
-        if self.getID() == 'nzbs_org':
-            params['cat'] += ',5070,5090'
 
         if search_params:
             params.update(search_params)
@@ -296,11 +294,7 @@ class NewznabCache(tvcache.TVCache):
     def _getRSSData(self):
 
         params = {"t": "tvsearch",
-                  "cat": '5040,5030'}
-
-        # hack this in for now
-        if self.provider.getID() == 'nzbs_org':
-            params['cat'] += ',5070,5090'
+                  "cat": self.provider.catIDs}
 
         if self.provider.key:
             params['apikey'] = self.provider.key
