@@ -55,7 +55,7 @@ CFG = None
 CONFIG_FILE = None
 
 # this is the version of the config we EXPECT to find
-CONFIG_VERSION = 3
+CONFIG_VERSION = 4
 
 PROG_DIR = '.'
 MY_FULLNAME = None

@@ -92,8 +92,9 @@ def makeNewznabProvider(configString):
     try:
         name, url, key, catIDs, enabled = configString.split('|')
     except:
-        # that did not work, try the old format without catIDs
+        # if that did not work, try the old format without catIDs (set catIDs to default)
         name, url, key, enabled = configString.split('|')
+        catIDs = '5030,5040'
 
     newznab = sys.modules['sickbeard.providers.newznab']
 
