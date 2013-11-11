@@ -182,7 +182,7 @@ def change_VERSION_NOTIFY(version_notify):
         sickbeard.NEWEST_VERSION_STRING = None
 
     if oldSetting == False and version_notify == True:
-        sickbeard.versionCheckScheduler.action.run()  #@UndefinedVariable
+        sickbeard.versionCheckScheduler.action.run()  # @UndefinedVariable
 
 
 def CheckSection(CFG, sec):
@@ -282,7 +282,8 @@ class ConfigMigrator():
         self.expected_config_version = sickbeard.CONFIG_VERSION
         self.migration_names = {1: 'Custom naming',
                                 2: 'Sync backup number with version number',
-                                3: 'Rename omgwtfnzb variables'
+                                3: 'Rename omgwtfnzb variables',
+                                4: 'Add newznab catIDs'
                                 }
 
     def migrate_config(self):
@@ -429,7 +430,7 @@ class ConfigMigrator():
     def _migrate_v2(self):
         return
 
-    # Migration v2: Rename  omgwtfnzb variables
+    # Migration v2: Rename omgwtfnzb variables
     def _migrate_v3(self):
         """
         Reads in the old naming settings from your config and generates a new config template from them.
@@ -437,3 +438,18 @@ class ConfigMigrator():
         # get the old settings from the file and store them in the new variable names
         sickbeard.OMGWTFNZBS_USERNAME = check_setting_str(self.config_obj, 'omgwtfnzbs', 'omgwtfnzbs_uid', '')
         sickbeard.OMGWTFNZBS_APIKEY = check_setting_str(self.config_obj, 'omgwtfnzbs', 'omgwtfnzbs_key', '')
+
+    # Migration v4: Add default newznab catIDs
+    def _migrate_v4(self):
+        """ Update newznab providers so that the category IDs can be set independently via the config """
+
+        newznabProviderDict = dict(zip([x.getID() for x in sickbeard.newznabProviderList], sickbeard.newznabProviderList))
+        for curProvider in newznabProviderDict:
+            if curProvider == 'nzbs_org':
+                default_cat = '5030,5040,5070,5090'
+            else:
+                default_cat = '5030,5040'
+
+            # only touch catIDs if they are not set (set built in providers since we have to hack nzbs_org this one time)
+            if newznabProviderDict[curProvider].default or newznabProviderDict[curProvider].catIDs is None:
+                newznabProviderDict[curProvider].catIDs = default_cat

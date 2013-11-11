@@ -88,19 +88,26 @@ def makeNewznabProvider(configString):
     if not configString:
         return None
 
-    name, url, key, enabled = configString.split('|')
+    # first try the new format of the newznab providers (catIDs added)
+    try:
+        name, url, key, catIDs, enabled = configString.split('|')
+    except:
+        # if that did not work, try the old format without catIDs (set catIDs to default)
+        name, url, key, enabled = configString.split('|')
+        catIDs = '5030,5040'
 
     newznab = sys.modules['sickbeard.providers.newznab']
 
     newProvider = newznab.NewznabProvider(name, url)
     newProvider.key = key
+    newProvider.catIDs = catIDs
     newProvider.enabled = enabled == '1'
 
     return newProvider
 
 
 def getDefaultNewznabProviders():
-    return 'Sick Beard Index|http://lolo.sickbeard.com/|0|0!!!NZBs.org|http://nzbs.org/||0!!!Usenet-Crawler|http://www.usenet-crawler.com/||0'
+    return 'Sick Beard Index|http://lolo.sickbeard.com/|0|5030,5040|0!!!NZBs.org|http://nzbs.org/||5030,5040,5070,5090|0!!!Usenet-Crawler|http://www.usenet-crawler.com/||5030,5040|0'
 
 
 def getProviderModule(name):
