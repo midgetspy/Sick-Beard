@@ -68,6 +68,7 @@ class TVShow(object):
         self.paused = 0
         self.air_by_date = 0
         self.lang = lang
+        self.last_update_tvdb = 1
 
         self.lock = threading.Lock()
         self._isDirGood = False
@@ -374,6 +375,10 @@ class TVShow(object):
 
                 scannedEps[season][episode] = True
 
+        # Done updating save last update date
+        self.last_update_tvdb = datetime.date.today().toordinal()
+        self.saveToDB()
+
         return scannedEps
 
     def setTVRID(self, force=False):
@@ -602,6 +607,8 @@ class TVShow(object):
             if self.lang == "":
                 self.lang = sqlResults[0]["lang"]
 
+            self.last_update_tvdb = sqlResults[0]["last_update_tvdb"]
+
     def loadFromTVDB(self, cache=True, tvapi=None, cachedSeason=None):
 
         logger.log(str(self.tvdbid) + u": Loading show info from theTVDB")
@@ -811,7 +818,8 @@ class TVShow(object):
                         "air_by_date": self.air_by_date,
                         "startyear": self.startyear,
                         "tvr_name": self.tvrname,
-                        "lang": self.lang
+                        "lang": self.lang,
+                        "last_update_tvdb": self.last_update_tvdb
                         }
 
         myDB.upsert("tv_shows", newValueDict, controlValueDict)
