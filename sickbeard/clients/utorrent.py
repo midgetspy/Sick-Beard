@@ -68,8 +68,9 @@ class uTorrentAPI(GenericClient):
 
         if sickbeard.TORRENT_PAUSED:
             params = {'action':'pause', 'hash':result.hash}
-            return self._request(params=params)
+        else:
+            params = {'action':'start', 'hash':result.hash}
         
-        return True
+        return self._request(params=params)
         
 api = uTorrentAPI()       
