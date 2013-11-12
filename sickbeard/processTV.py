@@ -138,11 +138,6 @@ def processDir(dirName, nzbName=None, process_method=None, force=False, is_prior
                 if process_method == "move" and \
                 ek.ek(os.path.normpath, processPath) != ek.ek(os.path.normpath, sickbeard.TV_DOWNLOAD_DIR):
                     delete_dir(processPath)
-    
-    if sickbeard.USE_FAILED_DOWNLOADS and sickbeard.TREAT_EMPTY_AS_FAILED \
-    and not failed and not nzbNameOriginal is None and process_result:
-        returnStr += logHelper(u"No media files were found, treating this as failed.", logger.DEBUG)
-        process_failed(dirName, nzbNameOriginal)
         
     return returnStr
 

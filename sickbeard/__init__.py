@@ -403,7 +403,6 @@ SUBTITLES_HISTORY = False
 
 USE_FAILED_DOWNLOADS = False
 DELETE_FAILED = False
-TREAT_EMPTY_AS_FAILED = False
 
 EXTRA_SCRIPTS = []
 
@@ -460,7 +459,7 @@ def initialize(consoleLogging=True):
                 NEWZBIN, NEWZBIN_USERNAME, NEWZBIN_PASSWORD, GIT_PATH, MOVE_ASSOCIATED_FILES, \
                 GUI_NAME, HOME_LAYOUT, HISTORY_LAYOUT, DISPLAY_SHOW_SPECIALS, COMING_EPS_LAYOUT, COMING_EPS_SORT, COMING_EPS_DISPLAY_PAUSED, COMING_EPS_MISSED_RANGE, METADATA_WDTV, METADATA_TIVO, IGNORE_WORDS,  CALENDAR_UNPROTECTED, CREATE_MISSING_SHOW_DIRS, \
                 ADD_SHOWS_WO_DIR, USE_SUBTITLES, SUBTITLES_LANGUAGES, SUBTITLES_DIR, SUBTITLES_SERVICES_LIST, SUBTITLES_SERVICES_ENABLED, SUBTITLES_HISTORY, subtitlesFinderScheduler, \
-                USE_FAILED_DOWNLOADS, DELETE_FAILED, TREAT_EMPTY_AS_FAILED, ANON_REDIRECT, LOCALHOST_IP
+                USE_FAILED_DOWNLOADS, DELETE_FAILED, ANON_REDIRECT, LOCALHOST_IP
 
         if __INITIALIZED__:
             return False
@@ -835,7 +834,6 @@ def initialize(consoleLogging=True):
 
         USE_FAILED_DOWNLOADS = bool(check_setting_int(CFG, 'FailedDownloads', 'use_failed_downloads', 0))
         DELETE_FAILED = bool(check_setting_int(CFG, 'FailedDownloads', 'delete_failed', 0))
-        TREAT_EMPTY_AS_FAILED = bool(check_setting_int(CFG, 'FailedDownloads', 'treat_empty_as_failed', 0))
 
         GIT_PATH = check_setting_str(CFG, 'General', 'git_path', '')
 
@@ -1591,7 +1589,6 @@ def save_config():
     new_config['FailedDownloads']= {}
     new_config['FailedDownloads']['use_failed_downloads'] = int(USE_FAILED_DOWNLOADS)
     new_config['FailedDownloads']['delete_failed'] = int(DELETE_FAILED)
-    new_config['FailedDownloads']['treat_empty_as_failed'] = int(TREAT_EMPTY_AS_FAILED)
 
     new_config.write()
 
