@@ -19,6 +19,14 @@
 #     Default is same as sickbeard_dir.
 # sickbeard_pid:  The name of the pidfile to create.
 #     Default is sickbeard.pid in sickbeard_dir.
+# sickbeard_host: The hostname or IP Sick Beard is listening on
+#     Default is 127.0.0.1
+# sickbeard_port: The port Sick Beard is listening on
+#     Default is 8081
+# sickbeard_web_user: Username to authenticate to the Sick Beard web interface
+#     Default is an empty string (no username)
+# sickbeard_web_password: Password to authenticate to the Sick Beard web interface
+#     Default is an empty string (no password)
 PATH="/sbin:/bin:/usr/sbin:/usr/bin:/usr/local/sbin:/usr/local/bin"
 
 . /etc/rc.subr
@@ -33,12 +41,12 @@ load_rc_config ${name}
 : ${sickbeard_dir:="/usr/local/sickbeard"}
 : ${sickbeard_chdir:="${sickbeard_dir}"}
 : ${sickbeard_pid:="${sickbeard_dir}/sickbeard.pid"}
+: ${sickbeard_host:="127.0.0.1"}
+: ${sickbeard_port:="8081"}
+: ${sickbeard_web_user:=""}
+: ${sickbeard_web_password:=""}
 
 WGET="/usr/local/bin/wget" # You need wget for this script to safely shutdown Sick Beard.
-HOST="127.0.0.1" # Set Sick Beard address here.
-PORT="8081" # Set Sick Beard port here.
-SBUSR="" # Set Sick Beard username (if you use one) here.
-SBPWD="" # Set Sick Beard password (if you use one) here.
 
 status_cmd="${name}_status"
 stop_cmd="${name}_stop"
@@ -69,7 +77,7 @@ verify_sickbeard_pid() {
 sickbeard_stop() {
     echo "Stopping $name"
     verify_sickbeard_pid
-    ${WGET} -O - -q --user=${SBUSR} --password=${SBPWD} "http://${HOST}:${PORT}/home/shutdown/" >/dev/null
+    ${WGET} -O - -q --user=${sickbeard_web_user} --password=${sickbeard_web_password} "http://${sickbeard_host}:${sickbeard_port}/home/shutdown/" >/dev/null
     if [ -n "${pid}" ]; then
       wait_for_pids ${pid}
       echo "Stopped"
