@@ -1853,7 +1853,7 @@ pre {
 	-o-transform:rotate(90deg);
     filter: flipv fliph;
     display: inline-block;
-    margin: 8.1px 0px 0px -8px !important;
+    margin: 7.1px 0px 0px -8px !important;
     background-color: #79DF46;
     position: absolute;
     font-weight: bold;
@@ -1862,7 +1862,7 @@ pre {
     width: 37px;
     text-align: center;
     border-radius: 4px 4px 0px 0px;
-    border-width: 3px 3px 0 3px;
+    border-width: 2px 2px 0 2px;
     border-style: solid;
     border-color: #B7B7B7;
 }

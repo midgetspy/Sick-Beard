@@ -21,9 +21,25 @@
     \$("#historyTable:has(tbody tr)").tablesorter({
         widgets: ['zebra', 'filter'],
         sortList: [[0,1]],
-        textExtraction: {
-            4: function(node) { return \$(node).find("span").text().toLowerCase(); }
-        }
+	    textExtraction: {
+		#if ( $layout == 'detailed'):
+	    	4: function(node) { return \$(node).find("span").text().toLowerCase(); }
+	    #else
+			1: function(node) { return \$(node).find("span").text().toLowerCase(); },
+	        5: function(node) { return \$(node).find("span").text().toLowerCase(); }
+        #end if
+        },
+        headers: {
+        #if ( $layout == 'detailed'):
+        	4: { sorter: 'quality' }
+        #else
+	        2: { sorter: false},
+	        3: { sorter: false},
+	        4: { sorter: false},
+	        5: { sorter: 'quality' }
+	    #end if
+	    }
+        
     });
     \$('#limit').change(function(){
         url = '$sbRoot/history/?limit='+\$(this).val()
@@ -46,10 +62,10 @@
     </select>
 </div>
 
-<div id="HistoryLayout" style="float: right; margin-top: -3px;">
+<div id="HistoryLayout" style="float: right; margin-top: 2px;">
 	<span><b>Layout:</b>
 		<a class="inner" href="$sbRoot/setHistoryLayout/?layout=compact" style="font-size: 12px;">Compact</a> &middot;
-		<a class="inner" href="$sbRoot/setHistoryLayout/?layout=detailed" style="font-size: 12px;">Detailed</a> &middot;
+		<a class="inner" href="$sbRoot/setHistoryLayout/?layout=detailed" style="font-size: 12px;">Detailed</a>
 	</span>
 </div>
 
@@ -75,10 +91,10 @@
 	            #set $match = $re.search("(\w+)\-.*\-"+$match.group(1)+"\.\w{3}\Z", $os.path.basename($hItem["resource"]), re.IGNORECASE)
 	            #if $match
 	                <i>$match.group(1).upper()</i>
-	          #end if
+	          	#end if
 	          #else:
-	          <i>$match.group(1).upper()</i>
-	        #end if
+	          	<i>$match.group(1).upper()</i>
+	          #end if
 	      #end if
 	    #else
 	      #if $hItem["provider"] > 0
@@ -95,6 +111,7 @@
 		  #end if
 	    #end if
 	    </td>
+	 	<span style="display: none;">$curQuality</span>
 	    <td align="center"><span class="quality $Quality.qualityStrings[$curQuality].replace("720p","HD720p").replace("1080p","HD1080p").replace("RawHD TV", "RawHD").replace("HD TV", "HD720p")">$Quality.qualityStrings[$curQuality]</span></td>
 	  </tr>
 	#end for
@@ -104,53 +121,69 @@
 #else:
 
 	<table id="historyTable" class="sickbeardTable tablesorter" cellspacing="1" border="0" cellpadding="0">
-	  <thead><tr><th class="nowrap">Time</th><th>Episode</th><th>Actions & Providers</th><th>Quality</th></tr></thead>
+	  <thead><tr><th class="nowrap">Time</th><th>Episode</th><th>Snatched</th><th>Downloaded</th><th>Subtitled</th><th>Quality</th></tr></thead>
 	  <tbody>
-	#for $hItem in $compactResults:
+	  #for $hItem in $compactResults:
+	  <tr>
 	    <td class="nowrap">$datetime.datetime.strptime(str($hItem["actions"][0]["time"]), $history.dateFormat)</td>
-	    <td width="25%">
-	    <div style="display:inline-block; overflow:hidden;">
-			<img style="width: 200px; height: 37px; border-radius: 4px 0px 0px 4px; border-width: 3px 0 3px 3px ; border-style: solid; border-color: #B7B7B7;" src="$sbRoot/showPoster/?show=$hItem["show_id"]&amp;which=banner" class="banner" alt="$hItem["show_id"]"/>
-		</div>
-		<div class="vertical"><%=str(hItem["season"]) +"x"+ "%02i" % int(hItem["episode"]) %></div>
-		<td align="left">
+	  	<td width="25%">
+		    <span style="display: none;">$hItem["show_name"]</span>
+			<a href="$sbRoot/home/displayShow?show=$hItem["show_id"]#season-$hItem["season"]">
+			    <div style="display:inline-block; overflow:hidden; -moz-box-shadow: 3px 3px 5px 6px #ccc !important;">
+					<img style="width: 200px; height: 37px; border-radius: 4px 0px 0px 4px; border-width: 2px 0 2px 2px ; border-style: solid; border-color: #B7B7B7;" src="$sbRoot/showPoster/?show=$hItem["show_id"]&amp;which=banner" class="banner" alt="$hItem["show_id"]" title="$hItem["show_name"] - <%=str(hItem["season"]) +"x"+ "%02i" % int(hItem["episode"]) %>"/>
+				</div>
+				<div class="vertical"><%=str(hItem["season"]) +"x"+ "%02i" % int(hItem["episode"]) %></div>
+			</a>
+		</td>
+		<td align="center">
 			#for $action in sorted($hItem["actions"]):
 				#set $curStatus, $curQuality = $Quality.splitCompositeStatus(int($action["action"]))
-				<span style="cursor: help;" title="$os.path.basename($action["resource"])">$statusStrings[$curStatus]</span>
+			    #if $curStatus == SNATCHED:
+					#set $provider = $providers.getProviderClass($generic.GenericProvider.makeID($action["provider"]))
+				    #if $provider != None: 
+						<img src="$sbRoot/images/providers/<%=provider.imageName()%>" width="16" height="16" alt="$provider.name" style="cursor: help;" title="$provider.name: $os.path.basename($action["resource"])"/>
+				    #else:
+					    <img src="$sbRoot/images/providers/missing.png" width="16" height="16" alt="missing provider" title="missing provider"/>
+				    #end if
+				    </span>
+				#end if    
+			#end for
+		</td>	
+		<td align="center">
+			#for $action in sorted($hItem["actions"]):
+				#set $curStatus, $curQuality = $Quality.splitCompositeStatus(int($action["action"]))
 			    #if $curStatus == DOWNLOADED:
 			      #set $match = $re.search("\-(\w+)\.\w{3}\Z", $os.path.basename($action["resource"]))
 			      #if $match
 			      	#if $match.group(1).upper() in ("X264", "720P"):
 			            #set $match = $re.search("(\w+)\-.*\-"+$match.group(1)+"\.\w{3}\Z", $os.path.basename($hItem["resource"]), re.IGNORECASE)
 			            #if $match
-			                <i>$match.group(1).upper()</i>
+			                <span style="cursor: help;" title="$os.path.basename($action["resource"])">
+			                	<i>$match.group(1).upper()</i>
+			                </span>
 			          	#end if
 			     	#else:
-			   	 		<i>$match.group(1).upper()</i>
+			        	<span style="cursor: help;" title="$os.path.basename($action["resource"])">
+			            	<i>$match.group(1).upper()</i>
+			            </span>
 			        #end if
 			      #end if
-			    #else
-			      #if $action["provider"] > 0
-			        #if $curStatus == SNATCHED:
-				        #set $provider = $providers.getProviderClass($generic.GenericProvider.makeID($action["provider"]))
-				        #if $provider != None: 
-					        <img src="$sbRoot/images/providers/<%=provider.imageName()%>" width="16" height="16" alt="$provider.name" title="$provider.name"/>
-				        #else:
-					        <img src="$sbRoot/images/providers/missing.png" width="16" height="16" alt="missing provider" title="missing provider"/>
-				        #end if
-					#else:
-				  		<img src="$sbRoot/images/subtitles/<%=action["provider"]+'.png' %>" width="16" height="16" alt="$action["provider"]" title="<%=action["provider"].capitalize()%>"/>
-			        #end if
-				  #end if
 			    #end if
-				<span>|</span>
+			#end for
+		</td>	
+		<td align="center">
+			#for $action in sorted($hItem["actions"]):
+				#set $curStatus, $curQuality = $Quality.splitCompositeStatus(int($action["action"]))
+		    	#if $curStatus == SUBTITLED:
+		    		<img width="16" height="11" src="$sbRoot/images/flags/<%= action["resource"][len(action["resource"])-6:len(action["resource"])-4]+'.png'%>">
+					<img src="$sbRoot/images/subtitles/<%=action["provider"]+'.png' %>" width="16" height="16" alt="$action["provider"]" title="<%=action["provider"].capitalize()%>: $os.path.basename($action["resource"])"/>
+				#end if    
 			#end for
 	 	</td>
+	 	<span style="display: none;">$curQuality</span>
 	    <td align="center" width="14%"><span class="quality $Quality.qualityStrings[$curQuality].replace("720p","HD720p").replace("1080p","HD1080p").replace("RawHD TV", "RawHD").replace("HD TV", "HD720p")">$Quality.qualityStrings[$curQuality]</span></td>
 	  </tr>
-	  <tr>
-	  </tr>
-	#end for
+	  #end for
 	  </tbody>
 	</table>
 
