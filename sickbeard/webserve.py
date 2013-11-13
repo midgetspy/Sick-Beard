@@ -3999,9 +3999,11 @@ class WebInterface:
         time_re = re.compile('([0-9]{1,2})\:([0-9]{2})(\ |)([AM|am|PM|pm]{2})')
 
     # Create a iCal string
-        ical = 'BEGIN:VCALENDAR\n'
-        ical += 'VERSION:2.0\n'
-        ical += 'PRODID://Sick-Beard Upcoming Episodes//\n'
+        ical = 'BEGIN:VCALENDAR\r\n'
+        ical += 'VERSION:2.0\r\n'
+        ical += 'X-WR-CALNAME:Sick Beard\r\n'
+        ical += 'X-WR-CALDESC:Sick Beard\r\n'
+        ical += 'PRODID://Sick-Beard Upcoming Episodes//\r\n'
 
         # Get shows info
         myDB = db.DBConnection()
@@ -4048,19 +4050,19 @@ class WebInterface:
                 air_date_time = datetime.datetime.combine(air_date, t).astimezone(local_zone)
 
         # Create event for episode
-                ical = ical + 'BEGIN:VEVENT\n'
-                ical = ical + 'DTSTART:' + str(air_date_time.date()).replace("-", "") + '\n'
-                ical = ical + 'SUMMARY:' + show['show_name'] + ': ' + episode['name'] + '\n'
-                ical = ical + 'UID:' + str(datetime.date.today().isoformat()) + '-' + str(random.randint(10000,99999)) + '@Sick-Beard\n'
+                ical = ical + 'BEGIN:VEVENT\r\n'
+                ical = ical + 'DTSTART;VALUE=DATE:' + str(air_date_time.date()).replace("-", "") + '\r\n'
+                ical = ical + 'SUMMARY:' + show['show_name'] + ': ' + episode['name'] + '\r\n'
+                ical = ical + 'UID:Sick-Beard-' + str(datetime.date.today().isoformat()) + '-' + show['show_name'].replace(" ", "-") + '-E' + str(episode['episode']) + 'S' + str(episode['season']) + '\r\n'
                 if (episode['description'] != ''):
-                    ical = ical + 'DESCRIPTION:' + show['airs'] + ' on ' + show['network'] + '\\n\\n' + episode['description'] + '\n'
+                    ical = ical + 'DESCRIPTION:' + show['airs'] + ' on ' + show['network'] + '\\n\\n' + episode['description'].splitlines()[0] + '\r\n'
                 else:
-                    ical = ical + 'DESCRIPTION:' + show['airs'] + ' on ' + show['network'] + '\n'
-                ical = ical + 'LOCATION:' + 'Episode ' + str(episode['episode']) + ' - Season ' + str(episode['season']) + '\n'
-                ical = ical + 'END:VEVENT\n'
+                    ical = ical + 'DESCRIPTION:' + show['airs'] + ' on ' + show['network'] + '\r\n'
+                ical = ical + 'LOCATION:' + 'Episode ' + str(episode['episode']) + ' - Season ' + str(episode['season']) + '\r\n'
+                ical = ical + 'END:VEVENT\r\n'
 
         # Ending the iCal
-        ical += 'END:VCALENDAR\n'
+        ical += 'END:VCALENDAR'
 
         return ical
 
