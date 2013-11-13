@@ -69,7 +69,7 @@ fi
 verify_sickbeard_pid() {
     # Make sure the pid corresponds to the Sick Beard process.
     pid=`cat ${sickbeard_pid} 2>/dev/null`
-    ps -p ${pid} | grep -q "python ${sickbeard_dir}/SickBeard.py"
+    ps -p ${pid} 2>/dev/null | grep -q "python ${sickbeard_dir}/SickBeard.py"
     return $?
 }
 
