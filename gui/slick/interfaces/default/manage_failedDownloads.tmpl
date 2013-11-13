@@ -18,9 +18,9 @@
 \$(document).ready(function()
 {
     \$("#failedTable:has(tbody tr)").tablesorter({
-        widgets: ['zebra', 'stickyHeaders', 'filter'],
+        widgets: ['zebra'],
         sortList: [[0,0]],
-        headers: { 3: { sorter: false, filter: false } }
+        headers: { 3: { sorter: false } }
     });
     \$('#limit').change(function(){
         url = '$sbRoot/manage/failedDownloads/?limit='+\$(this).val()
