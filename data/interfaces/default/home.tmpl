@@ -180,7 +180,7 @@ $myShowList.sort(lambda x, y: cmp(x.name, y.name))
 #else:
     <td align="center"><span class="quality Custom">Custom</span></td>
 #end if
-    <td align="center"><span style="display: none;">$dlStat+%$per%</span><div id="progressbar$curShow.tvdbid" style="position:relative;"><div class='progressbarText'>$dlStat</div></div>
+    <td align="center"><div id="progressbar$curShow.tvdbid" style="position:relative;"><div class='progressbarText'>$dlStat</div></div><span style="display: none;">%$per%</span>
         <script type="text/javascript">
         <!--
             \$(function() {
