@@ -57,6 +57,10 @@
 
 \$(document).ready(function(){ 
 
+    function nextXDays(e,n){
+        return new Date().setDate(new Date().getDate()+n) > new Date(e);
+    }
+
     \$("#showListTable:has(tbody tr)").tablesorter({
         sortList: [[5,1],[1,0]],
         textExtraction: {
@@ -64,12 +68,32 @@
             4: function(node) { return \$(node).find("span").text(); },
             5: function(node) { return \$(node).find("img").attr("alt"); }
         },
-        widgets: ['saveSort', 'zebra', 'stickyHeaders'],
+        widgets: ['saveSort', 'zebra', 'stickyHeaders', 'filter'],
         headers: {
             0: { sorter: 'isoDate' },
             1: { sorter: 'loadingNames' },
             3: { sorter: 'quality' },
             4: { sorter: 'eps' }
+        },
+        widgetOptions : {
+            filter_functions : {
+                0: {
+                    "next three days" : function(e, n, f, i, \$r) { return nextXDays(e,3); },
+                    "next seven days" : function(e, n, f, i, \$r) { return nextXDays(e,7); },
+                    "next 14 days" : function(e, n, f, i, \$r) { return nextXDays(e,14); },
+                    "next month" : function(e, n, f, i, \$r) { return nextXDays(e,30); }
+                },
+                3: {
+                    ">= SD" : function(e, n, f, i, \$r) { return /^[S|H]/.test(e); },
+                    ">= HD" : function(e, n, f, i, \$r) { return /^HD/.test(e); },
+                    ">= HD720p" : function(e, n, f, i, \$r) { return /^HD(720|1080)/.test(e); },
+                    ">= HD1080p" : function(e, n, f, i, \$r) { return /^HD1080/.test(e); }
+                },
+                4: {
+                    "unfinished" : function(e, n, f, i, \$r) { return e.charAt(0) !== '?'?e.split('%')[1]<100:false; },
+                    "no episodes found" : function(e, n, f, i, \$r) { return e.charAt(0) === '?'; }
+                }
+            }
         }
     });
 
@@ -79,7 +103,7 @@
 
 <table id="showListTable" class="tablesorter" cellspacing="1" border="0" cellpadding="0">
 
-  <thead><tr><th class="nowrap">Next Ep</th><th>Show</th><th>Network</th><th>Quality</th><th>Downloads</th><th>Active</th><th>Status</th></tr></thead>
+  <thead><tr><th class="nowrap">Next Ep</th><th>Show</th><th class="filter-select">Network</th><th>Quality</th><th>Downloads</th><th>Active</th><th class="filter-select">Status</th></tr></thead>
   <tfoot>
     <tr>
       <th rowspan="1" colspan="1" align="center"><a href="$sbRoot/home/addShows/">Add Show</a></th>
