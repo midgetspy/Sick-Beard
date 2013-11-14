@@ -90,7 +90,7 @@
                     "Quality >= HD1080p" : function(e, n, f, i, \$r) { return /^HD1080/.test(e); }
                 },
                 4: {
-                    "Downloaded all" : function(e, n, f, i, \$r) { return e.charAt(0) !== '?'?e.split('%')[1]<100:false; },
+                    "Downloaded all" : function(e, n, f, i, \$r) { return e.charAt(0) !== '?'?e.split('%')[1]==100:false; },
                     "Downloads unfinished" : function(e, n, f, i, \$r) { return e.charAt(0) !== '?'?e.split('%')[1]<100:false; },
                     "No episodes found" : function(e, n, f, i, \$r) { return e.charAt(0) === '?'; }
                 }
