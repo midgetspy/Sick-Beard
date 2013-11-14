@@ -33,8 +33,9 @@ from sickbeard import providers, metadata
 
 from providers import ezrss, tvtorrents, torrentleech, btn, nzbsrus, newznab, womble, nzbx, omgwtfnzbs, hdbits
 
-from providers import kickass, torrentz, dtt, torrentleech, thepiratebay, publichd, torrentday
+from providers import kickass, torrentz, dtt, thepiratebay, publichd, torrentday
 from providers import sceneaccess, iptorrents, bithdtv, fucklimits, btdigg, torrentshack
+
 from sickbeard.config import CheckSection, check_setting_int, check_setting_str, ConfigMigrator
 
 from sickbeard import searchCurrent, searchBacklog, showUpdater, versionChecker, properFinder, autoPostProcesser
