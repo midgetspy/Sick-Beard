@@ -1,82 +1,98 @@
+###################################################################################################
+# Author: Jodi Jones <venom@gen-x.co.nz>
+# URL: https://github.com/VeNoMouS/Sick-Beard
+#
+# This file is part of Sick Beard.
+#
+# Sick Beard is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# Sick Beard is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with Sick Beard.  If not, see <http://www.gnu.org/licenses/>.
+###################################################################################################
 
-
-import sickbeard
+import os
+import re
+import sys
+import json
+import urllib
 import generic
+import datetime
+import sickbeard
+import exceptions
+
+from lib import requests
+from xml.sax.saxutils import escape
 
 from sickbeard import db
-from sickbeard import helpers
 from sickbeard import logger
 from sickbeard import tvcache
-from sickbeard import show_name_helpers
-
-from httplib import BadStatusLine
+from sickbeard.exceptions import ex
 from sickbeard.common import Quality
 from sickbeard.common import Overview
-
-import traceback
-
-
-import urllib, urllib2, cookielib
-import re, json, socket,datetime
+from sickbeard import show_name_helpers
 
 class TorrentDayProvider(generic.TorrentProvider):
-
+    
+    ###################################################################################################
     def __init__(self):
-
         generic.TorrentProvider.__init__(self, "TorrentDay")
-        
+        self.cache = TorrentDayCache(self)     
+        self.name = "TorrentDay"
+        self.session = None
         self.supportsBacklog = True
-        self.cache = TorrentDayCache(self)
-        self.cj = cookielib.CookieJar()
-        self.rssuid = ''
-        self.rsshash = ''
-        self.rsslink = ''
         self.url = 'http://www.torrentday.com/'
-        self.downloadUrl = 'http://www.torrentday.com/download.php/'
-        #self.token = None
-                
-        logger.log('Loading TorrentDay')
-        
-        self.cache = TorrentDayCache(self)
-        
-        
-        
-    def _checkAuth(self):
-        if len(self.cj) >= 2:
-            return True
-        return False 
-
+        logger.log('[' + self.name + '] initializing...')
+    
+    ###################################################################################################
+    
     def isEnabled(self):
         return sickbeard.TORRENTDAY
-        
+    
+    ###################################################################################################
+    
     def imageName(self):
         return 'torrentday.png'
+    
+    ###################################################################################################
 
     def getQuality(self, item):        
         quality = Quality.nameQuality(item[0])
         return quality 
     
+    ################################################################################################### 
+
     def _get_title_and_url(self, item):
         return item
 
+    ###################################################################################################
+
+    def _get_airbydate_season_range(self, season):        
+        if season == None:
+            return ()        
+        year, month = map(int, season.split('-'))
+        min_date = datetime.date(year, month, 1)
+        if month == 12:
+            max_date = datetime.date(year, month, 31)
+        else:    
+            max_date = datetime.date(year, month+1, 1) -  datetime.timedelta(days=1)
+        return (min_date, max_date)    
+
+    ###################################################################################################
+
     def _get_season_search_strings(self, show, season=None):
-        
         search_string = []
     
         if not show:
             return []
-
-        #Building the search string with the season we need
-        #1) ShowName SXX 
-        #2) ShowName Season X
-        #for show_name in set(show_name_helpers.allPossibleShowNames(show)):
-        #    ep_string = show_name + ' ' + 'S%02d' % int(season)   
-        #    search_string.append(ep_string)
-        #  
-        #    ep_string = show_name + ' ' + 'Season' + ' ' + str(season)   
-        #    search_string.append(ep_string)
-
-        #Building the search string with the episodes we need         
+      
         myDB = db.DBConnection()
         
         if show.air_by_date:
@@ -95,11 +111,11 @@ class TorrentDayProvider(generic.TorrentProvider):
                     for show_name in set(show_name_helpers.allPossibleShowNames(show)):
                         ep_string = show_name_helpers.sanitizeSceneName(show_name) +' '+ sickbeard.config.naming_ep_type[2] % {'seasonnumber': season, 'episodenumber': int(sqlEp["episode"])}
                         search_string.append(ep_string)                       
-        
         return search_string
 
-    def _get_episode_search_strings(self, ep_obj):
-        
+    ###################################################################################################
+
+    def _get_episode_search_strings(self, ep_obj):  
         search_string = []
        
         if not ep_obj:
@@ -112,162 +128,131 @@ class TorrentDayProvider(generic.TorrentProvider):
             for show_name in set(show_name_helpers.allPossibleShowNames(ep_obj.show)):
                 ep_string = show_name_helpers.sanitizeSceneName(show_name) +' '+ sickbeard.config.naming_ep_type[2] % {'seasonnumber': ep_obj.season, 'episodenumber': ep_obj.episode}
                 search_string.append(ep_string)
-    
         return search_string    
+ 
+    ###################################################################################################
 
-
-    def doLogin(self):
-        success = False
-        if len(self.cj) < 2:
-            '''Login function, returns True on success.'''
-            
-            username = sickbeard.TORRENTDAY_USERNAME
-            password = sickbeard.TORRENTDAY_PASSWORD
-            
-            cookie = cookielib.CookieJar()
-            opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(cookie))
-            login_data = urllib.urlencode({'username' : username, 'password' : password, 'submit.x': 0, 'submit.y': 0})
-            res = opener.open('http://www.torrentday.com/torrents/', login_data)      
-            
-            headers = str(res.headers).splitlines()
-            success = False
-            for header in headers:
-                if 'Expires' in header:
-                    for cookies in cookie:
-                        if cookies.name == 'uid':
-                            uid = 'UID={0}; '.format(cookies.value)
-                        elif cookies.name == 'pass':
-                            passwd = 'PASS={0}; '.format(cookies.value)
-                    self.cj = cookie
-                    #self.token = ('{0}{1}'.format(uid,passwd))
-                    success = True
-                    logger.log("TorrentDay session: {0}".format(self.token), logger.DEBUG)
-                    logger.log("TorrentDay successfully logged user '{0}' in.".format(sickbeard.TORRENTDAY_USERNAME))
-                    logger.log("Detecting RSS Feed for user '{0}'.".format(sickbeard.TORRENTDAY_USERNAME))
-                    rss_data = 'cat%5B%5D=24&cat%5B%5D=14&cat%5B%5D=7&cat%5B%5D=2&feed=direct&login=passkey'
-                    rss_res = opener.open('http://www.torrentday.com/rss.php', rss_data).readlines()[-1]
-                    reRSS = re.compile(r'u=(.*);tp=([0-9A-Fa-f]{32})', re.IGNORECASE|re.DOTALL)
-                    uidhash = reRSS.findall(rss_res)
-                    self.rssuid = uidhash[0][0]
-                    self.rsshash = uidhash[0][1]
-                    self.rsslink = 'http://www.torrentday.com/torrents/rss?download;l24;l14;l7;l2;u={0};tp={1}'.format(self.rssuid,self.rsshash)
-                    logger.log('RSS Url: {0}'.format(self.rsslink), logger.DEBUG)
-            if not success:
-                logger.log("TorrentDay failed to log user '{0}' in. Incorrect Password?".format(sickbeard.TORRENTDAY_USERNAME), logger.ERROR)
-                    
-            res.close()
-            
-        else:
-            success = True
-            logger.log("Using TorrentDay session from cookie")
-        return success
-    
-    def getURL(self, url, headers=[], data=None):
-        html = ''
-        if self.doLogin():
-            result = None
-            try:
-                opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(self.cj))
-                search_data = data
-                result = opener.open(url, search_data)
-                #result = opener.open('http://www.torrentday.com/V3/API/API.php', search_data)
-                html = result.read()               
-                
-                
-                logger.log('Got Results from Torrentday!')
-                             
-            except urllib2.HTTPError, e:
-                logger.log(u"HTTP error " + str(e.code) + " while loading URL " + url, logger.WARNING)
-                return None
-            except urllib2.URLError, e:
-                logger.log(u"URL error " + str(e.reason) + " while loading URL " + url, logger.WARNING)
-                return None
-            except BadStatusLine:
-                logger.log(u"BadStatusLine error while loading URL " + url, logger.WARNING)
-                return None
-            except socket.timeout:
-                logger.log(u"Timed out while loading URL " + url, logger.WARNING)
-                return None
-            except ValueError:
-                logger.log(u"Unknown error while loading URL " + url, logger.WARNING)
-                return None
-            except Exception:
-                logger.log(u"Unknown exception while loading URL " + url + ": " + traceback.format_exc(), logger.WARNING)
-                return None
-        return html
-    
-    
     def _doSearch(self, search_params, show=None):
+        search_params = search_params.replace('.',' ')
+        logger.log("[" + self.name + "] Performing Search For: {0}".format(search_params))
+        searchUrl = self.url + "V3/API/API.php"
+        PostData = {'/browse.php?' : None,'cata':'yes', 'jxt':8, 'jxw':'b', 'search':search_params, 'c7':1, 'c14':1,'c26':1}
         
-        logger.log('Performing Search: {0}'.format(search_params))
-        
-        results = []
-        
-        searchTerm = '+'.join(search_params.split())
-            
-        data = {'/browse.php?' : None,'cata':'yes','jxt':8,'jxw':'b','search':searchTerm, 'c7':1, 'c26':1,'c2':1, 'c24':1}
-        search_data = urllib.urlencode(data)
-        html = self.getURL('http://www.torrentday.com/V3/API/API.php', data=search_data)
-        logger.log('Post Data: {0}'.format(data), logger.DEBUG)
-        res, pages = self.parseResults(html)
-        
-        results = results + res
-        
-        if pages > 1:
-            for page in xrange(1,pages+1):
-                data = {'/browse.php?' : None,'cata':'yes','page':page, 'jxt':8,'jxw':'b','search':searchTerm, 'c7':1, 'c26':1,'c2':1, 'c24':1}
-                search_data = urllib.urlencode(data)
-                html = self.getURL('http://www.torrentday.com/V3/API/API.php', search_data)
-                logger.log('Post Data: {0}'.format(data), logger.DEBUG)
-                res = self.parseResults(html)[0]
-                results = results + res
-        return results
-        
-            
-            
-    def parseResults(self, html):
-        
-        results = []
-        numpages = 1
-        
-        try: 
-            data = json.loads(html)
-            torrents = data.get('Fs', [])[0].get('Cn', {}).get('torrents', [])
-            rePager = re.compile(r'page=(\d*)',re.IGNORECASE|re.DOTALL)
-            pager = rePager.findall(str(html))
-            if pager:
-                numpages = int(max(list(set(pager))))
-                pass
-            else:
-                numpages = 1
-                pass
-            
-            for tor in torrents:
-                results.append(([tor['name'],self.downloadUrl + '{0}/{1}?torrent_pass={2}'.format(tor['id'],tor['fname'],self.rsshash)]))
-                logger.log('Parser found: {0}'.format(tor['name']))   
-        except AttributeError, e: 
-            logger.log("No results found", logger.DEBUG)
-            return [],0
+        try:
+            data = self.getURL(searchUrl,data=PostData)
+            jdata = json.loads(data)
+            if jdata.get('Fs', [])[0].get('Fn', {}) == "Oarrive":
+                logger.log("[" + self.name + "] _doSearch() search data sent 0 results.")
+                return []
+            torrents = jdata.get('Fs', [])[0].get('Cn', {}).get('torrents', [])
         except ValueError, e:
-            logger.log("No results found", logger.DEBUG)
-            return [],0
-        return results, numpages
+            logger.log("[" + self.name + "] _doSearch() invalid json returned.")
+            return []
 
+        return self.parseResults(torrents)
 
-class TorrentDayCache(tvcache.TVCache):
-    def __init__(self, provider):
+    ###################################################################################################
+    
+    def parseResults(self, torrents): 
+        results = []
         
-        tvcache.TVCache.__init__(self, provider)
-        self.provider = provider
-        self.minTime = 20
+        for torrent in torrents:
+            item = (torrent['name'].replace('.',' '), self.url + "download.php/" + str(torrent['id']) + "/" + torrent['fname'])
+            results.append(item)                        
+            logger.log("[" + self.name + "] parseResults() Title: " + torrent['name'], logger.DEBUG)
+        
+        if len(results):
+            logger.log("[" + self.name + "] parseResults() Some results found.")
+        else:
+            logger.log("[" + self.name + "] parseResults() No results found.")
+            
+        return results
+    
+    ###################################################################################################
+    
+    def getURL(self, url, headers=None,data=None):
+        response = None
+        
+        if not self.session:
+            if not self._doLogin():
+                return response
+            
+        if not headers:
+            headers = []
+            
+        try:
+            if "/torrents/rss" in url:
+                response = self.session.get(url, verify=False)
+            else:
+                response = self.session.post(url, verify=False,data=data)
+        except (requests.exceptions.ConnectionError, requests.exceptions.HTTPError), e:
+            logger.log("[" + self.name + "] getURL() Error loading " + self.name + " URL: " + ex(e), logger.ERROR)
+            return None
+        
+        if response.status_code not in [200,302,303]:
+            logger.log("[" + self.name + "] getURL() requested URL - " + url +" returned status code is " + str(response.status_code), logger.ERROR)
+            return None
+        
+        return response.content
+    
+    ###################################################################################################
+    
+    def _doLogin(self):
+        login_params  = {
+            'username': sickbeard.TORRENTDAY_USERNAME,
+            'password': sickbeard.TORRENTDAY_PASSWORD,
+            'submit.x' : '0',
+            'submit.y' : '0',
+            'login': 'submit'
+        }
 
+        self.session = requests.Session()
+        logger.log("[" + self.name + "] Attempting to Login")
+
+        try:
+            response = self.session.post(self.url + "torrents/", data=login_params, timeout=30, verify=False)
+        except (requests.exceptions.ConnectionError, requests.exceptions.HTTPError), e:
+            raise Exception("[" + self.name + "] _doLogin() Error: " + ex(e))
+            return False
+        
+        if re.search("Password not correct|<title>Torrentday :: Login|User not found</title>",response.text) \
+        or response.status_code in [401,403]:
+            raise Exception("[" + self.name + "] Login Failed, Invalid username or password for " + self.name + ". Check your settings.")
+            return False
+        return True
+    
+    ###################################################################################################
+    
+class TorrentDayCache(tvcache.TVCache):
+    
+    ###################################################################################################
+    
+    def __init__(self, provider):
+        tvcache.TVCache.__init__(self, provider)
+        self.minTime = 15
+
+    ###################################################################################################
         
     def _getRSSData(self):
-        self.url = self.provider.rsslink
-        logger.log(u'RSS url:{0}'.format(self.url))
-        xml = helpers.getURL(self.url)
-        return xml
-    
+        if sickbeard.TORRENTDAY_UID and sickbeard.TORRENTDAY_RSSHASH:
+            self.rss_url = "{0}torrents/rss?download;l24;l14;l26;l7;l2;u={1};tp={2}".format(provider.url,sickbeard.TORRENTDAY_UID, sickbeard.TORRENTDAY_RSSHASH)
+            logger.log("[" + provider.name + "] RSS URL - {0}".format(self.rss_url))
+            xml = provider.getURL(self.rss_url)
+        else:
+            logger.log("[" + provider.name + "] WARNING: RSS construction via browse since no RSS variables provided.") 
+            xml = "<rss xmlns:atom=\"http://www.w3.org/2005/Atom\" version=\"2.0\">" + \
+            "<channel>" + \
+            "<title>" + provider.name + "</title>" + \
+            "<link>" + provider.url + "</link>" + \
+            "<description>torrent search</description>" + \
+            "<language>en-us</language>" + \
+            "<atom:link href=\"" + provider.url + "\" rel=\"self\" type=\"application/rss+xml\"/>"
+
+            for title, url in provider._doSearch(""):
+                xml += "<item>" + "<title>" + escape(title) + "</title>" +  "<link>"+ urllib.quote(url,'/,:') + "</link>" + "</item>"
+            xml += "</channel></rss>"
+        return xml    
         
-        
-provider = TorrentDayProvider()   
+    ###################################################################################################    
+
+provider = TorrentDayProvider()

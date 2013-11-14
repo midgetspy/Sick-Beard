@@ -1,6 +1,6 @@
 ###################################################################################################
 # Author: Jodi Jones <venom@gen-x.co.nz>
-# URL: http://code.google.com/p/sickbeard/
+# URL: https://github.com/VeNoMouS/Sick-Beard
 #
 # This file is part of Sick Beard.
 #
@@ -18,34 +18,36 @@
 # along with Sick Beard.  If not, see <http://www.gnu.org/licenses/>.
 ###################################################################################################
 
-import re
-import urllib, urllib2, cookielib
-import sys
-import datetime
 import os
-import exceptions
-import sickbeard
+import re
+import sys
+import urllib
 import generic
+import datetime
+import sickbeard
+import exceptions
 
+from lib import requests
 from xml.sax.saxutils import escape
-from sickbeard.common import Quality
+
+from sickbeard import db
 from sickbeard import logger
 from sickbeard import tvcache
-from sickbeard import helpers
-from sickbeard import show_name_helpers
-from sickbeard import db
-from sickbeard.common import Overview
 from sickbeard.exceptions import ex
+from sickbeard.common import Quality
+from sickbeard.common import Overview
+from sickbeard import show_name_helpers
 
-class FUCKLIMITSProvider(generic.TorrentProvider):
+class FuckLimitsProvider(generic.TorrentProvider):
     ###################################################################################################
     def __init__(self):
         generic.TorrentProvider.__init__(self, "FuckLimits")
+        self.cache = FuckLimitsCache(self)     
+        self.name = "FuckLimits"
+        self.session = None
         self.supportsBacklog = True
-        self.cache = FUCKLIMITSCache(self)     
         self.url = 'http://fucklimits.org/'
-        self.token = None
-        logger.log('[FuckLimits] Loading FuckLimits')
+        logger.log("[" + self.name + "] initializing...")
     
     ###################################################################################################
     
@@ -62,6 +64,11 @@ class FUCKLIMITSProvider(generic.TorrentProvider):
     def getQuality(self, item):        
         quality = Quality.nameQuality(item[0])
         return quality 
+        
+    ################################################################################################### 
+
+    def _get_title_and_url(self, item):
+        return item
     
     ###################################################################################################
 
@@ -126,92 +133,82 @@ class FUCKLIMITSProvider(generic.TorrentProvider):
 
     def _doSearch(self, search_params, show=None):
         search_params = search_params.replace('.',' ')
-        logger.log("[FuckLimits] Performing Search: {0}".format(search_params))
+        logger.log("[" + self.name + "] Performing Search: {0}".format(search_params))
         searchUrl = self.url + "torrents.php?groupname=" + urllib.quote(search_params) + "&filter_cat[8]=1&filter_cat[11]=1&filter_cat[12]=1&filter_cat[13]=1"
         return self.parseResults(searchUrl)
-    
-    ################################################################################################### 
-
-    def _get_title_and_url(self, item):
-        return item
 
     ###################################################################################################
     
     def parseResults(self, searchUrl):
         data = self.getURL(searchUrl)
         results = []
+        
         if data:
-            logger.log("[FuckLimits] parseResults() URL: " + searchUrl, logger.DEBUG)
+            logger.log("[" + self.name + "] parseResults() URL: " + searchUrl, logger.DEBUG)
 
             for torrent in re.compile('title="View Torrent">(?P<title>.*?)</a>.*?<a href="torrents.php(?P<url>.*?)" title="Download">',re.MULTILINE|re.DOTALL).finditer(data):
                 item = (torrent.group('title').replace('.',' '), self.url + "torrents.php" + torrent.group('url').replace('&amp;','&'))
                 results.append(item)                        
-                logger.log("[FuckLimits] parseResults() Title: " + torrent.group('title'), logger.DEBUG)
+                logger.log("[" + self.name + "] parseResults() Title: " + torrent.group('title'), logger.DEBUG)
             if len(results):
-                logger.log("[FuckLimits] parseResults() Some results found.")
+                logger.log("[" + self.name + "] parseResults() Some results found.")
             else:
-                logger.log("[FuckLimits] parseResults() No results found.")
+                logger.log("[" + self.name + "] parseResults() No results found.")
         else:
-            logger.log("[FuckLimits] parseResults() Error no data returned!!")
+            logger.log("[" + self.name + "] parseResults() Error no data returned!!")
         return results
     
     ###################################################################################################
     
     def getURL(self, url, headers=None):
         response = None
-        if self.doLogin():        
-            if not headers:
-                headers = []
-            headers.append(('Cookie', self.token))          
-            try:
-                response = helpers.getURL(url, headers)
-                if re.search("You entered an invalid password|<title>Login :: FLO</title>|<title>FLO</title>",response):
-                    logger.log("[FuckLimits] getURL() Session expired loading " + self.name + " URL: " + url +" Let's login again.")
-                    self.token = None
-                    self.getURL(url, headers)
-            except (urllib2.HTTPError, IOError, Exception), e:
-                self.token = None
-                logger.log("[FuckLimits] getURL() Error loading " + self.name + " URL: " + str(sys.exc_info()) + " - " + ex(e), logger.ERROR)
-                return None
-        return response
+        
+        if not self.session:
+             if not self._doLogin():
+                return response
+            
+        if not headers:
+            headers = []
+            
+        try:
+            response = self.session.get(url, verify=False)
+        except (requests.exceptions.ConnectionError, requests.exceptions.HTTPError), e:
+            logger.log("[" + self.name + "] getURL() Error loading " + self.name + " URL: " + ex(e), logger.ERROR)
+            return None
+        
+        if response.status_code not in [200,302,303]:
+            logger.log("[" + self.name + "] getURL() requested URL - " + url +" returned status code is " + str(response.status_code), logger.ERROR)
+            return None
+
+        return response.content
     
     ###################################################################################################
     
-    def doLogin(self):
-        if not self.token:
-            login_params  = {
-                'username': sickbeard.FUCKLIMITS_USERNAME,
-                'password': sickbeard.FUCKLIMITS_PASSWORD,
-                'login': 'submit'
-            }
-            result = None
+    def _doLogin(self):
+        login_params  = {
+            'username': sickbeard.FUCKLIMITS_USERNAME,
+            'password': sickbeard.FUCKLIMITS_PASSWORD,
+            'login': 'submit'
+        }
             
-            cookies = cookielib.CookieJar()
-            opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(cookies))
-            try:
-                logger.log("[FuckLimits] Attempting to Login")
-                urllib2.install_opener(opener)
-                response = opener.open(self.url + "login.php", urllib.urlencode(login_params))
-                result = response.read()
-            except (urllib2.HTTPError, IOError, Exception), e:
-                raise Exception("[FuckLimits] doLogin() Error: " + str(e.code) + " " + str(e.reason), logger.ERROR)
-                return None
-            if re.search("You entered an invalid password|<title>Login :: FLO</title>|<title>FLO</title>",result):
-                response.close()
-                logger.log("[FuckLimits] Failed Login")
-                raise Exception("Invalid username or password for " + self.name + ". Check your settings.")
-                return None
-            self.token = ""
-            for cookie in cookies:
-                if not cookie.value == "deleted":
-                    self.token += str(cookie.name) + "=" + str(cookie.value) + ";"
-            logger.log("[FuckLimits] Successfully logged user '%s' in." % sickbeard.FUCKLIMITS_USERNAME)
-            response.close()
+        self.session = requests.Session()
+        logger.log("[" + self.name + "] Attempting to Login")
+        
+        try:
+            response = self.session.post(self.url + "login.php", data=login_params, timeout=30, verify=False)
+        except (requests.exceptions.ConnectionError, requests.exceptions.HTTPError), e:
+            raise Exception("[" + self.name + "] _doLogin() Error: " + ex(e))
+            return False
+        
+        if re.search("You entered an invalid password|<title>Login :: FLO</title>|<title>FLO</title>",response.text) \
+        or response.status_code in [401,403]:
+            raise Exception("[" + self.name + "] Login Failed, Invalid username or password for " + self.name + ". Check your settings.")
+            return False
         return True
     
     ###################################################################################################
     
-class FUCKLIMITSCache(tvcache.TVCache):
+class FuckLimitsCache(tvcache.TVCache):
     
     ###################################################################################################
     
@@ -226,7 +223,7 @@ class FUCKLIMITSCache(tvcache.TVCache):
         
         xml =   "<rss xmlns:atom=\"http://www.w3.org/2005/Atom\" version=\"2.0\">" + \
                 "<channel>" + \
-                "<title>FuckLimits</title>" + \
+                "<title>" + provider.name + "</title>" + \
                 "<link>" + provider.url + "</link>" + \
                 "<description>torrent search</description>" + \
                 "<language>en-us</language>" + \
@@ -239,4 +236,4 @@ class FUCKLIMITSCache(tvcache.TVCache):
         
     ###################################################################################################    
 
-provider = FUCKLIMITSProvider()
+provider = FuckLimitsProvider()

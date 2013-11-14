@@ -39,7 +39,6 @@ from sickbeard import providers
 from sickbeard.exceptions import ex
 from sickbeard.providers.generic import GenericProvider
 
-import urllib
 import urllib2
 
 def _downloadResult(result):
@@ -129,13 +128,13 @@ def snatchEpisode(result, endStatus=SNATCHED):
                     urllib2.urlopen(url)
                     result.url = url
                     break
-                except Exception, e:
+                except Exception:
                     continue 
             
         # torrents are always saved to disk
         if sickbeard.TORRENT_METHOD == "blackhole": 
             dlResult = _downloadResult(result)
-       # torrents are sending to torrent client
+        # torrents are sending to torrent client
         elif sickbeard.TORRENT_METHOD == "utorrent":
             dlResult = utorrent.sendTORRENT(result)
         elif sickbeard.TORRENT_METHOD == "transmission":

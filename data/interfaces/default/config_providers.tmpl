@@ -158,7 +158,22 @@
                             </label>
                         </div>
                     </div><!-- /omgwtfnzbsDiv //-->
-
+                    
+                    <div class="providerDiv" id="bithdtvDiv">
+                        <div class="field-pair">
+                            <label class="clearfix">
+                                <span class="component-title">Username:</span>
+                                <input class="component-desc" type="text" name="bithdtv_username" value="$sickbeard.BITHDTV_USERNAME" size="40" />
+                            </label>
+                        </div>
+                        <div class="field-pair">
+                            <label class="clearfix">
+                                <span class="component-title">Password:</span>
+                                <input class="component-desc" type="password" name="bithdtv_password" value="$sickbeard.BITHDTV_PASSWORD" size="40" />
+                            </label>
+                        </div>
+                    </div><!-- /bithdtvDiv //-->
+                    
                     <div class="providerDiv" id="hdbitsDiv">
                         <div class="field-pair">
                             <label class="clearfix">
@@ -189,7 +204,7 @@
                         </div>
                     </div><!-- /tvtorrentsDiv //-->
                     
-					<div class="providerDiv" id="thepiratebayDiv">
+		    <div class="providerDiv" id="thepiratebayDiv">
                         <div class="field-pair">
                             <input type="checkbox" class="enabler" name="thepiratebay_proxy" id="thepiratebay_proxy" #if $sickbeard.THEPIRATEBAY_PROXY then "checked=\"checked\"" else ""#/>
                             <label class="clearfix" for="thepiratebay_proxy">
@@ -233,7 +248,7 @@
                                 <span class="component-desc">Download torrent only from trusted uploaders?</span>
                             </label>
                         </div>
-					</div><!-- /thepiratebayDiv //-->
+                    </div><!-- /thepiratebayDiv //-->
                      
                     <div class="providerDiv" id="btnDiv">
                         <div class="field-pair">
@@ -259,7 +274,7 @@
                                 <span class="component-desc">Download only single file release?</span>
                             </label>
                         </div>
-					</div><!-- /dailytvtorrentsDiv //-->
+                    </div><!-- /dailytvtorrentsDiv //-->
 
                     <div class="providerDiv" id="torrentzDiv">
                         <div class="field-pair">
@@ -269,7 +284,7 @@
                                 <span class="component-desc">Download only verified torrents?</span>
                             </label>
                         </div>
-					</div><!-- /torrentzDiv //-->
+		    </div><!-- /torrentzDiv //-->
                     
                     <div class="providerDiv" id="torrentdayDiv">
                         <div class="field-pair">
@@ -283,6 +298,21 @@
                                 <span class="component-title">Password:</span>
                                 <input class="component-desc" type="password" name="torrentday_password" value="$sickbeard.TORRENTDAY_PASSWORD" size="40" />
                             </label>
+                        </div>
+                        <div class="field-pair">
+                            <label class="clearfix">
+                                <span class="component-title">RSS UID (*):</span>
+                                <input class="component-desc" type="text" name="torrentday_uid" value="$sickbeard.TORRENTDAY_UID" size="40" /></b>
+                            </label>
+                        </div>
+                        <div class="field-pair">
+                            <label class="clearfix">
+                                <span class="component-title">RSS Hash (*):</span>
+                                <input class="component-desc" type="text" name="torrentday_rsshash" value="$sickbeard.TORRENTDAY_RSSHASH" size="40" /></b>
+                            </label>
+                        </div>
+                        <div class="field-pair">
+                            <span class="component-title"><i>Note: options with (*) are optional, this is generated from </i><a href="http://www.torrentday.com/rss.php" target="_blank">http://www.torrentday.com/rss.php</a></span>
                         </div>
                     </div><!-- /torrentdayDiv //-->
                 
@@ -353,20 +383,6 @@
                         </div>
                     </div><!-- /iptorrentsDiv //-->
                     
-                    <div class="providerDiv" id="bithdtvDiv">
-                        <div class="field-pair">
-                            <label class="clearfix">
-                                <span class="component-title">Username:</span>
-                                <input class="component-desc" type="text" name="bithdtv_username" value="$sickbeard.BITHDTV_USERNAME" size="40" />
-                            </label>
-                        </div>
-                        <div class="field-pair">
-                            <label class="clearfix">
-                                <span class="component-title">Password:</span>
-                                <input class="component-desc" type="password" name="bithdtv_password" value="$sickbeard.BITHDTV_PASSWORD" size="40" />
-                            </label>
-                        </div>
-                    </div><!-- /bithdtvDiv //-->
                     
                     <div class="providerDiv" id="fucklimitsDiv">
                         <div class="field-pair">
@@ -423,7 +439,7 @@
                         <div class="field-pair">
                             <span class="component-title"><i>Note: options with (*) are optional, these variables can gathered from </i><a href="http://torrentshack.net/rss.php" target="_blank">http://torrentshack.net/rss.php</a> and clicking on a link</span>
                         </div>
-                    </div><!-- /iptorrentsDiv //-->
+                    </div><!-- /torrentshackDiv //-->
 <!-- end div for editing providers -->
             
                     </fieldset>

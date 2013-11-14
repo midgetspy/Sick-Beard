@@ -33,8 +33,9 @@ from sickbeard import providers, metadata
 
 from providers import ezrss, tvtorrents, torrentleech, btn, nzbsrus, newznab, womble, nzbx, omgwtfnzbs, hdbits
 
-from providers import kickass, torrentz, dtt, torrentleech, thepiratebay, publichd, torrentday
+from providers import kickass, torrentz, dtt, thepiratebay, publichd, torrentday
 from providers import sceneaccess, iptorrents, bithdtv, fucklimits, btdigg, torrentshack
+
 from sickbeard.config import CheckSection, check_setting_int, check_setting_str, ConfigMigrator
 
 from sickbeard import searchCurrent, searchBacklog, showUpdater, versionChecker, properFinder, autoPostProcesser
@@ -195,7 +196,7 @@ TORRENTLEECH_PASSWORD = None
 TORRENTDAY = False
 TORRENTDAY_USERNAME = None
 TORRENTDAY_PASSWORD = None
-TORRENTDAY_UID =None
+TORRENTDAY_UID = None
 TORRENTDAY_RSSHASH = None
 
 SCENEACCESS = False
@@ -412,7 +413,7 @@ def initialize(consoleLogging=True):
                 TORRENT_DIR, USENET_RETENTION, SOCKET_TIMEOUT, \
                 KICKASS, TORRENTZ, TORRENTZ_VERIFIED, \
                 TORRENTLEECH, TORRENTLEECH_USERNAME, TORRENTLEECH_PASSWORD, \
-                TORRENTDAY, TORRENTDAY_USERNAME, TORRENTDAY_PASSWORD, TORRENTDAY_RSSHASH,TORRENTDAY_UID,\
+                TORRENTDAY, TORRENTDAY_USERNAME, TORRENTDAY_PASSWORD, TORRENTDAY_RSSHASH, TORRENTDAY_UID,\
                 SCENEACCESS, SCENEACCESS_USERNAME, SCENEACCESS_PASSWORD, SCENEACCESS_RSSHASH, \
                 IPTORRENTS, IPTORRENTS_USERNAME, IPTORRENTS_PASSWORD, IPTORRENTS_UID, IPTORRENTS_RSSHASH, \
                 BITHDTV, BITHDTV_USERNAME, BITHDTV_PASSWORD, \
