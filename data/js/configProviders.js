@@ -34,7 +34,7 @@ $(document).ready(function(){
         }
 
         if ($('#providerOrderList > #'+id).length == 0) {
-            var toAdd = '<li class="ui-state-default" id="'+id+'"> <input type="checkbox" id="enable_'+id+'" class="provider_enabler" CHECKED> <a href="'+url+'" class="imgLink" target="_new"><img src="'+sbRoot+'/images/providers/newznab.png" alt="'+name+'" width="16" height="16"></a> '+name+'</li>';
+            var toAdd = '<li class="ui-state-default" id="'+id+'"> <input type="checkbox" id="enable_'+id+'" class="provider_enabler" CHECKED> <a href="'+url+'" class="imgLink" target="_new"><img src="'+sbRoot+'/images/providers/newznab.png" alt="'+name+'" width="16" height="16"></a> '+name+'<span class="ui-icon ui-icon-arrowthick-2-n-s pull-right"></span></li>';
 
             $('#providerOrderList').append(toAdd);
             $('#providerOrderList').sortable("refresh");

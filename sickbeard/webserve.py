@@ -1013,7 +1013,7 @@ class ConfigProviders:
 
         else:
 
-            newProvider = newznab.NewznabProvider(name, url, key)
+            newProvider = newznab.NewznabProvider(name, url, key=key)
             sickbeard.newznabProviderList.append(newProvider)
             return newProvider.getID() + '|' + newProvider.configStr()
 
@@ -1058,21 +1058,25 @@ class ConfigProviders:
                 if not curNewznabProviderStr:
                     continue
 
-                curName, curURL, curKey = curNewznabProviderStr.split('|')
+                cur_name, cur_url, cur_key = curNewznabProviderStr.split('|')
 
-                newProvider = newznab.NewznabProvider(curName, curURL, curKey)
+                if not cur_url.endswith('/'):
+                    cur_url = cur_url + '/'
 
-                curID = newProvider.getID()
+                newProvider = newznab.NewznabProvider(cur_name, cur_url, key=cur_key)
+
+                cur_id = newProvider.getID()
 
                 # if it already exists then update it
-                if curID in newznabProviderDict:
-                    newznabProviderDict[curID].name = curName
-                    newznabProviderDict[curID].url = curURL
-                    newznabProviderDict[curID].key = curKey
+                if cur_id in newznabProviderDict:
+                    newznabProviderDict[cur_id].name = cur_name
+                    newznabProviderDict[cur_id].url = cur_url
+                    newznabProviderDict[cur_id].key = cur_key
+
                 else:
                     sickbeard.newznabProviderList.append(newProvider)
 
-                finishedNames.append(curID)
+                finishedNames.append(cur_id)
 
             # delete anything that is missing
             for curProvider in sickbeard.newznabProviderList:
@@ -1118,6 +1122,7 @@ class ConfigProviders:
         sickbeard.OMGWTFNZBS_USERNAME = omgwtfnzbs_username.strip()
         sickbeard.OMGWTFNZBS_APIKEY = omgwtfnzbs_apikey.strip()
 
+        sickbeard.NEWZNAB_DATA = '!!!'.join([x.configStr() for x in sickbeard.newznabProviderList])
         sickbeard.PROVIDER_ORDER = provider_list
 
         sickbeard.save_config()
@@ -1128,7 +1133,7 @@ class ConfigProviders:
             ui.notifications.error('Error(s) Saving Configuration',
                         '<br />\n'.join(results))
         else:
-            ui.notifications.message('Configuration Saved', ek.ek(os.path.join, sickbeard.CONFIG_FILE) )
+            ui.notifications.message('Configuration Saved', ek.ek(os.path.join, sickbeard.CONFIG_FILE))
 
         redirect("/config/providers/")
 
