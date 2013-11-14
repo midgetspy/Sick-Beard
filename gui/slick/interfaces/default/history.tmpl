@@ -16,28 +16,28 @@
 
 <script type="text/javascript">
 <!--
+
 \$(document).ready(function() 
 { 
     \$("#historyTable:has(tbody tr)").tablesorter({
         widgets: ['zebra', 'filter'],
         sortList: [[0,1]],
       textExtraction: {
-    #if ( $layout == 'detailed'):
-        4: function(node) { return \$(node).find("span").text().toLowerCase(); }
-      #else
-      1: function(node) { return \$(node).find("span").text().toLowerCase(); },
-          5: function(node) { return \$(node).find("span").text().toLowerCase(); }
-        #end if
-        },
+	    #if ( $layout == 'detailed'):
+	    	4: function(node) { return \$(node).find("span").text().toLowerCase(); }
+	    #else
+	    	1: function(node) { return \$(node).find("span").text().toLowerCase(); },
+	    	2: function(node) { return \$(node).attr("provider").toLowerCase(); },
+	    	5: function(node) { return \$(node).attr("quality").toLowerCase(); }
+	    #end if
+      },
         headers: {
         #if ( $layout == 'detailed'):
           4: { sorter: 'quality' }
         #else
-          2: { sorter: false},
-          3: { sorter: false},
-          4: { sorter: false},
+          4: { sorter: false },
           5: { sorter: 'quality' }
-      #end if
+        #end if
       }
         
     });
@@ -129,13 +129,13 @@
       <td width="25%">
         <span style="display: none;">$hItem["show_name"]</span>
       <a href="$sbRoot/home/displayShow?show=$hItem["show_id"]#season-$hItem["season"]">
-          <div style="display:inline-block; overflow:hidden; -moz-box-shadow: 3px 3px 5px 6px #ccc !important;">
+          <div style="display:inline-block; overflow:hidden;">
           <img style="width: 200px; height: 37px; border-radius: 4px 0px 0px 4px; border-width: 2px 0 2px 2px ; border-style: solid; border-color: #B7B7B7;" src="$sbRoot/showPoster/?show=$hItem["show_id"]&amp;which=banner" class="banner" alt="$hItem["show_id"]" title="$hItem["show_name"] - <%=str(hItem["season"]) +"x"+ "%02i" % int(hItem["episode"]) %>"/>
         </div>
         <div class="vertical"><%=str(hItem["season"]) +"x"+ "%02i" % int(hItem["episode"]) %></div>
       </a>
     </td>
-    <td align="center">
+    <td align="center" provider="<%=str(sorted(hItem["actions"])[0]["provider"])%>">
       #for $action in sorted($hItem["actions"]):
         #set $curStatus, $curQuality = $Quality.splitCompositeStatus(int($action["action"]))
           #if $curStatus == SNATCHED:
@@ -145,7 +145,6 @@
             #else:
               <img src="$sbRoot/images/providers/missing.png" width="16" height="16" alt="missing provider" title="missing provider"/>
             #end if
-            </span>
         #end if    
       #end for
     </td> 
@@ -170,7 +169,7 @@
             #end if
           #end if
       #end for
-    </td> 
+    </td>
     <td align="center">
       #for $action in sorted($hItem["actions"]):
         #set $curStatus, $curQuality = $Quality.splitCompositeStatus(int($action["action"]))
@@ -182,8 +181,7 @@
         #end if    
       #end for
     </td>
-    <span style="display: none;">$curQuality</span>
-      <td align="center" width="14%"><span class="quality $Quality.qualityStrings[$curQuality].replace("720p","HD720p").replace("1080p","HD1080p").replace("RawHD TV", "RawHD").replace("HD TV", "HD720p")">$Quality.qualityStrings[$curQuality]</span></td>
+      <td align="center" width="14%" quality="$curQuality"><span class="quality $Quality.qualityStrings[$curQuality].replace("720p","HD720p").replace("1080p","HD1080p").replace("RawHD TV", "RawHD").replace("HD TV", "HD720p")">$Quality.qualityStrings[$curQuality]</span></td>
     </tr>
     #end for
     </tbody>
