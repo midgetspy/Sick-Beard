@@ -50,21 +50,7 @@
         return false; 
     },
     format: function(s) {
-        match = s.match(/^(.*)/);
-
-        if (match == null || match[1] == "?")
-            return -10;
-
-        var nums = match[1].split(" / ");
-
-        if (parseInt(nums[0]) === 0)
-            return parseInt(nums[1]);
-
-        var finalNum = parseInt((nums[0]/nums[1])*1000)*100;
-        if (finalNum > 0)
-            finalNum += parseInt(nums[0]);
-
-        return finalNum;
+        return s.split('%')[1];
     },
     type: 'numeric'
 });
@@ -137,15 +123,18 @@ $myShowList.sort(lambda x, y: cmp(x.name, y.name))
     #set $dlStat = str($curShowDownloads[0])+" / "+str($curShowAll[0])
     #set $nom = $curShowDownloads[0]
     #set $den = $curShowAll[0]
+    #set $per = $nom * 100 / $den
   #else
     #set $dlStat = "0 / "+str($curShowAll[0])
     #set $nom = 0
     #set $den = $curShowAll[0]
+    #set $per = 0
   #end if
 #else
   #set $dlStat = "?"
   #set $nom = 0
   #set $den = 1
+  #set $per = 0
 #end if
 
 
@@ -158,14 +147,13 @@ $myShowList.sort(lambda x, y: cmp(x.name, y.name))
 #else:
     <td align="center"><span class="quality Custom">Custom</span></td>
 #end if
-    <td align="center"><span style="display: none;">$dlStat</span><div id="progressbar$curShow.tvdbid" style="position:relative;"></div>
+    <td align="center"><span style="display: none;">$dlStat+%$per%</span><div id="progressbar$curShow.tvdbid" style="position:relative;"><div class='progressbarText'>$dlStat</div></div>
         <script type="text/javascript">
         <!--
             \$(function() {
                \$("\#progressbar$curShow.tvdbid").progressbar({
-                   value: parseInt($nom) * 100 / parseInt($den)
+                   value: $per
                });
-               \$("\#progressbar$curShow.tvdbid").append( "<div class='progressbarText'>$dlStat</div>" )
             });
         //-->
         </script>
