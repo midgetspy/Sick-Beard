@@ -79,6 +79,7 @@ class TVShow(object):
         self.air_by_date = 0
         self.subtitles = int(sickbeard.SUBTITLES_DEFAULT if sickbeard.SUBTITLES_DEFAULT else 0)
         self.lang = lang
+        self.last_update_tvdb = 1
 
         self.lock = threading.Lock()
         self._isDirGood = False
@@ -393,6 +394,10 @@ class TVShow(object):
 
                 scannedEps[season][episode] = True
 
+        # Done updating save last update date
+        self.last_update_tvdb = datetime.date.today().toordinal()
+        self.saveToDB()
+
         return scannedEps
 
     def setTVRID(self, force=False):
@@ -632,6 +637,8 @@ class TVShow(object):
 
             if self.lang == "":
                 self.lang = sqlResults[0]["lang"]
+
+            self.last_update_tvdb = sqlResults[0]["last_update_tvdb"]
 
             if self.imdbid == "":
                 self.imdbid = sqlResults[0]["imdb_id"]                    
@@ -947,7 +954,8 @@ class TVShow(object):
                         "startyear": self.startyear,
                         "tvr_name": self.tvrname,
                         "lang": self.lang,
-                        "imdb_id": self.imdbid
+                        "imdb_id": self.imdbid,
+                        "last_update_tvdb": self.last_update_tvdb
                         }
 
         myDB.upsert("tv_shows", newValueDict, controlValueDict)

@@ -103,6 +103,16 @@ class ShowUpdater():
                 next_airdate = datetime.date.fromordinal(sql_result[0]['airdate'])
                 if next_airdate <= (update_date + graceperiod):
                     return True
+                
+            last_update_tvdb = datetime.date.fromordinal(curShow.last_update_tvdb)
+            
+            # in the first year after ended (last airdate), update every 30 days
+            if (update_date - last_airdate) < datetime.timedelta(days=450) and (update_date - last_update_tvdb) > datetime.timedelta(days=30):
+                return True
+            
+            # always update every 90 days
+            if (update_date - last_update_tvdb) > datetime.timedelta(days=90):
+                return True
 
             return False
 
