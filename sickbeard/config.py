@@ -278,7 +278,7 @@ class ConfigMigrator():
         self.config_obj = config_obj
 
         # check the version of the config
-        self.config_version = check_setting_int(config_obj, 'General', 'config_version', 0)
+        self.config_version = check_setting_int(config_obj, 'General', 'config_version', sickbeard.CONFIG_VERSION)
         self.expected_config_version = sickbeard.CONFIG_VERSION
         self.migration_names = {1: 'Custom naming',
                                 2: 'Sync backup number with version number',
