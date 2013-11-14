@@ -403,7 +403,7 @@ class AddShowidTvdbidIndex(Add1080pAndRawHDQualities):
 
 
 # included in build 502 (TBD)
-class AddLastUpdateTVDB(AddSizeAndSceneNameFields):
+class AddLastUpdateTVDB(AddShowidTvdbidIndex):
     """ Adding column last_update_tvdb to tv_shows for controlling nightly updates """
 
     def test(self):
