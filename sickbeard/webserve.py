@@ -981,14 +981,14 @@ class ConfigProviders:
     def canAddNewznabProvider(self, name):
 
         if not name:
-            return json.dumps({'error': 'Invalid name specified'})
+            return json.dumps({'error': 'No Provider Name specified'})
 
         providerDict = dict(zip([x.getID() for x in sickbeard.newznabProviderList], sickbeard.newznabProviderList))
 
         tempProvider = newznab.NewznabProvider(name, '')
 
         if tempProvider.getID() in providerDict:
-            return json.dumps({'error': 'Exists as ' + providerDict[tempProvider.getID()].name})
+            return json.dumps({'error': 'Provider Name already exists as ' + providerDict[tempProvider.getID()].name})
         else:
             return json.dumps({'success': tempProvider.getID()})
 
@@ -1007,7 +1007,13 @@ class ConfigProviders:
             if not providerDict[name].default:
                 providerDict[name].name = name
                 providerDict[name].url = url
+
             providerDict[name].key = key
+            # a 0 in the key spot indicates that no key is needed
+            if key == '0':
+                providerDict[name].needs_auth = False
+            else:
+                providerDict[name].needs_auth = True
 
             return providerDict[name].getID() + '|' + providerDict[name].configStr()
 
@@ -1072,6 +1078,11 @@ class ConfigProviders:
                     newznabProviderDict[cur_id].name = cur_name
                     newznabProviderDict[cur_id].url = cur_url
                     newznabProviderDict[cur_id].key = cur_key
+                    # a 0 in the key spot indicates that no key is needed
+                    if cur_key == '0':
+                        newznabProviderDict[cur_id].needs_auth = False
+                    else:
+                        newznabProviderDict[cur_id].needs_auth = True
 
                 else:
                     sickbeard.newznabProviderList.append(newProvider)

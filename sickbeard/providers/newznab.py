@@ -49,10 +49,14 @@ class NewznabProvider(generic.NZBProvider):
         self.cache = NewznabCache(self)
 
         self.url = url
+
         self.key = key
 
-        # if a provider doesn't need an api key then this can be false
-        self.needs_auth = True
+        # a 0 in the key spot indicates that no key is needed
+        if self.key == '0':
+            self.needs_auth = False
+        else:
+            self.needs_auth = True
 
         if catIDs:
             self.catIDs = catIDs
@@ -201,7 +205,7 @@ class NewznabProvider(generic.NZBProvider):
         if search_params:
             params.update(search_params)
 
-        if self.key:
+        if self.needs_auth and self.key:
             params['apikey'] = self.key
 
         search_url = self.url + 'api?' + urllib.urlencode(params)
@@ -299,7 +303,7 @@ class NewznabCache(tvcache.TVCache):
         params = {"t": "tvsearch",
                   "cat": self.provider.catIDs}
 
-        if self.provider.key:
+        if self.provider.needs_auth and self.provider.key:
             params['apikey'] = self.provider.key
 
         rss_url = self.provider.url + 'api?' + urllib.urlencode(params)

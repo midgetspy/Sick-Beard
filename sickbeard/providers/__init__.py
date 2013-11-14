@@ -67,11 +67,6 @@ def getNewznabProviderList(data):
         if not curDefault:
             continue
 
-        # a 0 in the key spot indicates that no key is needed, so set this on the object
-        if curDefault.key == '0':
-            curDefault.key = ''
-            curDefault.needs_auth = False
-
         if curDefault.name not in providerDict:
             curDefault.default = True
             providerList.append(curDefault)

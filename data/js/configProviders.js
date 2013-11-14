@@ -173,11 +173,20 @@ $(document).ready(function(){
 
         var selectedProvider = $('#editANewznabProvider :selected').val();
 
-        var name = $('#newznab_name').val();
-        var url = $('#newznab_url').val();
-        var key = $('#newznab_key').val();
+        var name = $.trim($('#newznab_name').val());
+        var url = $.trim($('#newznab_url').val());
+        var key = $.trim($('#newznab_key').val());
 
-        var params = { name: name };
+        if (!name)
+            return;
+
+        if (!url)
+            return;
+
+        if (!key)
+            return;
+
+        var params = {name: name};
 
         // send to the form with ajax, get a return value
         $.getJSON(sbRoot + '/config/providers/canAddNewznabProvider', params,
