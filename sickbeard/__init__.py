@@ -193,8 +193,6 @@ TORRENTLEECH_PASSWORD = None
 TORRENTDAY = False
 TORRENTDAY_USERNAME = None
 TORRENTDAY_PASSWORD = None
-TORRENTDAY_UID = None
-TORRENTDAY_RSSHASH = None
 
 SCENEACCESS = False
 SCENEACCESS_USERNAME = None
@@ -410,7 +408,7 @@ def initialize(consoleLogging=True):
                 TORRENT_DIR, USENET_RETENTION, SOCKET_TIMEOUT, \
                 KICKASS, TORRENTZ, TORRENTZ_VERIFIED, \
                 TORRENTLEECH, TORRENTLEECH_USERNAME, TORRENTLEECH_PASSWORD, \
-                TORRENTDAY, TORRENTDAY_USERNAME, TORRENTDAY_PASSWORD, TORRENTDAY_RSSHASH, TORRENTDAY_UID,\
+                TORRENTDAY, TORRENTDAY_USERNAME, TORRENTDAY_PASSWORD, \
                 SCENEACCESS, SCENEACCESS_USERNAME, SCENEACCESS_PASSWORD, SCENEACCESS_RSSHASH, \
                 IPTORRENTS, IPTORRENTS_USERNAME, IPTORRENTS_PASSWORD, IPTORRENTS_UID, IPTORRENTS_RSSHASH, \
                 BITHDTV, BITHDTV_USERNAME, BITHDTV_PASSWORD, \
@@ -594,8 +592,6 @@ def initialize(consoleLogging=True):
         TORRENTDAY = bool(check_setting_int(CFG, 'TORRENTDAY', 'torrentday', 0))    
         TORRENTDAY_USERNAME = check_setting_str(CFG, 'TORRENTDAY', 'torrentday_username', '')   
         TORRENTDAY_PASSWORD = check_setting_str(CFG, 'TORRENTDAY', 'torrentday_password', '')
-        TORRENTDAY_UID = check_setting_str(CFG, 'TORRENTDAY', 'torrentday_uid', '') 
-        TORRENTDAY_RSSHASH = check_setting_str(CFG, 'TORRENTDAY', 'torrentday_rsshash', '')
         
         SCENEACCESS = bool(check_setting_int(CFG, 'SCENEACCESS', 'sceneaccess', 0))
         SCENEACCESS_USERNAME = check_setting_str(CFG, 'SCENEACCESS', 'sceneaccess_username', '')
@@ -1242,8 +1238,6 @@ def save_config():
     new_config['TORRENTDAY']['torrentday'] = int(TORRENTDAY)
     new_config['TORRENTDAY']['torrentday_username'] = TORRENTDAY_USERNAME
     new_config['TORRENTDAY']['torrentday_password'] = TORRENTDAY_PASSWORD
-    new_config['TORRENTDAY']['torrentday_rsshash'] = TORRENTDAY_RSSHASH
-    new_config['TORRENTDAY']['torrentday_uid'] = TORRENTDAY_UID
 
     new_config['SCENEACCESS'] = {}
     new_config['SCENEACCESS']['sceneaccess'] = int(SCENEACCESS)

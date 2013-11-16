@@ -1065,7 +1065,7 @@ class ConfigProviders:
                       thepiratebay_trusted = None, thepiratebay_proxy = None, thepiratebay_proxy_url = None,thepiratebay_url_override = None, thepiratebay_url_override_enable = None,
                       dtt_norar = None, dtt_single = None, 
                       torrentleech_username = None, torrentleech_password = None,
-                      torrentday_username = None, torrentday_password = None, torrentday_rsshash = None, torrentday_uid = None,
+                      torrentday_username = None, torrentday_password = None,
                       sceneaccess_username = None, sceneaccess_password = None, sceneaccess_rsshash = None,
                       iptorrents_username = None, iptorrents_password = None,iptorrents_uid = None, iptorrents_rsshash = None,
                       bithdtv_username = None, bithdtv_password = None,
@@ -1224,8 +1224,6 @@ class ConfigProviders:
         
         sickbeard.TORRENTDAY_USERNAME = torrentday_username.strip()
         sickbeard.TORRENTDAY_PASSWORD = torrentday_password.strip()
-        sickbeard.TORRENTDAY_RSSHASH = torrentday_rsshash.strip()
-        sickbeard.TORRENTDAY_UID = torrentday_uid.strip()
         
         sickbeard.SCENEACCESS_USERNAME = sceneaccess_username.strip()
         sickbeard.SCENEACCESS_PASSWORD = sceneaccess_password.strip()
