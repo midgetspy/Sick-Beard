@@ -249,25 +249,12 @@ class TorrentDayCache(tvcache.TVCache):
     ###################################################################################################
         
     def _getRSSData(self):
-        if not provider.rssuid or not provider.rsshash:
+        if not provider.session:
             provider._doLogin()
-            self.rss_url = "{0}torrents/rss?download;l24;l14;l26;l7;l2;u={1};tp={2}".format(provider.url, provider.rssuid, provider.rsshash)
-            logger.log("[" + provider.name + "] RSS URL - {0}".format(self.rss_url))
-            xml = provider.getURL(self.rss_url)
-        else:
-            logger.log("[" + provider.name + "] WARNING: RSS construction via browse since no RSS variables provided.") 
-            xml = "<rss xmlns:atom=\"http://www.w3.org/2005/Atom\" version=\"2.0\">" + \
-            "<channel>" + \
-            "<title>" + provider.name + "</title>" + \
-            "<link>" + provider.url + "</link>" + \
-            "<description>torrent search</description>" + \
-            "<language>en-us</language>" + \
-            "<atom:link href=\"" + provider.url + "\" rel=\"self\" type=\"application/rss+xml\"/>"
-
-            for title, url in provider._doSearch(""):
-                xml += "<item>" + "<title>" + escape(title) + "</title>" +  "<link>"+ urllib.quote(url,'/,:') + "</link>" + "</item>"
-            xml += "</channel></rss>"
-        return xml    
+        
+        self.rss_url = "{0}torrents/rss?download;l24;l14;l26;l7;l2;u={1};tp={2}".format(provider.url, provider.rssuid, provider.rsshash)
+        logger.log("[" + provider.name + "] RSS URL - {0}".format(self.rss_url))
+        return provider.getURL(self.rss_url)
         
     ###################################################################################################    
 
