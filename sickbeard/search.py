@@ -86,9 +86,6 @@ def _downloadResult(result):
         logger.log(u"Invalid provider type - this is a coding error, report it please", logger.ERROR)
         return False
 
-    if newResult:
-        ui.notifications.message('Episode snatched','<b>%s</b> snatched from <b>%s</b>' % (result.name, resProvider.name))
-
     return newResult
 
 def snatchEpisode(result, endStatus=SNATCHED):
@@ -123,6 +120,8 @@ def snatchEpisode(result, endStatus=SNATCHED):
 
     if dlResult == False:
         return False
+
+    ui.notifications.message('Episode snatched', result.name)
 
     history.logSnatch(result)
 

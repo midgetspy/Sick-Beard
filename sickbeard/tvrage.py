@@ -255,16 +255,21 @@ class TVRage:
             result = result.decode('utf-8')
 
         urlData = result.splitlines()
-
         info = {}
 
         for x in urlData:
             if x.startswith("No Show Results Were Found"):
-                logger.log(x.encode('utf-8'), logger.WARNING)
+                logger.log(u"TVRage returned: " + x.encode('utf-8'), logger.WARNING)
                 return info
-            key, value = x.split("@")
-            key = key.replace('<pre>','')
-            info[key] = value.strip()
+
+            if "@" in x:
+                key, value = x.split("@")
+                if key:
+                    key = key.replace('<pre>', '')
+                    info[key] = value.strip()
+            else:
+                logger.log(u"TVRage returned: " + x.encode('utf-8'), logger.WARNING)
+                return info
 
         # save it for later in case somebody is curious
         if info.has_key('Show ID'):

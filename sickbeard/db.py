@@ -32,6 +32,7 @@ from sickbeard.exceptions import ex
 
 db_lock = threading.Lock()
 
+
 def dbFilename(filename="sickbeard.db", suffix=None):
     """
     @param filename: The sqlite database filename to use. If not specified,
@@ -43,6 +44,7 @@ def dbFilename(filename="sickbeard.db", suffix=None):
     if suffix:
         filename = "%s.%s" % (filename, suffix)
     return ek.ek(os.path.join, sickbeard.DATA_DIR, filename)
+
 
 class DBConnection:
     def __init__(self, filename="sickbeard.db", suffix=None, row_type=None):
@@ -116,35 +118,34 @@ class DBConnection:
 
             if query == None:
                 return
-    
+
             sqlResult = None
             attempt = 0
-    
+
             while attempt < 5:
                 try:
                     if args == None:
-                        logger.log(self.filename+": "+query, logger.DEBUG)
+                        logger.log(self.filename + ": " + query, logger.DEBUG)
                         sqlResult = self.connection.execute(query)
                     else:
-                        logger.log(self.filename+": "+query+" with args "+str(args), logger.DEBUG)
+                        logger.log(self.filename + ": " + query + " with args " + str(args), logger.DEBUG)
                         sqlResult = self.connection.execute(query, args)
                     self.connection.commit()
                     # get out of the connection attempt loop since we were successful
                     break
                 except sqlite3.OperationalError, e:
                     if "unable to open database file" in e.message or "database is locked" in e.message:
-                        logger.log(u"DB error: "+ex(e), logger.WARNING)
+                        logger.log(u"DB error: " + ex(e), logger.WARNING)
                         attempt += 1
                         time.sleep(1)
                     else:
-                        logger.log(u"DB error: "+ex(e), logger.ERROR)
+                        logger.log(u"DB error: " + ex(e), logger.ERROR)
                         raise
                 except sqlite3.DatabaseError, e:
                     logger.log(u"Fatal error executing query: " + ex(e), logger.ERROR)
                     raise
-    
-            return sqlResult
 
+            return sqlResult
 
     def select(self, query, args=None):
 
@@ -159,14 +160,14 @@ class DBConnection:
 
         changesBefore = self.connection.total_changes
 
-        genParams = lambda myDict : [x + " = ?" for x in myDict.keys()]
+        genParams = lambda myDict: [x + " = ?" for x in myDict.keys()]
 
-        query = "UPDATE "+tableName+" SET " + ", ".join(genParams(valueDict)) + " WHERE " + " AND ".join(genParams(keyDict))
+        query = "UPDATE " + tableName + " SET " + ", ".join(genParams(valueDict)) + " WHERE " + " AND ".join(genParams(keyDict))
 
         self.action(query, valueDict.values() + keyDict.values())
 
         if self.connection.total_changes == changesBefore:
-            query = "INSERT INTO "+tableName+" (" + ", ".join(valueDict.keys() + keyDict.keys()) + ")" + \
+            query = "INSERT INTO " + tableName + " (" + ", ".join(valueDict.keys() + keyDict.keys()) + ")" + \
                      " VALUES (" + ", ".join(["?"] * len(valueDict.keys() + keyDict.keys())) + ")"
             self.action(query, valueDict.values() + keyDict.values())
 
@@ -177,16 +178,18 @@ class DBConnection:
         for column in cursor:
             columns[column['name']] = { 'type': column['type'] }
         return columns
-    
+
     # http://stackoverflow.com/questions/3300464/how-can-i-get-dict-from-sqlite-query
     def _dict_factory(self, cursor, row):
         d = {}
         for idx, col in enumerate(cursor.description):
             d[col[0]] = row[idx]
         return d
-    
+
+
 def sanityCheckDatabase(connection, sanity_check):
     sanity_check(connection).check()
+
 
 class DBSanityCheck(object):
     def __init__(self, connection):
@@ -199,29 +202,34 @@ class DBSanityCheck(object):
 # = Upgrade API =
 # ===============
 
+
 def upgradeDatabase(connection, schema):
     logger.log(u"Checking database structure...", logger.MESSAGE)
     _processUpgrade(connection, schema)
 
-def prettyName(str):
-    return ' '.join([x.group() for x in re.finditer("([A-Z])([a-z0-9]+)", str)])
+
+def prettyName(class_name):
+    return ' '.join([x.group() for x in re.finditer("([A-Z])([a-z0-9]+)", class_name)])
+
 
 def _processUpgrade(connection, upgradeClass):
     instance = upgradeClass(connection)
-    logger.log(u"Checking " + prettyName(upgradeClass.__name__) + " database upgrade", logger.DEBUG)
+    pretty_class_name = prettyName(upgradeClass.__name__)
+    logger.log(u"Checking " + pretty_class_name + " database upgrade", logger.DEBUG)
     if not instance.test():
-        logger.log(u"Database upgrade required: " + prettyName(upgradeClass.__name__), logger.MESSAGE)
+        logger.log(u"Database upgrade required: " + pretty_class_name, logger.MESSAGE)
         try:
             instance.execute()
         except sqlite3.DatabaseError, e:
-            print "Error in " + str(upgradeClass.__name__) + ": " + ex(e)
+            print "Error in " + str(pretty_class_name) + ": " + ex(e)
             raise
-        logger.log(upgradeClass.__name__ + " upgrade completed", logger.DEBUG)
+        logger.log(pretty_class_name + u" upgrade completed", logger.DEBUG)
     else:
-        logger.log(upgradeClass.__name__ + " upgrade not required", logger.DEBUG)
+        logger.log(pretty_class_name + u" upgrade not required", logger.DEBUG)
 
     for upgradeSubClass in upgradeClass.__subclasses__():
         _processUpgrade(connection, upgradeSubClass)
+
 
 # Base migration class. All future DB changes should be subclassed from this class
 class SchemaUpgrade (object):
@@ -234,14 +242,14 @@ class SchemaUpgrade (object):
     def hasColumn(self, tableName, column):
         return column in self.connection.tableInfo(tableName)
 
-    def addColumn(self, table, column, type="NUMERIC", default=0):
-        self.connection.action("ALTER TABLE %s ADD %s %s" % (table, column, type))
-        self.connection.action("UPDATE %s SET %s = ?" % (table, column), (default,))
+    def addColumn(self, tableName, column, data_type="NUMERIC", default=0):
+        self.connection.action("ALTER TABLE %s ADD %s %s" % (tableName, column, data_type))
+        self.connection.action("UPDATE %s SET %s = ?" % (tableName, column), (default,))
 
     def checkDBVersion(self):
         return self.connection.checkDBVersion()
 
     def incDBVersion(self):
-        curVersion = self.checkDBVersion()
-        self.connection.action("UPDATE db_version SET db_version = ?", [curVersion+1])
-        return curVersion+1
+        new_version = self.checkDBVersion() + 1
+        self.connection.action("UPDATE db_version SET db_version = ?", [new_version])
+        return new_version

@@ -68,6 +68,7 @@ class TVShow(object):
         self.paused = 0
         self.air_by_date = 0
         self.lang = lang
+        self.last_update_tvdb = 1
 
         self.lock = threading.Lock()
         self._isDirGood = False
@@ -179,6 +180,44 @@ class TVShow(object):
                 self.episodes[season][episode] = ep
 
         return self.episodes[season][episode]
+
+    def should_update(self, update_date=datetime.date.today()):
+
+        # if show is not 'Ended' always update (status 'Continuing' or '')
+        if self.status != 'Ended':
+            return True
+
+        # run logic against the current show latest aired and next unaired data to see if we should bypass 'Ended' status
+        cur_tvdbid = self.tvdbid
+
+        graceperiod = datetime.timedelta(days=30)
+
+        myDB = db.DBConnection()
+        last_airdate = datetime.date.fromordinal(1)
+
+        # get latest aired episode to compare against today - graceperiod and today + graceperiod
+        sql_result = myDB.select("SELECT * FROM tv_episodes WHERE showid = ? AND season > '0' AND airdate > '1' AND status > '1' ORDER BY airdate DESC LIMIT 1", [cur_tvdbid])
+
+        if sql_result:
+            last_airdate = datetime.date.fromordinal(sql_result[0]['airdate'])
+            if last_airdate >= (update_date - graceperiod) and last_airdate <= (update_date + graceperiod):
+                return True
+
+        # get next upcoming UNAIRED episode to compare against today + graceperiod
+        sql_result = myDB.select("SELECT * FROM tv_episodes WHERE showid = ? AND season > '0' AND airdate > '1' AND status = '1' ORDER BY airdate ASC LIMIT 1", [cur_tvdbid])
+
+        if sql_result:
+            next_airdate = datetime.date.fromordinal(sql_result[0]['airdate'])
+            if next_airdate <= (update_date + graceperiod):
+                return True
+
+        last_update_tvdb = datetime.date.fromordinal(self.last_update_tvdb)
+
+        # in the first year after ended (last airdate), update every 30 days
+        if (update_date - last_airdate) < datetime.timedelta(days=450) and (update_date - last_update_tvdb) > datetime.timedelta(days=30):
+            return True
+
+        return False
 
     def writeShowNFO(self):
 
@@ -373,6 +412,10 @@ class TVShow(object):
                         ep.saveToDB()
 
                 scannedEps[season][episode] = True
+
+        # Done updating save last update date
+        self.last_update_tvdb = datetime.date.today().toordinal()
+        self.saveToDB()
 
         return scannedEps
 
@@ -602,6 +645,8 @@ class TVShow(object):
             if self.lang == "":
                 self.lang = sqlResults[0]["lang"]
 
+            self.last_update_tvdb = sqlResults[0]["last_update_tvdb"]
+
     def loadFromTVDB(self, cache=True, tvapi=None, cachedSeason=None):
 
         logger.log(str(self.tvdbid) + u": Loading show info from theTVDB")
@@ -811,7 +856,8 @@ class TVShow(object):
                         "air_by_date": self.air_by_date,
                         "startyear": self.startyear,
                         "tvr_name": self.tvrname,
-                        "lang": self.lang
+                        "lang": self.lang,
+                        "last_update_tvdb": self.last_update_tvdb
                         }
 
         myDB.upsert("tv_shows", newValueDict, controlValueDict)

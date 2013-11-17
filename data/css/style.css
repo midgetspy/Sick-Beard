@@ -142,7 +142,7 @@ div.formpaginate .prev, div.formpaginate .next {
 /* =======================================================================
 tablesorter.css -- custom
 ========================================================================== */
-table.tablesorter {
+.tablesorter {
   width: 100%;
   margin-right: auto;
   margin-left: auto;
@@ -151,25 +151,26 @@ table.tablesorter {
   background-color: #fff;
   border-spacing: 0;
 }
-table.tablesorter th,
-table.tablesorter td {
+.tablesorter th,
+.tablesorter td {
   padding: 4px;
   border-top: #fff 1px solid;
   border-left: #fff 1px solid;
+  vertical-align: middle;
 }
 /* remove extra border from left edge */
-table.tablesorter th:first-child,
-table.tablesorter td:first-child {
+.tablesorter th:first-child,
+.tablesorter td:first-child {
   border-left: none;
 }
-table.tablesorter th {
+.tablesorter th {
   color: #fff;
   text-align: center;
   text-shadow: -1px -1px 0 rgba(0,0,0,0.3);
   background-color: #333;
   border-collapse: collapse;
 }
-table.tablesorter .tablesorter-header {
+.tablesorter .tablesorter-header {
   padding: 4px 18px 4px 4px;
   cursor: pointer;
   background-image: url(data:image/gif;base64,R0lGODlhFQAJAIAAAP///////yH5BAEAAAEALAAAAAAVAAkAAAIXjI+AywnaYnhUMoqt3gZXPmVg94yJVQAAOw==);
@@ -177,56 +178,63 @@ table.tablesorter .tablesorter-header {
   background-repeat: no-repeat;
   /* background-image: url(../images/tablesorter/bg.gif); */
 }
-table.tablesorter th.tablesorter-headerSortUp {
+.tablesorter thead .tablesorter-headerDesc {
   background-color: #57442b;
   background-image: url(data:image/gif;base64,R0lGODlhFQAEAIAAAP///////yH5BAEAAAEALAAAAAAVAAQAAAINjB+gC+jP2ptn0WskLQA7);
   /* background-image: url(../images/tablesorter/asc.gif); */
 }
-table.tablesorter th.tablesorter-headerSortDown {
+.tablesorter thead .tablesorter-headerAsc {
   background-color: #57442b;
   background-image: url(data:image/gif;base64,R0lGODlhFQAEAIAAAP///////yH5BAEAAAEALAAAAAAVAAQAAAINjI8Bya2wnINUMopZAQA7);
   /* background-image: url(../images/tablesorter/desc.gif); */
 }
+.tablesorter thead .sorter-false {
+  background-image: none;
+  padding: 4px;
+  cursor: default;
+}
+thead.tablesorter-stickyHeader {
+  border-top: 2px solid #fff;
+  border-bottom: 2px solid #fff;
+}
+
 /* Zebra Widget - row alternating colors */
-table.tablesorter tr.odd, .sickbeardTable tr.odd {
+.tablesorter tr.odd, .sickbeardTable tr.odd {
   background-color: #f5f1e4;
 }
-table.tablesorter tr.even, .sickbeardTable tr.even {
+.tablesorter tr.even, .sickbeardTable tr.even {
   background-color: #dfdacf;
 }
 /* filter widget */
-table.tablesorter input.tablesorter-filter {
+.tablesorter input.tablesorter-filter {
   width: 98%;
-  height: inherit;
+  height: auto;
   -webkit-box-sizing: border-box;
      -moz-box-sizing: border-box;
           box-sizing: border-box;
 }
-table.tablesorter tr.tablesorter-filter,
-table.tablesorter tr.tablesorter-filter td {
+.tablesorter tr.tablesorter-filter-row,
+.tablesorter tr.tablesorter-filter-row td {
   text-align: center;
   background: #eee;
+  border-bottom: 1px solid #ddd;
 }
 /* optional disabled input styling */
-table.tablesorter input.tablesorter-filter.disabled {
+.tablesorter input.tablesorter-filter-row .disabled {
   display: none;
 }
 .tablesorter-header-inner {
   padding: 0 2px;
   text-align: center;
 }
-tr.tablesorter-stickyHeader {
-  padding: 2px 0;
-  background-color: #fff;
-}
-table.tablesorter tfoot tr {
+.tablesorter tfoot tr {
   color: #fff;
   text-align: center;
   text-shadow: -1px -1px 0 rgba(0,0,0,0.3);
   background-color: #333;
   border-collapse: collapse;
 }
-table.tablesorter tfoot a {
+.tablesorter tfoot a {
   color:#fff;
   text-decoration: none;
 }
@@ -587,10 +595,6 @@ config*.tmpl
   width: 90%;
   margin: 10px 0;
   color: #666;
-}
-.component-group-list {
-  float: left;
-  width: 590px;
 }
 #config div.field-pair {
   padding: 8px 4px;
@@ -973,6 +977,9 @@ td.tvShow a {
   font-size: 14px;
   color: #333;
   text-decoration: none;
+  display: block;
+  width: 100%;
+  height: 100%;
 }
 td.tvShow:hover a {
   color:#000;

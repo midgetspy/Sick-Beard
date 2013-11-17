@@ -44,15 +44,15 @@ notifyStrings[NOTIFY_SNATCH] = "Started Download"
 notifyStrings[NOTIFY_DOWNLOAD] = "Download Finished"
 
 ### Episode statuses
-UNKNOWN = -1 # should never happen
-UNAIRED = 1 # episodes that haven't aired yet
-SNATCHED = 2 # qualified with quality
-WANTED = 3 # episodes we don't have but want to get
-DOWNLOADED = 4 # qualified with quality
-SKIPPED = 5 # episodes we don't want
-ARCHIVED = 6 # episodes that you don't have locally (counts toward download completion stats)
-IGNORED = 7 # episodes that you don't want included in your download stats
-SNATCHED_PROPER = 9 # qualified with quality
+UNKNOWN = -1         # should never happen
+UNAIRED = 1          # episodes that haven't aired yet
+SNATCHED = 2         # qualified with quality
+WANTED = 3           # episodes we don't have but want to get
+DOWNLOADED = 4       # qualified with quality
+SKIPPED = 5          # episodes we don't want
+ARCHIVED = 6         # episodes that you don't have locally (counts toward download completion stats)
+IGNORED = 7          # episodes that you don't want included in your download stats
+SNATCHED_PROPER = 9  # qualified with quality
 
 NAMING_REPEAT = 1
 NAMING_EXTEND = 2
@@ -71,19 +71,19 @@ multiEpStrings[NAMING_LIMITED_EXTEND_E_PREFIXED] = "Extend (Limited, E-prefixed)
 
 
 class Quality:
-    NONE = 0              # 0
-    SDTV = 1              # 1
-    SDDVD = 1 << 1        # 2
-    HDTV = 1 << 2         # 4
-    RAWHDTV = 1 << 3      # 8  -- 720p/1080i mpeg2 (trollhd releases)
-    FULLHDTV = 1 << 4     # 16 -- 1080p HDTV (QCF releases)
-    HDWEBDL = 1 << 5      # 32
-    FULLHDWEBDL = 1 << 6  # 64 -- 1080p web-dl
-    HDBLURAY = 1 << 7     # 128
-    FULLHDBLURAY = 1 << 8 # 256
+    NONE = 0               # 0
+    SDTV = 1               # 1
+    SDDVD = 1 << 1         # 2
+    HDTV = 1 << 2          # 4
+    RAWHDTV = 1 << 3       # 8  -- 720p/1080i mpeg2 (trollhd releases)
+    FULLHDTV = 1 << 4      # 16 -- 1080p HDTV (QCF releases)
+    HDWEBDL = 1 << 5       # 32
+    FULLHDWEBDL = 1 << 6   # 64 -- 1080p web-dl
+    HDBLURAY = 1 << 7      # 128
+    FULLHDBLURAY = 1 << 8  # 256
 
     # put these bits at the other end of the spectrum, far enough out that they shouldn't interfere
-    UNKNOWN = 1 << 15     # 32768
+    UNKNOWN = 1 << 15      # 32768
 
     qualityStrings = {NONE: "N/A",
                       UNKNOWN: "Unknown",
@@ -143,9 +143,9 @@ class Quality:
             if regex_match:
                 return x
 
-        checkName = lambda list, func: func([re.search(x, name, re.I) for x in list])
+        checkName = lambda namelist, func: func([re.search(x, name, re.I) for x in namelist])
 
-        if checkName(["(pdtv|hdtv|dsr|tvrip|webrip).(xvid|x264)"], all) and not checkName(["(720|1080)[pi]"], all):
+        if checkName(["(pdtv|hdtv|dsr|tvrip|web.dl|webrip).(xvid|x264)"], all) and not checkName(["(720|1080)[pi]"], all):
             return Quality.SDTV
         elif checkName(["(dvdrip|bdrip)(.ws)?.(xvid|divx|x264)"], any) and not checkName(["(720|1080)[pi]"], all):
             return Quality.SDDVD
@@ -213,13 +213,10 @@ Quality.SNATCHED = [Quality.compositeStatus(SNATCHED, x) for x in Quality.qualit
 Quality.SNATCHED_PROPER = [Quality.compositeStatus(SNATCHED_PROPER, x) for x in Quality.qualityStrings.keys()]
 
 SD = Quality.combineQualities([Quality.SDTV, Quality.SDDVD], [])
-HD = Quality.combineQualities([Quality.HDTV, Quality.FULLHDTV, Quality.HDWEBDL, Quality.FULLHDWEBDL, Quality.HDBLURAY, Quality.FULLHDBLURAY], []) # HD720p + HD1080p
+HD = Quality.combineQualities([Quality.HDTV, Quality.FULLHDTV, Quality.HDWEBDL, Quality.FULLHDWEBDL, Quality.HDBLURAY, Quality.FULLHDBLURAY], [])  # HD720p + HD1080p
 HD720p = Quality.combineQualities([Quality.HDTV, Quality.HDWEBDL, Quality.HDBLURAY], [])
 HD1080p = Quality.combineQualities([Quality.FULLHDTV, Quality.FULLHDWEBDL, Quality.FULLHDBLURAY], [])
-ANY = Quality.combineQualities([Quality.SDTV, Quality.SDDVD, Quality.HDTV, Quality.FULLHDTV, Quality.HDWEBDL, Quality.FULLHDWEBDL, Quality.HDBLURAY, Quality.FULLHDBLURAY, Quality.UNKNOWN], []) # SD + HD
-
-# legacy template, cant remove due to reference in mainDB upgrade?
-BEST = Quality.combineQualities([Quality.SDTV, Quality.HDTV, Quality.HDWEBDL], [Quality.HDTV])
+ANY = Quality.combineQualities([Quality.SDTV, Quality.SDDVD, Quality.HDTV, Quality.FULLHDTV, Quality.HDWEBDL, Quality.FULLHDWEBDL, Quality.HDBLURAY, Quality.FULLHDBLURAY, Quality.UNKNOWN], [])  # SD + HD
 
 qualityPresets = (SD, HD, HD720p, HD1080p, ANY)
 qualityPresetStrings = {SD: "SD",
@@ -258,14 +255,14 @@ statusStrings = StatusStrings()
 
 
 class Overview:
-    UNAIRED = UNAIRED # 1
+    UNAIRED = UNAIRED  # 1
     QUAL = 2
-    WANTED = WANTED # 3
+    WANTED = WANTED  # 3
     GOOD = 4
-    SKIPPED = SKIPPED # 5
+    SKIPPED = SKIPPED  # 5
 
     # For both snatched statuses. Note: SNATCHED/QUAL have same value and break dict.
-    SNATCHED = SNATCHED_PROPER # 9
+    SNATCHED = SNATCHED_PROPER  # 9
 
     overviewStrings = {SKIPPED: "skipped",
                        WANTED: "wanted",

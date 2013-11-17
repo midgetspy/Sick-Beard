@@ -20,6 +20,7 @@ import cherrypy
 import os.path
 import datetime
 import re
+import sys
 
 from sickbeard import helpers
 from sickbeard import logger
@@ -300,7 +301,12 @@ class ConfigMigrator():
             else:
                 migration_name = ''
 
-            helpers.backupVersionedFile(sickbeard.CONFIG_FILE, self.config_version)
+            logger.log(u"Backing up config before upgrade")
+            if not helpers.backupVersionedFile(sickbeard.CONFIG_FILE, self.config_version):
+                logger.log(u"Config backup failed, abort upgrading config")
+                sys.exit("Config backup failed, abort upgrading config")
+            else:
+                logger.log(u"Proceeding with upgrade")
 
             # do the migration, expect a method named _migrate_v<num>
             logger.log(u"Migrating config up to version " + str(next_version) + migration_name)
