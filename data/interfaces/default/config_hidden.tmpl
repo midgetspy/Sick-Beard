@@ -1,0 +1,126 @@
+#import sickbeard
+#set global $title="Config - Hidden Settings"
+#set global $header="Hidden Settings"
+
+#set global $sbPath="../.."
+
+#set global $topmenu="config"#
+#import os.path
+#include $os.path.join($sickbeard.PROG_DIR, "data/interfaces/default/inc_top.tmpl")
+
+<script type="text/javascript" src="$sbRoot/js/config.js?$sbPID"></script>
+
+<div id="config">
+<div id="config-content">
+<h5>All non-absolute folder locations are relative to <span class="path">$sickbeard.DATA_DIR</span></h5>
+
+<form id="configForm" action="saveHidden" method="post">
+
+            <div id="config-components">
+
+                <div id="core-component-group1" class="component-group clearfix">
+
+                    <div class="alert alert-danger">
+                        <strong>Note:</strong> These options can adversely affect SB core, be careful on what you change.
+                    </div>
+
+                    <fieldset class="component-group-list">
+
+                        <div class="field-pair">
+                            <label class="nocheck clearfix">
+                                <span class="component-title">Anonymous Redirect</span>
+                                <input type="text" name="anon_redirect" value="$sickbeard.ANON_REDIRECT" size="55" />
+                            </label>
+                            <label class="nocheck clearfix">
+                                <span class="component-title">&nbsp;</span>
+                                <span class="component-desc">Backlink protection via anonymizer service, must end in <b>?</b> (blank for none).</span>
+                            </label>
+                        </div>
+
+                        <div class="field-pair">
+                            <label class="nocheck clearfix">
+                                <span class="component-title">Git Path</span>
+                                <input type="text" name="git_path" value="$sickbeard.GIT_PATH" size="55" />
+                            </label>
+                            <label class="nocheck clearfix">
+                                <span class="component-title">&nbsp;</span>
+                                <span class="component-desc">Specify path to Git binary, only use if OS is unable to find the path to Git on its own.</span>
+                            </label>
+                        </div>
+
+                        <div class="field-pair">
+                            <label class="nocheck clearfix">
+                                <span class="component-title">Extra Scripts</span>
+                                <input type="text" name="extra_scripts" value="<%='|'.join(sickbeard.EXTRA_SCRIPTS)%>" size="55" />
+                            </label>
+                            <label class="nocheck clearfix">
+                                <span class="component-title">&nbsp;</span>
+                                <span class="component-desc">Additional scripts separated by <b>|</b> that are called after Sick Beard's own post-processing.</span>
+                            </label>
+                        </div>
+
+                        <div class="field-pair">
+                            <input type="checkbox" name="create_missing_show_dirs" id="create_missing_show_dirs" #if $sickbeard.CREATE_MISSING_SHOW_DIRS then "checked=\"checked\"" else ""#/>
+                            <label class="clearfix" for="create_missing_show_dirs">
+                                <span class="component-title">Create Missing Show Dirs</span>
+                                <span class="component-desc">Should Sick Beard re-create show dir during post-processing if its missing?</span>
+                            </label>
+                        </div>
+
+                        <div class="field-pair">
+                            <input type="checkbox" name="add_shows_wo_dir" id="add_shows_wo_dir" #if $sickbeard.ADD_SHOWS_WO_DIR then "checked=\"checked\"" else ""#/>
+                            <label class="clearfix" for="add_shows_wo_dir">
+                                <span class="component-title">Add Shows Without Dir</span>
+                                <span class="component-desc">Should Sick Beard skip creating a show directory when adding?</span>
+                            </label>
+                        </div>
+
+                        <div class="field-pair">
+                            <label class="nocheck clearfix">
+                                <span class="component-title">Ignore Words</span>
+                                <input type="text" name="ignore_words" value="$sickbeard.IGNORE_WORDS" size="55" />
+                            </label>
+                            <label class="nocheck clearfix">
+                                <span class="component-title">&nbsp;</span>
+                                <span class="component-desc">Case insensitive words separated by <b>,</b> that you wish to ignore in releases.</span>
+                            </label>
+                        </div>
+
+                        <input type="submit" class="btn config_submitter" value="Save Changes" />
+                    </fieldset>
+                </div><!-- /component-group1 //-->
+
+                <br />
+                <h2>Scripts</h2>
+                <br />
+
+                    <fieldset class="component-group-list">
+
+                        <div class="testNotification" id="sbEnded-result"><input type="button" class="btn btn-info" value="SBEnded" id="sbEnded" /> Simple script to check all of your Sick-Beard 'Ended' shows against TVDB.</div>
+
+                    </fieldset>
+
+            </div><!-- /config-components //-->
+
+</form>
+</div></div>
+
+<script type="text/javascript">
+\$(document).ready(function () {
+    var loading = '<img src="' + sbRoot + '/images/loading16.gif" height="16" width="16" />';
+
+    \$('#sbEnded').click(function () {
+        \$('#sbEnded-result').html(loading);
+        \$.get(sbRoot + "/config/hidden/sbEnded",
+            function (data) { 
+                \$('#sbEnded-result').html(data); 
+                \$("table").tablesorter({ theme : 'blue', widgets: ['zebra'], sortList: [[0,0]] });
+                var resort = true;
+                \$("table").trigger("update", [resort]);
+            });
+    });
+
+});
+</script>
+
+#include $os.path.join($sickbeard.PROG_DIR, "data/interfaces/default/inc_bottom.tmpl")

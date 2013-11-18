@@ -292,14 +292,20 @@ class QueueItemAdd(ShowQueueItem):
 
         try:
             self.show.loadEpisodesFromTVDB()
-            self.show.setTVRID()
 
         except Exception, e:
             logger.log(u"Error with TVDB, not creating episode list: " + ex(e), logger.ERROR)
             logger.log(traceback.format_exc(), logger.DEBUG)
 
         try:
+            self.show.setTVRID()
+
+        except Exception, e:
+            logger.log(u"Error with TVRage, not setting tvrid" + ex(e), logger.ERROR)
+
+        try:
             self.show.loadEpisodesFromDir()
+
         except Exception, e:
             logger.log(u"Error searching dir for episodes: " + ex(e), logger.ERROR)
             logger.log(traceback.format_exc(), logger.DEBUG)
@@ -404,9 +410,11 @@ class QueueItemUpdate(ShowQueueItem):
         logger.log(u"Retrieving show info from TVDB", logger.DEBUG)
         try:
             self.show.loadFromTVDB(cache=not self.force)
+
         except tvdb_exceptions.tvdb_error, e:
             logger.log(u"Unable to contact TVDB, aborting: " + ex(e), logger.WARNING)
             return
+
         except tvdb_exceptions.tvdb_attributenotfound, e:
             logger.log(u"Data retrieved from TVDB was incomplete, aborting: " + ex(e), logger.ERROR)
             return
@@ -419,6 +427,7 @@ class QueueItemUpdate(ShowQueueItem):
         logger.log(u"Loading all episodes from theTVDB", logger.DEBUG)
         try:
             TVDBEpList = self.show.loadEpisodesFromTVDB(cache=not self.force)
+
         except tvdb_exceptions.tvdb_exception, e:
             logger.log(u"Unable to get info from TVDB, the show info will not be refreshed: " + ex(e), logger.ERROR)
             TVDBEpList = None
