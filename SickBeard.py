@@ -279,20 +279,20 @@ def main():
             sickbeard.NO_RESIZE = True
 
     # The pidfile is only useful in daemon mode, make sure we can write the file properly
-    if sickbeard.CREATEPID and sickbeard.DAEMON:
+    if sickbeard.CREATEPID:
+        if sickbeard.DAEMON:
             pid_dir = os.path.dirname(sickbeard.PIDFILE)
             if not os.access(pid_dir, os.F_OK):
                 sys.exit("PID dir: " + pid_dir + " doesn't exist. Exiting.")
             if not os.access(pid_dir, os.W_OK):
                 sys.exit("PID dir: " + pid_dir + " must be writable (write permissions). Exiting.")
 
-    else:
-        logger.log(u"Not running in daemon mode. PID file creation disabled.")
-        if consoleLogging:
-            sys.stdout.write("Not running in daemon mode. PID file creation disabled.\n")
+        else:
+            if consoleLogging:
+                sys.stdout.write("Not running in daemon mode. PID file creation disabled.\n")
 
-        sickbeard.CREATEPID = False
-
+            sickbeard.CREATEPID = False
+            
     # If they don't specify a config file then put it in the data dir
     if not sickbeard.CONFIG_FILE:
         sickbeard.CONFIG_FILE = os.path.join(sickbeard.DATA_DIR, "config.ini")
