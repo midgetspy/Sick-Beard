@@ -46,6 +46,8 @@ class TorrentDayProvider(generic.TorrentProvider):
         generic.TorrentProvider.__init__(self, "TorrentDay")
         self.cache = TorrentDayCache(self)     
         self.name = "TorrentDay"
+        self.rsshash = None
+        self.rssuid = None
         self.session = None
         self.supportsBacklog = True
         self.url = 'http://www.torrentday.com/'
@@ -157,7 +159,7 @@ class TorrentDayProvider(generic.TorrentProvider):
         results = []
         
         for torrent in torrents:
-            item = (torrent['name'].replace('.',' '), self.url + "download.php/" + str(torrent['id']) + "/" + torrent['fname'])
+            item = (torrent['name'].replace('.',' '), self.url + "download.php/" + str(torrent['id']) + "/" + torrent['fname'] + "?torrent_pass=" + self.rsshash)
             results.append(item)                        
             logger.log("[" + self.name + "] parseResults() Title: " + torrent['name'], logger.DEBUG)
         
@@ -197,6 +199,17 @@ class TorrentDayProvider(generic.TorrentProvider):
     
     ###################################################################################################
     
+    def _getPassKey(self):
+        logger.log("[" + self.name + "] _getPassKey() Attempting to acquire RSS info")
+        rssData = re.findall(r'u=(.*);tp=([0-9A-Fa-f]{32})',self.getURL(self.url + "rss.php",data={'cat[]':'26', 'feed':'direct', 'login':'passkey'}))
+        if rssData:
+            self.rssuid = rssData[0][0]
+            self.rsshash = rssData[0][1]
+            return True
+        return False
+    
+    ###################################################################################################
+    
     def _doLogin(self):
         login_params  = {
             'username': sickbeard.TORRENTDAY_USERNAME,
@@ -213,12 +226,14 @@ class TorrentDayProvider(generic.TorrentProvider):
             response = self.session.post(self.url + "torrents/", data=login_params, timeout=30, verify=False)
         except (requests.exceptions.ConnectionError, requests.exceptions.HTTPError), e:
             raise Exception("[" + self.name + "] _doLogin() Error: " + ex(e))
-            return False
         
         if re.search("Password not correct|<title>Torrentday :: Login|User not found</title>",response.text) \
         or response.status_code in [401,403]:
             raise Exception("[" + self.name + "] Login Failed, Invalid username or password for " + self.name + ". Check your settings.")
-            return False
+        
+        if not self._getPassKey() or not self.rssuid or not self.rsshash:
+            raise Exception("[" + self.name + "] _doLogin() Could not extract rssHash info... aborting")
+        
         return True
     
     ###################################################################################################
@@ -234,24 +249,12 @@ class TorrentDayCache(tvcache.TVCache):
     ###################################################################################################
         
     def _getRSSData(self):
-        if sickbeard.TORRENTDAY_UID and sickbeard.TORRENTDAY_RSSHASH:
-            self.rss_url = "{0}torrents/rss?download;l24;l14;l26;l7;l2;u={1};tp={2}".format(provider.url,sickbeard.TORRENTDAY_UID, sickbeard.TORRENTDAY_RSSHASH)
-            logger.log("[" + provider.name + "] RSS URL - {0}".format(self.rss_url))
-            xml = provider.getURL(self.rss_url)
-        else:
-            logger.log("[" + provider.name + "] WARNING: RSS construction via browse since no RSS variables provided.") 
-            xml = "<rss xmlns:atom=\"http://www.w3.org/2005/Atom\" version=\"2.0\">" + \
-            "<channel>" + \
-            "<title>" + provider.name + "</title>" + \
-            "<link>" + provider.url + "</link>" + \
-            "<description>torrent search</description>" + \
-            "<language>en-us</language>" + \
-            "<atom:link href=\"" + provider.url + "\" rel=\"self\" type=\"application/rss+xml\"/>"
-
-            for title, url in provider._doSearch(""):
-                xml += "<item>" + "<title>" + escape(title) + "</title>" +  "<link>"+ urllib.quote(url,'/,:') + "</link>" + "</item>"
-            xml += "</channel></rss>"
-        return xml    
+        if not provider.session:
+            provider._doLogin()
+        
+        self.rss_url = "{0}torrents/rss?download;l24;l14;l26;l7;l2;u={1};tp={2}".format(provider.url, provider.rssuid, provider.rsshash)
+        logger.log("[" + provider.name + "] RSS URL - {0}".format(self.rss_url))
+        return provider.getURL(self.rss_url)
         
     ###################################################################################################    
 
