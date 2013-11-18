@@ -92,6 +92,20 @@ $(document).ready(function(){
             $('#password_desc').text('Synology Password');
             $('#label_desc').text('Synology Label');
             $('#directory_desc').text('Synology Directory');
+        } else if (selectedProvider == "rtorrent"){
+            $('#t_blackhole_settings').hide();
+            $('#torrent_settings').show();
+            $('#Torrent_Label').show();            
+            $('#Torrent_username').show();
+            $('#Torrent_Paused').hide();
+            $('#Torrent_Path').show();
+            $('#Torrent_Ratio').show();
+            $('#Torrent_High_Bandwidth').hide();
+            $('#host_desc').text('rTorrent Host');
+            $('#username_desc').text('rTorrent Username');
+            $('#password_desc').text('rTorrent Password');
+            $('#label_desc').text('rTorrent Label');
+            $('#directory_desc').text('rTorrent Directory');
         }
     }
 

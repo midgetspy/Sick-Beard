@@ -710,7 +710,7 @@ class CMD_ComingEpisodes(ApiCall):
         """ display the coming episodes """
         today = datetime.date.today().toordinal()
         next_week = (datetime.date.today() + datetime.timedelta(days=7)).toordinal()
-        recently = (datetime.date.today() - datetime.timedelta(days=3)).toordinal()
+        recently = (datetime.date.today() - datetime.timedelta(days=sickbeard.COMING_EPS_MISSED_RANGE)).toordinal()
 
         done_show_list = []
         qualList = Quality.DOWNLOADED + Quality.SNATCHED + [ARCHIVED, IGNORED]
@@ -1016,24 +1016,6 @@ class CMD_SubtitleSearch(ApiCall):
         
         try:
             subtitles = epObj.downloadSubtitles()
-            
-            if sickbeard.SUBTITLES_DIR:
-                for video in subtitles:
-                    subs_new_path = ek.ek(os.path.join, os.path.dirname(video.path), sickbeard.SUBTITLES_DIR)
-                    dir_exists = helpers.makeDir(subs_new_path)
-                    if not dir_exists:
-                        logger.log(u"Unable to create subtitles folder "+subs_new_path, logger.ERROR)
-                    else:
-                        helpers.chmodAsParent(subs_new_path)
-                        
-                    for subtitle in subtitles.get(video):
-                        new_file_path = ek.ek(os.path.join, subs_new_path, os.path.basename(subtitle.path))
-                        helpers.moveFile(subtitle.path, new_file_path)
-                        helpers.chmodAsParent(new_file_path)
-            else:
-                for video in subtitles:
-                    for subtitle in subtitles.get(video):
-                        helpers.chmodAsParent(subtitle.path)
         except:
             return _responds(RESULT_FAILURE, msg='Unable to find subtitles')
                     

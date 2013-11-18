@@ -321,10 +321,14 @@ class QueueItemAdd(ShowQueueItem):
 
         try:
             self.show.loadEpisodesFromTVDB()
-            self.show.setTVRID()
         except Exception, e:
             logger.log(u"Error with TVDB, not creating episode list: " + ex(e), logger.ERROR)
             logger.log(traceback.format_exc(), logger.DEBUG)
+
+        try:
+            self.show.setTVRID()
+        except Exception, e:
+            logger.log(u"Error with TVRage, not setting tvrid" + ex(e), logger.ERROR)
 
         try:
             self.show.loadEpisodesFromDir()

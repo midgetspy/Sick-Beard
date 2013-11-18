@@ -50,7 +50,7 @@ class PublicHDProvider(generic.TorrentProvider):
 
         self.url = 'https://publichd.se/'
 
-        self.searchurl = self.url + 'index.php?page=torrents&search=%s&active=1&category=%s&order=5&by=2'  #order by seed
+        self.searchurl = self.url + 'index.php?page=torrents&search=%s&active=0&category=%s&order=5&by=2'  #order by seed
 
         self.categories = {'Season': ['23'], 'Episode': ['7', '14', '24'], 'RSS': ['7', '14', '23', '24']}
 
@@ -145,7 +145,7 @@ class PublicHDProvider(generic.TorrentProvider):
 
                     #Continue only if one Release is found
                     if len(torrent_rows)<2:
-#                        logger.log(u"The Data returned from " + self.name + " do not contains any torrent", logger.WARNING)
+                        logger.log(u"The Data returned from " + self.name + " do not contains any torrent", logger.DEBUG)
                         continue
 
                     for tr in torrent_rows[1:]:

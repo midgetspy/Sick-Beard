@@ -89,6 +89,9 @@ class SearchResult:
         # release name
         self.name = ""
 
+        # size of the release (-1 = n/a)
+        self.size = -1
+
     def __str__(self):
 
         if self.provider == None:
@@ -98,6 +101,12 @@ class SearchResult:
         myString += "Extra Info:\n"
         for extra in self.extraInfo:
             myString += "  " + extra + "\n"
+
+        myString += "Episode: " + str(self.episodes) + "\n"
+        myString += "Quality: " + Quality.qualityStrings[self.quality] + "\n"
+        myString += "Name: " + self.name + "\n"
+        myString += "Size: " + str(self.size) + "\n"
+
         return myString
 
     def fileName(self):

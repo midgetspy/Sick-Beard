@@ -15,6 +15,8 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with Sick Beard.  If not, see <http://www.gnu.org/licenses/>.
+import os
+from glob import glob
 
 import re
 import datetime
@@ -25,6 +27,7 @@ from sickbeard.helpers import sanitizeSceneName
 from sickbeard.scene_exceptions import get_scene_exceptions
 from sickbeard import logger
 from sickbeard import db
+from sickbeard import encodingKludge as ek
 from name_parser.parser import NameParser, InvalidNameException
 from lib.unidecode import unidecode
 
@@ -242,3 +245,37 @@ def allPossibleShowNames(show):
     showNames += newShowNames
 
     return showNames
+
+def determineReleaseName(dir_name=None, nzb_name=None):
+    """Determine a release name from an nzb and/or folder name"""
+
+    if nzb_name is not None:
+        logger.log(u"Using nzb_name for release name.")
+        return nzb_name.rpartition('.')[0]
+
+    if dir_name is None:
+        return None
+
+    # try to get the release name from nzb/nfo
+    # TODO: Handle case-sensitivity
+    file_types = ["*.nzb", "*.nfo"]
+    for search in file_types:
+        search_path = ek.ek(os.path.join, dir_name, search)
+        results = ek.ek(glob, search_path)
+        if len(results) == 1:
+            found_file = ek.ek(os.path.basename, results[0])
+            found_file = found_file.rpartition('.')[0]
+            if filterBadReleases(found_file):
+                logger.log(u"Release name (" + found_file + ") found from file (" + results[0] + ")")
+                return found_file.rpartition('.')[0]
+
+    # If that fails, we try the folder
+    folder = ek.ek(os.path.basename, dir_name)
+    if filterBadReleases(folder):
+        # NOTE: Multiple failed downloads will change the folder name.
+        # (e.g., appending #s)
+        # Should we handle that?
+        logger.log(u"Folder name (" + folder + ") appears to be a valid release name. Using it.")
+        return folder
+
+    return None

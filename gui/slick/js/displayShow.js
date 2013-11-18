@@ -1,6 +1,7 @@
 $(document).ready(function(){
 
     $('#sbRoot').ajaxEpSearch({'colorRow': true});
+	$('#sbRoot').ajaxEpRetry({'colorRow': true});
     
     $('#sbRoot').ajaxEpSubtitlesSearch();
 	

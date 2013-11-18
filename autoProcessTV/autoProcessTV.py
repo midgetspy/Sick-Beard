@@ -41,7 +41,7 @@ class AuthURLOpener(urllib.FancyURLopener):
         return urllib.FancyURLopener.open(self, url)
 
 
-def processEpisode(dirName, nzbName=None):
+def processEpisode(dirName, nzbName=None, failed=False):
 
     config = ConfigParser.ConfigParser()
     configFilename = os.path.join(os.path.dirname(sys.argv[0]), "autoProcessTV.cfg")
@@ -80,6 +80,8 @@ def processEpisode(dirName, nzbName=None):
     params['dir'] = dirName
     if nzbName != None:
         params['nzbName'] = nzbName
+
+    params['failed'] = failed
         
     myOpener = AuthURLOpener(username, password)
     

@@ -39,11 +39,12 @@ proxy_dict = {
               'Getprivate.eu (NL)' : 'http://getprivate.eu/',
               '15bb51.info (US)' : 'http://15bb51.info/',
               'Hideme.nl (NL)' : 'http://hideme.nl/',
-              'Rapidproxy.us (GB)' : 'http://rapidproxy.us/',
               'Proxite.eu (DE)' :'http://proxite.eu/',
-              'Shieldmagic.com (GB)' : 'http://www.shieldmagic.com/',
               'Webproxy.cz (CZ)' : 'http://webproxy.cz/',
-              'Freeproxy.cz (CZ)' : 'http://www.freeproxy.cz/',
+              '2me2u (CZ)' : 'http://2me2u.me/',
+              'Interproxy.net (EU)': 'http://interproxy.net/',
+              'Unblockersurf.info (DK)' : 'http://unblockersurf.info',
+              'Hiload.org (NL)' : 'http://hiload.org',
              }
 
 class ThePirateBayProvider(generic.TorrentProvider):
@@ -295,7 +296,7 @@ class ThePirateBayProvider(generic.TorrentProvider):
         result = None
 
         try:
-            result = helpers.getURL(url, headers)
+            result = helpers.getURL(url, headers=headers)
         except (urllib2.HTTPError, IOError), e:
             logger.log(u"Error loading " + self.name + " URL: " + str(sys.exc_info()) + " - " + ex(e), logger.ERROR)
             return None
