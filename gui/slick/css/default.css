@@ -1847,22 +1847,19 @@ pre {
 }
 
 .vertical {
-	-webkit-transform: rotate(90deg);
-	-moz-transform: rotate(90deg);
-	-ms-transform: rotate(90deg);
-	-o-transform:rotate(90deg);
-    filter: flipv fliph;
     display: inline-block;
-    margin: 7.1px 0px 0px -8px !important;
+
     background-color: #79DF46;
+    border-radius: 0 4px 4px 0;
+    border-width: 3px 3px 3px 0;
+    border-style: solid;
+    border-color: #B7B7B7;    
     position: absolute;
     font-weight: bold;
-    font-size: 0.95em;
+    font-size: 0.99em;
+    line-height: 12.5px;
+    width: 24px;
     color: #343434;
-    width: 37px;
+    height: 37px;
     text-align: center;
-    border-radius: 4px 4px 0px 0px;
-    border-width: 2px 2px 0 2px;
-    border-style: solid;
-    border-color: #B7B7B7;
 }

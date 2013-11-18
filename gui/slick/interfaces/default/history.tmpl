@@ -130,9 +130,9 @@
         <span style="display: none;">$hItem["show_name"]</span>
       <a href="$sbRoot/home/displayShow?show=$hItem["show_id"]#season-$hItem["season"]">
           <div style="display:inline-block; overflow:hidden;">
-          <img style="width: 200px; height: 37px; border-radius: 4px 0px 0px 4px; border-width: 2px 0 2px 2px ; border-style: solid; border-color: #B7B7B7;" src="$sbRoot/showPoster/?show=$hItem["show_id"]&amp;which=banner" class="banner" alt="$hItem["show_id"]" title="$hItem["show_name"] - <%=str(hItem["season"]) +"x"+ "%02i" % int(hItem["episode"]) %>"/>
+          <img style="width: 200px; height: 37.1px; border-radius: 4px 0px 0px 4px; border-width: 3px 0 3px 3px ; border-style: solid; border-color: #B7B7B7;" src="$sbRoot/showPoster/?show=$hItem["show_id"]&amp;which=banner" class="banner" alt="$hItem["show_id"]" title="$hItem["show_name"] - <%=str(hItem["season"]) +"x"+ "%02i" % int(hItem["episode"]) %>"/>
         </div>
-        <div class="vertical"><%=str(hItem["season"]) +"x"+ "%02i" % int(hItem["episode"]) %></div>
+        <div class="vertical"><span><%=str(hItem["season"])%></br></span><span>x</span></br><span><%= "%02i" % int(hItem["episode"])%></span> </div>
       </a>
     </td>
     <td align="center" provider="<%=str(sorted(hItem["actions"])[0]["provider"])%>">
