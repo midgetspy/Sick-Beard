@@ -19,12 +19,15 @@
 from __future__ import with_statement
 
 import cherrypy
-import webbrowser
-import sqlite3
 import datetime
+import os
+import re
 import socket
-import os, sys, subprocess, re
+import sqlite3
+import subprocess
+import sys
 import urllib
+import webbrowser
 
 from threading import Lock
 
@@ -1063,7 +1066,7 @@ def start():
 
             started = True
 
-def halt ():
+def halt():
 
     global __INITIALIZED__, currentSearchScheduler, backlogSearchScheduler, showUpdateScheduler, \
             showQueueScheduler, properFinderScheduler, autoPostProcesserScheduler, searchQueueScheduler, \
@@ -1152,6 +1155,18 @@ def halt ():
             __INITIALIZED__ = False
 
 
+def remove_pid_file(PIDFILE):
+
+    try:
+        if os.path.exists(PIDFILE):
+            os.remove(PIDFILE)
+
+    except (IOError, OSError):
+        return False
+
+    return True
+
+
 def sig_handler(signum=None, frame=None):
     if type(signum) != type(None):
         logger.log(u"Signal %i caught, saving and exiting..." % int(signum))
@@ -1183,7 +1198,7 @@ def saveAndShutdown(restart=False):
 
     if CREATEPID:
         logger.log(u"Removing pidfile " + str(PIDFILE))
-        os.remove(PIDFILE)
+        remove_pid_file(PIDFILE)
 
     if restart:
         install_type = versionCheckScheduler.action.install_type
