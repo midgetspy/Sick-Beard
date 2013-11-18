@@ -206,24 +206,6 @@ def main():
         if o in ('--config',):
             sickbeard.CONFIG_FILE = os.path.abspath(a)
 
-<<<<<<< HEAD
-        # Prevent resizing of the banner/posters even if PIL is installed
-        if o in ('--noresize',):
-            sickbeard.NO_RESIZE = True
-
-    # The pidfile is only useful in daemon mode, make sure we can write the file properly
-    if sickbeard.CREATEPID:
-        if sickbeard.DAEMON:
-            pid_dir = os.path.dirname(sickbeard.PIDFILE)
-            if not os.access(pid_dir, os.F_OK):
-                sys.exit("PID dir: " + pid_dir + " doesn't exist. Exiting.")
-            if not os.access(pid_dir, os.W_OK):
-                sys.exit("PID dir: " + pid_dir + " must be writable (write permissions). Exiting.")
-
-        else:
-            if consoleLogging:
-                sys.stdout.write("Not running in daemon mode. PID file creation disabled.\n")
-=======
         # Specify folder to use as the data dir
         if o in ('--datadir',):
             sickbeard.DATA_DIR = os.path.abspath(a)
@@ -245,10 +227,7 @@ def main():
                     raise SystemExit("Unable to write PID file: %s [%d]" % (e.strerror, e.errno))
             else:
                 logger.log(u"Not running in daemon mode. PID file creation disabled.")
->>>>>>> parent of 1350173... Change start options + added help text (itofzo)
 
-            sickbeard.CREATEPID = False
-            
     # If they don't specify a config file then put it in the data dir
     if not sickbeard.CONFIG_FILE:
         sickbeard.CONFIG_FILE = os.path.join(sickbeard.DATA_DIR, "config.ini")
