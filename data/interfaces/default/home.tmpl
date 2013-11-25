@@ -47,9 +47,9 @@
 \$.tablesorter.addParser({ 
     id: 'eps',
     is: function(s) {
-        return false; 
+        return false;
     },
-    format: function(s) {
+    format: function(s) { 
         return s;
     },
     type: 'text'
@@ -83,24 +83,45 @@
                     "Within 14 days" : function(e, n, f, i, \$r) { return nextXDays(e,14); },
                     "Within a month" : function(e, n, f, i, \$r) { return nextXDays(e,30); }
                 },
-                3: {
-                    "Quality >= SD" : function(e, n, f, i, \$r) { return /^[S|H]/.test(e); },
-                    "Quality >= HD" : function(e, n, f, i, \$r) { return /^HD/.test(e); },
-                    "Quality >= HD720p" : function(e, n, f, i, \$r) { return /^HD(720|1080)/.test(e); },
-                    "Quality >= HD1080p" : function(e, n, f, i, \$r) { return /^HD1080/.test(e); }
-                },
                 4: {
                     "Complete" : function(e, n, f, i, \$r) {return n.charAt(0) === 'C'; },
                     "Incomplete" : function(e, n, f, i, \$r) { return n.charAt(0) === 'B'; },
                     "None" : function(e, n, f, i, \$r) { return n.charAt(0) === 'A'; }
                 }
+            },
+            filter_formatter  : {
+                3 :function(\$cell, indx){
+                    console.log([\$cell, indx]);
+                    return \$.tablesorter.filterFormatter.uiSlider( \$cell, indx, {
+                    // add any of the jQuery UI Slider options here (http://api.jqueryui.com/slider/)
+                    value: 1,             // starting value
+                    min: 1,               // minimum value
+                    max: 5,             // maximum value
+                    step: 1,
+                    delayed: true,        // delay search (set by filter_searchDelay)
+                    valueToHeader: false, // add current slider value to the header cell
+                    exactMatch: false,    // exact (true) or match (false)
+                    allText: 'all',       // text shown when slider is at the minimum value; ignored when compare has a value
+                    compare: '>='         // show values >= selected value; overrides exactMatch
+                    });
+                }
             }
         }
     });
-
 });
 //-->
 </script>
+<style type="text/css">
+.slider3 {
+    width: 80%;
+    left: 10%;
+}
+
+.tablesorter-filter.disabled{
+    display: none;
+}
+
+</style>
 
 <table id="showListTable" class="tablesorter" cellspacing="1" border="0" cellpadding="0">
 
