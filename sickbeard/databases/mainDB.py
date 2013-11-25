@@ -382,7 +382,7 @@ class Add1080pAndRawHDQualities(RenameSeasonFolders):
         self.connection.action("VACUUM")
 
 
-# included in build 502 (TBD)
+# included in build 502 (2013-11-24)
 class AddShowidTvdbidIndex(Add1080pAndRawHDQualities):
     """ Adding index on tvdb_id (tv_shows) and showid (tv_episodes) to speed up searches/queries """
 
@@ -396,13 +396,15 @@ class AddShowidTvdbidIndex(Add1080pAndRawHDQualities):
         MainSanityCheck(self.connection).fix_duplicate_shows()
 
         logger.log(u"Adding index on tvdb_id (tv_shows) and showid (tv_episodes) to speed up searches/queries.")
-        self.connection.action("CREATE INDEX idx_showid ON tv_episodes (showid);")
-        self.connection.action("CREATE UNIQUE INDEX idx_tvdb_id ON tv_shows (tvdb_id);")
+        if not self.hasTable("idx_showid"):
+            self.connection.action("CREATE INDEX idx_showid ON tv_episodes (showid);")
+        if not self.hasTable("idx_tvdb_id"):
+            self.connection.action("CREATE UNIQUE INDEX idx_tvdb_id ON tv_shows (tvdb_id);")
 
         self.incDBVersion()
 
 
-# included in build 502 (TBD)
+# included in build 502 (2013-11-24)
 class AddLastUpdateTVDB(AddShowidTvdbidIndex):
     """ Adding column last_update_tvdb to tv_shows for controlling nightly updates """
 
