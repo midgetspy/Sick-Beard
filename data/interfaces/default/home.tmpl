@@ -50,9 +50,9 @@
         return false; 
     },
     format: function(s) {
-        return s.split('%')[1];
+        return s;
     },
-    type: 'numeric'
+    type: 'text'
 });
 
 \$(document).ready(function(){ 
@@ -90,9 +90,9 @@
                     "Quality >= HD1080p" : function(e, n, f, i, \$r) { return /^HD1080/.test(e); }
                 },
                 4: {
-                    "Downloaded all" : function(e, n, f, i, \$r) { return e.charAt(0) !== '?'?e.split('%')[1]==100:false; },
-                    "Downloads unfinished" : function(e, n, f, i, \$r) { return e.charAt(0) !== '?'?e.split('%')[1]<100:false; },
-                    "No episodes found" : function(e, n, f, i, \$r) { return e.charAt(0) === '?'; }
+                    "Complete" : function(e, n, f, i, \$r) {return n.charAt(0) === 'C'; },
+                    "Incomplete" : function(e, n, f, i, \$r) { return n.charAt(0) === 'B'; },
+                    "None" : function(e, n, f, i, \$r) { return n.charAt(0) === 'A'; }
                 }
             }
         }
@@ -156,20 +156,22 @@ $myShowList.sort(lambda x, y: cmp(x.name, y.name))
     #set $dlStat = str($curShowDownloads[0])+" / "+str($curShowAll[0])
     #set $nom = $curShowDownloads[0]
     #set $den = $curShowAll[0]
-    #set $per = $nom * 100 / $den
+    #set $per = $nom * 10000 / $den
+    #set $sort = "C"+str($curShowAll[0]) if ($nom == $den) else  "B" + str($per)
   #else
     #set $dlStat = "0 / "+str($curShowAll[0])
     #set $nom = 0
     #set $den = $curShowAll[0]
     #set $per = 0
+    #set $sort = "B0"
   #end if
 #else
   #set $dlStat = "?"
   #set $nom = 0
   #set $den = 1
-  #set $per = -10
+  #set $per = 0
+  #set $sort = "A"
 #end if
-
 
   <tr>
     <td align="center" class="nowrap">#if len($curEp) != 0 then $curEp[0].airdate else ""#</td>
@@ -180,12 +182,13 @@ $myShowList.sort(lambda x, y: cmp(x.name, y.name))
 #else:
     <td align="center"><span class="quality Custom">Custom</span></td>
 #end if
-    <td align="center"><div id="progressbar$curShow.tvdbid" style="position:relative;"><div class='progressbarText'>$dlStat</div></div><span style="display: none;">%$per%</span>
+    <td align="center"><div id="progressbar$curShow.tvdbid" style="position:relative;"><div class='progressbarText'>$dlStat</div></div><span style="display: none;">$sort</span>
         <script type="text/javascript">
         <!--
             \$(function() {
                \$("\#progressbar$curShow.tvdbid").progressbar({
-                   value: $per
+                   value: $per,
+                   max: 10000
                });
             });
         //-->
