@@ -2211,7 +2211,7 @@ class ConfigSubtitles:
         sickbeard.SUBTITLES_LANGUAGES = [lang.alpha2 for lang in subtitles.isValidLanguage(subtitles_languages.replace(' ', '').split(','))] if subtitles_languages != ''  else ''
         sickbeard.SUBTITLES_DIR = subtitles_dir
         sickbeard.SUBTITLES_HISTORY = subtitles_history
-        sickbeard.SUBTITLES_FINDER_FREQUENCY = int(subtitles_finder_frequency)
+        sickbeard.SUBTITLES_FINDER_FREQUENCY = int(subtitles_finder_frequency) if not re.search("\D", subtitles_finder_frequency) else 1 
 
         # Subtitles services
         services_str_list = service_order.split()

@@ -69,16 +69,6 @@
                             </label>
                         </div>
                         <div id="content_use_subtitles">
-	                                <div class="field-pair">
-	                                    <label class="nocheck clearfix">
-	                                        <span class="component-title">Subtitle Find Frequency</span>
-	                                        <input type="number" name="subtitles_finder_frequency" value="$sickbeard.SUBTITLES_FINDER_FREQUENCY" size="5" hours="1" class="input-small" />
-	                                    </label>
-	                                    <label class="nocheck clearfix">
-	                                        <span class="component-title">&nbsp;</span>
-	                                        <span class="component-desc">Time in hours between scans (hours. 1)</span>
-	                                    </label>
-	                                </div>
 	                        	<div class="field-pair">
 		                            <label class="nocheck clearfix">
 		                                <span class="component-title">Subtitle Languages</span>
@@ -99,6 +89,16 @@
 			                                <span class="component-desc"><b>NOTE:</b> Leave empty if you want store subtitle in episode path.</span>
 	          	                	</label>
                         		</div>
+	                            <div class="field-pair">
+	                            	<label class="nocheck clearfix">
+	                                	<span class="component-title">Subtitle Find Frequency</span>
+	                                    <input type="number" name="subtitles_finder_frequency" value="$sickbeard.SUBTITLES_FINDER_FREQUENCY" size="5" hours="1" class="input-small" />
+	                                </label>
+	                                <label class="nocheck clearfix">
+	                                	<span class="component-title">&nbsp;</span>
+	                                    <span class="component-desc">Time in hours between scans (hours. 1)</span>
+	                                </label>
+	                            </div>
 		                        <div class="field-pair">
 		                            <input type="checkbox" name="subtitles_history" id="subtitles_history" #if $sickbeard.SUBTITLES_HISTORY then " checked=\"checked\"" else ""#/>
 		                            <label class="clearfix" for="subtitles_history">
