@@ -1,0 +1,91 @@
+#import sickbeard
+#import os.path
+#import datetime
+#import re
+#from sickbeard import providers
+#from sickbeard.providers import generic
+#from sickbeard.common import *
+#set global $header="Failed Downloads"
+#set global $title="Failed Downloads"
+
+#set global $sbPath=".."
+
+#set global $topmenu="manage"#
+#include $os.path.join($sickbeard.PROG_DIR, "gui/slick/interfaces/default/inc_top.tmpl")
+
+<script type="text/javascript">
+<!--
+\$(document).ready(function()
+{
+    \$("#failedTable:has(tbody tr)").tablesorter({
+        widgets: ['zebra'],
+        sortList: [[0,0]],
+        headers: { 3: { sorter: false } }
+    });
+    \$('#limit').change(function(){
+        url = '$sbRoot/manage/failedDownloads/?limit='+\$(this).val()
+        window.location.href = url
+    });
+});
+//-->
+</script>
+<script type="text/javascript" src="$sbRoot/js/failedDownloads.js?$sbPID"></script>
+
+#if $varExists('header') 
+	<h1 class="header">$header</h1>
+#else 
+	<h1 class="title">$title</h1>
+#end if
+
+<div class="h2footer align-right"><b>Limit:</b>
+    <select name="limit" id="limit">
+        <option value="0" #if $limit == "0" then "selected=\"selected\"" else ""#>All</option>
+        <option value="100" #if $limit == "100" then "selected=\"selected\"" else ""#>100</option>
+        <option value="250" #if $limit == "250" then "selected=\"selected\"" else ""#>250</option>
+        <option value="500" #if $limit == "500" then "selected=\"selected\"" else ""#>500</option>
+    </select>
+</div>
+
+<table id="failedTable" class="sickbeardTable tablesorter" cellspacing="1" border="0" cellpadding="0">
+  <thead>
+    <tr>
+      <th class="nowrap" width="75%" style="text-align: left;">Release</th>
+      <th width="10%">Size</th>
+      <th width="14%">Provider</th>
+      <th width="1%">Remove<br />
+        <input type="checkbox" class="bulkCheck" id="removeCheck" />
+      </th>
+    </tr>
+  </thead>
+  <tfoot>
+    <tr>
+      <td rowspan="1" colspan="4" class="align-right"><input type="button" class="btn btn-primary" value="Submit" id="submitMassRemove"></td>
+    </tr>
+  </tfoot>
+  <tbody>
+#for $hItem in $failedResults:
+#set $curRemove  = "<input type=\"checkbox\" class=\"removeCheck\" id=\"remove-"+$hItem["release"]+"\" />"
+  <tr>
+    <td class="nowrap">$hItem["release"]</td>
+    <td align="center">
+    #if $hItem["size"] != -1
+    	$hItem["size"]
+    #else
+    	?
+    #end if	
+    </td>
+   	<td align="center">
+	#set $provider = $providers.getProviderClass($generic.GenericProvider.makeID($hItem["provider"]))
+	#if $provider != None: 
+		<img src="$sbRoot/images/providers/<%=provider.imageName()%>" width="16" height="16" alt="$provider.name" title="$provider.name"/>
+	#else:
+	    <img src="$sbRoot/images/providers/missing.png" width="16" height="16" alt="missing provider" title="missing provider"/>
+	#end if
+    </td>
+    <td align="center">$curRemove</td>
+  </tr>
+#end for
+  </tbody>
+</table>
+
+#include $os.path.join($sickbeard.PROG_DIR, "gui/slick/interfaces/default/inc_bottom.tmpl")

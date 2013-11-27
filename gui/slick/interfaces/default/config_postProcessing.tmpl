@@ -83,6 +83,21 @@
                             </label>
                         </div>
 
+						<div class="field-pair">
+						    <label class="nocheck clearfix">
+						        <span class="component-title">Extra Scripts</span>
+						        <input type="text" name="extra_scripts" value="<%='|'.join(sickbeard.EXTRA_SCRIPTS)%>" size="35" />
+						    </label>
+						    <label class="nocheck clearfix">
+						        <span class="component-title">&nbsp;</span>
+						        <span class="component-desc">Additional scripts separated by <b>|</b>.</span>
+						    </label>
+						    <label class="nocheck clearfix">
+						        <span class="component-title">&nbsp;</span>
+						        <span class="component-desc"><b>NOTE:</b> Scripts are called after Sick Beard's own post-processing.</span>
+						    </label>						    
+						</div>
+
                         <div class="field-pair">
                             <input type="checkbox" name="move_associated_files" id="move_associated_files" #if $sickbeard.MOVE_ASSOCIATED_FILES == True then "checked=\"checked\"" else ""# />
                             <label class="clearfix" for="move_associated_files">
@@ -129,6 +144,33 @@
                                 <span class="component-title">&nbsp;</span>
                                 <span class="component-desc"><b>NOTE:</b> Only working with RAR archive</span>
                             </label>
+                        </div>
+                    
+                        <div class="field-pair">
+                            <input id="use_failed_downloads" type="checkbox" class="enabler" name="use_failed_downloads" #if $sickbeard.USE_FAILED_DOWNLOADS == True then "checked=\"checked\"" else ""# />
+                            <label class="clearfix" for="use_failed_downloads">
+                                <span class="component-title">Use Failed Downloads</span>
+                                <span class="component-desc">Use Failed Download Handling?</span>
+                            </label>
+                            <label class="nocheck clearfix" for="use_failed_downloads">
+                                <span class="component-title">&nbsp;</span>
+                                <span class="component-desc"><b>NOTE:</b> See <i>readme-FailedDownloads.md</i> before enabling.</span>
+                            </label>
+                        </div>
+						
+                        <div id="content_use_failed_downloads">
+                            <div class="field-pair">
+                                <input id="delete_failed" type="checkbox" name="delete_failed" #if $sickbeard.DELETE_FAILED == True then "checked=\"checked\"" else ""# />
+                                <label class="clearfix" for="delete_failed">
+                                    <span class="component-title">Delete Failed</span>
+                                    <span class="component-desc">Delete files left over from a failed download?</span>
+                                </label>
+                                <label class="nocheck clearfix" for="delete_failed">
+                                    <span class="component-title">&nbsp;</span>
+                                    <span class="component-desc"><b>NOTE:</b> This only works if Use Failed Downloads is enabled.</span>
+                                </label>
+                            </div>
+
                         </div>
 
                         <div class="clearfix"></div>

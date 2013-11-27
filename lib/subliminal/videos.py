@@ -58,6 +58,10 @@ class Video(object):
         self.imdbid = imdbid
         self._path = None
         self.hashes = {}
+        
+        if isinstance(path, unicode):
+            path = path.encode('utf-8')
+        
         if os.path.exists(path):
             self._path = path
             self.size = os.path.getsize(self._path)

@@ -67,15 +67,15 @@ class DBConnection:
             return 0
 
     def mass_action(self, querylist, logTransaction=False):
-    
+
         with db_lock:
-    
+
             if querylist == None:
                 return
-    
+
             sqlResult = []
             attempt = 0
-    
+
             while attempt < 5:
                 try:
                     for qu in querylist:
@@ -85,21 +85,21 @@ class DBConnection:
                             sqlResult.append(self.connection.execute(qu[0]))
                         elif len(qu) > 1:
                             if logTransaction:
-                                logger.log(qu[0]+" with args "+str(qu[1]), logger.DEBUG)
+                                logger.log(qu[0] + " with args " + str(qu[1]), logger.DEBUG)
                             sqlResult.append(self.connection.execute(qu[0], qu[1]))
                     self.connection.commit()
-                    logger.log(u"Transaction with "+str(len(querylist)) + u" query's executed", logger.DEBUG)
+                    logger.log(u"Transaction with "  + str(len(querylist)) + u" query's executed", logger.DEBUG)
                     return sqlResult
                 except sqlite3.OperationalError, e:
                     sqlResult = []
                     if self.connection:
                         self.connection.rollback()
                     if "unable to open database file" in e.message or "database is locked" in e.message:
-                        logger.log(u"DB error: "+ex(e), logger.WARNING)
+                        logger.log(u"DB error: " + ex(e), logger.WARNING)
                         attempt += 1
                         time.sleep(1)
                     else:
-                        logger.log(u"DB error: "+ex(e), logger.ERROR)
+                        logger.log(u"DB error: " + ex(e), logger.ERROR)
                         raise
                 except sqlite3.DatabaseError, e:
                     sqlResult = []
@@ -107,42 +107,42 @@ class DBConnection:
                         self.connection.rollback()
                     logger.log(u"Fatal error executing query: " + ex(e), logger.ERROR)
                     raise
-    
+
             return sqlResult
-        
+
     def action(self, query, args=None):
 
         with db_lock:
 
             if query == None:
                 return
-    
+
             sqlResult = None
             attempt = 0
-    
+
             while attempt < 5:
                 try:
                     if args == None:
-                        logger.log(self.filename+": "+query, logger.DB)
+                        logger.log(self.filename + ": " + query, logger.DB)
                         sqlResult = self.connection.execute(query)
                     else:
-                        logger.log(self.filename+": "+query+" with args "+str(args), logger.DB)
+                        logger.log(self.filename + ": " + query + " with args " + str(args), logger.DB)
                         sqlResult = self.connection.execute(query, args)
                     self.connection.commit()
                     # get out of the connection attempt loop since we were successful
                     break
                 except sqlite3.OperationalError, e:
                     if "unable to open database file" in e.message or "database is locked" in e.message:
-                        logger.log(u"DB error: "+ex(e), logger.WARNING)
+                        logger.log(u"DB error: " + ex(e), logger.WARNING)
                         attempt += 1
                         time.sleep(1)
                     else:
-                        logger.log(u"DB error: "+ex(e), logger.ERROR)
+                        logger.log(u"DB error: " + ex(e), logger.ERROR)
                         raise
                 except sqlite3.DatabaseError, e:
                     logger.log(u"Fatal error executing query: " + ex(e), logger.ERROR)
                     raise
-    
+
             return sqlResult
 
 
@@ -161,12 +161,12 @@ class DBConnection:
 
         genParams = lambda myDict : [x + " = ?" for x in myDict.keys()]
 
-        query = "UPDATE "+tableName+" SET " + ", ".join(genParams(valueDict)) + " WHERE " + " AND ".join(genParams(keyDict))
+        query = "UPDATE " + tableName + " SET " + ", ".join(genParams(valueDict)) + " WHERE " + " AND ".join(genParams(keyDict))
 
         self.action(query, valueDict.values() + keyDict.values())
 
         if self.connection.total_changes == changesBefore:
-            query = "INSERT INTO "+tableName+" (" + ", ".join(valueDict.keys() + keyDict.keys()) + ")" + \
+            query = "INSERT INTO " + tableName + " (" + ", ".join(valueDict.keys() + keyDict.keys()) + ")" + \
                      " VALUES (" + ", ".join(["?"] * len(valueDict.keys() + keyDict.keys())) + ")"
             self.action(query, valueDict.values() + keyDict.values())
 
@@ -177,14 +177,14 @@ class DBConnection:
         for column in cursor:
             columns[column['name']] = { 'type': column['type'] }
         return columns
-    
+
     # http://stackoverflow.com/questions/3300464/how-can-i-get-dict-from-sqlite-query
     def _dict_factory(self, cursor, row):
         d = {}
         for idx, col in enumerate(cursor.description):
             d[col[0]] = row[idx]
         return d
-    
+
 def sanityCheckDatabase(connection, sanity_check):
     sanity_check(connection).check()
 
@@ -203,8 +203,8 @@ def upgradeDatabase(connection, schema):
     logger.log(u"Checking database structure...", logger.MESSAGE)
     _processUpgrade(connection, schema)
 
-def prettyName(str):
-    return ' '.join([x.group() for x in re.finditer("([A-Z])([a-z0-9]+)", str)])
+def prettyName(class_name):
+    return ' '.join([x.group() for x in re.finditer("([A-Z])([a-z0-9]+)", class_name)])
 
 def _processUpgrade(connection, upgradeClass):
     instance = upgradeClass(connection)
@@ -246,6 +246,6 @@ class SchemaUpgrade (object):
             return 0
 
     def incDBVersion(self):
-        curVersion = self.checkDBVersion()
-        self.connection.action("UPDATE db_version SET db_version = ?", [curVersion+1])
-        return curVersion+1
+        new_version = self.checkDBVersion() + 1
+        self.connection.action("UPDATE db_version SET db_version = ?", [new_version])
+        return new_version

@@ -24,6 +24,7 @@
 <script type="text/javascript" src="$sbRoot/js/plotTooltip.js?$sbPID"></script>
 <script type="text/javascript" src="$sbRoot/js/ajaxEpSearch.js?$sbPID"></script>
 <script type="text/javascript" src="$sbRoot/js/ajaxEpSubtitles.js?$sbPID"></script>
+<script type="text/javascript" src="$sbRoot/js/ajaxEpRetry.js?$sbPID"></script>
 
 <div class="navShows">
 </br>
@@ -166,7 +167,7 @@
 <div class="float-left">
 	Change selected episodes to 
 	<select id="statusSelect">
-		#for $curStatus in [$WANTED, $SKIPPED, $ARCHIVED, $IGNORED] + sorted($Quality.DOWNLOADED):
+		#for $curStatus in [$WANTED, $SKIPPED, $ARCHIVED, $IGNORED, $FAILED] + sorted($Quality.DOWNLOADED):
 		#if $curStatus == $DOWNLOADED:
 		#continue
 		#end if
@@ -255,7 +256,11 @@ $epLoc
 #end if
     <td class="search">
     #if int($epResult["season"]) != 0:
-      <a class="epSearch" href="searchEpisode?show=$show.tvdbid&amp;season=$epResult["season"]&amp;episode=$epResult["episode"]"><img src="$sbRoot/images/search32.png" width="16" height="16" alt="search" title="Manual Search" /></a>
+		#if ( int($epResult["status"]) in $Quality.SNATCHED or int($epResult["status"]) in $Quality.DOWNLOADED ) and $sickbeard.USE_FAILED_DOWNLOADS:
+			<a class="epRetry" href="retryEpisode?show=$show.tvdbid&amp;season=$epResult["season"]&amp;episode=$epResult["episode"]"><img src="$sbRoot/images/search32.png" height="16" alt="retry" title="Retry Download" /></a>
+		#else:
+	    	<a class="epSearch" href="searchEpisode?show=$show.tvdbid&amp;season=$epResult["season"]&amp;episode=$epResult["episode"]"><img src="$sbRoot/images/search32.png" width="16" height="16" alt="search" title="Manual Search" /></a>
+		#end if
     #end if
     #if $sickbeard.USE_SUBTITLES and $show.subtitles and len(set(str($epResult["subtitles"]).split(',')).intersection(set($subtitles.wantedLanguages()))) < len($subtitles.wantedLanguages()) and $epResult["location"]
       <a class="epSubtitlesSearch" href="searchEpisodeSubtitles?show=$show.tvdbid&amp;season=$epResult["season"]&amp;episode=$epResult["episode"]"><img src="$sbRoot/images/closed_captioning.png" height="16" alt="search subtitles" title="Search Subtitles" /></a>

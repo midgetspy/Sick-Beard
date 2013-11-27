@@ -321,6 +321,9 @@ class TVCache():
         if not quality:
             quality = Quality.sceneQuality(name)
 
+        if not isinstance(name, unicode):
+            name = unicode(name, 'utf-8')
+
         myDB.action("INSERT INTO " + self.providerID + " (name, season, episodes, tvrid, tvdbid, url, time, quality) VALUES (?,?,?,?,?,?,?,?)",
                     [name, season, episodeText, tvrage_id, tvdb_id, url, curTimestamp, quality])
 
