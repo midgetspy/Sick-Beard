@@ -250,7 +250,6 @@ class FailedQueueItem(generic_queue.QueueItem):
         self.success = None
 
     def execute(self):
-
         generic_queue.QueueItem.execute(self)
 
         if self.ep_obj:
@@ -277,7 +276,8 @@ class FailedQueueItem(generic_queue.QueueItem):
             self.success = result
 
         else:    
-            
+    
+            results = []
             myDB = db.DBConnection()
     
             if not self.show.air_by_date:

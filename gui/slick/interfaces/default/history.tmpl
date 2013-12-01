@@ -121,7 +121,7 @@
 #else:
 
   <table id="historyTable" class="sickbeardTable tablesorter" cellspacing="1" border="0" cellpadding="0">
-    <thead><tr><th class="nowrap">Time</th><th>Episode</th><th>Snatched</th><th>Downloaded</th><th>Subtitled</th><th>Quality</th></tr></thead>
+    <thead><tr><th class="nowrap">Time</th><th>Episode</th><th>Snatched</th><th>Downloaded</th>#if sickbeard.USE_SUBTITLES then "<th>Subtitled</th>" else ""#<th>Quality</th></tr></thead>
     <tbody>
     #for $hItem in $compactResults:
     <tr>
@@ -170,6 +170,7 @@
           #end if
       #end for
     </td>
+	#if sickbeard.USE_SUBTITLES:
     <td align="center">
       #for $action in sorted($hItem["actions"]):
         #set $curStatus, $curQuality = $Quality.splitCompositeStatus(int($action["action"]))
@@ -181,6 +182,7 @@
         #end if    
       #end for
     </td>
+    #end if
       <td align="center" width="14%" quality="$curQuality"><span class="quality $Quality.qualityStrings[$curQuality].replace("720p","HD720p").replace("1080p","HD1080p").replace("RawHD TV", "RawHD").replace("HD TV", "HD720p")">$Quality.qualityStrings[$curQuality]</span></td>
     </tr>
     #end for
