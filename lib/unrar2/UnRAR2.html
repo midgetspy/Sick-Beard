@@ -6,9 +6,9 @@
 <table width="100%" cellspacing=0 cellpadding=2 border=0 summary="heading">
 <tr bgcolor="#7799ee">
 <td valign=bottom>&nbsp;<br>
-<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong>UnRAR2</strong></big></big> (version 0.99.1)</font></td
+<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong>UnRAR2</strong></big></big> (version 0.99.2)</font></td
 ><td align=right valign=bottom
-><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="file:///C|/python26/lib/site-packages/unrar2/__init__.py">c:\python26\lib\site-packages\unrar2\__init__.py</a></font></td></tr></table>
+><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="file:/home/rainman/dev/py-unrar2/UnRAR2/__init__.py">/home/rainman/dev/py-unrar2/UnRAR2/__init__.py</a></font></td></tr></table>
     <p><tt>pyUnRAR2&nbsp;is&nbsp;a&nbsp;ctypes&nbsp;based&nbsp;wrapper&nbsp;around&nbsp;the&nbsp;free&nbsp;UnRAR.dll.&nbsp;<br>
 &nbsp;<br>
 It&nbsp;is&nbsp;an&nbsp;modified&nbsp;version&nbsp;of&nbsp;Jimmy&nbsp;Retzlaff's&nbsp;pyUnRAR&nbsp;-&nbsp;more&nbsp;simple,<br>
@@ -26,11 +26,12 @@ higher&nbsp;level&nbsp;interface&nbsp;which&nbsp;makes&nbsp;some&nbsp;common&nbs
 <font color="#ffffff" face="helvetica, arial"><big><strong>Package Contents</strong></big></font></td></tr>
     
 <tr><td bgcolor="#aa55cc"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
-<td width="100%"><table width="100%" summary="list"><tr><td width="25%" valign=top><a href="UnRAR2.rar_exceptions.html">rar_exceptions</a><br>
-<a href="UnRAR2.setup.html">setup</a><br>
-</td><td width="25%" valign=top><a href="UnRAR2.test_UnRAR2.html">test_UnRAR2</a><br>
-<a href="UnRAR2.unix.html">unix</a><br>
-</td><td width="25%" valign=top><a href="UnRAR2.windows.html">windows</a><br>
+<td width="100%"><table width="100%" summary="list"><tr><td width="25%" valign=top><a href="UnRAR2.UnRAR2.html"><strong>UnRAR2</strong>&nbsp;(package)</a><br>
+<a href="UnRAR2.rar_exceptions.html">rar_exceptions</a><br>
+</td><td width="25%" valign=top><a href="UnRAR2.setup.html">setup</a><br>
+<a href="UnRAR2.test_UnRAR2.html">test_UnRAR2</a><br>
+</td><td width="25%" valign=top><a href="UnRAR2.unix.html">unix</a><br>
+<a href="UnRAR2.windows.html">windows</a><br>
 </td><td width="25%" valign=top></td></tr></table></td></tr></table><p>
 <table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
 <tr bgcolor="#ee77aa">
@@ -39,7 +40,7 @@ higher&nbsp;level&nbsp;interface&nbsp;which&nbsp;makes&nbsp;some&nbsp;common&nbs
     
 <tr><td bgcolor="#ee77aa"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
 <td width="100%"><dl>
-<dt><font face="helvetica, arial"><a href="UnRAR2.windows.html#RarFileImplementation">UnRAR2.windows.RarFileImplementation</a>(<a href="__builtin__.html#object">__builtin__.object</a>)
+<dt><font face="helvetica, arial"><a href="UnRAR2.unix.html#RarFileImplementation">UnRAR2.unix.RarFileImplementation</a>(<a href="__builtin__.html#object">__builtin__.object</a>)
 </font></dt><dd>
 <dl>
 <dt><font face="helvetica, arial"><a href="UnRAR2.html#RarFile">RarFile</a>
@@ -56,12 +57,12 @@ higher&nbsp;level&nbsp;interface&nbsp;which&nbsp;makes&nbsp;some&nbsp;common&nbs
 <table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
 <tr bgcolor="#ffc8d8">
 <td colspan=3 valign=bottom>&nbsp;<br>
-<font color="#000000" face="helvetica, arial"><a name="RarFile">class <strong>RarFile</strong></a>(<a href="UnRAR2.windows.html#RarFileImplementation">UnRAR2.windows.RarFileImplementation</a>)</font></td></tr>
+<font color="#000000" face="helvetica, arial"><a name="RarFile">class <strong>RarFile</strong></a>(<a href="UnRAR2.unix.html#RarFileImplementation">UnRAR2.unix.RarFileImplementation</a>)</font></td></tr>
     
 <tr><td bgcolor="#ffc8d8"><tt>&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
 <td width="100%"><dl><dt>Method resolution order:</dt>
 <dd><a href="UnRAR2.html#RarFile">RarFile</a></dd>
-<dd><a href="UnRAR2.windows.html#RarFileImplementation">UnRAR2.windows.RarFileImplementation</a></dd>
+<dd><a href="UnRAR2.unix.html#RarFileImplementation">UnRAR2.unix.RarFileImplementation</a></dd>
 <dd><a href="__builtin__.html#object">__builtin__.object</a></dd>
 </dl>
 <hr>
@@ -121,15 +122,17 @@ If&nbsp;"condition"&nbsp;is&nbsp;omitted,&nbsp;all&nbsp;files&nbsp;are&nbsp;retu
 Returns&nbsp;list&nbsp;of&nbsp;tuples&nbsp;(<a href="#RarInfo">RarInfo</a>&nbsp;info,&nbsp;str&nbsp;contents)</tt></dd></dl>
 
 <hr>
-Methods inherited from <a href="UnRAR2.windows.html#RarFileImplementation">UnRAR2.windows.RarFileImplementation</a>:<br>
+Methods inherited from <a href="UnRAR2.unix.html#RarFileImplementation">UnRAR2.unix.RarFileImplementation</a>:<br>
+<dl><dt><a name="RarFile-call"><strong>call</strong></a>(self, cmd, options<font color="#909090">=[]</font>, files<font color="#909090">=[]</font>)</dt></dl>
+
 <dl><dt><a name="RarFile-destruct"><strong>destruct</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="RarFile-escaped_password"><strong>escaped_password</strong></a>(self)</dt></dl>
 
 <dl><dt><a name="RarFile-init"><strong>init</strong></a>(self, password<font color="#909090">=None</font>)</dt></dl>
 
-<dl><dt><a name="RarFile-make_sure_ready"><strong>make_sure_ready</strong></a>(self)</dt></dl>
-
 <hr>
-Data descriptors inherited from <a href="UnRAR2.windows.html#RarFileImplementation">UnRAR2.windows.RarFileImplementation</a>:<br>
+Data descriptors inherited from <a href="UnRAR2.unix.html#RarFileImplementation">UnRAR2.unix.RarFileImplementation</a>:<br>
 <dl><dt><strong>__dict__</strong></dt>
 <dd><tt>dictionary&nbsp;for&nbsp;instance&nbsp;variables&nbsp;(if&nbsp;defined)</tt></dd>
 </dl>
@@ -186,6 +189,6 @@ Data descriptors defined here:<br>
 <font color="#ffffff" face="helvetica, arial"><big><strong>Data</strong></big></font></td></tr>
     
 <tr><td bgcolor="#55aa55"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
-<td width="100%"><strong>__version__</strong> = '0.99.1'<br>
-<strong>in_windows</strong> = True</td></tr></table>
+<td width="100%"><strong>__version__</strong> = '0.99.2'<br>
+<strong>in_windows</strong> = False</td></tr></table>
 </body></html>
