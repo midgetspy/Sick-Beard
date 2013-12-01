@@ -1,12 +1,12 @@
-Metadata-Version: 1.0
+Metadata-Version: 1.1
 Name: pyUnRAR2
-Version: 0.99.2
+Version: 0.99.3
 Summary: Improved Python wrapper around the free UnRAR.dll
 Home-page: http://code.google.com/py-unrar2
 Author: Konstantin Yegupov
 Author-email: yk4ever@gmail.com
 License: MIT
-Description: pyUnRAR2 is a ctypes based wrapper around the free UnRAR.dll.
+Description: pyUnRAR2 is a ctypes based wrapper around the free UnRAR.dll. 
         
         It is an modified version of Jimmy Retzlaff's pyUnRAR - more simple,
         stable and foolproof.
