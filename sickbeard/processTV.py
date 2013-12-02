@@ -127,9 +127,9 @@ def processDir (dirName, nzbName=None, recurse=False):
                 except (OSError, IOError), e:
                     returnStr += logHelper(u"Warning: unable to remove the folder " + dirName + ": " + ex(e), logger.WARNING)
 
-            returnStr += logHelper(u"<b>Processing succeeded for "+cur_video_file_path+"</b>")
+            returnStr += logHelper(u"***** Processing succeeded for "+cur_video_file_path+" *****")
             
         else:
-            returnStr += logHelper(u"<font color=\"red\"><b>Processing failed for "+cur_video_file_path+": "+process_fail_message+"</b></font>", logger.WARNING)
+            returnStr += logHelper(u"***** Processing failed for "+cur_video_file_path+": "+process_fail_message+" *****", logger.WARNING)
 
     return returnStr
