@@ -92,8 +92,8 @@ def sendTORRENT(torrent):
             else:
                 tc.add_torrent(base64.b64encode(r.content),**params)    
             logger.log("[Transmission] Added Torrent To Transmission.",logger.DEBUG)
-        except transmissionrpc.TransmissionError, e:
-            logger.log("[Transmission] Error Adding Torrent - " + transmissionrpc.TransmissionError.message, logger.ERROR)
+        except Exception, e:
+            logger.log("[Transmission] Error Adding Torrent - " + ex(e), logger.ERROR)
             return False,u"[Transmission] Error Adding Torrent."
         
         ###################################################################################################
