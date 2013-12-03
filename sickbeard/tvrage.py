@@ -16,9 +16,8 @@
 # You should have received a copy of the GNU General Public License
 # along with Sick Beard.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
-import urllib, urllib2
+import urllib
+import urllib2
 import datetime
 import traceback
 
@@ -32,6 +31,7 @@ from sickbeard import exceptions, helpers
 from sickbeard.exceptions import ex
 
 from lib.tvdb_api import tvdb_api, tvdb_exceptions
+
 
 class TVRage:
 
@@ -58,7 +58,7 @@ class TVRage:
 
             if show_is_right:
 
-                logger.log(u"Setting TVRage ID for "+show.name+" to "+str(self._tvrid))
+                logger.log(u"Setting TVRage ID for " + show.name + " to " + str(self._tvrid))
                 self.show.tvrid = self._tvrid
                 self.show.saveToDB()
 
@@ -67,10 +67,9 @@ class TVRage:
             if self._tvrname == None:
                 self._getTVRageInfo()
 
-            logger.log(u"Setting TVRage Show Name for "+show.name+" to "+self._tvrname)
+            logger.log(u"Setting TVRage Show Name for " + show.name + " to " + self._tvrname)
             self.show.tvrname = self._tvrname
             self.show.saveToDB()
-
 
     def confirmShow(self, force=False):
 
@@ -100,7 +99,7 @@ class TVRage:
             # check the first episode of every season
             for curSeason in t[self.show.tvdbid]:
 
-                logger.log(u"Checking TVDB and TVRage sync for season "+str(curSeason), logger.DEBUG)
+                logger.log(u"Checking TVDB and TVRage sync for season " + str(curSeason), logger.DEBUG)
 
                 airdate = None
 
@@ -138,7 +137,7 @@ class TVRage:
 
                 # if we couldn't compare with TVDB try comparing it with the local database
                 except tvdb_exceptions.tvdb_exception, e:
-                    logger.log(u"Unable to check TVRage info against TVDB: "+ex(e))
+                    logger.log(u"Unable to check TVRage info against TVDB: " + ex(e))
 
                     logger.log(u"Trying against DB instead", logger.DEBUG)
 
@@ -150,10 +149,9 @@ class TVRage:
                     else:
                         airdate = datetime.date.fromordinal(int(sqlResults[0]["airdate"]))
 
-
                 # check if TVRage and TVDB have the same airdate for this episode
                 if curEpInfo['airdate'] == airdate:
-                    logger.log(u"Successful match for TVRage and TVDB data for episode "+str(curSeason)+"x1)", logger.DEBUG)
+                    logger.log(u"Successful match for TVRage and TVDB data for episode " + str(curSeason) + "x1)", logger.DEBUG)
                     return True
 
                 logger.log(u"Date from TVDB for episode " + str(curSeason) + "x1: " + str(airdate), logger.DEBUG)
@@ -199,7 +197,7 @@ class TVRage:
                 airdate = datetime.date(rawAirdate[0], rawAirdate[1], rawAirdate[2])
 
             except tvdb_exceptions.tvdb_exception, e:
-                logger.log(u"Unable to check TVRage info against TVDB: "+ex(e))
+                logger.log(u"Unable to check TVRage info against TVDB: " + ex(e))
 
                 logger.log(u"Trying against DB instead", logger.DEBUG)
 
@@ -241,7 +239,7 @@ class TVRage:
             urlData = {'sid': self.show.tvrid}
 
         if season != None and episode != None:
-            urlData['ep'] = str(season)+'x'+str(episode)
+            urlData['ep'] = str(season) + 'x' + str(episode)
 
         # build the URL
         url += urllib.urlencode(urlData)
@@ -294,7 +292,6 @@ class TVRage:
         if self.lastEpInfo == None or self.nextEpInfo == None:
             raise exceptions.TVRageException("TVRage has malformed data, unable to update the show")
 
-
     def _getEpInfo(self, epString):
 
         logger.log(u"Parsing info from TVRage: " + epString, logger.DEBUG)
@@ -309,7 +306,7 @@ class TVRage:
             try:
                 date = datetime.datetime.strptime(epInfo[2], "%d/%b/%Y").date()
             except ValueError:
-                logger.log(u"Unable to figure out the time from the TVRage data "+epInfo[2])
+                logger.log(u"Unable to figure out the time from the TVRage data " + epInfo[2])
                 return None
 
         toReturn = {'season': int(numInfo[0]), 'episode': numInfo[1], 'name': epInfo[1], 'airdate': date}
