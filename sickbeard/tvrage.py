@@ -270,10 +270,10 @@ class TVRage:
                 return info
 
         # save it for later in case somebody is curious
-        if info.has_key('Show ID'):
+        if 'Show ID' in info:
             self._tvrid = info['Show ID']
 
-        if info.has_key('Show Name'):
+        if 'Show Name' in info:
             self._tvrname = info['Show Name']
 
         return info
@@ -283,7 +283,7 @@ class TVRage:
         if info == None:
             info = self._getTVRageInfo()
 
-        if not info.has_key('Next Episode') or not info.has_key('Latest Episode'):
+        if 'Next Episode' not in info or 'Latest Episode' not in info:
             raise exceptions.TVRageException("TVRage doesn't have all the required info for this show")
 
         self.lastEpInfo = self._getEpInfo(info['Latest Episode'])
@@ -294,22 +294,40 @@ class TVRage:
 
     def _getEpInfo(self, epString):
 
+        month_dict = {"Jan": 1, "Feb": 2, "Mar": 3, "Apr": 4, "May": 5, "Jun": 6, "Jul": 7, "Aug": 8, "Sep": 9, "Oct": 10, "Nov": 11, "Dec": 12}
+
         logger.log(u"Parsing info from TVRage: " + epString, logger.DEBUG)
 
-        epInfo = epString.split('^')
+        ep_info = epString.split('^')
 
-        numInfo = [int(x) for x in epInfo[0].split('x')]
+        num_info = [int(x) for x in ep_info[0].split('x')]
+
+        date_info = ep_info[2]
 
         try:
-            date = datetime.datetime.strptime(epInfo[2], "%b/%d/%Y").date()
-        except ValueError:
-            try:
-                date = datetime.datetime.strptime(epInfo[2], "%d/%b/%Y").date()
-            except ValueError:
-                logger.log(u"Unable to figure out the time from the TVRage data " + epInfo[2])
-                return None
+            air_date = year = month = day = None
 
-        toReturn = {'season': int(numInfo[0]), 'episode': numInfo[1], 'name': epInfo[1], 'airdate': date}
+            date_info_list = date_info.split("/")
+            year = date_info_list[2]
+
+            if date_info_list[0] in month_dict:
+                month = month_dict[date_info_list[0]]
+                day = date_info_list[1]
+
+            else:
+                day = date_info_list[0]
+                month = month_dict[date_info_list[1]]
+
+            air_date = datetime.date(int(year), int(month), int(day))
+
+        except:
+            air_date = None
+
+        if not air_date:
+            logger.log(u"Unable to figure out the time from the TVRage data " + ep_info[2])
+            return None
+
+        toReturn = {'season': int(num_info[0]), 'episode': num_info[1], 'name': ep_info[1], 'airdate': air_date}
 
         logger.log(u"Result of parse: " + str(toReturn), logger.DEBUG)
 
