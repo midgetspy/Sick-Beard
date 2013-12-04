@@ -38,7 +38,7 @@ The docstring for `Tvdb.__init__` lists all initialisation arguments, including 
 
 There are several exceptions you may catch, these can be imported from `tvdb_api`:
 
-- `tvdb_error` - this is raised when there is an error communicating with [www.thetvdb.com][tvdb] (a network error most commonly)
+- `tvdb_error` - this is raised when there is an error communicating with [thetvdb.com][tvdb] (a network error most commonly)
 - `tvdb_userabort` - raised when a user aborts the Select Series dialog (by `ctrl+c`, or entering `q`)
 - `tvdb_shownotfound` - raised when `t['show name']` cannot find anything
 - `tvdb_seasonnotfound` - raised when the requested series (`t['show name][99]`) does not exist
@@ -105,5 +105,5 @@ Remember a simple list of actors is accessible via the default Show data:
     >>> t['scrubs']['actors']
     u'|Zach Braff|Donald Faison|Sarah Chalke|Christa Miller|Aloma Wright|Robert Maschio|Sam Lloyd|Neil Flynn|Ken Jenkins|Judy Reyes|John C. McGinley|Travis Schuldt|Johnny Kastl|Heather Graham|Michael Mosley|Kerry Bish\xe9|Dave Franco|Eliza Coupe|'
 
-[tvdb]: http://www.thetvdb.com
+[tvdb]: http://thetvdb.com
 [tvnamer]: http://github.com/dbr/tvnamer
