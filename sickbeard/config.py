@@ -182,7 +182,7 @@ def change_VERSION_NOTIFY(version_notify):
         sickbeard.NEWEST_VERSION_STRING = None
 
     if oldSetting == False and version_notify == True:
-        sickbeard.versionCheckScheduler.action.run()  #@UndefinedVariable
+        sickbeard.versionCheckScheduler.action.run()  # @UndefinedVariable
 
 
 def CheckSection(CFG, sec):
@@ -278,11 +278,12 @@ class ConfigMigrator():
         self.config_obj = config_obj
 
         # check the version of the config
-        self.config_version = check_setting_int(config_obj, 'General', 'config_version', 0)
+        self.config_version = check_setting_int(config_obj, 'General', 'config_version', sickbeard.CONFIG_VERSION)
         self.expected_config_version = sickbeard.CONFIG_VERSION
         self.migration_names = {1: 'Custom naming',
                                 2: 'Sync backup number with version number',
-                                3: 'Rename omgwtfnzb variables'
+                                3: 'Rename omgwtfnzb variables',
+                                4: 'Add newznab catIDs'
                                 }
 
     def migrate_config(self):
@@ -429,7 +430,7 @@ class ConfigMigrator():
     def _migrate_v2(self):
         return
 
-    # Migration v2: Rename  omgwtfnzb variables
+    # Migration v2: Rename omgwtfnzb variables
     def _migrate_v3(self):
         """
         Reads in the old naming settings from your config and generates a new config template from them.
@@ -437,3 +438,33 @@ class ConfigMigrator():
         # get the old settings from the file and store them in the new variable names
         sickbeard.OMGWTFNZBS_USERNAME = check_setting_str(self.config_obj, 'omgwtfnzbs', 'omgwtfnzbs_uid', '')
         sickbeard.OMGWTFNZBS_APIKEY = check_setting_str(self.config_obj, 'omgwtfnzbs', 'omgwtfnzbs_key', '')
+
+    # Migration v4: Add default newznab catIDs
+    def _migrate_v4(self):
+        """ Update newznab providers so that the category IDs can be set independently via the config """
+
+        new_newznab_data = []
+        old_newznab_data = check_setting_str(self.config_obj, 'Newznab', 'newznab_data', '')
+
+        if old_newznab_data:
+            old_newznab_data_list = old_newznab_data.split("!!!")
+
+            for cur_provider_data in old_newznab_data_list:
+                try:
+                    name, url, key, enabled = cur_provider_data.split("|")
+                except ValueError:
+                    logger.log(u"Skipping Newznab provider string: '" + cur_provider_data + "', incorrect format", logger.ERROR)
+                    continue
+
+                if name == 'Sick Beard Index':
+                    key = '0'
+
+                if name == 'NZBs.org':
+                    catIDs = '5030,5040,5070,5090'
+                else:
+                    catIDs = '5030,5040'
+
+                cur_provider_data_list = [name, url, key, catIDs, enabled]
+                new_newznab_data.append("|".join(cur_provider_data_list))
+
+            sickbeard.NEWZNAB_DATA = "!!!".join(new_newznab_data)
