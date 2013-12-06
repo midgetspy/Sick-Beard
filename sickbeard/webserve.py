@@ -224,6 +224,7 @@ class Manage:
 
             result[cur_season][cur_episode] = cur_result["name"]
 
+        cherrypy.response.headers['Content-Type'] = 'application/json'
         return json.dumps(result)
 
     @cherrypy.expose
@@ -981,6 +982,8 @@ class ConfigProviders:
     def canAddNewznabProvider(self, name):
 
         if not name:
+
+            cherrypy.response.headers['Content-Type'] = 'application/json'
             return json.dumps({'error': 'No Provider Name specified'})
 
         providerDict = dict(zip([x.getID() for x in sickbeard.newznabProviderList], sickbeard.newznabProviderList))
@@ -988,8 +991,12 @@ class ConfigProviders:
         tempProvider = newznab.NewznabProvider(name, '')
 
         if tempProvider.getID() in providerDict:
+
+            cherrypy.response.headers['Content-Type'] = 'application/json'
             return json.dumps({'error': 'Provider Name already exists as ' + providerDict[tempProvider.getID()].name})
         else:
+
+            cherrypy.response.headers['Content-Type'] = 'application/json'
             return json.dumps({'success': tempProvider.getID()})
 
     @cherrypy.expose
@@ -1636,6 +1643,7 @@ class NewHomeAddShows:
         result.sort()
         result.insert(0, 'en')
 
+        cherrypy.response.headers['Content-Type'] = 'application/json'
         return json.dumps({'results': result})
 
     @cherrypy.expose
@@ -1698,6 +1706,7 @@ class NewHomeAddShows:
 
         lang_id = tvdb_api.Tvdb().config['langabbv_to_id'][lang]
 
+        cherrypy.response.headers['Content-Type'] = 'application/json'
         return json.dumps({'results': results, 'langid': lang_id})
 
     @cherrypy.expose
@@ -2072,8 +2081,10 @@ class Home:
         cherrypy.response.headers['Access-Control-Allow-Headers'] = 'x-requested-with'
 
         if sickbeard.started:
+            cherrypy.response.headers['Content-Type'] = 'application/json'
             return callback+'('+json.dumps({"msg": str(sickbeard.PID)})+');'
         else:
+            cherrypy.response.headers['Content-Type'] = 'application/json'
             return callback+'('+json.dumps({"msg": "nope"})+');'
 
     @cherrypy.expose
@@ -2623,6 +2634,8 @@ class Home:
             errMsg = "You must specify a show and at least one episode"
             if direct:
                 ui.notifications.error('Error', errMsg)
+    
+                cherrypy.response.headers['Content-Type'] = 'application/json'
                 return json.dumps({'result': 'error'})
             else:
                 return _genericMessage("Error", errMsg)
@@ -2631,6 +2644,8 @@ class Home:
             errMsg = "Invalid status"
             if direct:
                 ui.notifications.error('Error', errMsg)
+    
+                cherrypy.response.headers['Content-Type'] = 'application/json'
                 return json.dumps({'result': 'error'})
             else:
                 return _genericMessage("Error", errMsg)
@@ -2641,6 +2656,8 @@ class Home:
             errMsg = "Error", "Show not in show list"
             if direct:
                 ui.notifications.error('Error', errMsg)
+    
+                cherrypy.response.headers['Content-Type'] = 'application/json'
                 return json.dumps({'result': 'error'})
             else:
                 return _genericMessage("Error", errMsg)
@@ -2695,6 +2712,8 @@ class Home:
             ui.notifications.message("Backlog started", msg)
 
         if direct:
+
+            cherrypy.response.headers['Content-Type'] = 'application/json'
             return json.dumps({'result': 'success'})
         else:
             redirect("/home/displayShow?show=" + show)
@@ -2799,6 +2818,8 @@ class Home:
         # retrieve the episode object and fail if we can't get one
         ep_obj = _getEpisode(show, season, episode)
         if isinstance(ep_obj, str):
+
+            cherrypy.response.headers['Content-Type'] = 'application/json'
             return json.dumps({'result': 'failure'})
 
         # make a queue item for it and put it on the queue
@@ -2811,8 +2832,11 @@ class Home:
 
         # return the correct json value
         if ep_queue_item.success:
+
+            cherrypy.response.headers['Content-Type'] = 'application/json'
             return json.dumps({'result': statusStrings[ep_obj.status]})
 
+        cherrypy.response.headers['Content-Type'] = 'application/json'
         return json.dumps({'result': 'failure'})
 
 
@@ -2836,6 +2860,7 @@ class UI:
                                                                    'type': cur_notification.type}
             cur_notification_num += 1
 
+        cherrypy.response.headers['Content-Type'] = 'application/json'
         return json.dumps(messages)
 
 
