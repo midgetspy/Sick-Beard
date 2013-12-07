@@ -53,7 +53,7 @@ CFG = None
 CONFIG_FILE = None
 
 # This is the version of the config we EXPECT to find
-CONFIG_VERSION = 3
+CONFIG_VERSION = 4
 
 # Default encryption version (0 for None)
 ENCRYPTION_VERSION = 0
@@ -183,6 +183,8 @@ TORRENTLEECH_KEY = None
 
 BTN = False
 BTN_API_KEY = None
+
+NEWZNAB_DATA = None
 
 THEPIRATEBAY = False
 THEPIRATEBAY_TRUSTED = False
@@ -434,7 +436,7 @@ def initialize(consoleLogging=True):
                 USE_PLEX, PLEX_NOTIFY_ONSNATCH, PLEX_NOTIFY_ONDOWNLOAD, PLEX_NOTIFY_ONSUBTITLEDOWNLOAD, PLEX_UPDATE_LIBRARY, \
                 PLEX_SERVER_HOST, PLEX_HOST, PLEX_USERNAME, PLEX_PASSWORD, \
                 showUpdateScheduler, __INITIALIZED__, LAUNCH_BROWSER, UPDATE_SHOWS_ON_START, SORT_ARTICLE, showList, loadingShowList, \
-                NZBS, NZBS_UID, NZBS_HASH, EZRSS, TVTORRENTS, TVTORRENTS_DIGEST, TVTORRENTS_HASH, TVTORRENTS_OPTIONS, BTN, BTN_API_KEY, BTN_OPTIONS, \
+                NEWZNAB_DATA, NZBS, NZBS_UID, NZBS_HASH, EZRSS, TVTORRENTS, TVTORRENTS_DIGEST, TVTORRENTS_HASH, TVTORRENTS_OPTIONS, BTN, BTN_API_KEY, BTN_OPTIONS, \
                 THEPIRATEBAY, THEPIRATEBAY_TRUSTED, THEPIRATEBAY_PROXY, THEPIRATEBAY_PROXY_URL, THEPIRATEBAY_BLACKLIST, THEPIRATEBAY_OPTIONS, TORRENTLEECH, TORRENTLEECH_USERNAME, TORRENTLEECH_PASSWORD, TORRENTLEECH_OPTIONS, \
                 IPTORRENTS, IPTORRENTS_USERNAME, IPTORRENTS_PASSWORD, IPTORRENTS_FREELEECH, IPTORRENTS_OPTIONS, KAT, KAT_VERIFIED, KAT_OPTIONS, PUBLICHD, PUBLICHD_OPTIONS, SCC, SCC_USERNAME, SCC_PASSWORD, SCC_OPTIONS, TORRENTDAY, TORRENTDAY_USERNAME, TORRENTDAY_PASSWORD, TORRENTDAY_UID, TORRENTDAY_HASH, TORRENTDAY_FREELEECH, TORRENTDAY_OPTIONS, \
                 HDBITS, HDBITS_USERNAME, HDBITS_PASSKEY, HDBITS_OPTIONS, TORRENT_DIR, USENET_RETENTION, SOCKET_TIMEOUT, SEARCH_FREQUENCY, DEFAULT_SEARCH_FREQUENCY, BACKLOG_SEARCH_FREQUENCY, \
@@ -922,14 +924,16 @@ def initialize(consoleLogging=True):
         COMING_EPS_SORT = check_setting_str(CFG, 'GUI', 'coming_eps_sort', 'date')
         COMING_EPS_MISSED_RANGE = check_setting_int(CFG, 'GUI', 'coming_eps_missed_range', 7)
 
-        newznabData = check_setting_str(CFG, 'Newznab', 'newznab_data', '')
-        newznabProviderList = providers.getNewznabProviderList(newznabData)
-
+        NEWZNAB_DATA = check_setting_str(CFG, 'Newznab', 'newznab_data', '')
+        newznabProviderList = providers.getNewznabProviderList(NEWZNAB_DATA)        
+        
         torrentRssData = check_setting_str(CFG, 'TorrentRss', 'torrentrss_data', '')
         torrentRssProviderList = providers.getTorrentRssProviderList(torrentRssData)
-        
-        providerList = providers.makeProviderList()
 
+        if not os.path.isfile(CONFIG_FILE):
+            logger.log(u"Unable to find '" + CONFIG_FILE + "', all settings will be default!", logger.DEBUG)
+            save_config()
+            
         # start up all the threads
         logger.sb_log_instance.initLogging(consoleLogging=consoleLogging)
 
@@ -948,6 +952,9 @@ def initialize(consoleLogging=True):
         # migrate the config if it needs it
         migrator = ConfigMigrator(CFG)
         migrator.migrate_config()
+        
+        newznabProviderList = providers.getNewznabProviderList(NEWZNAB_DATA)
+        providerList = providers.makeProviderList()
 
         currentSearchScheduler = scheduler.Scheduler(searchCurrent.CurrentSearcher(),
                                                      cycleTime=datetime.timedelta(minutes=SEARCH_FREQUENCY),
@@ -1278,7 +1285,7 @@ def save_config():
     new_config['General']['quality_default'] = int(QUALITY_DEFAULT)
     new_config['General']['status_default'] = int(STATUS_DEFAULT)
     new_config['General']['flatten_folders_default'] = int(FLATTEN_FOLDERS_DEFAULT)
-    new_config['General']['provider_order'] = ' '.join([x.getID() for x in providers.sortedProviderList()])
+    new_config['General']['provider_order'] = ' '.join(PROVIDER_ORDER)
     new_config['General']['version_notify'] = int(VERSION_NOTIFY)
     new_config['General']['naming_strip_year'] = int(NAMING_STRIP_YEAR)
     new_config['General']['naming_pattern'] = NAMING_PATTERN
@@ -1564,7 +1571,7 @@ def save_config():
     new_config['Email']['email_list'] = EMAIL_LIST
 
     new_config['Newznab'] = {}
-    new_config['Newznab']['newznab_data'] = '!!!'.join([x.configStr() for x in newznabProviderList])
+    new_config['Newznab']['newznab_data'] = NEWZNAB_DATA
 
     new_config['TorrentRss'] = {}
     new_config['TorrentRss']['torrentrss_data'] = '!!!'.join([x.configStr() for x in torrentRssProviderList])
