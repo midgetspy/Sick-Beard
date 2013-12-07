@@ -416,8 +416,10 @@ class AddShowidTvdbidIndex(AddEmailSubscriptionTable):
         MainSanityCheck(self.connection).fix_duplicate_shows()
 
         logger.log(u"Adding index on tvdb_id (tv_shows) and showid (tv_episodes) to speed up searches/queries.")
-        self.connection.action("CREATE INDEX idx_showid ON tv_episodes (showid);")
-        self.connection.action("CREATE UNIQUE INDEX idx_tvdb_id ON tv_shows (tvdb_id);")
+        if not self.hasTable("idx_showid"):
+            self.connection.action("CREATE INDEX idx_showid ON tv_episodes (showid);")
+        if not self.hasTable("idx_tvdb_id"):
+            self.connection.action("CREATE UNIQUE INDEX idx_tvdb_id ON tv_shows (tvdb_id);")
 
         self.incDBVersion()
 
