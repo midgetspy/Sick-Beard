@@ -1519,9 +1519,9 @@ class ConfigProviders:
                 if not cur_url.endswith('/'):
                     cur_url = cur_url + '/'
 
-                newProvider = newznab.NewznabProvider(curName, curURL, curKey)
+                newProvider = newznab.NewznabProvider(cur_name, cur_url, key=cur_key)
 
-                curID = newProvider.getID()
+                cur_id = newProvider.getID()
 
                 # if it already exists then update it
                 if cur_id in newznabProviderDict:
