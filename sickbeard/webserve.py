@@ -1166,7 +1166,7 @@ class ConfigNotifications:
                           use_prowl=None, prowl_notify_onsnatch=None, prowl_notify_ondownload=None, prowl_api=None, prowl_priority=0,
                           use_twitter=None, twitter_notify_onsnatch=None, twitter_notify_ondownload=None,
                           use_boxcar=None, boxcar_notify_onsnatch=None, boxcar_notify_ondownload=None, boxcar_username=None,
-                          use_pushover=None, pushover_notify_onsnatch=None, pushover_notify_ondownload=None, pushover_userkey=None,
+                          use_pushover=None, pushover_notify_onsnatch=None, pushover_notify_ondownload=None, pushover_userkey=None, pushover_device=None, pushover_sound=None,
                           use_libnotify=None, libnotify_notify_onsnatch=None, libnotify_notify_ondownload=None,
                           use_nmj=None, nmj_host=None, nmj_database=None, nmj_mount=None, use_synoindex=None,
                           use_nmjv2=None, nmjv2_host=None, nmjv2_dbloc=None, nmjv2_database=None,
@@ -1397,6 +1397,8 @@ class ConfigNotifications:
         sickbeard.PUSHOVER_NOTIFY_ONSNATCH = pushover_notify_onsnatch
         sickbeard.PUSHOVER_NOTIFY_ONDOWNLOAD = pushover_notify_ondownload
         sickbeard.PUSHOVER_USERKEY = pushover_userkey
+        sickbeard.PUSHOVER_DEVICE = pushover_device
+        sickbeard.PUSHOVER_SOUND = pushover_sound
 
         sickbeard.USE_LIBNOTIFY = use_libnotify == "on"
         sickbeard.LIBNOTIFY_NOTIFY_ONSNATCH = libnotify_notify_onsnatch == "on"
@@ -2137,10 +2139,10 @@ class Home:
             return "Error sending Boxcar notification"
 
     @cherrypy.expose
-    def testPushover(self, userKey=None):
+    def testPushover(self, userKey=None, device='', sound=''):
         cherrypy.response.headers['Cache-Control'] = "max-age=0,no-cache,no-store"
 
-        result = notifiers.pushover_notifier.test_notify(userKey)
+        result = notifiers.pushover_notifier.test_notify(userKey, device, sound)
         if result:
             return "Pushover notification succeeded. Check your Pushover clients to make sure it worked"
         else:
