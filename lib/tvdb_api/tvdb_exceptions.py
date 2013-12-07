@@ -9,7 +9,7 @@
 """
 
 __author__ = "dbr/Ben"
-__version__ = "1.8.2"
+__version__ = "1.9"
 
 __all__ = ["tvdb_error", "tvdb_userabort", "tvdb_shownotfound",
 "tvdb_seasonnotfound", "tvdb_episodenotfound", "tvdb_attributenotfound"]
@@ -20,7 +20,7 @@ class tvdb_exception(Exception):
     pass
 
 class tvdb_error(tvdb_exception):
-    """An error with www.thetvdb.com (Cannot connect, for example)
+    """An error with thetvdb.com (Cannot connect, for example)
     """
     pass
 
@@ -31,17 +31,17 @@ class tvdb_userabort(tvdb_exception):
     pass
 
 class tvdb_shownotfound(tvdb_exception):
-    """Show cannot be found on www.thetvdb.com (non-existant show)
+    """Show cannot be found on thetvdb.com (non-existant show)
     """
     pass
 
 class tvdb_seasonnotfound(tvdb_exception):
-    """Season cannot be found on www.thetvdb.com
+    """Season cannot be found on thetvdb.com
     """
     pass
 
 class tvdb_episodenotfound(tvdb_exception):
-    """Episode cannot be found on www.thetvdb.com
+    """Episode cannot be found on thetvdb.com
     """
     pass
 
