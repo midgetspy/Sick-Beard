@@ -6,12 +6,12 @@ import sys, re, time, operator, warnings, os
 import base64
 import json
 
-from transmissionrpc.constants import DEFAULT_PORT, DEFAULT_TIMEOUT
-from transmissionrpc.error import TransmissionError, HTTPHandlerError
-from transmissionrpc.utils import LOGGER, get_arguments, make_rpc_name, argument_value_convert, rpc_bool
-from transmissionrpc.httphandler import DefaultHTTPHandler
-from transmissionrpc.torrent import Torrent
-from transmissionrpc.session import Session
+from .constants import DEFAULT_PORT, DEFAULT_TIMEOUT
+from .error import TransmissionError, HTTPHandlerError
+from .utils import LOGGER, get_arguments, make_rpc_name, argument_value_convert, rpc_bool
+from .httphandler import DefaultHTTPHandler
+from .torrent import Torrent
+from .session import Session
 
 from six import PY3, integer_types, string_types, iteritems
 
