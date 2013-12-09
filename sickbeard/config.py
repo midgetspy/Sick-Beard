@@ -292,8 +292,8 @@ class ConfigMigrator():
         """
 
         if self.config_version > self.expected_config_version:
-            sys.exit("Your config version (" + str(self.config_version) + ") has been incremented past what this version of Sick Beard supports (" + str(self.expected_config_version) + ").\n" + \
-                        "If you have used other forks or a newer version of Sick Beard, your config file may be unusable due to their modifications.")
+            logger.log_error_and_exit(u"Your config version (" + str(self.config_version) + ") has been incremented past what this version of Sick Beard supports (" + str(self.expected_config_version) + ").\n" + \
+                                      "If you have used other forks or a newer version of Sick Beard, your config file may be unusable due to their modifications.")
 
         sickbeard.CONFIG_VERSION = self.config_version
 
@@ -308,8 +308,7 @@ class ConfigMigrator():
 
             logger.log(u"Backing up config before upgrade")
             if not helpers.backupVersionedFile(sickbeard.CONFIG_FILE, self.config_version):
-                logger.log(u"Config backup failed, abort upgrading config")
-                sys.exit("Config backup failed, abort upgrading config")
+                logger.log_error_and_exit(u"Config backup failed, abort upgrading config")
             else:
                 logger.log(u"Proceeding with upgrade")
 

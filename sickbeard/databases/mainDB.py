@@ -87,8 +87,7 @@ def backupDatabase(version):
     logger.log(u"Backing up database before upgrade")
 
     if not helpers.backupVersionedFile(db.dbFilename(), version):
-        logger.log(u"Database backup failed, abort upgrading database")
-        sys.exit("Database backup failed, abort upgrading database")
+        logger.log_error_and_exit(u"Database backup failed, abort upgrading database")
     else:
         logger.log(u"Proceeding with upgrade")
 
@@ -124,12 +123,16 @@ class InitialSchema (db.SchemaUpgrade):
             cur_db_version = self.checkDBVersion()
 
             if cur_db_version < MIN_DB_VERSION:
-                sys.exit("Your database version (" + str(cur_db_version) + ") is too old to migrate from what this version of Sick Beard supports (" + str(MIN_DB_VERSION) + ").\n" + \
-                                 "Upgrade using a previous version (tag) build 496 to build 501 of Sick Beard first or remove database file to begin fresh.")
+                logger.log_error_and_exit(u"Your database version (" + str(cur_db_version) + ") is too old to migrate from what this version of Sick Beard supports (" + \
+                                          str(MIN_DB_VERSION) + ").\n" + \
+                                          "Upgrade using a previous version (tag) build 496 to build 501 of Sick Beard first or remove database file to begin fresh."
+                                          )
 
             if cur_db_version > MAX_DB_VERSION:
-                sys.exit("Your database version (" + str(cur_db_version) + ") has been incremented past what this version of Sick Beard supports (" + str(MAX_DB_VERSION) + ").\n" + \
-                                  "If you have used other forks of Sick Beard, your database may be unusable due to their modifications.")
+                logger.log_error_and_exit(u"Your database version (" + str(cur_db_version) + ") has been incremented past what this version of Sick Beard supports (" + \
+                                          str(MAX_DB_VERSION) + ").\n" + \
+                                          "If you have used other forks of Sick Beard, your database may be unusable due to their modifications."
+                                          )
 
 
 # included in build 496 (2012-06-28)
