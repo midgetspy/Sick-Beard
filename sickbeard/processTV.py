@@ -34,6 +34,34 @@ from sickbeard.exceptions import ex
 from sickbeard import logger
 
 
+def delete_folder(folder, check_empty=True):
+
+    # check if it's a folder
+    if not ek.ek(os.path.isdir, folder):
+        return False
+
+    # check if it isn't TV_DOWNLOAD_DIR
+    if sickbeard.TV_DOWNLOAD_DIR:
+        if helpers.real_path(folder) == helpers.real_path(sickbeard.TV_DOWNLOAD_DIR):
+            return False
+
+    # check if it's empty folder when wanted checked
+    if check_empty:
+        check_files = ek.ek(os.listdir, folder)
+        if check_files:
+            return False
+
+    # try deleting folder
+    try:
+        logger.log(u"Deleting folder: " + folder)
+        shutil.rmtree(folder)
+    except (OSError, IOError), e:
+        logger.log(u"Warning: unable to delete folder: " + folder + ": " + ex(e), logger.WARNING)
+        return False
+
+    return True
+
+
 def logHelper(logMessage, logLevel=logger.MESSAGE):
     logger.log(logMessage, logLevel)
     return logMessage + u"\n"
@@ -51,7 +79,7 @@ def processDir(dirName, nzbName=None, method=None, recurse=False):
 
     returnStr = ''
 
-    returnStr += logHelper(u"Processing folder " + dirName, logger.DEBUG)
+    returnStr += logHelper(u"Processing folder: " + dirName, logger.DEBUG)
 
     # if they passed us a real dir then assume it's the one we want
     if ek.ek(os.path.isdir, dirName):
@@ -61,7 +89,7 @@ def processDir(dirName, nzbName=None, method=None, recurse=False):
     elif sickbeard.TV_DOWNLOAD_DIR and ek.ek(os.path.isdir, sickbeard.TV_DOWNLOAD_DIR) \
             and ek.ek(os.path.normpath, dirName) != ek.ek(os.path.normpath, sickbeard.TV_DOWNLOAD_DIR):
         dirName = ek.ek(os.path.join, sickbeard.TV_DOWNLOAD_DIR, ek.ek(os.path.abspath, dirName).split(os.path.sep)[-1])
-        returnStr += logHelper(u"Trying to use folder " + dirName, logger.DEBUG)
+        returnStr += logHelper(u"Trying to use folder: " + dirName, logger.DEBUG)
 
     # if we didn't find a real dir then quit
     if not ek.ek(os.path.isdir, dirName):
@@ -97,19 +125,39 @@ def processDir(dirName, nzbName=None, method=None, recurse=False):
     videoFiles = sorted(filter(helpers.isMediaFile, fileList), key=lambda x: os.path.getsize(ek.ek(os.path.join, dirName, x)), reverse=True)
     remaining_video_files = list(videoFiles)
 
+    num_videoFiles = len(videoFiles)
+
+    # if there are no videofiles in parent and only one subfolder, pass the nzbName to child
+    if num_videoFiles == 0 and len(folders) == 1:
+        parent_nzbName = nzbName
+    else:
+        parent_nzbName = None
+
     # recursively process all the folders
-    for curFolder in folders:
-        returnStr += logHelper(u"Recursively processing a folder: " + curFolder, logger.DEBUG)
-        returnStr += processDir(ek.ek(os.path.join, dirName, curFolder), recurse=True, method=method)
+    for cur_folder in folders:
+
+        returnStr += u"\n"
+        # use full path
+        cur_folder = ek.ek(os.path.join, dirName, cur_folder)
+
+        if helpers.is_hidden_folder(cur_folder):
+            returnStr += logHelper(u"Ignoring hidden folder: " + cur_folder, logger.DEBUG)
+        else:
+            returnStr += logHelper(u"Recursively processing a folder: " + cur_folder, logger.DEBUG)
+            returnStr += processDir(cur_folder, nzbName=parent_nzbName, recurse=True, method=method)
 
     remainingFolders = filter(lambda x: ek.ek(os.path.isdir, ek.ek(os.path.join, dirName, x)), fileList)
 
-    if len(videoFiles) == 0:
+    if num_videoFiles == 0:
         returnStr += logHelper(u"There are no videofiles in folder: " + dirName, logger.DEBUG)
-        returnStr += u"\n"
 
-    # If there's more than one videofile in the folder, files can be lost (overwritten) when nzbName contains only one episode.
-    if len(videoFiles) >= 2:
+        # if there a no videofiles, try deleting empty folder
+        if method != 'Manual':
+            if delete_folder(dirName, check_empty=True):
+                returnStr += logHelper(u"Deleted empty folder: " + dirName, logger.DEBUG)
+
+    # if there's more than one videofile in the folder, files can be lost (overwritten) when nzbName contains only one episode.
+    if num_videoFiles >= 2:
         nzbName = None
 
     # process any files in the dir
@@ -133,6 +181,7 @@ def processDir(dirName, nzbName=None, method=None, recurse=False):
                 continue
 
         try:
+            returnStr += u"\n"
             processor = postProcessor.PostProcessor(cur_video_file_path, nzbName)
             process_result = processor.process()
             process_fail_message = ""
@@ -152,23 +201,13 @@ def processDir(dirName, nzbName=None, method=None, recurse=False):
 
             remaining_video_files.remove(cur_video_file)
 
-            if not sickbeard.KEEP_PROCESSED_DIR and \
-                len(remaining_video_files) == 0 and len(remainingFolders) == 0 and \
-                ek.ek(os.path.normpath, ek.ek(os.path.normcase, ek.ek(os.path.realpath, dirName))) != \
-                ek.ek(os.path.normpath, ek.ek(os.path.normcase, ek.ek(os.path.realpath, sickbeard.TV_DOWNLOAD_DIR))):
-
-                returnStr += logHelper(u"Deleting folder " + dirName, logger.DEBUG)
-
-                try:
-                    shutil.rmtree(dirName)
-                except (OSError, IOError), e:
-                    returnStr += logHelper(u"Warning: unable to remove the folder " + dirName + ": " + ex(e), logger.WARNING)
+            if not sickbeard.KEEP_PROCESSED_DIR and len(remaining_video_files) == 0 and len(remainingFolders) == 0:
+                if delete_folder(dirName, check_empty=False):
+                    returnStr += logHelper(u"Deleted folder: " + dirName, logger.DEBUG)
 
             returnStr += logHelper(u"Processing succeeded for " + cur_video_file_path)
 
         else:
             returnStr += logHelper(u"Processing failed for " + cur_video_file_path + ": " + process_fail_message, logger.WARNING)
-
-        returnStr += u"\n"
 
     return returnStr

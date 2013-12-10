@@ -54,8 +54,6 @@ class PostProcessor(object):
     EXISTS_SMALLER = 3
     DOESNT_EXIST = 4
 
-    IGNORED_FILESTRINGS = ["/.AppleDouble/", ".DS_Store"]
-
     NZB_NAME = 1
     FOLDER_NAME = 2
     FILE_NAME = 3
@@ -369,7 +367,7 @@ class PostProcessor(object):
         # parse the name to break it into show name, season, and episode
         np = NameParser(file_name)
         parse_result = np.parse(name)
-        self._log("Parsed " + name + " into " + str(parse_result).decode('utf-8'), logger.DEBUG)
+        self._log(u"Parsed " + name + " into " + str(parse_result).decode('utf-8', 'xmlcharrefreplace'), logger.DEBUG)
 
         if parse_result.air_by_date:
             season = -1
@@ -563,8 +561,9 @@ class PostProcessor(object):
 
         # if we can't find the show then there's nothing we can really do
         if not show_obj:
-            self._log(u"This show isn't in your list, you need to add it to SB before post-processing an episode", logger.ERROR)
-            raise exceptions.PostProcessingFailed()
+            error_msg = u"This show isn't in your list, you need to add it to SB before post-processing an episode"
+            self._log(error_msg, logger.ERROR)
+            raise exceptions.PostProcessingFailed(error_msg)
 
         root_ep = None
         for cur_episode in episodes:
@@ -576,8 +575,9 @@ class PostProcessor(object):
             try:
                 curEp = show_obj.getEpisode(season, episode)
             except exceptions.EpisodeNotFoundException, e:
-                self._log(u"Unable to create episode: " + ex(e), logger.DEBUG)
-                raise exceptions.PostProcessingFailed()
+                error_msg = u"Unable to create episode: " + ex(e)
+                self._log(error_msg, logger.DEBUG)
+                raise exceptions.PostProcessingFailed(error_msg)
 
             # associate all the episodes together under a single root episode
             if root_ep == None:
@@ -695,9 +695,10 @@ class PostProcessor(object):
 
         # if there's an existing downloaded file with same quality, check filesize to decide
         if new_ep_quality == old_ep_quality:
-            self._log(u"File already exists and has same quality as new file", logger.DEBUG)
+            self._log(u"File already exists in database and has same quality as new file", logger.DEBUG)
 
             # check for an existing file
+            self._log(u"Checking existing file size", logger.DEBUG)
             existing_file_status = self._checkForExistingFile(ep_obj.location)
 
             if existing_file_status in (PostProcessor.EXISTS_LARGER, PostProcessor.EXISTS_SAME):
@@ -732,11 +733,6 @@ class PostProcessor(object):
             self._log(u"File " + self.file_path + " seems to be a directory")
             return False
 
-        for ignore_file in self.IGNORED_FILESTRINGS:
-            if ignore_file in self.file_path:
-                self._log(u"File " + self.file_path + " is ignored type, skipping")
-                return False
-
         # reset per-file stuff
         self.in_history = False
 
@@ -745,6 +741,8 @@ class PostProcessor(object):
 
         # if we don't have it then give up
         if not tvdb_id or season == None or not episodes:
+            self._log(u"Not enough information to determine what episode this is", logger.DEBUG)
+            self._log(u"Quitting post-processing", logger.DEBUG)
             return False
 
         # retrieve/create the corresponding TVEpisode objects
