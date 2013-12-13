@@ -48,7 +48,7 @@ class PublicHDProvider(generic.TorrentProvider):
 
         self.cache = PublicHDCache(self)
 
-        self.url = 'https://publichd.se/'
+        self.url = 'http://phdproxy.com/'
 
         self.searchurl = self.url + 'index.php?page=torrents&search=%s&active=0&category=%s&order=5&by=2'  #order by seed
 
