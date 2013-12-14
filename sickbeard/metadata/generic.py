@@ -56,7 +56,7 @@ class GenericMetadata():
         self._show_file_name = "tvshow.nfo"
         self._ep_nfo_extension = "nfo"
 
-        self.poster_name = "folder.jpg"
+        self.banner_name = self.poster_name = "folder.jpg"
         self.fanart_name = "fanart.jpg"
 
         self.generate_show_metadata = True
@@ -66,7 +66,7 @@ class GenericMetadata():
 
         self.show_metadata = show_metadata
         self.episode_metadata = episode_metadata
-        self.poster = poster
+        self.banner = self.poster = poster
         self.fanart = fanart
         self.episode_thumbnails = episode_thumbnails
         self.season_thumbnails = season_thumbnails
@@ -86,7 +86,7 @@ class GenericMetadata():
         config_list = [bool(int(x)) for x in string.split('|')]
         self.show_metadata = config_list[0]
         self.episode_metadata = config_list[1]
-        self.poster = config_list[2]
+        self.banner = self.poster = config_list[2]
         self.fanart = config_list[3]
         self.episode_thumbnails = config_list[4]
         self.season_thumbnails = config_list[5]
@@ -99,6 +99,11 @@ class GenericMetadata():
     def _has_episode_metadata(self, ep_obj):
         result = ek.ek(os.path.isfile, self.get_episode_file_path(ep_obj))
         logger.log("Checking if " + self.get_episode_file_path(ep_obj) + " exists: " + str(result), logger.DEBUG)
+        return result
+
+    def _has_banner(self, show_obj):
+        result = ek.ek(os.path.isfile, self.get_banner_path(show_obj))
+        logger.log("Checking if " + self.get_banner_path(show_obj) + " exists: " + str(result), logger.DEBUG)
         return result
 
     def _has_poster(self, show_obj):
@@ -130,6 +135,9 @@ class GenericMetadata():
 
     def get_episode_file_path(self, ep_obj):
         return helpers.replaceExtension(ep_obj.location, self._ep_nfo_extension)
+
+    def get_banner_path(self, show_obj):
+        return ek.ek(os.path.join, show_obj.location, self.banner_name)
 
     def get_poster_path(self, show_obj):
         return ek.ek(os.path.join, show_obj.location, self.poster_name)
@@ -192,6 +200,12 @@ class GenericMetadata():
         if self.episode_metadata and ep_obj and not self._has_episode_metadata(ep_obj):
             logger.log("Metadata provider " + self.name + " creating episode metadata for " + ep_obj.prettyName(), logger.DEBUG)
             return self.write_ep_file(ep_obj)
+        return False
+
+    def create_banner(self, show_obj):
+        if self.banner and show_obj and not self._has_banner(show_obj):
+            logger.log("Metadata provider " + self.name + " creating banner for " + show_obj.name, logger.DEBUG)
+            return self.save_banner(show_obj)
         return False
 
     def create_poster(self, show_obj):
@@ -404,6 +418,25 @@ class GenericMetadata():
 
         return self._write_image(fanart_data, fanart_path)
 
+    def save_banner(self, show_obj, which=None):
+        """
+        Downloads a banner image and saves it to the filename specified by banner_name
+        inside the show's root folder.
+
+        show_obj: a TVShow object for which to download a banner
+        """
+
+        # use the default banner name
+        banner_path = self.get_banner_path(show_obj)
+
+        banner_data = self._retrieve_show_image('banner', show_obj, which)
+
+        if not banner_data:
+            logger.log(u"No show folder image was retrieved, unable to write banner", logger.DEBUG)
+            return False
+
+        return self._write_image(banner_data, banner_path)
+
     def save_poster(self, show_obj, which=None):
         """
         Downloads a poster image and saves it to the filename specified by poster_name
@@ -415,12 +448,7 @@ class GenericMetadata():
         # use the default poster name
         poster_path = self.get_poster_path(show_obj)
 
-        if sickbeard.USE_BANNER:
-            img_type = 'banner'
-        else:
-            img_type = 'poster'
-
-        poster_data = self._retrieve_show_image(img_type, show_obj, which)
+        poster_data = self._retrieve_show_image('poster', show_obj, which)
 
         if not poster_data:
             logger.log(u"No show folder image was retrieved, unable to write poster", logger.DEBUG)
@@ -595,17 +623,17 @@ class GenericMetadata():
 
         return result
 
-    def retrieveShowMetadata(self, dir):
+    def retrieveShowMetadata(self, folder):
 
         empty_return = (None, None)
 
-        metadata_path = ek.ek(os.path.join, dir, self._show_file_name)
+        metadata_path = ek.ek(os.path.join, folder, self._show_file_name)
 
-        if not ek.ek(os.path.isdir, dir) or not ek.ek(os.path.isfile, metadata_path):
+        if not ek.ek(os.path.isdir, folder) or not ek.ek(os.path.isfile, metadata_path):
             logger.log(u"Can't load the metadata file from " + repr(metadata_path) + ", it doesn't exist", logger.DEBUG)
             return empty_return
 
-        logger.log(u"Loading show info from metadata file in " + dir, logger.DEBUG)
+        logger.log(u"Loading show info from metadata file in " + folder, logger.DEBUG)
 
         try:
             xmlFileObj = ek.ek(open, metadata_path, 'r')

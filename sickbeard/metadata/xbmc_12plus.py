@@ -1,4 +1,3 @@
-# Author: Nic Wolfe <nic@wolfeden.ca>
 # URL: http://code.google.com/p/sickbeard/
 #
 # This file is part of Sick Beard.
@@ -16,23 +15,14 @@
 # You should have received a copy of the GNU General Public License
 # along with Sick Beard.  If not, see <http://www.gnu.org/licenses/>.
 
-import os
-
 import generic
+import xbmc
+import os
 
 from sickbeard import encodingKludge as ek
 
 
-class PS3Metadata(generic.GenericMetadata):
-    """
-    Metadata generation class for Sony PS3.
-
-    The following file structure is used:
-
-    show_root/cover.jpg                                      (poster)
-    show_root/Season 01/show - 1x01 - episode.avi            (existing video)
-    show_root/Season 01/show - 1x01 - episode.avi.cover.jpg  (episode thumb)
-    """
+class XBMC_12PLUS(xbmc.XBMCMetadata):
 
     def __init__(self,
                  show_metadata=False,
@@ -50,46 +40,55 @@ class PS3Metadata(generic.GenericMetadata):
                                          episode_thumbnails,
                                          season_thumbnails)
 
-        self.banner_name = self.poster_name = 'cover.jpg'
+        self.banner_name = "banner.jpg"
+        self.poster_name = "poster.jpg"
 
-        self.name = 'Sony PS3'
+        self.name = 'XBMC 12+'
 
-        self.eg_show_metadata = "<i>not supported</i>"
-        self.eg_episode_metadata = "<i>not supported</i>"
-        self.eg_fanart = "<i>not supported</i>"
-        self.eg_poster = "cover.jpg"
-        self.eg_episode_thumbnails = "Season##\\<i>filename</i>.ext.cover.jpg"
-        self.eg_season_thumbnails = "<i>not supported</i>"
+        self.eg_show_metadata = "tvshow.nfo"
+        self.eg_episode_metadata = "Season##\\<i>filename</i>.nfo"
+        self.eg_fanart = "fanart.jpg"
+        self.eg_poster = "poster.jpg (banner.jpg)"
+        self.eg_episode_thumbnails = "Season##\\<i>filename</i>-thumb.jpg"
+        self.eg_season_thumbnails = "season##-poster.jpg"
 
-    # all of the following are not supported, so do nothing
-    def create_show_metadata(self, show_obj):
-        pass
-
-    def create_episode_metadata(self, ep_obj):
-        pass
-
-    def create_fanart(self, show_obj):
-        pass
-
-    def create_season_thumbs(self, show_obj):
-        pass
+    def get_id(self):
+        return 'xbmc_12plus'
 
     def get_episode_thumb_path(self, ep_obj):
         """
-        Returns the path where the episode thumbnail should be stored. Defaults to
-        the same path as the episode file but with a .cover.jpg extension.
-
+        Returns the path where the episode thumbnail should be stored.
         ep_obj: a TVEpisode instance for which to create the thumbnail
         """
         if ek.ek(os.path.isfile, ep_obj.location):
-            tbn_filename = ep_obj.location + '.cover.jpg'
+
+            tbn_filename = ep_obj.location.rpartition(".")
+
+            if tbn_filename[0] == "":
+                tbn_filename = ep_obj.location + "-thumb.jpg"
+            else:
+                tbn_filename = tbn_filename[0] + "-thumb.jpg"
         else:
             return None
 
         return tbn_filename
 
-    def retrieveShowMetadata(self, folder):
-        return (None, None)
+    def get_season_thumb_path(self, show_obj, season):
+        """
+        Returns the full path to the file for a given season thumb.
 
-# present a standard "interface"
-metadata_class = PS3Metadata
+        show_obj: a TVShow instance for which to generate the path
+        season: a season number to be used for the path. Note that sesaon 0
+                means specials.
+        """
+        # Our specials thumbnail is, well, special
+        if season == 0:
+            season_thumb_file_path = 'season-specials'
+        else:
+            season_thumb_file_path = 'season' + str(season).zfill(2)
+
+        return ek.ek(os.path.join, show_obj.location, season_thumb_file_path + '-poster.jpg')
+
+
+# present a standard "interface" from the module
+metadata_class = XBMC_12PLUS

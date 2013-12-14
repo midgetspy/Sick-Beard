@@ -455,8 +455,8 @@
                                 <span class="component-desc">
                                     #set $m_dict = $metadata.get_metadata_generator_dict()
                                     <select id="metadataType" class="input-medium" >
-                                    #for ($cur_name, $cur_generator) in $m_dict.items():
-                                        <option value="$GenericMetadata.makeID($cur_name)">$cur_name</option>
+                                    #for ($cur_name, $cur_generator) in sorted($m_dict.items()):
+                                        <option value="$cur_generator.get_id()">$cur_name</option>
                                     #end for
                                     </select>
                                 </span>
@@ -466,7 +466,7 @@
 
 #for ($cur_name, $cur_generator) in $m_dict.items(): 
 #set $cur_metadata_inst = $sickbeard.metadata_provider_dict[$cur_generator.name]
-#set $cur_id = $GenericMetadata.makeID($cur_name)
+#set $cur_id = $cur_generator.get_id()
 <div class="metadataDiv clearfix" id="$cur_id">
     <div class="metadata-options-wrapper">
         <h4>Create:</h4>
