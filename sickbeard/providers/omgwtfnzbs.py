@@ -113,7 +113,7 @@ class OmgwtfnzbsCache(tvcache.TVCache):
                   'eng': 1,
                   'catid': '19,20'} # SD,HD
 
-        url = 'http://rss.omgwtfnzbs.org/rss-download.php?' + urllib.urlencode(params)
+        url = 'https://rss.omgwtfnzbs.org/rss-download.php?' + urllib.urlencode(params)
         logger.log(u"omgwtfnzbs cache update URL: " + url, logger.DEBUG)
         return self.provider.getURL(url)
 
