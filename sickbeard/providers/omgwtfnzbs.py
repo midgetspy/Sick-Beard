@@ -38,7 +38,7 @@ class OmgwtfnzbsProvider(generic.NZBProvider):
     def __init__(self):
         generic.NZBProvider.__init__(self, "omgwtfnzbs")
         self.cache = OmgwtfnzbsCache(self)
-        self.url = 'http://omgwtfnzbs.org/'
+        self.url = 'https://omgwtfnzbs.org/'
         self.supportsBacklog = True
 
     def isEnabled(self):
