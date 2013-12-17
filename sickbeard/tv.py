@@ -227,6 +227,7 @@ class TVShow(object):
             logger.log(str(self.tvdbid) + u": Show dir doesn't exist, skipping NFO generation")
             return False
 
+        logger.log(str(self.tvdbid) + u": Writing NFOs for show")
         for cur_provider in sickbeard.metadata_provider_dict.values():
             result = cur_provider.create_show_metadata(self) or result
 

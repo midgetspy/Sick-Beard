@@ -111,6 +111,15 @@ class XBMCMetadata(generic.GenericMetadata):
         if myShow["rating"] != None:
             rating.text = myShow["rating"]
 
+        year = etree.SubElement(tv_node, "year")
+        if myShow["firstaired"] != None:
+            try:
+                year_text = str(datetime.datetime.strptime(myShow["firstaired"], '%Y-%m-%d').year)
+                if year_text:
+                    year.text = year_text
+            except:
+                pass
+
         plot = etree.SubElement(tv_node, "plot")
         if myShow["overview"] != None:
             plot.text = myShow["overview"]
@@ -133,7 +142,7 @@ class XBMCMetadata(generic.GenericMetadata):
 
         genre = etree.SubElement(tv_node, "genre")
         if myShow["genre"] != None:
-            genre.text = " / ".join([x for x in myShow["genre"].split('|') if x])
+                genre.text = " / ".join([x for x in myShow["genre"].split('|') if x])
 
         premiered = etree.SubElement(tv_node, "premiered")
         if myShow["firstaired"] != None:
@@ -142,6 +151,7 @@ class XBMCMetadata(generic.GenericMetadata):
         studio = etree.SubElement(tv_node, "studio")
         if myShow["network"] != None:
             studio.text = myShow["network"]
+
         for actor in myShow['_actors']:
             cur_actor = etree.SubElement(tv_node, "actor")
             cur_actor_name = etree.SubElement(cur_actor, "name")
@@ -223,11 +233,18 @@ class XBMCMetadata(generic.GenericMetadata):
             if curEpToWrite.name != None:
                 title.text = curEpToWrite.name
 
+            showtitle = etree.SubElement(episode, "showtitle")
+            if curEpToWrite.show.name != None:
+                showtitle.text = curEpToWrite.show.name
+
             season = etree.SubElement(episode, "season")
             season.text = str(curEpToWrite.season)
 
             episodenum = etree.SubElement(episode, "episode")
             episodenum.text = str(curEpToWrite.episode)
+
+            uniqueid = etree.SubElement(episode, "uniqueid")
+            uniqueid.text = str(curEpToWrite.tvdbid)
 
             aired = etree.SubElement(episode, "aired")
             if curEpToWrite.airdate != datetime.date.fromordinal(1):
@@ -239,14 +256,19 @@ class XBMCMetadata(generic.GenericMetadata):
             if curEpToWrite.description != None:
                 plot.text = curEpToWrite.description
 
+            runtime = etree.SubElement(episode, "runtime")
+            if curEpToWrite.season != 0:
+                if myShow["runtime"] != None:
+                    runtime.text = myShow["runtime"]
+
             displayseason = etree.SubElement(episode, "displayseason")
-            if myEp.has_key('airsbefore_season'):
+            if 'airsbefore_season' in myEp:
                 displayseason_text = myEp['airsbefore_season']
                 if displayseason_text != None:
                     displayseason.text = displayseason_text
 
             displayepisode = etree.SubElement(episode, "displayepisode")
-            if myEp.has_key('airsbefore_episode'):
+            if 'airsbefore_episode' in myEp:
                 displayepisode_text = myEp['airsbefore_episode']
                 if displayepisode_text != None:
                     displayepisode.text = displayepisode_text
