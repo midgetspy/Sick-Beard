@@ -62,11 +62,11 @@ $(document).ready(function () {
     }
 
     function fill_abd_examples() {
-    	if (!$('#naming_custom_abd').prop('checked')) {
-    		$('#naming_abd_pattern').qtip('hide');
-    		return;
-    	}
-    	
+        if (!$('#naming_custom_abd').prop('checked')) {
+            $('#naming_abd_pattern').qtip('hide');
+            return;
+        }
+
         var pattern = $('#naming_abd_pattern').val();
 
         $.get(sbRoot + '/config/postProcessing/testNaming', {pattern: pattern, abd: 'True'},
@@ -171,7 +171,7 @@ $(document).ready(function () {
     setup_abd_naming();
 
     // -- start of metadata options div toggle code --
-    $('#metadataType').change(function () {
+    $('#metadataType').on('change keyup', function () {
         $(this).showHideMetadata();
     });
 
@@ -187,7 +187,7 @@ $(document).ready(function () {
             }
         });
     };
-    //initalize to show the div
+    //initialize to show the div
     $(this).showHideMetadata();
     // -- end of metadata options div toggle code --
 
