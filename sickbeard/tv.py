@@ -702,7 +702,7 @@ class TVShow(object):
 
     def loadNFO(self):
 
-        if not os.path.isdir(self._location):
+        if not ek.ek(os.path.isdir, self._location):
             logger.log(str(self.tvdbid) + u": Show dir doesn't exist, can't load NFO")
             raise exceptions.NoNFOException("The show dir doesn't exist, no NFO could be loaded")
 
@@ -1257,7 +1257,7 @@ class TVEpisode(object):
 
     def loadFromNFO(self, location):
 
-        if not os.path.isdir(self.show._location):
+        if not ek.ek(os.path.isdir, self.show._location):
             logger.log(str(self.show.tvdbid) + u": The show dir is missing, not bothering to try loading the episode NFO")
             return
 
