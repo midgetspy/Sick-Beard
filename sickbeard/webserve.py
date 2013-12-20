@@ -2684,7 +2684,7 @@ class Home:
                     epObj.status = int(status)
                     epObj.saveToDB()
 
-        msg = "Backlog was automatically started for the following seasons of <b>"+showObj.name+"</b>:<br />"
+        msg = "Backlog was automatically started for the following seasons of <b>" + showObj.name + "</b>:<br /><ul>"
         for cur_segment in segment_list:
             msg += "<li>Season "+str(cur_segment)+"</li>"
             logger.log(u"Sending backlog for "+showObj.name+" season "+str(cur_segment)+" because some eps were set to wanted")
