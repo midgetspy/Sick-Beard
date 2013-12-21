@@ -18,6 +18,7 @@
 
 import sickbeard
 
+from datetime import datetime
 from sickbeard import logger, common
 from sickbeard.exceptions import ex
 
@@ -49,7 +50,7 @@ class TwitterNotifier:
             self._notifyTwitter(common.notifyStrings[common.NOTIFY_DOWNLOAD]+': '+ep_name)
 
     def test_notify(self):
-        return self._notifyTwitter("This is a test notification from Sick Beard", force=True)
+        return self._notifyTwitter("["+ str(datetime.now()) + " ]This is a test notification from Sick Beard", force=True)
 
     def _get_authorization(self):
     
