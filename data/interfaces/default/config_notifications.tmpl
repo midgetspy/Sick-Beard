@@ -822,6 +822,23 @@
                                 </label>
                             </div>
                             <div class="field-pair">
+                                <input type="checkbox" class="enabler" name="twitter_use_mention" id="twitter_use_mention" #if $sickbeard.TWITTER_USE_MENTION then "checked=\"checked\"" else ""# />
+                                <label class="clearfix" for="twitter_use_mention">
+                                    <span class="component-title">Mention an account</span>
+                                    <span class="component-desc">Include a mention of a twitter user in notifications?</span>
+                                </label>
+                            </div>
+                            <div class="field-pair" id="content_twitter_use_mention">
+                                <label class="nocheck clearfix">
+                                       <span class="component-title">Username:</span>
+                                    <input type="text" name="twitter_mention_username" id="twitter_mention_username" value="$sickbeard.TWITTER_MENTION_USERNAME" size="35" />
+                                </label>
+                                <label class="nocheck clearfix">
+                                    <span class="component-title">&nbsp;</span>
+                                    <span class="component-desc">Username to mention in notifications</span>
+                                </label>
+                            </div>                                                        
+                            <div class="field-pair">
                                 <label class="clearfix">
                                     <span class="component-title">Step One</span>
                                 </label>

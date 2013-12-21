@@ -130,6 +130,9 @@ class TwitterNotifier:
     
         if not sickbeard.USE_TWITTER and not force:
             return False
+
+        if sickbeard.TWITTER_USE_MENTION:
+            message += ' @' + sickbeard.TWITTER_MENTION_USERNAME
     
         return self._send_tweet(prefix+": "+message)
 
