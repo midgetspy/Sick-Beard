@@ -1389,7 +1389,8 @@ class ConfigNotifications:
         sickbeard.TWITTER_NOTIFY_ONSNATCH = twitter_notify_onsnatch
         sickbeard.TWITTER_NOTIFY_ONDOWNLOAD = twitter_notify_ondownload
         sickbeard.TWITTER_USE_MENTION = twitter_use_mention == "on"
-        sickbeard.TWITTER_MENTION_USERNAME = twitter_mention_username
+        #cleanup any whitespace and the @ sign, if they included it.
+        sickbeard.TWITTER_MENTION_USERNAME = twitter_mention_username.strip().strip('@').strip() 
 
         sickbeard.USE_BOXCAR = use_boxcar
         sickbeard.BOXCAR_NOTIFY_ONSNATCH = boxcar_notify_onsnatch
