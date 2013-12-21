@@ -1126,7 +1126,7 @@ def save_config():
     new_config['Twitter']['twitter_username'] = TWITTER_USERNAME
     new_config['Twitter']['twitter_password'] = TWITTER_PASSWORD
     new_config['Twitter']['twitter_prefix'] = TWITTER_PREFIX
-    new_config['Twitter']['twitter_use_mention'] = TWITTER_USE_MENTION
+    new_config['Twitter']['twitter_use_mention'] = int(TWITTER_USE_MENTION)
     new_config['Twitter']['twitter_mention_username'] = TWITTER_MENTION_USERNAME
 
     new_config['Boxcar'] = {}
