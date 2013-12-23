@@ -1473,7 +1473,7 @@ class ConfigHidden:
 
         sickbeard.ANON_REDIRECT = anon_redirect
         sickbeard.GIT_PATH = git_path
-        sickbeard.EXTRA_SCRIPTS = extra_scripts.split('|')
+        sickbeard.EXTRA_SCRIPTS = [x.strip() for x in extra_scripts.split('|') if x.strip()]
         sickbeard.CREATE_MISSING_SHOW_DIRS = create_missing_show_dirs
         sickbeard.ADD_SHOWS_WO_DIR = add_shows_wo_dir
         sickbeard.IGNORE_WORDS = ignore_words
