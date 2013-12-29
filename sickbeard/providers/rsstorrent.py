@@ -132,7 +132,7 @@ class TorrentRssProvider(generic.TorrentProvider):
             self.session = requests.Session()
         
         try:
-            response = self.session.get(url)
+            response = self.session.get(url, verify=False)
         except (requests.exceptions.ConnectionError, requests.exceptions.HTTPError), e:
             logger.log(u"Error loading "+self.name+" URL: " + ex(e), logger.ERROR)
             return None
