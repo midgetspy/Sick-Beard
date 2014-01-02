@@ -49,7 +49,9 @@ class QualityTests(unittest.TestCase):
     def test_RAWHDTV(self):
         self.assertEqual(common.Quality.RAWHDTV, common.Quality.nameQuality("Test.Show.S01E02.720p.HDTV.DD5.1.MPEG2-GROUP"))
         self.assertEqual(common.Quality.RAWHDTV, common.Quality.nameQuality("Test.Show.S01E02.1080i.HDTV.DD2.0.MPEG2-GROUP"))
-        #self.assertEqual(common.Quality.RAWHDTV, common.Quality.nameQuality("Test Show - S01E02 - 1080i HDTV MPA1.0 H.264 - GROUP")) # TODO: add support or leave mpeg only?
+        self.assertEqual(common.Quality.RAWHDTV, common.Quality.nameQuality("Test.Show.S01E02.1080i.HDTV.H.264.DD2.0-GROUP"))
+        self.assertEqual(common.Quality.RAWHDTV, common.Quality.nameQuality("Test Show - S01E02 - 1080i HDTV MPA1.0 H.264 - GROUP"))
+        self.assertEqual(common.Quality.RAWHDTV, common.Quality.nameQuality("Test.Show.S01E02.1080i.HDTV.DD.5.1.h264-GROUP"))
 
     def test_FULLHDTV(self):
         self.assertEqual(common.Quality.FULLHDTV, common.Quality.nameQuality("Test.Show.S01E02.1080p.HDTV.x264-GROUP"))
