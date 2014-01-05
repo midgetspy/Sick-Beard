@@ -425,13 +425,13 @@ class MediaBrowserMetadata(generic.GenericMetadata):
                 # append data from (if any) related episodes
                 EpisodeNumberEnd.text = str(curEpToWrite.episode)
 
-                if curEpToWrite.name != None:
+                if curEpToWrite.name:
                     if not EpisodeName.text:
                         EpisodeName.text = curEpToWrite.name
                     else:
                         EpisodeName.text = EpisodeName.text + ", " + curEpToWrite.name
 
-                if curEpToWrite.description != None and curEpToWrite.description != "":
+                if curEpToWrite.description:
                     if not Overview.text:
                         Overview.text = curEpToWrite.description
                     else:
