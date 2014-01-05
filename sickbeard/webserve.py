@@ -2850,8 +2850,7 @@ class WebInterface:
 
     @cherrypy.expose
     def index(self):
-
-        redirect("/home")
+        redirect("/home", 301)
 
     @cherrypy.expose
     def showPoster(self, show=None, which=None):
