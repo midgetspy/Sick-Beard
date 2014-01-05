@@ -231,8 +231,9 @@ class TIVOMetadata(generic.GenericMetadata):
                     rating = float(myShow['rating'])
                 except ValueError:
                     rating = 0.0
-                # only whole numbers or half numbers work, hence we round
-                rating = round(rating / 10.0 * 4)
+                # convert 10 to 4 star rating. 4 * rating / 10
+                # only whole numbers or half numbers work. multiply by 2, round, divide by 2.0
+                rating = round(8 * rating / 10) / 2.0
                 data += ("starRating : " + str(rating) + "\n")
 
             # This is shown on both the Program screen and the Details screen.
