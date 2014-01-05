@@ -23,6 +23,19 @@ from sickbeard import encodingKludge as ek
 
 
 class XBMC_12PLUS(xbmc.XBMCMetadata):
+    """
+    Metadata generation class for XBMC 12+.
+
+    The following file structure is used:
+
+    show_root/tvshow.nfo                    (show metadata)
+    show_root/poster.jpg                    (poster)
+    show_root/fanart.jpg                    (fanart)
+    show_root/season##-poster.jpg           (season thumb)
+    show_root/Season ##/filename.ext        (*)
+    show_root/Season ##/filename.nfo        (episode metadata)
+    show_root/Season ##/filename-thumb.jpg  (episode thumb)
+    """
 
     def __init__(self,
                  show_metadata=False,
