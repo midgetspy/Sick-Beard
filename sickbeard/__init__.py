@@ -1170,6 +1170,12 @@ def save_config():
     new_config['Trakt']['trakt_username'] = TRAKT_USERNAME
     new_config['Trakt']['trakt_password'] = TRAKT_PASSWORD
     new_config['Trakt']['trakt_api'] = TRAKT_API
+    
+    new_config['BetaSeries'] = {}
+    new_config['BetaSeries']['use_betaseries'] = int(USE_BETASERIES)
+    new_config['BetaSeries']['betaseries_username'] = BETASERIES_USERNAME
+    new_config['BetaSeries']['betaseries_password'] = BETASERIES_PASSWORD
+    new_config['BetaSeries']['betaseries_api'] = BETASERIES_API
 
     new_config['pyTivo'] = {}
     new_config['pyTivo']['use_pytivo'] = int(USE_PYTIVO)
