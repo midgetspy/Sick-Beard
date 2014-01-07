@@ -1172,6 +1172,7 @@ class ConfigNotifications:
                           use_nmj=None, nmj_host=None, nmj_database=None, nmj_mount=None, use_synoindex=None,
                           use_nmjv2=None, nmjv2_host=None, nmjv2_dbloc=None, nmjv2_database=None,
                           use_trakt=None, trakt_username=None, trakt_password=None, trakt_api=None,
+                          use_betaseries=None, betaseries_username=None, betaseries_password=None,
                           use_pytivo=None, pytivo_notify_onsnatch=None, pytivo_notify_ondownload=None, pytivo_update_library=None,
                           pytivo_host=None, pytivo_share_name=None, pytivo_tivo_name=None,
                           use_nma=None, nma_notify_onsnatch=None, nma_notify_ondownload=None, nma_api=None, nma_priority=0 ):
@@ -1319,6 +1320,11 @@ class ConfigNotifications:
         else:
             use_trakt = 0
 
+        if use_betaseries == "on":
+            use_betaseries = 1
+        else:
+            use_betaseries = 0
+
         if use_pytivo == "on":
             use_pytivo = 1
         else:
@@ -1419,6 +1425,10 @@ class ConfigNotifications:
         sickbeard.TRAKT_USERNAME = trakt_username
         sickbeard.TRAKT_PASSWORD = trakt_password
         sickbeard.TRAKT_API = trakt_api
+
+        sickbeard.USE_BETASERIES = use_betaseries
+        sickbeard.BETASERIES_USERNAME = betaseries_username
+        sickbeard.BETASERIES_PASSWORD = betaseries_password
 
         sickbeard.USE_PYTIVO = use_pytivo
         sickbeard.PYTIVO_NOTIFY_ONSNATCH = pytivo_notify_onsnatch == "off"
@@ -2261,6 +2271,16 @@ class Home:
             return "Test notice sent successfully to Trakt"
         else:
             return "Test notice failed to Trakt"
+
+    @cherrypy.expose
+    def testBetaSeries(self, username=None, password=None):
+        cherrypy.response.headers['Cache-Control'] = "max-age=0,no-cache,no-store"
+
+        result = notifiers.betaseries_notifier.test_notify(username, password)
+        if result:
+            return "Test notice sent successfully to BetaSeries"
+        else:
+            return "Test notice failed to BetaSeries"
 
     @cherrypy.expose
     def testNMA(self, nma_api=None, nma_priority=0):

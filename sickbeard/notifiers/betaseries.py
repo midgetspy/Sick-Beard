@@ -52,7 +52,7 @@ class BetaSeriesNotifier:
 
         self._notifyBetaSeries('episodes/downloaded', {'thetvdb_id': ep_obj.show.tvdbid})
 
-    def test_notify(self, api, username, password):
+    def test_notify(self, username, password):
         """
         Sends a test notification to trakt with the given authentication info and returns a boolean
         representing success.
