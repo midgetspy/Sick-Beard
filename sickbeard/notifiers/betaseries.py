@@ -149,8 +149,8 @@ class BetaSeriesNotifier:
                 url="https://api.betaseries.com/{0}".format(method),
                 data=urllib.urlencode(data),
                 headers={
-                    "User-Agent": "Sickbeard/1.0"},
-                    "X-BetaSeries-Version": "2.2"},
+                    "User-Agent": "Sickbeard/1.0",
+                    "X-BetaSeries-Version": "2.2",
                     "X-BetaSeries-Key": self._api()})
 
         if token:
