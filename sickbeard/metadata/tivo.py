@@ -226,9 +226,9 @@ class TIVOMetadata(generic.GenericMetadata):
                         data += ("vActor : " + actor + "\n")
 
             # This is shown on both the Program screen and the Details screen.
-            if myShow["rating"] != None:
+            if myEp["rating"] != None:
                 try:
-                    rating = float(myShow['rating'])
+                    rating = float(myEp['rating'])
                 except ValueError:
                     rating = 0.0
                 # convert 10 to 4 star rating. 4 * rating / 10
