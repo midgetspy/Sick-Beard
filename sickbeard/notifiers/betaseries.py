@@ -147,11 +147,12 @@ class BetaSeriesNotifier:
         logger.log("betaseries_notifier: building request for {0} with payload {1}".format(method, data), logger.DEBUG)
         request = urllib2.Request(
                 url="https://api.betaseries.com/{0}".format(method),
-                data=urllib.urlencode(data),
                 headers={
                     "User-Agent": "Sickbeard/1.0",
                     "X-BetaSeries-Version": "2.2",
                     "X-BetaSeries-Key": self._api()})
+        if data:
+            request.add_data(urllib.urlencode(data))
 
         if token:
             request.add_header("X-BetaSeries-Token", token)
