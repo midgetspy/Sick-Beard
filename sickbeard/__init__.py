@@ -280,6 +280,9 @@ TRAKT_API = ''
 USE_BETASERIES = False
 BETASERIES_USERNAME = None
 BETASERIES_PASSWORD = None
+# This key is registered for Sick Beard.
+# For your application, please get one at http://www.betaseries.com/api/
+BETASERIES_API = '4c6ad443cfae'
 
 USE_PYTIVO = False
 PYTIVO_NOTIFY_ONSNATCH = False
