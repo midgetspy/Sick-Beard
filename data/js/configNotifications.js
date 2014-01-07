@@ -146,7 +146,7 @@ $(document).ready(function () {
             var JSONData = $.parseJSON(data);
             $('#testNMJv2-result').html(JSONData.message);
             $('#nmjv2_database').val(JSONData.database);
-            
+
             if (JSONData.database) {
                 $('#nmjv2_database').attr('readonly', true);
             } else {
@@ -158,7 +158,7 @@ $(document).ready(function () {
     $('#testNMJv2').click(function () {
         $('#testNMJv2-result').html(loading);
         var nmjv2_host = $("#nmjv2_host").val();
-        
+
         $.get(sbRoot + "/home/testNMJv2", {'host': nmjv2_host},
             function (data){ $('#testNMJv2-result').html(data); });
     });
@@ -171,6 +171,15 @@ $(document).ready(function () {
 
         $.get(sbRoot + "/home/testTrakt", {'api': trakt_api, 'username': trakt_username, 'password': trakt_password},
             function (data) { $('#testTrakt-result').html(data); });
+    });
+
+    $('#testBetaSeries').click(function () {
+        $('#testBetaSeries-result').html(loading);
+        var betaseries_username = $("#betaseries_username").val();
+        var betaseries_password = $("#betaseries_password").val();
+
+        $.get(sbRoot + "/home/testBetaSeries", {'username': betaseries_username, 'password': betaseries_password},
+            function (data) { $('#testBetaSeries-result').html(data); });
     });
 
     $('#testNMA').click(function () {
