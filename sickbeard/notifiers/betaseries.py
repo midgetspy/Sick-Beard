@@ -15,7 +15,7 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with Sick Beard.  If not, see <http://www.gnu.org/licenses/>.
-import urllib2
+import urllib2, urllib
 
 from hashlib import md5
 
@@ -63,9 +63,7 @@ class BetaSeriesNotifier:
 
         Returns: True if the request succeeded, False otherwise
         """
-
-        method = "timeline/home"
-        return self._notifyBetaSeries(method, login=username, password=password)
+        return self._notifyBetaSeries("timeline/home", login=username, password=password)
 
     def _username(self):
         return sickbeard.BETASERIES_USERNAME
@@ -91,7 +89,7 @@ class BetaSeriesNotifier:
 
         Returns: A boolean representing success
         """
-        logger.log("betaseries_notifier: Call method " + method, logger.DEBUG)
+        logger.log("betaseries_notifier: Call method {0}".format(method), logger.DEBUG)
 
         # if the username isn't given then use the config username
         if not login:
@@ -105,7 +103,7 @@ class BetaSeriesNotifier:
         token = None
 
         try:
-            stream = urllib2.urlopen(_requestBetaSeries('members/auth', {"login": login, "password": password}))
+            stream = urllib2.urlopen(self._requestBetaSeries('members/auth', {"login": login, "password": password}))
             auth_resp = stream.read()
             auth_resp = json.loads(auth_resp)
 
@@ -119,23 +117,25 @@ class BetaSeriesNotifier:
             return False
 
 
-        # request the URL from trakt and parse the result as json
+        # request the URL from betaseries and parse the result as json
         try:
-            logger.log("betaseries_notifier: Calling method https://api.betaseries.com/{0}, with data: {1}".format(method, encoded_data), logger.DEBUG)
-            stream = urllib2.urlopen(_requestBetaSeries(method, data, token))
+            stream = urllib2.urlopen(self._requestBetaSeries(method, data, token))
             resp = stream.read()
 
             resp = json.loads(resp)
 
             if resp["errors"]:
                 raise Exception(resp["errors"])
+        except urllib2.URLError, e:
+            error = ''.join(e.readlines())
+            logger.log("betaseries_notifier: Failed method call on {0}: {1} ({2})".format(method, e, error), logger.ERROR)
 
-        except (IOError):
-            logger.log("betaseries_notifier: Failed calling method", logger.ERROR)
+        except IOError:
+            logger.log("betaseries_notifier: Failed calling method {0}".format(method), logger.ERROR)
             return False
 
         if not resp["errors"]:
-            logger.log("betaseries_notifier: Succeeded calling method. Result: {0}".format(resp), logger.DEBUG)
+            logger.log("betaseries_notifier: Succeeded calling {0}. Result: {0}".format(method, resp), logger.DEBUG)
             return True
 
         #TODO: Destroy token.
@@ -144,13 +144,14 @@ class BetaSeriesNotifier:
         return False
 
     def _requestBetaSeries(self, method, data, token = None, version = "2.2"):
+        logger.log("betaseries_notifier: building request for {0} with payload {1}".format(method, data), logger.DEBUG)
         request = urllib2.Request(
-                url="https://api.betaseries.com/{0}",
+                url="https://api.betaseries.com/{0}".format(method),
                 data=urllib.urlencode(data),
-                headers=[
-                    ("User-Agent", "Sickbeard/1.0"),
-                    ("X-BetaSeries-Version", "2.2"),
-                    ("X-BetaSeries-Key", self._api())])
+                headers={
+                    "User-Agent": "Sickbeard/1.0"},
+                    "X-BetaSeries-Version": "2.2"},
+                    "X-BetaSeries-Key": self._api()})
 
         if token:
             request.add_header("X-BetaSeries-Token", token)
