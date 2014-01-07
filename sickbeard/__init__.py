@@ -277,6 +277,13 @@ TRAKT_USERNAME = None
 TRAKT_PASSWORD = None
 TRAKT_API = ''
 
+USE_BETASERIES = False
+BETASERIES_USERNAME = None
+BETASERIES_PASSWORD = None
+# The following key is registered for Sick-Beard.
+# For your application, please get one at http://www.betaseries.com/api/
+BETASERIES_API = 'TBD'
+
 USE_PYTIVO = False
 PYTIVO_NOTIFY_ONSNATCH = False
 PYTIVO_NOTIFY_ONDOWNLOAD = False
