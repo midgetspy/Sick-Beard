@@ -2,15 +2,15 @@
 Document   : jquery.pnotify.default.css
 Created on : Nov 23, 2009, 3:14:10 PM
 Author     : Hunter Perrin
-Version    : 1.2.0
+Version    : 1.2.2
 Link       : http://pinesframework.org/pnotify/
 Description:
 	Default styling for Pines Notify jQuery plugin.
 */
 /* -- Notice */
 .ui-pnotify {
-top: 10px;
-right: 15px;
+top: 25px;
+right: 25px;
 position: absolute;
 height: auto;
 /* Ensures notices are above everything */
@@ -80,4 +80,13 @@ width: 100%;
 .ui-pnotify-history-container .ui-pnotify-history-pulldown {
 display: block;
 margin: 0 auto;
+}
+/* Alternate stack initial positioning. */
+.ui-pnotify.stack-topleft, .ui-pnotify.stack-bottomleft {
+left: 25px;
+right: auto;
+}
+.ui-pnotify.stack-bottomright, .ui-pnotify.stack-bottomleft {
+bottom: 25px;
+top: auto;
 }

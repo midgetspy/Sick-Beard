@@ -40,6 +40,7 @@ from sickbeard import encodingKludge as ek
 from sickbeard import search_queue
 from sickbeard import image_cache
 from sickbeard import naming
+from sickbeard import failed_history
 
 from sickbeard.providers import newznab
 from sickbeard.common import Quality, Overview, statusStrings
@@ -571,7 +572,7 @@ class Manage:
         redirect("/manage")
 
     @cherrypy.expose
-    def failedDownloads(self, limit=100, toRemove=None):
+    def failedDownloads(self, limit=100, toRemove=None, add=None):
 
         myDB = db.DBConnection("failed.db")
 
@@ -579,6 +580,9 @@ class Manage:
             toRemove = toRemove.split("|")
         else:
             toRemove = []
+
+        if add != None and not myDB.select("SELECT * FROM failed WHERE release = ?", [failed_history.prepareFailedName(add)]):
+            failed_history.logFailed(add)
 
         for release in toRemove:
             myDB.action('DELETE FROM failed WHERE release = ?', [release])
@@ -822,7 +826,7 @@ class ConfigSearch:
             use_torrents = 0
 
         if usenet_retention == None:
-            usenet_retention = 200
+            usenet_retention = 500
 
         sickbeard.USE_NZBS = use_nzbs
         sickbeard.USE_TORRENTS = use_torrents
@@ -831,6 +835,10 @@ class ConfigSearch:
         sickbeard.USENET_RETENTION = int(usenet_retention)
 
         sickbeard.DOWNLOAD_PROPERS = download_propers
+        if sickbeard.DOWNLOAD_PROPERS:
+            sickbeard.properFinderScheduler.silent = False
+        else:
+            sickbeard.properFinderScheduler.silent = True
 
         sickbeard.SAB_USERNAME = sab_username
         sickbeard.SAB_PASSWORD = sab_password
@@ -918,6 +926,11 @@ class ConfigPostProcessing:
             delete_failed = 0
 
         sickbeard.PROCESS_AUTOMATICALLY = process_automatically
+        if sickbeard.PROCESS_AUTOMATICALLY:
+            sickbeard.autoPostProcesserScheduler.silent = False
+        else:
+            sickbeard.autoPostProcesserScheduler.silent = True
+
         sickbeard.KEEP_PROCESSED_DIR = keep_processed_dir
         sickbeard.RENAME_EPISODES = rename_episodes
         sickbeard.MOVE_ASSOCIATED_FILES = move_associated_files
@@ -1063,12 +1076,12 @@ class ConfigProviders:
 
     @cherrypy.expose
     def saveProviders(self, nzbs_r_us_uid=None, nzbs_r_us_hash=None, newznab_string='',
-                      omgwtfnzbs_uid=None, omgwtfnzbs_key=None,
+                      omgwtfnzbs_username=None, omgwtfnzbs_apikey=None,
                       tvtorrents_digest=None, tvtorrents_hash=None,
                       torrentleech_key=None,
                       btn_api_key=None,
                       kerews_url=None, kerews_apikey=None, kerews_catIDs=None,
-                      provider_order=None):
+                      provider_order=None, nzbto_user=None, nzbto_pass=None, nzbto_proxy=None):
 
         results = []
 
@@ -1140,6 +1153,8 @@ class ConfigProviders:
                 sickbeard.TORRENTLEECH = curEnabled
             elif curProvider == 'btn':
                 sickbeard.BTN = curEnabled
+            elif curProvider == 'nzbto':
+                sickbeard.NZBTO = curEnabled
             elif curProvider in newznabProviderDict:
                 newznabProviderDict[curProvider].enabled = int(curEnabled)
             else:
@@ -1159,8 +1174,12 @@ class ConfigProviders:
         sickbeard.KEREWS_APIKEY = kerews_apikey
         sickbeard.KEREWS_CATIDS = kerews_catIDs
 
-        sickbeard.OMGWTFNZBS_UID = omgwtfnzbs_uid.strip()
-        sickbeard.OMGWTFNZBS_KEY = omgwtfnzbs_key.strip()
+        sickbeard.NZBTO_USER = nzbto_user.strip()
+        sickbeard.NZBTO_PASS = nzbto_pass.strip()
+        sickbeard.NZBTO_PROXY = nzbto_proxy.strip()
+
+        sickbeard.OMGWTFNZBS_USERNAME = omgwtfnzbs_username.strip()
+        sickbeard.OMGWTFNZBS_APIKEY = omgwtfnzbs_apikey.strip()
 
         sickbeard.PROVIDER_ORDER = provider_list
 
@@ -2730,11 +2749,14 @@ class Home:
             # this is probably the worst possible way to deal with double eps but I've kinda painted myself into a corner here with this stupid database
             ep_result = myDB.select("SELECT * FROM tv_episodes WHERE showid = ? AND season = ? AND episode = ? AND 5=5", [show, epInfo[0], epInfo[1]])
             if not ep_result:
-                logger.log(u"Unable to find an episode for "+curEp+", skipping", logger.WARNING)
+                logger.log(u"Unable to find an episode for " + curEp + ", skipping", logger.WARNING)
                 continue
+
             related_eps_result = myDB.select("SELECT * FROM tv_episodes WHERE location = ? AND episode != ?", [ep_result[0]["location"], epInfo[1]])
 
             root_ep_obj = show_obj.getEpisode(int(epInfo[0]), int(epInfo[1]))
+            root_ep_obj.relatedEps = []
+
             for cur_related_ep in related_eps_result:
                 related_ep_obj = show_obj.getEpisode(int(cur_related_ep["season"]), int(cur_related_ep["episode"]))
                 if related_ep_obj not in root_ep_obj.relatedEps:
@@ -2766,6 +2788,7 @@ class Home:
 
         return json.dumps({'result': 'failure'})
 
+
 class UI:
 
     @cherrypy.expose
@@ -2781,7 +2804,7 @@ class UI:
         messages = {}
         cur_notification_num = 1
         for cur_notification in ui.notifications.get_notifications():
-            messages['notification-'+str(cur_notification_num)] = {'title': cur_notification.title,
+            messages['notification-' + str(cur_notification_num)] = {'title': cur_notification.title,
                                                                    'message': cur_notification.message,
                                                                    'type': cur_notification.type}
             cur_notification_num += 1
@@ -2790,6 +2813,12 @@ class UI:
 
 
 class WebInterface:
+
+    @cherrypy.expose
+    def robots_txt(self):
+        """ Keep web crawlers out """
+        cherrypy.response.headers['Content-Type'] = 'text/plain'
+        return 'User-agent: *\nDisallow: /\n'
 
     @cherrypy.expose
     def index(self):

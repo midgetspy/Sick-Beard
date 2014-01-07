@@ -21,7 +21,7 @@ from __future__ import with_statement
 import os
 import shutil
 
-import sickbeard 
+import sickbeard
 from sickbeard import postProcessor
 from sickbeard import db, helpers, exceptions
 
@@ -30,18 +30,18 @@ from sickbeard.exceptions import ex
 
 from sickbeard import logger
 
-from sickbeard import ui, search_queue
-from sickbeard.common import WANTED, statusStrings
+from sickbeard import failedProcessor
 
 
-def logHelper (logMessage, logLevel=logger.MESSAGE):
+def logHelper(logMessage, logLevel=logger.MESSAGE):
     logger.log(logMessage, logLevel)
     return logMessage + u"\n"
 
-def processDir (dirName, nzbName=None, recurse=False, failed=False):
+
+def processDir(dirName, nzbName=None, recurse=False, failed=False):
     """
     Scans through the files in dirName and processes whatever media files it finds
-    
+
     dirName: The folder name to look in
     nzbName: The NZB name which resulted in this folder being downloaded
     recurse: Boolean for whether we should descend into subfolders or not
@@ -68,16 +68,15 @@ def processDir (dirName, nzbName=None, recurse=False, failed=False):
         return returnStr
 
     if failed:
-        returnStr += logHelper(u"Failed download detected: (" + str(nzbName) + ", " + dirName + ")")
         try:
-            processor = postProcessor.PostProcessor(dirName, nzbName, failed=failed)
+            processor = failedProcessor.FailedProcessor(dirName, nzbName)
             process_result = processor.process()
             process_fail_message = ""
-        except exceptions.PostProcessingFailed, e:
+        except exceptions.FailedProcessingFailed, e:
             process_result = False
             process_fail_message = ex(e)
 
-        returnStr += processor.log 
+        returnStr += processor.log
 
         if sickbeard.DELETE_FAILED and process_result:
             returnStr += logHelper(u"Deleting folder of failed download " + dirName, logger.DEBUG)
@@ -87,9 +86,10 @@ def processDir (dirName, nzbName=None, recurse=False, failed=False):
                 returnStr += logHelper(u"Warning: Unable to remove the failed folder " + dirName + ": " + ex(e), logger.WARNING)
 
         if process_result:
-            returnStr += logHelper(u"Processing succeeded: ("+str(nzbName) + ", " + dirName + ")")
+            returnStr += logHelper(u"Processing succeeded: (" + str(nzbName) + ", " + dirName + ")")
         else:
-            returnStr += logHelper(u"Processing failed: (" + str(nzbName)  + ", " + dirName + "): "+process_fail_message, logger.WARNING)
+            returnStr += logHelper(u"Processing failed: (" + str(nzbName) + ", " + dirName + "): " + process_fail_message, logger.WARNING)
+
         return returnStr
 
     if ek.ek(os.path.basename, dirName).startswith('_UNDERSIZED_'):
@@ -121,7 +121,7 @@ def processDir (dirName, nzbName=None, recurse=False, failed=False):
     remainingFolders = filter(lambda x: ek.ek(os.path.isdir, ek.ek(os.path.join, dirName, x)), fileList)
 
     # If nzbName is set and there's more than one videofile in the folder, files will be lost (overwritten).
-    if nzbName != None and len(videoFiles) >= 2:
+    if nzbName is not None and len(videoFiles) >= 2:
         nzbName = None
 
     # process any files in the dir
@@ -130,14 +130,14 @@ def processDir (dirName, nzbName=None, recurse=False, failed=False):
         cur_video_file_path = ek.ek(os.path.join, dirName, cur_video_file_path)
 
         try:
-            processor = postProcessor.PostProcessor(cur_video_file_path, nzbName, failed=failed)
+            processor = postProcessor.PostProcessor(cur_video_file_path, nzbName)
             process_result = processor.process()
             process_fail_message = ""
         except exceptions.PostProcessingFailed, e:
             process_result = False
             process_fail_message = ex(e)
 
-        returnStr += processor.log 
+        returnStr += processor.log
 
         # as long as the postprocessing was successful delete the old folder unless the config wants us not to
         if process_result:
@@ -154,7 +154,7 @@ def processDir (dirName, nzbName=None, recurse=False, failed=False):
                     returnStr += logHelper(u"Warning: unable to remove the folder " + dirName + ": " + ex(e), logger.WARNING)
 
             returnStr += logHelper(u"Processing succeeded for "+cur_video_file_path)
-            
+
         else:
             returnStr += logHelper(u"Processing failed for "+cur_video_file_path+": "+process_fail_message, logger.WARNING)
 

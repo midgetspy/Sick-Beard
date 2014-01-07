@@ -29,13 +29,13 @@ import datetime
 
 from name_parser.parser import NameParser, InvalidNameException
 
-resultFilters = ["sub(pack|s|bed|\.)", "nlsub(bed|s)?", "swesub(bed)?",
-                 "(dir|sample|nfo)fix", "sample", "(dvd)?extras"]
+resultFilters = ["sub(pack|s|bed|\.|fix)?", "nlsub(bed|s)?", "swesub(bed)?",
+                 "(dir|sample|nfo)fix", "sample", "(dvd)?extras", "fastsub(bed|s)?", "VOSTFR"]
 
 mandatory = []
 
 langCodes = {
-    'de': 'german',
+    'de': 'german OR Videomann',
     'fr': 'french',
     'es': 'spanish'
 }
@@ -57,15 +57,19 @@ def filterBadReleases(name, show):
         logger.log(u"Unable to parse the filename "+name+" into a valid episode", logger.WARNING)
         return False
 
-    #if language not english, search for mandatory, else add german to ignore list
+    #if language not english, search for mandatory
     if show.lang != "en":
-        mandatory = [(langCodes[show.lang])]
+        mandatory = langCodes[show.lang].split(" OR ")
         if langCodes[show.lang] in resultFilters:
             resultFilters.remove(langCodes[show.lang])
         logger.log(u"Language for \""+show.name+"\" is "+show.lang+" so im looking for \""+langCodes[show.lang]+"\" in release names", logger.DEBUG)
+    #if show is in english append all languages to the ignore list
     elif show.lang == "en":
-        if not "german" in resultFilters:
-            resultFilters.append("german")
+        for language in langCodes.values():
+            if not language in resultFilters:
+                resultFilters.append(language)
+        # if not "german" in resultFilters:
+        #     resultFilters.append("german")
         mandatory = []
         logger.log(u"Language for \""+show.name+"\" is "+show.lang, logger.DEBUG)
 
@@ -91,10 +95,13 @@ def filterBadReleases(name, show):
             return False
     # if every of the mandatory words are in there, say yes
     if mandatory:
+        found = False
         for x in mandatory:
             if not re.search('(^|[\W_])'+x+'($|[\W_])', check_string, re.I):
-                logger.log(u"Mandatory string not found: "+name+" doesnt contains "+x+", ignoring it", logger.DEBUG)
-                return False
+                logger.log(u"Mandatory string not found: "+name+" doesnt contain "+x+", ignoring it", logger.DEBUG)
+            else:
+                found = True
+        return found
 
     return True
 
@@ -179,7 +186,8 @@ def makeSceneSeasonSearchString (show, segment, extraSearchType=None):
                     if show.lang == "en":
                         toReturn.append(curShow + "." + cur_season)
                     else:
-                        toReturn.append(curShow + "." + cur_season + " " + langCodes[show.lang]);
+                        for x in langCodes[show.lang].split(" OR "):
+                            toReturn.append(curShow + "." + cur_season + " " + x)
                     # toReturn.append(curShow + "." + cur_season)
 
         # nzbmatrix is special, we build a search string just for them
@@ -229,12 +237,31 @@ def makeSceneSearchString (episode):
     for curShow in showNames:
         for curEpString in epStrings:
             #toReturn.append(curShow + '.' + curEpString)
-            # Adds the target language to the search string if it is not an 'English' title
+            # Adds the target language to the search string if it is not an 'English' title (mostly needed for nzbindex)
             if episode.show.lang == "en":
                 toReturn.append(curShow + "." + curEpString)
             else:
-                toReturn.append(curShow + "." + curEpString + " " + langCodes[episode.show.lang]);
+                for x in langCodes[episode.show.lang].split(" OR "):
+                    toReturn.append(curShow + "." + curEpString + " " + x)
     return toReturn
+
+def trimRelease(name):
+    realname = name
+    #releasetrim = '^<?.* \d{9,} ?-? '
+        #use regex and sub to replace common spam
+    #releasetrim = ['^<?.* \d{9,} ?-? ', '^\.zZz\. "?', '^(.*) >', '^\[\d{5,}.*\[ ', '^\.: ', '^\s?-?\s?\[.+ presents\s?', '^\s+?\[\d{2}\/\d{2}]\s?-?\s?"?', '^>.*<<\s', '^\[.*\[\d{2}/\d{2}\]\s?-\s?"']
+    releasetrim = ['^sof-', '^euhd-', '^amb-', '^itg-', '^idtv-', '^zzgtv-', '^itn-', '^tcpa-', '^tvp-',
+                      '^<?.* \d{9,} ?-? ', '^\.?zZz\.? ("|\')?', '^(.*) >', '^\[\d{5,}.*\[ ', '^\.: ', '^\s?-?\s?\[.+ presents\s?',
+                      '^\s+?\[\d{2}\/\d{2}]\s?-?\s?("|\')?', '^>.*<<\s', '^\[.*\[\d{2}/\d{2}\]\s?-\s?("|\')','^<?.+?\[.*\d{2}] - ("|\')','\[ ?TOWN.*\] - ?','\[\d{2}\/\d{2}\]\s?-\s?"']
+    realname = name
+    for regex in releasetrim:
+        name = re.sub(regex, "", name)
+
+    if realname != name:
+        logger.log(u"REGEX - Releasename: "+realname, logger.DEBUG)
+        logger.log(u"REGEX - Cleaned Releasename: "+name, logger.DEBUG)
+
+    return name
 
 def isGoodResult(name, show, log=True):
     """
@@ -251,14 +278,12 @@ def isGoodResult(name, show, log=True):
 
         #releasetrim = '^<?.* \d{9,} ?-? '
         #use regex and sub to replace common spam
-        releasetrim = ['^<?.* \d{9,} ?-? ','^\.zZz\. "?','^(.*) >','^\[\d{5,}.*\[ ','^\.: ','^\s?-?\s?\[.+ presents\s?','^\s+?\[\d{2}\/\d{2}]\s?-?\s?"?','^>.*<<\s','^\[.*\[\d{2}/\d{2}\]\s?-\s?"']
-        realname = name
-        for regex in releasetrim:
-            name = re.sub(regex, "", name)
-
-        if realname != name:
-            logger.log(u"REGEX - Releasename: "+realname, logger.DEBUG)
-            logger.log(u"REGEX - Cleaned Releasename: "+name, logger.DEBUG)
+        # releasetrim = ['^<?.* \d{9,} ?-? ','^\.zZz\. "?','^(.*) >','^\[\d{5,}.*\[ ','^\.: ','^\s?-?\s?\[.+ presents\s?','^\s+?\[\d{2}\/\d{2}]\s?-?\s?"?','^>.*<<\s','^\[.*\[\d{2}/\d{2}\]\s?-\s?"']
+        # realname = name
+        # for regex in releasetrim:
+        #     name = re.sub(regex, "", name)
+        #
+        name = trimRelease(name)
 
         curRegex = '^' + escaped_name + '\W+(?:(?:S\d[\dE._ -])|(?:\d\d?x)|(?:\d{4}\W\d\d\W\d\d)|(?:(?:part|pt)[\._ -]?(\d|[ivx]))|Season\W+\d+\W+|E\d+\W+)'
         if log:

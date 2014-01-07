@@ -14,7 +14,7 @@
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU General Public License
 # along with Sick Beard.  If not, see <http://www.gnu.org/licenses/>.
 
@@ -22,11 +22,15 @@
 import sys
 import autoProcessTV
 
-if len(sys.argv) < 8:
+if len(sys.argv) < 7:
     print "Not enough arguments received from SABnzbd. Please update it."
     sys.exit()
 else:
-    autoProcessTV.processEpisode(sys.argv[1], sys.argv[2], sys.argv[7])
+    if sys.argv[2].split(".nzb")[0] != sys.argv[3]:
+        print "seems like the release was downloaded from nzbindex useing nzbname/foldername for this one..."
+        autoProcessTV.processEpisode(sys.argv[1], sys.argv[3], sys.argv[7])
+    else:
+        autoProcessTV.processEpisode(sys.argv[1], sys.argv[2], sys.argv[7])
 
 # SABnzbd argv:
 # 1	The final directory of the job (full path)

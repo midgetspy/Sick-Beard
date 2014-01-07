@@ -1,6 +1,6 @@
 $(document).ready(function(){
   $('#submitMassRemove').click(function(){
-  
+
     var removeArr = new Array()
 
     $('.removeCheck').each(function() {
@@ -13,19 +13,18 @@ $(document).ready(function(){
       return false
 
     url = sbRoot + '/manage/failedDownloads?toRemove='+removeArr.join('|')
-    
+
     window.location.href = url
 
   });
 
   $('.bulkCheck').click(function(){
-    
+
     var bulkCheck = this;
     var whichBulkCheck = $(bulkCheck).attr('id');
 
-    $('.'+whichBulkCheck).each(function(){
-        if (!this.disabled)
-            this.checked = !this.checked 
+    $('.'+whichBulkCheck+':visible').each(function(){
+        this.checked = bulkCheck.checked
     });
   });
 
@@ -42,11 +41,10 @@ $(document).ready(function(){
       var check = this;
       var found = 0;
 
-      $(name).each(function() {
+      $(name+':visible').each(function() {
         switch (found) {
           case 2: return false;
-          case 1: 
-            if (!this.disabled)
+          case 1:
               this.checked = lastCheck.checked;
         }
 
@@ -54,9 +52,19 @@ $(document).ready(function(){
           found++;
       });
 
-      lastClick = this;
     });
 
   });
-  
+
+  $('#addFailedRelease').click(function(){
+    releasename = $('#failedRelease').val()
+    if (releasename) {
+      url = sbRoot + '/manage/failedDownloads?add='+releasename
+      window.location.href = url
+    } else {
+      return false
+    }
+
+  })
+
 });

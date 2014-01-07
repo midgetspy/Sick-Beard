@@ -37,7 +37,7 @@ from sickbeard.exceptions import ex
 def sendNZB(nzb):
     """
     Sends an NZB to SABnzbd via the API.
-    
+
     nzb: The NZBSearchResult object to send to SAB
     """
 
@@ -76,7 +76,7 @@ def sendNZB(nzb):
         params['mode'] = 'addfile'
         multiPartParams = {"nzbfile": (nzb.name + ".nzb", nzb.extraInfo[0])}
 
-    if nzb.resultType == "nzb" and nzb.provider.getID() in ['nzbindex','nzbclub']:
+    if nzb.resultType == "nzb" and nzb.provider.getID() in ['nzbindex','nzbclub','nzbto']:
         logger.log(u"Pretty name for SAB queue: " + nzb.name)
         params['nzbname'] = nzb.name
 
@@ -88,12 +88,12 @@ def sendNZB(nzb):
     try:
         #Sometimes (only from nzbindex results?) we have stupid names in sab queue - postprocessing does not work then.
         #Should use &nzbname=NiceName here to send the "real" name to sab.
-        
 
-        # if we have the URL to an NZB then we've built up the SAB API URL already so just call it 
+
+        # if we have the URL to an NZB then we've built up the SAB API URL already so just call it
         if nzb.resultType == "nzb":
             f = urllib.urlopen(url)
-        
+
         # if we are uploading the NZB data to SAB then we need to build a little POST form and send it
         elif nzb.resultType == "nzbdata":
             cookies = cookielib.CookieJar()
@@ -190,7 +190,7 @@ def _sabURLOpenSimple(url):
 
 def getSabAccesMethod(host=None, username=None, password=None, apikey=None):
     url = host + "api?mode=auth"
-    
+
     result, f = _sabURLOpenSimple(url)
     if not result:
         return False, f
@@ -204,15 +204,15 @@ def getSabAccesMethod(host=None, username=None, password=None, apikey=None):
 def testAuthentication(host=None, username=None, password=None, apikey=None):
     """
     Sends a simple API request to SAB to determine if the given connection information is connect
-    
+
     host: The host where SAB is running (incl port)
     username: The username to use for the HTTP request
     password: The password to use for the HTTP request
     apikey: The API key to provide to SAB
-    
+
     Returns: A tuple containing the success boolean and a message
     """
-    
+
     # build up the URL parameters
     params = {}
     params['mode'] = 'queue'
@@ -221,7 +221,7 @@ def testAuthentication(host=None, username=None, password=None, apikey=None):
     params['ma_password'] = password
     params['apikey'] = apikey
     url = host + "api?" + urllib.urlencode(params)
-    
+
     # send the test request
     logger.log(u"SABnzbd test URL: " + url, logger.DEBUG)
     result, f = _sabURLOpenSimple(url)
@@ -232,6 +232,6 @@ def testAuthentication(host=None, username=None, password=None, apikey=None):
     result, sabText = _checkSabResponse(f)
     if not result:
         return False, sabText
-    
+
     return True, "Success"
-    
+

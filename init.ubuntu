@@ -39,7 +39,7 @@ DESC=SickBeard
 ## otherwise default sickbeard is used
 
 ## The defaults
-# Run as username 
+# Run as username
 RUN_AS=${SB_USER-sickbeard}
 
 # Path to app SB_HOME=path_to_app_SickBeard.py
@@ -94,6 +94,7 @@ case "$1" in
         echo "Starting $DESC"
         start-stop-daemon -d $APP_PATH -c $RUN_AS $EXTRA_SSD_OPTS --start --pidfile $PID_FILE --exec $DAEMON -- $DAEMON_OPTS
         ;;
+
     stop)
         echo "Stopping $DESC"
         start-stop-daemon --stop --pidfile $PID_FILE --retry 15
@@ -104,9 +105,37 @@ case "$1" in
         start-stop-daemon --stop --pidfile $PID_FILE --retry 15
         start-stop-daemon -d $APP_PATH -c $RUN_AS $EXTRA_SSD_OPTS --start --pidfile $PID_FILE --exec $DAEMON -- $DAEMON_OPTS
         ;;
+
+    status)
+        # Use LSB function library if it exists
+        if [ -f /lib/lsb/init-functions ]; then
+            . /lib/lsb/init-functions
+
+            if [ -e $PID_FILE ]; then
+                status_of_proc -p $PID_FILE "$DAEMON" "$NAME" && exit 0 || exit $?
+            else
+                log_daemon_msg "$NAME is not running"
+                exit 3
+            fi
+
+        else
+        # Use basic functions
+            if [ -e $PID_FILE ]; then
+                PID=`cat $PID_FILE`
+                if kill -0 $PID > /dev/null 2>&1; then
+                    echo " * $NAME is running"
+                    exit 0
+                fi
+            else
+                echo " * $NAME is not running"
+                exit 3
+            fi
+        fi
+        ;;
+
     *)
         N=/etc/init.d/$NAME
-        echo "Usage: $N {start|stop|restart|force-reload}" >&2
+        echo "Usage: $N {start|stop|restart|force-reload|status}" >&2
         exit 1
         ;;
 esac
