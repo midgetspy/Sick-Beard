@@ -22,7 +22,6 @@ import sickbeard
 
 import generic
 
-from sickbeard.common import XML_NSMAP
 from sickbeard import logger, exceptions, helpers
 from sickbeard.exceptions import ex
 
@@ -32,6 +31,19 @@ import xml.etree.cElementTree as etree
 
 
 class XBMCMetadata(generic.GenericMetadata):
+    """
+    Metadata generation class for XBMC (legacy).
+
+    The following file structure is used:
+
+    show_root/tvshow.nfo              (show metadata)
+    show_root/folder.jpg              (poster)
+    show_root/fanart.jpg              (fanart)
+    show_root/season##.tbn            (season thumb)
+    show_root/Season ##/filename.ext  (*)
+    show_root/Season ##/filename.nfo  (episode metadata)
+    show_root/Season ##/filename.tbn  (episode thumb)
+    """
 
     def __init__(self,
                  show_metadata=False,
@@ -79,8 +91,6 @@ class XBMCMetadata(generic.GenericMetadata):
         t = tvdb_api.Tvdb(actors=True, **ltvdb_api_parms)
 
         tv_node = etree.Element("tvshow")
-        for ns in XML_NSMAP.keys():
-            tv_node.set(ns, XML_NSMAP[ns])
 
         try:
             myShow = t[int(show_ID)]
@@ -155,7 +165,7 @@ class XBMCMetadata(generic.GenericMetadata):
         for actor in myShow['_actors']:
             cur_actor = etree.SubElement(tv_node, "actor")
             cur_actor_name = etree.SubElement(cur_actor, "name")
-            cur_actor_name.text = actor['name']
+            cur_actor_name.text = actor['name'].strip()
             cur_actor_role = etree.SubElement(cur_actor, "role")
             cur_actor_role_text = actor['role']
             if cur_actor_role_text != None:
@@ -201,10 +211,6 @@ class XBMCMetadata(generic.GenericMetadata):
             rootNode = etree.Element("xbmcmultiepisode")
         else:
             rootNode = etree.Element("episodedetails")
-
-        # Set our namespace correctly
-        for ns in XML_NSMAP.keys():
-            rootNode.set(ns, XML_NSMAP[ns])
 
         # write an NFO containing info for all matching episodes
         for curEpToWrite in eps_to_write:
@@ -309,7 +315,7 @@ class XBMCMetadata(generic.GenericMetadata):
                 cur_actor = etree.SubElement(episode, "actor")
 
                 cur_actor_name = etree.SubElement(cur_actor, "name")
-                cur_actor_name.text = actor['name']
+                cur_actor_name.text = actor['name'].strip()
 
                 cur_actor_role = etree.SubElement(cur_actor, "role")
                 cur_actor_role_text = actor['role']

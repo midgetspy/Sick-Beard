@@ -22,7 +22,6 @@ import os
 
 import sickbeard
 
-#from sickbeard.common import *
 from sickbeard import logger, exceptions, helpers
 from sickbeard.metadata import generic
 from sickbeard import encodingKludge as ek
@@ -36,10 +35,10 @@ class TIVOMetadata(generic.GenericMetadata):
 
     The following file structure is used:
 
-    show_root/Season 01/show - 1x01 - episode.avi.txt       (* existing episode)
-    show_root/Season 01/.meta/show - 1x01 - episode.avi.txt (episode metadata)
+    show_root/Season ##/filename.ext            (*)
+    show_root/Season ##/.meta/filename.ext.txt  (episode metadata)
 
-    This class only generates episode specific metadata files, it does NOT generated a default.txt file.
+    This class only generates episode specific metadata files, it does NOT generate a default.txt file.
     """
 
     def __init__(self,
@@ -69,11 +68,23 @@ class TIVOMetadata(generic.GenericMetadata):
         self.eg_episode_thumbnails = "<i>not supported</i>"
         self.eg_season_thumbnails = "<i>not supported</i>"
 
-    # Override with empty methods for unsupported features.
+    # Override with empty methods for unsupported features
     def create_show_metadata(self, show_obj):
         pass
 
     def create_fanart(self, show_obj):
+        pass
+
+    def create_banner(self, show_obj):
+        pass
+
+    def create_poster(self, show_obj):
+        pass
+
+    def create_episode_thumb(self, ep_obj):
+        pass
+
+    def create_season_thumbs(self, ep_obj):
         pass
 
     def get_episode_thumb_path(self, ep_obj):
@@ -143,7 +154,7 @@ class TIVOMetadata(generic.GenericMetadata):
         except tvdb_exceptions.tvdb_shownotfound, e:
             raise exceptions.ShowNotFoundException(str(e))
         except tvdb_exceptions.tvdb_error, e:
-            logger.log("Unable to connect to TVDB while creating meta files - skipping - " + str(e), logger.ERROR)
+            logger.log(u"Unable to connect to TVDB while creating meta files - skipping - " + str(e), logger.ERROR)
             return False
 
         for curEpToWrite in eps_to_write:
@@ -151,7 +162,7 @@ class TIVOMetadata(generic.GenericMetadata):
             try:
                 myEp = myShow[curEpToWrite.season][curEpToWrite.episode]
             except (tvdb_exceptions.tvdb_episodenotfound, tvdb_exceptions.tvdb_seasonnotfound):
-                logger.log("Unable to find episode " + str(curEpToWrite.season) + "x" + str(curEpToWrite.episode) + " on tvdb... has it been removed? Should I delete from db?")
+                logger.log(u"Unable to find episode " + str(curEpToWrite.season) + "x" + str(curEpToWrite.episode) + " on tvdb... has it been removed? Should I delete from db?")
                 return None
 
             if myEp["firstaired"] == None and ep_obj.season == 0:
@@ -161,18 +172,9 @@ class TIVOMetadata(generic.GenericMetadata):
                 return None
 
             if myShow["seriesname"] != None:
-
-                # Title of the series (The Simpsons, Seinfeld, etc.) or title of the movie (The Mummy, Spiderman, etc).
                 data += ("title : " + myShow["seriesname"] + "\n")
-
-                # Name of series (The Simpsons, Seinfeld, etc.). This should be included if the show is episodic.
-                # For movies, you may repeat the name of the movie (The Mummy, Spiderman, etc), leave blank, or omit.
                 data += ("seriesTitle : " + myShow["seriesname"] + "\n")
 
-            # Title of the episode (Pilot, Homer's Night Out, Episode 02, etc.) Should be included for episodic shows.
-            # Leave blank or omit for movies.
-            #
-            # Added season episode to title, so that the shows will sort correctly, as often the date information is wrong
             data += ("episodeTitle : " + curEpToWrite._format_pattern('%Sx%0E %EN') + "\n")
 
             # This should be entered for episodic shows and omitted for movies. The standard tivo format is to enter
@@ -223,14 +225,15 @@ class TIVOMetadata(generic.GenericMetadata):
                     if actor:
                         data += ("vActor : " + actor + "\n")
 
-            # This is shown on both the Program screen and the Details screen. It uses a single digit to determine the
-            # number of stars: 1 for 1 star, 7 for 4 stars
-            if myShow["rating"] != None:
+            # This is shown on both the Program screen and the Details screen.
+            if myEp["rating"] != None:
                 try:
-                    rating = float(myShow['rating'])
+                    rating = float(myEp['rating'])
                 except ValueError:
                     rating = 0.0
-                rating = rating / 10 * 4
+                # convert 10 to 4 star rating. 4 * rating / 10
+                # only whole numbers or half numbers work. multiply by 2, round, divide by 2.0
+                rating = round(8 * rating / 10) / 2.0
                 data += ("starRating : " + str(rating) + "\n")
 
             # This is shown on both the Program screen and the Details screen.
@@ -278,7 +281,7 @@ class TIVOMetadata(generic.GenericMetadata):
 
         try:
             if not ek.ek(os.path.isdir, nfo_file_dir):
-                logger.log("Metadata dir didn't exist, creating it at " + nfo_file_dir, logger.DEBUG)
+                logger.log(u"Metadata dir didn't exist, creating it at " + nfo_file_dir, logger.DEBUG)
                 ek.ek(os.makedirs, nfo_file_dir)
                 helpers.chmodAsParent(nfo_file_dir)
 

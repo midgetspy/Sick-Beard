@@ -36,21 +36,17 @@ import xml.etree.cElementTree as etree
 
 class SynologyMetadata(generic.GenericMetadata):
     """
-    Metadata generation class for Synology. All xml formatting and
-    file naming information was contributed by users in the following
-    ticket's comments:
-
-    http://code.google.com/p/sickbeard/issues/detail?id=311
+    Metadata generation class for Synology.
 
     The following file structure is used:
 
-    show_root/series.xml                           (show metadata)
-    show_root/folder.jpg                           (poster)
-    show_root/backdrop.jpg                         (fanart)
-    show_root/Season 01/folder.jpg                 (season thumb)
-    show_root/Season 01/show - 1x01 - episode.avi  (* example of existing ep of course)
-    show_root/Season 01/show - 1x01 - episode.xml  (episode metadata)
-    show_root/Season 01/show - 1x01 - episode.jpg  (episode thumb)
+    show_root/series.xml              (show metadata)
+    show_root/folder.jpg              (poster)
+    show_root/backdrop.jpg            (fanart)
+    show_root/Season ##/folder.jpg    (season thumb)
+    show_root/Season ##/filename.ext  (*)
+    show_root/Season ##/filename.xml  (episode metadata)
+    show_root/Season ##/filename.jpg  (episode thumb)
     """
 
     def __init__(self,
