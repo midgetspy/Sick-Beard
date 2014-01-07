@@ -54,6 +54,7 @@ nma_notifier = nma.NMA_Notifier()
 # online
 twitter_notifier = tweet.TwitterNotifier()
 trakt_notifier = trakt.TraktNotifier()
+betaseries_notifier = betaseries.BetaSeriesNotifier()
 
 notifiers = [
     libnotify_notifier, # Libnotify notifier goes first because it doesn't involve blocking on network activity.
@@ -70,6 +71,7 @@ notifiers = [
     nma_notifier,
     twitter_notifier,
     trakt_notifier,
+    betaseries_notifier,
 ]
 
 
