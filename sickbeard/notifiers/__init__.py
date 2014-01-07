@@ -34,6 +34,7 @@ import nma
 
 import tweet
 import trakt
+import betaseries
 
 from sickbeard.common import *
 
