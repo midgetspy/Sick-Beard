@@ -135,7 +135,7 @@ class BetaSeriesNotifier:
             return False
 
         if not resp["errors"]:
-            logger.log("betaseries_notifier: Succeeded calling {0}. Result: {0}".format(method, resp), logger.DEBUG)
+            logger.log("betaseries_notifier: Succeeded calling {0}. Result: {1}".format(method, resp), logger.DEBUG)
             return True
 
         #TODO: Destroy token.
