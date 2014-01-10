@@ -41,7 +41,7 @@ $(document).ready(function()
 
     is_alive();
     
-    $('#shut_down_message').ajaxError(function(e, jqxhr, settings, exception) {
+    $(document).ajaxError(function(e, jqxhr, settings, exception) {
         num_restart_waits += 1;
 
         $('#shut_down_loading').hide();
