@@ -1980,10 +1980,10 @@ class TVEpisode(object):
             logger.log(str(self.tvdbid) + u": File " + self.location + " is already named correctly, skipping", logger.DEBUG)
             return
 
-        related_files = postProcessor.PostProcessor(self.location)._list_associated_files(self.location)
+        related_files = postProcessor.PostProcessor(self.location).list_associated_files(self.location)
 
         if self.show.subtitles and sickbeard.SUBTITLES_DIR != '':
-            related_subs = postProcessor.PostProcessor(self.location)._list_associated_files(sickbeard.SUBTITLES_DIR, subtitles_only=True)
+            related_subs = postProcessor.PostProcessor(self.location).list_associated_files(sickbeard.SUBTITLES_DIR, subtitles_only=True)
             absolute_proper_subs_path = ek.ek(os.path.join, sickbeard.SUBTITLES_DIR, self.formatted_filename())
             
         logger.log(u"Files associated to " + self.location + ": " + str(related_files), logger.DEBUG)
