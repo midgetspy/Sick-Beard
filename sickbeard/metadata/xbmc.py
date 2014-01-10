@@ -109,6 +109,15 @@ class XBMCMetadata(generic.GenericMetadata):
         rating = etree.SubElement(tv_node, "rating")
         if myShow["rating"] != None:
             rating.text = myShow["rating"]
+            
+        year = etree.SubElement(tv_node, "year")
+        if myShow["firstaired"] != None:
+            try:
+                year_text = str(datetime.datetime.strptime(myShow["firstaired"], '%Y-%m-%d').year)
+                if year_text:
+                    year.text = year_text
+            except:
+                pass            
 
         plot = etree.SubElement(tv_node, "plot")
         if myShow["overview"] != None:
@@ -229,12 +238,19 @@ class XBMCMetadata(generic.GenericMetadata):
             title = etree.SubElement( episode, "title" )
             if curEpToWrite.name != None:
                 title.text = curEpToWrite.name
+                
+            showtitle = etree.SubElement(episode, "showtitle")
+            if curEpToWrite.show.name != None:
+                showtitle.text = curEpToWrite.show.name
 
             season = etree.SubElement( episode, "season" )
             season.text = str(curEpToWrite.season)
 
             episodenum = etree.SubElement( episode, "episode" )
             episodenum.text = str(curEpToWrite.episode)
+            
+            uniqueid = etree.SubElement(episode, "uniqueid")
+            uniqueid.text = str(curEpToWrite.tvdbid)
 
             aired = etree.SubElement( episode, "aired" )
             if curEpToWrite.airdate != datetime.date.fromordinal(1):
@@ -246,14 +262,19 @@ class XBMCMetadata(generic.GenericMetadata):
             if curEpToWrite.description != None:
                 plot.text = curEpToWrite.description
 
+            runtime = etree.SubElement(episode, "runtime")
+            if curEpToWrite.season != 0:
+                if myShow["runtime"] != None:
+                    runtime.text = myShow["runtime"]
+
             displayseason = etree.SubElement( episode, "displayseason" )
-            if myEp.has_key('airsbefore_season'):
+            if 'airsbefore_season' in myEp:
                 displayseason_text = myEp['airsbefore_season']
                 if displayseason_text != None:
                     displayseason.text = displayseason_text
 
             displayepisode = etree.SubElement( episode, "displayepisode" )
-            if myEp.has_key('airsbefore_episode'):
+            if 'airsbefore_episode' in myEp:
                 displayepisode_text = myEp['airsbefore_episode']
                 if displayepisode_text != None:
                     displayepisode.text = displayepisode_text
