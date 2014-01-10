@@ -294,6 +294,10 @@ class ConfigMigrator():
         """
         Calls each successive migration until the config is the same version as SB expects
         """
+
+        if self.config_version > self.expected_config_version:
+            sys.exit("Your config version (" + str(self.config_version) + ") has been incremented past what this version of Sick Beard supports (" + str(self.expected_config_version) + ").\n" + \
+                        "If you have used other forks or a newer version of Sick Beard, your config file may be unusable due to their modifications.")
         
         sickbeard.CONFIG_VERSION = self.config_version
         
