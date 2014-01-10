@@ -29,9 +29,9 @@ class PS3Metadata(generic.GenericMetadata):
 
     The following file structure is used:
 
-    show_root/cover.jpg                                      (poster)
-    show_root/Season 01/show - 1x01 - episode.avi            (existing video)
-    show_root/Season 01/show - 1x01 - episode.avi.cover.jpg  (episode thumb)
+    show_root/cover.jpg                         (poster)
+    show_root/Season ##/filename.ext            (*)
+    show_root/Season ##/filename.ext.cover.jpg  (episode thumb)
     """
 
     def __init__(self,
@@ -50,9 +50,9 @@ class PS3Metadata(generic.GenericMetadata):
                                          episode_thumbnails,
                                          season_thumbnails)
 
-        self.banner_name = self.poster_name = 'cover.jpg'
+        self.banner_name = self.poster_name = "cover.jpg"
 
-        self.name = 'Sony PS3'
+        self.name = "Sony PS3"
 
         self.eg_show_metadata = "<i>not supported</i>"
         self.eg_episode_metadata = "<i>not supported</i>"
@@ -61,7 +61,7 @@ class PS3Metadata(generic.GenericMetadata):
         self.eg_episode_thumbnails = "Season##\\<i>filename</i>.ext.cover.jpg"
         self.eg_season_thumbnails = "<i>not supported</i>"
 
-    # all of the following are not supported, so do nothing
+    # Override with empty methods for unsupported features
     def create_show_metadata(self, show_obj):
         pass
 
@@ -82,7 +82,7 @@ class PS3Metadata(generic.GenericMetadata):
         ep_obj: a TVEpisode instance for which to create the thumbnail
         """
         if ek.ek(os.path.isfile, ep_obj.location):
-            tbn_filename = ep_obj.location + '.cover.jpg'
+            tbn_filename = ep_obj.location + ".cover.jpg"
         else:
             return None
 

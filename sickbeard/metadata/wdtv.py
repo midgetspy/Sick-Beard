@@ -31,16 +31,18 @@ from sickbeard.exceptions import ex
 
 import xml.etree.cElementTree as etree
 
+
 class WDTVMetadata(generic.GenericMetadata):
     """
     Metadata generation class for WDTV
 
     The following file structure is used:
 
-    show_root/folder.jpg                                     (poster)
-    show_root/Season 01/folder.jpg                           (season thumb)
-    show_root/Season 01/show - 1x01 - episode.metathumb      (episode thumb)
-    show_root/Season 01/show - 1x01 - episode.xml            (episode metadata)
+    show_root/folder.jpg                    (poster)
+    show_root/Season ##/folder.jpg          (season thumb)
+    show_root/Season ##/filename.ext        (*)
+    show_root/Season ##/filename.metathumb  (episode thumb)
+    show_root/Season ##/filename.xml        (episode metadata)
     """
 
     def __init__(self,
@@ -70,7 +72,7 @@ class WDTVMetadata(generic.GenericMetadata):
         self.eg_episode_thumbnails = "Season##\\<i>filename</i>.metathumb"
         self.eg_season_thumbnails = "Season##\\folder.jpg"
 
-    # all of the following are not supported, so do nothing
+    # Override with empty methods for unsupported features
     def create_show_metadata(self, show_obj):
         pass
 
@@ -105,7 +107,7 @@ class WDTVMetadata(generic.GenericMetadata):
         season_dir = None
 
         for cur_dir in dir_list:
-            if season == 0 and cur_dir == 'Specials':
+            if season == 0 and cur_dir == "Specials":
                 season_dir = cur_dir
                 break
 
@@ -152,7 +154,7 @@ class WDTVMetadata(generic.GenericMetadata):
         except tvdb_exceptions.tvdb_shownotfound, e:
             raise exceptions.ShowNotFoundException(e.message)
         except tvdb_exceptions.tvdb_error, e:
-            logger.log("Unable to connect to TVDB while creating meta files - skipping - " + ex(e), logger.ERROR)
+            logger.log(u"Unable to connect to TVDB while creating meta files - skipping - " + ex(e), logger.ERROR)
             return False
 
         rootNode = etree.Element("details")
@@ -163,7 +165,7 @@ class WDTVMetadata(generic.GenericMetadata):
             try:
                 myEp = myShow[curEpToWrite.season][curEpToWrite.episode]
             except (tvdb_exceptions.tvdb_episodenotfound, tvdb_exceptions.tvdb_seasonnotfound):
-                logger.log("Unable to find episode " + str(curEpToWrite.season) + "x" + str(curEpToWrite.episode) + " on tvdb... has it been removed? Should I delete from db?")
+                logger.log(u"Unable to find episode " + str(curEpToWrite.season) + "x" + str(curEpToWrite.episode) + " on tvdb... has it been removed? Should I delete from db?")
                 return None
 
             if myEp["firstaired"] == None and ep_obj.season == 0:

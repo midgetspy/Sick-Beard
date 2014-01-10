@@ -24,7 +24,6 @@ import sickbeard
 
 import generic
 
-from sickbeard.common import XML_NSMAP
 from sickbeard import logger, exceptions, helpers
 from sickbeard import encodingKludge as ek
 from lib.tvdb_api import tvdb_api, tvdb_exceptions
@@ -35,21 +34,17 @@ import xml.etree.cElementTree as etree
 
 class MediaBrowserMetadata(generic.GenericMetadata):
     """
-    Metadata generation class for Media Browser. All xml formatting and
-    file naming information was contributed by users in the following
-    ticket's comments:
-
-    http://code.google.com/p/sickbeard/issues/detail?id=311
+    Metadata generation class for Media Browser 2.x/3.x - Standard Mode.
 
     The following file structure is used:
 
-    show_root/series.xml                           (show metadata)
-    show_root/folder.jpg                           (poster)
-    show_root/backdrop.jpg                         (fanart)
-    show_root/Season 01/folder.jpg                 (season thumb)
-    show_root/Season 01/show - 1x01 - episode.avi  (* example of existing ep of course)
-    show_root/Season 01/show - 1x01 - episode.xml  (episode metadata)
-    show_root/metadata/show - 1x01 - episode.jpg   (episode thumb)
+    show_root/series.xml                       (show metadata)
+    show_root/folder.jpg                       (poster)
+    show_root/backdrop.jpg                     (fanart)
+    show_root/Season ##/folder.jpg             (season thumb)
+    show_root/Season ##/filename.ext           (*)
+    show_root/Season ##/metadata/filename.xml  (episode metadata)
+    show_root/Season ##/metadata/filename.jpg  (episode thumb)
     """
 
     def __init__(self,
@@ -130,7 +125,10 @@ class MediaBrowserMetadata(generic.GenericMetadata):
         season_dir = None
 
         for cur_dir in dir_list:
-            if season == 0 and cur_dir == 'Specials':
+            # MediaBrowser 1.x only supports 'Specials'
+            # MediaBrowser 2.x looks to only support 'Season 0'
+            # MediaBrowser 3.x looks to mimic XBMC/Plex support
+            if season == 0 and cur_dir == "Specials":
                 season_dir = cur_dir
                 break
 
@@ -171,85 +169,130 @@ class MediaBrowserMetadata(generic.GenericMetadata):
         t = tvdb_api.Tvdb(actors=True, **ltvdb_api_parms)
 
         tv_node = etree.Element("Series")
-        for ns in XML_NSMAP.keys():
-            tv_node.set(ns, XML_NSMAP[ns])
 
         try:
             myShow = t[int(show_obj.tvdbid)]
         except tvdb_exceptions.tvdb_shownotfound:
-            logger.log("Unable to find show with id " + str(show_obj.tvdbid) + " on tvdb, skipping it", logger.ERROR)
+            logger.log(u"Unable to find show with id " + str(show_obj.tvdbid) + " on tvdb, skipping it", logger.ERROR)
             raise
 
         except tvdb_exceptions.tvdb_error:
-            logger.log("TVDB is down, can't use its data to make the NFO", logger.ERROR)
+            logger.log(u"TVDB is down, can't use its data to make the NFO", logger.ERROR)
             raise
 
         # check for title and id
         try:
-            if myShow["seriesname"] == None or myShow["seriesname"] == "" or myShow["id"] == None or myShow["id"] == "":
-                logger.log("Incomplete info for show with id " + str(show_obj.tvdbid) + " on tvdb, skipping it", logger.ERROR)
+            if myShow['seriesname'] == None or myShow['seriesname'] == "" or myShow['id'] == None or myShow['id'] == "":
+                logger.log(u"Incomplete info for show with id " + str(show_obj.tvdbid) + " on tvdb, skipping it", logger.ERROR)
                 return False
         except tvdb_exceptions.tvdb_attributenotfound:
-            logger.log("Incomplete info for show with id " + str(show_obj.tvdbid) + " on tvdb, skipping it", logger.ERROR)
-
+            logger.log(u"Incomplete info for show with id " + str(show_obj.tvdbid) + " on tvdb, skipping it", logger.ERROR)
             return False
 
         tvdbid = etree.SubElement(tv_node, "id")
-        if myShow["id"] != None:
-            tvdbid.text = myShow["id"]
-
-        Actors = etree.SubElement(tv_node, "Actors")
-        if myShow["actors"] != None:
-            Actors.text = myShow["actors"]
-
-        ContentRating = etree.SubElement(tv_node, "ContentRating")
-        if myShow["contentrating"] != None:
-            ContentRating.text = myShow["contentrating"]
-
-        premiered = etree.SubElement(tv_node, "FirstAired")
-        if myShow["firstaired"] != None:
-            premiered.text = myShow["firstaired"]
-
-        genre = etree.SubElement(tv_node, "genre")
-        if myShow["genre"] != None:
-            genre.text = myShow["genre"]  
-
-        IMDBId = etree.SubElement(tv_node, "IMDBId")
-        if myShow["imdb_id"] != None:
-            IMDBId.text = myShow["imdb_id"]
-
-        IMDB_ID = etree.SubElement(tv_node, "IMDB_ID")
-        if myShow["imdb_id"] != None:
-            IMDB_ID.text = myShow["imdb_id"]
-
-        Overview = etree.SubElement(tv_node, "Overview")
-        if myShow["overview"] != None:
-            Overview.text = myShow["overview"]
-
-        Network = etree.SubElement(tv_node, "Network")
-        if myShow["network"] != None:
-            Network.text = myShow["network"]
-
-        Runtime = etree.SubElement(tv_node, "Runtime")
-        if myShow["runtime"] != None:
-            Runtime.text = myShow["runtime"]
-
-
-        Rating = etree.SubElement(tv_node, "Rating")
-        if myShow["rating"] != None:
-            Rating.text = myShow["rating"]
-
-        SeriesID = etree.SubElement(tv_node, "SeriesID")
-        if myShow["seriesid"] != None:
-            SeriesID.text = myShow["seriesid"]
+        if myShow['id'] != None:
+            tvdbid.text = myShow['id']
 
         SeriesName = etree.SubElement(tv_node, "SeriesName")
-        if myShow["seriesname"] != None:
-            SeriesName.text = myShow["seriesname"]        
+        if myShow['seriesname'] != None:
+            SeriesName.text = myShow['seriesname']
 
-        rating = etree.SubElement(tv_node, "Status")
-        if myShow["status"] != None:
-            rating.text = myShow["status"]
+        Status = etree.SubElement(tv_node, "Status")
+        if myShow['status'] != None:
+            Status.text = myShow['status']
+
+        Network = etree.SubElement(tv_node, "Network")
+        if myShow['network'] != None:
+            Network.text = myShow['network']
+
+        Airs_Time = etree.SubElement(tv_node, "Airs_Time")
+        if myShow['airs_time'] != None:
+            Airs_Time.text = myShow['airs_time']
+
+        Airs_DayOfWeek = etree.SubElement(tv_node, "Airs_DayOfWeek")
+        if myShow['airs_dayofweek'] != None:
+            Airs_DayOfWeek.text = myShow['airs_dayofweek']
+
+        FirstAired = etree.SubElement(tv_node, "FirstAired")
+        if myShow['firstaired'] != None:
+            FirstAired.text = myShow['firstaired']
+
+        ContentRating = etree.SubElement(tv_node, "ContentRating")
+        MPAARating = etree.SubElement(tv_node, "MPAARating")
+        certification = etree.SubElement(tv_node, "certification")
+        if myShow['contentrating'] != None:
+            ContentRating.text = myShow['contentrating']
+            MPAARating.text = myShow['contentrating']
+            certification.text = myShow['contentrating']
+
+        MetadataType = etree.SubElement(tv_node, "Type")
+        MetadataType.text = "Series"
+
+        Overview = etree.SubElement(tv_node, "Overview")
+        if myShow['overview'] != None:
+            Overview.text = myShow['overview']
+
+        PremiereDate = etree.SubElement(tv_node, "PremiereDate")
+        if myShow['firstaired'] != None:
+            PremiereDate.text = myShow['firstaired']
+
+        Rating = etree.SubElement(tv_node, "Rating")
+        if myShow['rating'] != None:
+            Rating.text = myShow['rating']
+
+        ProductionYear = etree.SubElement(tv_node, "ProductionYear")
+        if myShow['firstaired'] != None:
+            try:
+                year_text = str(datetime.datetime.strptime(myShow['firstaired'], '%Y-%m-%d').year)
+                if year_text:
+                    ProductionYear.text = year_text
+            except:
+                pass
+
+        RunningTime = etree.SubElement(tv_node, "RunningTime")
+        Runtime = etree.SubElement(tv_node, "Runtime")
+        if myShow['runtime'] != None:
+            RunningTime.text = myShow['runtime']
+            Runtime.text = myShow['runtime']
+
+        IMDB_ID = etree.SubElement(tv_node, "IMDB_ID")
+        IMDB = etree.SubElement(tv_node, "IMDB")
+        IMDbId = etree.SubElement(tv_node, "IMDbId")
+        if myShow['imdb_id'] != None:
+            IMDB_ID.text = myShow['imdb_id']
+            IMDB.text = myShow['imdb_id']
+            IMDbId.text = myShow['imdb_id']
+
+        Zap2ItId = etree.SubElement(tv_node, "Zap2ItId")
+        if myShow['zap2it_id'] != None:
+            Zap2ItId.text = myShow['zap2it_id']
+
+        Genres = etree.SubElement(tv_node, "Genres")
+        for genre in myShow['genre'].split('|'):
+            if genre:
+                cur_genre = etree.SubElement(Genres, "Genre")
+                cur_genre.text = genre
+
+        Genre = etree.SubElement(tv_node, "Genre")
+        if myShow['genre'] != None:
+            Genre.text = "|".join([x for x in myShow["genre"].split('|') if x])
+
+        Studios = etree.SubElement(tv_node, "Studios")
+        Studio = etree.SubElement(Studios, "Studio")
+        if myShow["network"] != None:
+            Studio.text = myShow['network']
+
+        Persons = etree.SubElement(tv_node, "Persons")
+        for actor in myShow['_actors']:
+            cur_actor = etree.SubElement(Persons, "Person")
+            cur_actor_name = etree.SubElement(cur_actor, "Name")
+            cur_actor_name.text = actor['name'].strip()
+            cur_actor_type = etree.SubElement(cur_actor, "Type")
+            cur_actor_type.text = "Actor"
+            cur_actor_role = etree.SubElement(cur_actor, "Role")
+            cur_actor_role_text = actor['role']
+            if cur_actor_role_text != None:
+                cur_actor_role.text = cur_actor_role_text
 
         helpers.indentXML(tv_node)
 
@@ -267,6 +310,11 @@ class MediaBrowserMetadata(generic.GenericMetadata):
 
         eps_to_write = [ep_obj] + ep_obj.relatedEps
 
+        persons_dict = {}
+        persons_dict['Director'] = []
+        persons_dict['GuestStar'] = []
+        persons_dict['Writer'] = []
+
         tvdb_lang = ep_obj.show.lang
 
         try:
@@ -282,14 +330,10 @@ class MediaBrowserMetadata(generic.GenericMetadata):
         except tvdb_exceptions.tvdb_shownotfound, e:
             raise exceptions.ShowNotFoundException(e.message)
         except tvdb_exceptions.tvdb_error, e:
-            logger.log("Unable to connect to TVDB while creating meta files - skipping - " + ex(e), logger.ERROR)
+            logger.log(u"Unable to connect to TVDB while creating meta files - skipping - " + ex(e), logger.ERROR)
             return False
 
         rootNode = etree.Element("Item")
-
-        # Set our namespace correctly
-        for ns in XML_NSMAP.keys():
-            rootNode.set(ns, XML_NSMAP[ns])
 
         # write an MediaBrowser XML containing info for all matching episodes
         for curEpToWrite in eps_to_write:
@@ -297,108 +341,123 @@ class MediaBrowserMetadata(generic.GenericMetadata):
             try:
                 myEp = myShow[curEpToWrite.season][curEpToWrite.episode]
             except (tvdb_exceptions.tvdb_episodenotfound, tvdb_exceptions.tvdb_seasonnotfound):
-                logger.log("Unable to find episode " + str(curEpToWrite.season) + "x" + str(curEpToWrite.episode) + " on tvdb... has it been removed? Should I delete from db?")
+                logger.log(u"Unable to find episode " + str(curEpToWrite.season) + "x" + str(curEpToWrite.episode) + " on tvdb... has it been removed? Should I delete from db?")
                 return None
 
-            if myEp["firstaired"] == None and ep_obj.season == 0:
-                myEp["firstaired"] = str(datetime.date.fromordinal(1))
+            if curEpToWrite == ep_obj:
+                # root (or single) episode
 
-            if myEp["episodename"] == None or myEp["firstaired"] == None:
-                return None
+                # default to today's date for specials if firstaired is not set
+                if myEp['firstaired'] == None and ep_obj.season == 0:
+                    myEp['firstaired'] = str(datetime.date.fromordinal(1))
 
-            if len(eps_to_write) > 1:
-                episode = etree.SubElement(rootNode, "Item")
-            else:
+                if myEp['episodename'] == None or myEp['firstaired'] == None:
+                    return None
+
                 episode = rootNode
 
-            ID = etree.SubElement(episode, "ID")
-            ID.text = str(curEpToWrite.episode)
+                EpisodeName = etree.SubElement(episode, "EpisodeName")
+                if curEpToWrite.name != None:
+                    EpisodeName.text = curEpToWrite.name
+                else:
+                    EpisodeName.text = ""
 
-            #To do get right EpisodeID
-            episodeID = etree.SubElement(episode, "EpisodeID")
-            episodeID.text = str(curEpToWrite.tvdbid)
+                EpisodeNumber = etree.SubElement(episode, "EpisodeNumber")
+                EpisodeNumber.text = str(ep_obj.episode)
 
-            title = etree.SubElement(episode, "EpisodeName")
-            if curEpToWrite.name != None:
-                title.text = curEpToWrite.name
+                if ep_obj.relatedEps:
+                    EpisodeNumberEnd = etree.SubElement(episode, "EpisodeNumberEnd")
+                    EpisodeNumberEnd.text = str(curEpToWrite.episode)
 
-            episodenum = etree.SubElement(episode, "EpisodeNumber")
-            episodenum.text = str(curEpToWrite.episode)
+                SeasonNumber = etree.SubElement(episode, "SeasonNumber")
+                SeasonNumber.text = str(curEpToWrite.season)
 
-            FirstAired = etree.SubElement(episode, "FirstAired")
-            if curEpToWrite.airdate != datetime.date.fromordinal(1):
-                FirstAired.text = str(curEpToWrite.airdate)
+                if not ep_obj.relatedEps:
+                    absolute_number = etree.SubElement(episode, "absolute_number")
+                    absolute_number.text = myEp['absolute_number']
+
+                FirstAired = etree.SubElement(episode, "FirstAired")
+                if curEpToWrite.airdate != datetime.date.fromordinal(1):
+                    FirstAired.text = str(curEpToWrite.airdate)
+                else:
+                    FirstAired.text = ""
+
+                MetadataType = etree.SubElement(episode, "Type")
+                MetadataType.text = "Episode"
+
+                Overview = etree.SubElement(episode, "Overview")
+                if curEpToWrite.description != None:
+                    Overview.text = curEpToWrite.description
+                else:
+                    Overview.text = ""
+
+                if not ep_obj.relatedEps:
+                    Rating = etree.SubElement(episode, "Rating")
+                    rating_text = myEp['rating']
+                    if rating_text != None:
+                        Rating.text = rating_text
+
+                    IMDB_ID = etree.SubElement(episode, "IMDB_ID")
+                    IMDB = etree.SubElement(episode, "IMDB")
+                    IMDbId = etree.SubElement(episode, "IMDbId")
+                    if myShow['imdb_id'] != None:
+                        IMDB_ID.text = myShow['imdb_id']
+                        IMDB.text = myShow['imdb_id']
+                        IMDbId.text = myShow['imdb_id']
+
+                TvDbId = etree.SubElement(episode, "TvDbId")
+                TvDbId.text = str(curEpToWrite.tvdbid)
+
+                Persons = etree.SubElement(episode, "Persons")
+
+                Language = etree.SubElement(episode, "Language")
+                Language.text = myEp['language']
+
+                thumb = etree.SubElement(episode, "filename")
+                # TODO: See what this is needed for.. if its still needed
+                # just write this to the NFO regardless of whether it actually exists or not
+                # note: renaming files after nfo generation will break this, tough luck
+                thumb_text = self.get_episode_thumb_path(ep_obj)
+                if thumb_text:
+                    thumb.text = thumb_text
+
             else:
-                FirstAired.text = ''
+                # append data from (if any) related episodes
+                EpisodeNumberEnd.text = str(curEpToWrite.episode)
 
-            Overview = etree.SubElement(episode, "Overview")
-            if curEpToWrite.description != None:
-                Overview.text = curEpToWrite.description
+                if curEpToWrite.name:
+                    if not EpisodeName.text:
+                        EpisodeName.text = curEpToWrite.name
+                    else:
+                        EpisodeName.text = EpisodeName.text + ", " + curEpToWrite.name
 
-            DVD_chapter = etree.SubElement(episode, "DVD_chapter")
-            DVD_chapter.text = ''
+                if curEpToWrite.description:
+                    if not Overview.text:
+                        Overview.text = curEpToWrite.description
+                    else:
+                        Overview.text = Overview.text + "\r" + curEpToWrite.description
 
-            DVD_discid = etree.SubElement(episode, "DVD_discid")
-            DVD_discid.text = ''
+            # collect all directors, guest stars and writers
+            if myEp['director']:
+                persons_dict['Director'] += [x.strip() for x in myEp['director'].split('|') if x]
+            if myEp['gueststars']:
+                persons_dict['GuestStar'] += [x.strip() for x in myEp['gueststars'].split('|') if x]
+            if myEp['writer']:
+                persons_dict['Writer'] += [x.strip() for x in myEp['writer'].split('|') if x]
 
-            DVD_episodenumber = etree.SubElement(episode, "DVD_episodenumber")
-            DVD_episodenumber.text = ''
+        # fill in Persons section with collected directors, guest starts and writers
+        for person_type, names in persons_dict.iteritems():
+            # remove doubles
+            names = list(set(names))
+            for cur_name in names:
+                Person = etree.SubElement(Persons, "Person")
+                cur_person_name = etree.SubElement(Person, "Name")
+                cur_person_name.text = cur_name
+                cur_person_type = etree.SubElement(Person, "Type")
+                cur_person_type.text = person_type
 
-            DVD_season = etree.SubElement(episode, "DVD_season")
-            DVD_season.text = ''
-
-            director = etree.SubElement(episode, "Director")
-            director_text = myEp['director']
-            if director_text != None:
-                director.text = director_text
-
-            gueststar = etree.SubElement(episode, "GuestStars")
-            gueststar_text = myEp['gueststars']
-            if gueststar_text != None:
-                gueststar.text = gueststar_text
-
-            IMDB_ID = etree.SubElement(episode, "IMDB_ID")
-            IMDB_ID.text = myEp['imdb_id']
-
-            Language = etree.SubElement(episode, "Language")
-            Language.text = myEp['language']
-
-            ProductionCode = etree.SubElement(episode, "ProductionCode")
-            ProductionCode.text = myEp['productioncode']
-
-            Rating = etree.SubElement(episode, "Rating")
-            rating_text = myEp['rating']
-            if rating_text != None:
-                Rating.text = rating_text
-
-            Writer = etree.SubElement(episode, "Writer")
-            Writer_text = myEp['writer']
-            if Writer_text != None:
-                Writer.text = Writer_text
-
-            SeasonNumber = etree.SubElement(episode, "SeasonNumber")
-            SeasonNumber.text = str(curEpToWrite.season)
-
-            absolute_number = etree.SubElement(episode, "absolute_number")
-            absolute_number.text = myEp['absolute_number']
-
-            seasonid = etree.SubElement(episode, "seasonid")
-            seasonid.text = myEp['seasonid']
-
-            seriesid = etree.SubElement(episode, "seriesid")
-            seriesid.text = str(curEpToWrite.show.tvdbid)
-
-            thumb = etree.SubElement(episode, "filename")
-
-            # just write this to the NFO regardless of whether it actually exists or not
-            # note: renaming files after nfo generation will break this, tough luck
-            thumb_text = self.get_episode_thumb_path(ep_obj)
-            if thumb_text:
-                thumb.text = thumb_text
-
-            # Make it purdy
-            helpers.indentXML(rootNode)
-            data = etree.ElementTree(rootNode)
+        helpers.indentXML(rootNode)
+        data = etree.ElementTree(rootNode)
 
         return data
 
