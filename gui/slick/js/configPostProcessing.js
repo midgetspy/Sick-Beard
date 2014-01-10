@@ -191,7 +191,7 @@ $(document).ready(function () {
     setup_abd_naming();
 
     // -- start of metadata options div toggle code --
-    $('#metadataType').change(function () {
+    $('#metadataType').on('change keyup', function () {
         $(this).showHideMetadata();
     });
 
@@ -207,7 +207,7 @@ $(document).ready(function () {
             }
         });
     };
-    //initalize to show the div
+    //initialize to show the div
     $(this).showHideMetadata();
     // -- end of metadata options div toggle code --
 
