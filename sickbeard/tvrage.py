@@ -56,7 +56,7 @@ class TVRage:
 
             if show_is_right:
 
-                logger.log(u"Setting TVRage ID for "+show.name+" to "+str(self._tvrid))
+                logger.log(u"Setting TVRage ID for " + show.name + " to " + str(self._tvrid))
                 self.show.tvrid = self._tvrid
                 self.show.saveToDB()
 
@@ -65,7 +65,7 @@ class TVRage:
             if self._tvrname == None:
                 self._getTVRageInfo()
 
-            logger.log(u"Setting TVRage Show Name for "+show.name+" to "+self._tvrname)
+            logger.log(u"Setting TVRage Show Name for " + show.name + " to " + self._tvrname)
             self.show.tvrname = self._tvrname
             self.show.saveToDB()
 
@@ -98,7 +98,7 @@ class TVRage:
             # check the first episode of every season
             for curSeason in t[self.show.tvdbid]:
 
-                logger.log(u"Checking TVDB and TVRage sync for season "+str(curSeason), logger.DEBUG)
+                logger.log(u"Checking TVDB and TVRage sync for season " + str(curSeason), logger.DEBUG)
 
                 airdate = None
 
@@ -136,7 +136,7 @@ class TVRage:
 
                 # if we couldn't compare with TVDB try comparing it with the local database
                 except tvdb_exceptions.tvdb_exception, e:
-                    logger.log(u"Unable to check TVRage info against TVDB: "+ex(e))
+                    logger.log(u"Unable to check TVRage info against TVDB: " + ex(e))
 
                     logger.log(u"Trying against DB instead", logger.DEBUG)
 
@@ -151,7 +151,7 @@ class TVRage:
 
                 # check if TVRage and TVDB have the same airdate for this episode
                 if curEpInfo['airdate'] == airdate:
-                    logger.log(u"Successful match for TVRage and TVDB data for episode "+str(curSeason)+"x1)", logger.DEBUG)
+                    logger.log(u"Successful match for TVRage and TVDB data for episode " + str(curSeason) + "x1)", logger.DEBUG)
                     return True
 
                 logger.log(u"Date from TVDB for episode " + str(curSeason) + "x1: " + str(airdate), logger.DEBUG)
@@ -197,7 +197,7 @@ class TVRage:
                 airdate = datetime.date(rawAirdate[0], rawAirdate[1], rawAirdate[2])
 
             except tvdb_exceptions.tvdb_exception, e:
-                logger.log(u"Unable to check TVRage info against TVDB: "+ex(e))
+                logger.log(u"Unable to check TVRage info against TVDB: " + ex(e))
 
                 logger.log(u"Trying against DB instead", logger.DEBUG)
 
@@ -239,7 +239,7 @@ class TVRage:
             urlData = {'sid': self.show.tvrid}
 
         if season != None and episode != None:
-            urlData['ep'] = str(season)+'x'+str(episode)
+            urlData['ep'] = str(season) + 'x' + str(episode)
 
         # build the URL
         url += urllib.urlencode(urlData)
@@ -306,7 +306,7 @@ class TVRage:
             try:
                 date = datetime.datetime.strptime(epInfo[2], "%d/%b/%Y").date()
             except ValueError:
-                logger.log(u"Unable to figure out the time from the TVRage data "+epInfo[2])
+                logger.log(u"Unable to figure out the time from the TVRage data " + epInfo[2])
                 return None
 
         toReturn = {'season': int(numInfo[0]), 'episode': numInfo[1], 'name': epInfo[1], 'airdate': date}
@@ -344,4 +344,3 @@ class TVRage:
             logger.log(u"Unable to create episode from tvrage (could be for a variety of reasons): " + ex(e))
 
         return ep
-
