@@ -99,5 +99,3 @@ def getShowImage(url, imgNum=None):
         return None
 
     return image_data
-
-

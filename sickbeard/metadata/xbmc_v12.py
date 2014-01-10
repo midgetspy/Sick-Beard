@@ -34,7 +34,7 @@ from lib.tvdb_api import tvdb_api, tvdb_exceptions
 import xml.etree.cElementTree as etree
 
 class XBMC_V12(xbmc.XBMCMetadata):
-    
+
     def __init__(self,
                  show_metadata=False,
                  episode_metadata=False,
@@ -50,7 +50,7 @@ class XBMC_V12(xbmc.XBMCMetadata):
                                          fanart,
                                          episode_thumbnails,
                                          season_thumbnails)
-        
+
         self.name = 'XBMC v12+'
 
         self.poster_name = "poster.jpg"
@@ -65,8 +65,8 @@ class XBMC_V12(xbmc.XBMCMetadata):
 
     def get_episode_thumb_path(self, ep_obj):
         """
-        Returns the path where the episode thumbnail should be stored. 
-        
+        Returns the path where the episode thumbnail should be stored.
+
         ep_obj: a TVEpisode instance for which to create the thumbnail
         """
         if ek.ek(os.path.isfile, ep_obj.location):
@@ -77,13 +77,13 @@ class XBMC_V12(xbmc.XBMCMetadata):
                 tbn_filename = tbn_filename[0] + "-thumb.jpg"
         else:
             return None
-        
+
         return tbn_filename
-    
+
     def get_season_thumb_path(self, show_obj, season):
         """
         Returns the full path to the file for a given season thumb.
-        
+
         show_obj: a TVShow instance for which to generate the path
         season: a season number to be used for the path. Note that sesaon 0
                 means specials.
@@ -94,7 +94,7 @@ class XBMC_V12(xbmc.XBMCMetadata):
             season_thumb_file_path = 'season-specials'
         else:
             season_thumb_file_path = 'season' + str(season).zfill(2)
-        
+
         return ek.ek(os.path.join, show_obj.location, season_thumb_file_path + '-poster.jpg')
 
 
