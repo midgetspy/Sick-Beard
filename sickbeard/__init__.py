@@ -515,7 +515,7 @@ def initialize(consoleLogging=True):
         
         
         LOCALHOST_IP = check_setting_str(CFG, 'General', 'localhost_ip', '')
-        ANON_REDIRECT = check_setting_str(CFG, 'General', 'anon_redirect', 'http://derefer.me/?')
+        ANON_REDIRECT = check_setting_str(CFG, 'General', 'anon_redirect', 'http://dereferer.org/?')
         # attempt to help prevent users from breaking links by using a bad url 
         if not ANON_REDIRECT.endswith('?'):
             ANON_REDIRECT = ''
