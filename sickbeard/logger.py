@@ -212,7 +212,7 @@ class SBRotatingLogHandler(object):
             meThread = threading.currentThread().getName()
             message = meThread + u" :: " + toLog
 
-            out_line = message.encode('utf-8')
+            out_line = message
 
             sb_logger = logging.getLogger('sickbeard')
             setattr(sb_logger, 'db', lambda *args: sb_logger.log(DB, *args))
