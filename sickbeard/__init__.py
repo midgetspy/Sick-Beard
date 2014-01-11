@@ -671,6 +671,12 @@ def initialize(consoleLogging=True):
         TRAKT_USERNAME = check_setting_str(CFG, 'Trakt', 'trakt_username', '')
         TRAKT_PASSWORD = check_setting_str(CFG, 'Trakt', 'trakt_password', '')
         TRAKT_API = check_setting_str(CFG, 'Trakt', 'trakt_api', '')
+        
+        CheckSection(CFG, 'BetaSeries')
+        USE_BETASERIES = bool(check_setting_int(CFG, 'BetaSeries', 'use_betaseries', 0))
+        BETASERIES_USERNAME = check_setting_str(CFG, 'BetaSeries', 'betaseries_username', '')
+        BETASERIES_PASSWORD = check_setting_str(CFG, 'BetaSeries', 'betaseries_password', '')
+        BETASERIES_API = check_setting_str(CFG, 'BetaSeries', 'betaseries_api', '')
 
         CheckSection(CFG, 'pyTivo')
         USE_PYTIVO = bool(check_setting_int(CFG, 'pyTivo', 'use_pytivo', 0))
