@@ -50,7 +50,7 @@ class BetaSeriesNotifier:
 
         # TODO: Figure out if the show is present, and eventually add it.
 
-        self._notifyBetaSeries('episodes/downloaded', {'thetvdb_id': ep_obj.show.tvdbid})
+        self._notifyBetaSeries('episodes/downloaded', {'thetvdb_id': ep_obj.tvdbid})
 
     def test_notify(self, username, password):
         """
