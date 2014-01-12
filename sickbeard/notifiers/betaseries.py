@@ -65,7 +65,7 @@ class BetaSeriesNotifier:
         """
         return self._notifyBetaSeries("timeline/home", login=username, password=password)
 
-    def _username(self):
+    def _login(self):
         return sickbeard.BETASERIES_USERNAME
 
     def _password(self):
@@ -79,19 +79,19 @@ class BetaSeriesNotifier:
 
     def _notifyBetaSeries(self, method, data = {}, login = None, password = None):
         """
-        A generic method for communicating with trakt. Uses the method and data provided along
+        A generic method for communicating with betaseries. Uses the method and data provided along
         with the auth info to send the command.
 
         method: The URL to use at trakt, relative, no leading slash.
         api: The API string to provide to trakt
-        username: The username to use when logging in
+        login: The username to use when logging in
         password: The unencrypted password to use when logging in
 
         Returns: A boolean representing success
         """
         logger.log("betaseries_notifier: Call method {0}".format(method), logger.DEBUG)
 
-        # if the username isn't given then use the config username
+        # if the login isn't given then use the config login
         if not login:
             login = self._login()
 
