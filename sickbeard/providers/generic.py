@@ -1,3 +1,6 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
 # Author: Nic Wolfe <nic@wolfeden.ca>
 # URL: http://code.google.com/p/sickbeard/
 #
@@ -35,7 +38,7 @@ from lib.hachoir_parser import createParser
 from sickbeard.name_parser.parser import NameParser, InvalidNameException
 
 
-class GenericProvider:
+class GenericProvider(object):
 
     NZB = "nzb"
     TORRENT = "torrent"
