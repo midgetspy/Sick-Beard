@@ -408,11 +408,11 @@ def initialize(consoleLogging=True):
             ROOT_DIRS = ''
 
         proxies = urllib.getproxies()
-        proxy_url = None # @UnusedVariable
+        proxy_url = None  # @UnusedVariable
         if 'http' in proxies:
-            proxy_url = proxies['http'] # @UnusedVariable
+            proxy_url = proxies['http']  # @UnusedVariable
         elif 'ftp' in proxies:
-            proxy_url = proxies['ftp'] # @UnusedVariable
+            proxy_url = proxies['ftp']  # @UnusedVariable
 
         # Set our common tvdb_api options here
         TVDB_API_PARMS = {'apikey': TVDB_API_KEY,
@@ -469,64 +469,30 @@ def initialize(consoleLogging=True):
 
         USE_BANNER = bool(check_setting_int(CFG, 'General', 'use_banner', 0))
         USE_LISTVIEW = bool(check_setting_int(CFG, 'General', 'use_listview', 0))
-        METADATA_TYPE = check_setting_str(CFG, 'General', 'metadata_type', '')
 
         metadata_provider_dict = metadata.get_metadata_generator_dict()
 
-        # if this exists it's legacy, use the info to upgrade metadata to the new settings
-        if METADATA_TYPE:
+        METADATA_XBMC = check_setting_str(CFG, 'General', 'metadata_xbmc', '0|0|0|0|0|0')
+        METADATA_XBMC_12PLUS = check_setting_str(CFG, 'General', 'metadata_xbmc_12plus', '0|0|0|0|0|0')
+        METADATA_MEDIABROWSER = check_setting_str(CFG, 'General', 'metadata_mediabrowser', '0|0|0|0|0|0')
+        METADATA_PS3 = check_setting_str(CFG, 'General', 'metadata_ps3', '0|0|0|0|0|0')
+        METADATA_WDTV = check_setting_str(CFG, 'General', 'metadata_wdtv', '0|0|0|0|0|0')
+        METADATA_TIVO = check_setting_str(CFG, 'General', 'metadata_tivo', '0|0|0|0|0|0')
+        METADATA_SYNOLOGY = check_setting_str(CFG, 'General', 'metadata_synology', '0|0|0|0|0|0')
 
-            old_metadata_class = None
+        for cur_metadata_tuple in [(METADATA_XBMC, metadata.xbmc),
+                                   (METADATA_XBMC_12PLUS, metadata.xbmc_12plus),
+                                   (METADATA_MEDIABROWSER, metadata.mediabrowser),
+                                   (METADATA_PS3, metadata.ps3),
+                                   (METADATA_WDTV, metadata.wdtv),
+                                   (METADATA_TIVO, metadata.tivo),
+                                   (METADATA_SYNOLOGY, metadata.synology),
+                                   ]:
 
-            if METADATA_TYPE == 'xbmc':
-                old_metadata_class = metadata.xbmc.metadata_class
-            elif METADATA_TYPE == 'mediabrowser':
-                old_metadata_class = metadata.mediabrowser.metadata_class
-            elif METADATA_TYPE == 'ps3':
-                old_metadata_class = metadata.ps3.metadata_class
-
-            if old_metadata_class:
-
-                METADATA_SHOW = bool(check_setting_int(CFG, 'General', 'metadata_show', 1))
-                METADATA_EPISODE = bool(check_setting_int(CFG, 'General', 'metadata_episode', 1))
-
-                ART_POSTER = bool(check_setting_int(CFG, 'General', 'art_poster', 1))
-                ART_FANART = bool(check_setting_int(CFG, 'General', 'art_fanart', 1))
-                ART_THUMBNAILS = bool(check_setting_int(CFG, 'General', 'art_thumbnails', 1))
-                ART_SEASON_THUMBNAILS = bool(check_setting_int(CFG, 'General', 'art_season_thumbnails', 1))
-
-                new_metadata_class = old_metadata_class(METADATA_SHOW,
-                                                        METADATA_EPISODE,
-                                                        ART_POSTER,
-                                                        ART_FANART,
-                                                        ART_THUMBNAILS,
-                                                        ART_SEASON_THUMBNAILS)
-
-                metadata_provider_dict[new_metadata_class.name] = new_metadata_class
-
-        # this is the normal codepath for metadata config
-        else:
-            METADATA_XBMC = check_setting_str(CFG, 'General', 'metadata_xbmc', '0|0|0|0|0|0')
-            METADATA_XBMC_12PLUS = check_setting_str(CFG, 'General', 'metadata_xbmc_12plus', '0|0|0|0|0|0')
-            METADATA_MEDIABROWSER = check_setting_str(CFG, 'General', 'metadata_mediabrowser', '0|0|0|0|0|0')
-            METADATA_PS3 = check_setting_str(CFG, 'General', 'metadata_ps3', '0|0|0|0|0|0')
-            METADATA_WDTV = check_setting_str(CFG, 'General', 'metadata_wdtv', '0|0|0|0|0|0')
-            METADATA_TIVO = check_setting_str(CFG, 'General', 'metadata_tivo', '0|0|0|0|0|0')
-            METADATA_SYNOLOGY = check_setting_str(CFG, 'General', 'metadata_synology', '0|0|0|0|0|0')
-
-            for cur_metadata_tuple in [(METADATA_XBMC, metadata.xbmc),
-                                       (METADATA_XBMC_12PLUS, metadata.xbmc_12plus),
-                                       (METADATA_MEDIABROWSER, metadata.mediabrowser),
-                                       (METADATA_PS3, metadata.ps3),
-                                       (METADATA_WDTV, metadata.wdtv),
-                                       (METADATA_TIVO, metadata.tivo),
-                                       (METADATA_SYNOLOGY, metadata.synology),
-                                       ]:
-
-                (cur_metadata_config, cur_metadata_class) = cur_metadata_tuple
-                tmp_provider = cur_metadata_class.metadata_class()
-                tmp_provider.set_config(cur_metadata_config)
-                metadata_provider_dict[tmp_provider.name] = tmp_provider
+            (cur_metadata_config, cur_metadata_class) = cur_metadata_tuple
+            tmp_provider = cur_metadata_class.metadata_class()
+            tmp_provider.set_config(cur_metadata_config)
+            metadata_provider_dict[tmp_provider.name] = tmp_provider
 
         CheckSection(CFG, 'GUI')
         COMING_EPS_LAYOUT = check_setting_str(CFG, 'GUI', 'coming_eps_layout', 'banner')
