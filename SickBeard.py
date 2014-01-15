@@ -33,7 +33,7 @@ except:
 
 # We only need this for compiling an EXE and I will just always do that on 2.6+
 if sys.hexversion >= 0x020600F0:
-    from multiprocessing import freeze_support
+    from multiprocessing import freeze_support  # @UnresolvedImport
 
 import locale
 import os

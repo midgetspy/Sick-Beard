@@ -908,14 +908,16 @@ div.metadata-options label {
 div.metadata-options label:hover {
   color: #fff;
   background-color: #57442b;
+  cursor: pointer;
 }
 div.metadata-example {
-  padding: 7px;
+  padding: 8px;
 }
 div.metadata-example label {
   display: block;
-  line-height: 21px;
+  line-height: 20px;
   color: #000;
+  cursor: pointer;
 }
 div.metadataDiv .disabled {
   color: #ccc;
