@@ -37,21 +37,27 @@ class GenericMetadata():
     """
     Base class for all metadata providers. Default behavior is meant to mostly
     follow XBMC metadata standards. Has support for:
-    - show poster
-    - show fanart
     - show metadata file
-    - episode thumbnail
     - episode metadata file
-    - season thumbnails
+    - episode thumbnail
+    - show fanart
+    - show poster
+    - show banner
+    - season thumbnails (poster)
+    - season thumbnails (banner)
+    - season all (poster/banner)
     """
 
     def __init__(self,
                  show_metadata=False,
                  episode_metadata=False,
                  poster=False,
+                 banner=False,
                  fanart=False,
                  episode_thumbnails=False,
-                 season_thumbnails=False):
+                 season_posters=False,
+                 season_banners=False,
+                 season_all_images=False):
 
         self._show_file_name = "tvshow.nfo"
         self._ep_nfo_extension = "nfo"
@@ -66,10 +72,10 @@ class GenericMetadata():
         self.banner = self.poster = poster
         self.fanart = fanart
         self.episode_thumbnails = episode_thumbnails
-        self.season_thumbnails = season_thumbnails
+        self.season_all_images = self.season_banners = self.season_posters = season_posters
 
     def get_config(self):
-        config_list = [self.show_metadata, self.episode_metadata, self.poster, self.fanart, self.episode_thumbnails, self.season_thumbnails]
+        config_list = [self.show_metadata, self.episode_metadata, self.poster, self.fanart, self.episode_thumbnails, self.season_posters]
         return '|'.join([str(int(x)) for x in config_list])
 
     def get_id(self):
@@ -86,7 +92,7 @@ class GenericMetadata():
         self.banner = self.poster = config_list[2]
         self.fanart = config_list[3]
         self.episode_thumbnails = config_list[4]
-        self.season_thumbnails = config_list[5]
+        self.season_banners = self.season_posters = config_list[5]
 
     def _has_show_metadata(self, show_obj):
         result = ek.ek(os.path.isfile, self.get_show_file_path(show_obj))
@@ -120,7 +126,7 @@ class GenericMetadata():
             logger.log(u"Checking if " + location + " exists: " + str(result), logger.DEBUG)
         return result
 
-    def _has_season_thumb(self, show_obj, season):
+    def _has_season_poster(self, show_obj, season):
         location = self.get_season_thumb_path(show_obj, season)
         result = location != None and ek.ek(os.path.isfile, location)
         if location:
@@ -161,7 +167,7 @@ class GenericMetadata():
         Returns the full path to the file for a given season thumb.
 
         show_obj: a TVShow instance for which to generate the path
-        season: a season number to be used for the path. Note that sesaon 0
+        season: a season number to be used for the path. Note that season 0
                 means specials.
         """
 
@@ -223,12 +229,12 @@ class GenericMetadata():
             return self.save_thumbnail(ep_obj)
         return  False
 
-    def create_season_thumbs(self, show_obj):
-        if self.season_thumbnails and show_obj:
+    def create_season_posters(self, show_obj):
+        if self.season_posters and show_obj:
             result = []
             for season, episodes in show_obj.episodes.iteritems():
-                if not self._has_season_thumb(show_obj, season):
-                    logger.log(u"Metadata provider " + self.name + " creating season thumbnails for " + show_obj.name, logger.DEBUG)
+                if not self._has_season_poster(show_obj, season):
+                    logger.log(u"Metadata provider " + self.name + " creating season posters for " + show_obj.name, logger.DEBUG)
                     result = result + [self.save_season_thumbs(show_obj, season)]
             return all(result)
         return False

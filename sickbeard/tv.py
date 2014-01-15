@@ -449,7 +449,7 @@ class TVShow(object):
                 poster_result = cur_provider.create_poster(self) or poster_result
 
             fanart_result = cur_provider.create_fanart(self) or fanart_result
-            season_thumb_result = cur_provider.create_season_thumbs(self) or season_thumb_result
+            season_thumb_result = cur_provider.create_season_posters(self) or season_thumb_result
 
         return poster_result or fanart_result or season_thumb_result
 

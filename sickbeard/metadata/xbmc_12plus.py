@@ -41,17 +41,23 @@ class XBMC_12PLUS(xbmc.XBMCMetadata):
                  show_metadata=False,
                  episode_metadata=False,
                  poster=False,
+                 banner=False,
                  fanart=False,
                  episode_thumbnails=False,
-                 season_thumbnails=False):
+                 season_posters=False,
+                 season_banners=False,
+                 season_all_images=False):
 
         generic.GenericMetadata.__init__(self,
                                          show_metadata,
                                          episode_metadata,
                                          poster,
+                                         banner,
                                          fanart,
                                          episode_thumbnails,
-                                         season_thumbnails)
+                                         season_posters,
+                                         season_banners,
+                                         season_all_images)
 
         self.banner_name = "banner.jpg"
         self.poster_name = "poster.jpg"
@@ -61,9 +67,12 @@ class XBMC_12PLUS(xbmc.XBMCMetadata):
         self.eg_show_metadata = "tvshow.nfo"
         self.eg_episode_metadata = "Season##\\<i>filename</i>.nfo"
         self.eg_fanart = "fanart.jpg"
-        self.eg_poster = "poster.jpg (banner.jpg)"
+        self.eg_poster = "poster.jpg"
+        self.eg_banner = "banner.jpg"
         self.eg_episode_thumbnails = "Season##\\<i>filename</i>-thumb.jpg"
-        self.eg_season_thumbnails = "season##-poster.jpg"
+        self.eg_season_posters = "season##-poster.jpg"
+        self.eg_season_banners = "season##-banner.jpg"
+        self.eg_season_all_images = "season-all-(poster/banner).jpg"
 
     def get_id(self):
         return 'xbmc_12plus'
@@ -91,7 +100,7 @@ class XBMC_12PLUS(xbmc.XBMCMetadata):
         Returns the full path to the file for a given season thumb.
 
         show_obj: a TVShow instance for which to generate the path
-        season: a season number to be used for the path. Note that sesaon 0
+        season: a season number to be used for the path. Note that season 0
                 means specials.
         """
         # Our specials thumbnail is, well, special

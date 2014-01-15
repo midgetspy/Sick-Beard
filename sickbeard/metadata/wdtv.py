@@ -49,17 +49,23 @@ class WDTVMetadata(generic.GenericMetadata):
                  show_metadata=False,
                  episode_metadata=False,
                  poster=False,
+                 banner=False,
                  fanart=False,
                  episode_thumbnails=False,
-                 season_thumbnails=False):
+                 season_posters=False,
+                 season_banners=False,
+                 season_all_images=False):
 
         generic.GenericMetadata.__init__(self,
                                          show_metadata,
                                          episode_metadata,
                                          poster,
+                                         banner,
                                          fanart,
                                          episode_thumbnails,
-                                         season_thumbnails)
+                                         season_posters,
+                                         season_banners,
+                                         season_all_images)
 
         self._ep_nfo_extension = 'xml'
 
@@ -69,8 +75,11 @@ class WDTVMetadata(generic.GenericMetadata):
         self.eg_episode_metadata = "Season##\\<i>filename</i>.xml"
         self.eg_fanart = "<i>not supported</i>"
         self.eg_poster = "folder.jpg"
+        self.eg_banner = "<i>not supported</i>"
         self.eg_episode_thumbnails = "Season##\\<i>filename</i>.metathumb"
-        self.eg_season_thumbnails = "Season##\\folder.jpg"
+        self.eg_season_posters = "Season##\\folder.jpg"
+        self.eg_season_banners = "<i>not supported</i>"
+        self.eg_season_all_images = "<i>not supported</i>"
 
     # Override with empty methods for unsupported features
     def create_show_metadata(self, show_obj):

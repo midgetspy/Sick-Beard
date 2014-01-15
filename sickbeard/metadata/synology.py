@@ -53,17 +53,23 @@ class SynologyMetadata(generic.GenericMetadata):
                  show_metadata=False,
                  episode_metadata=False,
                  poster=False,
+                 banner=False,
                  fanart=False,
                  episode_thumbnails=False,
-                 season_thumbnails=False):
+                 season_posters=False,
+                 season_banners=False,
+                 season_all_images=False):
 
         generic.GenericMetadata.__init__(self,
                                          show_metadata,
                                          episode_metadata,
                                          poster,
+                                         banner,
                                          fanart,
                                          episode_thumbnails,
-                                         season_thumbnails)
+                                         season_posters,
+                                         season_banners,
+                                         season_all_images)
 
         self.fanart_name = "backdrop.jpg"
         self._show_file_name = 'series.xml'
@@ -75,8 +81,11 @@ class SynologyMetadata(generic.GenericMetadata):
         self.eg_episode_metadata = "Season##\\<i>filename</i>.xml"
         self.eg_fanart = "backdrop.jpg"
         self.eg_poster = "folder.jpg"
+        self.eg_banner = "banner.jpg"
         self.eg_episode_thumbnails = "Season##\\<i>filename</i>.jpg"
-        self.eg_season_thumbnails = "Season##\\folder.jpg"
+        self.eg_season_posters = "Season##\\folder.jpg"
+        self.eg_season_banners = "<i>not supported</i>"
+        self.eg_season_all_images = "<i>not supported</i>"
 
     def get_episode_file_path(self, ep_obj):
         """
@@ -142,7 +151,7 @@ class SynologyMetadata(generic.GenericMetadata):
                 break
 
         if not season_dir:
-            logger.log(u"Unable to find a season dir for season "+str(season), logger.DEBUG)
+            logger.log(u"Unable to find a season dir for season " + str(season), logger.DEBUG)
             return None
 
         logger.log(u"Using " + str(season_dir) + "/folder.jpg as season dir for season " + str(season), logger.DEBUG)
@@ -209,7 +218,7 @@ class SynologyMetadata(generic.GenericMetadata):
 
         genre = etree.SubElement(tv_node, "genre")
         if myShow["genre"] != None:
-            genre.text = myShow["genre"]  
+            genre.text = myShow["genre"]
 
         IMDBId = etree.SubElement(tv_node, "IMDBId")
         if myShow["imdb_id"] != None:
