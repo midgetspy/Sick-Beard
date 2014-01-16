@@ -1,3 +1,6 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
 # Author: Nic Wolfe <nic@wolfeden.ca>
 # URL: http://code.google.com/p/sickbeard/
 #
@@ -19,13 +22,10 @@
 __all__ = ['ezrss',
            'tvtorrents',
            'torrentleech',
-           'nzbsrus',
            'womble',
            'nzbindex',
-           'kere_ws',
            'btn',
            'nzbclub',
-           'nzbx',
            'omgwtfnzbs',
            'nzbto'
            ]

@@ -1,3 +1,6 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
 # Author: Nic Wolfe <nic@wolfeden.ca>
 # URL: http://code.google.com/p/sickbeard/
 #
@@ -1075,12 +1078,11 @@ class ConfigProviders:
 
 
     @cherrypy.expose
-    def saveProviders(self, nzbs_r_us_uid=None, nzbs_r_us_hash=None, newznab_string='',
+    def saveProviders(self, newznab_string='',
                       omgwtfnzbs_username=None, omgwtfnzbs_apikey=None,
                       tvtorrents_digest=None, tvtorrents_hash=None,
                       torrentleech_key=None,
                       btn_api_key=None,
-                      kerews_url=None, kerews_apikey=None, kerews_catIDs=None,
                       provider_order=None, nzbto_user=None, nzbto_pass=None, nzbto_proxy=None):
 
         results = []
@@ -1129,14 +1131,10 @@ class ConfigProviders:
 
             provider_list.append(curProvider)
 
-            if curProvider == 'nzbs_r_us':
-                sickbeard.NZBSRUS = curEnabled
-            elif curProvider == 'nzbindex':
+            if curProvider == 'nzbindex':
                 sickbeard.NZBINDEX = curEnabled
             elif curProvider == 'nzbclub':
                 sickbeard.NZBCLUB = curEnabled
-            elif curProvider == 'kerews':
-                sickbeard.KEREWS = curEnabled
             elif curProvider == 'bin_req':
                 sickbeard.BINREQ = curEnabled
             elif curProvider == 'womble_s_index':
@@ -1166,13 +1164,6 @@ class ConfigProviders:
         sickbeard.TORRENTLEECH_KEY = torrentleech_key.strip()
 
         sickbeard.BTN_API_KEY = btn_api_key.strip()
-
-        sickbeard.NZBSRUS_UID = nzbs_r_us_uid.strip()
-        sickbeard.NZBSRUS_HASH = nzbs_r_us_hash.strip()
-
-        sickbeard.KEREWS_URL = kerews_url
-        sickbeard.KEREWS_APIKEY = kerews_apikey
-        sickbeard.KEREWS_CATIDS = kerews_catIDs
 
         sickbeard.NZBTO_USER = nzbto_user.strip()
         sickbeard.NZBTO_PASS = nzbto_pass.strip()

@@ -1,3 +1,6 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
 # Author: Nic Wolfe <nic@wolfeden.ca>
 # URL: http://code.google.com/p/sickbeard/
 #
@@ -36,7 +39,7 @@ from threading import Lock
 
 # apparently py2exe won't build these unless they're imported somewhere
 from sickbeard import providers, metadata
-from providers import ezrss, tvtorrents, torrentleech, btn, nzbsrus, newznab, womble, nzbx, omgwtfnzbs, nzbindex, kere_ws, nzbclub, nzbto
+from providers import ezrss, tvtorrents, torrentleech, btn, newznab, womble, omgwtfnzbs, nzbindex, nzbclub, nzbto
 from sickbeard.config import CheckSection, check_setting_int, check_setting_str, ConfigMigrator
 
 from sickbeard import searchCurrent, searchBacklog, showUpdater, versionChecker, properFinder, autoPostProcesser
@@ -186,16 +189,9 @@ NZBS_HASH = None
 
 WOMBLE = False
 
-NZBX = False
-NZBX_COMPLETION = 100
-
 OMGWTFNZBS = False
 OMGWTFNZBS_USERNAME = None
 OMGWTFNZBS_APIKEY = None
-
-NZBSRUS = False
-NZBSRUS_UID = None
-NZBSRUS_HASH = None
 
 NZBINDEX = False
 
@@ -205,11 +201,6 @@ NZBTO_PASS = None
 NZBTO_PROXY = "http//cytec.us/nzbto/index.php?"
 
 NZBCLUB = False
-
-KEREWS = False
-KEREWS_URL = 'http://kere.ws/'
-KEREWS_APIKEY = None
-KEREWS_CATIDS = None
 
 SAB_USERNAME = None
 SAB_PASSWORD = None
@@ -358,14 +349,14 @@ def initialize(consoleLogging=True):
                 showQueueScheduler, searchQueueScheduler, ROOT_DIRS, CACHE_DIR, ACTUAL_CACHE_DIR, TVDB_API_PARMS, \
                 NAMING_PATTERN, NAMING_MULTI_EP, NAMING_FORCE_FOLDERS, NAMING_ABD_PATTERN, NAMING_CUSTOM_ABD, \
                 RENAME_EPISODES, properFinderScheduler, PROVIDER_ORDER, autoPostProcesserScheduler, \
-                NZBSRUS, NZBSRUS_UID, NZBSRUS_HASH, WOMBLE, NZBX, NZBX_COMPLETION, OMGWTFNZBS, OMGWTFNZBS_USERNAME, OMGWTFNZBS_APIKEY, providerList, newznabProviderList, \
+                WOMBLE, OMGWTFNZBS, OMGWTFNZBS_USERNAME, OMGWTFNZBS_APIKEY, providerList, newznabProviderList, \
                 EXTRA_SCRIPTS, USE_TWITTER, TWITTER_USERNAME, TWITTER_PASSWORD, TWITTER_PREFIX, \
                 USE_NOTIFO, NOTIFO_USERNAME, NOTIFO_APISECRET, NOTIFO_NOTIFY_ONDOWNLOAD, NOTIFO_NOTIFY_ONSNATCH, \
                 USE_BOXCAR, BOXCAR_USERNAME, BOXCAR_PASSWORD, BOXCAR_NOTIFY_ONDOWNLOAD, BOXCAR_NOTIFY_ONSNATCH, \
                 USE_PUSHOVER, PUSHOVER_USERKEY, PUSHOVER_NOTIFY_ONDOWNLOAD, PUSHOVER_NOTIFY_ONSNATCH, \
                 USE_LIBNOTIFY, LIBNOTIFY_NOTIFY_ONSNATCH, LIBNOTIFY_NOTIFY_ONDOWNLOAD, USE_NMJ, NMJ_HOST, NMJ_DATABASE, NMJ_MOUNT, USE_NMJv2, NMJv2_HOST, NMJv2_DATABASE, NMJv2_DBLOC, USE_SYNOINDEX, \
                 USE_BANNER, USE_LISTVIEW, METADATA_XBMC, METADATA_MEDIABROWSER, METADATA_PS3, METADATA_SYNOLOGY, metadata_provider_dict, \
-                NEWZBIN, NEWZBIN_USERNAME, NEWZBIN_PASSWORD, KEREWS, KEREWS_URL, KEREWS_APIKEY, KEREWS_CATIDS, NZBCLUB, GIT_PATH, MOVE_ASSOCIATED_FILES, \
+                NEWZBIN, NEWZBIN_USERNAME, NEWZBIN_PASSWORD, NZBCLUB, GIT_PATH, MOVE_ASSOCIATED_FILES, \
                 COMING_EPS_LAYOUT, COMING_EPS_SORT, COMING_EPS_DISPLAY_PAUSED, METADATA_WDTV, METADATA_TIVO, IGNORE_WORDS, CREATE_MISSING_SHOW_DIRS, \
                 ADD_SHOWS_WO_DIR, ANON_REDIRECT
 
@@ -377,7 +368,6 @@ def initialize(consoleLogging=True):
         CheckSection(CFG, 'General')
         CheckSection(CFG, 'Blackhole')
         CheckSection(CFG, 'Newzbin')
-        CheckSection(CFG, 'KereWS')
         CheckSection(CFG, 'SABnzbd')
         CheckSection(CFG, 'NZBget')
         CheckSection(CFG, 'XBMC')
@@ -594,11 +584,6 @@ def initialize(consoleLogging=True):
         NZBS_UID = check_setting_str(CFG, 'NZBs', 'nzbs_uid', '')
         NZBS_HASH = check_setting_str(CFG, 'NZBs', 'nzbs_hash', '')
 
-        CheckSection(CFG, 'NZBsRUS')
-        NZBSRUS = bool(check_setting_int(CFG, 'NZBsRUS', 'nzbsrus', 0))
-        NZBSRUS_UID = check_setting_str(CFG, 'NZBsRUS', 'nzbsrus_uid', '')
-        NZBSRUS_HASH = check_setting_str(CFG, 'NZBsRUS', 'nzbsrus_hash', '')
-
         CheckSection(CFG, 'NZBMatrix')
         NZBMATRIX = bool(check_setting_int(CFG, 'NZBMatrix', 'nzbmatrix', 0))
         NZBMATRIX_USERNAME = check_setting_str(CFG, 'NZBMatrix', 'nzbmatrix_username', '')
@@ -619,17 +604,7 @@ def initialize(consoleLogging=True):
 
         NZBCLUB = bool(check_setting_int(CFG, 'NZBClub', 'nzbclub', 0))
 
-        KEREWS = bool(check_setting_int(CFG, 'KereWS', 'kerews', 0))
-        KEREWS_URL = check_setting_str(CFG, 'KereWS', 'kerews_url', 'http://kere.ws/')
-        KEREWS_APIKEY = check_setting_str(CFG, 'KereWS', 'kerews_apikey', '')
-        KEREWS_CATIDS = check_setting_str(CFG, 'KereWS', 'kerews_catIDs', '2000,8000')
-
         WOMBLE = bool(check_setting_int(CFG, 'Womble', 'womble', 0))
-
-
-        CheckSection(CFG, 'nzbX')
-        NZBX = bool(check_setting_int(CFG, 'nzbX', 'nzbx', 0))
-        NZBX_COMPLETION = check_setting_int(CFG, 'nzbX', 'nzbx_completion', 100)
 
         CheckSection(CFG, 'omgwtfnzbs')
         OMGWTFNZBS = bool(check_setting_int(CFG, 'omgwtfnzbs', 'omgwtfnzbs', 0))
@@ -1113,11 +1088,6 @@ def save_config():
     new_config['NZBs']['nzbs_uid'] = NZBS_UID
     new_config['NZBs']['nzbs_hash'] = NZBS_HASH
 
-    new_config['NZBsRUS'] = {}
-    new_config['NZBsRUS']['nzbsrus'] = int(NZBSRUS)
-    new_config['NZBsRUS']['nzbsrus_uid'] = NZBSRUS_UID
-    new_config['NZBsRUS']['nzbsrus_hash'] = NZBSRUS_HASH
-
     new_config['NZBIndex'] = {}
     new_config['NZBIndex']['nzbindex'] = int(NZBINDEX)
 
@@ -1131,24 +1101,8 @@ def save_config():
     new_config['NZBClub'] = {}
     new_config['NZBClub']['nzbclub'] = int(NZBCLUB)
 
-
-    # Add category for http://kere.ws
-    new_config['KereWS'] = {}
-    # kere.ws enabled?
-    new_config['KereWS']['kerews'] = int(KEREWS)
-    # URL of kere.ws (in case it should change in the future)
-    new_config['KereWS']['kerews_url'] = KEREWS_URL
-    # API key of kere.ws
-    new_config['KereWS']['kerews_apikey'] = KEREWS_APIKEY
-    # CategoryIDs of kere.ws to be searched
-    new_config['KereWS']['kerews_catIDs'] = KEREWS_CATIDS
-
     new_config['Womble'] = {}
     new_config['Womble']['womble'] = int(WOMBLE)
-
-    new_config['nzbX'] = {}
-    new_config['nzbX']['nzbx'] = int(NZBX)
-    new_config['nzbX']['nzbx_completion'] = int(NZBX_COMPLETION)
 
     new_config['omgwtfnzbs'] = {}
     new_config['omgwtfnzbs']['omgwtfnzbs'] = int(OMGWTFNZBS)
