@@ -16,13 +16,12 @@
 # You should have received a copy of the GNU General Public License
 # along with Sick Beard.  If not, see <http://www.gnu.org/licenses/>.
 
-__all__ = ['generic', 'helpers', 'mediabrowser', 'ps3', 'synology', 'tivo', 'wdtv', 'xbmc', 'xbmc_12plus']
+__all__ = ['generic', 'helpers', 'mediabrowser', 'ps3', 'tivo', 'wdtv', 'xbmc', 'xbmc_12plus']
 
 import sys
 
 import mediabrowser
 import ps3
-import synology
 import tivo
 import wdtv
 import xbmc
