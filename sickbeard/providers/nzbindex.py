@@ -138,7 +138,7 @@ class NZBIndexProvider(generic.NZBProvider):
 
             (title, url) = self._get_title_and_url(curResult)
 
-            pubDate_node = curResult.getElementsByTagName('pubDate')[0]
+            pubDate_node = curResult.find('pubDate')
             pubDate = helpers.get_xml_text(pubDate_node)
             dateStr = re.search('(\w{3}, \d{1,2} \w{3} \d{4} \d\d:\d\d:\d\d) [\+\-]\d{4}', pubDate)
             if not dateStr:

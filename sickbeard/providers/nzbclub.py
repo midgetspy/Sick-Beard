@@ -35,6 +35,7 @@ import generic
 from sickbeard import classes, logger, show_name_helpers, helpers
 from sickbeard import tvcache
 from sickbeard.exceptions import ex
+from lib.dateutil.parser import parse as parseDate
 
 class NZBClubProvider(generic.NZBProvider):
 
@@ -139,14 +140,14 @@ class NZBClubProvider(generic.NZBProvider):
 
             (title, url) = self._get_title_and_url(curResult)
 
-            pubDate_node = curResult.getElementsByTagName('pubDate')[0]
+            pubDate_node = curResult.find('pubDate')
             pubDate = helpers.get_xml_text(pubDate_node)
             dateStr = re.search('(\w{3}, \d{1,2} \w{3} \d{4} \d\d:\d\d:\d\d) [\+\-]\d{4}', pubDate)
             if not dateStr:
                 logger.log(u"Unable to figure out the date for entry "+title+", skipping it")
                 continue
             else:
-                resultDate = datetime.datetime.strptime(match.group(1), "%a, %d %b %Y %H:%M:%S")
+                resultDate = parseDate(dateStr.group(1)).replace(tzinfo=None)
 
             if date == None or resultDate > date:
                 results.append(classes.Proper(title, url, resultDate))
