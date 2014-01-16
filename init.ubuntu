@@ -19,6 +19,9 @@ else
     echo "/etc/default/sickbeard not found using default settings.";
 fi
 
+# Source init functions
+. /lib/lsb/init-functions
+
 # Script name
 NAME=sickbeard
 
@@ -91,23 +94,31 @@ if [ -e $PID_FILE ]; then
     fi
 fi
 
+start_sickbeard() {
+    echo "Starting $DESC"
+    start-stop-daemon -d $APP_PATH -c $RUN_AS $EXTRA_SSD_OPTS --start --pidfile $PID_FILE --exec $DAEMON -- $DAEMON_OPTS
+}
+
+stop_sickbeard() {
+    echo "Stopping $DESC"
+    start-stop-daemon --stop --pidfile $PID_FILE --retry 15
+}
+
 case "$1" in
     start)
-        echo "Starting $DESC"
-        start-stop-daemon -d $APP_PATH -c $RUN_AS $EXTRA_SSD_OPTS --start --pidfile $PID_FILE --exec $DAEMON -- $DAEMON_OPTS
+        start_sickbeard
         ;;
     stop)
-        echo "Stopping $DESC"
-        start-stop-daemon --stop --pidfile $PID_FILE --retry 15
-	test x$? = x0 && rm $PID_FILE
+        stop_sickbeard
         ;;
 
     restart|force-reload)
-        echo "Restarting $DESC"
-        start-stop-daemon --stop --pidfile $PID_FILE --retry 15
-	test x$? = x0 && rm $PID_FILE
+        stop_sickbeard
         sleep 2
-        start-stop-daemon -d $APP_PATH -c $RUN_AS $EXTRA_SSD_OPTS --start --pidfile $PID_FILE --exec $DAEMON -- $DAEMON_OPTS
+        start_sickbeard
+        ;;
+    status)
+        status_of_proc -p "$PID_FILE" "$DAEMON" "$DESC"
         ;;
     *)
         N=/etc/init.d/$NAME
