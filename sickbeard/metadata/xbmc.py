@@ -54,7 +54,8 @@ class XBMCMetadata(generic.GenericMetadata):
                  episode_thumbnails=False,
                  season_posters=False,
                  season_banners=False,
-                 season_all_images=False):
+                 season_all_poster=False,
+                 season_all_banner=False):
 
         generic.GenericMetadata.__init__(self,
                                          show_metadata,
@@ -65,7 +66,8 @@ class XBMCMetadata(generic.GenericMetadata):
                                          episode_thumbnails,
                                          season_posters,
                                          season_banners,
-                                         season_all_images)
+                                         season_all_poster,
+                                         season_all_banner)
 
         self.name = 'XBMC'
 
@@ -78,7 +80,8 @@ class XBMCMetadata(generic.GenericMetadata):
         self.eg_episode_thumbnails = "Season##\\<i>filename</i>.tbn"
         self.eg_season_posters = "season##.tbn"
         self.eg_season_banners = "<i>not supported</i>"
-        self.eg_season_all_images = "season-all.tbn"
+        self.eg_season_all_poster = "season-all.tbn"
+        self.eg_season_all_banner = "<i>not supported</i>"
 
     def _show_data(self, show_obj):
         """

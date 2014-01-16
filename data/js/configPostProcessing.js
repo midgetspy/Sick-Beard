@@ -212,17 +212,19 @@ $(document).ready(function () {
             var episode_thumbnails = $("#" + generator_name + "_episode_thumbnails").prop('checked');
             var season_posters = $("#" + generator_name + "_season_posters").prop('checked');
             var season_banners = $("#" + generator_name + "_season_banners").prop('checked');
-            var season_all_images = $("#" + generator_name + "_season_all_images").prop('checked');
+            var season_all_poster = $("#" + generator_name + "_season_all_poster").prop('checked');
+            var season_all_banner = $("#" + generator_name + "_season_all_banner").prop('checked');
 
             config_arr.push(show_metadata ? '1' : '0');
             config_arr.push(episode_metadata ? '1' : '0');
+            config_arr.push(fanart ? '1' : '0');
             config_arr.push(poster ? '1' : '0');
             //config_arr.push(banner ? '1' : '0');
-            config_arr.push(fanart ? '1' : '0');
             config_arr.push(episode_thumbnails ? '1' : '0');
             config_arr.push(season_posters ? '1' : '0');
             //config_arr.push(season_banners ? '1' : '0');
-            //config_arr.push(season_all_images ? '1' : '0');
+            //config_arr.push(season_all_poster ? '1' : '0');
+            //config_arr.push(season_all_banner ? '1' : '0');
 
             var cur_num = 0;
             for (var i = 0; i < config_arr.length; i++)
@@ -234,13 +236,14 @@ $(document).ready(function () {
 
             $("#" + generator_name + "_eg_show_metadata").attr('class', show_metadata ? 'enabled' : 'disabled');
             $("#" + generator_name + "_eg_episode_metadata").attr('class', episode_metadata ? 'enabled' : 'disabled');
+            $("#" + generator_name + "_eg_fanart").attr('class', fanart ? 'enabled' : 'disabled');
             $("#" + generator_name + "_eg_poster").attr('class', poster ? 'enabled' : 'disabled');
             $("#" + generator_name + "_eg_banner").attr('class', banner ? 'enabled' : 'disabled');
-            $("#" + generator_name + "_eg_fanart").attr('class', fanart ? 'enabled' : 'disabled');
             $("#" + generator_name + "_eg_episode_thumbnails").attr('class', episode_thumbnails ? 'enabled' : 'disabled');
             $("#" + generator_name + "_eg_season_posters").attr('class', season_posters ? 'enabled' : 'disabled');
             $("#" + generator_name + "_eg_season_banners").attr('class', season_banners ? 'enabled' : 'disabled');
-            $("#" + generator_name + "_eg_season_all_images").attr('class', season_all_images ? 'enabled' : 'disabled');
+            $("#" + generator_name + "_eg_season_all_poster").attr('class', season_all_poster ? 'enabled' : 'disabled');
+            $("#" + generator_name + "_eg_season_all_banner").attr('class', season_all_banner ? 'enabled' : 'disabled');
             $("#" + generator_name + "_data").val(config_arr.join('|'))
 
         });

@@ -50,7 +50,8 @@ class TIVOMetadata(generic.GenericMetadata):
                  episode_thumbnails=False,
                  season_posters=False,
                  season_banners=False,
-                 season_all_images=False):
+                 season_all_poster=False,
+                 season_all_banner=False):
 
         generic.GenericMetadata.__init__(self,
                                          show_metadata,
@@ -61,7 +62,8 @@ class TIVOMetadata(generic.GenericMetadata):
                                          episode_thumbnails,
                                          season_posters,
                                          season_banners,
-                                         season_all_images)
+                                         season_all_poster,
+                                         season_all_banner)
 
         self.name = 'TIVO'
 
@@ -76,7 +78,8 @@ class TIVOMetadata(generic.GenericMetadata):
         self.eg_episode_thumbnails = "<i>not supported</i>"
         self.eg_season_posters = "<i>not supported</i>"
         self.eg_season_banners = "<i>not supported</i>"
-        self.eg_season_all_images = "<i>not supported</i>"
+        self.eg_season_all_poster = "<i>not supported</i>"
+        self.eg_season_all_banner = "<i>not supported</i>"
 
     # Override with empty methods for unsupported features
     def create_show_metadata(self, show_obj):

@@ -56,7 +56,8 @@ class MediaBrowserMetadata(generic.GenericMetadata):
                  episode_thumbnails=False,
                  season_posters=False,
                  season_banners=False,
-                 season_all_images=False):
+                 season_all_poster=False,
+                 season_all_banner=False):
 
         generic.GenericMetadata.__init__(self,
                                          show_metadata,
@@ -67,7 +68,8 @@ class MediaBrowserMetadata(generic.GenericMetadata):
                                          episode_thumbnails,
                                          season_posters,
                                          season_banners,
-                                         season_all_images)
+                                         season_all_poster,
+                                         season_all_banner)
 
         self.name = 'MediaBrowser'
 
@@ -85,7 +87,8 @@ class MediaBrowserMetadata(generic.GenericMetadata):
         self.eg_episode_thumbnails = "Season##\\metadata\\<i>filename</i>.jpg"
         self.eg_season_posters = "Season##\\folder.jpg"
         self.eg_season_banners = "Season##\\banner.jpg"
-        self.eg_season_all_images = "<i>not supported</i>"
+        self.eg_season_all_poster = "<i>not supported</i>"
+        self.eg_season_all_banner = "<i>not supported</i>"
 
     def get_episode_file_path(self, ep_obj):
         """

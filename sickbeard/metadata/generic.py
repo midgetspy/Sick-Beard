@@ -45,7 +45,8 @@ class GenericMetadata():
     - show banner
     - season thumbnails (poster)
     - season thumbnails (banner)
-    - season all (poster/banner)
+    - season all poster
+    - season all banner
     """
 
     def __init__(self,
@@ -57,7 +58,8 @@ class GenericMetadata():
                  episode_thumbnails=False,
                  season_posters=False,
                  season_banners=False,
-                 season_all_images=False):
+                 season_all_poster=False,
+                 season_all_banner=False):
 
         self.name = "Generic"
 
@@ -76,7 +78,8 @@ class GenericMetadata():
         self.episode_thumbnails = episode_thumbnails
         self.season_posters = season_posters
         self.season_banners = season_banners
-        self.season_all_images = season_all_images
+        self.season_all_poster = season_all_poster
+        self.season_all_banner = season_all_banner
 
     def get_config(self):
         config_list = [self.show_metadata, self.episode_metadata, self.poster, self.fanart, self.episode_thumbnails, self.season_posters]

@@ -46,7 +46,8 @@ class XBMC_12PLUS(xbmc.XBMCMetadata):
                  episode_thumbnails=False,
                  season_posters=False,
                  season_banners=False,
-                 season_all_images=False):
+                 season_all_poster=False,
+                 season_all_banner=False):
 
         generic.GenericMetadata.__init__(self,
                                          show_metadata,
@@ -57,7 +58,8 @@ class XBMC_12PLUS(xbmc.XBMCMetadata):
                                          episode_thumbnails,
                                          season_posters,
                                          season_banners,
-                                         season_all_images)
+                                         season_all_poster,
+                                         season_all_banner)
 
         self.name = 'XBMC 12+'
 
@@ -72,7 +74,8 @@ class XBMC_12PLUS(xbmc.XBMCMetadata):
         self.eg_episode_thumbnails = "Season##\\<i>filename</i>-thumb.jpg"
         self.eg_season_posters = "season##-poster.jpg"
         self.eg_season_banners = "season##-banner.jpg"
-        self.eg_season_all_images = "season-all-(poster/banner).jpg"
+        self.eg_season_all_poster = "season-all-poster.jpg"
+        self.eg_season_all_banner = "season-all-banner.jpg"
 
     def get_id(self):
         return 'xbmc_12plus'
