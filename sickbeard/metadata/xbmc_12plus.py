@@ -40,9 +40,9 @@ class XBMC_12PLUS(xbmc.XBMCMetadata):
     def __init__(self,
                  show_metadata=False,
                  episode_metadata=False,
+                 fanart=False,
                  poster=False,
                  banner=False,
-                 fanart=False,
                  episode_thumbnails=False,
                  season_posters=False,
                  season_banners=False,
@@ -51,19 +51,19 @@ class XBMC_12PLUS(xbmc.XBMCMetadata):
         generic.GenericMetadata.__init__(self,
                                          show_metadata,
                                          episode_metadata,
+                                         fanart,
                                          poster,
                                          banner,
-                                         fanart,
                                          episode_thumbnails,
                                          season_posters,
                                          season_banners,
                                          season_all_images)
 
-        self.banner_name = "banner.jpg"
-        self.poster_name = "poster.jpg"
-
         self.name = 'XBMC 12+'
 
+        self.poster_name = "poster.jpg"
+
+        # web-ui metadata template
         self.eg_show_metadata = "tvshow.nfo"
         self.eg_episode_metadata = "Season##\\<i>filename</i>.nfo"
         self.eg_fanart = "fanart.jpg"

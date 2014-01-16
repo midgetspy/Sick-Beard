@@ -50,9 +50,9 @@ class MediaBrowserMetadata(generic.GenericMetadata):
     def __init__(self,
                  show_metadata=False,
                  episode_metadata=False,
+                 fanart=False,
                  poster=False,
                  banner=False,
-                 fanart=False,
                  episode_thumbnails=False,
                  season_posters=False,
                  season_banners=False,
@@ -61,20 +61,22 @@ class MediaBrowserMetadata(generic.GenericMetadata):
         generic.GenericMetadata.__init__(self,
                                          show_metadata,
                                          episode_metadata,
+                                         fanart,
                                          poster,
                                          banner,
-                                         fanart,
                                          episode_thumbnails,
                                          season_posters,
                                          season_banners,
                                          season_all_images)
 
-        self.fanart_name = "backdrop.jpg"
-        self._show_file_name = 'series.xml'
-        self._ep_nfo_extension = 'xml'
-
         self.name = 'MediaBrowser'
 
+        self._ep_nfo_extension = 'xml'
+        self._show_metadata_filename = 'series.xml'
+
+        self.fanart_name = "backdrop.jpg"
+
+        # web-ui metadata template
         self.eg_show_metadata = "series.xml"
         self.eg_episode_metadata = "Season##\\metadata\\<i>filename</i>.xml"
         self.eg_fanart = "backdrop.jpg"

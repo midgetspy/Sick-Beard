@@ -72,7 +72,7 @@ class SynologyMetadata(generic.GenericMetadata):
                                          season_all_images)
 
         self.fanart_name = "backdrop.jpg"
-        self._show_file_name = 'series.xml'
+        self._show_metadata_filename = 'series.xml'
         self._ep_nfo_extension = 'xml'
 
         self.name = 'Synology'

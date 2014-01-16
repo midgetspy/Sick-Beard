@@ -51,28 +51,32 @@ class GenericMetadata():
     def __init__(self,
                  show_metadata=False,
                  episode_metadata=False,
+                 fanart=False,
                  poster=False,
                  banner=False,
-                 fanart=False,
                  episode_thumbnails=False,
                  season_posters=False,
                  season_banners=False,
                  season_all_images=False):
 
-        self._show_file_name = "tvshow.nfo"
-        self._ep_nfo_extension = "nfo"
-
-        self.banner_name = self.poster_name = "folder.jpg"
-        self.fanart_name = "fanart.jpg"
-
         self.name = "Generic"
+
+        self._ep_nfo_extension = "nfo"
+        self._show_metadata_filename = "tvshow.nfo"
+
+        self.fanart_name = "fanart.jpg"
+        self.poster_name = "folder.jpg"
+        self.banner_name = "banner.jpg"
 
         self.show_metadata = show_metadata
         self.episode_metadata = episode_metadata
-        self.banner = self.poster = poster
         self.fanart = fanart
+        self.poster = poster
+        self.banner = banner
         self.episode_thumbnails = episode_thumbnails
-        self.season_all_images = self.season_banners = self.season_posters = season_posters
+        self.season_posters = season_posters
+        self.season_banners = season_banners
+        self.season_all_images = season_all_images
 
     def get_config(self):
         config_list = [self.show_metadata, self.episode_metadata, self.poster, self.fanart, self.episode_thumbnails, self.season_posters]
@@ -134,7 +138,7 @@ class GenericMetadata():
         return result
 
     def get_show_file_path(self, show_obj):
-        return ek.ek(os.path.join, show_obj.location, self._show_file_name)
+        return ek.ek(os.path.join, show_obj.location, self._show_metadata_filename)
 
     def get_episode_file_path(self, ep_obj):
         return helpers.replaceExtension(ep_obj.location, self._ep_nfo_extension)
@@ -630,7 +634,7 @@ class GenericMetadata():
 
         empty_return = (None, None)
 
-        metadata_path = ek.ek(os.path.join, folder, self._show_file_name)
+        metadata_path = ek.ek(os.path.join, folder, self._show_metadata_filename)
 
         if not ek.ek(os.path.isdir, folder) or not ek.ek(os.path.isfile, metadata_path):
             logger.log(u"Can't load the metadata file from " + repr(metadata_path) + ", it doesn't exist", logger.DEBUG)

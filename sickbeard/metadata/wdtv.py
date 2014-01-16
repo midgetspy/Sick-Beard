@@ -48,9 +48,9 @@ class WDTVMetadata(generic.GenericMetadata):
     def __init__(self,
                  show_metadata=False,
                  episode_metadata=False,
+                 fanart=False,
                  poster=False,
                  banner=False,
-                 fanart=False,
                  episode_thumbnails=False,
                  season_posters=False,
                  season_banners=False,
@@ -59,18 +59,19 @@ class WDTVMetadata(generic.GenericMetadata):
         generic.GenericMetadata.__init__(self,
                                          show_metadata,
                                          episode_metadata,
+                                         fanart,
                                          poster,
                                          banner,
-                                         fanart,
                                          episode_thumbnails,
                                          season_posters,
                                          season_banners,
                                          season_all_images)
 
-        self._ep_nfo_extension = 'xml'
-
         self.name = 'WDTV'
 
+        self._ep_nfo_extension = 'xml'
+
+        # web-ui metadata template
         self.eg_show_metadata = "<i>not supported</i>"
         self.eg_episode_metadata = "Season##\\<i>filename</i>.xml"
         self.eg_fanart = "<i>not supported</i>"
