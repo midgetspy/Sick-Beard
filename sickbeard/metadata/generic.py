@@ -82,7 +82,8 @@ class GenericMetadata():
         self.season_all_banner = season_all_banner
 
     def get_config(self):
-        config_list = [self.show_metadata, self.episode_metadata, self.poster, self.fanart, self.episode_thumbnails, self.season_posters]
+        #old_config_list = [self.show_metadata, self.episode_metadata, self.poster, self.fanart, self.episode_thumbnails, self.season_posters]
+        config_list = [self.show_metadata, self.episode_metadata, self.fanart, self.poster, self.banner, self.episode_thumbnails, self.season_posters, self.season_banners, self.season_all_poster, self.season_all_banner]
         return '|'.join([str(int(x)) for x in config_list])
 
     def get_id(self):
@@ -94,12 +95,26 @@ class GenericMetadata():
 
     def set_config(self, string):
         config_list = [bool(int(x)) for x in string.split('|')]
-        self.show_metadata = config_list[0]
-        self.episode_metadata = config_list[1]
-        self.banner = self.poster = config_list[2]
-        self.fanart = config_list[3]
-        self.episode_thumbnails = config_list[4]
-        self.season_banners = self.season_posters = config_list[5]
+        if len(config_list) == 6:
+            # old
+            self.show_metadata = config_list[0]
+            self.episode_metadata = config_list[1]
+            self.banner = self.poster = config_list[2]
+            self.fanart = config_list[3]
+            self.episode_thumbnails = config_list[4]
+            self.season_banners = self.season_posters = config_list[5]
+        else:
+            # new
+            self.show_metadata = config_list[0]
+            self.episode_metadata = config_list[1]
+            self.fanart = config_list[2]
+            self.poster = config_list[3]
+            self.banner = config_list[4]
+            self.episode_thumbnails = config_list[5]
+            self.season_posters = config_list[6]
+            self.season_banners = config_list[7]
+            self.season_all_poster = config_list[8]
+            self.season_all_banner = config_list[9]
 
     def _has_show_metadata(self, show_obj):
         result = ek.ek(os.path.isfile, self.get_show_file_path(show_obj))

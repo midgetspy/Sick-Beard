@@ -283,7 +283,8 @@ class ConfigMigrator():
         self.migration_names = {1: 'Custom naming',
                                 2: 'Sync backup number with version number',
                                 3: 'Rename omgwtfnzb variables',
-                                4: 'Add newznab catIDs'
+                                4: 'Add newznab catIDs',
+                                5: 'Metadata update'
                                 }
 
     def migrate_config(self):
@@ -471,3 +472,118 @@ class ConfigMigrator():
                 new_newznab_data.append("|".join(cur_provider_data_list))
 
             sickbeard.NEWZNAB_DATA = "!!!".join(new_newznab_data)
+
+    # Migration v5: Metadata upgrade
+    def _migrate_v5(self):
+        """ Updates metadata values to the new format """
+
+        """ Quick overview of what the upgrade does:
+
+        new | old | description (new)
+        ----+-----+--------------------
+          1 |  1  | show metadata
+          2 |  2  | episode metadata
+          3 |  4  | show fanart
+          4 |  3  | show poster
+          5 |  -  | show banner
+          6 |  5  | episode thumb
+          7 |  6  | season poster
+          8 |  -  | season banner
+          9 |  -  | season all poster
+         10 |  -  | season all banner
+
+        Note that the ini places start at 1 while the list index starts at 0.
+        old format: 0|0|0|0|0|0 -- 6 places
+        new format: 0|0|0|0|0|0|0|0|0|0 -- 10 places
+        """
+
+        sickbeard.METADATA_XBMC = check_setting_str(self.config_obj, 'General', 'metadata_xbmc', '0|0|0|0|0|0')
+        sickbeard.METADATA_XBMC_12PLUS = check_setting_str(self.config_obj, 'General', 'metadata_xbmc_12plus', '0|0|0|0|0|0')
+        sickbeard.METADATA_MEDIABROWSER = check_setting_str(self.config_obj, 'General', 'metadata_mediabrowser', '0|0|0|0|0|0')
+        sickbeard.METADATA_PS3 = check_setting_str(self.config_obj, 'General', 'metadata_ps3', '0|0|0|0|0|0')
+        sickbeard.METADATA_WDTV = check_setting_str(self.config_obj, 'General', 'metadata_wdtv', '0|0|0|0|0|0')
+        sickbeard.METADATA_TIVO = check_setting_str(self.config_obj, 'General', 'metadata_tivo', '0|0|0|0|0|0')
+
+        cur_metadata = sickbeard.METADATA_XBMC.split('|')
+        # if target has the old number of values, do upgrade
+        if len(cur_metadata) == 6:
+            logger.log(u"Upgrading XBMC metadata, old value: " + sickbeard.METADATA_XBMC)
+            cur_metadata.insert(4, '0')
+            cur_metadata.append('0')
+            cur_metadata.append('0')
+            cur_metadata.append('0')
+            cur_metadata[3], cur_metadata[2] = cur_metadata[2], cur_metadata[3]
+            # write new format
+            sickbeard.METADATA_XBMC = '|'.join(cur_metadata)
+            logger.log(u"Upgrading XBMC metadata, new value: " + sickbeard.METADATA_XBMC)
+            cur_metadata = None
+
+        cur_metadata = sickbeard.METADATA_XBMC_12PLUS.split('|')
+        # if target has the old number of values, do upgrade
+        if len(cur_metadata) == 6:
+            logger.log(u"Upgrading XBMC 12+ metadata, old value: " + sickbeard.METADATA_XBMC_12PLUS)
+            cur_metadata.insert(4, '0')
+            cur_metadata.append('0')
+            cur_metadata.append('0')
+            cur_metadata.append('0')
+            cur_metadata[3], cur_metadata[2] = cur_metadata[2], cur_metadata[3]
+            # write new format
+            sickbeard.METADATA_XBMC_12PLUS = '|'.join(cur_metadata)
+            logger.log(u"Upgrading XBMC 12+ metadata, new value: " + sickbeard.METADATA_XBMC_12PLUS)
+            cur_metadata = None
+
+        cur_metadata = sickbeard.METADATA_MEDIABROWSER.split('|')
+        # if target has the old number of values, do upgrade
+        if len(cur_metadata) == 6:
+            logger.log(u"Upgrading MediaBrowser metadata, old value: " + sickbeard.METADATA_MEDIABROWSER)
+            cur_metadata.insert(4, '0')
+            cur_metadata.append('0')
+            cur_metadata.append('0')
+            cur_metadata.append('0')
+            cur_metadata[3], cur_metadata[2] = cur_metadata[2], cur_metadata[3]
+            # write new format
+            sickbeard.METADATA_MEDIABROWSER = '|'.join(cur_metadata)
+            logger.log(u"Upgrading MediaBrowser metadata, new value: " + sickbeard.METADATA_MEDIABROWSER)
+            cur_metadata = None
+
+        cur_metadata = sickbeard.METADATA_PS3.split('|')
+        # if target has the old number of values, do upgrade
+        if len(cur_metadata) == 6:
+            logger.log(u"Upgrading PS3 metadata, old value: " + sickbeard.METADATA_PS3)
+            cur_metadata.insert(4, '0')
+            cur_metadata.append('0')
+            cur_metadata.append('0')
+            cur_metadata.append('0')
+            cur_metadata[3], cur_metadata[2] = cur_metadata[2], cur_metadata[3]
+            # write new format
+            sickbeard.METADATA_PS3 = '|'.join(cur_metadata)
+            logger.log(u"Upgrading PS3 metadata, new value: " + sickbeard.METADATA_PS3)
+            cur_metadata = None
+
+        cur_metadata = sickbeard.METADATA_WDTV.split('|')
+        # if target has the old number of values, do upgrade
+        if len(cur_metadata) == 6:
+            logger.log(u"Upgrading WDTV metadata, old value: " + sickbeard.METADATA_WDTV)
+            cur_metadata.insert(4, '0')
+            cur_metadata.append('0')
+            cur_metadata.append('0')
+            cur_metadata.append('0')
+            cur_metadata[3], cur_metadata[2] = cur_metadata[2], cur_metadata[3]
+            # write new format
+            sickbeard.METADATA_WDTV = '|'.join(cur_metadata)
+            logger.log(u"Upgrading WDTV metadata, new value: " + sickbeard.METADATA_WDTV)
+            cur_metadata = None
+
+        cur_metadata = sickbeard.METADATA_TIVO.split('|')
+        # if target has the old number of values, do upgrade
+        if len(cur_metadata) == 6:
+            logger.log(u"Upgrading TIVO metadata, old value: " + sickbeard.METADATA_TIVO)
+            cur_metadata.insert(4, '0')
+            cur_metadata.append('0')
+            cur_metadata.append('0')
+            cur_metadata.append('0')
+            cur_metadata[3], cur_metadata[2] = cur_metadata[2], cur_metadata[3]
+            # write new format
+            sickbeard.METADATA_TIVO = '|'.join(cur_metadata)
+            logger.log(u"Upgrading TIVO metadata, new value: " + sickbeard.METADATA_TIVO)
+            cur_metadata = None

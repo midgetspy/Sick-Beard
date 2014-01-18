@@ -219,16 +219,17 @@ $(document).ready(function () {
             config_arr.push(episode_metadata ? '1' : '0');
             config_arr.push(fanart ? '1' : '0');
             config_arr.push(poster ? '1' : '0');
-            //config_arr.push(banner ? '1' : '0');
+            config_arr.push(banner ? '1' : '0');
             config_arr.push(episode_thumbnails ? '1' : '0');
             config_arr.push(season_posters ? '1' : '0');
-            //config_arr.push(season_banners ? '1' : '0');
-            //config_arr.push(season_all_poster ? '1' : '0');
-            //config_arr.push(season_all_banner ? '1' : '0');
+            config_arr.push(season_banners ? '1' : '0');
+            config_arr.push(season_all_poster ? '1' : '0');
+            config_arr.push(season_all_banner ? '1' : '0');
 
             var cur_num = 0;
-            for (var i = 0; i < config_arr.length; i++)
+            for (var i = 0; i < config_arr.length; i++) {
                 cur_num += parseInt(config_arr[i]);
+            }
             if (cur_num > cur_most) {
                 cur_most = cur_num;
                 cur_most_provider = generator_name;
@@ -244,12 +245,12 @@ $(document).ready(function () {
             $("#" + generator_name + "_eg_season_banners").attr('class', season_banners ? 'enabled' : 'disabled');
             $("#" + generator_name + "_eg_season_all_poster").attr('class', season_all_poster ? 'enabled' : 'disabled');
             $("#" + generator_name + "_eg_season_all_banner").attr('class', season_all_banner ? 'enabled' : 'disabled');
-            $("#" + generator_name + "_data").val(config_arr.join('|'))
+            $("#" + generator_name + "_data").val(config_arr.join('|'));
 
         });
 
         if (cur_most_provider != '' && first) {
-            $('#metadataType option[value=' + cur_most_provider + ']').attr('selected', 'selected')
+            $('#metadataType option[value=' + cur_most_provider + ']').attr('selected', 'selected');
             $(this).showHideMetadata();
         }
 
@@ -274,7 +275,7 @@ $(document).ready(function () {
         position: {
             viewport: $(window),
             at: 'top center',
-            my: 'bottom center',
+            my: 'bottom center'
         },
         style: {
             tip: {
@@ -294,7 +295,7 @@ $(document).ready(function () {
         position: {
             viewport: $(window),
             at: 'center left',
-            my: 'center right',
+            my: 'center right'
         },
         style: {
             tip: {
