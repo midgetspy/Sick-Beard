@@ -184,7 +184,7 @@ class IPTorrentsProvider(generic.TorrentProvider):
                             torrent_name = torrent.string
                             torrent_download_url = self.urls['base_url'] + (result.find_all('td')[3].find('a'))['href']
                             torrent_details_url = self.urls['base_url'] + torrent['href']
-                            torrent_seeders = int(result.find('td', attrs = {'class' : 'ac t_seeders'}).string)
+                            torrent_seeders = int(result.find('b', attrs = {'class' : 'c_ratio'}).string)
                             ## Not used, perhaps in the future ##
                             #torrent_id = int(torrent['href'].replace('/details.php?id=', ''))
                             #torrent_leechers = int(result.find('td', attrs = {'class' : 'ac t_leechers'}).string)
