@@ -30,7 +30,7 @@ class RequestMethods(object):
     in the URL (such as GET, HEAD, DELETE).
 
     :meth:`.request_encode_body` is for sending requests whose fields are
-    encoded in the *body* of the request using multipart or www-orm-urlencoded
+    encoded in the *body* of the request using multipart or www-form-urlencoded
     (such as for POST, PUT, PATCH).
 
     :meth:`.request` is for making any kind of request, it will look up the
@@ -45,7 +45,6 @@ class RequestMethods(object):
     """
 
     _encode_url_methods = set(['DELETE', 'GET', 'HEAD', 'OPTIONS'])
-    _encode_body_methods = set(['PATCH', 'POST', 'PUT', 'TRACE'])
 
     def __init__(self, headers=None):
         self.headers = headers or {}

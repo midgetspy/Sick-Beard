@@ -23,7 +23,7 @@ usage:
 
    >>> payload = dict(key1='value1', key2='value2')
    >>> r = requests.post("http://httpbin.org/post", data=payload)
-   >>> print r.text
+   >>> print(r.text)
    {
      ...
      "form": {
@@ -36,21 +36,21 @@ usage:
 The other HTTP methods are supported - see `requests.api`. Full documentation
 is at <http://python-requests.org>.
 
-:copyright: (c) 2013 by Kenneth Reitz.
+:copyright: (c) 2014 by Kenneth Reitz.
 :license: Apache 2.0, see LICENSE for more details.
 
 """
 
 __title__ = 'requests'
-__version__ = '1.2.3'
-__build__ = 0x010203
+__version__ = '2.2.0'
+__build__ = 0x020200
 __author__ = 'Kenneth Reitz'
 __license__ = 'Apache 2.0'
-__copyright__ = 'Copyright 2013 Kenneth Reitz'
+__copyright__ = 'Copyright 2014 Kenneth Reitz'
 
 # Attempt to enable urllib3's SNI support, if possible
 try:
-    from requests.packages.urllib3.contrib import pyopenssl
+    from .packages.urllib3.contrib import pyopenssl
     pyopenssl.inject_into_urllib3()
 except ImportError:
     pass
