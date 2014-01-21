@@ -1,3 +1,6 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
 # Author: Nic Wolfe <nic@wolfeden.ca>
 # URL: http://code.google.com/p/sickbeard/
 #
@@ -147,7 +150,7 @@ class Quality:
 
         if checkName(["(pdtv|hdtv|dsr|hdtvrip|webrip|webhdrip)(.repack)?.(xvi-?d|x264)"], all) and not checkName(["(720|1080)[pi]"], all) or checkName(["videomann"], all) and not checkName(["(720|1080)[pi]"], all):
             return Quality.SDTV
-        elif checkName(["(dvdrip|bdrip|blurayrip)(.repack)?(.ws)?.(xvi-?d|divx|x264)"], any) and not checkName(["(720|1080)[pi]"], all):
+        elif checkName(["(dvdrip|bdrip|blurayrip|ituneshd)(.repack)?(.ws)?.(xvi-?d|divx|x264)"], any) and not checkName(["(720|1080)[pi]"], all):
             return Quality.SDDVD
         elif checkName(["720p", "hdtv", "x264"], all) or checkName(["hr.ws.pdtv.x264"], any) and not checkName(["(1080)[pi]"], all) or checkName(["videomann", "720p"], all):
             return Quality.HDTV
