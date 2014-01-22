@@ -115,7 +115,7 @@ var show_nzb_providers = #if $sickbeard.USE_NZBS then "true" else "false"#;
                                 <span class="component-title jumbo">Configure Provider:</span>
                                 <span class="component-desc">
                                     #set $provider_config_list = []
-                                    #for $cur_provider in ("thepiratebay", "tvtorrents", "btn", "torrentleech", "iptorrents", "omgwtfnzbs", "kickasstorrents", "sceneaccess", "hdbits"):
+                                    #for $cur_provider in ("thepiratebay", "tvtorrents", "btn", "torrentleech", "iptorrents", "omgwtfnzbs", "kickasstorrents", "sceneaccess", "hdbits", "nextgen"):
                                         #set $cur_provider_obj = $sickbeard.providers.getProviderClass($cur_provider)
                                         #if $cur_provider_obj.providerType == $GenericProvider.NZB and not $sickbeard.USE_NZBS:
                                         	#continue
@@ -339,7 +339,22 @@ var show_nzb_providers = #if $sickbeard.USE_NZBS then "true" else "false"#;
                                 <span class="component-desc">This will only download <b>[FreeLeech]</b> torrents.</span>
                             </label>
                         </div>
-</div><!-- /iptorrentsDiv //-->
+</div><!-- /torrentsDayDiv //-->
+
+<div class="providerDiv" id="nextgenDiv">
+                        <div class="field-pair">
+                            <label class="clearfix">
+                                <span class="component-title">Username:</span>
+                                <input class="component-desc" type="text" name="nextgen_username" value="$sickbeard.NEXTGEN_USERNAME" size="40" />
+                            </label>
+                        </div>
+                        <div class="field-pair">
+                            <label class="clearfix">
+                                <span class="component-title">Password:</span>
+                                <input class="component-desc" type="password" name="nextgen_password" value="$sickbeard.NEXTGEN_PASSWORD" size="40" />
+                            </label>
+                        </div>
+</div><!-- /nextgenDiv //-->
 
 <div class="providerDiv" id="hdbitsDiv">
                         <div class="field-pair">

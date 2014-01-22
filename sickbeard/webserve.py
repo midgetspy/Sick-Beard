@@ -1495,6 +1495,7 @@ class ConfigProviders:
                       scc_username=None, scc_password=None,
                       torrentday_username=None, torrentday_password=None, torrentday_freeleech=None,
                       hdbits_username=None, hdbits_passkey=None,
+					  nextgen_username=None, nextgen_password=None,
                       newzbin_username=None, newzbin_password=None,
                       provider_order=None):
 
@@ -1622,6 +1623,8 @@ class ConfigProviders:
                 sickbeard.TORRENTDAY = curEnabled
             elif curProvider == 'hdbits':
                 sickbeard.HDBITS = curEnabled
+            elif curProvider == 'nextgen':
+                sickbeard.NEXTGEN = curEnabled				
             elif curProvider in newznabProviderDict:
                 newznabProviderDict[curProvider].enabled = bool(curEnabled)
             elif curProvider in torrentRssProviderDict:
@@ -1696,6 +1699,9 @@ class ConfigProviders:
         sickbeard.OMGWTFNZBS_USERNAME = omgwtfnzbs_username.strip()
         sickbeard.OMGWTFNZBS_APIKEY = omgwtfnzbs_apikey.strip()
 
+        sickbeard.NEXTGEN_USERNAME = nextgen_username.strip()
+        sickbeard.NEXTGEN_PASSWORD = nextgen_password.strip()
+		
         sickbeard.NEWZNAB_DATA = '!!!'.join([x.configStr() for x in sickbeard.newznabProviderList])
         sickbeard.PROVIDER_ORDER = provider_list
 
