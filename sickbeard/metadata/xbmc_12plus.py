@@ -19,6 +19,7 @@ import generic
 import xbmc
 import os
 
+from sickbeard import logger
 from sickbeard import encodingKludge as ek
 
 
@@ -80,6 +81,16 @@ class XBMC_12PLUS(xbmc.XBMCMetadata):
     def get_id(self):
         return 'xbmc_12plus'
 
+    def create_season_banners(self, show_obj):
+        if self.season_banners and show_obj:
+            result = []
+            for season, episodes in show_obj.episodes.iteritems():  # @UnusedVariable
+                if not self._has_season_banner(show_obj, season):
+                    logger.log(u"Metadata provider " + self.name + " creating season banners for " + show_obj.name, logger.DEBUG)
+                    result = result + [self.save_season_banners(show_obj, season)]
+            return all(result)
+        return False
+
     def get_episode_thumb_path(self, ep_obj):
         """
         Returns the path where the episode thumbnail should be stored.
@@ -98,7 +109,7 @@ class XBMC_12PLUS(xbmc.XBMCMetadata):
 
         return tbn_filename
 
-    def get_season_thumb_path(self, show_obj, season):
+    def get_season_poster_path(self, show_obj, season):
         """
         Returns the full path to the file for a given season thumb.
 
@@ -108,11 +119,11 @@ class XBMC_12PLUS(xbmc.XBMCMetadata):
         """
         # Our specials thumbnail is, well, special
         if season == 0:
-            season_thumb_file_path = 'season-specials'
+            season_poster_filename = 'season-specials'
         else:
-            season_thumb_file_path = 'season' + str(season).zfill(2)
+            season_poster_filename = 'season' + str(season).zfill(2)
 
-        return ek.ek(os.path.join, show_obj.location, season_thumb_file_path + '-poster.jpg')
+        return ek.ek(os.path.join, show_obj.location, season_poster_filename + '-poster.jpg')
 
 
 # present a standard "interface" from the module

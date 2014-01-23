@@ -84,7 +84,13 @@ class PS3Metadata(generic.GenericMetadata):
     def create_fanart(self, show_obj):
         pass
 
+    def create_banner(self, show_obj):
+        pass
+
     def create_season_posters(self, show_obj):
+        pass
+
+    def create_season_banners(self, ep_obj):
         pass
 
     def get_episode_thumb_path(self, ep_obj):

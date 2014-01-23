@@ -106,7 +106,7 @@ class WDTVMetadata(generic.GenericMetadata):
 
         return tbn_filename
 
-    def get_season_thumb_path(self, show_obj, season):
+    def get_season_poster_path(self, show_obj, season):
         """
         Season thumbs for WDTV go in Show Dir/Season X/folder.jpg
 

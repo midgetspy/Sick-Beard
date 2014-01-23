@@ -88,10 +88,10 @@ class TIVOMetadata(generic.GenericMetadata):
     def create_fanart(self, show_obj):
         pass
 
-    def create_banner(self, show_obj):
+    def create_poster(self, show_obj):
         pass
 
-    def create_poster(self, show_obj):
+    def create_banner(self, show_obj):
         pass
 
     def create_episode_thumb(self, ep_obj):
@@ -100,10 +100,16 @@ class TIVOMetadata(generic.GenericMetadata):
     def create_season_posters(self, ep_obj):
         pass
 
+    def create_season_banners(self, ep_obj):
+        pass
+
     def get_episode_thumb_path(self, ep_obj):
         pass
 
-    def get_season_thumb_path(self, show_obj, season):
+    def get_season_poster_path(self, show_obj, season):
+        pass
+
+    def get_season_banner_path(self, show_obj, season):
         pass
 
     def retrieveShowMetadata(self, folder):

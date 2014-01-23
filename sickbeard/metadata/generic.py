@@ -82,7 +82,6 @@ class GenericMetadata():
         self.season_all_banner = season_all_banner
 
     def get_config(self):
-        #old_config_list = [self.show_metadata, self.episode_metadata, self.poster, self.fanart, self.episode_thumbnails, self.season_posters]
         config_list = [self.show_metadata, self.episode_metadata, self.fanart, self.poster, self.banner, self.episode_thumbnails, self.season_posters, self.season_banners, self.season_all_poster, self.season_all_banner]
         return '|'.join([str(int(x)) for x in config_list])
 
@@ -95,26 +94,16 @@ class GenericMetadata():
 
     def set_config(self, string):
         config_list = [bool(int(x)) for x in string.split('|')]
-        if len(config_list) == 6:
-            # old
-            self.show_metadata = config_list[0]
-            self.episode_metadata = config_list[1]
-            self.banner = self.poster = config_list[2]
-            self.fanart = config_list[3]
-            self.episode_thumbnails = config_list[4]
-            self.season_banners = self.season_posters = config_list[5]
-        else:
-            # new
-            self.show_metadata = config_list[0]
-            self.episode_metadata = config_list[1]
-            self.fanart = config_list[2]
-            self.poster = config_list[3]
-            self.banner = config_list[4]
-            self.episode_thumbnails = config_list[5]
-            self.season_posters = config_list[6]
-            self.season_banners = config_list[7]
-            self.season_all_poster = config_list[8]
-            self.season_all_banner = config_list[9]
+        self.show_metadata = config_list[0]
+        self.episode_metadata = config_list[1]
+        self.fanart = config_list[2]
+        self.poster = config_list[3]
+        self.banner = config_list[4]
+        self.episode_thumbnails = config_list[5]
+        self.season_posters = config_list[6]
+        self.season_banners = config_list[7]
+        self.season_all_poster = config_list[8]
+        self.season_all_banner = config_list[9]
 
     def _has_show_metadata(self, show_obj):
         result = ek.ek(os.path.isfile, self.get_show_file_path(show_obj))
@@ -149,7 +138,14 @@ class GenericMetadata():
         return result
 
     def _has_season_poster(self, show_obj, season):
-        location = self.get_season_thumb_path(show_obj, season)
+        location = self.get_season_poster_path(show_obj, season)
+        result = location != None and ek.ek(os.path.isfile, location)
+        if location:
+            logger.log(u"Checking if " + location + " exists: " + str(result), logger.DEBUG)
+        return result
+
+    def _has_season_banner(self, show_obj, season):
+        location = self.get_season_banner_path(show_obj, season)
         result = location != None and ek.ek(os.path.isfile, location)
         if location:
             logger.log(u"Checking if " + location + " exists: " + str(result), logger.DEBUG)
@@ -161,14 +157,14 @@ class GenericMetadata():
     def get_episode_file_path(self, ep_obj):
         return helpers.replaceExtension(ep_obj.location, self._ep_nfo_extension)
 
-    def get_banner_path(self, show_obj):
-        return ek.ek(os.path.join, show_obj.location, self.banner_name)
+    def get_fanart_path(self, show_obj):
+        return ek.ek(os.path.join, show_obj.location, self.fanart_name)
 
     def get_poster_path(self, show_obj):
         return ek.ek(os.path.join, show_obj.location, self.poster_name)
 
-    def get_fanart_path(self, show_obj):
-        return ek.ek(os.path.join, show_obj.location, self.fanart_name)
+    def get_banner_path(self, show_obj):
+        return ek.ek(os.path.join, show_obj.location, self.banner_name)
 
     def get_episode_thumb_path(self, ep_obj):
         """
@@ -184,9 +180,9 @@ class GenericMetadata():
 
         return tbn_filename
 
-    def get_season_thumb_path(self, show_obj, season):
+    def get_season_poster_path(self, show_obj, season):
         """
-        Returns the full path to the file for a given season thumb.
+        Returns the full path to the file for a given season poster.
 
         show_obj: a TVShow instance for which to generate the path
         season: a season number to be used for the path. Note that season 0
@@ -195,11 +191,28 @@ class GenericMetadata():
 
         # Our specials thumbnail is, well, special
         if season == 0:
-            season_thumb_file_path = 'season-specials'
+            season_poster_filename = 'season-specials'
         else:
-            season_thumb_file_path = 'season' + str(season).zfill(2)
+            season_poster_filename = 'season' + str(season).zfill(2)
 
-        return ek.ek(os.path.join, show_obj.location, season_thumb_file_path + '.tbn')
+        return ek.ek(os.path.join, show_obj.location, season_poster_filename + '.tbn')
+
+    def get_season_banner_path(self, show_obj, season):
+        """
+        Returns the full path to the file for a given season banner.
+
+        show_obj: a TVShow instance for which to generate the path
+        season: a season number to be used for the path. Note that season 0
+                means specials.
+        """
+
+        # Our specials thumbnail is, well, special
+        if season == 0:
+            season_banner_filename = 'season-specials'
+        else:
+            season_banner_filename = 'season' + str(season).zfill(2)
+
+        return ek.ek(os.path.join, show_obj.location, season_banner_filename + '-banner.jpg')
 
     def _show_data(self, show_obj):
         """
@@ -227,10 +240,10 @@ class GenericMetadata():
             return self.write_ep_file(ep_obj)
         return False
 
-    def create_banner(self, show_obj):
-        if self.banner and show_obj and not self._has_banner(show_obj):
-            logger.log(u"Metadata provider " + self.name + " creating banner for " + show_obj.name, logger.DEBUG)
-            return self.save_banner(show_obj)
+    def create_fanart(self, show_obj):
+        if self.fanart and show_obj and not self._has_fanart(show_obj):
+            logger.log(u"Metadata provider " + self.name + " creating fanart for " + show_obj.name, logger.DEBUG)
+            return self.save_fanart(show_obj)
         return False
 
     def create_poster(self, show_obj):
@@ -239,10 +252,10 @@ class GenericMetadata():
             return self.save_poster(show_obj)
         return False
 
-    def create_fanart(self, show_obj):
-        if self.fanart and show_obj and not self._has_fanart(show_obj):
-            logger.log(u"Metadata provider " + self.name + " creating fanart for " + show_obj.name, logger.DEBUG)
-            return self.save_fanart(show_obj)
+    def create_banner(self, show_obj):
+        if self.banner and show_obj and not self._has_banner(show_obj):
+            logger.log(u"Metadata provider " + self.name + " creating banner for " + show_obj.name, logger.DEBUG)
+            return self.save_banner(show_obj)
         return False
 
     def create_episode_thumb(self, ep_obj):
@@ -254,10 +267,20 @@ class GenericMetadata():
     def create_season_posters(self, show_obj):
         if self.season_posters and show_obj:
             result = []
-            for season, episodes in show_obj.episodes.iteritems():
+            for season, episodes in show_obj.episodes.iteritems():  # @UnusedVariable
                 if not self._has_season_poster(show_obj, season):
                     logger.log(u"Metadata provider " + self.name + " creating season posters for " + show_obj.name, logger.DEBUG)
-                    result = result + [self.save_season_thumbs(show_obj, season)]
+                    result = result + [self.save_season_posters(show_obj, season)]
+            return all(result)
+        return False
+
+    def create_season_banners(self, show_obj):
+        if self.season_banners and show_obj:
+            result = []
+            for season, episodes in show_obj.episodes.iteritems():  # @UnusedVariable
+                if not self._has_season_banner(show_obj, season):
+                    logger.log(u"Metadata provider " + self.name + " creating season banners for " + show_obj.name, logger.DEBUG)
+                    result = result + [self.save_season_banners(show_obj, season)]
             return all(result)
         return False
 
@@ -481,18 +504,18 @@ class GenericMetadata():
 
         return self._write_image(poster_data, poster_path)
 
-    def save_season_thumbs(self, show_obj, season):
+    def save_season_posters(self, show_obj, season):
         """
-        Saves all season thumbnails to disk for the given show.
+        Saves all season posters to disk for the given show.
 
         show_obj: a TVShow object for which to save the season thumbs
 
-        Cycles through all seasons and saves the season thumbs if possible. This
+        Cycles through all seasons and saves the season posters if possible. This
         method should not need to be overridden by implementing classes, changing
-        _season_thumb_dict and get_season_thumb_path should be good enough.
+        _season_posters_dict and get_season_poster_path should be good enough.
         """
 
-        season_dict = self._season_thumb_dict(show_obj, season)
+        season_dict = self._season_posters_dict(show_obj, season)
         result = []
 
         # Returns a nested dictionary of season art with the season
@@ -508,19 +531,66 @@ class GenericMetadata():
             # Just grab whatever's there for now
             art_id, season_url = cur_season_art.popitem()  # @UnusedVariable
 
-            season_thumb_file_path = self.get_season_thumb_path(show_obj, cur_season)
+            season_poster_file_path = self.get_season_poster_path(show_obj, cur_season)
 
-            if not season_thumb_file_path:
+            if not season_poster_file_path:
                 logger.log(u"Path for season " + str(cur_season) + " came back blank, skipping this season", logger.DEBUG)
                 continue
 
             seasonData = metadata_helpers.getShowImage(season_url)
 
             if not seasonData:
-                logger.log(u"No season thumb data available, skipping this season", logger.DEBUG)
+                logger.log(u"No season poster data available, skipping this season", logger.DEBUG)
                 continue
 
-            result = result + [self._write_image(seasonData, season_thumb_file_path)]
+            result = result + [self._write_image(seasonData, season_poster_file_path)]
+        if result:
+            return all(result)
+        else:
+            return False
+
+        return True
+
+    def save_season_banners(self, show_obj, season):
+        """
+        Saves all season banners to disk for the given show.
+
+        show_obj: a TVShow object for which to save the season thumbs
+
+        Cycles through all seasons and saves the season banners if possible. This
+        method should not need to be overridden by implementing classes, changing
+        _season_banners_dict and get_season_banner_path should be good enough.
+        """
+
+        season_dict = self._season_banners_dict(show_obj, season)
+        result = []
+
+        # Returns a nested dictionary of season art with the season
+        # number as primary key. It's really overkill but gives the option
+        # to present to user via ui to pick down the road.
+        for cur_season in season_dict:
+
+            cur_season_art = season_dict[cur_season]
+
+            if len(cur_season_art) == 0:
+                continue
+
+            # Just grab whatever's there for now
+            art_id, season_url = cur_season_art.popitem()  # @UnusedVariable
+
+            season_banner_file_path = self.get_season_banner_path(show_obj, cur_season)
+
+            if not season_banner_file_path:
+                logger.log(u"Path for season " + str(cur_season) + " came back blank, skipping this season", logger.DEBUG)
+                continue
+
+            seasonData = metadata_helpers.getShowImage(season_url)
+
+            if not seasonData:
+                logger.log(u"No season banner data available, skipping this season", logger.DEBUG)
+                continue
+
+            result = result + [self._write_image(seasonData, season_banner_file_path)]
         if result:
             return all(result)
         else:
@@ -601,7 +671,7 @@ class GenericMetadata():
 
         return image_data
 
-    def _season_thumb_dict(self, show_obj, season):
+    def _season_posters_dict(self, show_obj, season):
         """
         Should return a dict like:
 
@@ -634,6 +704,53 @@ class GenericMetadata():
 
         # Give us just the normal poster-style season graphics
         seasonsArtObj = tvdb_show_obj['_banners']['season']['season']
+
+        # Returns a nested dictionary of season art with the season
+        # number as primary key. It's really overkill but gives the option
+        # to present to user via ui to pick down the road.
+
+        result[season] = {}
+
+        # find the correct season in the tvdb object and just copy the dict into our result dict
+        for seasonArtID in seasonsArtObj.keys():
+            if int(seasonsArtObj[seasonArtID]['season']) == season and seasonsArtObj[seasonArtID]['language'] == 'en':
+                result[season][seasonArtID] = seasonsArtObj[seasonArtID]['_bannerpath']
+
+        return result
+
+    def _season_banners_dict(self, show_obj, season):
+        """
+        Should return a dict like:
+
+        result = {<season number>:
+                    {1: '<url 1>', 2: <url 2>, ...},}
+        """
+
+        # This holds our resulting dictionary of season art
+        result = {}
+
+        tvdb_lang = show_obj.lang
+
+        try:
+            # There's gotta be a better way of doing this but we don't wanna
+            # change the language value elsewhere
+            ltvdb_api_parms = sickbeard.TVDB_API_PARMS.copy()
+
+            if tvdb_lang and not tvdb_lang == 'en':
+                ltvdb_api_parms['language'] = tvdb_lang
+
+            t = tvdb_api.Tvdb(banners=True, **ltvdb_api_parms)
+            tvdb_show_obj = t[show_obj.tvdbid]
+        except (tvdb_exceptions.tvdb_error, IOError), e:
+            logger.log(u"Unable to look up show on TVDB, not downloading images: " + ex(e), logger.ERROR)
+            return result
+
+        # if we have no season banners then just finish
+        if 'season' not in tvdb_show_obj['_banners'] or 'seasonwide' not in tvdb_show_obj['_banners']['season']:
+            return result
+
+        # Give us just the normal season graphics
+        seasonsArtObj = tvdb_show_obj['_banners']['season']['seasonwide']
 
         # Returns a nested dictionary of season art with the season
         # number as primary key. It's really overkill but gives the option

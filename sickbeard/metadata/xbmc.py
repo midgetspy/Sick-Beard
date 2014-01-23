@@ -71,17 +71,23 @@ class XBMCMetadata(generic.GenericMetadata):
 
         self.name = 'XBMC'
 
+        self.banner_name = "folder.jpg"
+
         # web-ui metadata template
         self.eg_show_metadata = "tvshow.nfo"
         self.eg_episode_metadata = "Season##\\<i>filename</i>.nfo"
         self.eg_fanart = "fanart.jpg"
         self.eg_poster = "folder.jpg"
-        self.eg_banner = "<i>not supported</i>"
+        self.eg_banner = "folder.jpg"
         self.eg_episode_thumbnails = "Season##\\<i>filename</i>.tbn"
         self.eg_season_posters = "season##.tbn"
         self.eg_season_banners = "<i>not supported</i>"
         self.eg_season_all_poster = "season-all.tbn"
         self.eg_season_all_banner = "<i>not supported</i>"
+
+    # Override with empty methods for unsupported features
+    def create_season_banners(self, ep_obj):
+        pass
 
     def _show_data(self, show_obj):
         """
