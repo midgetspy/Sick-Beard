@@ -7,44 +7,44 @@
 # Add the following lines to /etc/rc.conf.local or /etc/rc.conf
 # to enable this service:
 #
-# sickbeard_enable (bool):	Set to NO by default.
-#			Set it to YES to enable it.
-# sickbeard_user:  The user account Sick Beard daemon runs as what
-#			you want it to be. It uses '_sabnzbd' user by
-#			default. Do not sets it as empty or it will run
-#			as root.
-# sickbeard_dir:	Directory where Sick Beard lives.
-#			Default: /usr/local/sickbeard
-# sickbeard_chdir:  Change to this directory before running Sick Beard.
-#     Default is same as sickbeard_dir.
-# sickbeard_pid:  The name of the pidfile to create.
-#     Default is sickbeard.pid in sickbeard_dir.
-PATH="/sbin:/bin:/usr/sbin:/usr/bin:/usr/local/sbin:/usr/local/bin"
+# sickbeard_enable (bool):    	Set to NO by default.
+#                       		Set it to YES to enable it.
+# sickbeard_conf_dir:   		Directory where sickbeard configuration
+#                       		data is stored.
+#                       		Default: /usr/local/sickbeard
+# sickbeard_user:       		The user account sickbeard daemon runs as what
+#                       		you want it to be. It uses '_sickbeard' user by
+#                       		default. Do not sets it as empty or it will run
+#                       		as root.
+# sickbeard_group:      		The group account sickbeard daemon runs as what
+#                       		you want it to be. It uses '_sickbeard' group by
+#                       		default. Do not sets it as empty or it will run
+#                       		as wheel.
+PATH="/sbin:/bin:/usr/sbin:/usr/bin:/usr/local/sbin:/usr/local/bin:/usr/local/bin/python2.7"
 
 . /etc/rc.subr
 
-name="sickbeard"
-rcvar=${name}_enable
-
+name=sickbeard
+rcvar=sickbeard_enable
 load_rc_config ${name}
 
-: ${sickbeard_enable:="NO"}
-: ${sickbeard_user:="_sabnzbd"}
-: ${sickbeard_dir:="/usr/local/sickbeard"}
-: ${sickbeard_chdir:="${sickbeard_dir}"}
-: ${sickbeard_pid:="${sickbeard_dir}/sickbeard.pid"}
+: ${sickbeard_enable:=NO}
+: ${sickbeard_user:=root}
+: ${sickbeard_group:=wheel}
+: ${sickbeard_conf_dir="/usr/local/share/sickbeard"}
+
+status_cmd="${name}_status"
 
 WGET="/usr/local/bin/wget" # You need wget for this script to safely shutdown Sick Beard.
-HOST="127.0.0.1" # Set Sick Beard address here.
-PORT="8081" # Set Sick Beard port here.
+HOST=$(grep -m1 ^web_host ${sickbeard_conf_dir}/config.ini | tr -dc '[0-9\.]') # Set Sick Beard address here.
+PORT=$(grep -m1 ^web_port ${sickbeard_conf_dir}/config.ini | tr -dc '[0-9]') # Set Sick Beard port here.
 SBUSR="" # Set Sick Beard username (if you use one) here.
 SBPWD="" # Set Sick Beard password (if you use one) here.
 
-status_cmd="${name}_status"
-stop_cmd="${name}_stop"
-
-command="/usr/sbin/daemon"
-command_args="-f -p ${sickbeard_pid} python ${sickbeard_dir}/SickBeard.py ${sickbeard_flags} --quiet --nolaunch"
+pidfile=/var/run/sickbeard/sickbeard-$(grep -m1 ^web_port ${sickbeard_conf_dir}/config.ini | tr -dc '[0-9]').pid
+command_interpreter="python"
+command="${sickbeard_conf_dir}/SickBeard.py"
+command_args="--quiet --nolaunch --daemon -f --pid ${pidfile}"
 
 # Check for wget and refuse to start without it.
 if [ ! -x "${WGET}" ]; then
@@ -60,20 +60,9 @@ fi
 
 verify_sickbeard_pid() {
     # Make sure the pid corresponds to the Sick Beard process.
-    pid=`cat ${sickbeard_pid} 2>/dev/null`
-    ps -p ${pid} | grep -q "python ${sickbeard_dir}/SickBeard.py"
+    pid=`cat ${pidfile} 2>/dev/null`
+    ps -p ${pid} | grep -q "python ${sickbeard_conf_dir}/SickBeard.py"
     return $?
-}
-
-# Try to stop Sick Beard cleanly by calling shutdown over http.
-sickbeard_stop() {
-    echo "Stopping $name"
-    verify_sickbeard_pid
-    ${WGET} -O - -q --user=${SBUSR} --password=${SBPWD} "http://${HOST}:${PORT}/home/shutdown/" >/dev/null
-    if [ -n "${pid}" ]; then
-      wait_for_pids ${pid}
-      echo "Stopped"
-    fi
 }
 
 sickbeard_status() {
@@ -81,4 +70,3 @@ sickbeard_status() {
 }
 
 run_rc_command "$1"
-
