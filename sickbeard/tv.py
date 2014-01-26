@@ -141,7 +141,20 @@ class TVShow(object):
         sql_selection = sql_selection + " FROM tv_episodes tve WHERE showid = " + str(self.tvdbid)
 
         if season is not None:
-            sql_selection = sql_selection + " AND season = " + str(season)
+            if not self.air_by_date:
+                sql_selection = sql_selection + " AND season = " + str(season)
+            else:
+                segment_year, segment_month = map(int, season.split('-'))
+                min_date = datetime.date(segment_year, segment_month, 1)
+    
+                # it's easier to just hard code this than to worry about rolling the year over or making a month length map
+                if segment_month == 12:
+                    max_date = datetime.date(segment_year, 12, 31)
+                else:
+                    max_date = datetime.date(segment_year, segment_month + 1, 1) - datetime.timedelta(days=1)
+
+                sql_selection = sql_selection + " AND airdate >= " + str(min_date.toordinal()) + " AND airdate <= " + str(max_date.toordinal())
+
         if has_location:
             sql_selection = sql_selection + " AND location != '' "
 
