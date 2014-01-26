@@ -16,7 +16,7 @@ $(document).ready(function () {
                 if (data == "supported") {
                 } else {
                     $('#unpack').qtip('option', {
-                        'content.text': 'Your system seem to not support Unrar.',
+                        'content.text': 'Unrar Executable not found.',
                         'style.classes': 'qtip-rounded qtip-shadow qtip-red'
 				    });
 					$('#unpack').qtip('toggle', true);
