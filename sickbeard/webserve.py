@@ -166,10 +166,10 @@ def _getEpisode(show, season, episode):
 
 
 ManageMenu = [
-    { 'title': 'Backlog Overview',          'path': 'manage/backlogOverview' },
-    { 'title': 'Manage Searches',           'path': 'manage/manageSearches'  },
-    { 'title': 'Manage Torrents',           'path': 'manage/manageTorrents'  },
-    { 'title': 'Episode Status Management', 'path': 'manage/episodeStatuses' },
+    { 'title': 'Backlog Overview',          'path': 'manage/backlogOverview/' },
+    { 'title': 'Manage Searches',           'path': 'manage/manageSearches/'  },
+    { 'title': 'Manage Torrents',           'path': 'manage/manageTorrents/'  },
+    { 'title': 'Episode Status Management', 'path': 'manage/episodeStatuses/' },
 ]
 
 if sickbeard.USE_SUBTITLES:
@@ -202,7 +202,7 @@ class ManageSearches:
             ui.notifications.message('Episode search started',
                           'Note: RSS feeds may not be updated if retrieved recently')
 
-        redirect("/manage/manageSearches")
+        redirect("/manage/manageSearches/")
 
     @cherrypy.expose
     def pauseBacklog(self, paused=None):
@@ -211,7 +211,7 @@ class ManageSearches:
         else:
             sickbeard.searchQueueScheduler.action.unpause_backlog() # @UndefinedVariable
 
-        redirect("/manage/manageSearches")
+        redirect("/manage/manageSearches/")
 
     @cherrypy.expose
     def forceVersionCheck(self):
@@ -221,7 +221,7 @@ class ManageSearches:
         if result:
             logger.log(u"Forcing version check")
 
-        redirect("/manage/manageSearches")
+        redirect("/manage/manageSearches/")
 
 
 class Manage:
@@ -432,7 +432,7 @@ class Manage:
                 show = sickbeard.helpers.findCertainShow(sickbeard.showList, int(cur_tvdb_id))
                 subtitles = show.getEpisode(int(season), int(episode)).downloadSubtitles()
 
-        redirect('/manage/subtitleMissed')
+        redirect('/manage/subtitleMissed/')
 
     @cherrypy.expose
     def backlogShow(self, tvdb_id):
@@ -442,7 +442,7 @@ class Manage:
         if show_obj:
             sickbeard.backlogSearchScheduler.action.searchBacklog([show_obj]) # @UndefinedVariable
 
-        redirect("/manage/backlogOverview")
+        redirect("/manage/backlogOverview/")
 
     @cherrypy.expose
     def backlogOverview(self):
@@ -492,7 +492,7 @@ class Manage:
         t.submenu = ManageMenu
 
         if not toEdit:
-            redirect("/manage")
+            redirect("/manage/")
 
         showIDs = toEdit.split("|")
         showList = []
@@ -619,7 +619,7 @@ class Manage:
             ui.notifications.error('%d error%s while saving changes:' % (len(errors), "" if len(errors) == 1 else "s"),
                         " ".join(errors))
 
-        redirect("/manage")
+        redirect("/manage/")
 
     @cherrypy.expose
     def massUpdate(self, toUpdate=None, toRefresh=None, toRename=None, toDelete=None, toMetadata=None, toSubtitle=None):
@@ -728,7 +728,7 @@ class Manage:
             ui.notifications.message("The following actions were queued:",
                           messageDetail)
 
-        redirect("/manage")
+        redirect("/manage/")
 
     @cherrypy.expose
     def manageTorrents(self):
@@ -858,7 +858,7 @@ class History:
         myDB = db.DBConnection()
         myDB.action("DELETE FROM history WHERE 1=1")
         ui.notifications.message('History cleared')
-        redirect("/history")
+        redirect("/history/")
 
 
     @cherrypy.expose
@@ -867,7 +867,7 @@ class History:
         myDB = db.DBConnection()
         myDB.action("DELETE FROM history WHERE date < "+str((datetime.datetime.today()-datetime.timedelta(days=30)).strftime(history.dateFormat)))
         ui.notifications.message('Removed history entries greater than 30 days old')
-        redirect("/history")
+        redirect("/history/")
 
 ConfigMenu = [
     { 'title': 'General',           'path': 'config/general/'          },
@@ -2352,7 +2352,7 @@ class HomePostProcess:
             is_priority = False
 
         if not dir:
-            redirect("/home/postprocess")
+            redirect("/home/postprocess/")
         else:
             result = processTV.processDir(dir, nzbName, process_method=process_method, force=force, is_priority=is_priority, failed=failed)
             if quiet != None and int(quiet) == 1:
@@ -2617,7 +2617,7 @@ class NewHomeAddShows:
             if not dir_exists:
                 logger.log(u"Unable to create the folder " + show_dir + ", can't add the show", logger.ERROR)
                 ui.notifications.error("Unable to add show", "Unable to create the folder " + show_dir + ", can't add the show")
-                redirect("/home")
+                redirect("/home/")
             else:
                 helpers.chmodAsParent(show_dir)
 
@@ -2750,7 +2750,7 @@ class ErrorLogs:
     @cherrypy.expose
     def clearerrors(self):
         classes.ErrorViewer.clear()
-        redirect("/errorlogs")
+        redirect("/errorlogs/")
 
     @cherrypy.expose
     def viewlog(self, minLevel=logger.MESSAGE, maxLines=500):
@@ -3069,7 +3069,7 @@ class Home:
     def shutdown(self, pid=None):
 
         if str(pid) != str(sickbeard.PID):
-            redirect("/home")
+            redirect("/home/")
 
         threading.Timer(2, sickbeard.invoke_shutdown).start()
 
@@ -3082,7 +3082,7 @@ class Home:
     def restart(self, pid=None):
 
         if str(pid) != str(sickbeard.PID):
-            redirect("/home")
+            redirect("/home/")
 
         t = PageTemplate(file="restart.tmpl")
         t.submenu = HomeMenu()
@@ -3096,7 +3096,7 @@ class Home:
     def update(self, pid=None):
 
         if str(pid) != str(sickbeard.PID):
-            redirect("/home")
+            redirect("/home/")
 
         updated = sickbeard.versionCheckScheduler.action.update() # @UndefinedVariable
 
@@ -3381,7 +3381,7 @@ class Home:
         showObj.deleteShow()
 
         ui.notifications.message('<b>%s</b> has been deleted' % showObj.name)
-        redirect("/home")
+        redirect("/home/")
 
     @cherrypy.expose
     def refreshShow(self, show=None):
@@ -3818,7 +3818,7 @@ class WebInterface:
     @cherrypy.expose
     def index(self):
 
-        redirect("/home")
+        redirect("/home/")
 
     @cherrypy.expose
     def showPoster(self, show=None, which=None):
@@ -3862,7 +3862,7 @@ class WebInterface:
 
         sickbeard.HOME_LAYOUT = layout
 
-        redirect("/home")
+        redirect("/home/")
 
     @cherrypy.expose
     def setHistoryLayout(self, layout):
@@ -3872,7 +3872,7 @@ class WebInterface:
 
         sickbeard.HISTORY_LAYOUT = layout
 
-        redirect("/history")
+        redirect("/history/")
 
     @cherrypy.expose
     def toggleDisplayShowSpecials(self, show):
@@ -3888,14 +3888,14 @@ class WebInterface:
 
         sickbeard.COMING_EPS_LAYOUT = layout
 
-        redirect("/comingEpisodes")
+        redirect("/comingEpisodes/")
 
     @cherrypy.expose
     def toggleComingEpsDisplayPaused(self):
 
         sickbeard.COMING_EPS_DISPLAY_PAUSED = not sickbeard.COMING_EPS_DISPLAY_PAUSED
 
-        redirect("/comingEpisodes")
+        redirect("/comingEpisodes/")
 
     @cherrypy.expose
     def setComingEpsSort(self, sort):
@@ -3904,7 +3904,7 @@ class WebInterface:
 
         sickbeard.COMING_EPS_SORT = sort
 
-        redirect("/comingEpisodes")
+        redirect("/comingEpisodes/")
 
     @cherrypy.expose
     def comingEpisodes(self, layout="None"):
