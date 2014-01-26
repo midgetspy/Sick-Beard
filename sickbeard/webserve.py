@@ -1185,7 +1185,7 @@ class ConfigPostProcessing:
 
     @cherrypy.expose
     def savePostProcessing(self, naming_pattern=None, naming_multi_ep=None,
-                    xbmc_data=None, xbmc_v12__data=None, mediabrowser_data=None, synology_data=None, sony_ps3_data=None, wdtv_data=None, tivo_data=None, mede8er_data=None,
+                    xbmc_data=None, xbmc_12plus_data=None, mediabrowser_data=None, synology_data=None, sony_ps3_data=None, wdtv_data=None, tivo_data=None, mede8er_data=None,
                     use_banner=None, keep_processed_dir=None, process_method=None, process_automatically=None, rename_episodes=None, unpack=None,
                     move_associated_files=None, tv_download_dir=None, naming_custom_abd=None, naming_abd_pattern=None, naming_strip_year=None, use_failed_downloads=None,
                     delete_failed=None, treat_empty_as_failed=None, extra_scripts=None):
@@ -1277,7 +1277,7 @@ class ConfigPostProcessing:
         sickbeard.TREAT_EMPTY_AS_FAILED = treat_empty_as_failed
 
         sickbeard.metadata_provider_dict['XBMC'].set_config(xbmc_data)
-        sickbeard.metadata_provider_dict['XBMC v12+'].set_config(xbmc_v12__data)
+        sickbeard.metadata_provider_dict['XBMC 12+'].set_config(xbmc_12plus_data)
         sickbeard.metadata_provider_dict['MediaBrowser'].set_config(mediabrowser_data)
         sickbeard.metadata_provider_dict['Synology'].set_config(synology_data)
         sickbeard.metadata_provider_dict['Sony PS3'].set_config(sony_ps3_data)

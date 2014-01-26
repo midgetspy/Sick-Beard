@@ -22,7 +22,6 @@ import sickbeard
 
 import generic
 
-from sickbeard.common import XML_NSMAP
 from sickbeard import logger, exceptions, helpers
 from sickbeard.exceptions import ex
 
@@ -30,7 +29,21 @@ from lib.tvdb_api import tvdb_api, tvdb_exceptions
 
 import xml.etree.cElementTree as etree
 
+
 class XBMCMetadata(generic.GenericMetadata):
+    """
+    Metadata generation class for XBMC (legacy).
+
+    The following file structure is used:
+
+    show_root/tvshow.nfo              (show metadata)
+    show_root/folder.jpg              (poster)
+    show_root/fanart.jpg              (fanart)
+    show_root/season##.tbn            (season thumb)
+    show_root/Season ##/filename.ext  (*)
+    show_root/Season ##/filename.nfo  (episode metadata)
+    show_root/Season ##/filename.tbn  (episode thumb)
+    """
 
     def __init__(self,
                  show_metadata=False,
@@ -78,8 +91,6 @@ class XBMCMetadata(generic.GenericMetadata):
         t = tvdb_api.Tvdb(actors=True, **ltvdb_api_parms)
 
         tv_node = etree.Element("tvshow")
-        for ns in XML_NSMAP.keys():
-            tv_node.set(ns, XML_NSMAP[ns])
 
         try:
             myShow = t[int(show_ID)]
@@ -109,7 +120,7 @@ class XBMCMetadata(generic.GenericMetadata):
         rating = etree.SubElement(tv_node, "rating")
         if myShow["rating"] != None:
             rating.text = myShow["rating"]
-            
+
         year = etree.SubElement(tv_node, "year")
         if myShow["firstaired"] != None:
             try:
@@ -117,14 +128,14 @@ class XBMCMetadata(generic.GenericMetadata):
                 if year_text:
                     year.text = year_text
             except:
-                pass            
+                pass
 
         plot = etree.SubElement(tv_node, "plot")
         if myShow["overview"] != None:
             plot.text = myShow["overview"]
 
         episodeguide = etree.SubElement(tv_node, "episodeguide")
-        episodeguideurl = etree.SubElement( episodeguide, "url")
+        episodeguideurl = etree.SubElement(episodeguide, "url")
         episodeguideurl2 = etree.SubElement(tv_node, "episodeguideurl")
         if myShow["id"] != None:
             showurl = sickbeard.TVDB_BASE_URL + '/series/' + myShow["id"] + '/all/en.zip'
@@ -141,7 +152,7 @@ class XBMCMetadata(generic.GenericMetadata):
 
         genre = etree.SubElement(tv_node, "genre")
         if myShow["genre"] != None:
-            genre.text = " / ".join([x for x in myShow["genre"].split('|') if x])
+                genre.text = " / ".join([x for x in myShow["genre"].split('|') if x])
 
         premiered = etree.SubElement(tv_node, "premiered")
         if myShow["firstaired"] != None:
@@ -152,23 +163,17 @@ class XBMCMetadata(generic.GenericMetadata):
             studio.text = myShow["network"]
 
         for actor in myShow['_actors']:
-
             cur_actor = etree.SubElement(tv_node, "actor")
-
-            cur_actor_name = etree.SubElement( cur_actor, "name")
-            cur_actor_name.text = actor['name']
-            cur_actor_role = etree.SubElement( cur_actor, "role")
+            cur_actor_name = etree.SubElement(cur_actor, "name")
+            cur_actor_name.text = actor['name'].strip()
+            cur_actor_role = etree.SubElement(cur_actor, "role")
             cur_actor_role_text = actor['role']
-
             if cur_actor_role_text != None:
                 cur_actor_role.text = cur_actor_role_text
-
-            cur_actor_thumb = etree.SubElement( cur_actor, "thumb")
+            cur_actor_thumb = etree.SubElement(cur_actor, "thumb")
             cur_actor_thumb_text = actor['image']
-
             if cur_actor_thumb_text != None:
                 cur_actor_thumb.text = cur_actor_thumb_text
-
         # Make it purdy
         helpers.indentXML(tv_node)
 
@@ -180,8 +185,7 @@ class XBMCMetadata(generic.GenericMetadata):
         """
         Creates an elementTree XML structure for an XBMC-style episode.nfo and
         returns the resulting data object.
-
-        show_obj: a TVEpisode instance to create the NFO for
+            show_obj: a TVEpisode instance to create the NFO for
         """
 
         eps_to_write = [ep_obj] + ep_obj.relatedEps
@@ -204,13 +208,9 @@ class XBMCMetadata(generic.GenericMetadata):
             return
 
         if len(eps_to_write) > 1:
-            rootNode = etree.Element( "xbmcmultiepisode" )
+            rootNode = etree.Element("xbmcmultiepisode")
         else:
-            rootNode = etree.Element( "episodedetails" )
-
-        # Set our namespace correctly
-        for ns in XML_NSMAP.keys():
-            rootNode.set(ns, XML_NSMAP[ns])
+            rootNode = etree.Element("episodedetails")
 
         # write an NFO containing info for all matching episodes
         for curEpToWrite in eps_to_write:
@@ -231,34 +231,34 @@ class XBMCMetadata(generic.GenericMetadata):
             logger.log(u"Creating metadata for episode " + str(ep_obj.season) + "x" + str(ep_obj.episode), logger.DEBUG)
 
             if len(eps_to_write) > 1:
-                episode = etree.SubElement( rootNode, "episodedetails" )
+                episode = etree.SubElement(rootNode, "episodedetails")
             else:
                 episode = rootNode
 
-            title = etree.SubElement( episode, "title" )
+            title = etree.SubElement(episode, "title")
             if curEpToWrite.name != None:
                 title.text = curEpToWrite.name
-                
+
             showtitle = etree.SubElement(episode, "showtitle")
             if curEpToWrite.show.name != None:
                 showtitle.text = curEpToWrite.show.name
 
-            season = etree.SubElement( episode, "season" )
+            season = etree.SubElement(episode, "season")
             season.text = str(curEpToWrite.season)
 
-            episodenum = etree.SubElement( episode, "episode" )
+            episodenum = etree.SubElement(episode, "episode")
             episodenum.text = str(curEpToWrite.episode)
-            
+
             uniqueid = etree.SubElement(episode, "uniqueid")
             uniqueid.text = str(curEpToWrite.tvdbid)
 
-            aired = etree.SubElement( episode, "aired" )
+            aired = etree.SubElement(episode, "aired")
             if curEpToWrite.airdate != datetime.date.fromordinal(1):
                 aired.text = str(curEpToWrite.airdate)
             else:
                 aired.text = ''
 
-            plot = etree.SubElement( episode, "plot" )
+            plot = etree.SubElement(episode, "plot")
             if curEpToWrite.description != None:
                 plot.text = curEpToWrite.description
 
@@ -267,37 +267,37 @@ class XBMCMetadata(generic.GenericMetadata):
                 if myShow["runtime"] != None:
                     runtime.text = myShow["runtime"]
 
-            displayseason = etree.SubElement( episode, "displayseason" )
+            displayseason = etree.SubElement(episode, "displayseason")
             if 'airsbefore_season' in myEp:
                 displayseason_text = myEp['airsbefore_season']
                 if displayseason_text != None:
                     displayseason.text = displayseason_text
 
-            displayepisode = etree.SubElement( episode, "displayepisode" )
+            displayepisode = etree.SubElement(episode, "displayepisode")
             if 'airsbefore_episode' in myEp:
                 displayepisode_text = myEp['airsbefore_episode']
                 if displayepisode_text != None:
                     displayepisode.text = displayepisode_text
 
-            thumb = etree.SubElement( episode, "thumb" )
+            thumb = etree.SubElement(episode, "thumb")
             thumb_text = myEp['filename']
             if thumb_text != None:
                 thumb.text = thumb_text
 
-            watched = etree.SubElement( episode, "watched" )
+            watched = etree.SubElement(episode, "watched")
             watched.text = 'false'
 
-            credits = etree.SubElement( episode, "credits" )
+            credits = etree.SubElement(episode, "credits")
             credits_text = myEp['writer']
             if credits_text != None:
                 credits.text = credits_text
 
-            director = etree.SubElement( episode, "director" )
+            director = etree.SubElement(episode, "director")
             director_text = myEp['director']
             if director_text != None:
                 director.text = director_text
 
-            rating = etree.SubElement( episode, "rating" )
+            rating = etree.SubElement(episode, "rating")
             rating_text = myEp['rating']
             if rating_text != None:
                 rating.text = rating_text
@@ -305,33 +305,32 @@ class XBMCMetadata(generic.GenericMetadata):
             gueststar_text = myEp['gueststars']
             if gueststar_text != None:
                 for actor in gueststar_text.split('|'):
-                    cur_actor = etree.SubElement( episode, "actor" )
+                    cur_actor = etree.SubElement(episode, "actor")
                     cur_actor_name = etree.SubElement(
                         cur_actor, "name"
-                        )
+                       )
                     cur_actor_name.text = actor
 
             for actor in myShow['_actors']:
-                cur_actor = etree.SubElement( episode, "actor" )
+                cur_actor = etree.SubElement(episode, "actor")
 
-                cur_actor_name = etree.SubElement( cur_actor, "name" )
-                cur_actor_name.text = actor['name']
+                cur_actor_name = etree.SubElement(cur_actor, "name")
+                cur_actor_name.text = actor['name'].strip()
 
-                cur_actor_role = etree.SubElement( cur_actor, "role" )
+                cur_actor_role = etree.SubElement(cur_actor, "role")
                 cur_actor_role_text = actor['role']
                 if cur_actor_role_text != None:
                     cur_actor_role.text = cur_actor_role_text
 
-                cur_actor_thumb = etree.SubElement( cur_actor, "thumb" )
+                cur_actor_thumb = etree.SubElement(cur_actor, "thumb")
                 cur_actor_thumb_text = actor['image']
                 if cur_actor_thumb_text != None:
                     cur_actor_thumb.text = cur_actor_thumb_text
 
-        #
         # Make it purdy
-        helpers.indentXML( rootNode )
+        helpers.indentXML(rootNode)
 
-        data = etree.ElementTree( rootNode )
+        data = etree.ElementTree(rootNode)
 
         return data
 

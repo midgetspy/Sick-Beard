@@ -33,23 +33,20 @@ from sickbeard.exceptions import ex
 
 import xml.etree.cElementTree as etree
 
+
 class SynologyMetadata(generic.GenericMetadata):
     """
-    Metadata generation class for Synology. All xml formatting and
-    file naming information was contributed by users in the following
-    ticket's comments:
-
-    http://code.google.com/p/sickbeard/issues/detail?id=311
+    Metadata generation class for Synology.
 
     The following file structure is used:
 
-    show_root/series.xml                           (show metadata)
-    show_root/folder.jpg                           (poster)
-    show_root/backdrop.jpg                         (fanart)
-    show_root/Season 01/folder.jpg                 (season thumb)
-    show_root/Season 01/show - 1x01 - episode.avi  (* example of existing ep of course)
-    show_root/Season 01/show - 1x01 - episode.xml  (episode metadata)
-    show_root/Season 01/show - 1x01 - episode.jpg  (episode thumb)
+    show_root/series.xml              (show metadata)
+    show_root/folder.jpg              (poster)
+    show_root/backdrop.jpg            (fanart)
+    show_root/Season ##/folder.jpg    (season thumb)
+    show_root/Season ##/filename.ext  (*)
+    show_root/Season ##/filename.xml  (episode metadata)
+    show_root/Season ##/filename.jpg  (episode thumb)
     """
 
     def __init__(self,
@@ -145,7 +142,7 @@ class SynologyMetadata(generic.GenericMetadata):
                 break
 
         if not season_dir:
-            logger.log(u"Unable to find a season dir for season " + str(season), logger.DEBUG)
+            logger.log(u"Unable to find a season dir for season "+str(season), logger.DEBUG)
             return None
 
         logger.log(u"Using " + str(season_dir) + "/folder.jpg as season dir for season " + str(season), logger.DEBUG)
@@ -212,7 +209,7 @@ class SynologyMetadata(generic.GenericMetadata):
 
         genre = etree.SubElement(tv_node, "genre")
         if myShow["genre"] != None:
-            genre.text = myShow["genre"]
+            genre.text = myShow["genre"]  
 
         IMDBId = etree.SubElement(tv_node, "IMDBId")
         if myShow["imdb_id"] != None:
@@ -233,7 +230,6 @@ class SynologyMetadata(generic.GenericMetadata):
         Runtime = etree.SubElement(tv_node, "Runtime")
         if myShow["runtime"] != None:
             Runtime.text = myShow["runtime"]
-
 
         Rating = etree.SubElement(tv_node, "Rating")
         if myShow["rating"] != None:
@@ -256,7 +252,6 @@ class SynologyMetadata(generic.GenericMetadata):
         data = etree.ElementTree(tv_node)
 
         return data
-
 
     def _ep_data(self, ep_obj):
         """
@@ -403,7 +398,7 @@ class SynologyMetadata(generic.GenericMetadata):
 
         return data
 
-    def retrieveShowMetadata(self, dir):
+    def retrieveShowMetadata(self, folder):
         return (None, None)
 
 # present a standard "interface"
