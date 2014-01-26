@@ -495,6 +495,9 @@ class ConfigMigrator():
         Note that the ini places start at 1 while the list index starts at 0.
         old format: 0|0|0|0|0|0 -- 6 places
         new format: 0|0|0|0|0|0|0|0|0|0 -- 10 places
+
+        Drop the use of use_banner option.
+        Migrate the poster override to just using the banner option (applies to xbmc only).
         """
 
         sickbeard.METADATA_XBMC = check_setting_str(self.config_obj, 'General', 'metadata_xbmc', '0|0|0|0|0|0')
@@ -503,6 +506,8 @@ class ConfigMigrator():
         sickbeard.METADATA_PS3 = check_setting_str(self.config_obj, 'General', 'metadata_ps3', '0|0|0|0|0|0')
         sickbeard.METADATA_WDTV = check_setting_str(self.config_obj, 'General', 'metadata_wdtv', '0|0|0|0|0|0')
         sickbeard.METADATA_TIVO = check_setting_str(self.config_obj, 'General', 'metadata_tivo', '0|0|0|0|0|0')
+
+        use_banner = bool(check_setting_int(self.config_obj, 'General', 'use_banner', 0))
 
         cur_metadata = sickbeard.METADATA_XBMC.split('|')
         # if target has the old number of values, do upgrade
@@ -513,6 +518,9 @@ class ConfigMigrator():
             cur_metadata.append('0')
             cur_metadata.append('0')
             cur_metadata[3], cur_metadata[2] = cur_metadata[2], cur_metadata[3]
+            # if user was using use_banner to override the poster, instead enable the banner option and deactivate poster
+            if use_banner:
+                cur_metadata[4], cur_metadata[3] = cur_metadata[3], '0'
             # write new format
             sickbeard.METADATA_XBMC = '|'.join(cur_metadata)
             logger.log(u"Upgrading XBMC metadata, new value: " + sickbeard.METADATA_XBMC)

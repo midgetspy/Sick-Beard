@@ -852,18 +852,13 @@ class ConfigPostProcessing:
     @cherrypy.expose
     def savePostProcessing(self, naming_pattern=None, naming_multi_ep=None,
                     xbmc_data=None, xbmc_12plus_data=None, mediabrowser_data=None, sony_ps3_data=None, wdtv_data=None, tivo_data=None,
-                    use_banner=None, keep_processed_dir=None, process_automatically=None, rename_episodes=None,
+                    keep_processed_dir=None, process_automatically=None, rename_episodes=None,
                     move_associated_files=None, tv_download_dir=None, naming_custom_abd=None, naming_abd_pattern=None):
 
         results = []
 
         if not config.change_TV_DOWNLOAD_DIR(tv_download_dir):
             results += ["Unable to create directory " + os.path.normpath(tv_download_dir) + ", dir not changed."]
-
-        if use_banner == "on":
-            use_banner = 1
-        else:
-            use_banner = 0
 
         if process_automatically == "on":
             process_automatically = 1
@@ -926,8 +921,6 @@ class ConfigPostProcessing:
             sickbeard.NAMING_ABD_PATTERN = naming_abd_pattern
         elif naming_custom_abd:
             results.append("You tried saving an invalid air-by-date naming config, not saving your air-by-date settings")
-
-        sickbeard.USE_BANNER = use_banner
 
         sickbeard.save_config()
 

@@ -121,7 +121,6 @@ CACHE_DIR = None
 ACTUAL_CACHE_DIR = None
 ROOT_DIRS = None
 
-USE_BANNER = None
 USE_LISTVIEW = None
 METADATA_XBMC = None
 METADATA_XBMC_12PLUS = None
@@ -466,7 +465,6 @@ def initialize(consoleLogging=True):
         IGNORE_WORDS = check_setting_str(CFG, 'General', 'ignore_words', IGNORE_WORDS)
         EXTRA_SCRIPTS = [x.strip() for x in check_setting_str(CFG, 'General', 'extra_scripts', '').split('|') if x.strip()]
 
-        USE_BANNER = bool(check_setting_int(CFG, 'General', 'use_banner', 0))
         USE_LISTVIEW = bool(check_setting_int(CFG, 'General', 'use_listview', 0))
 
         METADATA_XBMC = check_setting_str(CFG, 'General', 'metadata_xbmc', '0|0|0|0|0|0|0|0|0|0')
@@ -973,7 +971,6 @@ def save_config():
     new_config['General']['naming_multi_ep'] = int(NAMING_MULTI_EP)
     new_config['General']['launch_browser'] = int(LAUNCH_BROWSER)
 
-    new_config['General']['use_banner'] = int(USE_BANNER)
     new_config['General']['use_listview'] = int(USE_LISTVIEW)
     new_config['General']['metadata_xbmc'] = METADATA_XBMC
     new_config['General']['metadata_xbmc_12plus'] = METADATA_XBMC_12PLUS
