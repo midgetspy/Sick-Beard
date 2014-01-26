@@ -80,7 +80,7 @@ def getTVDBIDFromNFO(folder):
 
 def getShowImage(url, imgNum=None):
 
-    image_data = None
+    image_data = None  # @UnusedVariable
 
     if url == None:
         return None
@@ -91,7 +91,7 @@ def getShowImage(url, imgNum=None):
     else:
         tempURL = url
 
-    logger.log(u"Getting show image at " + tempURL, logger.DEBUG)
+    logger.log(u"Fetching image from " + tempURL, logger.DEBUG)
 
     image_data = helpers.getURL(tempURL)
 
