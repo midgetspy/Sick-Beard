@@ -438,7 +438,7 @@ class TVShow(object):
 
     def getImages(self, fanart=None, poster=None):
         fanart_result = poster_result = banner_result = False
-        season_posters_result = season_banners_result = False
+        season_posters_result = season_banners_result = season_all_poster_result = season_all_banner_result = False
 
         for cur_provider in sickbeard.metadata_provider_dict.values():
             # FIXME: Needs to not show this message if the option is not enabled?
@@ -450,8 +450,10 @@ class TVShow(object):
 
             season_posters_result = cur_provider.create_season_posters(self) or season_posters_result
             season_banners_result = cur_provider.create_season_banners(self) or season_banners_result
+            season_all_poster_result = cur_provider.create_season_all_poster(self) or season_all_poster_result
+            season_all_banner_result = cur_provider.create_season_all_banner(self) or season_all_banner_result
 
-        return fanart_result or poster_result or banner_result or season_posters_result or season_banners_result
+        return fanart_result or poster_result or banner_result or season_posters_result or season_banners_result or season_all_poster_result or season_all_banner_result
 
     def loadLatestFromTVRage(self):
 

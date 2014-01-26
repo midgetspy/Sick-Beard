@@ -90,6 +90,17 @@ class MediaBrowserMetadata(generic.GenericMetadata):
         self.eg_season_all_poster = "<i>not supported</i>"
         self.eg_season_all_banner = "<i>not supported</i>"
 
+    # Override with empty methods for unsupported features
+    def retrieveShowMetadata(self, folder):
+        # while show metadata is generated, it is not supported for our lookup
+        return (None, None)
+
+    def create_season_all_poster(self, show_obj):
+        pass
+
+    def create_season_all_banner(self, show_obj):
+        pass
+
     def get_episode_file_path(self, ep_obj):
         """
         Returns a full show dir/metadata/episode.xml path for MediaBrowser
@@ -163,6 +174,45 @@ class MediaBrowserMetadata(generic.GenericMetadata):
         logger.log(u"Using " + str(season_dir) + "/folder.jpg as season dir for season " + str(season), logger.DEBUG)
 
         return ek.ek(os.path.join, show_obj.location, season_dir, 'folder.jpg')
+
+    def get_season_banner_path(self, show_obj, season):
+        """
+        Season thumbs for MediaBrowser go in Show Dir/Season X/banner.jpg
+
+        If no season folder exists, None is returned
+        """
+
+        dir_list = [x for x in ek.ek(os.listdir, show_obj.location) if ek.ek(os.path.isdir, ek.ek(os.path.join, show_obj.location, x))]
+
+        season_dir_regex = '^Season\s+(\d+)$'
+
+        season_dir = None
+
+        for cur_dir in dir_list:
+            # MediaBrowser 1.x only supports 'Specials'
+            # MediaBrowser 2.x looks to only support 'Season 0'
+            # MediaBrowser 3.x looks to mimic XBMC/Plex support
+            if season == 0 and cur_dir == "Specials":
+                season_dir = cur_dir
+                break
+
+            match = re.match(season_dir_regex, cur_dir, re.I)
+            if not match:
+                continue
+
+            cur_season = int(match.group(1))
+
+            if cur_season == season:
+                season_dir = cur_dir
+                break
+
+        if not season_dir:
+            logger.log(u"Unable to find a season dir for season " + str(season), logger.DEBUG)
+            return None
+
+        logger.log(u"Using " + str(season_dir) + "/banner.jpg as season dir for season " + str(season), logger.DEBUG)
+
+        return ek.ek(os.path.join, show_obj.location, season_dir, 'banner.jpg')
 
     def _show_data(self, show_obj):
         """
@@ -475,8 +525,6 @@ class MediaBrowserMetadata(generic.GenericMetadata):
 
         return data
 
-    def retrieveShowMetadata(self, folder):
-        return (None, None)
 
-# present a standard "interface"
+# present a standard "interface" from the module
 metadata_class = MediaBrowserMetadata

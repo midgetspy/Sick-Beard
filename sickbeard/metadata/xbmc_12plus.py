@@ -65,6 +65,7 @@ class XBMC_12PLUS(xbmc.XBMCMetadata):
         self.name = 'XBMC 12+'
 
         self.poster_name = "poster.jpg"
+        self.season_all_poster_name = "season-all-poster.jpg"
 
         # web-ui metadata template
         self.eg_show_metadata = "tvshow.nfo"

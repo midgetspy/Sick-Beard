@@ -89,6 +89,9 @@ class XBMCMetadata(generic.GenericMetadata):
     def create_season_banners(self, ep_obj):
         pass
 
+    def create_season_all_banner(self, show_obj):
+        pass
+
     def _show_data(self, show_obj):
         """
         Creates an elementTree XML structure for an XBMC-style tvshow.nfo and
@@ -352,6 +355,7 @@ class XBMCMetadata(generic.GenericMetadata):
         data = etree.ElementTree(rootNode)
 
         return data
+
 
 # present a standard "interface" from the module
 metadata_class = XBMCMetadata

@@ -70,6 +70,9 @@ class GenericMetadata():
         self.poster_name = "folder.jpg"
         self.banner_name = "banner.jpg"
 
+        self.season_all_poster_name = "season-all.tbn"
+        self.season_all_banner_name = "season-all-banner.jpg"
+
         self.show_metadata = show_metadata
         self.episode_metadata = episode_metadata
         self.fanart = fanart
@@ -115,9 +118,9 @@ class GenericMetadata():
         logger.log(u"Checking if " + self.get_episode_file_path(ep_obj) + " exists: " + str(result), logger.DEBUG)
         return result
 
-    def _has_banner(self, show_obj):
-        result = ek.ek(os.path.isfile, self.get_banner_path(show_obj))
-        logger.log(u"Checking if " + self.get_banner_path(show_obj) + " exists: " + str(result), logger.DEBUG)
+    def _has_fanart(self, show_obj):
+        result = ek.ek(os.path.isfile, self.get_fanart_path(show_obj))
+        logger.log(u"Checking if " + self.get_fanart_path(show_obj) + " exists: " + str(result), logger.DEBUG)
         return result
 
     def _has_poster(self, show_obj):
@@ -125,9 +128,9 @@ class GenericMetadata():
         logger.log(u"Checking if " + self.get_poster_path(show_obj) + " exists: " + str(result), logger.DEBUG)
         return result
 
-    def _has_fanart(self, show_obj):
-        result = ek.ek(os.path.isfile, self.get_fanart_path(show_obj))
-        logger.log(u"Checking if " + self.get_fanart_path(show_obj) + " exists: " + str(result), logger.DEBUG)
+    def _has_banner(self, show_obj):
+        result = ek.ek(os.path.isfile, self.get_banner_path(show_obj))
+        logger.log(u"Checking if " + self.get_banner_path(show_obj) + " exists: " + str(result), logger.DEBUG)
         return result
 
     def _has_episode_thumb(self, ep_obj):
@@ -149,6 +152,16 @@ class GenericMetadata():
         result = location != None and ek.ek(os.path.isfile, location)
         if location:
             logger.log(u"Checking if " + location + " exists: " + str(result), logger.DEBUG)
+        return result
+
+    def _has_season_all_poster(self, show_obj):
+        result = ek.ek(os.path.isfile, self.get_season_all_poster_path(show_obj))
+        logger.log(u"Checking if " + self.get_season_all_poster_path(show_obj) + " exists: " + str(result), logger.DEBUG)
+        return result
+
+    def _has_season_all_banner(self, show_obj):
+        result = ek.ek(os.path.isfile, self.get_season_all_banner_path(show_obj))
+        logger.log(u"Checking if " + self.get_season_all_banner_path(show_obj) + " exists: " + str(result), logger.DEBUG)
         return result
 
     def get_show_file_path(self, show_obj):
@@ -214,6 +227,12 @@ class GenericMetadata():
 
         return ek.ek(os.path.join, show_obj.location, season_banner_filename + '-banner.jpg')
 
+    def get_season_all_poster_path(self, show_obj):
+        return ek.ek(os.path.join, show_obj.location, self.season_all_poster_name)
+
+    def get_season_all_banner_path(self, show_obj):
+        return ek.ek(os.path.join, show_obj.location, self.season_all_banner_name)
+
     def _show_data(self, show_obj):
         """
         This should be overridden by the implementing class. It should
@@ -262,7 +281,7 @@ class GenericMetadata():
         if self.episode_thumbnails and ep_obj and not self._has_episode_thumb(ep_obj):
             logger.log(u"Metadata provider " + self.name + " creating show metadata for " + ep_obj.prettyName(), logger.DEBUG)
             return self.save_thumbnail(ep_obj)
-        return  False
+        return False
 
     def create_season_posters(self, show_obj):
         if self.season_posters and show_obj:
@@ -282,6 +301,18 @@ class GenericMetadata():
                     logger.log(u"Metadata provider " + self.name + " creating season banners for " + show_obj.name, logger.DEBUG)
                     result = result + [self.save_season_banners(show_obj, season)]
             return all(result)
+        return False
+
+    def create_season_all_poster(self, show_obj):
+        if self.season_all_poster and show_obj and not self._has_season_all_poster(show_obj):
+            logger.log(u"Metadata provider " + self.name + " creating season all poster for " + show_obj.name, logger.DEBUG)
+            return self.save_season_all_poster(show_obj)
+        return False
+
+    def create_season_all_banner(self, show_obj):
+        if self.season_all_banner and show_obj and not self._has_season_all_banner(show_obj):
+            logger.log(u"Metadata provider " + self.name + " creating season all banner for " + show_obj.name, logger.DEBUG)
+            return self.save_season_all_banner(show_obj)
         return False
 
     def _get_episode_thumb_url(self, ep_obj):
@@ -466,25 +497,6 @@ class GenericMetadata():
 
         return self._write_image(fanart_data, fanart_path)
 
-    def save_banner(self, show_obj, which=None):
-        """
-        Downloads a banner image and saves it to the filename specified by banner_name
-        inside the show's root folder.
-
-        show_obj: a TVShow object for which to download a banner
-        """
-
-        # use the default banner name
-        banner_path = self.get_banner_path(show_obj)
-
-        banner_data = self._retrieve_show_image('banner', show_obj, which)
-
-        if not banner_data:
-            logger.log(u"No show folder image was retrieved, unable to write banner", logger.DEBUG)
-            return False
-
-        return self._write_image(banner_data, banner_path)
-
     def save_poster(self, show_obj, which=None):
         """
         Downloads a poster image and saves it to the filename specified by poster_name
@@ -499,10 +511,29 @@ class GenericMetadata():
         poster_data = self._retrieve_show_image('poster', show_obj, which)
 
         if not poster_data:
-            logger.log(u"No show folder image was retrieved, unable to write poster", logger.DEBUG)
+            logger.log(u"No show poster image was retrieved, unable to write poster", logger.DEBUG)
             return False
 
         return self._write_image(poster_data, poster_path)
+
+    def save_banner(self, show_obj, which=None):
+        """
+        Downloads a banner image and saves it to the filename specified by banner_name
+        inside the show's root folder.
+
+        show_obj: a TVShow object for which to download a banner
+        """
+
+        # use the default banner name
+        banner_path = self.get_banner_path(show_obj)
+
+        banner_data = self._retrieve_show_image('banner', show_obj, which)
+
+        if not banner_data:
+            logger.log(u"No show banner image was retrieved, unable to write banner", logger.DEBUG)
+            return False
+
+        return self._write_image(banner_data, banner_path)
 
     def save_season_posters(self, show_obj, season):
         """
@@ -598,6 +629,30 @@ class GenericMetadata():
 
         return True
 
+    def save_season_all_poster(self, show_obj, which=None):
+        # use the default season all poster name
+        poster_path = self.get_season_all_poster_path(show_obj)
+
+        poster_data = self._retrieve_show_image('poster', show_obj, which)
+
+        if not poster_data:
+            logger.log(u"No show poster image was retrieved, unable to write season all poster", logger.DEBUG)
+            return False
+
+        return self._write_image(poster_data, poster_path)
+
+    def save_season_all_banner(self, show_obj, which=None):
+        # use the default season all banner name
+        banner_path = self.get_season_all_banner_path(show_obj)
+
+        banner_data = self._retrieve_show_image('banner', show_obj, which)
+
+        if not banner_data:
+            logger.log(u"No show banner image was retrieved, unable to write season all banner", logger.DEBUG)
+            return False
+
+        return self._write_image(banner_data, banner_path)
+
     def _write_image(self, image_data, image_path):
         """
         Saves the data in image_data to the location image_path. Returns True/False
@@ -638,7 +693,7 @@ class GenericMetadata():
         """
         Gets an image URL from theTVDB.com, downloads it and returns the data.
 
-        image_type: type of image to retrieve (currently supported: poster, fanart)
+        image_type: type of image to retrieve (currently supported: fanart, poster, banner)
         show_obj: a TVShow object to use when searching for the image
         which: optional, a specific numbered poster to look for
 
@@ -766,6 +821,9 @@ class GenericMetadata():
         return result
 
     def retrieveShowMetadata(self, folder):
+        """
+        Used only when mass adding Existing Shows, using previously generated Show metadata to reduce the need to query TVDB.
+        """
 
         empty_return = (None, None)
 

@@ -82,6 +82,10 @@ class TIVOMetadata(generic.GenericMetadata):
         self.eg_season_all_banner = "<i>not supported</i>"
 
     # Override with empty methods for unsupported features
+    def retrieveShowMetadata(self, folder):
+        # no show metadata generated, we abort this lookup function
+        return (None, None)
+
     def create_show_metadata(self, show_obj):
         pass
 
@@ -103,19 +107,13 @@ class TIVOMetadata(generic.GenericMetadata):
     def create_season_banners(self, ep_obj):
         pass
 
-    def get_episode_thumb_path(self, ep_obj):
+    def create_season_all_poster(self, show_obj):
         pass
 
-    def get_season_poster_path(self, show_obj, season):
+    def create_season_all_banner(self, show_obj):
         pass
 
-    def get_season_banner_path(self, show_obj, season):
-        pass
-
-    def retrieveShowMetadata(self, folder):
-        return (None, None)
-
-    # Override and implement features for Tivo.
+    # Override generic class
     def get_episode_file_path(self, ep_obj):
         """
         Returns a full show dir/.meta/episode.txt path for Tivo
@@ -317,5 +315,6 @@ class TIVOMetadata(generic.GenericMetadata):
 
         return True
 
-# present a standard "interface"
+
+# present a standard "interface" from the module
 metadata_class = TIVOMetadata
