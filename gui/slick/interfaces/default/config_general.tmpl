@@ -1,6 +1,9 @@
 #import os.path
+#import datetime
+#import locale
 #import sickbeard
 #from sickbeard.common import *
+#from sickbeard.sbdatetime import *
 #from sickbeard import config
 #from sickbeard import metadata
 #from sickbeard.metadata.generic import GenericMetadata
@@ -27,6 +30,7 @@
 				<ul>
 					<li><a href="#core-component-group1">Misc</a></li>
 					<li><a href="#core-component-group2">Web Interface</a></li>
+					<li><a href="#core-component-group3">Date and Time</a></li>
 					<li><a href="#core-component-group4">Advanced Setting</a></li>
 				</ul>
 				
@@ -261,6 +265,47 @@
                         <input type="submit" class="btn config_submitter" value="Save Changes" />
                     </fieldset>
                 </div><!-- /component-group4 //-->
+
+                <div id="core-component-group3" class="component-group clearfix">
+
+                    <div class="component-group-desc">
+                        <h3>Date and Time</h3>
+                    </div>
+
+                    <fieldset class="component-group-list">
+
+                        <div class="field-pair">
+                            <label class="nocheck clearfix" for="date_presets">
+                                <span class="component-title">Date Format:</span>
+                                <span class="component-desc">
+                                    <select id="date_presets" name="date_preset">
+                                        <option value="%x" #if "%x" == $sickbeard.DATE_PRESET then "selected=\"selected\"" else ""#>Use System Default</option>
+                                        #for $cur_preset in $date_presets:
+                                            <option value="$cur_preset" #if $cur_preset == $sickbeard.DATE_PRESET then "selected=\"selected\"" else ""#>$datetime.datetime.now().strftime($cur_preset)</option>
+                                        #end for
+                                    </select>
+                                </span>
+                            </label>
+                        </div>
+
+                        <div class="field-pair">
+                            <label class="nocheck clearfix" for="time_presets">
+                                <span class="component-title">Time Format:</span>
+                                <span class="component-desc">
+                                    <select id="time_presets" name="time_preset">
+                                         #for $cur_preset in $time_presets:
+                                            <option value="$cur_preset" #if $cur_preset == $sickbeard.TIME_PRESET_W_SECONDS then "selected=\"selected\"" else ""#>$sbdatetime.now().sbftime(show_seconds=True,t_preset=$cur_preset)</option>
+                                         #end for
+                                    </select>
+                                <b>Note:</b> Seconds are only shown on the History Page.
+                                </span>
+                            </label>
+                        </div>
+
+                        <input type="submit" class="btn config_submitter" value="Save Changes" />
+                    </fieldset>
+                </div><!-- /component-group3 //-->
+                
                 <br/>
 				<small class="float-right"><b>All non-absolute folder locations are relative to <span class="path">$sickbeard.DATA_DIR</span></b> </small>
 				<input type="submit" class="btn config_submitter button" value="Save Changes" />

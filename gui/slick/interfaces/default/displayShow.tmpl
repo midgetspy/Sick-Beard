@@ -1,5 +1,5 @@
 #import sickbeard
-#from sickbeard import subtitles
+#from sickbeard import subtitles, sbdatetime, network_timezones
 #import sickbeard.helpers
 #from sickbeard.common import *
 #import subliminal
@@ -115,11 +115,11 @@
 <td  width="75%">
 <table>
 #if $show.network and $show.airs:
-    <tr><td class="showLegend">Airs: </td><td>$show.airs on $show.network</td></tr>
+    <tr><td class="showLegend">Originally Airs: </td><td>$show.airs #if not $network_timezones.test_timeformat($show.airs) then " <font color='#FF0000'><b>(invalid Timeformat)</b></font> " else ""# on $show.network</td></tr>
 #else if $show.network:
-    <tr><td class="showLegend">Airs: </td><td>$show.network</td></tr>
+    <tr><td class="showLegend">Originally Airs: </td><td>$show.network</td></tr>
 #else if $show.airs:
-    <tr><td class="showLegend">Airs: </td><td>$show.airs</td></tr>
+    <tr><td class="showLegend">Originally Airs: </td><td>>$show.airs #if not $network_timezones.test_timeformat($show.airs) then " <font color='#FF0000'><b>(invalid Timeformat)</b></font> " else ""#</td></tr>
 #end if
     <tr><td class="showLegend">Status: </td><td>$show.status</td></tr>
 #if $showLoc[1]:
@@ -228,7 +228,7 @@
 	#end if    
     $epResult["name"]
 </td>
-    <td align="center" class="nowrap">#if int($epResult["airdate"]) == 1 then "never" else $datetime.date.fromordinal(int($epResult["airdate"]))#</td>
+    <td align="center" class="nowrap">#if int($epResult["airdate"]) == 1 then "never" else $sbdatetime.sbdatetime.sbfdate($network_timezones.parse_date_time($epResult["airdate"],$show.airs,$show.network))#</td>
     <td class="filename"><small>
 #if $epLoc and $show._location and $epLoc.lower().startswith($show._location.lower()):
 	#set $epLoc = os.path.basename($epLoc[len($show._location)+1:])

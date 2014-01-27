@@ -1,7 +1,7 @@
 #import sickbeard
 #import datetime
 #from sickbeard.common import *
-#from sickbeard import db
+#from sickbeard import db, sbdatetime, network_timezones
 
 #set global $title="Home"
 #set global $header="Show List"
@@ -17,6 +17,10 @@
 #set $downloadedEps = $myDB.select("SELECT showid, COUNT(*) FROM tv_episodes WHERE (status IN ("+",".join([str(x) for x in $Quality.DOWNLOADED + [$ARCHIVED]])+") OR (status IN ("+",".join([str(x) for x in $Quality.SNATCHED + $Quality.SNATCHED_PROPER])+") AND location != '')) AND season != 0 and episode != 0 AND airdate <= "+$today+" GROUP BY showid")
 #set $allEps = $myDB.select("SELECT showid, COUNT(*) FROM tv_episodes WHERE season != 0 and episode != 0 AND (airdate != 1 OR status IN ("+",".join([str(x) for x in ($Quality.DOWNLOADED + $Quality.SNATCHED + $Quality.SNATCHED_PROPER) + [$ARCHIVED]])+")) AND airdate <= "+$today+" AND status != "+str($IGNORED)+" GROUP BY showid")
 #set $layout = $sickbeard.HOME_LAYOUT
+
+<style type="text/css">
+.sort_data {display:none}
+</style>
 
 <script type="text/javascript" charset="utf-8">
 <!--
@@ -94,7 +98,6 @@
 	        },
 	        widgets: ['saveSort', 'zebra'],
 	        headers: {
-	            0: { sorter: 'isoDate' },
 	            2: { sorter: 'loadingNames' },
 	            3: { sorter: 'network' },
 	            4: { sorter: 'quality' },
@@ -182,7 +185,8 @@ $myShowList.sort(lambda x, y: cmp(x.name, y.name))
 #set $which_thumb = $layout+"_thumb" 
 
   <tr>
-    <td align="center" class="nowrap" style="color: #555555;font-weight:bold;">#if len($curEp) != 0 then $curEp[0].airdate else ""#</td>
+    #set $ldatetime = $network_timezones.parse_date_time($curEp[0].airdate.toordinal(),$curShow.airs,$curShow.network)
+    <td align="center" class="nowrap" style="color: #555555;font-weight:bold;">#if len($curEp) != 0 then $sbdatetime.sbdatetime.sbfdate($ldatetime) else ""#</td>
     #if $layout == 'poster':
 	    <td>
 	    	<div class="imgHomeWrapper $layout">

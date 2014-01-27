@@ -950,7 +950,7 @@ class ConfigGeneral:
     def saveGeneral(self, log_dir=None, web_port=None, web_log=None, encryption_version=None, web_ipv6=None,
                     update_shows_on_start=None, launch_browser=None, web_username=None, use_api=None, api_key=None,
                     web_password=None, version_notify=None, enable_https=None, https_cert=None, https_key=None, sort_article=None,
-                    anon_redirect=None, git_path=None, calendar_unprotected=None):
+                    anon_redirect=None, git_path=None, calendar_unprotected=None, date_preset=None, time_preset=None):
 
         results = []
 
@@ -1009,6 +1009,13 @@ class ConfigGeneral:
         sickbeard.ENCRYPTION_VERSION = encryption_version
         sickbeard.WEB_USERNAME = web_username
         sickbeard.WEB_PASSWORD = web_password
+
+        if date_preset:
+            sickbeard.DATE_PRESET = date_preset
+        
+        if time_preset:
+            sickbeard.TIME_PRESET_W_SECONDS = time_preset
+            sickbeard.TIME_PRESET = sickbeard.TIME_PRESET_W_SECONDS.replace(u":%S",u"")
 
         if not config.change_LOG_DIR(log_dir, web_log):
             results += ["Unable to create directory " + os.path.normpath(log_dir) + ", log dir not changed."]
@@ -3909,10 +3916,6 @@ class WebInterface:
     @cherrypy.expose
     def comingEpisodes(self, layout="None"):
 
-        # get local timezone and load network timezones
-        sb_timezone = tz.tzlocal()
-        network_dict = network_timezones.load_network_dict()
-
         myDB = db.DBConnection()
 
         today1 = datetime.date.today()
@@ -3943,37 +3946,9 @@ class WebInterface:
         # make a dict out of the sql results
         sql_results = [dict(row) for row in sql_results]
 
-        # regex to parse time (12/24 hour format)
-        time_regex = re.compile(r"(\d{1,2}):(\d{2,2})( [PA]M)?\b", flags=re.IGNORECASE)
-
         # add localtime to the dict
         for index, item in enumerate(sql_results):
-            mo = time_regex.search(item['airs'])
-            if mo != None and len(mo.groups()) >= 2:
-                try:
-                    hr = helpers.tryInt(mo.group(1))
-                    m = helpers.tryInt(mo.group(2))
-                    ap = mo.group(3)
-                    # convert am/pm to 24 hour clock
-                    if ap != None:
-                        if ap.lower() == u" pm" and hr != 12:
-                            hr += 12
-                        elif ap.lower() == u" am" and hr == 12:
-                            hr -= 12
-                except:
-                    hr = 0
-                    m = 0
-            else:
-                hr = 0
-                m = 0
-            if hr < 0 or hr > 23 or m < 0 or m > 59:
-                hr = 0
-                m = 0
-
-            te = datetime.datetime.fromordinal(helpers.tryInt(item['airdate']))
-            foreign_timezone = network_timezones.get_network_timezone(item['network'], network_dict, sb_timezone)
-            foreign_naive = datetime.datetime(te.year, te.month, te.day, hr, m,tzinfo=foreign_timezone)
-            sql_results[index]['localtime'] = foreign_naive.astimezone(sb_timezone)
+            sql_results[index]['localtime'] = network_timezones.parse_date_time(item['airdate'],item['airs'],item['network'])
 
             #Normalize/Format the Airing Time
             try:
@@ -4003,8 +3978,8 @@ class WebInterface:
             paused_item,
         ]
 
-        t.next_week = datetime.datetime.combine(next_week1, datetime.time(tzinfo=sb_timezone))
-        t.today = datetime.datetime.now().replace(tzinfo=sb_timezone)
+        t.next_week = datetime.datetime.combine(next_week1, datetime.time(tzinfo=network_timezones.sb_timezone))
+        t.today = datetime.datetime.now().replace(tzinfo=network_timezones.sb_timezone)
         t.sql_results = sql_results
 
         # Allow local overriding of layout parameter
