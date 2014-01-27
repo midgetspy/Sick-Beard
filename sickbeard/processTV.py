@@ -79,7 +79,7 @@ def processDir(dirName, nzbName=None, process_method=None, force=False, is_prior
     returnStr += logHelper(u"PostProcessing Dirs: " + str(dirs), logger.DEBUG)
 
     rarFiles = filter(helpers.isRarFile, files)
-    rarContent = unRAR(path, rarFiles)
+    rarContent = unRAR(path, rarFiles, force)
     files += rarContent
     videoFiles = filter(helpers.isMediaFile, files)
     videoInRar = filter(helpers.isMediaFile, rarContent)
@@ -115,7 +115,7 @@ def processDir(dirName, nzbName=None, process_method=None, force=False, is_prior
         for processPath, processDir, fileList in ek.ek(os.walk, ek.ek(os.path.join, path, dir), topdown=False):
 
             rarFiles = filter(helpers.isRarFile, fileList)
-            rarContent = unRAR(processPath, rarFiles)
+            rarContent = unRAR(processPath, rarFiles, force)
             fileList = set(fileList + rarContent)
             videoFiles = filter(helpers.isMediaFile, fileList)
             videoInRar = filter(helpers.isMediaFile, rarContent)
@@ -196,7 +196,7 @@ def validateDir(path, dirName, nzbNameOriginal, failed):
 
     return False
 
-def unRAR(path, rarFiles):
+def unRAR(path, rarFiles, force):
 
     global process_result, returnStr
 
@@ -212,6 +212,18 @@ def unRAR(path, rarFiles):
 
             try:
                 rar_handle = RarFile(os.path.join(path, archive))
+
+                # Skip extraction if any file in archive has previously been extracted
+                skip_file = False
+                for file_in_archive in [os.path.basename(x.filename) for x in rar_handle.infolist() if not x.isdir]:
+                    if already_postprocessed(path, file_in_archive, force):
+                        returnStr += logHelper(u"Archive file already post-processed, extraction skipped: " + file_in_archive, logger.DEBUG)
+                        skip_file = True
+                        break
+
+                if skip_file:
+                    continue    
+                
                 rar_handle.extract(path = path, withSubpath = False, overwrite = False)
                 unpacked_files += [os.path.basename(x.filename) for x in rar_handle.infolist() if not x.isdir]
                 del rar_handle
