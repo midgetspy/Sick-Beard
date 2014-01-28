@@ -500,98 +500,43 @@ class ConfigMigrator():
         Migrate the poster override to just using the banner option (applies to xbmc only).
         """
 
-        sickbeard.METADATA_XBMC = check_setting_str(self.config_obj, 'General', 'metadata_xbmc', '0|0|0|0|0|0')
-        sickbeard.METADATA_XBMC_12PLUS = check_setting_str(self.config_obj, 'General', 'metadata_xbmc_12plus', '0|0|0|0|0|0')
-        sickbeard.METADATA_MEDIABROWSER = check_setting_str(self.config_obj, 'General', 'metadata_mediabrowser', '0|0|0|0|0|0')
-        sickbeard.METADATA_PS3 = check_setting_str(self.config_obj, 'General', 'metadata_ps3', '0|0|0|0|0|0')
-        sickbeard.METADATA_WDTV = check_setting_str(self.config_obj, 'General', 'metadata_wdtv', '0|0|0|0|0|0')
-        sickbeard.METADATA_TIVO = check_setting_str(self.config_obj, 'General', 'metadata_tivo', '0|0|0|0|0|0')
+        metadata_xbmc = check_setting_str(self.config_obj, 'General', 'metadata_xbmc', '0|0|0|0|0|0')
+        metadata_xbmc_12plus = check_setting_str(self.config_obj, 'General', 'metadata_xbmc_12plus', '0|0|0|0|0|0')
+        metadata_mediabrowser = check_setting_str(self.config_obj, 'General', 'metadata_mediabrowser', '0|0|0|0|0|0')
+        metadata_ps3 = check_setting_str(self.config_obj, 'General', 'metadata_ps3', '0|0|0|0|0|0')
+        metadata_wdtv = check_setting_str(self.config_obj, 'General', 'metadata_wdtv', '0|0|0|0|0|0')
+        metadata_tivo = check_setting_str(self.config_obj, 'General', 'metadata_tivo', '0|0|0|0|0|0')
 
         use_banner = bool(check_setting_int(self.config_obj, 'General', 'use_banner', 0))
 
-        cur_metadata = sickbeard.METADATA_XBMC.split('|')
-        # if target has the old number of values, do upgrade
-        if len(cur_metadata) == 6:
-            logger.log(u"Upgrading XBMC metadata, old value: " + sickbeard.METADATA_XBMC)
-            cur_metadata.insert(4, '0')
-            cur_metadata.append('0')
-            cur_metadata.append('0')
-            cur_metadata.append('0')
-            cur_metadata[3], cur_metadata[2] = cur_metadata[2], cur_metadata[3]
-            # if user was using use_banner to override the poster, instead enable the banner option and deactivate poster
-            if use_banner:
-                cur_metadata[4], cur_metadata[3] = cur_metadata[3], '0'
-            # write new format
-            sickbeard.METADATA_XBMC = '|'.join(cur_metadata)
-            logger.log(u"Upgrading XBMC metadata, new value: " + sickbeard.METADATA_XBMC)
-            cur_metadata = None
+        def _migrate_metadata(metadata, metadata_name, use_banner):
+            cur_metadata = metadata.split('|')
+            # if target has the old number of values, do upgrade
+            if len(cur_metadata) == 6:
+                logger.log(u"Upgrading " + metadata_name + " metadata, old value: " + metadata)
+                cur_metadata.insert(4, '0')
+                cur_metadata.append('0')
+                cur_metadata.append('0')
+                cur_metadata.append('0')
+                # swap show fanart, show poster
+                cur_metadata[3], cur_metadata[2] = cur_metadata[2], cur_metadata[3]
+                # if user was using use_banner to override the poster, instead enable the banner option and deactivate poster
+                if metadata_name == 'XBMC' and use_banner:
+                    cur_metadata[4], cur_metadata[3] = cur_metadata[3], '0'
+                # write new format
+                metadata = '|'.join(cur_metadata)
+                logger.log(u"Upgrading " + metadata_name + " metadata, new value: " + metadata)
 
-        cur_metadata = sickbeard.METADATA_XBMC_12PLUS.split('|')
-        # if target has the old number of values, do upgrade
-        if len(cur_metadata) == 6:
-            logger.log(u"Upgrading XBMC 12+ metadata, old value: " + sickbeard.METADATA_XBMC_12PLUS)
-            cur_metadata.insert(4, '0')
-            cur_metadata.append('0')
-            cur_metadata.append('0')
-            cur_metadata.append('0')
-            cur_metadata[3], cur_metadata[2] = cur_metadata[2], cur_metadata[3]
-            # write new format
-            sickbeard.METADATA_XBMC_12PLUS = '|'.join(cur_metadata)
-            logger.log(u"Upgrading XBMC 12+ metadata, new value: " + sickbeard.METADATA_XBMC_12PLUS)
-            cur_metadata = None
+            else:
+                logger.log(u"Skipping " + metadata_name + " metadata: '" + metadata + "', incorrect format", logger.ERROR)
+                metadata = '0|0|0|0|0|0|0|0|0|0'
+                logger.log(u"Setting " + metadata_name + " metadata, new value: " + metadata)
 
-        cur_metadata = sickbeard.METADATA_MEDIABROWSER.split('|')
-        # if target has the old number of values, do upgrade
-        if len(cur_metadata) == 6:
-            logger.log(u"Upgrading MediaBrowser metadata, old value: " + sickbeard.METADATA_MEDIABROWSER)
-            cur_metadata.insert(4, '0')
-            cur_metadata.append('0')
-            cur_metadata.append('0')
-            cur_metadata.append('0')
-            cur_metadata[3], cur_metadata[2] = cur_metadata[2], cur_metadata[3]
-            # write new format
-            sickbeard.METADATA_MEDIABROWSER = '|'.join(cur_metadata)
-            logger.log(u"Upgrading MediaBrowser metadata, new value: " + sickbeard.METADATA_MEDIABROWSER)
-            cur_metadata = None
+            return metadata
 
-        cur_metadata = sickbeard.METADATA_PS3.split('|')
-        # if target has the old number of values, do upgrade
-        if len(cur_metadata) == 6:
-            logger.log(u"Upgrading PS3 metadata, old value: " + sickbeard.METADATA_PS3)
-            cur_metadata.insert(4, '0')
-            cur_metadata.append('0')
-            cur_metadata.append('0')
-            cur_metadata.append('0')
-            cur_metadata[3], cur_metadata[2] = cur_metadata[2], cur_metadata[3]
-            # write new format
-            sickbeard.METADATA_PS3 = '|'.join(cur_metadata)
-            logger.log(u"Upgrading PS3 metadata, new value: " + sickbeard.METADATA_PS3)
-            cur_metadata = None
-
-        cur_metadata = sickbeard.METADATA_WDTV.split('|')
-        # if target has the old number of values, do upgrade
-        if len(cur_metadata) == 6:
-            logger.log(u"Upgrading WDTV metadata, old value: " + sickbeard.METADATA_WDTV)
-            cur_metadata.insert(4, '0')
-            cur_metadata.append('0')
-            cur_metadata.append('0')
-            cur_metadata.append('0')
-            cur_metadata[3], cur_metadata[2] = cur_metadata[2], cur_metadata[3]
-            # write new format
-            sickbeard.METADATA_WDTV = '|'.join(cur_metadata)
-            logger.log(u"Upgrading WDTV metadata, new value: " + sickbeard.METADATA_WDTV)
-            cur_metadata = None
-
-        cur_metadata = sickbeard.METADATA_TIVO.split('|')
-        # if target has the old number of values, do upgrade
-        if len(cur_metadata) == 6:
-            logger.log(u"Upgrading TIVO metadata, old value: " + sickbeard.METADATA_TIVO)
-            cur_metadata.insert(4, '0')
-            cur_metadata.append('0')
-            cur_metadata.append('0')
-            cur_metadata.append('0')
-            cur_metadata[3], cur_metadata[2] = cur_metadata[2], cur_metadata[3]
-            # write new format
-            sickbeard.METADATA_TIVO = '|'.join(cur_metadata)
-            logger.log(u"Upgrading TIVO metadata, new value: " + sickbeard.METADATA_TIVO)
-            cur_metadata = None
+        sickbeard.METADATA_XBMC = _migrate_metadata(metadata_xbmc, 'XBMC', use_banner)
+        sickbeard.METADATA_XBMC_12PLUS = _migrate_metadata(metadata_xbmc_12plus, 'XBMC 12+', use_banner)
+        sickbeard.METADATA_MEDIABROWSER = _migrate_metadata(metadata_mediabrowser, 'MediaBrowser', use_banner)
+        sickbeard.METADATA_PS3 = _migrate_metadata(metadata_ps3, 'PS3', use_banner)
+        sickbeard.METADATA_WDTV = _migrate_metadata(metadata_wdtv, 'WDTV', use_banner)
+        sickbeard.METADATA_TIVO = _migrate_metadata(metadata_tivo, 'TIVO', use_banner)
