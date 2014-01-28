@@ -185,8 +185,12 @@ $myShowList.sort(lambda x, y: cmp(x.name, y.name))
 #set $which_thumb = $layout+"_thumb" 
 
   <tr>
+    #if len($curEp) != 0:
     #set $ldatetime = $network_timezones.parse_date_time($curEp[0].airdate.toordinal(),$curShow.airs,$curShow.network)
-    <td align="center" class="nowrap" style="color: #555555;font-weight:bold;">#if len($curEp) != 0 then $sbdatetime.sbdatetime.sbfdate($ldatetime) else ""#</td>
+    	<td align="center" class="nowrap" style="color: #555555;font-weight:bold;">$sbdatetime.sbdatetime.sbfdate($ldatetime)</td>
+    #else:
+    	<td align="center" class="nowrap" style="color: #555555;font-weight:bold;"></td>
+    #end if
     #if $layout == 'poster':
 	    <td>
 	    	<div class="imgHomeWrapper $layout">
