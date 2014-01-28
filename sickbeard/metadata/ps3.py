@@ -60,7 +60,7 @@ class PS3Metadata(generic.GenericMetadata):
 
         self.name = "Sony PS3"
 
-        self.banner_name = self.poster_name = "cover.jpg"
+        self.poster_name = "cover.jpg"
 
         # web-ui metadata template
         self.eg_show_metadata = "<i>not supported</i>"
