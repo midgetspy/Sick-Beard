@@ -73,6 +73,8 @@ class WDTVMetadata(generic.GenericMetadata):
 
         self._ep_nfo_extension = 'xml'
 
+        self.poster_name = "folder.jpg"
+
         # web-ui metadata template
         self.eg_show_metadata = "<i>not supported</i>"
         self.eg_episode_metadata = "Season##\\<i>filename</i>.xml"
@@ -94,6 +96,9 @@ class WDTVMetadata(generic.GenericMetadata):
         pass
 
     def create_fanart(self, show_obj):
+        pass
+
+    def create_banner(self, show_obj):
         pass
 
     def create_season_banners(self, show_obj):
@@ -205,7 +210,7 @@ class WDTVMetadata(generic.GenericMetadata):
             else:
                 episode = rootNode
 
-            #To do get right EpisodeID
+            # TODO: get right EpisodeID
             episodeID = etree.SubElement(episode, "id")
             episodeID.text = str(curEpToWrite.tvdbid)
 

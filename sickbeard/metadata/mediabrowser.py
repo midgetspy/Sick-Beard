@@ -77,6 +77,7 @@ class MediaBrowserMetadata(generic.GenericMetadata):
         self._show_metadata_filename = 'series.xml'
 
         self.fanart_name = "backdrop.jpg"
+        self.poster_name = "folder.jpg"
 
         # web-ui metadata template
         self.eg_show_metadata = "series.xml"

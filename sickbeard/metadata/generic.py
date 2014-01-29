@@ -36,7 +36,7 @@ from lib.tvdb_api import tvdb_api, tvdb_exceptions
 class GenericMetadata():
     """
     Base class for all metadata providers. Default behavior is meant to mostly
-    follow XBMC metadata standards. Has support for:
+    follow XBMC 12+ metadata standards. Has support for:
     - show metadata file
     - episode metadata file
     - episode thumbnail
@@ -67,10 +67,10 @@ class GenericMetadata():
         self._show_metadata_filename = "tvshow.nfo"
 
         self.fanart_name = "fanart.jpg"
-        self.poster_name = "folder.jpg"
+        self.poster_name = "poster.jpg"
         self.banner_name = "banner.jpg"
 
-        self.season_all_poster_name = "season-all.tbn"
+        self.season_all_poster_name = "season-all-poster.jpg"
         self.season_all_banner_name = "season-all-banner.jpg"
 
         self.show_metadata = show_metadata
@@ -93,7 +93,9 @@ class GenericMetadata():
 
     @staticmethod
     def makeID(name):
-        return re.sub("[^\w\d_]", "_", name).lower()
+        name_id = re.sub("[+]", "plus", name)
+        name_id = re.sub("[^\w\d_]", "_", name_id).lower()
+        return name_id
 
     def set_config(self, string):
         config_list = [bool(int(x)) for x in string.split('|')]
@@ -181,13 +183,17 @@ class GenericMetadata():
 
     def get_episode_thumb_path(self, ep_obj):
         """
-        Returns the path where the episode thumbnail should be stored. Defaults to
-        the same path as the episode file but with a .tbn extension.
-
+        Returns the path where the episode thumbnail should be stored.
         ep_obj: a TVEpisode instance for which to create the thumbnail
         """
         if ek.ek(os.path.isfile, ep_obj.location):
-            tbn_filename = helpers.replaceExtension(ep_obj.location, 'tbn')
+
+            tbn_filename = ep_obj.location.rpartition(".")
+
+            if tbn_filename[0] == "":
+                tbn_filename = ep_obj.location + "-thumb.jpg"
+            else:
+                tbn_filename = tbn_filename[0] + "-thumb.jpg"
         else:
             return None
 
@@ -208,7 +214,7 @@ class GenericMetadata():
         else:
             season_poster_filename = 'season' + str(season).zfill(2)
 
-        return ek.ek(os.path.join, show_obj.location, season_poster_filename + '.tbn')
+        return ek.ek(os.path.join, show_obj.location, season_poster_filename + '-poster.jpg')
 
     def get_season_banner_path(self, show_obj, season):
         """

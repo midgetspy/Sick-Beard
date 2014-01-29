@@ -302,7 +302,7 @@ class TIVOMetadata(generic.GenericMetadata):
                 ek.ek(os.makedirs, nfo_file_dir)
                 helpers.chmodAsParent(nfo_file_dir)
 
-            logger.log(u"Writing episode nfo file to " + nfo_file_path)
+            logger.log(u"Writing episode nfo file to " + nfo_file_path, logger.DEBUG)
             nfo_file = ek.ek(open, nfo_file_path, 'w')
 
             # Calling encode directly, b/c often descriptions have wonky characters.
