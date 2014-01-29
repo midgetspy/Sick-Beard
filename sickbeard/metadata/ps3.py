@@ -82,6 +82,9 @@ class PS3Metadata(generic.GenericMetadata):
     def create_show_metadata(self, show_obj):
         pass
 
+    def get_show_file_path(self, show_obj):
+        pass
+
     def create_episode_metadata(self, ep_obj):
         pass
 

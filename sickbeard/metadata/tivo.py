@@ -71,7 +71,7 @@ class TIVOMetadata(generic.GenericMetadata):
 
         # web-ui metadata template
         self.eg_show_metadata = "<i>not supported</i>"
-        self.eg_episode_metadata = "Season##\\.meta\\<i>filename</i>.txt"
+        self.eg_episode_metadata = "Season##\\.meta\\<i>filename</i>.ext.txt"
         self.eg_fanart = "<i>not supported</i>"
         self.eg_poster = "<i>not supported</i>"
         self.eg_banner = "<i>not supported</i>"
@@ -89,6 +89,9 @@ class TIVOMetadata(generic.GenericMetadata):
     def create_show_metadata(self, show_obj):
         pass
 
+    def get_show_file_path(self, show_obj):
+        pass
+
     def create_fanart(self, show_obj):
         pass
 
@@ -99,6 +102,9 @@ class TIVOMetadata(generic.GenericMetadata):
         pass
 
     def create_episode_thumb(self, ep_obj):
+        pass
+
+    def get_episode_thumb_path(self, ep_obj):
         pass
 
     def create_season_posters(self, ep_obj):

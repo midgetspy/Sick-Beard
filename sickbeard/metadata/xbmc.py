@@ -32,12 +32,14 @@ class XBMCMetadata(xbmc_12plus.XBMC_12PlusMetadata):
     The following file structure is used:
 
     show_root/tvshow.nfo              (show metadata)
-    show_root/folder.jpg              (poster)
     show_root/fanart.jpg              (fanart)
-    show_root/season##.tbn            (season thumb)
+    show_root/folder.jpg              (poster)
+    show_root/folder.jpg              (banner)
     show_root/Season ##/filename.ext  (*)
     show_root/Season ##/filename.nfo  (episode metadata)
     show_root/Season ##/filename.tbn  (episode thumb)
+    show_root/season##.tbn            (season posters)
+    show_root/season-all.tbn          (season all poster)
     """
 
     def __init__(self,

@@ -285,7 +285,7 @@ class GenericMetadata():
 
     def create_episode_thumb(self, ep_obj):
         if self.episode_thumbnails and ep_obj and not self._has_episode_thumb(ep_obj):
-            logger.log(u"Metadata provider " + self.name + " creating show metadata for " + ep_obj.prettyName(), logger.DEBUG)
+            logger.log(u"Metadata provider " + self.name + " creating episode thumbnail for " + ep_obj.prettyName(), logger.DEBUG)
             return self.save_thumbnail(ep_obj)
         return False
 

@@ -95,6 +95,9 @@ class WDTVMetadata(generic.GenericMetadata):
     def create_show_metadata(self, show_obj):
         pass
 
+    def get_show_file_path(self, show_obj):
+        pass
+
     def create_fanart(self, show_obj):
         pass
 
