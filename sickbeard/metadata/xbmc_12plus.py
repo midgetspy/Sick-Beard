@@ -16,92 +16,342 @@
 # along with Sick Beard.  If not, see <http://www.gnu.org/licenses/>.
 
 import generic
-import xbmc
-import os
 
-from sickbeard import encodingKludge as ek
+import datetime
+
+from lib.tvdb_api import tvdb_api, tvdb_exceptions
+
+import sickbeard
+from sickbeard import logger, exceptions, helpers
+from sickbeard.exceptions import ex
+
+import xml.etree.cElementTree as etree
 
 
-class XBMC_12PLUS(xbmc.XBMCMetadata):
+class XBMC_12PlusMetadata(generic.GenericMetadata):
     """
     Metadata generation class for XBMC 12+.
 
     The following file structure is used:
 
     show_root/tvshow.nfo                    (show metadata)
-    show_root/poster.jpg                    (poster)
     show_root/fanart.jpg                    (fanart)
-    show_root/season##-poster.jpg           (season thumb)
+    show_root/poster.jpg                    (poster)
+    show_root/banner.jpg                    (banner)
     show_root/Season ##/filename.ext        (*)
     show_root/Season ##/filename.nfo        (episode metadata)
     show_root/Season ##/filename-thumb.jpg  (episode thumb)
+    show_root/season##-poster.jpg           (season posters)
+    show_root/season##-banner.jpg           (season banners)
+    show_root/season-all-poster.jpg         (season all poster)
+    show_root/season-all-banner.jpg         (season all banner)
     """
 
     def __init__(self,
                  show_metadata=False,
                  episode_metadata=False,
-                 poster=False,
                  fanart=False,
+                 poster=False,
+                 banner=False,
                  episode_thumbnails=False,
-                 season_thumbnails=False):
+                 season_posters=False,
+                 season_banners=False,
+                 season_all_poster=False,
+                 season_all_banner=False):
 
         generic.GenericMetadata.__init__(self,
                                          show_metadata,
                                          episode_metadata,
-                                         poster,
                                          fanart,
+                                         poster,
+                                         banner,
                                          episode_thumbnails,
-                                         season_thumbnails)
-
-        self.banner_name = "banner.jpg"
-        self.poster_name = "poster.jpg"
+                                         season_posters,
+                                         season_banners,
+                                         season_all_poster,
+                                         season_all_banner)
 
         self.name = 'XBMC 12+'
 
+        self.poster_name = "poster.jpg"
+        self.season_all_poster_name = "season-all-poster.jpg"
+
+        # web-ui metadata template
         self.eg_show_metadata = "tvshow.nfo"
         self.eg_episode_metadata = "Season##\\<i>filename</i>.nfo"
         self.eg_fanart = "fanart.jpg"
-        self.eg_poster = "poster.jpg (banner.jpg)"
+        self.eg_poster = "poster.jpg"
+        self.eg_banner = "banner.jpg"
         self.eg_episode_thumbnails = "Season##\\<i>filename</i>-thumb.jpg"
-        self.eg_season_thumbnails = "season##-poster.jpg"
+        self.eg_season_posters = "season##-poster.jpg"
+        self.eg_season_banners = "season##-banner.jpg"
+        self.eg_season_all_poster = "season-all-poster.jpg"
+        self.eg_season_all_banner = "season-all-banner.jpg"
 
-    def get_id(self):
-        return 'xbmc_12plus'
-
-    def get_episode_thumb_path(self, ep_obj):
+    def _show_data(self, show_obj):
         """
-        Returns the path where the episode thumbnail should be stored.
-        ep_obj: a TVEpisode instance for which to create the thumbnail
+        Creates an elementTree XML structure for an XBMC-style tvshow.nfo and
+        returns the resulting data object.
+
+        show_obj: a TVShow instance to create the NFO for
         """
-        if ek.ek(os.path.isfile, ep_obj.location):
 
-            tbn_filename = ep_obj.location.rpartition(".")
+        show_ID = show_obj.tvdbid
 
-            if tbn_filename[0] == "":
-                tbn_filename = ep_obj.location + "-thumb.jpg"
+        tvdb_lang = show_obj.lang
+        # There's gotta be a better way of doing this but we don't wanna
+        # change the language value elsewhere
+        ltvdb_api_parms = sickbeard.TVDB_API_PARMS.copy()
+
+        if tvdb_lang and not tvdb_lang == 'en':
+            ltvdb_api_parms['language'] = tvdb_lang
+
+        t = tvdb_api.Tvdb(actors=True, **ltvdb_api_parms)
+
+        tv_node = etree.Element("tvshow")
+
+        try:
+            myShow = t[int(show_ID)]
+        except tvdb_exceptions.tvdb_shownotfound:
+            logger.log(u"Unable to find show with id " + str(show_ID) + " on tvdb, skipping it", logger.ERROR)
+            raise
+
+        except tvdb_exceptions.tvdb_error:
+            logger.log(u"TVDB is down, can't use its data to add this show", logger.ERROR)
+            raise
+
+        # check for title and id
+        try:
+            if myShow["seriesname"] == None or myShow["seriesname"] == "" or myShow["id"] == None or myShow["id"] == "":
+                logger.log(u"Incomplete info for show with id " + str(show_ID) + " on tvdb, skipping it", logger.ERROR)
+
+                return False
+        except tvdb_exceptions.tvdb_attributenotfound:
+            logger.log(u"Incomplete info for show with id " + str(show_ID) + " on tvdb, skipping it", logger.ERROR)
+
+            return False
+
+        title = etree.SubElement(tv_node, "title")
+        if myShow["seriesname"] != None:
+            title.text = myShow["seriesname"]
+
+        rating = etree.SubElement(tv_node, "rating")
+        if myShow["rating"] != None:
+            rating.text = myShow["rating"]
+
+        year = etree.SubElement(tv_node, "year")
+        if myShow["firstaired"] != None:
+            try:
+                year_text = str(datetime.datetime.strptime(myShow["firstaired"], '%Y-%m-%d').year)
+                if year_text:
+                    year.text = year_text
+            except:
+                pass
+
+        plot = etree.SubElement(tv_node, "plot")
+        if myShow["overview"] != None:
+            plot.text = myShow["overview"]
+
+        episodeguide = etree.SubElement(tv_node, "episodeguide")
+        episodeguideurl = etree.SubElement(episodeguide, "url")
+        episodeguideurl2 = etree.SubElement(tv_node, "episodeguideurl")
+        if myShow["id"] != None:
+            showurl = sickbeard.TVDB_BASE_URL + '/series/' + myShow["id"] + '/all/en.zip'
+            episodeguideurl.text = showurl
+            episodeguideurl2.text = showurl
+
+        mpaa = etree.SubElement(tv_node, "mpaa")
+        if myShow["contentrating"] != None:
+            mpaa.text = myShow["contentrating"]
+
+        tvdbid = etree.SubElement(tv_node, "id")
+        if myShow["id"] != None:
+            tvdbid.text = myShow["id"]
+
+        genre = etree.SubElement(tv_node, "genre")
+        if myShow["genre"] != None:
+                genre.text = " / ".join([x for x in myShow["genre"].split('|') if x])
+
+        premiered = etree.SubElement(tv_node, "premiered")
+        if myShow["firstaired"] != None:
+            premiered.text = myShow["firstaired"]
+
+        studio = etree.SubElement(tv_node, "studio")
+        if myShow["network"] != None:
+            studio.text = myShow["network"]
+
+        for actor in myShow['_actors']:
+            cur_actor = etree.SubElement(tv_node, "actor")
+            cur_actor_name = etree.SubElement(cur_actor, "name")
+            cur_actor_name.text = actor['name'].strip()
+            cur_actor_role = etree.SubElement(cur_actor, "role")
+            cur_actor_role_text = actor['role']
+            if cur_actor_role_text != None:
+                cur_actor_role.text = cur_actor_role_text
+            cur_actor_thumb = etree.SubElement(cur_actor, "thumb")
+            cur_actor_thumb_text = actor['image']
+            if cur_actor_thumb_text != None:
+                cur_actor_thumb.text = cur_actor_thumb_text
+        # Make it purdy
+        helpers.indentXML(tv_node)
+
+        data = etree.ElementTree(tv_node)
+
+        return data
+
+    def _ep_data(self, ep_obj):
+        """
+        Creates an elementTree XML structure for an XBMC-style episode.nfo and
+        returns the resulting data object.
+            show_obj: a TVEpisode instance to create the NFO for
+        """
+
+        eps_to_write = [ep_obj] + ep_obj.relatedEps
+
+        tvdb_lang = ep_obj.show.lang
+        # There's gotta be a better way of doing this but we don't wanna
+        # change the language value elsewhere
+        ltvdb_api_parms = sickbeard.TVDB_API_PARMS.copy()
+
+        if tvdb_lang and not tvdb_lang == 'en':
+            ltvdb_api_parms['language'] = tvdb_lang
+
+        try:
+            t = tvdb_api.Tvdb(actors=True, **ltvdb_api_parms)
+            myShow = t[ep_obj.show.tvdbid]
+        except tvdb_exceptions.tvdb_shownotfound, e:
+            raise exceptions.ShowNotFoundException(e.message)
+        except tvdb_exceptions.tvdb_error, e:
+            logger.log(u"Unable to connect to TVDB while creating meta files - skipping - " + ex(e), logger.ERROR)
+            return
+
+        if len(eps_to_write) > 1:
+            rootNode = etree.Element("xbmcmultiepisode")
+        else:
+            rootNode = etree.Element("episodedetails")
+
+        # write an NFO containing info for all matching episodes
+        for curEpToWrite in eps_to_write:
+
+            try:
+                myEp = myShow[curEpToWrite.season][curEpToWrite.episode]
+            except (tvdb_exceptions.tvdb_episodenotfound, tvdb_exceptions.tvdb_seasonnotfound):
+                logger.log(u"Unable to find episode " + str(curEpToWrite.season) + "x" + str(curEpToWrite.episode) + " on tvdb... has it been removed? Should I delete from db?")
+                return None
+
+            if not myEp["firstaired"]:
+                myEp["firstaired"] = str(datetime.date.fromordinal(1))
+
+            if not myEp["episodename"]:
+                logger.log(u"Not generating nfo because the ep has no title", logger.DEBUG)
+                return None
+
+            logger.log(u"Creating metadata for episode " + str(ep_obj.season) + "x" + str(ep_obj.episode), logger.DEBUG)
+
+            if len(eps_to_write) > 1:
+                episode = etree.SubElement(rootNode, "episodedetails")
             else:
-                tbn_filename = tbn_filename[0] + "-thumb.jpg"
-        else:
-            return None
+                episode = rootNode
 
-        return tbn_filename
+            title = etree.SubElement(episode, "title")
+            if curEpToWrite.name != None:
+                title.text = curEpToWrite.name
 
-    def get_season_thumb_path(self, show_obj, season):
-        """
-        Returns the full path to the file for a given season thumb.
+            showtitle = etree.SubElement(episode, "showtitle")
+            if curEpToWrite.show.name != None:
+                showtitle.text = curEpToWrite.show.name
 
-        show_obj: a TVShow instance for which to generate the path
-        season: a season number to be used for the path. Note that sesaon 0
-                means specials.
-        """
-        # Our specials thumbnail is, well, special
-        if season == 0:
-            season_thumb_file_path = 'season-specials'
-        else:
-            season_thumb_file_path = 'season' + str(season).zfill(2)
+            season = etree.SubElement(episode, "season")
+            season.text = str(curEpToWrite.season)
 
-        return ek.ek(os.path.join, show_obj.location, season_thumb_file_path + '-poster.jpg')
+            episodenum = etree.SubElement(episode, "episode")
+            episodenum.text = str(curEpToWrite.episode)
+
+            uniqueid = etree.SubElement(episode, "uniqueid")
+            uniqueid.text = str(curEpToWrite.tvdbid)
+
+            aired = etree.SubElement(episode, "aired")
+            if curEpToWrite.airdate != datetime.date.fromordinal(1):
+                aired.text = str(curEpToWrite.airdate)
+            else:
+                aired.text = ''
+
+            plot = etree.SubElement(episode, "plot")
+            if curEpToWrite.description != None:
+                plot.text = curEpToWrite.description
+
+            runtime = etree.SubElement(episode, "runtime")
+            if curEpToWrite.season != 0:
+                if myShow["runtime"] != None:
+                    runtime.text = myShow["runtime"]
+
+            displayseason = etree.SubElement(episode, "displayseason")
+            if 'airsbefore_season' in myEp:
+                displayseason_text = myEp['airsbefore_season']
+                if displayseason_text != None:
+                    displayseason.text = displayseason_text
+
+            displayepisode = etree.SubElement(episode, "displayepisode")
+            if 'airsbefore_episode' in myEp:
+                displayepisode_text = myEp['airsbefore_episode']
+                if displayepisode_text != None:
+                    displayepisode.text = displayepisode_text
+
+            thumb = etree.SubElement(episode, "thumb")
+            thumb_text = myEp['filename']
+            if thumb_text != None:
+                thumb.text = thumb_text
+
+            watched = etree.SubElement(episode, "watched")
+            watched.text = 'false'
+
+            credits = etree.SubElement(episode, "credits")
+            credits_text = myEp['writer']
+            if credits_text != None:
+                credits.text = credits_text
+
+            director = etree.SubElement(episode, "director")
+            director_text = myEp['director']
+            if director_text != None:
+                director.text = director_text
+
+            rating = etree.SubElement(episode, "rating")
+            rating_text = myEp['rating']
+            if rating_text != None:
+                rating.text = rating_text
+
+            gueststar_text = myEp['gueststars']
+            if gueststar_text != None:
+                for actor in gueststar_text.split('|'):
+                    cur_actor = etree.SubElement(episode, "actor")
+                    cur_actor_name = etree.SubElement(
+                        cur_actor, "name"
+                       )
+                    cur_actor_name.text = actor
+
+            for actor in myShow['_actors']:
+                cur_actor = etree.SubElement(episode, "actor")
+
+                cur_actor_name = etree.SubElement(cur_actor, "name")
+                cur_actor_name.text = actor['name'].strip()
+
+                cur_actor_role = etree.SubElement(cur_actor, "role")
+                cur_actor_role_text = actor['role']
+                if cur_actor_role_text != None:
+                    cur_actor_role.text = cur_actor_role_text
+
+                cur_actor_thumb = etree.SubElement(cur_actor, "thumb")
+                cur_actor_thumb_text = actor['image']
+                if cur_actor_thumb_text != None:
+                    cur_actor_thumb.text = cur_actor_thumb_text
+
+        # Make it purdy
+        helpers.indentXML(rootNode)
+
+        data = etree.ElementTree(rootNode)
+
+        return data
 
 
 # present a standard "interface" from the module
-metadata_class = XBMC_12PLUS
+metadata_class = XBMC_12PlusMetadata

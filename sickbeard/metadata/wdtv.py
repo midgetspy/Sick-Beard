@@ -48,35 +48,69 @@ class WDTVMetadata(generic.GenericMetadata):
     def __init__(self,
                  show_metadata=False,
                  episode_metadata=False,
-                 poster=False,
                  fanart=False,
+                 poster=False,
+                 banner=False,
                  episode_thumbnails=False,
-                 season_thumbnails=False):
+                 season_posters=False,
+                 season_banners=False,
+                 season_all_poster=False,
+                 season_all_banner=False):
 
         generic.GenericMetadata.__init__(self,
                                          show_metadata,
                                          episode_metadata,
-                                         poster,
                                          fanart,
+                                         poster,
+                                         banner,
                                          episode_thumbnails,
-                                         season_thumbnails)
-
-        self._ep_nfo_extension = 'xml'
+                                         season_posters,
+                                         season_banners,
+                                         season_all_poster,
+                                         season_all_banner)
 
         self.name = 'WDTV'
 
+        self._ep_nfo_extension = 'xml'
+
+        self.poster_name = "folder.jpg"
+
+        # web-ui metadata template
         self.eg_show_metadata = "<i>not supported</i>"
         self.eg_episode_metadata = "Season##\\<i>filename</i>.xml"
         self.eg_fanart = "<i>not supported</i>"
         self.eg_poster = "folder.jpg"
+        self.eg_banner = "<i>not supported</i>"
         self.eg_episode_thumbnails = "Season##\\<i>filename</i>.metathumb"
-        self.eg_season_thumbnails = "Season##\\folder.jpg"
+        self.eg_season_posters = "Season##\\folder.jpg"
+        self.eg_season_banners = "<i>not supported</i>"
+        self.eg_season_all_poster = "<i>not supported</i>"
+        self.eg_season_all_banner = "<i>not supported</i>"
 
     # Override with empty methods for unsupported features
+    def retrieveShowMetadata(self, folder):
+        # no show metadata generated, we abort this lookup function
+        return (None, None)
+
     def create_show_metadata(self, show_obj):
         pass
 
+    def get_show_file_path(self, show_obj):
+        pass
+
     def create_fanart(self, show_obj):
+        pass
+
+    def create_banner(self, show_obj):
+        pass
+
+    def create_season_banners(self, show_obj):
+        pass
+
+    def create_season_all_poster(self, show_obj):
+        pass
+
+    def create_season_all_banner(self, show_obj):
         pass
 
     def get_episode_thumb_path(self, ep_obj):
@@ -93,7 +127,7 @@ class WDTVMetadata(generic.GenericMetadata):
 
         return tbn_filename
 
-    def get_season_thumb_path(self, show_obj, season):
+    def get_season_poster_path(self, show_obj, season):
         """
         Season thumbs for WDTV go in Show Dir/Season X/folder.jpg
 
@@ -179,7 +213,7 @@ class WDTVMetadata(generic.GenericMetadata):
             else:
                 episode = rootNode
 
-            #To do get right EpisodeID
+            # TODO: get right EpisodeID
             episodeID = etree.SubElement(episode, "id")
             episodeID.text = str(curEpToWrite.tvdbid)
 
@@ -247,8 +281,6 @@ class WDTVMetadata(generic.GenericMetadata):
 
         return data
 
-    def retrieveShowMetadata(self, folder):
-        return (None, None)
 
-# present a standard "interface"
+# present a standard "interface" from the module
 metadata_class = WDTVMetadata
