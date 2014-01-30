@@ -167,6 +167,8 @@ class TorrentDayProvider(generic.TorrentProvider):
         
         for mode in search_params.keys():
             for search_string in search_params[mode]:
+
+                logger.log(u"Search string: " + search_string, logger.DEBUG)
                 
                 search_string = '+'.join(search_string.split())
                 
