@@ -37,32 +37,52 @@ class PS3Metadata(generic.GenericMetadata):
     def __init__(self,
                  show_metadata=False,
                  episode_metadata=False,
-                 poster=False,
                  fanart=False,
+                 poster=False,
+                 banner=False,
                  episode_thumbnails=False,
-                 season_thumbnails=False):
+                 season_posters=False,
+                 season_banners=False,
+                 season_all_poster=False,
+                 season_all_banner=False):
 
         generic.GenericMetadata.__init__(self,
                                          show_metadata,
                                          episode_metadata,
-                                         poster,
                                          fanart,
+                                         poster,
+                                         banner,
                                          episode_thumbnails,
-                                         season_thumbnails)
-
-        self.banner_name = self.poster_name = "cover.jpg"
+                                         season_posters,
+                                         season_banners,
+                                         season_all_poster,
+                                         season_all_banner)
 
         self.name = "Sony PS3"
 
+        self.poster_name = "cover.jpg"
+
+        # web-ui metadata template
         self.eg_show_metadata = "<i>not supported</i>"
         self.eg_episode_metadata = "<i>not supported</i>"
         self.eg_fanart = "<i>not supported</i>"
         self.eg_poster = "cover.jpg"
+        self.eg_banner = "<i>not supported</i>"
         self.eg_episode_thumbnails = "Season##\\<i>filename</i>.ext.cover.jpg"
-        self.eg_season_thumbnails = "<i>not supported</i>"
+        self.eg_season_posters = "<i>not supported</i>"
+        self.eg_season_banners = "<i>not supported</i>"
+        self.eg_season_all_poster = "<i>not supported</i>"
+        self.eg_season_all_banner = "<i>not supported</i>"
 
     # Override with empty methods for unsupported features
+    def retrieveShowMetadata(self, folder):
+        # no show metadata generated, we abort this lookup function
+        return (None, None)
+
     def create_show_metadata(self, show_obj):
+        pass
+
+    def get_show_file_path(self, show_obj):
         pass
 
     def create_episode_metadata(self, ep_obj):
@@ -71,7 +91,19 @@ class PS3Metadata(generic.GenericMetadata):
     def create_fanart(self, show_obj):
         pass
 
-    def create_season_thumbs(self, show_obj):
+    def create_banner(self, show_obj):
+        pass
+
+    def create_season_posters(self, show_obj):
+        pass
+
+    def create_season_banners(self, ep_obj):
+        pass
+
+    def create_season_all_poster(self, show_obj):
+        pass
+
+    def create_season_all_banner(self, show_obj):
         pass
 
     def get_episode_thumb_path(self, ep_obj):
@@ -88,8 +120,6 @@ class PS3Metadata(generic.GenericMetadata):
 
         return tbn_filename
 
-    def retrieveShowMetadata(self, folder):
-        return (None, None)
 
-# present a standard "interface"
+# present a standard "interface" from the module
 metadata_class = PS3Metadata
