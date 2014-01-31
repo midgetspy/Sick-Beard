@@ -1,7 +1,7 @@
 #!/bin/sh
 #
 # PROVIDE: sickbeard
-# REQUIRE: LOGIN
+# REQUIRE: DAEMON sabnzbd
 # KEYWORD: shutdown
 #
 # Add the following lines to /etc/rc.conf.local or /etc/rc.conf
@@ -9,24 +9,16 @@
 #
 # sickbeard_enable (bool):	Set to NO by default.
 #			Set it to YES to enable it.
-# sickbeard_user:  The user account Sick Beard daemon runs as what
+# sickbeard_user:       The user account Sick Beard daemon runs as what
 #			you want it to be. It uses '_sabnzbd' user by
 #			default. Do not sets it as empty or it will run
 #			as root.
 # sickbeard_dir:	Directory where Sick Beard lives.
 #			Default: /usr/local/sickbeard
-# sickbeard_chdir:  Change to this directory before running Sick Beard.
-#     Default is same as sickbeard_dir.
-# sickbeard_pid:  The name of the pidfile to create.
-#     Default is sickbeard.pid in sickbeard_dir.
-# sickbeard_host: The hostname or IP Sick Beard is listening on
-#     Default is 127.0.0.1
-# sickbeard_port: The port Sick Beard is listening on
-#     Default is 8081
-# sickbeard_web_user: Username to authenticate to the Sick Beard web interface
-#     Default is an empty string (no username)
-# sickbeard_web_password: Password to authenticate to the Sick Beard web interface
-#     Default is an empty string (no password)
+# sickbeard_datadir:    Directory to store configurations
+#			Default: /usr/local/sickbeard
+# sickbeard_pid:        The name of the pidfile to create.
+#                       Default is sickbeard.pid in sickbeard_dir.
 PATH="/sbin:/bin:/usr/sbin:/usr/bin:/usr/local/sbin:/usr/local/bin"
 
 . /etc/rc.subr
@@ -39,54 +31,44 @@ load_rc_config ${name}
 : ${sickbeard_enable:="NO"}
 : ${sickbeard_user:="_sabnzbd"}
 : ${sickbeard_dir:="/usr/local/sickbeard"}
-: ${sickbeard_chdir:="${sickbeard_dir}"}
+: ${sickbeard_datadir:="${sickbeard_dir}"}
 : ${sickbeard_pid:="${sickbeard_dir}/sickbeard.pid"}
-: ${sickbeard_host:="127.0.0.1"}
-: ${sickbeard_port:="8081"}
-: ${sickbeard_web_user:=""}
-: ${sickbeard_web_password:=""}
-
-WGET="/usr/local/bin/wget" # You need wget for this script to safely shutdown Sick Beard.
 
 status_cmd="${name}_status"
 stop_cmd="${name}_stop"
 
+pid=`cat ${sickbeard_pid} 2>/dev/null`
 command="/usr/sbin/daemon"
-command_args="-f -p ${sickbeard_pid} python ${sickbeard_dir}/SickBeard.py --quiet --nolaunch"
+command_args="-f -p ${sickbeard_pid} python ${sickbeard_dir}/SickBeard.py --datadir=${sickbeard_datadir} --quiet --nolaunch"
 
-# Check for wget and refuse to start without it.
-if [ ! -x "${WGET}" ]; then
-  warn "Sickbeard not started: You need wget to safely shut down Sick Beard."
-  exit 1
-fi
-
-# Ensure user is root when running this script.
+#Ensure user is root when running this script.
 if [ `id -u` != "0" ]; then
   echo "Oops, you should be root before running this!"
   exit 1
 fi
 
-verify_sickbeard_pid() {
-    # Make sure the pid corresponds to the Sick Beard process.
-    pid=`cat ${sickbeard_pid} 2>/dev/null`
-    ps -p ${pid} 2>/dev/null | grep -q "python ${sickbeard_dir}/SickBeard.py"
-    return $?
-}
-
-# Try to stop Sick Beard cleanly by calling shutdown over http.
 sickbeard_stop() {
     echo "Stopping $name"
-    verify_sickbeard_pid
-    ${WGET} -O - -q --user=${sickbeard_web_user} --password=${sickbeard_web_password} "http://${sickbeard_host}:${sickbeard_port}/home/shutdown/" >/dev/null
-    if [ -n "${pid}" ]; then
-      wait_for_pids ${pid}
-      echo "Stopped"
+    if [ `grep ^use_api ${sickbeard_datadir}/config.ini | cut -d= -f2 | tr -d " _"` == "1" ]; then
+        apikey=`grep ^api_key ${sickbeard_datadir}/config.ini | cut -d= -f2 | tr -d " _"`
+	host=`grep ^web_host ${sickbeard_datadir}/config.ini | cut -d= -f2 | tr -d " _"`
+	port=`grep ^web_port ${sickbeard_datadir}/config.ini | cut -d= -f2 | tr -d " _"`
+	if [ `grep ^enable_https ${sickbeard_datadir}/config.ini | cut -d= -f2 | tr -d " _"` == "1" ]; then 
+		fetch -o /dev/null "https://${host}:${port}/api/${apikey}/?cmd=sb.shutdown" > /dev/null 2>&1
+        else
+		fetch -o /dev/null "http://${host}:${port}/api/${apikey}/?cmd=sb.shutdown" > /dev/null 2>&1
+	fi
+    else
+        kill $pid
     fi
 }
 
-sickbeard_status() {
-    verify_sickbeard_pid && echo "$name is running as ${pid}" || echo "$name is not running"
+sickbeard_status() { 
+	if [ -n "${pid}" ]; then
+        	echo "$name is running as ${pid}" 
+	else
+		echo "$name is not running"
+    	fi
 }
 
 run_rc_command "$1"
-
