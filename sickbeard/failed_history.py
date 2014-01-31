@@ -151,6 +151,27 @@ def revertEpisodes(show_obj, season, episodes):
 
     return log_str
 
+def markFailed(show_obj, season, episodes):
+
+    if len(episodes) > 0:
+        for cur_episode in episodes:
+            try:
+                ep_obj = show_obj.getEpisode(season, cur_episode)
+            except exceptions.EpisodeNotFoundException, e:
+                log_str += _log_helper(u"Unable to create episode, please set its status manually: " + exceptions.ex(e), logger.WARNING)
+                continue
+
+            with ep_obj.lock:
+                ep_obj.status = common.WANTED
+                ep_obj.saveToDB()
+    else:
+        # Whole season
+        for ep_obj in show_obj.getAllEpisodes(season):
+            with ep_obj.lock:
+                ep_obj.status = common.FAILED
+                ep_obj.saveToDB()
+
+    return log_str
 
 def logSnatch(searchResult):
     myDB = db.DBConnection("failed.db")
