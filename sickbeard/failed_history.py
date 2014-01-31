@@ -162,7 +162,7 @@ def markFailed(show_obj, season, episodes):
                 continue
 
             with ep_obj.lock:
-                ep_obj.status = common.WANTED
+                ep_obj.status = common.FAILED
                 ep_obj.saveToDB()
     else:
         # Whole season
