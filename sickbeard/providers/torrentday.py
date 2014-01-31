@@ -186,7 +186,7 @@ class TorrentDayProvider(generic.TorrentProvider):
 
                 for torrent in torrents:
                     
-                    title = torrent['name']
+                    title = re.sub(r"\[.*\=.*\].*\[/.*\]", "", torrent['name'])
                     url = self.urls['download'] %( torrent['id'], torrent['fname'] )
                     seeders = int(torrent['seed'])
                     leechers = int(torrent['leech'])
