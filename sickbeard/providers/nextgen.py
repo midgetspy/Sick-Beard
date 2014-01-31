@@ -192,7 +192,7 @@ class NextGenProvider(generic.TorrentProvider):
                 if data:
 
                     try:
-                        html = BeautifulSoup(data)
+                        html = BeautifulSoup(data, features=["html5lib", "permissive"])
                         resultsTable = html.find('div', attrs = {'id' : 'torrent-table-wrapper'})
 
                         if not resultsTable:
