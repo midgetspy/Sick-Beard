@@ -170,7 +170,9 @@ def validateDir(path, dirName, nzbNameOriginal, failed):
 
     # Get the videofile list for the next checks
     allFiles = []
+    allDirs = []
     for processPath, processDir, fileList in ek.ek(os.walk, ek.ek(os.path.join, path, dirName), topdown=False):
+        allDirs += processDir
         allFiles += fileList
 
     videoFiles = filter(helpers.isMediaFile, allFiles)
@@ -179,6 +181,13 @@ def validateDir(path, dirName, nzbNameOriginal, failed):
     for video in videoFiles:
         try:
             NameParser().parse(video)
+            return True
+        except InvalidNameException:
+            pass
+
+    for dir in allDirs:
+        try:
+            NameParser().parse(dir)
             return True
         except InvalidNameException:
             pass
