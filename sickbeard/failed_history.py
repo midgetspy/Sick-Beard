@@ -152,13 +152,14 @@ def revertEpisodes(show_obj, season, episodes):
     return log_str
 
 def markFailed(show_obj, season, episodes):
+    log_str = u""
 
     if len(episodes) > 0:
         for cur_episode in episodes:
             try:
                 ep_obj = show_obj.getEpisode(season, cur_episode)
             except exceptions.EpisodeNotFoundException, e:
-                log_str += _log_helper(u"Unable to create episode, please set its status manually: " + exceptions.ex(e), logger.WARNING)
+                log_str += _log_helper(u"Unable to get episode, please set its status manually: " + exceptions.ex(e), logger.WARNING)
                 continue
 
             with ep_obj.lock:
