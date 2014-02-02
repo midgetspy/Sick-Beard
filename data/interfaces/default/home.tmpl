@@ -47,29 +47,19 @@
 \$.tablesorter.addParser({ 
     id: 'eps',
     is: function(s) {
-        return false; 
+        return false;
     },
-    format: function(s) {
-        match = s.match(/^(.*)/);
-
-        if (match == null || match[1] == "?")
-            return -10;
-
-        var nums = match[1].split(" / ");
-
-        if (parseInt(nums[0]) === 0)
-            return parseInt(nums[1]);
-
-        var finalNum = parseInt((nums[0]/nums[1])*1000)*100;
-        if (finalNum > 0)
-            finalNum += parseInt(nums[0]);
-
-        return finalNum;
+    format: function(s) { 
+        return s;
     },
-    type: 'numeric'
+    type: 'text'
 });
 
 \$(document).ready(function(){ 
+
+    function nextXDays(e,n){
+        return new Date().setDate(new Date().getDate()+n) > new Date(e);
+    }
 
     \$("#showListTable:has(tbody tr)").tablesorter({
         sortList: [[5,1],[1,0]],
@@ -78,7 +68,7 @@
             4: function(node) { return \$(node).find("span").text(); },
             5: function(node) { return \$(node).find("img").attr("alt"); }
         },
-        widgets: ['saveSort', 'zebra', 'stickyHeaders'],
+        widgets: ['saveSort', 'zebra', 'stickyHeaders', 'filter'],
         headers: {
             0: { sorter: 'isoDate' },
             1: { sorter: 'loadingNames' },
@@ -87,14 +77,35 @@
         },
         sortStable: true
     });
-
 });
 //-->
 </script>
+<style type="text/css">
+.slider3 {
+    width: 80%;
+    left: 10%;
+}
+
+.tablesorter-filter.disabled{
+    display: none;
+}
+
+.tablesorter-filter-row > td > input, select {
+    font-size: 12px;
+}
+</style>
 
 <table id="showListTable" class="tablesorter" cellspacing="1" border="0" cellpadding="0">
 
-  <thead><tr><th class="nowrap">Next Ep</th><th>Show</th><th>Network</th><th>Quality</th><th>Downloads</th><th>Active</th><th>Status</th></tr></thead>
+  <thead><tr>
+    <th class="nowrap" data-placeholder="All">Next Ep</th>
+    <th data-placeholder="Type here to search...">Show</th>
+    <th class="filter-select" data-placeholder="All">Network</th>
+    <th data-placeholder="All">Quality</th>
+    <th data-placeholder="All">Downloads</th>
+    <th class="filter-false">Active</th>
+    <th class="filter-select" data-placeholder="All">Status</th>
+    </tr></thead>
   <tfoot>
     <tr>
       <th rowspan="1" colspan="1" align="center"><a href="$sbRoot/home/addShows/">Add Show</a></th>
@@ -138,17 +149,22 @@ $myShowList.sort(lambda x, y: cmp(x.name, y.name))
     #set $dlStat = str($curShowDownloads[0])+" / "+str($curShowAll[0])
     #set $nom = $curShowDownloads[0]
     #set $den = $curShowAll[0]
+    #set $per = $nom * 10000 / $den
+    #set $sort = "C"+str($curShowAll[0]) if ($nom == $den) else  "B" + str($per)
   #else
     #set $dlStat = "0 / "+str($curShowAll[0])
     #set $nom = 0
     #set $den = $curShowAll[0]
+    #set $per = 0
+    #set $sort = "B0"
   #end if
 #else
   #set $dlStat = "?"
   #set $nom = 0
   #set $den = 1
+  #set $per = 0
+  #set $sort = "A"
 #end if
-
 
   <tr>
     <td align="center" class="nowrap">#if len($curEp) != 0 then $curEp[0].airdate else ""#</td>
@@ -159,14 +175,14 @@ $myShowList.sort(lambda x, y: cmp(x.name, y.name))
 #else:
     <td align="center"><span class="quality Custom">Custom</span></td>
 #end if
-    <td align="center"><span style="display: none;">$dlStat</span><div id="progressbar$curShow.tvdbid" style="position:relative;"></div>
+    <td align="center"><div id="progressbar$curShow.tvdbid" style="position:relative;"><div class='progressbarText'>$dlStat</div></div><span style="display: none;">$sort</span>
         <script type="text/javascript">
         <!--
             \$(function() {
                \$("\#progressbar$curShow.tvdbid").progressbar({
-                   value: parseInt($nom) * 100 / parseInt($den)
+                   value: $per,
+                   max: 10000
                });
-               \$("\#progressbar$curShow.tvdbid").append( "<div class='progressbarText'>$dlStat</div>" )
             });
         //-->
         </script>
