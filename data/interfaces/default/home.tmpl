@@ -75,38 +75,7 @@
             3: { sorter: 'quality' },
             4: { sorter: 'eps' }
         },
-        widgetOptions : {
-            filter_functions : {
-                0: {
-                    "Within three days" : function(e, n, f, i, \$r) { return nextXDays(e,3); },
-                    "Within seven days" : function(e, n, f, i, \$r) { return nextXDays(e,7); },
-                    "Within 14 days" : function(e, n, f, i, \$r) { return nextXDays(e,14); },
-                    "Within a month" : function(e, n, f, i, \$r) { return nextXDays(e,30); }
-                },
-                4: {
-                    "Complete" : function(e, n, f, i, \$r) {return n.charAt(0) === 'C'; },
-                    "Incomplete" : function(e, n, f, i, \$r) { return n.charAt(0) === 'B'; },
-                    "None" : function(e, n, f, i, \$r) { return n.charAt(0) === 'A'; }
-                }
-            },
-            filter_formatter  : {
-                3 :function(\$cell, indx){
-                    console.log([\$cell, indx]);
-                    return \$.tablesorter.filterFormatter.uiSlider( \$cell, indx, {
-                    // add any of the jQuery UI Slider options here (http://api.jqueryui.com/slider/)
-                    value: 1,             // starting value
-                    min: 1,               // minimum value
-                    max: 5,             // maximum value
-                    step: 1,
-                    delayed: true,        // delay search (set by filter_searchDelay)
-                    valueToHeader: false, // add current slider value to the header cell
-                    exactMatch: false,    // exact (true) or match (false)
-                    allText: 'all',       // text shown when slider is at the minimum value; ignored when compare has a value
-                    compare: '>='         // show values >= selected value; overrides exactMatch
-                    });
-                }
-            }
-        }
+        sortStable: true
     });
 });
 //-->
