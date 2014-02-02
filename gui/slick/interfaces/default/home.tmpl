@@ -44,6 +44,18 @@
 });
 
 \$.tablesorter.addParser({
+    id: 'cDate',
+    is: function(s) {
+        return false;
+    },
+    format: function(s) {
+        return s; 
+    },
+    type: 'numeric'
+});
+
+
+\$.tablesorter.addParser({
     id: 'quality',
     is: function(s) {
         return false;
@@ -90,6 +102,7 @@
 	
 	        sortList: [[6,0],[2,0]],
 	        textExtraction: {
+				0: function(node) { return \$(node).find("span").text().toLowerCase(); },			
 	        #if ( $layout != 'simple'):
 		        3: function(node) { return \$(node).find("img").attr("alt"); },
 	        #end if
@@ -98,6 +111,7 @@
 	        },
 	        widgets: ['saveSort', 'zebra'],
 	        headers: {
+				0: { sorter: 'cDate' },
 	            2: { sorter: 'loadingNames' },
 	            3: { sorter: 'network' },
 	            4: { sorter: 'quality' },
@@ -187,7 +201,7 @@ $myShowList.sort(lambda x, y: cmp(x.name, y.name))
   <tr>
     #if len($curEp) != 0:
     #set $ldatetime = $network_timezones.parse_date_time($curEp[0].airdate.toordinal(),$curShow.airs,$curShow.network)
-    	<td align="center" class="nowrap" style="color: #555555;font-weight:bold;">$sbdatetime.sbdatetime.sbfdate($ldatetime)</td>
+    	<td align="center" class="nowrap" style="color: #555555;font-weight:bold;">$sbdatetime.sbdatetime.sbfdate($ldatetime)<span class="sort_data">$time.mktime($ldatetime.timetuple())</span> </td>
     #else:
     	<td align="center" class="nowrap" style="color: #555555;font-weight:bold;"></td>
     #end if
