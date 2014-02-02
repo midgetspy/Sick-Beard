@@ -1,6 +1,6 @@
 #import sickbeard
 #import datetime
-#from sickbeard import db
+#from sickbeard import db, sbdatetime
 #from sickbeard.common import *
     </div>
 </div>
@@ -16,7 +16,7 @@
 <b>$numShows shows</b> ($numGoodShows active) | <b>$numDLEpisodes/$numEpisodes</b> episodes downloaded | 
 <b>Search</b>: <%=str(sickbeard.currentSearchScheduler.timeLeft()).split('.')[0]%> |
 <!--<b>Update</b>: <a%a=str(sickbeard.updateScheduler.timeLeft()).split('.')[0]%> | //-->
-<b>Backlog</b>: $sickbeard.backlogSearchScheduler.nextRun().strftime("%Y-%m-%d").decode($sickbeard.SYS_ENCODING)
+<b>Backlog</b>: $sbdatetime.sbdatetime.sbfdate($sickbeard.backlogSearchScheduler.nextRun())
 </div>
 <ul style="float:right;">
 		<li>
