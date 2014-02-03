@@ -60,7 +60,7 @@ class DBConnection:
         try:
             result = self.select("SELECT db_version FROM db_version")
         except sqlite3.OperationalError, e:
-            if "no such table: db_version" in e.message:
+            if "no such table: db_version" in e.args[0]:
                 return 0
 
         if result:
@@ -96,7 +96,7 @@ class DBConnection:
                     sqlResult = []
                     if self.connection:
                         self.connection.rollback()
-                    if "unable to open database file" in e.message or "database is locked" in e.message:
+                    if "unable to open database file" in e.args[0] or "database is locked" in e.args[0]:
                         logger.log(u"DB error: " + ex(e), logger.WARNING)
                         attempt += 1
                         time.sleep(1)
@@ -134,7 +134,7 @@ class DBConnection:
                     # get out of the connection attempt loop since we were successful
                     break
                 except sqlite3.OperationalError, e:
-                    if "unable to open database file" in e.message or "database is locked" in e.message:
+                    if "unable to open database file" in e.args[0] or "database is locked" in e.args[0]:
                         logger.log(u"DB error: " + ex(e), logger.WARNING)
                         attempt += 1
                         time.sleep(1)
