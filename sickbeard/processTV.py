@@ -50,7 +50,7 @@ def processDir(dirName, nzbName=None, process_method=None, force=False, is_prior
     failed: Boolean for whether or not the download failed
     type: Type of postprocessing auto or manual
     """
-    
+
     global process_result, returnStr
     
     returnStr = ''
@@ -67,7 +67,7 @@ def processDir(dirName, nzbName=None, process_method=None, force=False, is_prior
     elif sickbeard.TV_DOWNLOAD_DIR and ek.ek(os.path.isdir, sickbeard.TV_DOWNLOAD_DIR) \
             and ek.ek(os.path.normpath, dirName) != ek.ek(os.path.normpath, sickbeard.TV_DOWNLOAD_DIR):
         dirName = ek.ek(os.path.join, sickbeard.TV_DOWNLOAD_DIR, ek.ek(os.path.abspath, dirName).split(os.path.sep)[-1])
-        returnStr += logHelper(u"Trying to use folder "+dirName, logger.DEBUG)
+        returnStr += logHelper(u"Trying to use folder " + dirName, logger.DEBUG)
 
     # if we didn't find a real dir then quit
     if not ek.ek(os.path.isdir, dirName):
@@ -122,7 +122,7 @@ def processDir(dirName, nzbName=None, process_method=None, force=False, is_prior
             fileList = set(fileList + rarContent)
             videoFiles = filter(helpers.isMediaFile, fileList)
             videoInRar = filter(helpers.isMediaFile, rarContent)
-            notwantedFiles = [x for x in fileList if x not in videoFiles]
+            notwantedFiles = [x for x in fileList if x not in videoFiles if videoFiles]
 
             #Don't Link media when the media is extracted from a rar in the same path
             if process_method in ('hardlink', 'symlink') and videoInRar:
@@ -133,7 +133,8 @@ def processDir(dirName, nzbName=None, process_method=None, force=False, is_prior
                 process_media(processPath, videoFiles, nzbName, process_method, force, is_priority)
 
                 #Delete all file not needed
-                if process_method != "move" or not process_result:
+                if process_method != "move" or not process_result \
+                or type=="manual": #Avoid to delete files if is Manual PostProcessing  
                     continue
     
                 delete_files(processPath, notwantedFiles)
@@ -179,7 +180,8 @@ def validateDir(path, dirName, nzbNameOriginal, failed):
         allFiles += fileList
 
     videoFiles = filter(helpers.isMediaFile, allFiles)
-
+    allDirs.append(dirName)
+    
     #check if the dir have at least one tv video file
     for video in videoFiles:
         try:
@@ -303,8 +305,6 @@ def process_media(processPath, videoFiles, nzbName, process_method, force, is_pr
             process_result = processor.process()
             process_fail_message = ""
         except exceptions.PostProcessingFailed, e:
-            # TODO: Add option to treat failure in processing as a failed download (the following line should do it)
-            # curCountMediaProcessed -= 1
             process_result = False
             process_fail_message = ex(e)
 
