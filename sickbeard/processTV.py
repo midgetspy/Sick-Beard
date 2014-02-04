@@ -122,7 +122,7 @@ def processDir(dirName, nzbName=None, process_method=None, force=False, is_prior
             fileList = set(fileList + rarContent)
             videoFiles = filter(helpers.isMediaFile, fileList)
             videoInRar = filter(helpers.isMediaFile, rarContent)
-            notwantedFiles = [x for x in fileList if x not in videoFiles if videoFiles]
+            notwantedFiles = [x for x in fileList if x not in videoFiles]
 
             #Don't Link media when the media is extracted from a rar in the same path
             if process_method in ('hardlink', 'symlink') and videoInRar:
