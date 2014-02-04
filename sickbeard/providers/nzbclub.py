@@ -99,7 +99,7 @@ class NZBClubProvider(generic.NZBProvider):
                   "sp":1 #nopass
                   }
 
-        searchURL = "http://nzbclub.com/nzbfeed.aspx?" + urllib.urlencode(params)
+        searchURL = "http://nzbclub.com/nzbfeeds.aspx?" + urllib.urlencode(params)
 
         logger.log(u"Search string: " + searchURL)
 
@@ -167,7 +167,7 @@ class NZBClubCache(tvcache.TVCache):
 
     def _getRSSData(self):
         # get all records since the last timestamp
-        url = "http://nzbclub.com/nzbfeed.aspx?"
+        url = "http://nzbclub.com/nzbfeeds.aspx?"
 
         urlArgs = {'q': '',
                    "rpp": 50, #max 50
