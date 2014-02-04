@@ -380,6 +380,13 @@ PUSHALOT_NOTIFY_ONDOWNLOAD = False
 PUSHALOT_NOTIFY_ONSUBTITLEDOWNLOAD = False
 PUSHALOT_AUTHORIZATIONTOKEN = None
 
+USE_PUSHBULLET = False
+PUSHBULLET_NOTIFY_ONSNATCH = False
+PUSHBULLET_NOTIFY_ONDOWNLOAD = False
+PUSHBULLET_NOTIFY_ONSUBTITLEDOWNLOAD = False
+PUSHBULLET_API = None
+PUSHBULLET_DEVICE = None
+
 USE_EMAIL = False
 EMAIL_NOTIFY_ONSNATCH = False
 EMAIL_NOTIFY_ONDOWNLOAD = False
@@ -456,6 +463,7 @@ def initialize(consoleLogging=True):
                 USE_PYTIVO, PYTIVO_NOTIFY_ONSNATCH, PYTIVO_NOTIFY_ONDOWNLOAD, PYTIVO_NOTIFY_ONSUBTITLEDOWNLOAD, PYTIVO_UPDATE_LIBRARY, PYTIVO_HOST, PYTIVO_SHARE_NAME, PYTIVO_TIVO_NAME, \
                 USE_NMA, NMA_NOTIFY_ONSNATCH, NMA_NOTIFY_ONDOWNLOAD, NMA_NOTIFY_ONSUBTITLEDOWNLOAD, NMA_API, NMA_PRIORITY, \
                 USE_PUSHALOT, PUSHALOT_NOTIFY_ONSNATCH, PUSHALOT_NOTIFY_ONDOWNLOAD, PUSHALOT_NOTIFY_ONSUBTITLEDOWNLOAD, PUSHALOT_AUTHORIZATIONTOKEN, \
+                USE_PUSHBULLET, PUSHBULLET_NOTIFY_ONSNATCH, PUSHBULLET_NOTIFY_ONDOWNLOAD, PUSHBULLET_NOTIFY_ONSUBTITLEDOWNLOAD, PUSHBULLET_API, PUSHBULLET_DEVICE, \
                 versionCheckScheduler, VERSION_NOTIFY, PROCESS_AUTOMATICALLY, UNPACK, \
                 KEEP_PROCESSED_DIR, PROCESS_METHOD, TV_DOWNLOAD_DIR, TVDB_BASE_URL, MIN_SEARCH_FREQUENCY, \
                 showQueueScheduler, searchQueueScheduler, ROOT_DIRS, CACHE_DIR, ACTUAL_CACHE_DIR, TVDB_API_PARMS, \
@@ -495,6 +503,7 @@ def initialize(consoleLogging=True):
         CheckSection(CFG, 'pyTivo')
         CheckSection(CFG, 'NMA')
         CheckSection(CFG, 'Pushalot')
+        CheckSection(CFG, 'Pushbullet')
         CheckSection(CFG, 'Subtitles')
 
         ACTUAL_LOG_DIR = check_setting_str(CFG, 'General', 'log_dir', 'Logs')
@@ -828,6 +837,13 @@ def initialize(consoleLogging=True):
         PUSHALOT_NOTIFY_ONDOWNLOAD = bool(check_setting_int(CFG, 'Pushalot', 'pushalot_notify_ondownload', 0))
         PUSHALOT_NOTIFY_ONSUBTITLEDOWNLOAD = bool(check_setting_int(CFG, 'Pushalot', 'pushalot_notify_onsubtitledownload', 0))
         PUSHALOT_AUTHORIZATIONTOKEN = check_setting_str(CFG, 'Pushalot', 'pushalot_authorizationtoken', '')
+
+        USE_PUSHBULLET = bool(check_setting_int(CFG, 'Pushbullet', 'use_pushbullet', 0))
+        PUSHBULLET_NOTIFY_ONSNATCH = bool(check_setting_int(CFG, 'Pushbullet', 'pushbullet_notify_onsnatch', 0))
+        PUSHBULLET_NOTIFY_ONDOWNLOAD = bool(check_setting_int(CFG, 'Pushbullet', 'pushbullet_notify_ondownload', 0))
+        PUSHBULLET_NOTIFY_ONSUBTITLEDOWNLOAD = bool(check_setting_int(CFG, 'Pushbullet', 'pushbullet_notify_onsubtitledownload', 0))
+        PUSHBULLET_API = check_setting_str(CFG, 'Pushbullet', 'pushbullet_api', '')
+        PUSHBULLET_DEVICE = check_setting_str(CFG, 'Pushbullet', 'pushbullet_device', '')
 
         USE_EMAIL = bool(check_setting_int(CFG, 'Email', 'use_email', 0))
         EMAIL_NOTIFY_ONSNATCH = bool(check_setting_int(CFG, 'Email', 'email_notify_onsnatch', 0))
@@ -1581,6 +1597,15 @@ def save_config():
     new_config['Pushalot']['pushalot_notify_ondownload'] = int(PUSHALOT_NOTIFY_ONDOWNLOAD)
     new_config['Pushalot']['pushalot_notify_onsubtitledownload'] = int(PUSHALOT_NOTIFY_ONSUBTITLEDOWNLOAD)
     new_config['Pushalot']['pushalot_authorizationtoken'] = PUSHALOT_AUTHORIZATIONTOKEN
+
+    new_config['Pushbullet'] = {}
+    new_config['Pushbullet']['use_pushbullet'] = int(USE_PUSHBULLET)
+    new_config['Pushbullet']['pushbullet_notify_onsnatch'] = int(PUSHBULLET_NOTIFY_ONSNATCH)
+    new_config['Pushbullet']['pushbullet_notify_ondownload'] = int(PUSHBULLET_NOTIFY_ONDOWNLOAD)
+    new_config['Pushbullet']['pushbullet_notify_onsubtitledownload'] = int(PUSHBULLET_NOTIFY_ONSUBTITLEDOWNLOAD)
+    new_config['Pushbullet']['pushbullet_api'] = PUSHBULLET_API
+    new_config['Pushbullet']['pushbullet_device'] = PUSHBULLET_DEVICE
+
 
     new_config['Email'] = {}
     new_config['Email']['use_email'] = int(USE_EMAIL)
