@@ -85,7 +85,11 @@ def processDir (dirName, nzbName=None, recurse=False):
 
     # split the list into video files and folders
     folders = filter(lambda x: ek.ek(os.path.isdir, ek.ek(os.path.join, dirName, x)), fileList)
-    videoFiles = filter(helpers.isMediaFile, fileList)
+
+    # videoFiles, sorted by size
+    #  This prevents from overwriting a big file with a small one with the same name 
+    #  workaround for bad named sample files in single episode archives/dirs
+    videoFiles = sorted( filter(helpers.isMediaFile, fileList), key=lambda x: os.path.getsize(ek.ek(os.path.join, dirName, x)) )
 
     # recursively process all the folders
     for curFolder in folders:
