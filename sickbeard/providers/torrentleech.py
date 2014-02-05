@@ -29,6 +29,15 @@ except ImportError:
 from sickbeard import helpers, logger, tvcache
 from sickbeard.exceptions import ex, AuthException
 
+from sickbeard.name_parser.parser import NameParser, InvalidNameException
+from sickbeard.common import Quality
+
+from bs4 import BeautifulSoup
+import urllib, urllib2, cookielib
+
+from time import time
+
+cookies_jar = cookielib.CookieJar()
 
 class TorrentLeechProvider(generic.TorrentProvider):
 
@@ -38,6 +47,10 @@ class TorrentLeechProvider(generic.TorrentProvider):
         self.supportsBacklog = False
         self.cache = TorrentLeechCache(self)
         self.url = 'http://www.torrentleech.org/'
+
+        handler = urllib2.HTTPCookieProcessor(cookies_jar)
+        self.opener = urllib2.build_opener(handler)
+        self.logged_in_expiry_time = 0
 
     def isEnabled(self):
         return sickbeard.TORRENTLEECH
@@ -63,6 +76,90 @@ class TorrentLeechProvider(generic.TorrentProvider):
             raise AuthException(u"Your authentication credentials for " + self.name + " are incorrect, check your config")
 
         return True
+
+    def _get_season_search_strings(self, show, season=None):
+        res_ = []
+
+        if show:
+            query = helpers.sanitizeSceneName(show.name).replace('.', ' ')
+            if season:
+                query += " S" + str(season).zfill(2)
+
+            res_.append(query.encode('utf-8'))
+
+        return res_
+
+    def _get_episode_search_strings(self, ep_obj):
+        res_ = []
+
+        if ep_obj:
+            query = helpers.sanitizeSceneName(ep_obj.show.name).replace('.', ' ')
+            
+            if ep_obj.show.air_by_date:
+                query += " " + str(ep_obj.airdate)
+            else:
+                query += " S" + str(ep_obj.season).zfill(2) + "E" + str(ep_obj.episode).zfill(2)
+
+            res_.append(query.encode('utf-8'))
+
+        return res_
+
+    def _doSearch(self, search_params, show=None):
+        res_ = []
+
+        logger.log(u"Search string: " + search_params, logger.DEBUG)
+
+        if search_params:
+            res_ = self.query(search_params)
+
+        return res_
+
+    def _get_title_and_url(self, item):
+        title = item.get("name", None)
+        url = item.get("url", None)
+
+        if not title or not url:
+            logger.log(u"Invalid item: " + str(item), logger.ERROR)
+
+        return (title, url)
+
+    def getURL(self, url, post_data=None, headers=None):
+        res_ = ""
+        if self.login():
+            res_ = self.opener.open(url).read()
+    
+        return res_            
+
+    def login(self):
+        res_ = False
+
+        if not self.logged_in_expiry_time or time() > self.logged_in_expiry_time:
+            form_values = {'username': sickbeard.TORRENTLEECH_USERNAME, 'password': sickbeard.TORRENTLEECH_PASSWORD, 'login': 'submit', 'remember_me': 'on'}
+            form_data = urllib.urlencode(form_values)
+
+            data = self.opener.open("http://www.torrentleech.org/user/messages", form_data).read()
+            html = BeautifulSoup(data)
+            if html and html.select(".user_poweruser"):
+                self.logged_in_expiry_time = time() + 3600
+                res_ = True
+        else:
+            res_ = True
+
+        return res_
+
+    def query(self, _q):
+        res_ = []
+        logger.log("Query TorrentLeech: " + str(_q))
+        query = "http://www.torrentleech.org/torrents/browse/index/query/" + urllib.quote(_q)
+        data = self.getURL(query)
+        html = BeautifulSoup(data)
+        torrents = html.select("table#torrenttable tbody tr")
+        for el in torrents:
+            name = el.select("td.name a")[0].string
+            url = "http://www.torrentleech.org" + el.select("td.quickdownload a")[0]["href"]
+            res_.append({"name": name, "url": url})
+
+        return res_
 
 
 class TorrentLeechCache(tvcache.TVCache):

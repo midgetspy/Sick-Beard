@@ -169,6 +169,8 @@ TVTORRENTS_HASH = None
 
 TORRENTLEECH = False
 TORRENTLEECH_KEY = None
+TORRENTLEECH_USERNAME = None
+TORRENTLEECH_PASSWORD = None
 
 BTN = False
 BTN_API_KEY = None
@@ -321,7 +323,7 @@ def initialize(consoleLogging=True):
                 USE_PLEX, PLEX_NOTIFY_ONSNATCH, PLEX_NOTIFY_ONDOWNLOAD, PLEX_UPDATE_LIBRARY, \
                 PLEX_SERVER_HOST, PLEX_HOST, PLEX_USERNAME, PLEX_PASSWORD, \
                 showUpdateScheduler, __INITIALIZED__, LAUNCH_BROWSER, showList, loadingShowList, \
-                NEWZNAB_DATA, NZBS, NZBS_UID, NZBS_HASH, EZRSS, HDBITS, HDBITS_USERNAME, HDBITS_PASSKEY, TVTORRENTS, TVTORRENTS_DIGEST, TVTORRENTS_HASH, BTN, BTN_API_KEY, TORRENTLEECH, TORRENTLEECH_KEY, \
+                NEWZNAB_DATA, NZBS, NZBS_UID, NZBS_HASH, EZRSS, HDBITS, HDBITS_USERNAME, HDBITS_PASSKEY, TVTORRENTS, TVTORRENTS_DIGEST, TVTORRENTS_HASH, BTN, BTN_API_KEY, TORRENTLEECH, TORRENTLEECH_KEY, TORRENTLEECH_USERNAME, TORRENTLEECH_PASSWORD, \
                 TORRENT_DIR, USENET_RETENTION, SOCKET_TIMEOUT, \
                 SEARCH_FREQUENCY, DEFAULT_SEARCH_FREQUENCY, BACKLOG_SEARCH_FREQUENCY, \
                 QUALITY_DEFAULT, FLATTEN_FOLDERS_DEFAULT, STATUS_DEFAULT, \
@@ -503,6 +505,8 @@ def initialize(consoleLogging=True):
         CheckSection(CFG, 'TorrentLeech')
         TORRENTLEECH = bool(check_setting_int(CFG, 'TorrentLeech', 'torrentleech', 0))
         TORRENTLEECH_KEY = check_setting_str(CFG, 'TorrentLeech', 'torrentleech_key', '')
+        TORRENTLEECH_USERNAME = check_setting_str(CFG, 'TorrentLeech', 'torrentleech_username', '')
+        TORRENTLEECH_PASSWORD = check_setting_str(CFG, 'TorrentLeech', 'torrentleech_password', '')
 
         CheckSection(CFG, 'NZBs')
         NZBS = bool(check_setting_int(CFG, 'NZBs', 'nzbs', 0))
@@ -1017,6 +1021,8 @@ def save_config():
     new_config['TorrentLeech'] = {}
     new_config['TorrentLeech']['torrentleech'] = int(TORRENTLEECH)
     new_config['TorrentLeech']['torrentleech_key'] = TORRENTLEECH_KEY
+    new_config['TorrentLeech']['torrentleech_username'] = TORRENTLEECH_USERNAME
+    new_config['TorrentLeech']['torrentleech_password'] = TORRENTLEECH_PASSWORD
 
     new_config['NZBs'] = {}
     new_config['NZBs']['nzbs'] = int(NZBS)
