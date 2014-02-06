@@ -275,6 +275,13 @@ TRAKT_USERNAME = None
 TRAKT_PASSWORD = None
 TRAKT_API = ''
 
+USE_BETASERIES = False
+BETASERIES_USERNAME = None
+BETASERIES_PASSWORD = None
+# This key is registered for Sick Beard.
+# For your application, please get one at http://www.betaseries.com/api/
+BETASERIES_API = '4c6ad443cfae'
+
 USE_PYTIVO = False
 PYTIVO_NOTIFY_ONSNATCH = False
 PYTIVO_NOTIFY_ONDOWNLOAD = False
@@ -318,6 +325,7 @@ def initialize(consoleLogging=True):
                 USE_XBMC, XBMC_NOTIFY_ONSNATCH, XBMC_NOTIFY_ONDOWNLOAD, XBMC_UPDATE_FULL, XBMC_UPDATE_ONLYFIRST, \
                 XBMC_UPDATE_LIBRARY, XBMC_HOST, XBMC_USERNAME, XBMC_PASSWORD, \
                 USE_TRAKT, TRAKT_USERNAME, TRAKT_PASSWORD, TRAKT_API, \
+                USE_BETASERIES, BETASERIES_USERNAME, BETASERIES_PASSWORD, BETASERIES_API, \
                 USE_PLEX, PLEX_NOTIFY_ONSNATCH, PLEX_NOTIFY_ONDOWNLOAD, PLEX_UPDATE_LIBRARY, \
                 PLEX_SERVER_HOST, PLEX_HOST, PLEX_USERNAME, PLEX_PASSWORD, \
                 showUpdateScheduler, __INITIALIZED__, LAUNCH_BROWSER, showList, loadingShowList, \
@@ -609,6 +617,12 @@ def initialize(consoleLogging=True):
         TRAKT_USERNAME = check_setting_str(CFG, 'Trakt', 'trakt_username', '')
         TRAKT_PASSWORD = check_setting_str(CFG, 'Trakt', 'trakt_password', '')
         TRAKT_API = check_setting_str(CFG, 'Trakt', 'trakt_api', '')
+        
+        CheckSection(CFG, 'BetaSeries')
+        USE_BETASERIES = bool(check_setting_int(CFG, 'BetaSeries', 'use_betaseries', 0))
+        BETASERIES_USERNAME = check_setting_str(CFG, 'BetaSeries', 'betaseries_username', '')
+        BETASERIES_PASSWORD = check_setting_str(CFG, 'BetaSeries', 'betaseries_password', '')
+        BETASERIES_API = check_setting_str(CFG, 'BetaSeries', 'betaseries_api', '')
 
         CheckSection(CFG, 'pyTivo')
         USE_PYTIVO = bool(check_setting_int(CFG, 'pyTivo', 'use_pytivo', 0))
@@ -1123,6 +1137,12 @@ def save_config():
     new_config['Trakt']['trakt_username'] = TRAKT_USERNAME
     new_config['Trakt']['trakt_password'] = TRAKT_PASSWORD
     new_config['Trakt']['trakt_api'] = TRAKT_API
+    
+    new_config['BetaSeries'] = {}
+    new_config['BetaSeries']['use_betaseries'] = int(USE_BETASERIES)
+    new_config['BetaSeries']['betaseries_username'] = BETASERIES_USERNAME
+    new_config['BetaSeries']['betaseries_password'] = BETASERIES_PASSWORD
+    new_config['BetaSeries']['betaseries_api'] = BETASERIES_API
 
     new_config['pyTivo'] = {}
     new_config['pyTivo']['use_pytivo'] = int(USE_PYTIVO)

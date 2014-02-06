@@ -881,6 +881,9 @@ class PostProcessor(object):
         # do the library update for Trakt
         notifiers.trakt_notifier.update_library(ep_obj)
 
+        # do the library update for BetaSeries
+        notifiers.betaseries_notifier.update_library(ep_obj)
+
         self._run_extra_scripts(ep_obj)
 
         return True
