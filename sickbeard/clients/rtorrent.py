@@ -64,8 +64,8 @@ class rTorrentAPI(GenericClient):
             if sickbeard.TORRENT_LABEL:
                 torrent.set_custom(1, sickbeard.TORRENT_LABEL.lower())
 
-            if sickbeard.TV_DOWNLOAD_DIR:
-                torrent.set_directory(sickbeard.TV_DOWNLOAD_DIR)
+            if sickbeard.TORRENT_PATH:
+                torrent.set_directory(sickbeard.TORRENT_PATH)
 
             # Start torrent
             torrent.start()
@@ -100,8 +100,8 @@ class rTorrentAPI(GenericClient):
             if sickbeard.TORRENT_LABEL:
                 torrent.set_custom(1, sickbeard.TORRENT_LABEL.lower())
 
-            if sickbeard.TV_DOWNLOAD_DIR:
-                torrent.set_directory(sickbeard.TV_DOWNLOAD_DIR)
+            if sickbeard.TORRENT_PATH:
+                torrent.set_directory(sickbeard.TORRENT_PATH)
 
             # Set Ratio Group
             # torrent.set_visible(group_name)
@@ -118,22 +118,22 @@ class rTorrentAPI(GenericClient):
 
         # if not name:
             # return False
-
+        #
         # if not self.auth:
             # return False
-
+        #
         # views = self.auth.get_views()
-
+        #
         # if name not in views:
             # self.auth.create_group(name)
 
         # group = self.auth.get_group(name)
 
         # ratio = int(float(sickbeard.TORRENT_RATIO) * 100)
-
+        #
         # try:
             # if ratio > 0:
-
+                #
                 # # Explicitly set all group options to ensure it is setup correctly
                 # group.set_upload('1M')
                 # group.set_min(ratio)
@@ -144,7 +144,7 @@ class rTorrentAPI(GenericClient):
                 # # Reset group action and disable it
                 # group.set_command()
                 # group.disable()
-
+        #
         # except:
             # return False
 
