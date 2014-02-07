@@ -99,6 +99,13 @@ class NameParser(object):
                 else:
                     result.episode_numbers = [ep_num]
 
+            if 'ep_ab_num' in named_groups:
+                ep_ab_num = self._convert_number(match.group('ep_ab_num'))
+                if 'extra_ab_ep_num' in named_groups and match.group('extra_ab_ep_num'):
+                    result.ab_episode_numbers = range(ep_ab_num, self._convert_number(match.group('extra_ab_ep_num'))+1)
+                else:
+                    result.ab_episode_numbers = [ep_ab_num]
+
             if 'air_year' in named_groups and 'air_month' in named_groups and 'air_day' in named_groups:
                 year = int(match.group('air_year'))
                 month = int(match.group('air_month'))
@@ -225,6 +232,7 @@ class NameParser(object):
 
         # build the ParseResult object
         final_result.air_date = self._combine_results(file_name_result, dir_name_result, 'air_date')
+        final_result.ab_episode_numbers = self._combine_results(file_name_result, dir_name_result, 'ab_episode_numbers')
 
         if not final_result.air_date:
             final_result.season_number = self._combine_results(file_name_result, dir_name_result, 'season_number')
@@ -262,7 +270,8 @@ class ParseResult(object):
                  episode_numbers=None,
                  extra_info=None,
                  release_group=None,
-                 air_date=None
+                 air_date=None,
+                 ab_episode_numbers=None
                  ):
 
         self.original_name = original_name
@@ -273,6 +282,11 @@ class ParseResult(object):
             self.episode_numbers = []
         else:
             self.episode_numbers = episode_numbers
+
+        if not ab_episode_numbers:
+            self.ab_episode_numbers = []
+        else:
+            self.ab_episode_numbers = ab_episode_numbers
 
         self.extra_info = extra_info
         self.release_group = release_group
@@ -297,6 +311,8 @@ class ParseResult(object):
             return False
         if self.air_date != other.air_date:
             return False
+        if self.ab_episode_numbers != other.ab_episode_numbers:
+            return False
         
         return True
 
@@ -313,6 +329,8 @@ class ParseResult(object):
 
         if self.air_by_date:
             to_return += str(self.air_date)
+        if self.ab_episode_numbers:
+            to_return += ' absolute_numbers: '+str(self.ab_episode_numbers)
 
         if self.extra_info:
             to_return += ' - ' + self.extra_info

@@ -43,7 +43,7 @@ from sickbeard.exceptions import ex
 from sickbeard.name_parser.parser import NameParser, InvalidNameException
 
 from lib.tvdb_api import tvdb_api, tvdb_exceptions
-
+from sickbeard.completparser import CompleteParser
 
 class PostProcessor(object):
     """
@@ -154,10 +154,7 @@ class PostProcessor(object):
             return []
 
         file_path_list = []
-        base_name = file_path.rpartition('.')[0]
-
-        if not base_name_only:
-            base_name = base_name + '.'
+        base_name = file_path.rpartition('.')[0] + '.'
 
         # don't strip it all and use cwd by accident
         if not base_name:
@@ -360,7 +357,14 @@ class PostProcessor(object):
 
         if not name:
             return to_return
+        
+        cp = CompleteParser(log=self._log, tvdbActiveLookUp=True)
+        cpr = cp.parse(name)
+        self.is_proper = cpr.is_proper
+        self.series_name = cpr.series_name
 
+        return (cpr.tvdbid, cpr.season, cpr.episodes)
+        """
         # parse the name to break it into show name, season, and episode
         np = NameParser(file)
         parse_result = np.parse(name)
@@ -380,7 +384,8 @@ class PostProcessor(object):
 
         if not name_list:
             return (None, season, episodes)
-
+        """
+        
         def _finalize(parse_result):
             self.release_group = parse_result.release_group
 
@@ -547,11 +552,27 @@ class PostProcessor(object):
                     season = 1
 
             if tvdb_id and season != None and episodes:
+                season, episodes = self._sceneToTVDBNumbers(tvdb_id, season, episodes)
                 return (tvdb_id, season, episodes)
 
+                season, episodes = self._sceneToTVDBNumbers(tvdb_id, season, episodes)
         return (tvdb_id, season, episodes)
 
-    def _get_ep_obj(self, tvdb_id, season, episodes):
+    def _sceneToTVDBNumbers(self, tvdb_id, season, episodes):
+        if not self.release_group:
+            self._log(u"This does NOT look like a scene release. assuming these are tvdb numbers", logger.DEBUG)
+            return (season, episodes)
+
+        self._log(u"This looks like a scene release converting scene numbers to tvdb numbers", logger.DEBUG)
+        ep_obj = self._get_ep_obj(tvdb_id, season, episodes, scene=True)
+        if ep_obj:
+            newEpisodeNumbers = []
+            for curEp in [ep_obj] + ep_obj.relatedEps:
+                newEpisodeNumbers.append(curEp.episode)
+            return (ep_obj.season, newEpisodeNumbers)
+        return (season, episodes)
+
+    def _get_ep_obj(self, tvdb_id, season, episodes, scene=False):
         """
         Retrieve the TVEpisode object requested.
 
@@ -564,6 +585,9 @@ class PostProcessor(object):
         """
 
         show_obj = None
+        sceneMsg = ""
+        if scene:
+            sceneMsg = "(scene numbers) "
 
         self._log(u"Loading show object for tvdb_id " + str(tvdb_id), logger.DEBUG)
         # find the show in the showlist
@@ -581,11 +605,11 @@ class PostProcessor(object):
         for cur_episode in episodes:
             episode = int(cur_episode)
 
-            self._log(u"Retrieving episode object for " + str(season) + "x" + str(episode), logger.DEBUG)
+            self._log(u"Retrieving episode object for " + sceneMsg + str(season) + "x" + str(episode), logger.DEBUG)
 
             # now that we've figured out which episode this file is just load it manually
             try:
-                curEp = show_obj.getEpisode(season, episode)
+                curEp = show_obj.getEpisode(season, episode, scene=scene)
             except exceptions.EpisodeNotFoundException, e:
                 self._log(u"Unable to create episode: " + ex(e), logger.DEBUG)
                 raise exceptions.PostProcessingFailed()

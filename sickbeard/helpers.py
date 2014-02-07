@@ -650,6 +650,8 @@ def fixSetGroupID(childPath):
         except OSError:
             logger.log(u"Failed to respect the set-group-ID bit on the parent directory for %s (setting group ID %i)" % (childPath, parentGID), logger.ERROR)
 
+def full_sanitizeSceneName(name):
+    return re.sub('[. -;]', ' ', sanitizeSceneName(name)).lower().lstrip()
 
 def sanitizeSceneName(name, ezrss=False):
     """

@@ -311,7 +311,7 @@ def findEpisode(episode, manualSearch=False):
 
     return bestResult
 
-def findSeason(show, season):
+def findSeason(show, season, scene=False):
 
     logger.log(u"Searching for stuff we need from "+show.name+" season "+str(season))
 
@@ -325,7 +325,7 @@ def findSeason(show, season):
             continue
 
         try:
-            curResults = curProvider.findSeasonResults(show, season)
+            curResults = curProvider.findSeasonResults(show, season, scene)
 
             # make a list of all the results for this provider
             for curEp in curResults:
