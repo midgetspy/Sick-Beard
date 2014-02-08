@@ -216,7 +216,7 @@ class ThePirateBayProvider(generic.TorrentProvider):
 
                 ep_string += ' %s' %add_string
 
-                search_string['Episode'].append(ep_string)
+                search_string['Episode'].append(re.sub('\s+', ' ', ep_string))
 
         return [search_string]
 
