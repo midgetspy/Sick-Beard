@@ -27,8 +27,10 @@ from sickbeard import common
 from sickbeard.exceptions import ex
 from sickbeard.encodingKludge import fixStupidEncodings
 
-# TODO: switch over to using ElementTree
-from xml.dom import minidom
+try:
+    import xml.etree.cElementTree as etree
+except ImportError:
+    import elementtree.ElementTree as etree
 
 
 class PLEXNotifier:
@@ -76,6 +78,7 @@ class PLEXNotifier:
             else:
                 logger.log(u"Contacting Plex via url: " + url, logger.DEBUG)
 
+            # TODO: Use our getURL from helper?
             response = urllib2.urlopen(req)
 
             result = response.read().decode(sickbeard.SYS_ENCODING)
@@ -164,19 +167,21 @@ class PLEXNotifier:
 
             url = "http://%s/library/sections" % sickbeard.PLEX_SERVER_HOST
             try:
-                xml_sections = minidom.parse(urllib.urlopen(url))
+                # TODO: Use our getURL from helper?
+                xml_tree = etree.parse(urllib.urlopen(url))
+                media_container = xml_tree.getroot()
             except IOError, e:
                 logger.log(u"Error while trying to contact Plex Media Server: " + ex(e), logger.ERROR)
                 return False
 
-            sections = xml_sections.getElementsByTagName('Directory')
+            sections = media_container.findall('.//Directory')
             if not sections:
                 logger.log(u"Plex Media Server not running on: " + sickbeard.PLEX_SERVER_HOST, logger.MESSAGE)
                 return False
 
-            for s in sections:
-                if s.getAttribute('type') == "show":
-                    url = "http://%s/library/sections/%s/refresh" % (sickbeard.PLEX_SERVER_HOST, s.getAttribute('key'))
+            for section in sections:
+                if section.attrib['type'] == "show":
+                    url = "http://%s/library/sections/%s/refresh" % (sickbeard.PLEX_SERVER_HOST, section.attrib['key'])
                     try:
                         urllib.urlopen(url)
                     except Exception, e:
