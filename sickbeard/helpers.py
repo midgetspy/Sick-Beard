@@ -543,7 +543,6 @@ def hardlinkFile(srcFile, destFile):
     except:
         logger.log(u"Failed to create hardlink of " + srcFile + " at " + destFile + ". Copying instead", logger.ERROR)
         copyFile(srcFile, destFile)
-        ek.ek(os.unlink, srcFile)
 
 def symlink(src, dst):
     if os.name == 'nt':
@@ -560,7 +559,6 @@ def moveAndSymlinkFile(srcFile, destFile):
     except:
         logger.log(u"Failed to create symlink of " + srcFile + " at " + destFile + ". Copying instead", logger.ERROR)
         copyFile(srcFile, destFile)
-        ek.ek(os.unlink, srcFile)
 
 def make_dirs(path):
     """

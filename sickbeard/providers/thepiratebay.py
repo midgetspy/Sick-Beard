@@ -20,11 +20,14 @@ import re
 import urllib, urllib2
 import sys
 import os
+import datetime
 
 import sickbeard
 import generic
 from sickbeard.common import Quality
 from sickbeard.name_parser.parser import NameParser, InvalidNameException
+from sickbeard import db
+from sickbeard import classes
 from sickbeard import logger
 from sickbeard import tvcache
 from sickbeard import helpers
@@ -191,7 +194,7 @@ class ThePirateBayProvider(generic.TorrentProvider):
         
         return [search_string]
 
-    def _get_episode_search_strings(self, ep_obj):
+    def _get_episode_search_strings(self, ep_obj, add_string=''):
        
         search_string = {'Episode': []}
        
@@ -207,12 +210,14 @@ class ThePirateBayProvider(generic.TorrentProvider):
         else:
             for show_name in set(allPossibleShowNames(ep_obj.show)):
                 ep_string = sanitizeSceneName(show_name) + ' ' + \
-                sickbeard.config.naming_ep_type[2] % {'seasonnumber': ep_obj.season, 'episodenumber': ep_obj.episode} + '*|' + \
-                sickbeard.config.naming_ep_type[0] % {'seasonnumber': ep_obj.season, 'episodenumber': ep_obj.episode} + '*|' + \
-                sickbeard.config.naming_ep_type[3] % {'seasonnumber': ep_obj.season, 'episodenumber': ep_obj.episode} + '*' \
+                sickbeard.config.naming_ep_type[2] % {'seasonnumber': ep_obj.season, 'episodenumber': ep_obj.episode} + '|' + \
+                sickbeard.config.naming_ep_type[0] % {'seasonnumber': ep_obj.season, 'episodenumber': ep_obj.episode} + '|' + \
+                sickbeard.config.naming_ep_type[3] % {'seasonnumber': ep_obj.season, 'episodenumber': ep_obj.episode}
 
-                search_string['Episode'].append(ep_string)
-    
+                ep_string += ' %s' %add_string
+
+                search_string['Episode'].append(re.sub('\s+', ' ', ep_string))
+
         return [search_string]
 
     def _doSearch(self, search_params, show=None):
@@ -337,6 +342,24 @@ class ThePirateBayProvider(generic.TorrentProvider):
         logger.log(u"Saved magnet link to " + magnetFileName + " ", logger.MESSAGE)
         return True
 
+    def findPropers(self, search_date=None):
+        
+        results = []
+
+        sqlResults = db.DBConnection().select('SELECT s.show_name, e.showid, e.season, e.episode, e.status, e.airdate FROM tv_episodes AS e INNER JOIN tv_shows AS s ON (e.showid = s.tvdb_id) WHERE e.airdate >= ? AND (e.status IN ('+','.join([str(x) for x in Quality.DOWNLOADED])+') OR (e.status IN ('+','.join([str(x) for x in Quality.SNATCHED ])+')))', [search_date.toordinal()])
+        if not sqlResults:
+            return []
+        
+        for sqlShow in sqlResults:
+            curShow = helpers.findCertainShow(sickbeard.showList, int(sqlShow["showid"]))
+            curEp = curShow.getEpisode(int(sqlShow["season"]),int(sqlShow["episode"]))
+            searchString = self._get_episode_search_strings(curEp, add_string='PROPER|REPACK')
+
+            for item in self._doSearch(searchString[0]):
+                title, url = self._get_title_and_url(item)
+                results.append(classes.Proper(title, url, datetime.datetime.today().toordinal()))
+
+        return results
 
 class ThePirateBayCache(tvcache.TVCache):
 

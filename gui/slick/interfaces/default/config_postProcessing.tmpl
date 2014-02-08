@@ -193,8 +193,8 @@
                                 <span class="component-desc">
                                     #set $m_dict = $metadata.get_metadata_generator_dict()
                                     <select id="metadataType">
-                                    #for ($cur_name, $cur_generator) in $m_dict.items():
-                                    <option value="$GenericMetadata.makeID($cur_name)">$cur_name</option>
+                                    #for ($cur_name, $cur_generator) in sorted($m_dict.items()):
+                                    	<option value="$cur_generator.get_id()">$cur_name</option>
                                     #end for
                                     </select>
                                 </span>
@@ -210,7 +210,7 @@
 
 #for ($cur_name, $cur_generator) in $m_dict.items(): 
 #set $cur_metadata_inst = $sickbeard.metadata_provider_dict[$cur_generator.name]
-#set $cur_id = $GenericMetadata.makeID($cur_name)
+#set $cur_id = $cur_generator.get_id()
 <div class="metadataDiv" id="$cur_id">
     <div class="metadata_options">
         <label for="${cur_id}_show_metadata"><input type="checkbox" class="metadata_checkbox" id="${cur_id}_show_metadata" #if $cur_metadata_inst.show_metadata then "checked=\"checked\"" else ""#/>&nbsp;Show Metadata</label>

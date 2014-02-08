@@ -281,11 +281,12 @@ class ConfigMigrator():
         self.config_obj = config_obj
 
         # check the version of the config
-        self.config_version = check_setting_int(config_obj, 'General', 'config_version', 0)
+        self.config_version = check_setting_int(config_obj, 'General', 'config_version', sickbeard.CONFIG_VERSION)
         self.expected_config_version = sickbeard.CONFIG_VERSION
         self.migration_names = {1: 'Custom naming',
                                 2: 'Sync backup number with version number',
-                                3: 'Rename omgwtfnzb variables'
+                                3: 'Rename omgwtfnzb variables',
+                                4: 'Add newznab catIDs'
                                 } 
 
 
@@ -293,6 +294,10 @@ class ConfigMigrator():
         """
         Calls each successive migration until the config is the same version as SB expects
         """
+
+        if self.config_version > self.expected_config_version:
+            logger.log_error_and_exit(u"Your config version (" + str(self.config_version) + ") has been incremented past what this version of Sick Beard supports (" + str(self.expected_config_version) + ").\n" + \
+                                      "If you have used other forks or a newer version of Sick Beard, your config file may be unusable due to their modifications.")
         
         sickbeard.CONFIG_VERSION = self.config_version
         
@@ -307,8 +312,7 @@ class ConfigMigrator():
             
             logger.log(u"Backing up config before upgrade")
             if not helpers.backupVersionedFile(sickbeard.CONFIG_FILE, self.config_version):
-                logger.log(u"Config backup failed, abort upgrading config")
-                sys.exit("Config backup failed, abort upgrading config") 
+                logger.log_error_and_exit(u"Config backup failed, abort upgrading config")
             else:
                 logger.log(u"Proceeding with upgrade")  
             
@@ -440,4 +444,34 @@ class ConfigMigrator():
         """
         # get the old settings from the file and store them in the new variable names
         sickbeard.OMGWTFNZBS_USERNAME = check_setting_str(self.config_obj, 'omgwtfnzbs', 'omgwtfnzbs_uid', '')
-        sickbeard.OMGWTFNZBS_APIKEY = check_setting_str(self.config_obj, 'omgwtfnzbs', 'omgwtfnzbs_key', '')     
+        sickbeard.OMGWTFNZBS_APIKEY = check_setting_str(self.config_obj, 'omgwtfnzbs', 'omgwtfnzbs_key', '')
+
+    # Migration v4: Add default newznab catIDs
+    def _migrate_v4(self):
+        """ Update newznab providers so that the category IDs can be set independently via the config """
+
+        new_newznab_data = []
+        old_newznab_data = check_setting_str(self.config_obj, 'Newznab', 'newznab_data', '')
+
+        if old_newznab_data:
+            old_newznab_data_list = old_newznab_data.split("!!!")
+
+            for cur_provider_data in old_newznab_data_list:
+                try:
+                    name, url, key, enabled = cur_provider_data.split("|")
+                except ValueError:
+                    logger.log(u"Skipping Newznab provider string: '" + cur_provider_data + "', incorrect format", logger.ERROR)
+                    continue
+
+                if name == 'Sick Beard Index':
+                    key = '0'
+
+                if name == 'NZBs.org':
+                    catIDs = '5030,5040,5070,5090'
+                else:
+                    catIDs = '5030,5040'
+
+                cur_provider_data_list = [name, url, key, catIDs, enabled]
+                new_newznab_data.append("|".join(cur_provider_data_list))
+
+            sickbeard.NEWZNAB_DATA = "!!!".join(new_newznab_data)          

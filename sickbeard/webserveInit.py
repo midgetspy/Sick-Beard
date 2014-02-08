@@ -62,7 +62,7 @@ def initWebServer(options = {}):
         <title>404</title>
         <script type="text/javascript" charset="utf-8">
           <!--
-          location.href = "%s/"
+          location.href = "%s/home/"
           //-->
         </script>
     </head>
@@ -81,7 +81,7 @@ def initWebServer(options = {}):
             # If either the HTTPS certificate or key do not exist, make some self-signed ones.
             if not (https_cert and os.path.exists(https_cert)) or not (https_key and os.path.exists(https_key)):
                 if not create_https_certificates(https_cert, https_key):
-                    logger.log(u"Unable to create cert/key files, disabling HTTPS")
+                    logger.log(u"Unable to create CERT/KEY files, disabling HTTPS")
                     sickbeard.ENABLE_HTTPS = False
                     enable_https = False
 

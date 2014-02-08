@@ -4,6 +4,7 @@
 #import re
 #from sickbeard import history
 #from sickbeard import providers
+#from sickbeard import sbdatetime
 #from sickbeard.providers import generic
 #from sickbeard.common import *
 #set global $title="History"
@@ -14,8 +15,23 @@
 
 #include $os.path.join($sickbeard.PROG_DIR, "gui/slick/interfaces/default/inc_top.tmpl")
 
+<style type="text/css">
+.sort_data {display:none}
+</style>
+
 <script type="text/javascript">
 <!--
+
+\$.tablesorter.addParser({
+    id: 'cDate',
+    is: function(s) {
+        return false;
+    },
+    format: function(s) {
+        return s;
+    },
+    type: 'numeric'
+});
 
 \$(document).ready(function() 
 { 
@@ -24,8 +40,10 @@
         sortList: [[0,1]],
       textExtraction: {
 	    #if ( $layout == 'detailed'):
+	    	0: function(node) { return \$(node).find("span").text().toLowerCase(); },
 	    	4: function(node) { return \$(node).find("span").text().toLowerCase(); }
 	    #else
+	    	0: function(node) { return \$(node).find("span").text().toLowerCase(); },
 	    	1: function(node) { return \$(node).find("span").text().toLowerCase(); },
 	    	2: function(node) { return \$(node).attr("provider").toLowerCase(); },
 	    	5: function(node) { return \$(node).attr("quality").toLowerCase(); }
@@ -33,8 +51,10 @@
       },
         headers: {
         #if ( $layout == 'detailed'):
+          0: { sorter: 'cDate' },
           4: { sorter: 'quality' }
         #else
+          0: { sorter: 'cDate' },
           4: { sorter: false },
           5: { sorter: 'quality' }
         #end if
@@ -76,7 +96,8 @@
   #for $hItem in $historyResults:
   #set $curStatus, $curQuality = $Quality.splitCompositeStatus(int($hItem["action"]))
     <tr>
-      <td class="nowrap">$datetime.datetime.strptime(str($hItem["date"]), $history.dateFormat)</td>
+      #set $curdatetime = $datetime.datetime.strptime(str($hItem["date"]), $history.dateFormat)
+      <td class="nowrap">$sbdatetime.sbdatetime.sbfdatetime($curdatetime, show_seconds=True)<span class="sort_data">$time.mktime($curdatetime.timetuple())</span></td>
       <td width="35%"><a style="color: #000000; text-align: center;" href="$sbRoot/home/displayShow?show=$hItem["showid"]#season-$hItem["season"]">$hItem["show_name"] - <%=str(hItem["season"]) +"x"+ "%02i" % int(hItem["episode"]) %>#if "proper" in $hItem["resource"].lower or "repack" in $hItem["resource"].lower then ' <span class="quality Proper">Proper</span>' else ""#</a></td>
       <td align="center" #if $curStatus == SUBTITLED then 'class="subtitles_column"' else ''#><span style="cursor: help;" title="$os.path.basename($hItem["resource"])">$statusStrings[$curStatus]</span>
         #if $curStatus == SUBTITLED:
@@ -125,7 +146,8 @@
     <tbody>
     #for $hItem in $compactResults:
     <tr>
-      <td class="nowrap">$datetime.datetime.strptime(str($hItem["actions"][0]["time"]), $history.dateFormat)</td>
+      #set $curdatetime = $datetime.datetime.strptime(str($hItem["actions"][0]["time"]), $history.dateFormat)
+      <td class="nowrap">$sbdatetime.sbdatetime.sbfdatetime($curdatetime, show_seconds=True)<span class="sort_data">$time.mktime($curdatetime.timetuple())</span></td>
       <td width="25%">
         <span style="display: none;">$hItem["show_name"]</span>
       <a href="$sbRoot/home/displayShow?show=$hItem["show_id"]#season-$hItem["season"]">

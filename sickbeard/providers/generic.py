@@ -56,7 +56,7 @@ class GenericProvider:
 
     @staticmethod
     def makeID(name):
-        return re.sub("[^\w\d_]", "_", name).lower()
+         return re.sub("[^\w\d_]", "_", name.strip().lower())
 
     def imageName(self):
         return self.getID() + '.png'

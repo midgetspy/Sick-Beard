@@ -28,10 +28,12 @@ __all__ = ['ezrss',
            'torrentday',
            'hdbits',
            'iptorrents',
-           'omgwtfnzbs'
+           'omgwtfnzbs',
+		   'nextgen'
            ]
 
 import sickbeard
+from sickbeard import logger
 
 from os import sys
 
@@ -69,11 +71,6 @@ def getNewznabProviderList(data):
         if not curDefault:
             continue
 
-        # a 0 in the key spot indicates that no key is needed, so set this on the object
-        if curDefault.key == '0':
-            curDefault.key = ''
-            curDefault.needs_auth = False
-
         if curDefault.name not in providerDict:
             curDefault.default = True
             providerList.append(curDefault)
@@ -91,12 +88,15 @@ def makeNewznabProvider(configString):
     if not configString:
         return None
 
-    name, url, key, enabled = configString.split('|')
+    try:
+        name, url, key, catIDs, enabled = configString.split('|')
+    except ValueError:
+        logger.log(u"Skipping Newznab provider string: '" + configString + "', incorrect format", logger.ERROR)
+        return None
 
     newznab = sys.modules['sickbeard.providers.newznab']
 
-    newProvider = newznab.NewznabProvider(name, url)
-    newProvider.key = key
+    newProvider = newznab.NewznabProvider(name, url, key=key, catIDs=catIDs)
     newProvider.enabled = enabled == '1'
 
     return newProvider
@@ -120,7 +120,7 @@ def makeTorrentRssProvider(configString):
     return newProvider
 
 def getDefaultNewznabProviders():
-    return 'Sick Beard Index|http://lolo.sickbeard.com/|0|0!!!NZBs.org|http://nzbs.org/||0!!!NZBGeek|https://index.nzbgeek.info/||0!!!NZBFinder|http://www.nzbfinder.ws/||0!!!Usenet-Crawler|http://www.usenet-crawler.com/||0'
+    return 'Sick Beard Index|http://lolo.sickbeard.com/|0|5030,5040|0!!!NZBs.org|http://nzbs.org/||5030,5040,5070,5090|0!!!Usenet-Crawler|http://www.usenet-crawler.com/||5030,5040|0'
 
 def getProviderModule(name):
     name = name.lower()

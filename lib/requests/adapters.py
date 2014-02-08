@@ -11,18 +11,20 @@ and maintain connections.
 import socket
 
 from .models import Response
-from .packages.urllib3.poolmanager import PoolManager, ProxyManager
+from .packages.urllib3.poolmanager import PoolManager, proxy_from_url
 from .packages.urllib3.response import HTTPResponse
+from .packages.urllib3.util import Timeout as TimeoutSauce
 from .compat import urlparse, basestring, urldefrag, unquote
 from .utils import (DEFAULT_CA_BUNDLE_PATH, get_encoding_from_headers,
-                    prepend_scheme_if_needed, get_auth_from_url)
+                    except_on_missing_scheme, get_auth_from_url)
 from .structures import CaseInsensitiveDict
 from .packages.urllib3.exceptions import MaxRetryError
 from .packages.urllib3.exceptions import TimeoutError
 from .packages.urllib3.exceptions import SSLError as _SSLError
 from .packages.urllib3.exceptions import HTTPError as _HTTPError
+from .packages.urllib3.exceptions import ProxyError as _ProxyError
 from .cookies import extract_cookies_to_jar
-from .exceptions import ConnectionError, Timeout, SSLError
+from .exceptions import ConnectionError, Timeout, SSLError, ProxyError
 from .auth import _basic_auth_str
 
 DEFAULT_POOLBLOCK = False
@@ -53,14 +55,16 @@ class HTTPAdapter(BaseAdapter):
 
     :param pool_connections: The number of urllib3 connection pools to cache.
     :param pool_maxsize: The maximum number of connections to save in the pool.
-    :param max_retries: The maximum number of retries each connection should attempt.
+    :param int max_retries: The maximum number of retries each connection
+        should attempt. Note, this applies only to failed connections and
+        timeouts, never to requests where the server returns a response.
     :param pool_block: Whether the connection pool should block for connections.
 
     Usage::
 
       >>> import requests
       >>> s = requests.Session()
-      >>> a = requests.adapters.HTTPAdapter()
+      >>> a = requests.adapters.HTTPAdapter(max_retries=3)
       >>> s.mount('http://', a)
     """
     __attrs__ = ['max_retries', 'config', '_pool_connections', '_pool_maxsize',
@@ -71,6 +75,7 @@ class HTTPAdapter(BaseAdapter):
                  pool_block=DEFAULT_POOLBLOCK):
         self.max_retries = max_retries
         self.config = {}
+        self.proxy_manager = {}
 
         super(HTTPAdapter, self).__init__()
 
@@ -85,6 +90,11 @@ class HTTPAdapter(BaseAdapter):
                     self.__attrs__)
 
     def __setstate__(self, state):
+        # Can't handle by adding 'proxy_manager' to self.__attrs__ because
+        # because self.poolmanager uses a lambda function, which isn't pickleable.
+        self.proxy_manager = {}
+        self.config = {}
+
         for attr, value in state.items():
             setattr(self, attr, value)
 
@@ -118,7 +128,7 @@ class HTTPAdapter(BaseAdapter):
         :param verify: Whether we should actually verify the certificate.
         :param cert: The SSL certificate to verify.
         """
-        if url.startswith('https') and verify:
+        if url.lower().startswith('https') and verify:
 
             cert_loc = None
 
@@ -184,18 +194,31 @@ class HTTPAdapter(BaseAdapter):
     def get_connection(self, url, proxies=None):
         """Returns a urllib3 connection for the given URL. This should not be
         called from user code, and is only exposed for use when subclassing the
-        :class:`HTTPAdapter <reqeusts.adapters.HTTPAdapter>`.
+        :class:`HTTPAdapter <requests.adapters.HTTPAdapter>`.
 
         :param url: The URL to connect to.
         :param proxies: (optional) A Requests-style dictionary of proxies used on this request.
         """
         proxies = proxies or {}
-        proxy = proxies.get(urlparse(url).scheme)
+        proxy = proxies.get(urlparse(url.lower()).scheme)
 
         if proxy:
-            proxy = prepend_scheme_if_needed(proxy, urlparse(url).scheme)
-            conn = ProxyManager(self.poolmanager.connection_from_url(proxy))
+            except_on_missing_scheme(proxy)
+            proxy_headers = self.proxy_headers(proxy)
+
+            if not proxy in self.proxy_manager:
+                self.proxy_manager[proxy] = proxy_from_url(
+                                                proxy,
+                                                proxy_headers=proxy_headers,
+                                                num_pools=self._pool_connections,
+                                                maxsize=self._pool_maxsize,
+                                                block=self._pool_block)
+
+            conn = self.proxy_manager[proxy].connection_from_url(url)
         else:
+            # Only scheme should be lower case
+            parsed = urlparse(url)
+            url = parsed.geturl()
             conn = self.poolmanager.connection_from_url(url)
 
         return conn
@@ -211,10 +234,10 @@ class HTTPAdapter(BaseAdapter):
     def request_url(self, request, proxies):
         """Obtain the url to use when making the final request.
 
-        If the message is being sent through a proxy, the full URL has to be
-        used. Otherwise, we should only use the path portion of the URL.
+        If the message is being sent through a HTTP proxy, the full URL has to
+        be used. Otherwise, we should only use the path portion of the URL.
 
-        This shoudl not be called from user code, and is only exposed for use
+        This should not be called from user code, and is only exposed for use
         when subclassing the
         :class:`HTTPAdapter <requests.adapters.HTTPAdapter>`.
 
@@ -222,9 +245,10 @@ class HTTPAdapter(BaseAdapter):
         :param proxies: A dictionary of schemes to proxy URLs.
         """
         proxies = proxies or {}
-        proxy = proxies.get(urlparse(request.url).scheme)
+        scheme = urlparse(request.url).scheme
+        proxy = proxies.get(scheme)
 
-        if proxy:
+        if proxy and scheme != 'https':
             url, _ = urldefrag(request.url)
         else:
             url = request.path_url
@@ -232,8 +256,9 @@ class HTTPAdapter(BaseAdapter):
         return url
 
     def add_headers(self, request, **kwargs):
-        """Add any headers needed by the connection. Currently this adds a
-        Proxy-Authorization header.
+        """Add any headers needed by the connection. As of v2.0 this does
+        nothing by default, but is left for overriding by users that subclass
+        the :class:`HTTPAdapter <requests.adapters.HTTPAdapter>`.
 
         This should not be called from user code, and is only exposed for use
         when subclassing the
@@ -242,21 +267,29 @@ class HTTPAdapter(BaseAdapter):
         :param request: The :class:`PreparedRequest <PreparedRequest>` to add headers to.
         :param kwargs: The keyword arguments from the call to send().
         """
-        proxies = kwargs.get('proxies', {})
+        pass
 
-        if proxies is None:
-            proxies = {}
+    def proxy_headers(self, proxy):
+        """Returns a dictionary of the headers to add to any request sent
+        through a proxy. This works with urllib3 magic to ensure that they are
+        correctly sent to the proxy, rather than in a tunnelled request if
+        CONNECT is being used.
 
-        proxy = proxies.get(urlparse(request.url).scheme)
+        This should not be called from user code, and is only exposed for use
+        when subclassing the
+        :class:`HTTPAdapter <requests.adapters.HTTPAdapter>`.
+
+        :param proxies: The url of the proxy being used for this request.
+        :param kwargs: Optional additional keyword arguments.
+        """
+        headers = {}
         username, password = get_auth_from_url(proxy)
 
         if username and password:
-            # Proxy auth usernames and passwords will be urlencoded, we need
-            # to decode them.
-            username = unquote(username)
-            password = unquote(password)
-            request.headers['Proxy-Authorization'] = _basic_auth_str(username,
-                                                                     password)
+            headers['Proxy-Authorization'] = _basic_auth_str(username,
+                                                             password)
+
+        return headers
 
     def send(self, request, stream=False, timeout=None, verify=True, cert=None, proxies=None):
         """Sends PreparedRequest object. Returns Response object.
@@ -265,7 +298,7 @@ class HTTPAdapter(BaseAdapter):
         :param stream: (optional) Whether to stream the request content.
         :param timeout: (optional) The timeout on the request.
         :param verify: (optional) Whether to verify SSL certificates.
-        :param vert: (optional) Any user-provided SSL certificate to be trusted.
+        :param cert: (optional) Any user-provided SSL certificate to be trusted.
         :param proxies: (optional) The proxies dictionary to apply to the request.
         """
 
@@ -273,9 +306,14 @@ class HTTPAdapter(BaseAdapter):
 
         self.cert_verify(conn, request.url, verify, cert)
         url = self.request_url(request, proxies)
-        self.add_headers(request, proxies=proxies)
+        self.add_headers(request)
 
         chunked = not (request.body is None or 'Content-Length' in request.headers)
+
+        if stream:
+            timeout = TimeoutSauce(connect=timeout)
+        else:
+            timeout = TimeoutSauce(connect=timeout, read=timeout)
 
         try:
             if not chunked:
@@ -298,33 +336,49 @@ class HTTPAdapter(BaseAdapter):
                     conn = conn.proxy_pool
 
                 low_conn = conn._get_conn(timeout=timeout)
-                low_conn.putrequest(request.method, url, skip_accept_encoding=True)
 
-                for header, value in request.headers.items():
-                    low_conn.putheader(header, value)
+                try:
+                    low_conn.putrequest(request.method,
+                                        url,
+                                        skip_accept_encoding=True)
 
-                low_conn.endheaders()
+                    for header, value in request.headers.items():
+                        low_conn.putheader(header, value)
 
-                for i in request.body:
-                    low_conn.send(hex(len(i))[2:].encode('utf-8'))
-                    low_conn.send(b'\r\n')
-                    low_conn.send(i)
-                    low_conn.send(b'\r\n')
-                low_conn.send(b'0\r\n\r\n')
+                    low_conn.endheaders()
 
-                r = low_conn.getresponse()
-                resp = HTTPResponse.from_httplib(r,
-                    pool=conn,
-                    connection=low_conn,
-                    preload_content=False,
-                    decode_content=False
-                )
+                    for i in request.body:
+                        low_conn.send(hex(len(i))[2:].encode('utf-8'))
+                        low_conn.send(b'\r\n')
+                        low_conn.send(i)
+                        low_conn.send(b'\r\n')
+                    low_conn.send(b'0\r\n\r\n')
+
+                    r = low_conn.getresponse()
+                    resp = HTTPResponse.from_httplib(
+                        r,
+                        pool=conn,
+                        connection=low_conn,
+                        preload_content=False,
+                        decode_content=False
+                    )
+                except:
+                    # If we hit any problems here, clean up the connection.
+                    # Then, reraise so that we can handle the actual exception.
+                    low_conn.close()
+                    raise
+                else:
+                    # All is well, return the connection to the pool.
+                    conn._put_conn(low_conn)
 
         except socket.error as sockerr:
             raise ConnectionError(sockerr)
 
         except MaxRetryError as e:
             raise ConnectionError(e)
+
+        except _ProxyError as e:
+            raise ProxyError(e)
 
         except (_SSLError, _HTTPError) as e:
             if isinstance(e, _SSLError):

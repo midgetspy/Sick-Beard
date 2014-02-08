@@ -16,7 +16,7 @@ $(document).ready(function () {
                 if (data == "supported") {
                 } else {
                     $('#unpack').qtip('option', {
-                        'content.text': 'Your system seem to not support Unrar.',
+                        'content.text': 'Unrar Executable not found.',
                         'style.classes': 'qtip-rounded qtip-shadow qtip-red'
 				    });
 					$('#unpack').qtip('toggle', true);
@@ -191,7 +191,7 @@ $(document).ready(function () {
     setup_abd_naming();
 
     // -- start of metadata options div toggle code --
-    $('#metadataType').change(function () {
+    $('#metadataType').on('change keyup', function () {
         $(this).showHideMetadata();
     });
 
@@ -207,7 +207,7 @@ $(document).ready(function () {
             }
         });
     };
-    //initalize to show the div
+    //initialize to show the div
     $(this).showHideMetadata();
     // -- end of metadata options div toggle code --
 
