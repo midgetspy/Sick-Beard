@@ -463,6 +463,6 @@ class AddLastProperSearch(AddLastUpdateTVDB):
 
         logger.log(u"Adding column last_proper_search to info")
         if not self.hasColumn("info", "last_proper_search"):
-            self.addColumn("info", "last_proper_search", defualt=1)
+            self.addColumn("info", "last_proper_search", default=1)
 
         self.incDBVersion()        
