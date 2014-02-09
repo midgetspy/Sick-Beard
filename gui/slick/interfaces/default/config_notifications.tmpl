@@ -924,6 +924,72 @@
                     </fieldset>
                 </div><!-- /pushalot component-group //-->
 
+                <div class="component-group clearfix">
+                    <div class="component-group-desc">
+                        <h3><a href="https://www.pushbullet.com" rel="noreferrer" onclick="window.open('${sickbeard.ANON_REDIRECT}' + this.href, '_blank'); return false;"><img class="notifier-icon" src="$sbRoot/images/notifiers/pushbullet.png" alt="" title="Pushbullet" /> Pushbullet </a></h3>
+                        <p>Pushbullet is a platform for receiving custom push notifications to connected devices running Android and desktop Chrome browsers.</p>
+                    </div>
+                    <fieldset class="component-group-list">
+                        <div class="field-pair">
+                            <input type="checkbox" class="enabler" name="use_pushbullet" id="use_pushbullet" #if $sickbeard.USE_PUSHBULLET then "checked=\"checked\"" else ""# />
+                            <label class="clearfix" for="use_pushbullet">
+                                <span class="component-title">Enable</span>
+                                <span class="component-desc">Should Sick Beard send notifications through Pushbullet?</span>
+                            </label>
+                        </div>
+
+                        <div id="content_use_pushbullet">
+                            <div class="field-pair">
+                                <input type="checkbox" name="pushbullet_notify_onsnatch" id="pushbullet_notify_onsnatch" #if $sickbeard.PUSHBULLET_NOTIFY_ONSNATCH then "checked=\"checked\"" else ""# />
+                                <label class="clearfix" for="pushbullet_notify_onsnatch">
+                                    <span class="component-title">Notify on Snatch</span>
+                                    <span class="component-desc">Send notification when we start a download?</span>
+                                </label>
+                            </div>
+                            <div class="field-pair">
+                                <input type="checkbox" name="pushbullet_notify_ondownload" id="pushbullet_notify_ondownload" #if $sickbeard.PUSHBULLET_NOTIFY_ONDOWNLOAD then "checked=\"checked\"" else ""# />
+                                <label class="clearfix" for="pushbullet_notify_ondownload">
+                                    <span class="component-title">Notify on Download</span>
+                                    <span class="component-desc">Send notification when we finish a download?</span>
+                                </label>
+                            </div>
+                            <div class="field-pair">
+                                <input type="checkbox" name="pushbullet_notify_onsubtitledownload" id="pushbullet_notify_onsubtitledownload" #if $sickbeard.PUSHBULLET_NOTIFY_ONSUBTITLEDOWNLOAD then "checked=\"checked\"" else ""# />
+                                <label class="clearfix" for="pushbullet_notify_onsubtitledownload">
+                                    <span class="component-title">Notify on Subtitle Download</span>
+                                    <span class="component-desc">Send notification when we finish a subtitle download?</span>
+                                </label>
+                            </div>
+                            <div class="field-pair">
+                                <label class="nocheck clearfix">
+                                    <span class="component-title">Pushbullet API Key</span>
+                                    <input type="text" name="pushbullet_api" id="pushbullet_api" value="$sickbeard.PUSHBULLET_API" size="35" />
+                                </label>
+                                <label class="nocheck clearfix">
+                                    <span class="component-title">&nbsp;</span>
+                                    <span class="component-desc">API key of your Pushbullet account</span>
+                                </label>
+                            </div>
+                            <div class="field-pair">
+                                <label class="nocheck clearfix">
+                                    <span class="component-title">Pushbullet Devices</span>
+                                    <select name="pushbullet_device_list" id="pushbullet_device_list"></select>
+                                    <input type="hidden" id="pushbullet_device" value="$sickbeard.PUSHBULLET_DEVICE">
+                                    <input type="button" class="btn" value="Update device list" id="getPushbulletDevices" />
+                                </label>
+                                <label class="nocheck clearfix">
+                                    <span class="component-title">&nbsp;</span>
+                                    <span class="component-desc">To which device you want to push to.</span>
+                                </label>
+                            </div>
+                            <div class="testNotification" id="testPushbullet-result">Click below to test.</div>
+                            <input type="button" class="btn" value="Test Pushbullet." id="testPushbullet" />
+                            <input type="submit" class="btn config_submitter" value="Save Changes" />
+                        </div><!-- /content_use_pushbullet //-->
+
+                    </fieldset>
+                </div><!-- /pushbullet component-group //-->
+
 			</div>
 			
             <div id="tabs-3">

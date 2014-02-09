@@ -13,6 +13,7 @@
 	<h1 class="title">$title</h1>
 #end if
 <form name="processForm" method="post" action="processEpisode" style="line-height: 44px">
+<input type="hidden" id="type" name="type" value="manual"> 
 <b>Enter the folder containing the episode:</b> <input type="text" name="dir" id="episodeDir" size="50" /><br/>
 <b>Process Method to be used:</b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;    
 <select name="process_method" id="process_method" class="input-medium" >

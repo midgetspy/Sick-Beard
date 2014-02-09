@@ -1,6 +1,8 @@
 #import sickbeard
 #import datetime
 #from sickbeard.common import *
+#from sickbeard import sbdatetime
+
 #set global $title="Coming Episodes"
 #set global $header="Coming Episodes"
 
@@ -139,7 +141,7 @@
 
     <!-- start $cur_result["show_name"] //-->
       <tr class="$show_div">
-        <td align="center" class="nowrap">$cur_result["localtime"].strftime('%x').decode($sickbeard.SYS_ENCODING).replace('/','-')<span class="sort_data">$time.mktime($cur_result["localtime"].timetuple())</span></td>
+        <td align="center" class="nowrap">$sbdatetime.sbdatetime.sbfdatetime($cur_result["localtime"]).decode($sickbeard.SYS_ENCODING)<span class="sort_data">$time.mktime($cur_result["localtime"].timetuple())</span></td>
         <td class="tvShow"><a href="$sbRoot/home/displayShow?show=${cur_result["showid"]}">$cur_result["show_name"]</a>
             #if int($cur_result["paused"]):
             <span class="pause">[paused]</span>
@@ -305,9 +307,9 @@
           	      <span><a href="$sbRoot/home/searchEpisode?show=${cur_result["showid"]}&amp;season=$cur_result["season"]&amp;episode=$cur_result["episode"]" title="Manual Search" id="forceUpdate-${cur_result["showid"]}" class="epSearch forceUpdate"><img alt="[search]" height="16" width="16" src="$sbRoot/images/search32.png" id="forceUpdateImage-${cur_result["showid"]}" /></a></span>
           	  </span>
           	</div>
-            <span class="title">Next Episode:</span> <span><%=str(cur_result["season"])+"x"+"%02i" % int(cur_result["episode"]) %> - $cur_result["name"] ($cur_result["localtime"].strftime('%x').decode($sickbeard.SYS_ENCODING).replace('/','-'))</span>
+            <span class="title">Next Episode:</span> <span><%=str(cur_result["season"])+"x"+"%02i" % int(cur_result["episode"]) %> - $cur_result["name"] ($sbdatetime.sbdatetime.fromtimestamp($time.mktime($cur_result["localtime"].timetuple())).sbfdate().decode($sickbeard.SYS_ENCODING))</span>
             <div class="clearfix">
-            	<span class="title">Airs:</span> <span>$cur_result["localtime_string"].decode($sickbeard.SYS_ENCODING) on $cur_result["network"]</span>
+            	<span class="title">Airs:</span> <span>$sbdatetime.sbdatetime.fromtimestamp($time.mktime($cur_result["localtime"].timetuple())).sbftime().decode($sickbeard.SYS_ENCODING) on $cur_result["network"]</span>
 	        </div>
             <div class="clearfix">
 	            <span class="title">Quality:</span>

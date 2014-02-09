@@ -232,7 +232,7 @@ class NameParser(object):
 
         # if there's no useful info in it then raise an exception
         if final_result.season_number == None and not final_result.episode_numbers and final_result.air_date == None and not final_result.series_name:
-            raise InvalidNameException("Unable to parse "+name.encode(sickbeard.SYS_ENCODING, 'ignore'))
+            raise InvalidNameException("Unable to parse " + name.encode(sickbeard.SYS_ENCODING, 'xmlcharrefreplace'))
 
         name_parser_cache.add(name, final_result)
         # return it

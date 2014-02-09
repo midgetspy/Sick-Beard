@@ -79,14 +79,18 @@ class FailedProcessor(object):
             self._log(u"Could not create show object. Either the show hasn't been added to SickBeard, or it's still loading (if SB was restarted recently)", logger.WARNING)
             raise exceptions.FailedProcessingFailed()
 
-        # Revert before fail, as fail alters the history
-        self._log(u"Reverting episodes...")
-        self.log += failed_history.revertEpisodes(self._show_obj, parsed.season_number, parsed.episode_numbers)
-        self._log(u"Marking release as bad: " + releaseName)
+#        # Revert before fail, as fail alters the history
+#        self._log(u"Reverting episodes...")
+#        self.log += failed_history.revertEpisodes(self._show_obj, parsed.season_number, parsed.episode_numbers)
+#        self._log(u"Marking release as bad: " + releaseName)
+#        self.log += failed_history.logFailed(releaseName)
+        
+        self.log += failed_history.markFailed(self._show_obj, parsed.season_number, parsed.episode_numbers)
+        self._log(u"Marking release as Failed: " + releaseName)
         self.log += failed_history.logFailed(releaseName)
-
-        cur_backlog_queue_item = search_queue.FailedQueueItem(self._show_obj, parsed.season_number)
-        sickbeard.searchQueueScheduler.action.add_item(cur_backlog_queue_item)
+        
+        cur_failed_queue_item = search_queue.FailedQueueItem(self._show_obj, parsed.season_number)
+        sickbeard.searchQueueScheduler.action.add_item(cur_failed_queue_item)
 
         return True
 

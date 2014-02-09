@@ -1,5 +1,5 @@
 #import sickbeard
-#from sickbeard import subtitles
+#from sickbeard import subtitles, sbdatetime, network_timezones
 #import sickbeard.helpers
 #from sickbeard.common import *
 #import subliminal
@@ -61,64 +61,65 @@
 
 #end if
 </span> 
+#if $seasonResults:
+    ##There is a special/season_0?##
+    #if int($seasonResults[-1]["season"]) == 0:
+        #set $season_special = 1
+    #else: 
+        #set $season_special = 0
+    #end if
 
-##There is a special/season_0?## 
-#if int($seasonResults[-1]["season"]) == 0:	
-	#set $season_special=1
-#else: 
-	#set $season_special=0
-#end if
-	
-#if not $sickbeard.DISPLAY_SHOW_SPECIALS and $season_special:
-	$seasonResults.pop(-1)
-#end if
+    #if not $sickbeard.DISPLAY_SHOW_SPECIALS and $season_special:
+        $seasonResults.pop(-1)
+    #end if
 
 <div class="seasonList"> 
 <span>
-#if (len($seasonResults) > 14):
+    #if (len($seasonResults) > 14):
     <select id="seasonJump">
         <option value="jump">Jump to Season</option>
-    #for $seasonNum in $seasonResults:
+        #for $seasonNum in $seasonResults:
         <option value="#season-$seasonNum["season"]">#if int($seasonNum["season"]) == 0 then "Specials" else "Season " + str($seasonNum["season"])#</option>
-    #end for
+        #end for
     </select>
-#else:
+    #else:
     <b>Season:</b>
-    #for $seasonNum in $seasonResults:
+        #for $seasonNum in $seasonResults:
         #if int($seasonNum["season"]) == 0:
-            <a href="#season-$seasonNum["season"]">Specials</a>
+        <a href="#season-$seasonNum["season"]">Specials</a>
         #else:
-            <a href="#season-$seasonNum["season"]">${str($seasonNum["season"])}</a>
+        <a href="#season-$seasonNum["season"]">${str($seasonNum["season"])}</a>
         #end if
         #if $seasonNum != $seasonResults[-1]:
-            <span class="separator">|</span>
+        <span class="separator">|</span>
         #end if
-    #end for
-#end if
+        #end for
+    #end if
 </span>
 
 <span class="float-right">
-#if $season_special:
-	<b>Display Specials:</b>
-	#if sickbeard.DISPLAY_SHOW_SPECIALS:
-		<a class="inner" href="$sbRoot/toggleDisplayShowSpecials/?show=$show.tvdbid">Hide</a>
-	#else:
-		<a class="inner" href="$sbRoot/toggleDisplayShowSpecials/?show=$show.tvdbid">Show</a>
-	#end if	
-#end if
+    #if $season_special:
+    <b>Display Specials:</b>
+        #if sickbeard.DISPLAY_SHOW_SPECIALS:
+        <a class="inner" href="$sbRoot/toggleDisplayShowSpecials/?show=$show.tvdbid">Hide</a>
+        #else:
+        <a class="inner" href="$sbRoot/toggleDisplayShowSpecials/?show=$show.tvdbid">Show</a>
+        #end if
+    #end if
 </span>
 </div>
+#end if
 <div id="summary" class="align-left">
 <table class="infoTable" cellspacing="1" border="0" cellpadding="0">
 <tr>
 <td  width="75%">
 <table>
 #if $show.network and $show.airs:
-    <tr><td class="showLegend">Airs: </td><td>$show.airs on $show.network</td></tr>
+    <tr><td class="showLegend">Originally Airs: </td><td>$show.airs #if not $network_timezones.test_timeformat($show.airs) then " <font color='#FF0000'><b>(invalid Timeformat)</b></font> " else ""# on $show.network</td></tr>
 #else if $show.network:
-    <tr><td class="showLegend">Airs: </td><td>$show.network</td></tr>
+    <tr><td class="showLegend">Originally Airs: </td><td>$show.network</td></tr>
 #else if $show.airs:
-    <tr><td class="showLegend">Airs: </td><td>$show.airs</td></tr>
+    <tr><td class="showLegend">Originally Airs: </td><td>>$show.airs #if not $network_timezones.test_timeformat($show.airs) then " <font color='#FF0000'><b>(invalid Timeformat)</b></font> " else ""#</td></tr>
 #end if
     <tr><td class="showLegend">Status: </td><td>$show.status</td></tr>
 #if $showLoc[1]:
@@ -227,7 +228,7 @@
 	#end if    
     $epResult["name"]
 </td>
-    <td align="center" class="nowrap">#if int($epResult["airdate"]) == 1 then "never" else $datetime.date.fromordinal(int($epResult["airdate"]))#</td>
+    <td align="center" class="nowrap">#if int($epResult["airdate"]) == 1 then "never" else $sbdatetime.sbdatetime.sbfdate($network_timezones.parse_date_time($epResult["airdate"],$show.airs,$show.network))#</td>
     <td class="filename"><small>
 #if $epLoc and $show._location and $epLoc.lower().startswith($show._location.lower()):
 	#set $epLoc = os.path.basename($epLoc[len($show._location)+1:])

@@ -42,28 +42,34 @@ from sickbeard.exceptions import ex, AuthException
 
 class NewznabProvider(generic.NZBProvider):
 
-    def __init__(self, name, url, key=''):
+    def __init__(self, name, url, key='', catIDs='5030,5040,5020,5050,5080'):
 
         generic.NZBProvider.__init__(self, name)
 
         self.cache = NewznabCache(self)
 
         self.url = url
+
         self.key = key
 
-        # if a provider doesn't need an api key then this can be false
-        if key:
-            self.needs_auth = True
+        # a 0 in the key spot indicates that no key is needed
+        if self.key == '0':
+            self.needs_auth = False
         else:
-            self.needs_auth = False 
-        
+            self.needs_auth = True
+
+        if catIDs:
+            self.catIDs = catIDs
+        else:
+            self.catIDs = '5030,5040,5020,5050,5080'
+
         self.enabled = True
         self.supportsBacklog = True
 
         self.default = False
 
     def configStr(self):
-        return self.name + '|' + self.url + '|' + self.key + '|' + str(int(self.enabled))
+        return self.name + '|' + self.url + '|' + self.key + '|' + self.catIDs + '|' + str(int(self.enabled))
 
     def imageName(self):
         if ek.ek(os.path.isfile, ek.ek(os.path.join, sickbeard.PROG_DIR, 'data', 'images', 'providers', self.getID() + '.png')):
@@ -190,21 +196,16 @@ class NewznabProvider(generic.NZBProvider):
         params = {"t": "tvsearch",
                   "maxage": sickbeard.USENET_RETENTION,
                   "limit": 100,
-                  #Cat: 5030 = SD, 5040 = HD (used global). nzb.su uses 5020 = foreign, 5050 = other, 5080 = documentary, nzbs.org uses 5080 = foreign, 5060 = other
-                  "cat": '5030,5040,5020,5050,5080'}
+                  "cat": self.catIDs}
 
         # if max_age is set, use it, don't allow it to be missing
         if max_age or not params['maxage']:
             params['maxage'] = max_age
 
-        # hack this in for now
-        if self.getID() == 'nzbs_org':
-            params['cat'] += ',5070,5090'
-
         if search_params:
             params.update(search_params)
 
-        if self.key:
+        if self.needs_auth and self.key:
             params['apikey'] = self.key
 
         search_url = self.url + 'api?' + urllib.urlencode(params)
@@ -300,14 +301,9 @@ class NewznabCache(tvcache.TVCache):
     def _getRSSData(self):
 
         params = {"t": "tvsearch",
-                  #Cat: 5030 = SD, 5040 = HD (used global). nzb.su uses 5020 = foreign, 5050 = other, 5080 = documentary, nzbs.org uses 5080 = foreign, 5060 = other
-                  "cat": '5030,5040,5020,5050,5080'}
+                  "cat": self.provider.catIDs}
 
-        # hack this in for now
-        if self.provider.getID() == 'nzbs_org':
-            params['cat'] += ',5070,5090'
-
-        if self.provider.key:
+        if self.provider.needs_auth and self.provider.key:
             params['apikey'] = self.provider.key
 
         rss_url = self.provider.url + 'api?' + urllib.urlencode(params)

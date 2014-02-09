@@ -25,6 +25,14 @@ from sickbeard import encodingKludge as ek
 from os.path import basename, realpath
 import os
 import re
+import datetime
+
+# regex to parse time (12/24 hour format)
+time_regex = re.compile(r"(\d{1,2}):(\d{2,2})( [PA]M)?\b", flags=re.IGNORECASE)
+
+network_dict = None
+
+sb_timezone = tz.tzlocal()
 
 # helper to remove failed temp download
 def _remove_zoneinfo_failed(filename):
@@ -36,6 +44,9 @@ def _remove_zoneinfo_failed(filename):
 # update the dateutil zoneinfo
 def _update_zoneinfo():
 
+    global sb_timezone
+    sb_timezone = tz.tzlocal()
+
     # now check if the zoneinfo needs update
     url_zv = 'http://github.com/Prinz23/sb_network_timezones/raw/master/zoneinfo.txt'
 
@@ -46,13 +57,13 @@ def _update_zoneinfo():
         logger.log(u"Loading zoneinfo.txt failed. Unable to get URL: " + url_zv, logger.ERROR)
         return
 
-    if (lib.dateutil.zoneinfo.ZONEINFOFILE != None):
+    if (lib.dateutil.zoneinfo.ZONEINFOFILE is not None):
         cur_zoneinfo = ek.ek(basename, lib.dateutil.zoneinfo.ZONEINFOFILE)
     else:
         cur_zoneinfo = None
     (new_zoneinfo, zoneinfo_md5) = url_data.decode('utf-8').strip().rsplit(u' ')
 
-    if ((cur_zoneinfo != None) and (new_zoneinfo == cur_zoneinfo)):
+    if ((cur_zoneinfo is not None) and (new_zoneinfo == cur_zoneinfo)):
         return
 
     # now load the new zoneinfo
@@ -76,7 +87,7 @@ def _update_zoneinfo():
         logger.log(u"Updating timezone info with new one: " + new_zoneinfo,logger.MESSAGE)
         try:
             # remove the old zoneinfo file
-            if (cur_zoneinfo != None):
+            if (cur_zoneinfo is not None):
                 old_file = ek.ek(realpath, u'lib/dateutil/zoneinfo/' + cur_zoneinfo)
                 if (os.path.exists(old_file)):
                     os.remove(old_file)
@@ -84,6 +95,7 @@ def _update_zoneinfo():
             os.rename(zonefile_tmp,zonefile)
             # load the new zoneinfo
             reload(lib.dateutil.zoneinfo)
+            sb_timezone = tz.tzlocal()
         except:
             _remove_zoneinfo_failed(zonefile_tmp)
             return
@@ -107,12 +119,13 @@ def update_network_dict():
     if url_data is None:
         # When urlData is None, trouble connecting to github
         logger.log(u"Loading Network Timezones update failed. Unable to get URL: " + url, logger.ERROR)
+        load_network_dict()
         return
 
     try:
         for line in url_data.splitlines():
            (key, val) = line.decode('utf-8').strip().rsplit(u':',1)
-           if key == None or val == None:
+           if key is None or val is None:
                continue
            d[key] = val
     except (IOError, OSError):
@@ -140,6 +153,7 @@ def update_network_dict():
         ql.append(["DELETE FROM network_timezones WHERE network_name IN ("+','.join(['?'] * len(L))+")", L])
     # change all network timezone infos at once (much faster)
     myDB.mass_action(ql)
+    load_network_dict()
 
 # load network timezones from db into dict
 def load_network_dict():
@@ -147,20 +161,61 @@ def load_network_dict():
     try:
         myDB = db.DBConnection("cache.db")
         cur_network_list = myDB.select("SELECT * FROM network_timezones")
-        if cur_network_list == None or len(cur_network_list) < 1:
+        if cur_network_list is None or len(cur_network_list) < 1:
             update_network_dict()
             cur_network_list = myDB.select("SELECT * FROM network_timezones")
         d = dict(cur_network_list)
     except:
         d = {}
-    return d
+    global network_dict
+    network_dict = d
 
 # get timezone of a network or return default timezone
-def get_network_timezone(network, network_dict, sb_timezone):
-    if network == None:
+def get_network_timezone(network, network_dict):
+    if network is None:
         return sb_timezone
 
     try:
         return tz.gettz(network_dict[network])
     except:
         return sb_timezone
+
+# parse date and time string into local time
+def parse_date_time(d, t, network):
+    if network_dict is None:
+        load_network_dict()
+    mo = time_regex.search(t)
+    if mo is not None and len(mo.groups()) >= 2:
+        try:
+            hr = helpers.tryInt(mo.group(1))
+            m = helpers.tryInt(mo.group(2))
+            ap = mo.group(3)
+            # convert am/pm to 24 hour clock
+            if ap is not None:
+                if ap.lower() == u" pm" and hr != 12:
+                    hr += 12
+                elif ap.lower() == u" am" and hr == 12:
+                    hr -= 12
+        except:
+            hr = 0
+            m = 0
+    else:
+        hr = 0
+        m = 0
+    if hr < 0 or hr > 23 or m < 0 or m > 59:
+        hr = 0
+        m = 0
+    te = datetime.datetime.fromordinal(helpers.tryInt(d))
+    foreign_timezone = get_network_timezone(network, network_dict)
+    foreign_naive = datetime.datetime(te.year, te.month, te.day, hr, m, tzinfo=foreign_timezone)
+    try:
+        return foreign_naive.astimezone(sb_timezone)
+    except (ValueError):
+        return foreign_naive
+
+def test_timeformat(t):
+    mo = time_regex.search(t)
+    if mo is None or len(mo.groups()) < 2:
+        return False
+    else:
+        return True

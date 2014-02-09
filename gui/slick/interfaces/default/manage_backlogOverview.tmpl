@@ -1,6 +1,7 @@
 #import sickbeard
 #import datetime
 #from sickbeard.common import *
+#from sickbeard import sbdatetime, network_timezones
 #set global $title="Backlog Overview"
 #set global $header="Backlog Overview"
 
@@ -83,7 +84,7 @@ Jump to Show
   <tr class="$Overview.overviewStrings[$showCats[$curShow.tvdbid][$whichStr]]">
     <td align="center">$whichStr</td>
     <td>$curResult["name"]</td>
-    <td align="center" class="nowrap">#if int($curResult["airdate"]) == 1 then "never" else $datetime.date.fromordinal(int($curResult["airdate"]))#</td>
+    <td align="center" class="nowrap">#if int($curResult["airdate"]) == 1 then "never" else $sbdatetime.sbdatetime.sbfdate($network_timezones.parse_date_time($curResult["airdate"],$curShow.airs,$curShow.network))#</td>
   </tr>
 
 #end for

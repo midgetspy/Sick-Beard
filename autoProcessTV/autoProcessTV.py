@@ -81,7 +81,7 @@ def processEpisode(dirName, nzbName=None, failed=False):
     if nzbName != None:
         params['nzbName'] = nzbName
 
-    params['failed'] = failed
+    params['failed'] = int(failed)
         
     myOpener = AuthURLOpener(username, password)
     
