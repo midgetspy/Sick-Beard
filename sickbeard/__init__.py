@@ -1022,7 +1022,7 @@ def initialize(consoleLogging=True):
         properFinderScheduler = scheduler.Scheduler(properFinderInstance,
                                                      cycleTime=properFinderInstance.updateInterval,
                                                      threadName="FINDPROPERS",
-                                                     runImmediately=False)
+                                                     runImmediately=True)
         if not DOWNLOAD_PROPERS:
             properFinderScheduler.silent = True
 
