@@ -337,8 +337,6 @@ def main():
     if forceUpdate or sickbeard.UPDATE_SHOWS_ON_START:
         sickbeard.showUpdateScheduler.action.run(force=True) # @UndefinedVariable
 
-    sickbeard.properFinderScheduler.action.run(force=True) # @UndefinedVariable
-
     # Stay alive while my threads do the work
     while (True):
 
