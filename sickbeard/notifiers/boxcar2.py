@@ -51,7 +51,7 @@ class Boxcar2Notifier:
         
         data = urllib.urlencode({
             'user_credentials': accessToken,
-            'notification[title]': title + " - " + msg.encode('utf-8'),
+            'notification[title]': "SickBeard - " + title + " - " + msg.encode('utf-8'),
             'notification[long_message]': msg.encode('utf-8'),
             'notification[sound]': "done"
             })
