@@ -261,15 +261,15 @@ class ProperFinder():
             myDB.action("INSERT INTO info (last_backlog, last_TVDB, last_proper_search) VALUES (?,?,?)", [0, 0, str(when)])
         else:
             myDB.action("UPDATE info SET last_proper_search=" + str(when))
-            
+
     def _get_lastProperSearch(self):
 
         myDB = db.DBConnection()
         sqlResults = myDB.select("SELECT * FROM info")
 
-        try:                         
+        try:
             last_proper_search = datetime.date.fromordinal(int(sqlResults[0]["last_proper_search"]))
-        except ValueError:
+        except:
             return datetime.date.fromordinal(1)
-            
+
         return last_proper_search
