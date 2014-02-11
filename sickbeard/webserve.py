@@ -47,6 +47,7 @@ from sickbeard import scene_exceptions
 from sickbeard import subtitles
 from sickbeard import failed_history
 from sickbeard import failedProcessor
+from sickbeard import network_timezones
 
 from sickbeard.providers import newznab, rsstorrent
 from sickbeard.common import Quality, Overview, statusStrings, qualityPresetStrings
@@ -60,7 +61,6 @@ from lib.dateutil import tz
 from lib.unrar2 import RarFile, RarInfo
 
 import subliminal
-import network_timezones
 
 try:
     import json
@@ -4080,7 +4080,7 @@ class WebInterface:
           # Get local timezone and load network timezones
                 local_zone = tz.tzlocal()
                 try:
-                    network_zone = network_timezones.get_network_timezone(show['network'], network_timezones.load_network_dict(), local_zone)
+                    network_zone = network_timezones.get_network_timezone(show['network'], network_timezones.load_network_dict())
                 except:
                   # Dummy network_zone for exceptions
                     network_zone = None
