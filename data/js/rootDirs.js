@@ -43,8 +43,8 @@ $(document).ready(function() {
             setDefault($('#rootDirs option').attr('id'));
         }
 
-        refreshRootDirs();
         $.get(sbRoot + '/config/general/saveRootDirs', { rootDirString: $('#rootDirText').val() });
+        refreshRootDirs();
 
     }
 
