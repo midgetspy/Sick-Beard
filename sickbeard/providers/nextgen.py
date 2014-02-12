@@ -107,7 +107,7 @@ class NextGenProvider(generic.TorrentProvider):
             self.session = requests.Session()
             self.session.headers.update({'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.8; rv:24.0) Gecko/20130519 Firefox/24.0)'})
             data = self.session.get(self.urls['login_page'])
-            bs = BeautifulSoup(data.content)
+            bs = BeautifulSoup(data.content.decode('iso-8859-1'))
             csrfraw = bs.find('form', attrs = {'id': 'login'})['action']
             output = self.session.post(self.urls['base_url']+csrfraw, data=login_params)            
             
@@ -194,7 +194,7 @@ class NextGenProvider(generic.TorrentProvider):
                 if data:
 
                     try:
-                        html = BeautifulSoup(data, features=["html5lib", "permissive"])
+                        html = BeautifulSoup(data.decode('iso-8859-1'), features=["html5lib", "permissive"])
                         resultsTable = html.find('div', attrs = {'id' : 'torrent-table-wrapper'})
 
                         if not resultsTable:
