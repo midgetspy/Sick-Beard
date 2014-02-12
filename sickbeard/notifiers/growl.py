@@ -17,7 +17,6 @@
 # along with Sick Beard.  If not, see <http://www.gnu.org/licenses/>.
 
 import socket
-
 import sickbeard
 
 from sickbeard import logger, common
@@ -72,14 +71,16 @@ class GrowlNotifier:
 
         return response
 
-    def _sendGrowl(self, title="Sick Beard Notification", message=None, name=None, host=None, password=None, force=False):
+    def _notify(self, title="Sick Beard Notification", message=None, name=None, host=None, password=None, force=False):
+        # suppress notifications if the notifier is disabled but the notify options are checked
         if not sickbeard.USE_GROWL and not force:
             return False
 
-        if name == None:
+        # fill in omitted parameters
+        if not name:
             name = title
 
-        if host == None:
+        if not host:
             hostParts = sickbeard.GROWL_HOST.split(':')
         else:
             hostParts = host.split(':')
@@ -102,7 +103,7 @@ class GrowlNotifier:
         opts['priority'] = None
         opts['debug'] = False
 
-        if password == None:
+        if not password:
             opts['password'] = sickbeard.GROWL_PASSWORD
         else:
             opts['password'] = password
@@ -110,19 +111,20 @@ class GrowlNotifier:
         opts['icon'] = True
 
         for pc in growlHosts:
+            print pc
             opts['host'] = pc[0]
             opts['port'] = pc[1]
-            logger.log(u"Sending growl to " + opts['host'] + ":" + str(opts['port']) + ": " + message)
+            logger.log(u"NOTIFIER-GROWL: Sending message '" + message + "' to " + opts['host'] + ":" + str(opts['port']))
             try:
                 return self._send_growl(opts, message)
-            except socket.error, e:
-                logger.log(u"Unable to send growl to " + opts['host'] + ":" + str(opts['port']) + ": " + ex(e))
+            except Exception, e:
+                logger.log(u"NOTIFIER-GROWL: Unable to send growl to " + opts['host'] + ":" + str(opts['port']) + " - " + ex(e))
                 return False
 
     def _sendRegistration(self, host=None, password=None, name='Sick Beard Notification'):
         opts = {}
 
-        if host == None:
+        if not host:
             hostParts = sickbeard.GROWL_HOST.split(':')
         else:
             hostParts = host.split(':')
@@ -135,7 +137,7 @@ class GrowlNotifier:
         opts['host'] = hostParts[0]
         opts['port'] = port
 
-        if password == None:
+        if not password:
             opts['password'] = sickbeard.GROWL_PASSWORD
         else:
             opts['password'] = password
@@ -146,7 +148,7 @@ class GrowlNotifier:
         #Send Registration
         register = gntp.GNTPRegister()
         register.add_header('Application-Name', opts['app'])
-        register.add_header('Application-Icon', 'https://raw.github.com/midgetspy/Sick-Beard/master/data/images/sickbeard.png')
+        register.add_header('Application-Icon', 'http://www.sickbeard.com/xbmc-notify.png')
 
         register.add_notification('Test', True)
         register.add_notification(common.notifyStrings[common.NOTIFY_SNATCH], True)
@@ -157,8 +159,8 @@ class GrowlNotifier:
 
         try:
             return self._send(opts['host'], opts['port'], register.encode(), opts['debug'])
-        except socket.error, e:
-            logger.log(u"Unable to send growl to " + opts['host'] + ":" + str(opts['port']) + ": " + str(e).decode('utf-8'))
+        except Exception, e:
+            logger.log(u"NOTIFIER-GROWL: Unable to send growl to " + opts['host'] + ":" + str(opts['port']) + " - " + ex(e))
             return False
 
 ##############################################################################
@@ -167,15 +169,15 @@ class GrowlNotifier:
 
     def notify_snatch(self, ep_name):
         if sickbeard.GROWL_NOTIFY_ONSNATCH:
-            self._sendGrowl(common.notifyStrings[common.NOTIFY_SNATCH], ep_name)
+            self._notify(common.notifyStrings[common.NOTIFY_SNATCH], ep_name)
 
     def notify_download(self, ep_name):
         if sickbeard.GROWL_NOTIFY_ONDOWNLOAD:
-            self._sendGrowl(common.notifyStrings[common.NOTIFY_DOWNLOAD], ep_name)
+            self._notify(common.notifyStrings[common.NOTIFY_DOWNLOAD], ep_name)
 
     def test_notify(self, host, password):
         self._sendRegistration(host, password, 'Test')
-        return self._sendGrowl("Test Growl", "Testing Growl settings from Sick Beard", "Test", host, password, force=True)
+        return self._notify("Test Growl", "Testing Growl settings from Sick Beard", "Test", host, password, force=True)
 
     def update_library(self, showName=None):
         pass

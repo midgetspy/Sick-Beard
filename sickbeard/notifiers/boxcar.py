@@ -109,7 +109,7 @@ class BoxcarNotifier:
         logger.log(u"Boxcar notification successful.", logger.DEBUG)
         return True
 
-    def _notifyBoxcar(self, title, message, username=None, force=False):
+    def _notify(self, title, message, username=None, force=False):
         """
         Sends a boxcar notification based on the provided info or SB config
 
@@ -119,8 +119,8 @@ class BoxcarNotifier:
         force: If True then the notification will be sent even if Boxcar is disabled in the config
         """
 
+        # suppress notifications if the notifier is disabled but the notify options are checked
         if not sickbeard.USE_BOXCAR and not force:
-            logger.log(u"Notification for Boxcar not enabled, skipping this notification", logger.DEBUG)
             return False
 
         # if no username was given then use the one from the config
@@ -136,13 +136,13 @@ class BoxcarNotifier:
 # Public functions
 ##############################################################################
 
-    def notify_snatch(self, ep_name, title=notifyStrings[NOTIFY_SNATCH]):
+    def notify_snatch(self, ep_name):
         if sickbeard.BOXCAR_NOTIFY_ONSNATCH:
-            self._notifyBoxcar(title, ep_name)
+            self._notify(notifyStrings[NOTIFY_SNATCH], ep_name)
 
-    def notify_download(self, ep_name, title=notifyStrings[NOTIFY_DOWNLOAD]):
+    def notify_download(self, ep_name):
         if sickbeard.BOXCAR_NOTIFY_ONDOWNLOAD:
-            self._notifyBoxcar(title, ep_name)
+            self._notify(notifyStrings[NOTIFY_DOWNLOAD], ep_name)
 
     def test_notify(self, email, title="Test"):
         return self._sendBoxcar("This is a test notification from SickBeard", title, email)

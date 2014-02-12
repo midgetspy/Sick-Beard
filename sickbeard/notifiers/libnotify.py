@@ -82,8 +82,11 @@ class LibnotifyNotifier:
         return True
 
     def _notify(self, title, message, force=False):
+        # suppress notifications if the notifier is disabled but the notify options are checked
         if not sickbeard.USE_LIBNOTIFY and not force:
             return False
+
+        # detect if we can use pynotify
         if not self.init_pynotify():
             return False
 

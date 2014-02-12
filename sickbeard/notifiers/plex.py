@@ -92,7 +92,7 @@ class PLEXNotifier:
             logger.log(u"Warning: Couldn't contact Plex at " + fixStupidEncodings(url) + " " + ex(e), logger.WARNING)
             return False
 
-    def _notify_pmc(self, message, title="Sick Beard", host=None, username=None, password=None, force=False):
+    def _notify(self, message, title="Sick Beard", host=None, username=None, password=None, force=False):
         """Internal wrapper for the notify_snatch and notify_download functions
 
         Args:
@@ -108,6 +108,9 @@ class PLEXNotifier:
             The result will either be 'OK' or False, this is used to be parsed by the calling function.
 
         """
+        # suppress notifications if the notifier is disabled but the notify options are checked
+        if not sickbeard.USE_PLEX and not force:
+            return False
 
         # fill in omitted parameters
         if not host:
@@ -116,11 +119,6 @@ class PLEXNotifier:
             username = sickbeard.PLEX_USERNAME
         if not password:
             password = sickbeard.PLEX_PASSWORD
-
-        # suppress notifications if the notifier is disabled but the notify options are checked
-        if not sickbeard.USE_PLEX and not force:
-            logger.log("Notification for Plex not enabled, skipping this notification", logger.DEBUG)
-            return False
 
         result = ''
         for curHost in [x.strip() for x in host.split(",")]:
@@ -139,14 +137,14 @@ class PLEXNotifier:
 
     def notify_snatch(self, ep_name):
         if sickbeard.PLEX_NOTIFY_ONSNATCH:
-            self._notify_pmc(ep_name, common.notifyStrings[common.NOTIFY_SNATCH])
+            self._notify(ep_name, common.notifyStrings[common.NOTIFY_SNATCH])
 
     def notify_download(self, ep_name):
         if sickbeard.PLEX_NOTIFY_ONDOWNLOAD:
-            self._notify_pmc(ep_name, common.notifyStrings[common.NOTIFY_DOWNLOAD])
+            self._notify(ep_name, common.notifyStrings[common.NOTIFY_DOWNLOAD])
 
     def test_notify(self, host, username, password):
-        return self._notify_pmc("Testing Plex notifications from Sick Beard", "Test Notification", host, username, password, force=True)
+        return self._notify("Testing Plex notifications from Sick Beard", "Test Notification", host, username, password, force=True)
 
     def update_library(self):
         """Handles updating the Plex Media Server host via HTTP API

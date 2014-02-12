@@ -100,7 +100,7 @@ class PushoverNotifier:
         logger.log(u"Pushover notification successful.", logger.DEBUG)
         return True
 
-    def _notifyPushover(self, title, message, userKey=None ):
+    def _notify(self, title, message, userKey=None ):
         """
         Sends a pushover notification based on the provided info or SB config
 
@@ -109,11 +109,11 @@ class PushoverNotifier:
         userKey: The userKey to send the notification to
         """
 
+        # suppress notifications if the notifier is disabled but the notify options are checked
         if not sickbeard.USE_PUSHOVER:
-            logger.log(u"Notification for Pushover not enabled, skipping this notification", logger.DEBUG)
             return False
 
-        # if no userKey was given then use the one from the config
+        # fill in omitted parameters
         if not userKey:
             userKey = sickbeard.PUSHOVER_USERKEY
 
@@ -126,13 +126,13 @@ class PushoverNotifier:
 # Public functions
 ##############################################################################
 
-    def notify_snatch(self, ep_name, title=notifyStrings[NOTIFY_SNATCH]):
+    def notify_snatch(self, ep_name):
         if sickbeard.PUSHOVER_NOTIFY_ONSNATCH:
-            self._notifyPushover(title, ep_name)
+            self._notify(notifyStrings[NOTIFY_SNATCH], ep_name)
 
-    def notify_download(self, ep_name, title=notifyStrings[NOTIFY_DOWNLOAD]):
+    def notify_download(self, ep_name):
         if sickbeard.PUSHOVER_NOTIFY_ONDOWNLOAD:
-            self._notifyPushover(title, ep_name)
+            self._notify(notifyStrings[NOTIFY_DOWNLOAD], ep_name)
 
     def test_notify(self, userKey=None):
         return self._sendPushover("This is a test notification from SickBeard", 'Test', userKey)

@@ -35,14 +35,15 @@ from sickbeard import logger, common
 
 class ProwlNotifier:
 
-    def _sendProwl(self, prowl_api=None, prowl_priority=None, event=None, message=None, force=False):
+    def _notify(self, prowl_api=None, prowl_priority=None, event=None, message=None, force=False):
 
+        # suppress notifications if the notifier is disabled but the notify options are checked
         if not sickbeard.USE_PROWL and not force:
             return False
 
+        # fill in omitted parameters
         if not prowl_api:
             prowl_api = sickbeard.PROWL_API
-
         if not prowl_priority:
             prowl_priority = sickbeard.PROWL_PRIORITY
 
@@ -92,14 +93,14 @@ class ProwlNotifier:
 
     def notify_snatch(self, ep_name):
         if sickbeard.PROWL_NOTIFY_ONSNATCH:
-            self._sendProwl(prowl_api=None, prowl_priority=None, event=common.notifyStrings[common.NOTIFY_SNATCH], message=ep_name)
+            self._notify(prowl_api=None, prowl_priority=None, event=common.notifyStrings[common.NOTIFY_SNATCH], message=ep_name)
 
     def notify_download(self, ep_name):
         if sickbeard.PROWL_NOTIFY_ONDOWNLOAD:
-            self._sendProwl(prowl_api=None, prowl_priority=None, event=common.notifyStrings[common.NOTIFY_DOWNLOAD], message=ep_name)
+            self._notify(prowl_api=None, prowl_priority=None, event=common.notifyStrings[common.NOTIFY_DOWNLOAD], message=ep_name)
 
     def test_notify(self, prowl_api, prowl_priority):
-        return self._sendProwl(prowl_api, prowl_priority, event="Test", message="Testing Prowl settings from Sick Beard", force=True)
+        return self._notify(prowl_api, prowl_priority, event="Test", message="Testing Prowl settings from Sick Beard", force=True)
 
     def update_library(self, showName=None):
         pass

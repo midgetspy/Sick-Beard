@@ -93,7 +93,7 @@ class XBMCNotifier:
             else:
                 return False
 
-    def _notify_xbmc(self, message, title="Sick Beard", host=None, username=None, password=None, force=False):
+    def _notify(self, message, title="Sick Beard", host=None, username=None, password=None, force=False):
         """Internal wrapper for the notify_snatch and notify_download functions
 
         Detects JSON-RPC version then branches the logic for either the JSON-RPC or legacy HTTP API methods.
@@ -112,6 +112,10 @@ class XBMCNotifier:
 
         """
 
+        # suppress notifications if the notifier is disabled but the notify options are checked
+        if not sickbeard.USE_XBMC and not force:
+            return False
+
         # fill in omitted parameters
         if not host:
             host = sickbeard.XBMC_HOST
@@ -119,11 +123,6 @@ class XBMCNotifier:
             username = sickbeard.XBMC_USERNAME
         if not password:
             password = sickbeard.XBMC_PASSWORD
-
-        # suppress notifications if the notifier is disabled but the notify options are checked
-        if not sickbeard.USE_XBMC and not force:
-            logger.log("Notification for XBMC not enabled, skipping this notification", logger.DEBUG)
-            return False
 
         result = ''
         for curHost in [x.strip() for x in host.split(",")]:
@@ -447,14 +446,14 @@ class XBMCNotifier:
 
     def notify_snatch(self, ep_name):
         if sickbeard.XBMC_NOTIFY_ONSNATCH:
-            self._notify_xbmc(ep_name, common.notifyStrings[common.NOTIFY_SNATCH])
+            self._notify(ep_name, common.notifyStrings[common.NOTIFY_SNATCH])
 
     def notify_download(self, ep_name):
         if sickbeard.XBMC_NOTIFY_ONDOWNLOAD:
-            self._notify_xbmc(ep_name, common.notifyStrings[common.NOTIFY_DOWNLOAD])
+            self._notify(ep_name, common.notifyStrings[common.NOTIFY_DOWNLOAD])
 
     def test_notify(self, host, username, password):
-        return self._notify_xbmc("Testing XBMC notifications from Sick Beard", "Test Notification", host, username, password, force=True)
+        return self._notify("Testing XBMC notifications from Sick Beard", "Test Notification", host, username, password, force=True)
 
     def update_library(self, showName=None):
         """Public wrapper for the update library functions to branch the logic for JSON-RPC or legacy HTTP API

@@ -152,8 +152,8 @@ class NMJNotifier:
         mount: The mount URL (optional, defaults to the mount URL in the config)
         force: If True then the notification will be sent even if NMJ is disabled in the config
         """
+        # suppress notifications if the notifier is disabled but the notify options are checked
         if not sickbeard.USE_NMJ and not force:
-            logger.log(u"Notification for NMJ scan update not enabled, skipping this notification", logger.DEBUG)
             return False
 
         # fill in omitted parameters

@@ -10,6 +10,7 @@ class NMA_Notifier:
 
         title = 'Sick-Beard'
 
+        # suppress notifications if the notifier is disabled but the notify options are checked
         if not sickbeard.USE_NMA and not force:
             return False
 

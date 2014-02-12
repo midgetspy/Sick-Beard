@@ -114,8 +114,8 @@ class TwitterNotifier:
 
         return True
 
-    def _notifyTwitter(self, message='', force=False):
-
+    def _notify(self, message='', force=False):
+        # suppress notifications if the notifier is disabled but the notify options are checked
         if not sickbeard.USE_TWITTER and not force:
             return False
 
@@ -127,14 +127,14 @@ class TwitterNotifier:
 
     def notify_snatch(self, ep_name):
         if sickbeard.TWITTER_NOTIFY_ONSNATCH:
-            self._notifyTwitter(common.notifyStrings[common.NOTIFY_SNATCH] + ': ' + ep_name)
+            self._notify(common.notifyStrings[common.NOTIFY_SNATCH] + ': ' + ep_name)
 
     def notify_download(self, ep_name):
         if sickbeard.TWITTER_NOTIFY_ONDOWNLOAD:
-            self._notifyTwitter(common.notifyStrings[common.NOTIFY_DOWNLOAD] + ': ' + ep_name)
+            self._notify(common.notifyStrings[common.NOTIFY_DOWNLOAD] + ': ' + ep_name)
 
     def test_notify(self):
-        return self._notifyTwitter("This is a test notification from Sick Beard", force=True)
+        return self._notify("This is a test notification from Sick Beard", force=True)
 
     def update_library(self, showName=None):
         pass
