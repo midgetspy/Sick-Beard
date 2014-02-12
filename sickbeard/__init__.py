@@ -53,7 +53,7 @@ CFG = None
 CONFIG_FILE = None
 
 # This is the version of the config we EXPECT to find
-CONFIG_VERSION = 4
+CONFIG_VERSION = 5
 
 # Default encryption version (0 for None)
 ENCRYPTION_VERSION = 0
@@ -126,7 +126,6 @@ ROOT_DIRS = None
 UPDATE_SHOWS_ON_START = None
 SORT_ARTICLE = None
 
-USE_BANNER = None
 USE_LISTVIEW = None
 METADATA_XBMC = None
 METADATA_XBMC_12PLUS = None
@@ -134,8 +133,6 @@ METADATA_MEDIABROWSER = None
 METADATA_PS3 = None
 METADATA_WDTV = None
 METADATA_TIVO = None
-METADATA_SYNOLOGY = None
-METADATA_MEDE8ER = None
 
 QUALITY_DEFAULT = None
 STATUS_DEFAULT = None
@@ -476,7 +473,7 @@ def initialize(consoleLogging=True):
                 USE_LIBNOTIFY, LIBNOTIFY_NOTIFY_ONSNATCH, LIBNOTIFY_NOTIFY_ONDOWNLOAD, LIBNOTIFY_NOTIFY_ONSUBTITLEDOWNLOAD, USE_NMJ, NMJ_HOST, NMJ_DATABASE, NMJ_MOUNT, USE_NMJv2, NMJv2_HOST, NMJv2_DATABASE, NMJv2_DBLOC, USE_SYNOINDEX, \
                 USE_SYNOLOGYNOTIFIER, SYNOLOGYNOTIFIER_NOTIFY_ONSNATCH, SYNOLOGYNOTIFIER_NOTIFY_ONDOWNLOAD, SYNOLOGYNOTIFIER_NOTIFY_ONSUBTITLEDOWNLOAD, \
                 USE_EMAIL, EMAIL_HOST, EMAIL_PORT, EMAIL_TLS, EMAIL_USER, EMAIL_PASSWORD, EMAIL_FROM, EMAIL_NOTIFY_ONSNATCH, EMAIL_NOTIFY_ONDOWNLOAD, EMAIL_NOTIFY_ONSUBTITLEDOWNLOAD, EMAIL_LIST, \
-                USE_BANNER, USE_LISTVIEW, METADATA_XBMC, METADATA_XBMC_12PLUS, METADATA_MEDIABROWSER, METADATA_PS3, METADATA_SYNOLOGY, METADATA_MEDE8ER, metadata_provider_dict, \
+                USE_LISTVIEW, METADATA_XBMC, METADATA_XBMC_12PLUS, METADATA_MEDIABROWSER, METADATA_PS3, metadata_provider_dict, \
                 NEWZBIN, NEWZBIN_USERNAME, NEWZBIN_PASSWORD, GIT_PATH, MOVE_ASSOCIATED_FILES, \
                 GUI_NAME, HOME_LAYOUT, HISTORY_LAYOUT, DISPLAY_SHOW_SPECIALS, COMING_EPS_LAYOUT, COMING_EPS_SORT, COMING_EPS_DISPLAY_PAUSED, COMING_EPS_MISSED_RANGE, DATE_PRESET, TIME_PRESET, TIME_PRESET_W_SECONDS, \
                 METADATA_WDTV, METADATA_TIVO, IGNORE_WORDS,  CALENDAR_UNPROTECTED, CREATE_MISSING_SHOW_DIRS, \
@@ -879,72 +876,14 @@ def initialize(consoleLogging=True):
 
         EXTRA_SCRIPTS = [x.strip() for x in check_setting_str(CFG, 'General', 'extra_scripts', '').split('|') if x.strip()]
 
-        USE_BANNER = bool(check_setting_int(CFG, 'General', 'use_banner', 0))
         USE_LISTVIEW = bool(check_setting_int(CFG, 'General', 'use_listview', 0))
-        METADATA_TYPE = check_setting_str(CFG, 'General', 'metadata_type', '')
 
-        metadata_provider_dict = metadata.get_metadata_generator_dict()
-
-        # if this exists it's legacy, use the info to upgrade metadata to the new settings
-        if METADATA_TYPE:
-
-            old_metadata_class = None
-
-            if METADATA_TYPE == 'xbmc':
-                old_metadata_class = metadata.xbmc.metadata_class
-            elif METADATA_TYPE == 'xbmcfrodo':
-                old_metadata_class = metadata.xbmcfrodo.metadata_class                 
-            elif METADATA_TYPE == 'mediabrowser':
-                old_metadata_class = metadata.mediabrowser.metadata_class
-            elif METADATA_TYPE == 'ps3':
-                old_metadata_class = metadata.ps3.metadata_class
-            elif METADATA_TYPE == 'mede8er':
-                old_metadata_class = metadata.mede8er.metadata_class
-
-            if old_metadata_class:
-
-                METADATA_SHOW = bool(check_setting_int(CFG, 'General', 'metadata_show', 1))
-                METADATA_EPISODE = bool(check_setting_int(CFG, 'General', 'metadata_episode', 1))
-
-                ART_POSTER = bool(check_setting_int(CFG, 'General', 'art_poster', 1))
-                ART_FANART = bool(check_setting_int(CFG, 'General', 'art_fanart', 1))
-                ART_THUMBNAILS = bool(check_setting_int(CFG, 'General', 'art_thumbnails', 1))
-                ART_SEASON_THUMBNAILS = bool(check_setting_int(CFG, 'General', 'art_season_thumbnails', 1))
-
-                new_metadata_class = old_metadata_class(METADATA_SHOW,
-                                                        METADATA_EPISODE,
-                                                        ART_POSTER,
-                                                        ART_FANART,
-                                                        ART_THUMBNAILS,
-                                                        ART_SEASON_THUMBNAILS)
-
-                metadata_provider_dict[new_metadata_class.name] = new_metadata_class
-
-        # this is the normal codepath for metadata config
-        else:
-            METADATA_XBMC = check_setting_str(CFG, 'General', 'metadata_xbmc', '0|0|0|0|0|0')
-            METADATA_XBMC_12PLUS = check_setting_str(CFG, 'General', 'metadata_xbmc_12plus', '0|0|0|0|0|0')
-            METADATA_MEDIABROWSER = check_setting_str(CFG, 'General', 'metadata_mediabrowser', '0|0|0|0|0|0')
-            METADATA_PS3 = check_setting_str(CFG, 'General', 'metadata_ps3', '0|0|0|0|0|0')
-            METADATA_WDTV = check_setting_str(CFG, 'General', 'metadata_wdtv', '0|0|0|0|0|0')
-            METADATA_TIVO = check_setting_str(CFG, 'General', 'metadata_tivo', '0|0|0|0|0|0')
-            METADATA_SYNOLOGY = check_setting_str(CFG, 'General', 'metadata_synology', '0|0|0|0|0|0')
-            METADATA_MEDE8ER = check_setting_str(CFG, 'General', 'metadata_mede8er', '0|0|0|0|0|0')
-
-            for cur_metadata_tuple in [(METADATA_XBMC, metadata.xbmc),
-                                       (METADATA_XBMC_12PLUS, metadata.xbmc_12plus),
-                                       (METADATA_MEDIABROWSER, metadata.mediabrowser),
-                                       (METADATA_PS3, metadata.ps3),
-                                       (METADATA_WDTV, metadata.wdtv),
-                                       (METADATA_TIVO, metadata.tivo),
-                                       (METADATA_SYNOLOGY, metadata.synology),
-                                       (METADATA_MEDE8ER, metadata.mede8er),
-                                       ]:
-
-                (cur_metadata_config, cur_metadata_class) = cur_metadata_tuple
-                tmp_provider = cur_metadata_class.metadata_class()
-                tmp_provider.set_config(cur_metadata_config)
-                metadata_provider_dict[tmp_provider.name] = tmp_provider
+        METADATA_XBMC = check_setting_str(CFG, 'General', 'metadata_xbmc', '0|0|0|0|0|0|0|0|0|0')
+        METADATA_XBMC_12PLUS = check_setting_str(CFG, 'General', 'metadata_xbmc_12plus', '0|0|0|0|0|0|0|0|0|0')
+        METADATA_MEDIABROWSER = check_setting_str(CFG, 'General', 'metadata_mediabrowser', '0|0|0|0|0|0|0|0|0|0')
+        METADATA_PS3 = check_setting_str(CFG, 'General', 'metadata_ps3', '0|0|0|0|0|0|0|0|0|0')
+        METADATA_WDTV = check_setting_str(CFG, 'General', 'metadata_wdtv', '0|0|0|0|0|0|0|0|0|0')
+        METADATA_TIVO = check_setting_str(CFG, 'General', 'metadata_tivo', '0|0|0|0|0|0|0|0|0|0')
 
         GUI_NAME = check_setting_str(CFG, 'GUI', 'gui_name', 'slick')
 
@@ -987,10 +926,27 @@ def initialize(consoleLogging=True):
         # migrate the config if it needs it
         migrator = ConfigMigrator(CFG)
         migrator.migrate_config()
-        
+
+        # initialize metadata_providers
+        metadata_provider_dict = metadata.get_metadata_generator_dict()
+        for cur_metadata_tuple in [(METADATA_XBMC, metadata.xbmc),
+                                   (METADATA_XBMC_12PLUS, metadata.xbmc_12plus),
+                                   (METADATA_MEDIABROWSER, metadata.mediabrowser),
+                                   (METADATA_PS3, metadata.ps3),
+                                   (METADATA_WDTV, metadata.wdtv),
+                                   (METADATA_TIVO, metadata.tivo),
+                                   ]:
+
+            (cur_metadata_config, cur_metadata_class) = cur_metadata_tuple
+            tmp_provider = cur_metadata_class.metadata_class()
+            tmp_provider.set_config(cur_metadata_config)
+            metadata_provider_dict[tmp_provider.name] = tmp_provider
+
+        # initialize newznab providers        
         newznabProviderList = providers.getNewznabProviderList(NEWZNAB_DATA)
         providerList = providers.makeProviderList()
 
+        # initialize newznab providers
         currentSearchScheduler = scheduler.Scheduler(searchCurrent.CurrentSearcher(),
                                                      cycleTime=datetime.timedelta(minutes=SEARCH_FREQUENCY),
                                                      threadName="SEARCH",
@@ -1022,7 +978,7 @@ def initialize(consoleLogging=True):
         properFinderScheduler = scheduler.Scheduler(properFinderInstance,
                                                      cycleTime=properFinderInstance.updateInterval,
                                                      threadName="FINDPROPERS",
-                                                     runImmediately=False)
+                                                     runImmediately=True)
         if not DOWNLOAD_PROPERS:
             properFinderScheduler.silent = True
 
@@ -1331,16 +1287,13 @@ def save_config():
     new_config['General']['update_shows_on_start'] = int(UPDATE_SHOWS_ON_START)
     new_config['General']['sort_article'] = int(SORT_ARTICLE)
 
-    new_config['General']['use_banner'] = int(USE_BANNER)
     new_config['General']['use_listview'] = int(USE_LISTVIEW)
-    new_config['General']['metadata_xbmc'] = metadata_provider_dict['XBMC'].get_config()
-    new_config['General']['metadata_xbmc_12plus'] = metadata_provider_dict['XBMC 12+'].get_config() 
-    new_config['General']['metadata_mediabrowser'] = metadata_provider_dict['MediaBrowser'].get_config()
-    new_config['General']['metadata_ps3'] = metadata_provider_dict['Sony PS3'].get_config()
-    new_config['General']['metadata_wdtv'] = metadata_provider_dict['WDTV'].get_config()
-    new_config['General']['metadata_tivo'] = metadata_provider_dict['TIVO'].get_config()
-    new_config['General']['metadata_synology'] = metadata_provider_dict['Synology'].get_config()
-    new_config['General']['metadata_mede8er'] = metadata_provider_dict['Mede8er'].get_config()
+    new_config['General']['metadata_xbmc'] = METADATA_XBMC
+    new_config['General']['metadata_xbmc_12plus'] = METADATA_XBMC_12PLUS
+    new_config['General']['metadata_mediabrowser'] = METADATA_MEDIABROWSER
+    new_config['General']['metadata_ps3'] = METADATA_PS3
+    new_config['General']['metadata_wdtv'] = METADATA_WDTV
+    new_config['General']['metadata_tivo'] = METADATA_TIVO
 
     new_config['General']['cache_dir'] = ACTUAL_CACHE_DIR if ACTUAL_CACHE_DIR else 'cache'
     new_config['General']['root_dirs'] = ROOT_DIRS if ROOT_DIRS else ''

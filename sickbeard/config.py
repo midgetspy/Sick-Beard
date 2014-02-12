@@ -286,7 +286,8 @@ class ConfigMigrator():
         self.migration_names = {1: 'Custom naming',
                                 2: 'Sync backup number with version number',
                                 3: 'Rename omgwtfnzb variables',
-                                4: 'Add newznab catIDs'
+                                4: 'Add newznab catIDs',
+                                5: 'Metadata update'
                                 } 
 
 
@@ -474,4 +475,72 @@ class ConfigMigrator():
                 cur_provider_data_list = [name, url, key, catIDs, enabled]
                 new_newznab_data.append("|".join(cur_provider_data_list))
 
-            sickbeard.NEWZNAB_DATA = "!!!".join(new_newznab_data)          
+            sickbeard.NEWZNAB_DATA = "!!!".join(new_newznab_data)
+
+    # Migration v5: Metadata upgrade
+    def _migrate_v5(self):
+        """ Updates metadata values to the new format """
+
+        """ Quick overview of what the upgrade does:
+
+        new | old | description (new)
+        ----+-----+--------------------
+        1 | 1 | show metadata
+        2 | 2 | episode metadata
+        3 | 4 | show fanart
+        4 | 3 | show poster
+        5 | - | show banner
+        6 | 5 | episode thumb
+        7 | 6 | season poster
+        8 | - | season banner
+        9 | - | season all poster
+        10 | - | season all banner
+        
+        Note that the ini places start at 1 while the list index starts at 0.
+        old format: 0|0|0|0|0|0 -- 6 places
+        new format: 0|0|0|0|0|0|0|0|0|0 -- 10 places
+        
+        Drop the use of use_banner option.
+        Migrate the poster override to just using the banner option (applies to xbmc only).
+        """
+
+        metadata_xbmc = check_setting_str(self.config_obj, 'General', 'metadata_xbmc', '0|0|0|0|0|0')
+        metadata_xbmc_12plus = check_setting_str(self.config_obj, 'General', 'metadata_xbmc_12plus', '0|0|0|0|0|0')
+        metadata_mediabrowser = check_setting_str(self.config_obj, 'General', 'metadata_mediabrowser', '0|0|0|0|0|0')
+        metadata_ps3 = check_setting_str(self.config_obj, 'General', 'metadata_ps3', '0|0|0|0|0|0')
+        metadata_wdtv = check_setting_str(self.config_obj, 'General', 'metadata_wdtv', '0|0|0|0|0|0')
+        metadata_tivo = check_setting_str(self.config_obj, 'General', 'metadata_tivo', '0|0|0|0|0|0')
+
+        use_banner = bool(check_setting_int(self.config_obj, 'General', 'use_banner', 0))
+
+        def _migrate_metadata(metadata, metadata_name, use_banner):
+            cur_metadata = metadata.split('|')
+            # if target has the old number of values, do upgrade
+            if len(cur_metadata) == 6:
+                logger.log(u"Upgrading " + metadata_name + " metadata, old value: " + metadata)
+                cur_metadata.insert(4, '0')
+                cur_metadata.append('0')
+                cur_metadata.append('0')
+                cur_metadata.append('0')
+                # swap show fanart, show poster
+                cur_metadata[3], cur_metadata[2] = cur_metadata[2], cur_metadata[3]
+                # if user was using use_banner to override the poster, instead enable the banner option and deactivate poster
+                if metadata_name == 'XBMC' and use_banner:
+                    cur_metadata[4], cur_metadata[3] = cur_metadata[3], '0'
+                # write new format
+                metadata = '|'.join(cur_metadata)
+                logger.log(u"Upgrading " + metadata_name + " metadata, new value: " + metadata)
+
+            else:
+                logger.log(u"Skipping " + metadata_name + " metadata: '" + metadata + "', incorrect format", logger.ERROR)
+                metadata = '0|0|0|0|0|0|0|0|0|0'
+                logger.log(u"Setting " + metadata_name + " metadata, new value: " + metadata)
+
+            return metadata
+
+        sickbeard.METADATA_XBMC = _migrate_metadata(metadata_xbmc, 'XBMC', use_banner)
+        sickbeard.METADATA_XBMC_12PLUS = _migrate_metadata(metadata_xbmc_12plus, 'XBMC 12+', use_banner)
+        sickbeard.METADATA_MEDIABROWSER = _migrate_metadata(metadata_mediabrowser, 'MediaBrowser', use_banner)
+        sickbeard.METADATA_PS3 = _migrate_metadata(metadata_ps3, 'PS3', use_banner)
+        sickbeard.METADATA_WDTV = _migrate_metadata(metadata_wdtv, 'WDTV', use_banner)
+        sickbeard.METADATA_TIVO = _migrate_metadata(metadata_tivo, 'TIVO', use_banner)

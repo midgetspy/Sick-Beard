@@ -20,7 +20,7 @@ import traceback
 import urllib2
 import urllib
 import time
-import cookielib
+import re
 
 import sickbeard
 import generic

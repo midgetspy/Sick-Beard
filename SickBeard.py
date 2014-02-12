@@ -39,7 +39,7 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), 'lib'
 
 # We only need this for compiling an EXE and I will just always do that on 2.6+
 if sys.hexversion >= 0x020600F0:
-    from multiprocessing import freeze_support
+    from multiprocessing import freeze_support # @UnresolvedImport
 
 import locale
 import threading
@@ -334,8 +334,8 @@ def main():
         sickbeard.launchBrowser(startPort)
 
     # Start an update if we're supposed to
-    if forceUpdate:
-        sickbeard.showUpdateScheduler.action.run(force=True)  # @UndefinedVariable
+    if forceUpdate or sickbeard.UPDATE_SHOWS_ON_START:
+        sickbeard.showUpdateScheduler.action.run(force=True) # @UndefinedVariable
 
     # Stay alive while my threads do the work
     while (True):

@@ -47,6 +47,7 @@ from sickbeard import scene_exceptions
 from sickbeard import subtitles
 from sickbeard import failed_history
 from sickbeard import failedProcessor
+from sickbeard import network_timezones
 
 from sickbeard.providers import newznab, rsstorrent
 from sickbeard.common import Quality, Overview, statusStrings, qualityPresetStrings
@@ -60,7 +61,6 @@ from lib.dateutil import tz
 from lib.unrar2 import RarFile, RarInfo
 
 import subliminal
-import network_timezones
 
 try:
     import json
@@ -1192,8 +1192,8 @@ class ConfigPostProcessing:
 
     @cherrypy.expose
     def savePostProcessing(self, naming_pattern=None, naming_multi_ep=None,
-                    xbmc_data=None, xbmc_12plus_data=None, mediabrowser_data=None, synology_data=None, sony_ps3_data=None, wdtv_data=None, tivo_data=None, mede8er_data=None,
-                    use_banner=None, keep_processed_dir=None, process_method=None, process_automatically=None, rename_episodes=None, unpack=None,
+                    xbmc_data=None, xbmc_12plus_data=None, mediabrowser_data=None, sony_ps3_data=None, wdtv_data=None, tivo_data=None,
+                    keep_processed_dir=None, process_method=None, process_automatically=None, rename_episodes=None, unpack=None,
                     move_associated_files=None, tv_download_dir=None, naming_custom_abd=None, naming_abd_pattern=None, naming_strip_year=None, use_failed_downloads=None,
                     delete_failed=None, treat_empty_as_failed=None, extra_scripts=None):
 
@@ -1201,11 +1201,6 @@ class ConfigPostProcessing:
 
         if not config.change_TV_DOWNLOAD_DIR(tv_download_dir):
             results += ["Unable to create directory " + os.path.normpath(tv_download_dir) + ", dir not changed."]
-
-        if use_banner == "on":
-            use_banner = 1
-        else:
-            use_banner = 0
 
         if process_automatically == "on":
             process_automatically = 1
@@ -1283,14 +1278,19 @@ class ConfigPostProcessing:
         sickbeard.DELETE_FAILED = delete_failed
         sickbeard.TREAT_EMPTY_AS_FAILED = treat_empty_as_failed
 
-        sickbeard.metadata_provider_dict['XBMC'].set_config(xbmc_data)
-        sickbeard.metadata_provider_dict['XBMC 12+'].set_config(xbmc_12plus_data)
-        sickbeard.metadata_provider_dict['MediaBrowser'].set_config(mediabrowser_data)
-        sickbeard.metadata_provider_dict['Synology'].set_config(synology_data)
-        sickbeard.metadata_provider_dict['Sony PS3'].set_config(sony_ps3_data)
-        sickbeard.metadata_provider_dict['WDTV'].set_config(wdtv_data)
-        sickbeard.metadata_provider_dict['TIVO'].set_config(tivo_data)
-        sickbeard.metadata_provider_dict['Mede8er'].set_config(mede8er_data)
+        sickbeard.METADATA_XBMC = xbmc_data
+        sickbeard.METADATA_XBMC_12PLUS = xbmc_12plus_data
+        sickbeard.METADATA_MEDIABROWSER = mediabrowser_data
+        sickbeard.METADATA_PS3 = sony_ps3_data
+        sickbeard.METADATA_WDTV = wdtv_data
+        sickbeard.METADATA_TIVO = tivo_data
+
+        sickbeard.metadata_provider_dict['XBMC'].set_config(sickbeard.METADATA_XBMC)
+        sickbeard.metadata_provider_dict['XBMC 12+'].set_config(sickbeard.METADATA_XBMC_12PLUS)
+        sickbeard.metadata_provider_dict['MediaBrowser'].set_config(sickbeard.METADATA_MEDIABROWSER)
+        sickbeard.metadata_provider_dict['Sony PS3'].set_config(sickbeard.METADATA_PS3)
+        sickbeard.metadata_provider_dict['WDTV'].set_config(sickbeard.METADATA_WDTV)
+        sickbeard.metadata_provider_dict['TIVO'].set_config(sickbeard.METADATA_TIVO)
 
         if self.isNamingValid(naming_pattern, naming_multi_ep) != "invalid":
             sickbeard.NAMING_PATTERN = naming_pattern
@@ -1303,8 +1303,6 @@ class ConfigPostProcessing:
             sickbeard.NAMING_ABD_PATTERN = naming_abd_pattern
         else:
             results.append("You tried saving an invalid air-by-date naming config, not saving your air-by-date settings")
-
-        sickbeard.USE_BANNER = use_banner
 
         sickbeard.save_config()
 
@@ -4080,7 +4078,7 @@ class WebInterface:
           # Get local timezone and load network timezones
                 local_zone = tz.tzlocal()
                 try:
-                    network_zone = network_timezones.get_network_timezone(show['network'], network_timezones.load_network_dict(), local_zone)
+                    network_zone = network_timezones.get_network_timezone(show['network'], network_timezones.load_network_dict())
                 except:
                   # Dummy network_zone for exceptions
                     network_zone = None
