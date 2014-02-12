@@ -44,59 +44,82 @@ class TIVOMetadata(generic.GenericMetadata):
     def __init__(self,
                  show_metadata=False,
                  episode_metadata=False,
-                 poster=False,
                  fanart=False,
+                 poster=False,
+                 banner=False,
                  episode_thumbnails=False,
-                 season_thumbnails=False):
+                 season_posters=False,
+                 season_banners=False,
+                 season_all_poster=False,
+                 season_all_banner=False):
 
         generic.GenericMetadata.__init__(self,
                                          show_metadata,
                                          episode_metadata,
-                                         poster,
                                          fanart,
+                                         poster,
+                                         banner,
                                          episode_thumbnails,
-                                         season_thumbnails)
-
-        self._ep_nfo_extension = "txt"
+                                         season_posters,
+                                         season_banners,
+                                         season_all_poster,
+                                         season_all_banner)
 
         self.name = 'TIVO'
 
+        self._ep_nfo_extension = "txt"
+
+        # web-ui metadata template
         self.eg_show_metadata = "<i>not supported</i>"
-        self.eg_episode_metadata = "Season##\\.meta\\<i>filename</i>.txt"
+        self.eg_episode_metadata = "Season##\\.meta\\<i>filename</i>.ext.txt"
         self.eg_fanart = "<i>not supported</i>"
         self.eg_poster = "<i>not supported</i>"
+        self.eg_banner = "<i>not supported</i>"
         self.eg_episode_thumbnails = "<i>not supported</i>"
-        self.eg_season_thumbnails = "<i>not supported</i>"
+        self.eg_season_posters = "<i>not supported</i>"
+        self.eg_season_banners = "<i>not supported</i>"
+        self.eg_season_all_poster = "<i>not supported</i>"
+        self.eg_season_all_banner = "<i>not supported</i>"
 
     # Override with empty methods for unsupported features
+    def retrieveShowMetadata(self, folder):
+        # no show metadata generated, we abort this lookup function
+        return (None, None)
+
     def create_show_metadata(self, show_obj):
+        pass
+
+    def get_show_file_path(self, show_obj):
         pass
 
     def create_fanart(self, show_obj):
         pass
 
-    def create_banner(self, show_obj):
+    def create_poster(self, show_obj):
         pass
 
-    def create_poster(self, show_obj):
+    def create_banner(self, show_obj):
         pass
 
     def create_episode_thumb(self, ep_obj):
         pass
 
-    def create_season_thumbs(self, ep_obj):
-        pass
-
     def get_episode_thumb_path(self, ep_obj):
         pass
 
-    def get_season_thumb_path(self, show_obj, season):
+    def create_season_posters(self, ep_obj):
         pass
 
-    def retrieveShowMetadata(self, folder):
-        return (None, None)
+    def create_season_banners(self, ep_obj):
+        pass
 
-    # Override and implement features for Tivo.
+    def create_season_all_poster(self, show_obj):
+        pass
+
+    def create_season_all_banner(self, show_obj):
+        pass
+
+    # Override generic class
     def get_episode_file_path(self, ep_obj):
         """
         Returns a full show dir/.meta/episode.txt path for Tivo
@@ -285,7 +308,7 @@ class TIVOMetadata(generic.GenericMetadata):
                 ek.ek(os.makedirs, nfo_file_dir)
                 helpers.chmodAsParent(nfo_file_dir)
 
-            logger.log(u"Writing episode nfo file to " + nfo_file_path)
+            logger.log(u"Writing episode nfo file to " + nfo_file_path, logger.DEBUG)
             nfo_file = ek.ek(open, nfo_file_path, 'w')
 
             # Calling encode directly, b/c often descriptions have wonky characters.
@@ -298,5 +321,6 @@ class TIVOMetadata(generic.GenericMetadata):
 
         return True
 
-# present a standard "interface"
+
+# present a standard "interface" from the module
 metadata_class = TIVOMetadata
