@@ -17,7 +17,6 @@
 # along with Sick Beard.  If not, see <http://www.gnu.org/licenses/>.
 
 import os
-import urllib2
 
 import sickbeard
 
@@ -29,19 +28,20 @@ from lib.tvdb_api import tvdb_api, tvdb_exceptions
 
 import xml.etree.cElementTree as etree
 
-def getTVDBIDFromNFO(dir):
 
-    if not ek.ek(os.path.isdir, dir):
+def getTVDBIDFromNFO(folder):
+
+    if not ek.ek(os.path.isdir, folder):
         logger.log(u"Show dir doesn't exist, can't load NFO")
         raise exceptions.NoNFOException("The show dir doesn't exist, no NFO could be loaded")
 
     logger.log(u"Loading show info from NFO")
 
-    xmlFile = ek.ek(os.path.join, dir, "tvshow.nfo")
+    xmlFile = ek.ek(os.path.join, folder, "tvshow.nfo")
 
     try:
         xmlFileObj = ek.ek(open, xmlFile, 'r')
-        showXML = etree.ElementTree(file = xmlFileObj)
+        showXML = etree.ElementTree(file=xmlFileObj)
 
         if showXML.findtext('title') == None or (showXML.findtext('tvdbid') == None and showXML.findtext('id') == None):
             raise exceptions.NoNFOException("Invalid info in tvshow.nfo (missing name or id):" \
@@ -77,9 +77,10 @@ def getTVDBIDFromNFO(dir):
 
     return tvdb_id
 
+
 def getShowImage(url, imgNum=None):
 
-    image_data = None
+    image_data = None  # @UnusedVariable
 
     if url == None:
         return None
@@ -90,7 +91,7 @@ def getShowImage(url, imgNum=None):
     else:
         tempURL = url
 
-    logger.log(u"Getting show image at "+tempURL, logger.DEBUG)
+    logger.log(u"Fetching image from " + tempURL, logger.DEBUG)
 
     image_data = helpers.getURL(tempURL)
 
