@@ -651,12 +651,7 @@ class ConfigGeneral:
         sickbeard.STATUS_DEFAULT = int(defaultStatus)
         sickbeard.QUALITY_DEFAULT = int(newQuality)
 
-        if defaultFlattenFolders == "true":
-            defaultFlattenFolders = 1
-        else:
-            defaultFlattenFolders = 0
-
-        sickbeard.FLATTEN_FOLDERS_DEFAULT = int(defaultFlattenFolders)
+        sickbeard.FLATTEN_FOLDERS_DEFAULT = config.checkbox_to_value(defaultFlattenFolders)
 
     @cherrypy.expose
     def generateKey(self):
@@ -688,60 +683,34 @@ class ConfigGeneral:
 
         results = []
 
-        if web_ipv6 == "on":
-            web_ipv6 = 1
-        else:
-            web_ipv6 = 0
-
-        if web_log == "on":
-            web_log = 1
-        else:
-            web_log = 0
-
-        if launch_browser == "on":
-            launch_browser = 1
-        else:
-            launch_browser = 0
-
-        if version_notify == "on":
-            version_notify = 1
-        else:
-            version_notify = 0
-
-        sickbeard.LAUNCH_BROWSER = launch_browser
+        # Misc
+        sickbeard.LAUNCH_BROWSER = config.checkbox_to_value(launch_browser)
+        config.change_VERSION_NOTIFY(config.checkbox_to_value(version_notify))
         # sickbeard.LOG_DIR is set in config.change_LOG_DIR()
 
-        sickbeard.WEB_PORT = int(web_port)
-        sickbeard.WEB_IPV6 = web_ipv6
+        # Web Interface
+        sickbeard.WEB_IPV6 = config.checkbox_to_value(web_ipv6)
         # sickbeard.WEB_LOG is set in config.change_LOG_DIR()
+
+        if not config.change_LOG_DIR(log_dir, web_log):
+            results += ["Unable to create directory " + os.path.normpath(log_dir) + ", log directory not changed."]
+
+        sickbeard.WEB_PORT = config.to_int(web_port, default=8081)
+
         sickbeard.WEB_USERNAME = web_username
         sickbeard.WEB_PASSWORD = web_password
 
-        if not config.change_LOG_DIR(log_dir, web_log):
-            results += ["Unable to create directory " + os.path.normpath(log_dir) + ", log dir not changed."]
-
-        if use_api == "on":
-            use_api = 1
-        else:
-            use_api = 0
-
-        sickbeard.USE_API = use_api
-        sickbeard.API_KEY = api_key
-
-        if enable_https == "on":
-            enable_https = 1
-        else:
-            enable_https = 0
-
-        sickbeard.ENABLE_HTTPS = enable_https
+        sickbeard.ENABLE_HTTPS = config.checkbox_to_value(enable_https)
 
         if not config.change_HTTPS_CERT(https_cert):
-            results += ["Unable to create directory " + os.path.normpath(https_cert) + ", https cert dir not changed."]
+            results += ["Unable to create directory " + os.path.normpath(https_cert) + ", https cert directory not changed."]
 
         if not config.change_HTTPS_KEY(https_key):
-            results += ["Unable to create directory " + os.path.normpath(https_key) + ", https key dir not changed."]
+            results += ["Unable to create directory " + os.path.normpath(https_key) + ", https key directory not changed."]
 
-        config.change_VERSION_NOTIFY(version_notify)
+        # API
+        sickbeard.USE_API = config.checkbox_to_value(use_api)
+        sickbeard.API_KEY = api_key
 
         sickbeard.save_config()
 
@@ -751,7 +720,7 @@ class ConfigGeneral:
             ui.notifications.error('Error(s) Saving Configuration',
                         '<br />\n'.join(results))
         else:
-            ui.notifications.message('Configuration Saved', ek.ek(os.path.join, sickbeard.CONFIG_FILE) )
+            ui.notifications.message('Configuration Saved', ek.ek(os.path.join, sickbeard.CONFIG_FILE))
 
         redirect("/config/general/")
 
@@ -772,60 +741,39 @@ class ConfigSearch:
 
         results = []
 
-        if not config.change_NZB_DIR(nzb_dir):
-            results += ["Unable to create directory " + os.path.normpath(nzb_dir) + ", dir not changed."]
+        # Episode Search
+        sickbeard.DOWNLOAD_PROPERS = config.checkbox_to_value(download_propers)
 
-        if not config.change_TORRENT_DIR(torrent_dir):
-            results += ["Unable to create directory " + os.path.normpath(torrent_dir) + ", dir not changed."]
-
-        config.change_SEARCH_FREQUENCY(search_frequency)
-
-        if download_propers == "on":
-            download_propers = 1
-        else:
-            download_propers = 0
-
-        if use_nzbs == "on":
-            use_nzbs = 1
-        else:
-            use_nzbs = 0
-
-        if use_torrents == "on":
-            use_torrents = 1
-        else:
-            use_torrents = 0
-
-        if usenet_retention == None:
-            usenet_retention = 500
-
-        sickbeard.USE_NZBS = use_nzbs
-        sickbeard.USE_TORRENTS = use_torrents
-
-        sickbeard.NZB_METHOD = nzb_method
-        sickbeard.USENET_RETENTION = int(usenet_retention)
-
-        sickbeard.DOWNLOAD_PROPERS = download_propers
         if sickbeard.DOWNLOAD_PROPERS:
             sickbeard.properFinderScheduler.silent = False
         else:
             sickbeard.properFinderScheduler.silent = True
 
+        config.change_SEARCH_FREQUENCY(search_frequency)
+        sickbeard.USENET_RETENTION = config.to_int(usenet_retention, default=500)
+
+        # NZB Search
+        sickbeard.USE_NZBS = config.checkbox_to_value(use_nzbs)
+        sickbeard.NZB_METHOD = nzb_method
+
         sickbeard.SAB_USERNAME = sab_username
         sickbeard.SAB_PASSWORD = sab_password
         sickbeard.SAB_APIKEY = sab_apikey.strip()
         sickbeard.SAB_CATEGORY = sab_category
+        sickbeard.SAB_HOST = config.clean_url(sab_host)
 
-        if sab_host and not re.match('https?://.*', sab_host):
-            sab_host = 'http://' + sab_host
+        if not config.change_NZB_DIR(nzb_dir):
+            results += ["Unable to create directory " + os.path.normpath(nzb_dir) + ", directory not changed."]
 
-        if not sab_host.endswith('/'):
-            sab_host = sab_host + '/'
-
-        sickbeard.SAB_HOST = sab_host
-
+        sickbeard.NZBGET_HOST = config.clean_host(nzbget_host)
         sickbeard.NZBGET_PASSWORD = nzbget_password
         sickbeard.NZBGET_CATEGORY = nzbget_category
-        sickbeard.NZBGET_HOST = nzbget_host
+
+        # Torrent Search
+        sickbeard.USE_TORRENTS = config.checkbox_to_value(use_torrents)
+
+        if not config.change_TORRENT_DIR(torrent_dir):
+            results += ["Unable to create directory " + os.path.normpath(torrent_dir) + ", directory not changed."]
 
         sickbeard.save_config()
 
@@ -835,7 +783,7 @@ class ConfigSearch:
             ui.notifications.error('Error(s) Saving Configuration',
                         '<br />\n'.join(results))
         else:
-            ui.notifications.message('Configuration Saved', ek.ek(os.path.join, sickbeard.CONFIG_FILE) )
+            ui.notifications.message('Configuration Saved', ek.ek(os.path.join, sickbeard.CONFIG_FILE))
 
         redirect("/config/search/")
 
@@ -857,45 +805,37 @@ class ConfigPostProcessing:
 
         results = []
 
+        # Post-Processing
         if not config.change_TV_DOWNLOAD_DIR(tv_download_dir):
             results += ["Unable to create directory " + os.path.normpath(tv_download_dir) + ", dir not changed."]
 
-        if process_automatically == "on":
-            process_automatically = 1
-        else:
-            process_automatically = 0
+        sickbeard.KEEP_PROCESSED_DIR = config.checkbox_to_value(keep_processed_dir)
+        sickbeard.MOVE_ASSOCIATED_FILES = config.checkbox_to_value(move_associated_files)
+        sickbeard.RENAME_EPISODES = config.checkbox_to_value(rename_episodes)
 
-        if rename_episodes == "on":
-            rename_episodes = 1
-        else:
-            rename_episodes = 0
+        sickbeard.PROCESS_AUTOMATICALLY = config.checkbox_to_value(process_automatically)
 
-        if keep_processed_dir == "on":
-            keep_processed_dir = 1
-        else:
-            keep_processed_dir = 0
-
-        if move_associated_files == "on":
-            move_associated_files = 1
-        else:
-            move_associated_files = 0
-
-        if naming_custom_abd == "on":
-            naming_custom_abd = 1
-        else:
-            naming_custom_abd = 0
-
-        sickbeard.PROCESS_AUTOMATICALLY = process_automatically
         if sickbeard.PROCESS_AUTOMATICALLY:
             sickbeard.autoPostProcesserScheduler.silent = False
         else:
             sickbeard.autoPostProcesserScheduler.silent = True
 
-        sickbeard.KEEP_PROCESSED_DIR = keep_processed_dir
-        sickbeard.RENAME_EPISODES = rename_episodes
-        sickbeard.MOVE_ASSOCIATED_FILES = move_associated_files
-        sickbeard.NAMING_CUSTOM_ABD = naming_custom_abd
+        # Naming
+        sickbeard.NAMING_CUSTOM_ABD = config.checkbox_to_value(naming_custom_abd)
 
+        if self.isNamingValid(naming_pattern, naming_multi_ep) != "invalid":
+            sickbeard.NAMING_PATTERN = naming_pattern
+            sickbeard.NAMING_MULTI_EP = int(naming_multi_ep)
+            sickbeard.NAMING_FORCE_FOLDERS = naming.check_force_season_folders()
+        else:
+            results.append("You tried saving an invalid naming config, not saving your naming settings")
+
+        if self.isNamingValid(naming_abd_pattern, None, True) != "invalid":
+            sickbeard.NAMING_ABD_PATTERN = naming_abd_pattern
+        elif naming_custom_abd:
+            results.append("You tried saving an invalid air-by-date naming config, not saving your air-by-date settings")
+
+        # Metadata
         sickbeard.METADATA_XBMC = xbmc_data
         sickbeard.METADATA_XBMC_12PLUS = xbmc_12plus_data
         sickbeard.METADATA_MEDIABROWSER = mediabrowser_data
@@ -910,18 +850,7 @@ class ConfigPostProcessing:
         sickbeard.metadata_provider_dict['WDTV'].set_config(sickbeard.METADATA_WDTV)
         sickbeard.metadata_provider_dict['TIVO'].set_config(sickbeard.METADATA_TIVO)
 
-        if self.isNamingValid(naming_pattern, naming_multi_ep) != "invalid":
-            sickbeard.NAMING_PATTERN = naming_pattern
-            sickbeard.NAMING_MULTI_EP = int(naming_multi_ep)
-            sickbeard.NAMING_FORCE_FOLDERS = naming.check_force_season_folders()
-        else:
-            results.append("You tried saving an invalid naming config, not saving your naming settings")
-
-        if self.isNamingValid(naming_abd_pattern, None, True) != "invalid":
-            sickbeard.NAMING_ABD_PATTERN = naming_abd_pattern
-        elif naming_custom_abd:
-            results.append("You tried saving an invalid air-by-date naming config, not saving your air-by-date settings")
-
+        # Save changes
         sickbeard.save_config()
 
         if len(results) > 0:
@@ -930,7 +859,7 @@ class ConfigPostProcessing:
             ui.notifications.error('Error(s) Saving Configuration',
                         '<br />\n'.join(results))
         else:
-            ui.notifications.message('Configuration Saved', ek.ek(os.path.join, sickbeard.CONFIG_FILE) )
+            ui.notifications.message('Configuration Saved', ek.ek(os.path.join, sickbeard.CONFIG_FILE))
 
         redirect("/config/postProcessing/")
 
@@ -1000,15 +929,12 @@ class ConfigProviders:
         if not name or not url:
             return '0'
 
-        if not url.endswith('/'):
-            url = url + '/'
-
         providerDict = dict(zip([x.name for x in sickbeard.newznabProviderList], sickbeard.newznabProviderList))
 
         if name in providerDict:
             if not providerDict[name].default:
                 providerDict[name].name = name
-                providerDict[name].url = url
+                providerDict[name].url = config.clean_url(url)
 
             providerDict[name].key = key
             # a 0 in the key spot indicates that no key is needed
@@ -1067,9 +993,7 @@ class ConfigProviders:
                     continue
 
                 cur_name, cur_url, cur_key = curNewznabProviderStr.split('|')
-
-                if not cur_url.endswith('/'):
-                    cur_url = cur_url + '/'
+                cur_url = config.clean_url(cur_url)
 
                 newProvider = newznab.NewznabProvider(cur_name, cur_url, key=cur_key)
 
@@ -1099,7 +1023,7 @@ class ConfigProviders:
         # do the enable/disable
         for curProviderStr in provider_str_list:
             curProvider, curEnabled = curProviderStr.split(':')
-            curEnabled = int(curEnabled)
+            curEnabled = config.to_int(curEnabled)
 
             provider_list.append(curProvider)
 
@@ -1175,265 +1099,92 @@ class ConfigNotifications:
                           use_trakt=None, trakt_username=None, trakt_password=None, trakt_api=None,
                           use_pytivo=None, pytivo_notify_onsnatch=None, pytivo_notify_ondownload=None, pytivo_update_library=None,
                           pytivo_host=None, pytivo_share_name=None, pytivo_tivo_name=None,
-                          use_nma=None, nma_notify_onsnatch=None, nma_notify_ondownload=None, nma_api=None, nma_priority=0 ):
+                          use_nma=None, nma_notify_onsnatch=None, nma_notify_ondownload=None, nma_api=None, nma_priority=0):
 
         results = []
 
-        if xbmc_notify_onsnatch == "on":
-            xbmc_notify_onsnatch = 1
-        else:
-            xbmc_notify_onsnatch = 0
-
-        if xbmc_notify_ondownload == "on":
-            xbmc_notify_ondownload = 1
-        else:
-            xbmc_notify_ondownload = 0
-
-        if xbmc_update_library == "on":
-            xbmc_update_library = 1
-        else:
-            xbmc_update_library = 0
-
-        if xbmc_update_full == "on":
-            xbmc_update_full = 1
-        else:
-            xbmc_update_full = 0
-
-        if xbmc_update_onlyfirst == "on":
-            xbmc_update_onlyfirst = 1
-        else:
-            xbmc_update_onlyfirst = 0
-
-        if use_xbmc == "on":
-            use_xbmc = 1
-        else:
-            use_xbmc = 0
-
-        if plex_update_library == "on":
-            plex_update_library = 1
-        else:
-            plex_update_library = 0
-
-        if plex_notify_onsnatch == "on":
-            plex_notify_onsnatch = 1
-        else:
-            plex_notify_onsnatch = 0
-
-        if plex_notify_ondownload == "on":
-            plex_notify_ondownload = 1
-        else:
-            plex_notify_ondownload = 0
-
-        if use_plex == "on":
-            use_plex = 1
-        else:
-            use_plex = 0
-
-        if growl_notify_onsnatch == "on":
-            growl_notify_onsnatch = 1
-        else:
-            growl_notify_onsnatch = 0
-
-        if growl_notify_ondownload == "on":
-            growl_notify_ondownload = 1
-        else:
-            growl_notify_ondownload = 0
-
-        if use_growl == "on":
-            use_growl = 1
-        else:
-            use_growl = 0
-
-        if prowl_notify_onsnatch == "on":
-            prowl_notify_onsnatch = 1
-        else:
-            prowl_notify_onsnatch = 0
-
-        if prowl_notify_ondownload == "on":
-            prowl_notify_ondownload = 1
-        else:
-            prowl_notify_ondownload = 0
-        if use_prowl == "on":
-            use_prowl = 1
-        else:
-            use_prowl = 0
-
-        if twitter_notify_onsnatch == "on":
-            twitter_notify_onsnatch = 1
-        else:
-            twitter_notify_onsnatch = 0
-
-        if twitter_notify_ondownload == "on":
-            twitter_notify_ondownload = 1
-        else:
-            twitter_notify_ondownload = 0
-        if use_twitter == "on":
-            use_twitter = 1
-        else:
-            use_twitter = 0
-
-        if boxcar_notify_onsnatch == "on":
-            boxcar_notify_onsnatch = 1
-        else:
-            boxcar_notify_onsnatch = 0
-
-        if boxcar_notify_ondownload == "on":
-            boxcar_notify_ondownload = 1
-        else:
-            boxcar_notify_ondownload = 0
-        if use_boxcar == "on":
-            use_boxcar = 1
-        else:
-            use_boxcar = 0
-
-        if pushover_notify_onsnatch == "on":
-            pushover_notify_onsnatch = 1
-        else:
-            pushover_notify_onsnatch = 0
-
-        if pushover_notify_ondownload == "on":
-            pushover_notify_ondownload = 1
-        else:
-            pushover_notify_ondownload = 0
-        if use_pushover == "on":
-            use_pushover = 1
-        else:
-            use_pushover = 0
-
-        if use_nmj == "on":
-            use_nmj = 1
-        else:
-            use_nmj = 0
-
-        if use_synoindex == "on":
-            use_synoindex = 1
-        else:
-            use_synoindex = 0
-
-        if use_nmjv2 == "on":
-            use_nmjv2 = 1
-        else:
-            use_nmjv2 = 0
-
-        if use_trakt == "on":
-            use_trakt = 1
-        else:
-            use_trakt = 0
-
-        if use_pytivo == "on":
-            use_pytivo = 1
-        else:
-            use_pytivo = 0
-
-        if pytivo_notify_onsnatch == "on":
-            pytivo_notify_onsnatch = 1
-        else:
-            pytivo_notify_onsnatch = 0
-
-        if pytivo_notify_ondownload == "on":
-            pytivo_notify_ondownload = 1
-        else:
-            pytivo_notify_ondownload = 0
-
-        if pytivo_update_library == "on":
-            pytivo_update_library = 1
-        else:
-            pytivo_update_library = 0
-
-        if use_nma == "on":
-            use_nma = 1
-        else:
-            use_nma = 0
-
-        if nma_notify_onsnatch == "on":
-            nma_notify_onsnatch = 1
-        else:
-            nma_notify_onsnatch = 0
-
-        if nma_notify_ondownload == "on":
-            nma_notify_ondownload = 1
-        else:
-            nma_notify_ondownload = 0
-
-        sickbeard.USE_XBMC = use_xbmc
-        sickbeard.XBMC_NOTIFY_ONSNATCH = xbmc_notify_onsnatch
-        sickbeard.XBMC_NOTIFY_ONDOWNLOAD = xbmc_notify_ondownload
-        sickbeard.XBMC_UPDATE_LIBRARY = xbmc_update_library
-        sickbeard.XBMC_UPDATE_FULL = xbmc_update_full
-        sickbeard.XBMC_UPDATE_ONLYFIRST = xbmc_update_onlyfirst
-        sickbeard.XBMC_HOST = xbmc_host
+        # Home Theater
+        sickbeard.USE_XBMC = config.checkbox_to_value(use_xbmc)
+        sickbeard.XBMC_NOTIFY_ONSNATCH = config.checkbox_to_value(xbmc_notify_onsnatch)
+        sickbeard.XBMC_NOTIFY_ONDOWNLOAD = config.checkbox_to_value(xbmc_notify_ondownload)
+        sickbeard.XBMC_UPDATE_LIBRARY = config.checkbox_to_value(xbmc_update_library)
+        sickbeard.XBMC_UPDATE_FULL = config.checkbox_to_value(xbmc_update_full)
+        sickbeard.XBMC_UPDATE_ONLYFIRST = config.checkbox_to_value(xbmc_update_onlyfirst)
+        sickbeard.XBMC_HOST = config.clean_hosts(xbmc_host)
         sickbeard.XBMC_USERNAME = xbmc_username
         sickbeard.XBMC_PASSWORD = xbmc_password
 
-        sickbeard.USE_PLEX = use_plex
-        sickbeard.PLEX_NOTIFY_ONSNATCH = plex_notify_onsnatch
-        sickbeard.PLEX_NOTIFY_ONDOWNLOAD = plex_notify_ondownload
-        sickbeard.PLEX_UPDATE_LIBRARY = plex_update_library
-        sickbeard.PLEX_HOST = plex_host
-        sickbeard.PLEX_SERVER_HOST = plex_server_host
+        sickbeard.USE_PLEX = config.checkbox_to_value(use_plex)
+        sickbeard.PLEX_NOTIFY_ONSNATCH = config.checkbox_to_value(plex_notify_onsnatch)
+        sickbeard.PLEX_NOTIFY_ONDOWNLOAD = config.checkbox_to_value(plex_notify_ondownload)
+        sickbeard.PLEX_UPDATE_LIBRARY = config.checkbox_to_value(plex_update_library)
+        sickbeard.PLEX_SERVER_HOST = config.clean_host(plex_server_host)
+        sickbeard.PLEX_HOST = config.clean_hosts(plex_host)
         sickbeard.PLEX_USERNAME = plex_username
         sickbeard.PLEX_PASSWORD = plex_password
 
-        sickbeard.USE_GROWL = use_growl
-        sickbeard.GROWL_NOTIFY_ONSNATCH = growl_notify_onsnatch
-        sickbeard.GROWL_NOTIFY_ONDOWNLOAD = growl_notify_ondownload
-        sickbeard.GROWL_HOST = growl_host
-        sickbeard.GROWL_PASSWORD = growl_password
-
-        sickbeard.USE_PROWL = use_prowl
-        sickbeard.PROWL_NOTIFY_ONSNATCH = prowl_notify_onsnatch
-        sickbeard.PROWL_NOTIFY_ONDOWNLOAD = prowl_notify_ondownload
-        sickbeard.PROWL_API = prowl_api
-        sickbeard.PROWL_PRIORITY = prowl_priority
-
-        sickbeard.USE_TWITTER = use_twitter
-        sickbeard.TWITTER_NOTIFY_ONSNATCH = twitter_notify_onsnatch
-        sickbeard.TWITTER_NOTIFY_ONDOWNLOAD = twitter_notify_ondownload
-
-        sickbeard.USE_BOXCAR = use_boxcar
-        sickbeard.BOXCAR_NOTIFY_ONSNATCH = boxcar_notify_onsnatch
-        sickbeard.BOXCAR_NOTIFY_ONDOWNLOAD = boxcar_notify_ondownload
-        sickbeard.BOXCAR_USERNAME = boxcar_username
-
-        sickbeard.USE_PUSHOVER = use_pushover
-        sickbeard.PUSHOVER_NOTIFY_ONSNATCH = pushover_notify_onsnatch
-        sickbeard.PUSHOVER_NOTIFY_ONDOWNLOAD = pushover_notify_ondownload
-        sickbeard.PUSHOVER_USERKEY = pushover_userkey
-
-        sickbeard.USE_LIBNOTIFY = use_libnotify == "on"
-        sickbeard.LIBNOTIFY_NOTIFY_ONSNATCH = libnotify_notify_onsnatch == "on"
-        sickbeard.LIBNOTIFY_NOTIFY_ONDOWNLOAD = libnotify_notify_ondownload == "on"
-
-        sickbeard.USE_NMJ = use_nmj
-        sickbeard.NMJ_HOST = nmj_host
+        sickbeard.USE_NMJ = config.checkbox_to_value(use_nmj)
+        sickbeard.NMJ_HOST = config.clean_host(nmj_host)
         sickbeard.NMJ_DATABASE = nmj_database
         sickbeard.NMJ_MOUNT = nmj_mount
 
-        sickbeard.USE_SYNOINDEX = use_synoindex
-
-        sickbeard.USE_NMJv2 = use_nmjv2
-        sickbeard.NMJv2_HOST = nmjv2_host
+        sickbeard.USE_NMJv2 = config.checkbox_to_value(use_nmjv2)
+        sickbeard.NMJv2_HOST = config.clean_host(nmjv2_host)
         sickbeard.NMJv2_DATABASE = nmjv2_database
         sickbeard.NMJv2_DBLOC = nmjv2_dbloc
 
-        sickbeard.USE_TRAKT = use_trakt
-        sickbeard.TRAKT_USERNAME = trakt_username
-        sickbeard.TRAKT_PASSWORD = trakt_password
-        sickbeard.TRAKT_API = trakt_api
+        sickbeard.USE_SYNOINDEX = config.checkbox_to_value(use_synoindex)
 
-        sickbeard.USE_PYTIVO = use_pytivo
-        sickbeard.PYTIVO_NOTIFY_ONSNATCH = pytivo_notify_onsnatch == "off"
-        sickbeard.PYTIVO_NOTIFY_ONDOWNLOAD = pytivo_notify_ondownload == "off"
-        sickbeard.PYTIVO_UPDATE_LIBRARY = pytivo_update_library
-        sickbeard.PYTIVO_HOST = pytivo_host
+        sickbeard.USE_PYTIVO = config.checkbox_to_value(use_pytivo)
+        # sickbeard.PYTIVO_NOTIFY_ONSNATCH = config.checkbox_to_value(pytivo_notify_onsnatch)
+        # sickbeard.PYTIVO_NOTIFY_ONDOWNLOAD = config.checkbox_to_value(pytivo_notify_ondownload)
+        # sickbeard.PYTIVO_UPDATE_LIBRARY = config.checkbox_to_value(pytivo_update_library)
+        sickbeard.PYTIVO_HOST = config.clean_host(pytivo_host)
         sickbeard.PYTIVO_SHARE_NAME = pytivo_share_name
         sickbeard.PYTIVO_TIVO_NAME = pytivo_tivo_name
 
-        sickbeard.USE_NMA = use_nma
-        sickbeard.NMA_NOTIFY_ONSNATCH = nma_notify_onsnatch
-        sickbeard.NMA_NOTIFY_ONDOWNLOAD = nma_notify_ondownload
+        # Devices
+        sickbeard.USE_GROWL = config.checkbox_to_value(use_growl)
+        sickbeard.GROWL_NOTIFY_ONSNATCH = config.checkbox_to_value(growl_notify_onsnatch)
+        sickbeard.GROWL_NOTIFY_ONDOWNLOAD = config.checkbox_to_value(growl_notify_ondownload)
+        sickbeard.GROWL_HOST = config.clean_host(growl_host, default_port=23053)
+        sickbeard.GROWL_PASSWORD = growl_password
+
+        sickbeard.USE_PROWL = config.checkbox_to_value(use_prowl)
+        sickbeard.PROWL_NOTIFY_ONSNATCH = config.checkbox_to_value(prowl_notify_onsnatch)
+        sickbeard.PROWL_NOTIFY_ONDOWNLOAD = config.checkbox_to_value(prowl_notify_ondownload)
+        sickbeard.PROWL_API = prowl_api
+        sickbeard.PROWL_PRIORITY = prowl_priority
+
+        sickbeard.USE_LIBNOTIFY = config.checkbox_to_value(use_libnotify)
+        sickbeard.LIBNOTIFY_NOTIFY_ONSNATCH = config.checkbox_to_value(libnotify_notify_onsnatch)
+        sickbeard.LIBNOTIFY_NOTIFY_ONDOWNLOAD = config.checkbox_to_value(libnotify_notify_ondownload)
+
+        sickbeard.USE_PUSHOVER = config.checkbox_to_value(use_pushover)
+        sickbeard.PUSHOVER_NOTIFY_ONSNATCH = config.checkbox_to_value(pushover_notify_onsnatch)
+        sickbeard.PUSHOVER_NOTIFY_ONDOWNLOAD = config.checkbox_to_value(pushover_notify_ondownload)
+        sickbeard.PUSHOVER_USERKEY = pushover_userkey
+
+        sickbeard.USE_BOXCAR = config.checkbox_to_value(use_boxcar)
+        sickbeard.BOXCAR_NOTIFY_ONSNATCH = config.checkbox_to_value(boxcar_notify_onsnatch)
+        sickbeard.BOXCAR_NOTIFY_ONDOWNLOAD = config.checkbox_to_value(boxcar_notify_ondownload)
+        sickbeard.BOXCAR_USERNAME = boxcar_username
+
+        sickbeard.USE_NMA = config.checkbox_to_value(use_nma)
+        sickbeard.NMA_NOTIFY_ONSNATCH = config.checkbox_to_value(nma_notify_onsnatch)
+        sickbeard.NMA_NOTIFY_ONDOWNLOAD = config.checkbox_to_value(nma_notify_ondownload)
         sickbeard.NMA_API = nma_api
         sickbeard.NMA_PRIORITY = nma_priority
+
+        # Online
+        sickbeard.USE_TWITTER = config.checkbox_to_value(use_twitter)
+        sickbeard.TWITTER_NOTIFY_ONSNATCH = config.checkbox_to_value(twitter_notify_onsnatch)
+        sickbeard.TWITTER_NOTIFY_ONDOWNLOAD = config.checkbox_to_value(twitter_notify_ondownload)
+
+        sickbeard.USE_TRAKT = config.checkbox_to_value(use_trakt)
+        sickbeard.TRAKT_USERNAME = trakt_username
+        sickbeard.TRAKT_PASSWORD = trakt_password
+        sickbeard.TRAKT_API = trakt_api
 
         sickbeard.save_config()
 
@@ -1443,7 +1194,7 @@ class ConfigNotifications:
             ui.notifications.error('Error(s) Saving Configuration',
                         '<br />\n'.join(results))
         else:
-            ui.notifications.message('Configuration Saved', ek.ek(os.path.join, sickbeard.CONFIG_FILE) )
+            ui.notifications.message('Configuration Saved', ek.ek(os.path.join, sickbeard.CONFIG_FILE))
 
         redirect("/config/notifications/")
 
@@ -1458,25 +1209,15 @@ class ConfigHidden:
         return _munge(t)
 
     @cherrypy.expose
-    def saveHidden(self, anon_redirect=None, git_path=None, extra_scripts=None, create_missing_show_dirs=None, add_shows_wo_dir=None, ignore_words=None ):
+    def saveHidden(self, anon_redirect=None, git_path=None, extra_scripts=None, create_missing_show_dirs=None, add_shows_wo_dir=None, ignore_words=None):
 
         results = []
-
-        if create_missing_show_dirs == "on":
-            create_missing_show_dirs = 1
-        else:
-            create_missing_show_dirs = 0
-
-        if add_shows_wo_dir == "on":
-            add_shows_wo_dir = 1
-        else:
-            add_shows_wo_dir = 0
 
         sickbeard.ANON_REDIRECT = anon_redirect
         sickbeard.GIT_PATH = git_path
         sickbeard.EXTRA_SCRIPTS = [x.strip() for x in extra_scripts.split('|') if x.strip()]
-        sickbeard.CREATE_MISSING_SHOW_DIRS = create_missing_show_dirs
-        sickbeard.ADD_SHOWS_WO_DIR = add_shows_wo_dir
+        sickbeard.CREATE_MISSING_SHOW_DIRS = config.checkbox_to_value(create_missing_show_dirs)
+        sickbeard.ADD_SHOWS_WO_DIR = config.checkbox_to_value(add_shows_wo_dir)
         sickbeard.IGNORE_WORDS = ignore_words
 
         sickbeard.save_config()
@@ -1487,7 +1228,7 @@ class ConfigHidden:
             ui.notifications.error('Error(s) Saving Configuration',
                         '<br />\n'.join(results))
         else:
-            ui.notifications.message('Configuration Saved', ek.ek(os.path.join, sickbeard.CONFIG_FILE) )
+            ui.notifications.message('Configuration Saved', ek.ek(os.path.join, sickbeard.CONFIG_FILE))
 
         redirect("/config/hidden/")
 
@@ -1879,10 +1620,7 @@ class NewHomeAddShows:
                 helpers.chmodAsParent(show_dir)
 
         # prepare the inputs for passing along
-        if flatten_folders == "on":
-            flatten_folders = 1
-        else:
-            flatten_folders = 0
+        flatten_folders = config.checkbox_to_value(flatten_folders)
 
         if not anyQualities:
             anyQualities = []
@@ -1937,10 +1675,7 @@ class NewHomeAddShows:
 
         shows_to_add = [urllib.unquote_plus(x) for x in shows_to_add]
 
-        if promptForSettings == "on":
-            promptForSettings = 1
-        else:
-            promptForSettings = 0
+        promptForSettings = config.checkbox_to_value(promptForSettings)
 
         tvdb_id_given = []
         dirs_only = []
@@ -2086,8 +1821,9 @@ class Home:
 
     @cherrypy.expose
     def testSABnzbd(self, host=None, username=None, password=None, apikey=None):
-        if not host.endswith("/"):
-            host = host + "/"
+
+        host = config.clean_url(host)
+
         connection, accesMsg = sab.getSabAccesMethod(host, username, password, apikey)
         if connection:
             authed, authMsg = sab.testAuthentication(host, username, password, apikey)  # @UnusedVariable
@@ -2101,6 +1837,8 @@ class Home:
     @cherrypy.expose
     def testGrowl(self, host=None, password=None):
         cherrypy.response.headers['Cache-Control'] = "max-age=0,no-cache,no-store"
+
+        host = config.clean_host(host, default_port=23053)
 
         result = notifiers.growl_notifier.test_notify(host, password)
         if password == None or password == '':
@@ -2174,7 +1912,9 @@ class Home:
     def testXBMC(self, host=None, username=None, password=None):
         cherrypy.response.headers['Cache-Control'] = "max-age=0,no-cache,no-store"
 
+        host = config.clean_hosts(host)
         finalResult = ''
+
         for curHost in [x.strip() for x in host.split(",")]:
             curResult = notifiers.xbmc_notifier.test_notify(urllib.unquote_plus(curHost), username, password)
             if len(curResult.split(":")) > 2 and 'OK' in curResult.split(":")[2]:
@@ -2189,7 +1929,9 @@ class Home:
     def testPLEX(self, host=None, username=None, password=None):
         cherrypy.response.headers['Cache-Control'] = "max-age=0,no-cache,no-store"
 
+        host = config.clean_hosts(host)
         finalResult = ''
+
         for curHost in [x.strip() for x in host.split(",")]:
             curResult = notifiers.plex_notifier.test_notify(urllib.unquote_plus(curHost), username, password)
             if len(curResult.split(":")) > 2 and 'OK' in curResult.split(":")[2]:
@@ -2213,6 +1955,7 @@ class Home:
     def testNMJ(self, host=None, database=None, mount=None):
         cherrypy.response.headers['Cache-Control'] = "max-age=0,no-cache,no-store"
 
+        host = config.clean_host(host)
         result = notifiers.nmj_notifier.test_notify(urllib.unquote_plus(host), database, mount)
         if result:
             return "Successfully started the scan update"
@@ -2223,6 +1966,7 @@ class Home:
     def settingsNMJ(self, host=None):
         cherrypy.response.headers['Cache-Control'] = "max-age=0,no-cache,no-store"
 
+        host = config.clean_host(host)
         result = notifiers.nmj_notifier.notify_settings(urllib.unquote_plus(host))
         if result:
             return '{"message": "Got settings from %(host)s", "database": "%(database)s", "mount": "%(mount)s"}' % {"host": host, "database": sickbeard.NMJ_DATABASE, "mount": sickbeard.NMJ_MOUNT}
@@ -2233,6 +1977,7 @@ class Home:
     def testNMJv2(self, host=None):
         cherrypy.response.headers['Cache-Control'] = "max-age=0,no-cache,no-store"
 
+        host = config.clean_host(host)
         result = notifiers.nmjv2_notifier.test_notify(urllib.unquote_plus(host))
         if result:
             return "Test notice sent successfully to " + urllib.unquote_plus(host)
@@ -2242,6 +1987,8 @@ class Home:
     @cherrypy.expose
     def settingsNMJv2(self, host=None, dbloc=None, instance=None):
         cherrypy.response.headers['Cache-Control'] = "max-age=0,no-cache,no-store"
+
+        host = config.clean_host(host)
         result = notifiers.nmjv2_notifier.notify_settings(urllib.unquote_plus(host), dbloc, instance)
         if result:
             return '{"message": "NMJ Database found at: %(host)s", "database": "%(database)s"}' % {"host": host, "database": sickbeard.NMJv2_DATABASE}
@@ -2435,20 +2182,11 @@ class Home:
 
             return _munge(t)
 
-        if flatten_folders == "on":
-            flatten_folders = 1
-        else:
-            flatten_folders = 0
+        flatten_folders = config.checkbox_to_value(flatten_folders)
+        logger.log(u"flatten folders: " + str(flatten_folders))
 
-        if paused == "on":
-            paused = 1
-        else:
-            paused = 0
-
-        if air_by_date == "on":
-            air_by_date = 1
-        else:
-            air_by_date = 0
+        paused = config.checkbox_to_value(paused)
+        air_by_date = config.checkbox_to_value(air_by_date)
 
         if tvdbLang and tvdbLang in tvdb_api.Tvdb().config['valid_languages']:
             tvdb_lang = tvdbLang
