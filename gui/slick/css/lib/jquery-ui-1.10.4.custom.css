@@ -1,8 +1,8 @@
-/*! jQuery UI - v1.10.3 - 2013-08-21
+/*! jQuery UI - v1.10.4 - 2014-02-03
 * http://jqueryui.com
-* Includes: jquery.ui.core.css, jquery.ui.resizable.css, jquery.ui.selectable.css, jquery.ui.autocomplete.css, jquery.ui.button.css, jquery.ui.dialog.css, jquery.ui.menu.css, jquery.ui.progressbar.css, jquery.ui.tabs.css
-* To view and modify this theme, visit http://jqueryui.com/themeroller/?ffDefault=Verdana%2CArial%2Csans-serif&fwDefault=bold&fsDefault=1.1em&cornerRadius=4px&bgColorHeader=ffffff&bgTextureHeader=flat&bgImgOpacityHeader=0&borderColorHeader=aaaaaa&fcHeader=222222&iconColorHeader=222222&bgColorContent=dcdcdc&bgTextureContent=highlight_soft&bgImgOpacityContent=75&borderColorContent=aaaaaa&fcContent=222222&iconColorContent=222222&bgColorDefault=efefef&bgTextureDefault=highlight_soft&bgImgOpacityDefault=75&borderColorDefault=aaaaaa&fcDefault=222222&iconColorDefault=8c291d&bgColorHover=dddddd&bgTextureHover=highlight_soft&bgImgOpacityHover=75&borderColorHover=999999&fcHover=222222&iconColorHover=222222&bgColorActive=dfdfdf&bgTextureActive=inset_soft&bgImgOpacityActive=75&borderColorActive=aaaaaa&fcActive=140f06&iconColorActive=8c291d&bgColorHighlight=fbf9ee&bgTextureHighlight=glass&bgImgOpacityHighlight=55&borderColorHighlight=aaaaaa&fcHighlight=363636&iconColorHighlight=2e83ff&bgColorError=fef1ec&bgTextureError=glass&bgImgOpacityError=95&borderColorError=aaaaaa&fcError=8c291d&iconColorError=cd0a0a&bgColorOverlay=aaaaaa&bgTextureOverlay=flat&bgImgOpacityOverlay=0&opacityOverlay=35&bgColorShadow=000000&bgTextureShadow=flat&bgImgOpacityShadow=0&opacityShadow=35&thicknessShadow=8px&offsetTopShadow=-8px&offsetLeftShadow=-8px&cornerRadiusShadow=8px&ctl=themeroller&zThemeParams=5d000001000106000000000000003d8888d844329a8dfe02723de3e5701fa198449035fc0613ff729a37dd818cf92b1f6938fefa90282d04ae436ba7bfb585bb638a1b642d97ebef778aaeb4159564db1eb76c399d9edf5ecada7b989dd85176284d0f5ba61a62e1029c3923df828563c5ec299b3ad62ddbcffffa3b54d59215498cdf923e75d0d9db1ab69beb6d73c00be43fe56ea5311994de4e505cae88adadbc27b4bdb531517e996cb84d3deadb659ace9ad36a00436066afe333dfc3d5eb0367c49f75c466bdd8841046a7d900563641a2abb39f39e8cd73dcedd911e027b347d8650823223718cf3a30aba29b76d978b32b77e5a5ad9644d88b510c3f0eeca30e3a1cff012a99b3a4931827f7d0e8361eb46c6891c70bea4f4087a62a3bf0c67b740981d972edcde4ca2a056c2ff365dac17893255dae1c46cbe60398c3ffa4a4814830b3851e4b9532eb1cf40248c4057ba9a211e8f716d2713a004fe96a37942697322a2eabf335ad82dc0af5d87c7ced64067270337cad781365cd1781f735be4efba5992db191f97cc0333177f633e0c5d96310904d5bef4d14f934f30823c112d2092bd9e72f35ef450d3031d66ace88026d77699eb5a37eb28b5472571af0cd8de338c2671d02d53a031b3ab981c8be0422edabae4c6673ddbafcfc4e2928
-* Copyright 2013 jQuery Foundation and other contributors Licensed MIT */
+* Includes: jquery.ui.core.css, jquery.ui.resizable.css, jquery.ui.selectable.css, jquery.ui.autocomplete.css, jquery.ui.button.css, jquery.ui.dialog.css, jquery.ui.menu.css, jquery.ui.progressbar.css, jquery.ui.tabs.css, jquery.ui.theme.css
+* To view and modify this theme, visit http://jqueryui.com/themeroller/?ffDefault=Verdana%2CArial%2Csans-serif&fwDefault=bold&fsDefault=1.1em&cornerRadius=4px&bgColorHeader=%23ffffff&bgTextureHeader=flat&bgImgOpacityHeader=0&borderColorHeader=%23aaaaaa&fcHeader=%23222222&iconColorHeader=%23222222&bgColorContent=%23dcdcdc&bgTextureContent=highlight_soft&bgImgOpacityContent=75&borderColorContent=%23aaaaaa&fcContent=%23222222&iconColorContent=%23222222&bgColorDefault=%23efefef&bgTextureDefault=highlight_soft&bgImgOpacityDefault=75&borderColorDefault=%23aaaaaa&fcDefault=%23222222&iconColorDefault=%238c291d&bgColorHover=%23dddddd&bgTextureHover=highlight_soft&bgImgOpacityHover=75&borderColorHover=%23999999&fcHover=%23222222&iconColorHover=%23222222&bgColorActive=%23dfdfdf&bgTextureActive=inset_soft&bgImgOpacityActive=75&borderColorActive=%23aaaaaa&fcActive=%23140f06&iconColorActive=%238c291d&bgColorHighlight=%23fbf9ee&bgTextureHighlight=glass&bgImgOpacityHighlight=55&borderColorHighlight=%23aaaaaa&fcHighlight=%23363636&iconColorHighlight=%232e83ff&bgColorError=%23fef1ec&bgTextureError=glass&bgImgOpacityError=95&borderColorError=%23aaaaaa&fcError=%238c291d&iconColorError=%23cd0a0a&bgColorOverlay=%23aaaaaa&bgTextureOverlay=flat&bgImgOpacityOverlay=0&opacityOverlay=35&bgColorShadow=%23000000&bgTextureShadow=flat&bgImgOpacityShadow=0&opacityShadow=35&thicknessShadow=8px&offsetTopShadow=-8px&offsetLeftShadow=-8px&cornerRadiusShadow=8px&ctl=themeroller
+* Copyright 2014 jQuery Foundation and other contributors; Licensed MIT */
 
 /* Layout helpers
 ----------------------------------*/
@@ -270,6 +270,7 @@ button.ui-button::-moz-focus-inner {
 	padding: 0;
 }
 .ui-dialog {
+	overflow: hidden;
 	position: absolute;
 	top: 0;
 	left: 0;
@@ -292,7 +293,7 @@ button.ui-button::-moz-focus-inner {
 	position: absolute;
 	right: .3em;
 	top: 50%;
-	width: 21px;
+	width: 20px;
 	margin: -10px 0 0 0;
 	padding: 1px;
 	height: 20px;
@@ -433,7 +434,7 @@ button.ui-button::-moz-focus-inner {
 	padding: 0;
 	white-space: nowrap;
 }
-.ui-tabs .ui-tabs-nav li a {
+.ui-tabs .ui-tabs-nav .ui-tabs-anchor {
 	float: left;
 	padding: .5em 1em;
 	text-decoration: none;
@@ -442,13 +443,12 @@ button.ui-button::-moz-focus-inner {
 	margin-bottom: -1px;
 	padding-bottom: 1px;
 }
-.ui-tabs .ui-tabs-nav li.ui-tabs-active a,
-.ui-tabs .ui-tabs-nav li.ui-state-disabled a,
-.ui-tabs .ui-tabs-nav li.ui-tabs-loading a {
+.ui-tabs .ui-tabs-nav li.ui-tabs-active .ui-tabs-anchor,
+.ui-tabs .ui-tabs-nav li.ui-state-disabled .ui-tabs-anchor,
+.ui-tabs .ui-tabs-nav li.ui-tabs-loading .ui-tabs-anchor {
 	cursor: text;
 }
-.ui-tabs .ui-tabs-nav li a, /* first selector in group seems obsolete, but required to overcome bug in Opera applying cursor: text overall if defined elsewhere... */
-.ui-tabs-collapsible .ui-tabs-nav li.ui-tabs-active a {
+.ui-tabs-collapsible .ui-tabs-nav li.ui-tabs-active .ui-tabs-anchor {
 	cursor: pointer;
 }
 .ui-tabs .ui-tabs-panel {
@@ -522,7 +522,11 @@ button.ui-button::-moz-focus-inner {
 .ui-state-hover a,
 .ui-state-hover a:hover,
 .ui-state-hover a:link,
-.ui-state-hover a:visited {
+.ui-state-hover a:visited,
+.ui-state-focus a,
+.ui-state-focus a:hover,
+.ui-state-focus a:link,
+.ui-state-focus a:visited {
 	color: #222222;
 	text-decoration: none;
 }
@@ -530,7 +534,7 @@ button.ui-button::-moz-focus-inner {
 .ui-widget-content .ui-state-active,
 .ui-widget-header .ui-state-active {
 	border: 1px solid #aaaaaa;
-	/* background: #dfdfdf url(images/ui-bg_inset-soft_75_dfdfdf_1x100.png) 50% 50% repeat-x; */
+	background: #dfdfdf url(images/ui-bg_inset-soft_75_dfdfdf_1x100.png) 50% 50% repeat-x;
 	font-weight: bold;
 	color: #140f06;
 }
@@ -840,7 +844,7 @@ button.ui-button::-moz-focus-inner {
 
 /* Overlays */
 .ui-widget-overlay {
-	/* background: #6e4f1c url(images/ui-bg_flat_0_aaaaaa_40x100.png) 50% 50% repeat-x; */
+	/* background: #aaaaaa url(images/ui-bg_flat_0_aaaaaa_40x100.png) 50% 50% repeat-x; */
 	opacity: .35;
 	filter: Alpha(Opacity=35);
 }
@@ -852,4 +856,3 @@ button.ui-button::-moz-focus-inner {
 	filter: Alpha(Opacity=35);
 	border-radius: 8px;
 }
-

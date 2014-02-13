@@ -186,6 +186,8 @@ class WindowsUpdateManager(UpdateManager):
         if self._newest_version and self._newest_version > self._cur_version:
             return True
 
+        return False
+
     def set_newest_text(self):
 
         sickbeard.NEWEST_VERSION_STRING = None
@@ -225,6 +227,10 @@ class WindowsUpdateManager(UpdateManager):
 
             if not ek.ek(os.path.isfile, zip_download_path):
                 logger.log(u"Unable to retrieve new version from " + zip_download_url + ", can't update", logger.ERROR)
+                return False
+
+            if not ek.ek(zipfile.is_zipfile, zip_download_path):
+                logger.log(u"Retrieved version from " + zip_download_url + " is corrupt, can't update", logger.ERROR)
                 return False
 
             # extract to sb-update dir
@@ -268,6 +274,7 @@ class GitUpdateManager(UpdateManager):
         self._cur_commit_hash = None
         self._newest_commit_hash = None
         self._num_commits_behind = 0
+        self._num_commits_ahead = 0
 
     def _git_error(self):
         error_message = 'Unable to find your git executable - Shutdown SickBeard and EITHER <a href="http://code.google.com/p/sickbeard/wiki/AdvancedSettings" onclick="window.open(this.href); return false;">set git_path in your config.ini</a> OR delete your .git folder and run from source to enable updates.'
@@ -334,7 +341,7 @@ class GitUpdateManager(UpdateManager):
 
         try:
             logger.log(u"Executing " + cmd + " with your shell in " + sickbeard.PROG_DIR, logger.DEBUG)
-            p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=True, cwd=sickbeard.PROG_DIR)
+            p = subprocess.Popen(cmd, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=True, cwd=sickbeard.PROG_DIR)
             output, err = p.communicate()
             exit_status = p.returncode
 
@@ -373,7 +380,7 @@ class GitUpdateManager(UpdateManager):
         Returns: True for success or False for failure
         """
 
-        output, err, exit_status = self._run_git(self._git_path, 'rev-parse HEAD')  #@UnusedVariable
+        output, err, exit_status = self._run_git(self._git_path, 'rev-parse HEAD')  # @UnusedVariable
 
         if exit_status == 0 and output:
             cur_commit_hash = output.strip()
@@ -395,38 +402,59 @@ class GitUpdateManager(UpdateManager):
 
     def _check_github_for_update(self):
         """
-        Uses pygithub to ask github if there is a newer version that the provided
-        commit hash. If there is a newer version it sets Sick Beard's version text.
-
-        commit_hash: hash that we're checking against
+        Uses git commands to check if there is a newer version that the provided
+        commit hash. If there is a newer version it sets _num_commits_behind.
         """
 
-        self._num_commits_behind = 0
         self._newest_commit_hash = None
+        self._num_commits_behind = 0
+        self._num_commits_ahead = 0
 
-        gh = github.GitHub(self.github_repo_user, self.github_repo, self.branch)
+        # get all new info from github
+        output, err, exit_status = self._run_git(self._git_path, 'fetch origin')
 
-        # find newest commit
-        for curCommit in gh.commits():
-            if not self._newest_commit_hash:
-                self._newest_commit_hash = curCommit['sha']
-                if not self._cur_commit_hash:
-                    break
+        if not exit_status == 0:
+            logger.log(u"Unable to contact github, can't check for update", logger.ERROR)
+            return
 
-            if curCommit['sha'] == self._cur_commit_hash:
-                break
+        # get latest commit_hash from remote
+        output, err, exit_status = self._run_git(self._git_path, 'rev-parse --verify --quiet @{upstream}')
 
-            self._num_commits_behind += 1
+        if exit_status == 0 and output:
+            cur_commit_hash = output.strip()
 
-        logger.log(u"newest: " + str(self._newest_commit_hash) + " and current: " + str(self._cur_commit_hash) + " and num_commits: " + str(self._num_commits_behind), logger.DEBUG)
+            if not re.match('^[a-z0-9]+$', cur_commit_hash):
+                logger.log(u"Output doesn't look like a hash, not using it", logger.DEBUG)
+                return
+
+            else:
+                self._newest_commit_hash = cur_commit_hash
+        else:
+            logger.log(u"git didn't return newest commit hash", logger.DEBUG)
+            return
+
+        # get number of commits behind and ahead
+        output, err, exit_status = self._run_git(self._git_path, 'rev-list --left-right --count @{upstream}...HEAD')
+
+        if exit_status == 0 and output:
+
+            try:
+                self._num_commits_behind, self._num_commits_ahead = map(int, output.split('\t'))
+            except:
+                logger.log(u"git didn't return numbers for behind and ahead, not using it", logger.DEBUG)
+                return
+
+        logger.log(u"cur_commit = " + str(self._cur_commit_hash) + u", newest_commit = " + str(self._newest_commit_hash)
+                   + u", num_commits_behind = " + str(self._num_commits_behind) + u", num_commits_ahead = " + str(self._num_commits_ahead), logger.DEBUG)
 
     def set_newest_text(self):
 
         # if we're up to date then don't set this
         sickbeard.NEWEST_VERSION_STRING = None
 
-        if self._num_commits_behind == 100:
-            newest_text = "You are ahead of " + self.branch + ". Update not possible."
+        if self._num_commits_ahead:
+            logger.log(u"Local branch is ahead of " + self.branch + ". Automatic update not possible.", logger.ERROR)
+            newest_text = "Local branch is ahead of " + self.branch + ". Automatic update not possible."
 
         elif self._num_commits_behind > 0:
 
@@ -459,8 +487,6 @@ class GitUpdateManager(UpdateManager):
                 logger.log(u"Unable to contact github, can't check for update: " + repr(e), logger.ERROR)
                 return False
 
-            logger.log(u"After checking, cur_commit = " + str(self._cur_commit_hash) + u", newest_commit = " + str(self._newest_commit_hash) + u", num_commits_behind = " + str(self._num_commits_behind), logger.DEBUG)
-
             if self._num_commits_behind > 0:
                 return True
 
@@ -472,7 +498,7 @@ class GitUpdateManager(UpdateManager):
         on the call's success.
         """
 
-        output, err, exit_status = self._run_git(self._git_path, 'pull origin ' + self.branch)  #@UnusedVariable
+        output, err, exit_status = self._run_git(self._git_path, 'pull origin ' + self.branch)  # @UnusedVariable
 
         if exit_status == 0:
             return True
@@ -512,13 +538,14 @@ class SourceUpdateManager(UpdateManager):
 
         self._find_installed_version()
 
-        try:
-            self._check_github_for_update()
-        except Exception, e:
-            logger.log(u"Unable to contact github, can't check for update: " + repr(e), logger.ERROR)
-            return False
-
-        logger.log(u"After checking, cur_commit = " + str(self._cur_commit_hash) + u", newest_commit = " + str(self._newest_commit_hash) + u", num_commits_behind = " + str(self._num_commits_behind), logger.DEBUG)
+        if not self._cur_commit_hash:
+            return True
+        else:
+            try:
+                self._check_github_for_update()
+            except Exception, e:
+                logger.log(u"Unable to contact github, can't check for update: " + repr(e), logger.ERROR)
+                return False
 
         if not self._cur_commit_hash or self._num_commits_behind > 0:
             return True
@@ -538,29 +565,43 @@ class SourceUpdateManager(UpdateManager):
 
         gh = github.GitHub(self.github_repo_user, self.github_repo, self.branch)
 
-        # find newest commit
-        for curCommit in gh.commits():
-            if not self._newest_commit_hash:
-                self._newest_commit_hash = curCommit['sha']
-                if not self._cur_commit_hash:
+        # try to get newest commit hash and commits behind directly by comparing branch and current commit
+        if self._cur_commit_hash:
+            branch_compared = gh.compare(base=self.branch, head=self._cur_commit_hash)
+
+            if 'base_commit' in branch_compared:
+                self._newest_commit_hash = branch_compared['base_commit']['sha']
+
+            if 'behind_by' in branch_compared:
+                self._num_commits_behind = int(branch_compared['behind_by'])
+
+        # fall back and iterate over last 100 (items per page in gh_api) commits
+        if not self._newest_commit_hash:
+
+            for curCommit in gh.commits():
+                if not self._newest_commit_hash:
+                    self._newest_commit_hash = curCommit['sha']
+                    if not self._cur_commit_hash:
+                        break
+
+                if curCommit['sha'] == self._cur_commit_hash:
                     break
 
-            if curCommit['sha'] == self._cur_commit_hash:
-                break
+                # when _cur_commit_hash doesn't match anything _num_commits_behind == 100
+                self._num_commits_behind += 1
 
-            self._num_commits_behind += 1
-
-        logger.log(u"newest: " + str(self._newest_commit_hash) + " and current: " + str(self._cur_commit_hash) + " and num_commits: " + str(self._num_commits_behind), logger.DEBUG)
+        logger.log(u"cur_commit = " + str(self._cur_commit_hash) + u", newest_commit = " + str(self._newest_commit_hash)
+                   + u", num_commits_behind = " + str(self._num_commits_behind), logger.DEBUG)
 
     def set_newest_text(self):
 
         # if we're up to date then don't set this
         sickbeard.NEWEST_VERSION_STRING = None
 
-        if not self._cur_commit_hash or self._num_commits_behind == 100:
-            logger.log(u"Unknown current version, don't know if we should update or not", logger.DEBUG)
+        if not self._cur_commit_hash:
+            logger.log(u"Unknown current version number, don't know if we should update or not", logger.DEBUG)
 
-            newest_text = "Unknown version: If you've never used the Sick Beard upgrade system then I don't know what version you have."
+            newest_text = "Unknown current version number: If you've never used the Sick Beard upgrade system before then current version is not set."
             newest_text += "&mdash; <a href=\"" + self.get_update_url() + "\">Update Now</a>"
 
         elif self._num_commits_behind > 0:
@@ -608,6 +649,10 @@ class SourceUpdateManager(UpdateManager):
                 logger.log(u"Unable to retrieve new version from " + tar_download_url + ", can't update", logger.ERROR)
                 return False
 
+            if not ek.ek(tarfile.is_tarfile, tar_download_path):
+                logger.log(u"Retrieved version from " + tar_download_url + " is corrupt, can't update", logger.ERROR)
+                return False
+
             # extract to sb-update dir
             logger.log(u"Extracting file " + tar_download_path)
             tar = tarfile.open(tar_download_path)
@@ -626,7 +671,8 @@ class SourceUpdateManager(UpdateManager):
             content_dir = os.path.join(sb_update_dir, update_dir_contents[0])
 
             # walk temp folder and move files to main folder
-            for dirname, dirnames, filenames in os.walk(content_dir):  #@UnusedVariable
+            logger.log(u"Moving files from " + content_dir + " to " + sickbeard.PROG_DIR)
+            for dirname, dirnames, filenames in os.walk(content_dir):  # @UnusedVariable
                 dirname = dirname[len(content_dir) + 1:]
                 for curfile in filenames:
                     old_path = os.path.join(content_dir, dirname, curfile)
@@ -642,7 +688,7 @@ class SourceUpdateManager(UpdateManager):
                             os.renames(old_path, new_path)
                         except Exception, e:
                             logger.log(u"Unable to update " + new_path + ': ' + ex(e), logger.DEBUG)
-                            os.remove(old_path)#Trash the updated file without moving in new path
+                            os.remove(old_path)  # Trash the updated file without moving in new path
                         continue
 
                     if os.path.isfile(new_path):
@@ -660,7 +706,7 @@ class SourceUpdateManager(UpdateManager):
 
         except Exception, e:
             logger.log(u"Error while trying to update: " + ex(e), logger.ERROR)
-            logger.log(u"Traceback: "  + traceback.format_exc(), logger.DEBUG)
+            logger.log(u"Traceback: " + traceback.format_exc(), logger.DEBUG)
             return False
 
         return True
