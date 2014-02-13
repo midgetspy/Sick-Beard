@@ -16,7 +16,6 @@
 # You should have received a copy of the GNU General Public License
 # along with Sick Beard.  If not, see <http://www.gnu.org/licenses/>.
 
-import generic
 import xbmc_12plus
 
 import os
@@ -54,7 +53,7 @@ class XBMCMetadata(xbmc_12plus.XBMC_12PlusMetadata):
                  season_all_poster=False,
                  season_all_banner=False):
 
-        generic.GenericMetadata.__init__(self,
+        xbmc_12plus.XBMC_12PlusMetadata.__init__(self,
                                          show_metadata,
                                          episode_metadata,
                                          fanart,
@@ -72,9 +71,9 @@ class XBMCMetadata(xbmc_12plus.XBMC_12PlusMetadata):
         self.season_all_poster_name = "season-all.tbn"
 
         # web-ui metadata template
-        self.eg_show_metadata = "tvshow.nfo"
-        self.eg_episode_metadata = "Season##\\<i>filename</i>.nfo"
-        self.eg_fanart = "fanart.jpg"
+        # self.eg_show_metadata = "tvshow.nfo"
+        # self.eg_episode_metadata = "Season##\\<i>filename</i>.nfo"
+        # self.eg_fanart = "fanart.jpg"
         self.eg_poster = "folder.jpg"
         self.eg_banner = "folder.jpg"
         self.eg_episode_thumbnails = "Season##\\<i>filename</i>.tbn"
