@@ -30,6 +30,7 @@ from sickbeard import logger
 from sickbeard import tvcache
 from sickbeard import db
 from sickbeard import classes
+from sickbeard import helpers
 from sickbeard import show_name_helpers
 from sickbeard.common import Overview
 from sickbeard.exceptions import ex
