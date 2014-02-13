@@ -1459,7 +1459,11 @@ class NewHomeAddShows:
 
         root_dirs = [urllib.unquote_plus(x) for x in root_dirs]
 
-        default_index = int(sickbeard.ROOT_DIRS.split('|')[0])
+        if sickbeard.ROOT_DIRS:
+            default_index = int(sickbeard.ROOT_DIRS.split('|')[0])
+        else:
+            default_index = 0
+
         if len(root_dirs) > default_index:
             tmp = root_dirs[default_index]
             if tmp in root_dirs:
