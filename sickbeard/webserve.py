@@ -1505,6 +1505,7 @@ class ConfigProviders:
                       iptorrents_username=None, iptorrents_password=None, iptorrents_freeleech=None,
                       kat_trusted = None, kat_verified = None,
                       scc_username=None, scc_password=None,
+                      hdtorrents_username=None, hdtorrents_password=None,
                       torrentday_username=None, torrentday_password=None, torrentday_freeleech=None,
                       hdbits_username=None, hdbits_passkey=None,
 					  nextgen_username=None, nextgen_password=None,
@@ -1631,6 +1632,8 @@ class ConfigProviders:
                 sickbeard.PUBLICHD = curEnabled
             elif curProvider == 'sceneaccess':
                 sickbeard.SCC = curEnabled
+            elif curProvider == 'hdtorrents':
+                sickbeard.HDTORRENTS = curEnabled
             elif curProvider == 'torrentday':
                 sickbeard.TORRENTDAY = curEnabled
             elif curProvider == 'hdbits':
@@ -1704,6 +1707,9 @@ class ConfigProviders:
 
         sickbeard.SCC_USERNAME = scc_username.strip()
         sickbeard.SCC_PASSWORD = scc_password.strip()
+
+        sickbeard.HDTORRENTS_USERNAME = hdtorrents_username.strip()
+        sickbeard.HDTORRENTS_PASSWORD = hdtorrents_password.strip()
 
         sickbeard.HDBITS_USERNAME = hdbits_username.strip()
         sickbeard.HDBITS_PASSKEY = hdbits_passkey.strip()
