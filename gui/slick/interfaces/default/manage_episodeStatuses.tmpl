@@ -55,6 +55,10 @@ Set checked shows/episodes to <select name="newStatus">
 $statusList.remove($int($whichStatus))
 #end if
 
+#if $int($whichStatus) in [$common.SNATCHED, $common.SNATCHED_PROPER]
+$statusList.append($common.FAILED)
+#end if
+
 #for $curStatus in $statusList:
 <option value="$curStatus">$common.statusStrings[$curStatus]</option>
 #end for
