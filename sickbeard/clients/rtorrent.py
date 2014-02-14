@@ -38,7 +38,7 @@ class rTorrentAPI(GenericClient):
             return
 
         if self.username and self.password:
-            self.auth = Rtorrent(self.host, self.username, self.password)
+            self.auth = RTorrent(self.host, self.username, self.password)
         else:
             self.auth = RTorrent(self.host, None, None, True)
 
