@@ -92,8 +92,8 @@ class rTorrentAPI(GenericClient):
             if sickbeard.TORRENT_LABEL:
                 torrent.set_custom(1, sickbeard.TORRENT_LABEL.lower())
 
-            if sickbeard.TV_DOWNLOAD_DIR:
-                torrent.set_directory(sickbeard.TV_DOWNLOAD_DIR)
+            if sickbeard.TORRENT_PATH:
+                torrent.set_directory(sickbeard.TORRENT_PATH)
 
             # Start torrent
             torrent.start()
