@@ -51,7 +51,7 @@ class KATProvider(generic.TorrentProvider):
 
         self.cache = KATCache(self)
         
-        self.url = 'http://proxykat.eu/'
+        self.url = 'http://katproxy.com/'
 
         self.searchurl = self.url+'usearch/%s/?field=seeders&sorder=desc'  #order by seed       
 
@@ -340,11 +340,16 @@ class KATProvider(generic.TorrentProvider):
         logger.log(u"Saved magnet link to " + magnetFileName + " ", logger.MESSAGE)
         return True
 
-    def findPropers(self, search_date=None):
+    def findPropers(self, search_date=datetime.datetime.today()):
 
         results = []
 
-        sqlResults = db.DBConnection().select('SELECT s.show_name, e.showid, e.season, e.episode, e.status, e.airdate FROM tv_episodes AS e INNER JOIN tv_shows AS s ON (e.showid = s.tvdb_id) WHERE e.airdate >= ? AND (e.status IN ('+','.join([str(x) for x in Quality.DOWNLOADED])+') OR (e.status IN ('+','.join([str(x) for x in Quality.SNATCHED ])+')))', [search_date.toordinal()])
+        sqlResults = db.DBConnection().select('SELECT s.show_name, e.showid, e.season, e.episode, e.status, e.airdate FROM tv_episodes AS e' +
+                                              ' INNER JOIN tv_shows AS s ON (e.showid = s.tvdb_id)' +
+                                              ' WHERE e.airdate >= ' + str(search_date.toordinal()) +
+                                              ' AND (e.status IN (' + ','.join([str(x) for x in Quality.DOWNLOADED]) + ')' +
+                                              ' OR (e.status IN (' + ','.join([str(x) for x in Quality.SNATCHED]) + ')))'
+                                              )
         if not sqlResults:
             return []
         
@@ -355,7 +360,7 @@ class KATProvider(generic.TorrentProvider):
 
             for item in self._doSearch(searchString[0]):
                 title, url = self._get_title_and_url(item)
-                results.append(classes.Proper(title, url, datetime.datetime.today().toordinal()))
+                results.append(classes.Proper(title, url, datetime.datetime.today()))
 
         return results
 
