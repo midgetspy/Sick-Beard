@@ -30,7 +30,7 @@ from threading import Lock
 
 # apparently py2exe won't build these unless they're imported somewhere
 from sickbeard import providers, metadata
-from providers import ezrss, tvtorrents, btn, newznab, womble, thepiratebay, torrentleech, kat, publichd, iptorrents, omgwtfnzbs, scc, torrentday, hdbits, nextgen
+from providers import ezrss, tvtorrents, btn, newznab, womble, thepiratebay, torrentleech, kat, publichd, iptorrents, omgwtfnzbs, scc, hdtorrents, torrentday, hdbits, nextgen
 from sickbeard.config import CheckSection, check_setting_int, check_setting_str, ConfigMigrator
 
 
@@ -210,7 +210,13 @@ PUBLICHD = None
 
 SCC = False         
 SCC_USERNAME = None 
-SCC_PASSWORD = None 
+SCC_PASSWORD = None
+
+HDTORRENTS = False
+HDTORRENTS_USERNAME = None
+HDTORRENTS_PASSWORD = None
+HDTORRENTS_UID = None
+HDTORRENTS_HASH = None
 
 TORRENTDAY = None
 TORRENTDAY_USERNAME = None
@@ -451,7 +457,7 @@ def initialize(consoleLogging=True):
                 showUpdateScheduler, __INITIALIZED__, LAUNCH_BROWSER, UPDATE_SHOWS_ON_START, SORT_ARTICLE, showList, loadingShowList, \
                 NEWZNAB_DATA, NZBS, NZBS_UID, NZBS_HASH, EZRSS, TVTORRENTS, TVTORRENTS_DIGEST, TVTORRENTS_HASH, TVTORRENTS_OPTIONS, BTN, BTN_API_KEY, BTN_OPTIONS, \
                 THEPIRATEBAY, THEPIRATEBAY_TRUSTED, THEPIRATEBAY_PROXY, THEPIRATEBAY_PROXY_URL, THEPIRATEBAY_BLACKLIST, THEPIRATEBAY_OPTIONS, TORRENTLEECH, TORRENTLEECH_USERNAME, TORRENTLEECH_PASSWORD, TORRENTLEECH_OPTIONS, \
-                IPTORRENTS, IPTORRENTS_USERNAME, IPTORRENTS_PASSWORD, IPTORRENTS_FREELEECH, IPTORRENTS_OPTIONS, KAT, KAT_VERIFIED, KAT_OPTIONS, PUBLICHD, PUBLICHD_OPTIONS, SCC, SCC_USERNAME, SCC_PASSWORD, SCC_OPTIONS, TORRENTDAY, TORRENTDAY_USERNAME, TORRENTDAY_PASSWORD, TORRENTDAY_UID, TORRENTDAY_HASH, TORRENTDAY_FREELEECH, TORRENTDAY_OPTIONS, \
+                IPTORRENTS, IPTORRENTS_USERNAME, IPTORRENTS_PASSWORD, IPTORRENTS_FREELEECH, IPTORRENTS_OPTIONS, KAT, KAT_VERIFIED, KAT_OPTIONS, PUBLICHD, PUBLICHD_OPTIONS, SCC, SCC_USERNAME, SCC_PASSWORD, SCC_OPTIONS, HDTORRENTS, HDTORRENTS_USERNAME, HDTORRENTS_PASSWORD, HDTORRENTS_UID, HDTORRENTS_HASH, HDTORRENTS_OPTIONS, TORRENTDAY, TORRENTDAY_USERNAME, TORRENTDAY_PASSWORD, TORRENTDAY_UID, TORRENTDAY_HASH, TORRENTDAY_FREELEECH, TORRENTDAY_OPTIONS, \
                 HDBITS, HDBITS_USERNAME, HDBITS_PASSKEY, HDBITS_OPTIONS, TORRENT_DIR, USENET_RETENTION, SOCKET_TIMEOUT, SEARCH_FREQUENCY, DEFAULT_SEARCH_FREQUENCY, BACKLOG_SEARCH_FREQUENCY, \
                 NEXTGEN, NEXTGEN_USERNAME, NEXTGEN_PASSWORD, NEXTGEN_FREELEECH, NEXTGEN_OPTIONS, \
 				QUALITY_DEFAULT, FLATTEN_FOLDERS_DEFAULT, SUBTITLES_DEFAULT, STATUS_DEFAULT, \
@@ -680,6 +686,11 @@ def initialize(consoleLogging=True):
         SCC_USERNAME = check_setting_str(CFG, 'SCC', 'scc_username', '')
         SCC_PASSWORD = check_setting_str(CFG, 'SCC', 'scc_password', '')
         SCC_OPTIONS = check_setting_str(CFG, 'SCC', 'scc_options', '')
+
+        HDTORRENTS = bool(check_setting_int(CFG, 'HDTORRENTS', 'hdtorrents', 0))
+        HDTORRENTS_USERNAME = check_setting_str(CFG, 'HDTORRENTS', 'hdtorrents_username', '')
+        HDTORRENTS_PASSWORD = check_setting_str(CFG, 'HDTORRENTS', 'hdtorrents_password', '')
+        HDTORRENTS_OPTIONS = check_setting_str(CFG, 'HDTORRENTS', 'hdtorrents_options', '')
 
         TORRENTDAY = bool(check_setting_int(CFG, 'TORRENTDAY', 'torrentday', 0))
         TORRENTDAY_USERNAME = check_setting_str(CFG, 'TORRENTDAY', 'torrentday_username', '')
@@ -1371,6 +1382,12 @@ def save_config():
     new_config['SCC']['scc_username'] = SCC_USERNAME
     new_config['SCC']['scc_password'] = helpers.encrypt(SCC_PASSWORD, ENCRYPTION_VERSION)
     new_config['SCC']['scc_options'] = SCC_OPTIONS
+
+    new_config['HDTORRENTS'] = {}
+    new_config['HDTORRENTS']['hdtorrents'] = int(HDTORRENTS)
+    new_config['HDTORRENTS']['hdtorrents_username'] = HDTORRENTS_USERNAME
+    new_config['HDTORRENTS']['hdtorrents_password'] = helpers.encrypt(HDTORRENTS_PASSWORD, ENCRYPTION_VERSION)
+    new_config['HDTORRENTS']['hdtorrents_options'] = HDTORRENTS_OPTIONS
 
     new_config['TORRENTDAY'] = {}
     new_config['TORRENTDAY']['torrentday'] = int(TORRENTDAY)

@@ -37,34 +37,37 @@ from lib import requests
 from bs4 import BeautifulSoup
 from lib.unidecode import unidecode
 
-class SCCProvider(generic.TorrentProvider):
+class HDTorrentsProvider(generic.TorrentProvider):
 
-    urls = {'base_url' : 'https://sceneaccess.eu',
-            'login' : 'https://sceneaccess.eu/login',
-            'detail' : 'https://www.sceneaccess.eu/details?id=%s',
-            'search' : 'https://sceneaccess.eu/browse?search=%s&method=1&%s',
+    urls = {'base_url' : 'https://hdts.ru/index.php',
+            'login' : 'https://hdts.ru/login.php',
+            'detail' : 'https://www.hdts.ru/details.php?id=%s',
+            'search' : 'https://hdts.ru/torrents.php?search=%s&active=1&options=0%s',
             'download' : 'https://www.sceneaccess.eu/%s',
+            'home' : 'https://www.hdts.ru/%s'
             }
 
     def __init__(self):
 
-        generic.TorrentProvider.__init__(self, "SceneAccess")
+        generic.TorrentProvider.__init__(self, "HDTorrents")
 
         self.supportsBacklog = True
 
-        self.cache = SCCCache(self)
+        self.cache = HDTorrentsCache(self)
 
         self.url = self.urls['base_url']
 
-        self.categories = "c27=27&c17=17&c11=11"
+        self.categories = "&category[]=59&category[]=60&category[]=30&category[]=38"
 
-        self.session = None
+        self.session = requests.Session()
+        
+        self.cookies = None
 
     def isEnabled(self):
-        return sickbeard.SCC
+        return sickbeard.HDTORRENTS
 
     def imageName(self):
-        return 'scc.png'
+        return 'hdtorrents.png'
 
     def getQuality(self, item):
 
@@ -73,25 +76,38 @@ class SCCProvider(generic.TorrentProvider):
 
     def _doLogin(self):
 
-        login_params = {'username': sickbeard.SCC_USERNAME,
-                        'password': sickbeard.SCC_PASSWORD,
-                        'submit': 'come on in',
-                        }
+        if any(requests.utils.dict_from_cookiejar(self.session.cookies).values()):
+            return True
+        
+        if sickbeard.HDTORRENTS_UID and sickbeard.HDTORRENTS_HASH:
+            
+            requests.utils.add_dict_to_cookiejar(self.session.cookies, self.cookies)
+        
+        else:    
 
-        self.session = requests.Session()
-
-        try:
-            response = self.session.post(self.urls['login'], data=login_params, timeout=30, verify=False)
-        except (requests.exceptions.ConnectionError, requests.exceptions.HTTPError), e:
-            logger.log(u'Unable to connect to ' + self.name + ' provider: ' +ex(e), logger.ERROR)
-            return False
-
-        if re.search('Username or password incorrect', response.text) \
-        or re.search('<title>SceneAccess \| Login</title>', response.text) \
-        or response.status_code == 401:
-            logger.log(u'Invalid username or password for ' + self.name + ' Check your settings', logger.ERROR)       
-            return False
-
+            login_params = {'uid': sickbeard.HDTORRENTS_USERNAME,
+                            'pwd': sickbeard.HDTORRENTS_PASSWORD,
+                            'submit': 'Confirm',
+                            }
+                                         
+            try:
+                response = self.session.post(self.urls['login'],  data=login_params, timeout=30)
+            except (requests.exceptions.ConnectionError, requests.exceptions.HTTPError), e:
+                logger.log(u'Unable to connect to ' + self.name + ' provider: ' + ex(e), logger.ERROR)
+                return False
+            
+            if re.search('You need cookies enabled to log in.', response.text) \
+            or response.status_code == 401:
+                logger.log(u'Invalid username or password for ' + self.name + ' Check your settings', logger.ERROR)
+                return False
+            
+            sickbeard.HDTORRENTS_UID = requests.utils.dict_from_cookiejar(self.session.cookies)['uid']
+            sickbeard.HDTORRENTS_HASH = requests.utils.dict_from_cookiejar(self.session.cookies)['pass']
+  
+            self.cookies = {'uid': sickbeard.HDTORRENTS_UID,
+                            'pass': sickbeard.HDTORRENTS_HASH
+                            }
+               
         return True
 
     def _get_season_search_strings(self, show, season=None):
@@ -156,35 +172,79 @@ class SCCProvider(generic.TorrentProvider):
                 if isinstance(search_string, unicode):
                     search_string = unidecode(search_string)
 
+                if search_string == '':
+                    continue
+                search_string = str(search_string).replace('.',' ')
                 searchURL = self.urls['search'] % (search_string, self.categories)
 
                 logger.log(u"Search string: " + searchURL, logger.DEBUG)
-
+                
                 data = self.getURL(searchURL)
                 if not data:
                     continue
 
+                
+          
+                # Remove HDTorrents NEW list
+                split_data = data.partition('<!-- Show New Torrents After Last Visit -->\n\n\n\n')
+                data = split_data[2]
+
                 try:
                     html = BeautifulSoup(data, features=["html5lib", "permissive"])
 
-                    torrent_table = html.find('table', attrs = {'id' : 'torrents-table'})
-                    torrent_rows = torrent_table.find_all('tr') if torrent_table else []
+                    #Get first entry in table
+                    entries = html.find_all('td', attrs={'align' : 'center'})
 
-                    #Continue only if one Release is found
-                    if len(torrent_rows)<2:
+                    if not entries:
                         logger.log(u"The Data returned from " + self.name + " do not contains any torrent", logger.DEBUG)
                         continue
 
-                    for result in torrent_table.find_all('tr')[1:]:
+                    try:
+                        title = entries[22].find('a')['title'].strip('History - ').replace('Blu-ray', 'bd50')
+                        url = self.urls['home'] % entries[15].find('a')['href']
+                        download_url = self.urls['home'] % entries[15].find('a')['href']
+                        id = entries[23].find('div')['id']
+                        seeders = int(entries[20].get_text())
+                        leechers = int(entries[21].get_text())
+                    except (AttributeError, TypeError):
+                        continue
 
+                    if mode != 'RSS' and seeders == 0:
+                            continue 
+
+                    if not title or not download_url:
+                            continue
+
+                    item = title, download_url, id, seeders, leechers
+                    logger.log(u"Found result: " + title + "(" + searchURL + ")", logger.DEBUG)
+
+                    items[mode].append(item)
+
+                    #Now attempt to get any others
+                    result_table = html.find('table', attrs = {'class' : 'mainblockcontenttt'})
+
+                    if not result_table:
+                        continue
+
+                    entries = result_table.find_all('td', attrs={'align' : 'center', 'class' : 'listas'})
+
+                    if not entries:
+                        continue
+
+                    for result in entries:
+                        block2 = result.find_parent('tr').find_next_sibling('tr')
+                        if not block2:
+                            continue
+                        cells = block2.find_all('td')
+                        
                         try:
-                            link = result.find('td', attrs = {'class' : 'ttr_name'}).find('a')
-                            url = result.find('td', attrs = {'class' : 'td_dl'}).find('a')
-                            title = link.string
-                            download_url = self.urls['download'] % url['href']
-                            id = int(link['href'].replace('details?id=', ''))
-                            seeders = int(result.find('td', attrs = {'class' : 'ttr_seeders'}).string)
-                            leechers = int(result.find('td', attrs = {'class' : 'ttr_leechers'}).string)
+                            title = cells[1].find('b').get_text().strip('\t ').replace('Blu-ray', 'bd50')
+                            url = self.urls['home'] % cells[4].find('a')['href']
+                            download_url = self.urls['home'] % cells[4].find('a')['href']
+                            detail = cells[1].find('a')['href']
+                            id = detail.replace('details.php?id=', '')
+                            seeders = int(cells[9].get_text())
+                            leechers = int(cells[10].get_text())
                         except (AttributeError, TypeError):
                             continue
 
@@ -263,13 +323,13 @@ class SCCProvider(generic.TorrentProvider):
         return results
 
 
-class SCCCache(tvcache.TVCache):
+class HDTorrentsCache(tvcache.TVCache):
 
     def __init__(self, provider):
 
         tvcache.TVCache.__init__(self, provider)
 
-        # only poll SCC every 10 minutes max
+        # only poll HDTorrents every 10 minutes max
         self.minTime = 20
 
     def updateCache(self):
@@ -277,7 +337,7 @@ class SCCCache(tvcache.TVCache):
         if not self.shouldUpdate():
             return
 
-        search_params = {'RSS': ['']}
+        search_params = {'RSS': []}
         rss_results = self.provider._doSearch(search_params)
         
         if rss_results:
@@ -303,4 +363,4 @@ class SCCCache(tvcache.TVCache):
 
         self._addCacheEntry(title, url)
 
-provider = SCCProvider()
+provider = HDTorrentsProvider()

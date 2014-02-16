@@ -15,8 +15,8 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with Sick Beard.  If not, see <http://www.gnu.org/licenses/>.
+import fnmatch
 import os
-from glob import glob
 
 import re
 import datetime
@@ -246,6 +246,7 @@ def allPossibleShowNames(show):
 
     return showNames
 
+
 def determineReleaseName(dir_name=None, nzb_name=None):
     """Determine a release name from an nzb and/or folder name"""
 
@@ -257,11 +258,14 @@ def determineReleaseName(dir_name=None, nzb_name=None):
         return None
 
     # try to get the release name from nzb/nfo
-    # TODO: Handle case-sensitivity
     file_types = ["*.nzb", "*.nfo"]
+
     for search in file_types:
-        search_path = ek.ek(os.path.join, dir_name, search)
-        results = ek.ek(glob, search_path)
+
+        reg_expr = re.compile(fnmatch.translate(search), re.IGNORECASE)
+        files = [file_name for file_name in ek.ek(os.listdir, dir_name) if ek.ek(os.path.isfile, ek.ek(os.path.join, dir_name, file_name))]
+        results = filter(reg_expr.search, files)
+
         if len(results) == 1:
             found_file = ek.ek(os.path.basename, results[0])
             found_file = found_file.rpartition('.')[0]
