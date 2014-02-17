@@ -31,6 +31,7 @@ from sickbeard import encodingKludge as ek
 from sickbeard.exceptions import ex
 
 from lib.hachoir_parser import createParser
+from sickbeard.completparser import CompleteParser
 
 from sickbeard.name_parser.parser import NameParser, InvalidNameException
 
@@ -240,6 +241,7 @@ class GenericProvider:
 
             (title, url) = self._get_title_and_url(item)
 
+            """
             # parse the file name
             try:
                 myParser = NameParser()
@@ -247,6 +249,10 @@ class GenericProvider:
             except InvalidNameException:
                 logger.log(u"Unable to parse the filename " + title + " into a valid episode", logger.WARNING)
                 continue
+            """
+            cp = CompleteParser(show=episode.show, tvdbActiveLookUp=True)
+            cpr = cp.parse(title)
+            parse_result = cpr.parse_result
 
             if episode.show.air_by_date:
                 if parse_result.air_date != episode.airdate:
@@ -254,11 +260,11 @@ class GenericProvider:
                     logger.log(u"Episode " + title + " didn't air on " + str(episode.airdate) + ", skipping it", logger.DEBUG)
                     continue
 
-            elif parse_result.season_number != episode.season or episode.episode not in parse_result.episode_numbers:
+            elif parse_result.season_number != episode.scene_season or episode.scene_episode not in parse_result.episode_numbers:
                 logger.log(u"Episode " + title + " isn't " + str(episode.season) + "x" + str(episode.episode) + ", skipping it", logger.DEBUG)
                 continue
 
-            quality = self.getQuality(item)
+            quality = cpr.quality #self.getQuality(item)
 
             if not episode.show.wantEpisode(episode.season, episode.episode, quality, manualSearch):
                 logger.log(u"Ignoring result " + title + " because we don't want an episode that is " + Quality.qualityStrings[quality], logger.DEBUG)
@@ -275,7 +281,7 @@ class GenericProvider:
 
         return results
 
-    def findSeasonResults(self, show, season):
+    def findSeasonResults(self, show, season, scene):
 
         itemList = []
         results = {}
@@ -290,9 +296,15 @@ class GenericProvider:
             quality = self.getQuality(item)
 
             # parse the file name
+            cp = CompleteParser(show=show)
+            cpr = cp.parse(title)
+            if not cpr:
+                continue
+            """
             try:
-                myParser = NameParser(False)
-                parse_result = myParser.parse(title)
+                #myParser = NameParser(False)
+                #parse_result = myParser.parse(title)
+                parse_result = None
             except InvalidNameException:
                 logger.log(u"Unable to parse the filename " + title + " into a valid episode", logger.WARNING)
                 continue
@@ -322,28 +334,29 @@ class GenericProvider:
                 actual_season = int(sql_results[0]["season"])
                 actual_episodes = [int(sql_results[0]["episode"])]
 
+            """
             # make sure we want the episode
             wantEp = True
-            for epNo in actual_episodes:
-                if not show.wantEpisode(actual_season, epNo, quality):
+            for epNo in cpr.episodes:
+                if not show.wantEpisode(cpr.season, epNo, cpr.quality):
                     wantEp = False
                     break
 
             if not wantEp:
-                logger.log(u"Ignoring result " + title + " because we don't want an episode that is " + Quality.qualityStrings[quality], logger.DEBUG)
+                logger.log(u"Ignoring result " + title + " because we don't want an episode (" + str(cpr.season) + "x" + str(epNo) + ") that is " + Quality.qualityStrings[quality], logger.DEBUG)
                 continue
 
             logger.log(u"Found result " + title + " at " + url, logger.DEBUG)
 
             # make a result object
             epObj = []
-            for curEp in actual_episodes:
-                epObj.append(show.getEpisode(actual_season, curEp))
+            for curEp in cpr.episodes:
+                epObj.append(show.getEpisode(cpr.season, curEp))
 
             result = self.getResult(epObj)
             result.url = url
             result.name = title
-            result.quality = quality
+            result.quality = cpr.quality
 
             if len(epObj) == 1:
                 epNum = epObj[0].episode

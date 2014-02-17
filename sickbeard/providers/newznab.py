@@ -79,7 +79,7 @@ class NewznabProvider(generic.NZBProvider):
     def isEnabled(self):
         return self.enabled
 
-    def _get_season_search_strings(self, show, season=None):
+    def _get_season_search_strings(self, show, season=None, scene=False):
 
         if not show:
             return [{}]
@@ -136,8 +136,8 @@ class NewznabProvider(generic.NZBProvider):
             params['season'] = date_str.partition('-')[0]
             params['ep'] = date_str.partition('-')[2].replace('-', '/')
         else:
-            params['season'] = ep_obj.season
-            params['ep'] = ep_obj.episode
+            params['season'] = ep_obj.scene_season
+            params['ep'] = ep_obj.scene_episode
 
         to_return = [params]
 

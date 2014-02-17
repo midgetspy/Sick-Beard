@@ -2132,11 +2132,15 @@ class Home:
         epCounts[Overview.UNAIRED] = 0
         epCounts[Overview.SNATCHED] = 0
 
+        showSceneNumberColum = False
         for curResult in sqlResults:
-
+            if not showSceneNumberColum and (isinstance(curResult["scene_season"], int) and isinstance(curResult["scene_episode"], int)):
+                showSceneNumberColum = True
             curEpCat = showObj.getOverview(int(curResult["status"]))
             epCats[str(curResult["season"]) + "x" + str(curResult["episode"])] = curEpCat
             epCounts[curEpCat] += 1
+
+        t.showSceneNumberColum = showSceneNumberColum
 
         def titler(x):
             if not x:
@@ -2397,7 +2401,11 @@ class Home:
                     if epObj.show.air_by_date:
                         ep_segment = str(epObj.airdate)[:7]
                     else:
+                        scene = False
                         ep_segment = epObj.season
+                        if isinstance(epObj.scene_season, int):
+                            ep_segment = int(epObj.scene_season)
+                            scene = True
 
                     if ep_segment not in segment_list:
                         segment_list.append(ep_segment)
@@ -2420,10 +2428,16 @@ class Home:
 
         msg = "Backlog was automatically started for the following seasons of <b>" + showObj.name + "</b>:<br /><ul>"
         for cur_segment in segment_list:
-            msg += "<li>Season " + str(cur_segment) + "</li>"
-            logger.log(u"Sending backlog for " + showObj.name + " season " + str(cur_segment) + " because some eps were set to wanted")
-            cur_backlog_queue_item = search_queue.BacklogQueueItem(showObj, cur_segment)
-            sickbeard.searchQueueScheduler.action.add_item(cur_backlog_queue_item)  # @UndefinedVariable
+            msg += "<li>Season "+str(cur_segment)
+            if scene is True:
+                msg += " (scene)</li>"
+                scene_msg = " (scene)"
+            else:
+                msg += "</li>"
+                scene_msg = ""
+            logger.log(u"Sending backlog for "+showObj.name+" season "+str(cur_segment)+scene_msg+" because some eps were set to wanted")
+            cur_backlog_queue_item = search_queue.BacklogQueueItem(showObj, cur_segment, scene)
+            sickbeard.searchQueueScheduler.action.add_item(cur_backlog_queue_item) #@UndefinedVariable
         msg += "</ul>"
 
         if segment_list:

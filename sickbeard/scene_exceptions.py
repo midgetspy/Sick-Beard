@@ -18,10 +18,14 @@
 
 import re
 
+from sickbeard.helpers import sanitizeSceneName
 from sickbeard import helpers
 from sickbeard import name_cache
 from sickbeard import logger
 from sickbeard import db
+import sickbeard
+
+exception_tvdb = {}
 
 
 def get_scene_exceptions(tvdb_id):
@@ -70,6 +74,8 @@ def retrieve_exceptions():
     remote_exception_dict = {}
     local_exception_dict = {}
     query_list = []
+    buil_name_set()
+    exception_dict = {}
 
     # remote exceptions are stored on github pages
     url = 'http://midgetspy.github.com/sb_tvdb_scene_exceptions/exceptions.txt'
@@ -143,3 +149,18 @@ def retrieve_exceptions():
             logger.log(u"No scene exceptions update needed")
 
     return True
+
+def buil_name_set():
+    logger.log(u"Updating internal scene name cache", logger.MESSAGE)
+    _excpetionDots = []
+    global exception_tvdb
+    exception_tvdb = {}
+
+    for show in sickbeard.showList:
+            for name in get_scene_exceptions(show.tvdbid):
+                exception_tvdb[name] = show.tvdbid
+                exception_tvdb[helpers.full_sanitizeSceneName(name)] = show.tvdbid
+                _excpetionDots.append(".")
+
+    logger.log(u"Updated internal scene name cache " + "".join(_excpetionDots), logger.MESSAGE)
+    logger.log(u"Internal scene name cache set to: " + str(exception_tvdb), logger.DEBUG)

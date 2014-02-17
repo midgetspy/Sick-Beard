@@ -190,7 +190,7 @@ class BTNProvider(generic.TorrentProvider):
 
         return (title, url)
 
-    def _get_season_search_strings(self, show, season=None):
+    def _get_season_search_strings(self, show, season=None, scene=False):
         if not show:
             return [{}]
 
@@ -260,7 +260,7 @@ class BTNProvider(generic.TorrentProvider):
 
         else:
             # Do a general name search for the episode, formatted like SXXEYY
-            search_params['name'] = "S%02dE%02d" % (ep_obj.season, ep_obj.episode)
+            search_params['name'] = "S%02dE%02d" % (ep_obj.scene_season,ep_obj.scene_episode)
 
         to_return = [search_params]
 
