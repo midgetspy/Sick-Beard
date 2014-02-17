@@ -713,8 +713,8 @@ class TVShow(object):
         xmlFile = ek.ek(os.path.join, self._location, "tvshow.nfo")
 
         try:
-            xmlFileObj = open(xmlFile, 'r')
-            showXML = etree.ElementTree(file=xmlFileObj)
+            with open(xmlFile, 'r') as xmlFileObj:
+                showXML = etree.ElementTree(file=xmlFileObj)
 
             if showXML.findtext('title') == None or (showXML.findtext('tvdbid') == None and showXML.findtext('id') == None):
                 raise exceptions.NoNFOException("Invalid info in tvshow.nfo (missing name or id):" \
@@ -948,7 +948,7 @@ class TVShow(object):
             return Overview.GOOD
         elif epStatus in Quality.DOWNLOADED + Quality.SNATCHED + Quality.SNATCHED_PROPER:
 
-            anyQualities, bestQualities = Quality.splitQuality(self.quality)  #@UnusedVariable
+            anyQualities, bestQualities = Quality.splitQuality(self.quality)  # @UnusedVariable
             if bestQualities:
                 maxBestQuality = max(bestQualities)
             else:
@@ -1507,7 +1507,7 @@ class TVEpisode(object):
                 return ''
             return parse_result.release_group
 
-        epStatus, epQual = Quality.splitCompositeStatus(self.status)  #@UnusedVariable
+        epStatus, epQual = Quality.splitCompositeStatus(self.status)  # @UnusedVariable
 
         return {
                    '%SN': self.show.name,
