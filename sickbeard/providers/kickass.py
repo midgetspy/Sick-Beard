@@ -42,7 +42,7 @@ class KICKASSProvider(generic.TorrentProvider):
 
         self.cache = KICKASSCache(self)
 
-        self.url = 'http://kat.ph/'
+        self.url = 'http://kickass.to/'
 
     def isEnabled(self):
         return sickbeard.KICKASS
@@ -110,7 +110,7 @@ class KICKASSProvider(generic.TorrentProvider):
             searchURL = searchURL + '/?rss=1&field=seeders&sorder=desc'
             searchURL = searchURL.lower()
             
-            logger.log(u"Search string: " + searchURL)
+            logger.log(u"Search string: " + searchURL, logger.DEBUG)
             #data = self.getURL(searchURL)
 
             items = []
@@ -140,7 +140,7 @@ class KICKASSProvider(generic.TorrentProvider):
                 except Exception, e:
                     logger.log(u"Error trying to load KICKASS RSS feed item: "+str(e).decode('utf-8'), logger.ERROR)
                
-            logger.log("KICKASS total torrents: %(count)d" % { 'count' : len(results) })
+            logger.log("KICKASS total torrents: %(count)d" % { 'count' : len(results) }, logger.DEBUG)
             
             return results
         except Exception, e:
