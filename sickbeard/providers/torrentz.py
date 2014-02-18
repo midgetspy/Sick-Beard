@@ -195,8 +195,8 @@ class TORRENTZCache(tvcache.TVCache):
     
     def _parseItem(self, item):
         try:      
-            title = helpers.get_xml_text(item.getElementsByTagName('title')[0])
-            torrentz_url = helpers.get_xml_text(item.getElementsByTagName('guid')[0])
+            title = helpers.get_xml_text(item.findall('title')[0])
+            torrentz_url = helpers.get_xml_text(item.findall('guid')[0])
             url = self.provider._getTorrentzCache(torrentz_url)
 
             if not title or not url:

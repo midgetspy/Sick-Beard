@@ -186,8 +186,8 @@ class KICKASSCache(tvcache.TVCache):
     
     def _parseItem(self, item):
         try:      
-            title = helpers.get_xml_text(item.getElementsByTagName('title')[0])
-            url = item.getElementsByTagName('enclosure')[0].getAttribute("url").replace('&amp;','&')
+            title = helpers.get_xml_text(item.findall('title')[0])
+            url = item.findall('enclosure')[0].get("url").replace('&amp;','&')
 
             if not title or not url:
                 logger.log(u"The XML returned from the KICKASS RSS feed is incomplete, this result is unusable", logger.ERROR)
