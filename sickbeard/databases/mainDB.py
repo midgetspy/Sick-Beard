@@ -255,6 +255,7 @@ class RenameSeasonFolders(AddSizeAndSceneNameFields):
 
         self.incDBVersion()
 
+
 # included in build 500 (2013-05-11)
 class Add1080pAndRawHDQualities(RenameSeasonFolders):
     """Add support for 1080p related qualities along with RawHD
@@ -374,18 +375,6 @@ class Add1080pAndRawHDQualities(RenameSeasonFolders):
             ql.append(["UPDATE history SET quality = ? WHERE showid = ? AND date = ?", [self._update_quality(cur_entry["quality"]), cur_entry["showid"], cur_entry["date"]]])
         self.connection.mass_action(ql)
 
-class AddSubtitleColumns(Add1080pAndRawHDQualities):
-
-    def test(self):
-        return self.checkDBVersion() >= 13
-    
-    def execute(self):
-        backupDatabase(13)
-
-        if not self.hasColumn("tv_episodes", "hassrt"):
-            self.addColumn("tv_episodes", "hassrt")
-            logger.log(u"Adding subtitle column to episodes")
-
         self.incDBVersion()
 
         # cleanup and reduce db if any previous data was removed
@@ -394,14 +383,14 @@ class AddSubtitleColumns(Add1080pAndRawHDQualities):
 
 
 # included in build 502 (TBD)
-class AddShowidTvdbidIndex(AddSubtitleColumns):
+class AddShowidTvdbidIndex(Add1080pAndRawHDQualities):
     """ Adding index on tvdb_id (tv_shows) and showid (tv_episodes) to speed up searches/queries """
 
     def test(self):
-        return self.checkDBVersion() >= 14
+        return self.checkDBVersion() >= 13
 
     def execute(self):
-        backupDatabase(14)
+        backupDatabase(13)
 
         logger.log(u"Check for duplicate shows before adding unique index.")
         MainSanityCheck(self.connection).fix_duplicate_shows()
@@ -418,13 +407,32 @@ class AddLastUpdateTVDB(AddShowidTvdbidIndex):
     """ Adding column last_update_tvdb to tv_shows for controlling nightly updates """
 
     def test(self):
-        return self.checkDBVersion() >= 15
+        return self.checkDBVersion() >= 14
 
     def execute(self):
-        backupDatabase(15)
+        backupDatabase(14)
 
         logger.log(u"Adding column last_update_tvdb to tvshows")
         if not self.hasColumn("tv_shows", "last_update_tvdb"):
             self.addColumn("tv_shows", "last_update_tvdb", default=1)
 
         self.incDBVersion()
+        
+
+class AddSubtitleColumns(AddLastUpdateTVDB):
+
+    def test(self):
+        return self.checkDBVersion() >= 15
+    
+    def execute(self):
+        backupDatabase(15)
+
+        if not self.hasColumn("tv_episodes", "hassrt"):
+            self.addColumn("tv_episodes", "hassrt")
+            logger.log(u"Adding subtitle column to episodes")
+
+        self.incDBVersion()
+
+        # cleanup and reduce db if any previous data was removed
+        logger.log(u"Performing a vacuum on the database.", logger.DEBUG)
+        self.connection.action("VACUUM")
