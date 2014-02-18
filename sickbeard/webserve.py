@@ -771,66 +771,45 @@ class ConfigSearch:
         results = []
 
         for key, value in postData.items():
-        	value = value.strip()
-        	val = 1 if value == "on" else value
-        	if hasattr(config, 'change_' + key.upper()):
-        	  	ret, msg = getattr(config, 'change_' + key.upper())(val)
-        	  	if ret == False:
-        	  		results.append(msg)
-        	elif hasattr(sickbeard, key.upper()):
-        	  	setattr(sickbeard, key.upper(), val)
-        	elif hasattr(sickbeard, key.lower()):
-        	  	setattr(sickbeard, key.lower(), val)
-        	else:
-        	  	logger.log("Unknown search setting: " + key, logger.ERROR)
+            value = value.strip()
+            val = 1 if value == "on" else value
+            if hasattr(config, 'change_' + key.upper()):
+                ret, msg = getattr(config, 'change_' + key.upper())(val)
+                if ret == False:
+                    results.append(msg)
+            elif hasattr(sickbeard, key.upper()):
+                setattr(sickbeard, key.upper(), val)
+            elif hasattr(sickbeard, key.lower()):
+                setattr(sickbeard, key.lower(), val)
+            else:
+                logger.log("Unknown search setting: " + key, logger.ERROR)
 
         # handle some special cases
         sickbeard.USE_TORRENTS = 1 if postData.get('use_torrents') == "on" else 0
         sickbeard.USE_NZBS = 1 if postData.get('use_nzbs') == "on" else 0
         sickbeard.TORRENT_PAUSED = 1 if postData.get('torrent_paused') == "on" else 0
-        sickbeard.DOWLOAD_PROPERS = 1 if postData.get('download_propers') == "on" else 0
+        sickbeard.DOWNLOAD_PROPERS = 1 if postData.get('download_propers') == "on" else 0
         sickbeard.PREFER_EPISODE_RELEASES = 1 if postData.get('prefer_episode_releases') == "on" else 0
-        sickbeard.USENET_RETENTION = int(postData.get('usenet_retention', 200))
+        sickbeard.USENET_RETENTION = int(postData.get('usenet_retention', 500))
+        sickbeard.SAB_APIKEY = postData.get('sab_apikey').strip()
+        if sickbeard.TORRENT_RATIO == "":
+            sickbeard.TORRENT_RATIO = None
+        else:
+            sickbeard.TORRENT_RATIO = float(sickbeard.TORRENT_RATIO)
+
 
         # this regex will match http or https urls or just a domain/address
         regex = re.compile(r'^(http)?(?P<s>s|)?(://)?(?P<addr>[^/]*)/?')
         # this substitution combined with above regex will return a '/' terminated url from given url or host
         regex_sub = r'http\g<s>://\g<addr>/'
 
-        if download_propers == "on":
-            download_propers = 1
-        else:
-            download_propers = 0
 
-        if use_nzbs == "on":
-            use_nzbs = 1
-        else:
-            use_nzbs = 0
-
-        if use_torrents == "on":
-            use_torrents = 1
-        else:
-            use_torrents = 0
-
-        if usenet_retention == None:
-            usenet_retention = 500
-
-        sickbeard.USE_NZBS = use_nzbs
-        sickbeard.USE_TORRENTS = use_torrents
-
-        sickbeard.NZB_METHOD = nzb_method
-        sickbeard.USENET_RETENTION = int(usenet_retention)
-
-        sickbeard.DOWNLOAD_PROPERS = download_propers
         if sickbeard.DOWNLOAD_PROPERS:
             sickbeard.properFinderScheduler.silent = False
         else:
             sickbeard.properFinderScheduler.silent = True
 
-        sickbeard.SAB_USERNAME = sab_username
-        sickbeard.SAB_PASSWORD = sab_password
-        sickbeard.SAB_APIKEY = sab_apikey.strip()
-        sickbeard.SAB_CATEGORY = sab_category
+        sab_host = postData.get('sab_host')
 
         if sab_host and not re.match('https?://.*', sab_host):
             sab_host = 'http://' + sab_host
@@ -840,10 +819,6 @@ class ConfigSearch:
 
         sickbeard.SAB_HOST = sab_host
         sickbeard.TORRENT_HOST = re.sub(regex, regex_sub, postData.get('torrent_host', ''))
-
-        sickbeard.NZBGET_PASSWORD = nzbget_password
-        sickbeard.NZBGET_CATEGORY = nzbget_category
-        sickbeard.NZBGET_HOST = nzbget_host
 
         sickbeard.save_config()
 
