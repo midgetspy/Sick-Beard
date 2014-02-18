@@ -58,7 +58,7 @@ class PostProcessor(object):
     FOLDER_NAME = 2
     FILE_NAME = 3
 
-    def __init__(self, file_path, nzb_name=None):
+    def __init__(self, file_path, nzb_name=None, pp_options={}):
         """
         Creates a new post processor with the given file path and optionally an NZB name.
 
@@ -79,6 +79,8 @@ class PostProcessor(object):
 
         # name of the NZB that resulted in this folder
         self.nzb_name = nzb_name
+
+        self.force_replace = pp_options.get('force_replace', False)
 
         self.in_history = False
         self.release_group = None
@@ -683,9 +685,9 @@ class PostProcessor(object):
 
         # Status downloaded. Quality/ size checks
 
-        # if the file processed appears to be a PROPER/REPACK then it's safe
-        if self.is_proper and new_ep_quality >= old_ep_quality and new_ep_quality != common.Quality.UNKNOWN:
-            self._log(u"Existing episode status is not snatched_proper, but new file appears to be a proper, marking it safe to replace", logger.DEBUG)
+        # if manual post process option is set to force_replace then it's safe
+        if self.force_replace:
+            self._log(u"Processed episode is set to force replace existing episode, marking it safe to replace", logger.DEBUG)
             return True
 
         # if the file processed is higher quality than the existing episode then it's safe

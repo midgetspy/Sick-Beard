@@ -67,7 +67,7 @@ def logHelper(logMessage, logLevel=logger.MESSAGE):
     return logMessage + u"\n"
 
 
-def processDir(dirName, nzbName=None, method=None, recurse=False):
+def processDir(dirName, nzbName=None, method=None, recurse=False, pp_options={}):
     """
     Scans through the files in dirName and processes whatever media files it finds
 
@@ -144,7 +144,7 @@ def processDir(dirName, nzbName=None, method=None, recurse=False):
             returnStr += logHelper(u"Ignoring hidden folder: " + cur_folder, logger.DEBUG)
         else:
             returnStr += logHelper(u"Recursively processing a folder: " + cur_folder, logger.DEBUG)
-            returnStr += processDir(cur_folder, nzbName=parent_nzbName, recurse=True, method=method)
+            returnStr += processDir(cur_folder, nzbName=parent_nzbName, recurse=True, method=method, pp_options=pp_options)
 
     remainingFolders = filter(lambda x: ek.ek(os.path.isdir, ek.ek(os.path.join, dirName, x)), fileList)
 
@@ -182,7 +182,7 @@ def processDir(dirName, nzbName=None, method=None, recurse=False):
 
         try:
             returnStr += u"\n"
-            processor = postProcessor.PostProcessor(cur_video_file_path, nzbName)
+            processor = postProcessor.PostProcessor(cur_video_file_path, nzb_name=nzbName, pp_options=pp_options)
             process_result = processor.process()
             process_fail_message = ""
 
