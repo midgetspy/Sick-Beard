@@ -33,7 +33,7 @@ except:
 
 # We only need this for compiling an EXE and I will just always do that on 2.6+
 if sys.hexversion >= 0x020600F0:
-    from multiprocessing import freeze_support
+    from multiprocessing import freeze_support  # @UnresolvedImport
 
 import locale
 import os
@@ -114,9 +114,7 @@ def daemonize():
         try:
             file(sickbeard.PIDFILE, 'w').write("%s\n" % pid)
         except IOError, e:
-            error_msg = "Unable to write PID file: " + sickbeard.PIDFILE + " Error: " + str(e.strerror) + " [" + str(e.errno) + "]"
-            logger.log(u"" + error_msg, logger.ERROR)
-            sys.exit(error_msg)
+            logger.log_error_and_exit(u"Unable to write PID file: " + sickbeard.PIDFILE + " Error: " + str(e.strerror) + " [" + str(e.errno) + "]")
 
     # Redirect all output
     sys.stdout.flush()

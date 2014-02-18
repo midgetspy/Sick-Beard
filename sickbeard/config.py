@@ -182,7 +182,7 @@ def change_VERSION_NOTIFY(version_notify):
         sickbeard.NEWEST_VERSION_STRING = None
 
     if oldSetting == False and version_notify == True:
-        sickbeard.versionCheckScheduler.action.run()  #@UndefinedVariable
+        sickbeard.versionCheckScheduler.action.run()  # @UndefinedVariable
 
 
 def CheckSection(CFG, sec):
@@ -278,17 +278,23 @@ class ConfigMigrator():
         self.config_obj = config_obj
 
         # check the version of the config
-        self.config_version = check_setting_int(config_obj, 'General', 'config_version', 0)
+        self.config_version = check_setting_int(config_obj, 'General', 'config_version', sickbeard.CONFIG_VERSION)
         self.expected_config_version = sickbeard.CONFIG_VERSION
         self.migration_names = {1: 'Custom naming',
                                 2: 'Sync backup number with version number',
-                                3: 'Rename omgwtfnzb variables'
+                                3: 'Rename omgwtfnzb variables',
+                                4: 'Add newznab catIDs',
+                                5: 'Metadata update'
                                 }
 
     def migrate_config(self):
         """
         Calls each successive migration until the config is the same version as SB expects
         """
+
+        if self.config_version > self.expected_config_version:
+            logger.log_error_and_exit(u"Your config version (" + str(self.config_version) + ") has been incremented past what this version of Sick Beard supports (" + str(self.expected_config_version) + ").\n" + \
+                                      "If you have used other forks or a newer version of Sick Beard, your config file may be unusable due to their modifications.")
 
         sickbeard.CONFIG_VERSION = self.config_version
 
@@ -303,8 +309,7 @@ class ConfigMigrator():
 
             logger.log(u"Backing up config before upgrade")
             if not helpers.backupVersionedFile(sickbeard.CONFIG_FILE, self.config_version):
-                logger.log(u"Config backup failed, abort upgrading config")
-                sys.exit("Config backup failed, abort upgrading config")
+                logger.log_error_and_exit(u"Config backup failed, abort upgrading config")
             else:
                 logger.log(u"Proceeding with upgrade")
 
@@ -429,7 +434,7 @@ class ConfigMigrator():
     def _migrate_v2(self):
         return
 
-    # Migration v2: Rename  omgwtfnzb variables
+    # Migration v2: Rename omgwtfnzb variables
     def _migrate_v3(self):
         """
         Reads in the old naming settings from your config and generates a new config template from them.
@@ -437,3 +442,101 @@ class ConfigMigrator():
         # get the old settings from the file and store them in the new variable names
         sickbeard.OMGWTFNZBS_USERNAME = check_setting_str(self.config_obj, 'omgwtfnzbs', 'omgwtfnzbs_uid', '')
         sickbeard.OMGWTFNZBS_APIKEY = check_setting_str(self.config_obj, 'omgwtfnzbs', 'omgwtfnzbs_key', '')
+
+    # Migration v4: Add default newznab catIDs
+    def _migrate_v4(self):
+        """ Update newznab providers so that the category IDs can be set independently via the config """
+
+        new_newznab_data = []
+        old_newznab_data = check_setting_str(self.config_obj, 'Newznab', 'newznab_data', '')
+
+        if old_newznab_data:
+            old_newznab_data_list = old_newznab_data.split("!!!")
+
+            for cur_provider_data in old_newznab_data_list:
+                try:
+                    name, url, key, enabled = cur_provider_data.split("|")
+                except ValueError:
+                    logger.log(u"Skipping Newznab provider string: '" + cur_provider_data + "', incorrect format", logger.ERROR)
+                    continue
+
+                if name == 'Sick Beard Index':
+                    key = '0'
+
+                if name == 'NZBs.org':
+                    catIDs = '5030,5040,5070,5090'
+                else:
+                    catIDs = '5030,5040'
+
+                cur_provider_data_list = [name, url, key, catIDs, enabled]
+                new_newznab_data.append("|".join(cur_provider_data_list))
+
+            sickbeard.NEWZNAB_DATA = "!!!".join(new_newznab_data)
+
+    # Migration v5: Metadata upgrade
+    def _migrate_v5(self):
+        """ Updates metadata values to the new format """
+
+        """ Quick overview of what the upgrade does:
+
+        new | old | description (new)
+        ----+-----+--------------------
+          1 |  1  | show metadata
+          2 |  2  | episode metadata
+          3 |  4  | show fanart
+          4 |  3  | show poster
+          5 |  -  | show banner
+          6 |  5  | episode thumb
+          7 |  6  | season poster
+          8 |  -  | season banner
+          9 |  -  | season all poster
+         10 |  -  | season all banner
+
+        Note that the ini places start at 1 while the list index starts at 0.
+        old format: 0|0|0|0|0|0 -- 6 places
+        new format: 0|0|0|0|0|0|0|0|0|0 -- 10 places
+
+        Drop the use of use_banner option.
+        Migrate the poster override to just using the banner option (applies to xbmc only).
+        """
+
+        metadata_xbmc = check_setting_str(self.config_obj, 'General', 'metadata_xbmc', '0|0|0|0|0|0')
+        metadata_xbmc_12plus = check_setting_str(self.config_obj, 'General', 'metadata_xbmc_12plus', '0|0|0|0|0|0')
+        metadata_mediabrowser = check_setting_str(self.config_obj, 'General', 'metadata_mediabrowser', '0|0|0|0|0|0')
+        metadata_ps3 = check_setting_str(self.config_obj, 'General', 'metadata_ps3', '0|0|0|0|0|0')
+        metadata_wdtv = check_setting_str(self.config_obj, 'General', 'metadata_wdtv', '0|0|0|0|0|0')
+        metadata_tivo = check_setting_str(self.config_obj, 'General', 'metadata_tivo', '0|0|0|0|0|0')
+
+        use_banner = bool(check_setting_int(self.config_obj, 'General', 'use_banner', 0))
+
+        def _migrate_metadata(metadata, metadata_name, use_banner):
+            cur_metadata = metadata.split('|')
+            # if target has the old number of values, do upgrade
+            if len(cur_metadata) == 6:
+                logger.log(u"Upgrading " + metadata_name + " metadata, old value: " + metadata)
+                cur_metadata.insert(4, '0')
+                cur_metadata.append('0')
+                cur_metadata.append('0')
+                cur_metadata.append('0')
+                # swap show fanart, show poster
+                cur_metadata[3], cur_metadata[2] = cur_metadata[2], cur_metadata[3]
+                # if user was using use_banner to override the poster, instead enable the banner option and deactivate poster
+                if metadata_name == 'XBMC' and use_banner:
+                    cur_metadata[4], cur_metadata[3] = cur_metadata[3], '0'
+                # write new format
+                metadata = '|'.join(cur_metadata)
+                logger.log(u"Upgrading " + metadata_name + " metadata, new value: " + metadata)
+
+            else:
+                logger.log(u"Skipping " + metadata_name + " metadata: '" + metadata + "', incorrect format", logger.ERROR)
+                metadata = '0|0|0|0|0|0|0|0|0|0'
+                logger.log(u"Setting " + metadata_name + " metadata, new value: " + metadata)
+
+            return metadata
+
+        sickbeard.METADATA_XBMC = _migrate_metadata(metadata_xbmc, 'XBMC', use_banner)
+        sickbeard.METADATA_XBMC_12PLUS = _migrate_metadata(metadata_xbmc_12plus, 'XBMC 12+', use_banner)
+        sickbeard.METADATA_MEDIABROWSER = _migrate_metadata(metadata_mediabrowser, 'MediaBrowser', use_banner)
+        sickbeard.METADATA_PS3 = _migrate_metadata(metadata_ps3, 'PS3', use_banner)
+        sickbeard.METADATA_WDTV = _migrate_metadata(metadata_wdtv, 'WDTV', use_banner)
+        sickbeard.METADATA_TIVO = _migrate_metadata(metadata_tivo, 'TIVO', use_banner)

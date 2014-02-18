@@ -227,6 +227,7 @@ class TVShow(object):
             logger.log(str(self.tvdbid) + u": Show dir doesn't exist, skipping NFO generation")
             return False
 
+        logger.log(str(self.tvdbid) + u": Writing NFOs for show")
         for cur_provider in sickbeard.metadata_provider_dict.values():
             result = cur_provider.create_show_metadata(self) or result
 
@@ -436,16 +437,23 @@ class TVShow(object):
             return
 
     def getImages(self, fanart=None, poster=None):
-
-        poster_result = fanart_result = season_thumb_result = False
+        fanart_result = poster_result = banner_result = False
+        season_posters_result = season_banners_result = season_all_poster_result = season_all_banner_result = False
 
         for cur_provider in sickbeard.metadata_provider_dict.values():
-            logger.log(u"Running season folders for " + cur_provider.name, logger.DEBUG)
-            poster_result = cur_provider.create_poster(self) or poster_result
-            fanart_result = cur_provider.create_fanart(self) or fanart_result
-            season_thumb_result = cur_provider.create_season_thumbs(self) or season_thumb_result
+            # FIXME: Needs to not show this message if the option is not enabled?
+            logger.log(u"Running metadata routines for " + cur_provider.name, logger.DEBUG)
 
-        return poster_result or fanart_result or season_thumb_result
+            fanart_result = cur_provider.create_fanart(self) or fanart_result
+            poster_result = cur_provider.create_poster(self) or poster_result
+            banner_result = cur_provider.create_banner(self) or banner_result
+
+            season_posters_result = cur_provider.create_season_posters(self) or season_posters_result
+            season_banners_result = cur_provider.create_season_banners(self) or season_banners_result
+            season_all_poster_result = cur_provider.create_season_all_poster(self) or season_all_poster_result
+            season_all_banner_result = cur_provider.create_season_all_banner(self) or season_all_banner_result
+
+        return fanart_result or poster_result or banner_result or season_posters_result or season_banners_result or season_all_poster_result or season_all_banner_result
 
     def loadLatestFromTVRage(self):
 
@@ -696,7 +704,7 @@ class TVShow(object):
 
     def loadNFO(self):
 
-        if not os.path.isdir(self._location):
+        if not ek.ek(os.path.isdir, self._location):
             logger.log(str(self.tvdbid) + u": Show dir doesn't exist, can't load NFO")
             raise exceptions.NoNFOException("The show dir doesn't exist, no NFO could be loaded")
 
@@ -1251,7 +1259,7 @@ class TVEpisode(object):
 
     def loadFromNFO(self, location):
 
-        if not os.path.isdir(self.show._location):
+        if not ek.ek(os.path.isdir, self.show._location):
             logger.log(str(self.show.tvdbid) + u": The show dir is missing, not bothering to try loading the episode NFO")
             return
 
@@ -1744,7 +1752,7 @@ class TVEpisode(object):
             logger.log(str(self.tvdbid) + u": File " + self.location + " is already named correctly, skipping", logger.DEBUG)
             return
 
-        related_files = postProcessor.PostProcessor(self.location)._list_associated_files(self.location)
+        related_files = postProcessor.PostProcessor(self.location).list_associated_files(self.location, base_name_only=True)
         logger.log(u"Files associated to " + self.location + ": " + str(related_files), logger.DEBUG)
 
         # move the ep file

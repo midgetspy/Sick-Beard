@@ -505,6 +505,59 @@ class test_tvdb_zip(unittest.TestCase):
         self.assertEquals(self.t['My Name Is Earl'][1][4]['episodename'], 'Faked His Own Death')
 
 
+class test_tvdb_show_ordering(unittest.TestCase):
+    # Used to store the cached instance of Tvdb()
+    t_dvd = None
+    t_air = None
+
+    def setUp(self):
+        if self.t_dvd is None:
+            self.t_dvd = tvdb_api.Tvdb(cache = True, useZip = True, dvdorder=True)
+
+        if self.t_air is None:
+            self.t_air = tvdb_api.Tvdb(cache = True, useZip = True)
+
+    def test_ordering(self):
+        """Test Tvdb.search method
+        """
+        self.assertEquals(u'The Train Job', self.t_air['Firefly'][1][1]['episodename'])
+        self.assertEquals(u'Serenity', self.t_dvd['Firefly'][1][1]['episodename'])
+
+        self.assertEquals(u'The Cat & the Claw (Part 1)', self.t_air['Batman The Animated Series'][1][1]['episodename'])
+        self.assertEquals(u'On Leather Wings', self.t_dvd['Batman The Animated Series'][1][1]['episodename'])
+
+class test_tvdb_show_search(unittest.TestCase):
+    # Used to store the cached instance of Tvdb()
+    t = None
+
+    def setUp(self):
+        if self.t is None:
+            self.__class__.t = tvdb_api.Tvdb(cache = True, useZip = True)
+
+    def test_search(self):
+        """Test Tvdb.search method
+        """
+        results = self.t.search("my name is earl")
+        all_ids = [x['seriesid'] for x in results]
+        self.assertTrue('75397' in all_ids)
+
+
+class test_tvdb_alt_names(unittest.TestCase):
+    t = None
+    def setUp(self):
+        if self.t is None:
+            self.__class__.t = tvdb_api.Tvdb(cache = True, actors = True)
+
+    def test_1(self):
+        """Tests basic access of series name alias
+        """
+        results = self.t.search("Don't Trust the B---- in Apartment 23")
+        series = results[0]
+        self.assertTrue(
+            'Apartment 23' in series['aliasnames']
+        )
+
+
 if __name__ == '__main__':
     runner = unittest.TextTestRunner(verbosity = 2)
     unittest.main(testRunner = runner)
