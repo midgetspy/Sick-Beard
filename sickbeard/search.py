@@ -75,7 +75,7 @@ def _downloadResult(result):
             with open(fileName, 'w') as fileOut:
                 fileOut.write(result.extraInfo[0])
             helpers.chmodAsParent(fileName)
-        except IOError, e:
+        except EnvironmentError, e:
             logger.log(u"Error trying to save NZB to black hole: " + ex(e), logger.ERROR)
             newResult = False
 

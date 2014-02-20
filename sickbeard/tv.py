@@ -735,7 +735,6 @@ class TVShow(object):
             logger.log(u"Attempting to rename it to tvshow.nfo.old", logger.DEBUG)
 
             try:
-                xmlFileObj.close()
                 ek.ek(os.rename, xmlFile, xmlFile + ".old")
             except Exception, e:
                 logger.log(u"Failed to rename your tvshow.nfo file - you need to delete it or fix it: " + ex(e), logger.ERROR)

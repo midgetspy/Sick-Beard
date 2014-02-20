@@ -285,7 +285,7 @@ def makeShowNFO(showID, showDir):
     try:
         with open(nfo_filename, 'w') as nfo_fh:
             nfo.write(nfo_fh, encoding="utf-8")
-    except IOError, e:
+    except EnvironmentError, e:
         logger.log(u"Unable to write NFO file: " + ex(e), logger.ERROR)
 
     return True

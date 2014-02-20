@@ -143,7 +143,7 @@ class GenericProvider:
             with open(file_name, writeMode) as fileOut:
                 fileOut.write(data)
             helpers.chmodAsParent(file_name)
-        except IOError, e:
+        except EnvironmentError, e:
             logger.log(u"Unable to save the file: " + ex(e), logger.ERROR)
             return False
 

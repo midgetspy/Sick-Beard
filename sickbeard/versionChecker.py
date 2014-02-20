@@ -502,7 +502,7 @@ class SourceUpdateManager(UpdateManager):
         try:
             with open(version_file, 'r') as fp:
                 self._cur_commit_hash = fp.read().strip(' \n\r')
-        except IOError, e:
+        except EnvironmentError, e:
             logger.log(u"Unable to open 'version.txt': " + ex(e), logger.DEBUG)
 
         if not self._cur_commit_hash:
@@ -640,7 +640,7 @@ class SourceUpdateManager(UpdateManager):
             try:
                 with open(version_path, 'w') as ver_file:
                     ver_file.write(self._newest_commit_hash)
-            except (IOError, OSError), e:
+            except EnvironmentError, e:
                 logger.log(u"Unable to write version file, update not complete: " + ex(e), logger.ERROR)
                 return False
 
