@@ -284,7 +284,7 @@ class Manage:
             status_list = []
 
         t = PageTemplate(file="manage_episodeStatuses.tmpl")
-        t.submenu = ManageMenu
+        t.submenu = self.manageMenu()
         t.whichStatus = whichStatus
 
         # if we have no status then this is as far as we need to go
@@ -382,7 +382,7 @@ class Manage:
     def subtitleMissed(self, whichSubs=None):
 
         t = PageTemplate(file="manage_subtitleMissed.tmpl")
-        t.submenu = ManageMenu
+        t.submenu = self.manageMenu()
         t.whichSubs = whichSubs
 
         if not whichSubs:
@@ -463,7 +463,7 @@ class Manage:
     def backlogOverview(self):
 
         t = PageTemplate(file="manage_backlogOverview.tmpl")
-        t.submenu = ManageMenu
+        t.submenu = self.manageMenu()
 
         myDB = db.DBConnection()
 
@@ -504,7 +504,7 @@ class Manage:
     def massEdit(self, toEdit=None):
 
         t = PageTemplate(file="manage_massEdit.tmpl")
-        t.submenu = ManageMenu
+        t.submenu = self.manageMenu()
 
         if not toEdit:
             redirect("/manage/")
@@ -750,7 +750,7 @@ class Manage:
 
         t = PageTemplate(file="manage_torrents.tmpl")
         t.info_download_station = ''
-        t.submenu = ManageMenu
+        t.submenu = self.manageMenu()
 
         if re.search('localhost', sickbeard.TORRENT_HOST):
 
@@ -792,7 +792,7 @@ class Manage:
         t = PageTemplate(file="manage_failedDownloads.tmpl")
         t.failedResults = sqlResults
         t.limit = limit
-        t.submenu = ManageMenu
+        t.submenu = self.manageMenu()
 
         return _munge(t)
 
