@@ -232,7 +232,7 @@ def pickBestResult(results, quality_list=None):
             logger.log(cur_result.name+" is a quality we know we don't want, rejecting it", logger.DEBUG)
             continue
 
-        if sickbeard.USE_FAILED_DOWNLOADS and failed_history.hasFailed(cur_result.name, cur_result.size):
+        if sickbeard.USE_FAILED_DOWNLOADS and failed_history.hasFailed(cur_result.name, cur_result.size, cur_result.provider.name):
             logger.log(cur_result.name + u" has previously failed, rejecting it")
             continue
 
@@ -471,7 +471,7 @@ def findSeason(show, season):
 
             logger.log(u"Seeing if we want to bother with multi-episode result "+multiResult.name, logger.DEBUG)
 
-            if sickbeard.USE_FAILED_DOWNLOADS and failed_history.hasFailed(multiResult.name, multiResult.size):
+            if sickbeard.USE_FAILED_DOWNLOADS and failed_history.hasFailed(multiResult.name, multiResult.size, multiResult.provider.name):
                 logger.log(multiResult.name + u" has previously failed, rejecting this multi-ep result")
                 continue
 
