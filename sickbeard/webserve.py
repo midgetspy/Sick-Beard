@@ -164,19 +164,25 @@ def _getEpisode(show, season, episode):
 
     return epObj
 
-
-ManageMenu = [
+def ManageMenu():
+        
+    manageMenu = [
     { 'title': 'Backlog Overview',          'path': 'manage/backlogOverview/' },
     { 'title': 'Manage Searches',           'path': 'manage/manageSearches/'  },
-    { 'title': 'Manage Torrents',           'path': 'manage/manageTorrents/'  },
-    { 'title': 'Episode Status Management', 'path': 'manage/episodeStatuses/' },
-]
+    { 'title': 'Episode Status Management', 'path': 'manage/episodeStatuses/' },]
 
-if sickbeard.USE_SUBTITLES:
-    ManageMenu.append({ 'title': 'Missed Subtitle Management', 'path': 'manage/subtitleMissed' })
+    if sickbeard.USE_TORRENTS and sickbeard.TORRENT_METHOD != 'blackhole' \
+    and (sickbeard.ENABLE_HTTPS and sickbeard.TORRENT_HOST[:5] == 'https' \
+    or not sickbeard.ENABLE_HTTPS and sickbeard.TORRENT_HOST[:5] == 'http:'):
+        manageMenu.append({ 'title': 'Manage Torrents', 'path': 'manage/manageTorrents/'})
 
-if sickbeard.USE_FAILED_DOWNLOADS:
-    ManageMenu.append({ 'title': 'Failed Downloads', 'path': 'manage/failedDownloads' })
+    if sickbeard.USE_SUBTITLES:
+        manageMenu.append({ 'title': 'Missed Subtitle Management', 'path': 'manage/subtitleMissed/' })
+            
+    if sickbeard.USE_FAILED_DOWNLOADS:
+        manageMenu.append({ 'title': 'Failed Downloads', 'path': 'manage/failedDownloads/' })
+
+    return manageMenu
 
 
 class ManageSearches:
@@ -188,7 +194,8 @@ class ManageSearches:
         t.backlogPaused = sickbeard.searchQueueScheduler.action.is_backlog_paused() # @UndefinedVariable
         t.backlogRunning = sickbeard.searchQueueScheduler.action.is_backlog_in_progress() # @UndefinedVariable
         t.searchStatus = sickbeard.currentSearchScheduler.action.amActive # @UndefinedVariable
-        t.submenu = ManageMenu
+        
+        t.submenu = ManageMenu()
 
         return _munge(t)
 
@@ -225,16 +232,15 @@ class ManageSearches:
 
 
 class Manage:
-
+    
     manageSearches = ManageSearches()
 
     @cherrypy.expose
     def index(self):
-
         t = PageTemplate(file="manage.tmpl")
-        t.submenu = ManageMenu
+        t.submenu = ManageMenu()
         return _munge(t)
-
+    
     @cherrypy.expose
     def showEpisodeStatuses(self, tvdb_id, whichStatus):
         myDB = db.DBConnection()
@@ -269,7 +275,7 @@ class Manage:
             status_list = []
 
         t = PageTemplate(file="manage_episodeStatuses.tmpl")
-        t.submenu = ManageMenu
+        t.submenu = ManageMenu()
         t.whichStatus = whichStatus
 
         # if we have no status then this is as far as we need to go
@@ -367,7 +373,7 @@ class Manage:
     def subtitleMissed(self, whichSubs=None):
 
         t = PageTemplate(file="manage_subtitleMissed.tmpl")
-        t.submenu = ManageMenu
+        t.submenu = ManageMenu()
         t.whichSubs = whichSubs
 
         if not whichSubs:
@@ -448,7 +454,7 @@ class Manage:
     def backlogOverview(self):
 
         t = PageTemplate(file="manage_backlogOverview.tmpl")
-        t.submenu = ManageMenu
+        t.submenu = ManageMenu()
 
         myDB = db.DBConnection()
 
@@ -489,7 +495,7 @@ class Manage:
     def massEdit(self, toEdit=None):
 
         t = PageTemplate(file="manage_massEdit.tmpl")
-        t.submenu = ManageMenu
+        t.submenu = ManageMenu()
 
         if not toEdit:
             redirect("/manage/")
@@ -735,7 +741,7 @@ class Manage:
 
         t = PageTemplate(file="manage_torrents.tmpl")
         t.info_download_station = ''
-        t.submenu = ManageMenu
+        t.submenu = ManageMenu()
 
         if re.search('localhost', sickbeard.TORRENT_HOST):
 
@@ -777,7 +783,7 @@ class Manage:
         t = PageTemplate(file="manage_failedDownloads.tmpl")
         t.failedResults = sqlResults
         t.limit = limit
-        t.submenu = ManageMenu
+        t.submenu = ManageMenu()
 
         return _munge(t)
 
