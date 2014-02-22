@@ -873,7 +873,7 @@ class GenericMetadata():
                 logger.log(u"Invalid tvdb id (" + str(tvdb_id) + "), not using metadata file", logger.WARNING)
                 return empty_return
 
-        except (exceptions.NoNFOException, SyntaxError, ValueError), e:
+        except Exception, e:
             logger.log(u"There was an error parsing your existing metadata file: " + ex(e), logger.WARNING)
             return empty_return
 
