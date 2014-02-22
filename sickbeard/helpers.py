@@ -16,6 +16,8 @@
 # You should have received a copy of the GNU General Public License
 # along with Sick Beard.  If not, see <http://www.gnu.org/licenses/>.
 
+from __future__ import with_statement
+
 import gzip
 import os
 import re
@@ -23,7 +25,6 @@ import shutil
 import socket
 import stat
 import StringIO
-import sys
 import time
 import traceback
 import urllib
@@ -281,8 +282,11 @@ def makeShowNFO(showID, showDir):
 
     logger.log(u"Writing NFO to " + os.path.join(showDir, "tvshow.nfo"), logger.DEBUG)
     nfo_filename = os.path.join(showDir, "tvshow.nfo").encode('utf-8')
-    nfo_fh = open(nfo_filename, 'w')
-    nfo.write(nfo_fh, encoding="utf-8")
+    try:
+        with open(nfo_filename, 'w') as nfo_fh:
+            nfo.write(nfo_fh, encoding="utf-8")
+    except EnvironmentError, e:
+        logger.log(u"Unable to write NFO file: " + ex(e), logger.ERROR)
 
     return True
 
@@ -600,7 +604,7 @@ def chmodAsParent(childPath):
         return
 
     childPath_owner = childPathStat.st_uid
-    user_id = os.geteuid()  #only available on UNIX
+    user_id = os.geteuid()  # @UndefinedVariable - only available on UNIX
 
     if user_id != 0 and user_id != childPath_owner:
         logger.log(u"Not running as root or owner of " + childPath + ", not trying to set permissions", logger.DEBUG)
@@ -638,14 +642,14 @@ def fixSetGroupID(childPath):
             return
 
         childPath_owner = childStat.st_uid
-        user_id = os.geteuid()  #only available on UNIX
+        user_id = os.geteuid()  # @UndefinedVariable - only available on UNIX
 
         if user_id != 0 and user_id != childPath_owner:
             logger.log(u"Not running as root or owner of " + childPath + ", not trying to set the set-group-ID", logger.DEBUG)
             return
 
         try:
-            ek.ek(os.chown, childPath, -1, parentGID)  #@UndefinedVariable - only available on UNIX
+            ek.ek(os.chown, childPath, -1, parentGID)  # @UndefinedVariable - only available on UNIX
             logger.log(u"Respecting the set-group-ID bit on the parent directory for %s" % (childPath), logger.DEBUG)
         except OSError:
             logger.log(u"Failed to respect the set-group-ID bit on the parent directory for %s (setting group ID %i)" % (childPath, parentGID), logger.ERROR)
@@ -685,8 +689,8 @@ def create_https_certificates(ssl_cert, ssl_key):
     Create self-signed HTTPS certificares and store in paths 'ssl_cert' and 'ssl_key'
     """
     try:
-        from OpenSSL import crypto  #@UnresolvedImport
-        from lib.certgen import createKeyPair, createCertRequest, createCertificate, TYPE_RSA, serial  #@UnresolvedImport
+        from OpenSSL import crypto  # @UnresolvedImport
+        from lib.certgen import createKeyPair, createCertRequest, createCertificate, TYPE_RSA, serial  # @UnresolvedImport
     except:
         logger.log(u"pyopenssl module missing, please install for https access", logger.WARNING)
         return False
