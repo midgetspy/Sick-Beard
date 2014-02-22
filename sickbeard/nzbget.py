@@ -29,9 +29,11 @@ import xmlrpclib
 
 from sickbeard.providers.generic import GenericProvider
 
-from sickbeard import logger
+from sickbeard import logger, helpers
 
-def sendNZB(nzb):
+from common import Quality
+
+def sendNZB(nzb, proper = False):
 
     addToTop = False
     nzbgetprio = 0
@@ -61,11 +63,21 @@ def sendNZB(nzb):
             logger.log(u"Protocol Error: " + e.errmsg, logger.ERROR)
         return False
 
-    # if it aired recently make it high priority
+    dupekey = ""
+    dupescore = 0
+    # if it aired recently make it high priority and generate DupeKey/Score
     for curEp in nzb.episodes:
+        if dupekey == "":
+            dupekey = "Sickbeard-" + str(curEp.show.tvdbid)
+        dupekey += "-" + str(curEp.season) + "." + str(curEp.episode)
         if datetime.date.today() - curEp.airdate <= datetime.timedelta(days=7):
             addToTop = True
             nzbgetprio = 100
+
+    if nzb.quality != Quality.UNKNOWN:
+        dupescore = nzb.quality * 100
+    if proper:
+        dupescore += 10
 
     # if it's a normal result need to download the NZB content
     if nzb.resultType == "nzb":
@@ -85,8 +97,12 @@ def sendNZB(nzb):
 
     try:
         # Find out if nzbget supports priority (Version 9.0+), old versions beginning with a 0.x will use the old command
-        if re.search(r"^0", nzbGetRPC.version()):
+        nzbget_version_str = nzbGetRPC.version()
+        nzbget_version = helpers.tryInt(nzbget_version_str[:nzbget_version_str.find(".")])
+        if nzbget_version == 0:
             nzbget_result = nzbGetRPC.append(nzb.name + ".nzb", sickbeard.NZBGET_CATEGORY, addToTop, nzbcontent64)
+        elif nzbget_version >= 12:
+            nzbget_result = nzbGetRPC.append(nzb.name + ".nzb", sickbeard.NZBGET_CATEGORY, nzbgetprio, False, nzbcontent64, False, dupekey, dupescore, "score")
         else:
             nzbget_result = nzbGetRPC.append(nzb.name + ".nzb", sickbeard.NZBGET_CATEGORY, nzbgetprio, False, nzbcontent64)
         
