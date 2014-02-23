@@ -26,7 +26,7 @@ from sickbeard import encodingKludge as ek
 from sickbeard.name_parser.parser import NameParser, InvalidNameException
 
 MIN_DB_VERSION = 9  # oldest db version we support migrating from
-MAX_DB_VERSION = 14
+MAX_DB_VERSION = 15
 
 
 class MainSanityCheck(db.DBSanityCheck):
@@ -112,8 +112,9 @@ class InitialSchema (db.SchemaUpgrade):
                 "CREATE TABLE tv_shows (show_id INTEGER PRIMARY KEY, location TEXT, show_name TEXT, tvdb_id NUMERIC, network TEXT, genre TEXT, runtime NUMERIC, quality NUMERIC, airs TEXT, status TEXT, flatten_folders NUMERIC, paused NUMERIC, startyear NUMERIC, tvr_id NUMERIC, tvr_name TEXT, air_by_date NUMERIC, lang TEXT, last_update_tvdb NUMERIC);",
                 "CREATE INDEX idx_tv_episodes_showid_airdate ON tv_episodes (showid,airdate);",
                 "CREATE INDEX idx_showid ON tv_episodes (showid);",
+                "CREATE INDEX idx_status ON tv_episodes (status,season,episode,airdate)",
                 "CREATE UNIQUE INDEX idx_tvdb_id ON tv_shows (tvdb_id);",
-                "INSERT INTO db_version (db_version) VALUES (14);"
+                "INSERT INTO db_version (db_version) VALUES (15);"
             ]
 
             for query in queries:
@@ -420,5 +421,26 @@ class AddLastUpdateTVDB(AddShowidTvdbidIndex):
         logger.log(u"Adding column last_update_tvdb to tvshows")
         if not self.hasColumn("tv_shows", "last_update_tvdb"):
             self.addColumn("tv_shows", "last_update_tvdb", default=1)
+
+        self.incDBVersion()
+
+
+class AddIndicesToTvEpisodes(AddLastUpdateTVDB):
+    """ Adding indices to tv episodes """
+
+    def test(self):
+        return self.checkDBVersion() >= 15
+
+    def execute(self):
+        backupDatabase(15)
+
+        logger.log(u"Adding index idx_status to tv_episodes")
+        self.connection.action("CREATE INDEX idx_status ON tv_episodes (status,season,episode,airdate)")
+
+        logger.log(u"Adding index idx_sta_epi_air to tv_episodes")
+        self.connection.action("CREATE INDEX idx_sta_epi_air ON tv_episodes (status,episode, airdate)")
+
+        logger.log(u"Adding index idx_sta_epi_sta_air to tv_episodes")
+        self.connection.action("CREATE INDEX idx_sta_epi_sta_air ON tv_episodes (season,episode, status, airdate)")
 
         self.incDBVersion()
