@@ -3578,36 +3578,9 @@ class WebInterface:
 
             for episode in episode_list:
 
-          # Get local timezone and load network timezones
-                local_zone = tz.tzlocal()
-                try:
-                    network_zone = network_timezones.get_network_timezone(show['network'], network_timezones.load_network_dict())
-                except:
-                  # Dummy network_zone for exceptions
-                    network_zone = None
-
-        # Get the air date and time
-                air_date = datetime.datetime.fromordinal(int(episode['airdate']))
-                air_time = re.compile('([0-9]{1,2})\:([0-9]{2})(\ |)([AM|am|PM|pm]{2})').search(show["airs"])
-
-        # Parse out the air time
-                try:
-                    if (air_time.group(4).lower() == 'pm' and int(air_time.group(1)) == 12):
-                        t = datetime.time(12, int(air_time.group(2)), 0, tzinfo=network_zone)
-                    elif (air_time.group(4).lower() == 'pm'):
-                        t = datetime.time((int(air_time.group(1)) + 12), int(air_time.group(2)), 0, tzinfo=network_zone)
-                    elif (air_time.group(4).lower() == 'am' and int(air_time.group(1)) == 12):
-                        t = datetime.time(0, int(air_time.group(2)), 0, tzinfo=network_zone)
-                    else:
-                        t = datetime.time(int(air_time.group(1)), int(air_time.group(2)), 0, tzinfo=network_zone)
-                except:
-                    # Dummy time for exceptions
-                    t = datetime.time(22, 0, 0, tzinfo=network_zone)
-
-        # Combine air time and air date into one datetime object
-                air_date_time = datetime.datetime.combine(air_date, t).astimezone(local_zone)
-
-        # Create event for episode
+                air_date_time = network_timezones.parse_date_time(episode['airdate'], show["airs"], show['network'])
+        
+                # Create event for episode
                 ical = ical + 'BEGIN:VEVENT\r\n'
                 ical = ical + 'DTSTART;VALUE=DATE:' + str(air_date_time.date()).replace("-", "") + '\r\n'
                 ical = ical + 'SUMMARY:' + show['show_name'] + ': ' + episode['name'] + '\r\n'
