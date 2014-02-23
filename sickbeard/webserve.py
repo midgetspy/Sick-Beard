@@ -2195,8 +2195,6 @@ class Home:
             return _munge(t)
 
         flatten_folders = config.checkbox_to_value(flatten_folders)
-        logger.log(u"flatten folders: " + str(flatten_folders))
-
         paused = config.checkbox_to_value(paused)
         air_by_date = config.checkbox_to_value(air_by_date)
 
