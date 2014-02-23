@@ -70,6 +70,9 @@ class TVShow(object):
         self.lang = lang
         self.last_update_tvdb = 1
 
+        self.rls_ignore_words = ""
+        self.rls_require_words = ""
+
         self.lock = threading.Lock()
         self._isDirGood = False
 
@@ -655,6 +658,9 @@ class TVShow(object):
 
             self.last_update_tvdb = sqlResults[0]["last_update_tvdb"]
 
+            self.rls_ignore_words = sqlResults[0]["rls_ignore_words"]
+            self.rls_require_words = sqlResults[0]["rls_require_words"]
+
     def loadFromTVDB(self, cache=True, tvapi=None, cachedSeason=None):
 
         logger.log(str(self.tvdbid) + u": Loading show info from theTVDB")
@@ -815,7 +821,9 @@ class TVShow(object):
                         "startyear": self.startyear,
                         "tvr_name": self.tvrname,
                         "lang": self.lang,
-                        "last_update_tvdb": self.last_update_tvdb
+                        "last_update_tvdb": self.last_update_tvdb,
+                        "rls_ignore_words": self.rls_ignore_words,
+                        "rls_require_words": self.rls_require_words
                         }
 
         myDB.upsert("tv_shows", newValueDict, controlValueDict)
