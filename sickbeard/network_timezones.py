@@ -46,7 +46,7 @@ def _remove_old_zoneinfo():
     if (lib.dateutil.zoneinfo.ZONEINFOFILE is not None):
         cur_zoneinfo = ek.ek(basename, lib.dateutil.zoneinfo.ZONEINFOFILE)
     else:
-        cur_zoneinfo = None
+        return
     
     cur_file = ek.ek(realpath, u'lib/dateutil/zoneinfo/' + cur_zoneinfo)
     
