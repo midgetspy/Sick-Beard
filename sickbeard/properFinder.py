@@ -150,7 +150,7 @@ class ProperFinder():
                 continue
 
             if not show_name_helpers.filterBadReleases(curProper.name):
-                logger.log(u"Proper " + curProper.name + " isn't a valid scene release that we want, igoring it", logger.DEBUG)
+                logger.log(u"Proper " + curProper.name + " isn't a valid scene release that we want, ignoring it", logger.DEBUG)
                 continue
 
             # if we have an air-by-date show then get the real season/episode numbers
