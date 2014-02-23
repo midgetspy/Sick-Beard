@@ -1,9 +1,9 @@
 Sick Beard
 =====
 
-*Sick Beard is currently an alpha release. There may be severe bugs in it and at any given time it may not work at all.*
+*SickBeard TPB  is currently an alpha release. There may be severe bugs in it and at any given time it may not work at all.*
 
-Sick Beard is a PVR for newsgroup users (with limited torrent support). It watches for new episodes of your favorite shows and when they are posted it downloads them, sorts and renames them, and optionally generates metadata for them. It currently supports NZBs.org, NZBMatrix, Bin-Req, NZBs'R'Us, EZTV.it, and any Newznab installation and retrieves show information from theTVDB.com and TVRage.com.
+Sick Beard TPB is a PVR for torrent and newsgroup users. It watches for new episodes of your favorite shows and when they are posted it downloads them, sorts and renames them, and optionally generates metadata for them. It retrieves show information from theTVDB.com and TVRage.com.
 
 Features include:
 
@@ -39,8 +39,7 @@ To run Sick Beard from source you will need Python 2.6+ and Cheetah 2.1.0+. The 
 
 ## Bugs
 
-If you find a bug please report it or it'll never get fixed. Verify that it hasn't [already been submitted][googleissues] and then [log a new bug][googlenewissue]. Be sure to provide as much information as possible.
-
+If you find a bug please report here on Github [githubissue]. Verify that it hasn't already been submitted and then [log a new bug]. Be sure to provide a sickbeard log in debug mode where is the error evidence or it'll never get fixed.
 [cherrypy]: http://www.cherrypy.org
 [cheetah]: http://www.cheetahtemplate.org/
 [simplejson]: http://code.google.com/p/simplejson/ 
@@ -52,7 +51,7 @@ If you find a bug please report it or it'll never get fixed. Verify that it hasn
 [socks]: http://code.google.com/p/socksipy-branch/
 [dateutil]: http://labix.org/python-dateutil
 [googledownloads]: http://code.google.com/p/sickbeard/downloads/list
-[googleissues]: http://code.google.com/p/sickbeard/issues/list
-[googlenewissue]: http://code.google.com/p/sickbeard/issues/entry
+[githubissues]: https://github.com/mr-orange/Sick-Beard/issues?state=open
+[githubnewissue]: https://github.com/mr-orange/Sick-Beard/issues/new
 [jsonrpclib]: https://github.com/joshmarshall/jsonrpclib
 [subliminal]: https://github.com/Diaoul/subliminal
