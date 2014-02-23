@@ -2220,11 +2220,13 @@ class Home:
                     errors.append("Unable to refresh this show: " + ex(e))
 
             showObj.paused = paused
-            showObj.air_by_date = air_by_date
-            showObj.lang = tvdb_lang
 
-            showObj.rls_ignore_words = rls_ignore_words
-            showObj.rls_require_words = rls_require_words
+            # if this routine was called via the mass edit, do not change the options that are not passed
+            if not directCall:
+                showObj.air_by_date = air_by_date
+                showObj.lang = tvdb_lang
+                showObj.rls_ignore_words = rls_ignore_words.strip()
+                showObj.rls_require_words = rls_require_words.strip()
 
             # if we change location clear the db of episodes, change it, write to db, and rescan
             if os.path.normpath(showObj._location) != os.path.normpath(location):
