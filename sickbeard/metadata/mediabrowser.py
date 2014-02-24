@@ -351,16 +351,23 @@ class MediaBrowserMetadata(generic.GenericMetadata):
             Studio.text = myShow['network']
 
         Persons = etree.SubElement(tv_node, "Persons")
-        for actor in myShow['_actors']:
-            cur_actor = etree.SubElement(Persons, "Person")
-            cur_actor_name = etree.SubElement(cur_actor, "Name")
-            cur_actor_name.text = actor['name'].strip()
-            cur_actor_type = etree.SubElement(cur_actor, "Type")
-            cur_actor_type.text = "Actor"
-            cur_actor_role = etree.SubElement(cur_actor, "Role")
-            cur_actor_role_text = actor['role']
-            if cur_actor_role_text != None:
-                cur_actor_role.text = cur_actor_role_text
+
+        if myShow["_actors"] != None:
+            for actor in myShow["_actors"]:
+                cur_actor_name_text = actor['name']
+
+                if cur_actor_name_text != None and cur_actor_name_text.strip():
+                    cur_actor = etree.SubElement(Persons, "Person")
+                    cur_actor_name = etree.SubElement(cur_actor, "Name")
+                    cur_actor_name.text = cur_actor_name_text.strip()
+
+                    cur_actor_type = etree.SubElement(cur_actor, "Type")
+                    cur_actor_type.text = "Actor"
+
+                    cur_actor_role = etree.SubElement(cur_actor, "Role")
+                    cur_actor_role_text = actor['role']
+                    if cur_actor_role_text != None:
+                        cur_actor_role.text = cur_actor_role_text
 
         helpers.indentXML(tv_node)
 
@@ -507,11 +514,11 @@ class MediaBrowserMetadata(generic.GenericMetadata):
 
             # collect all directors, guest stars and writers
             if myEp['director']:
-                persons_dict['Director'] += [x.strip() for x in myEp['director'].split('|') if x]
+                persons_dict['Director'] += [x.strip() for x in myEp['director'].split('|') if x and x.strip()]
             if myEp['gueststars']:
-                persons_dict['GuestStar'] += [x.strip() for x in myEp['gueststars'].split('|') if x]
+                persons_dict['GuestStar'] += [x.strip() for x in myEp['gueststars'].split('|') if x and x.strip()]
             if myEp['writer']:
-                persons_dict['Writer'] += [x.strip() for x in myEp['writer'].split('|') if x]
+                persons_dict['Writer'] += [x.strip() for x in myEp['writer'].split('|') if x and x.strip()]
 
         # fill in Persons section with collected directors, guest starts and writers
         for person_type, names in persons_dict.iteritems():

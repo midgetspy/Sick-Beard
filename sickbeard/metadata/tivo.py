@@ -248,8 +248,8 @@ class TIVOMetadata(generic.GenericMetadata):
             # This shows up at the beginning of the description on the Program screen and on the Details screen.
             if myShow["actors"]:
                 for actor in myShow["actors"].split('|'):
-                    if actor:
-                        data += ("vActor : " + actor + "\n")
+                    if actor != None and actor.strip():
+                        data += ("vActor : " + actor.strip() + "\n")
 
             # This is shown on both the Program screen and the Details screen.
             if myEp["rating"] != None:
