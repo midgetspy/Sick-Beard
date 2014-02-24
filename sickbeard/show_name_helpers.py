@@ -32,7 +32,7 @@ from name_parser.parser import NameParser, InvalidNameException
 from lib.unidecode import unidecode
 
 
-resultFilters = ["sub(pack|s|bed)", "nlsub(bed|s)?", "swesub(bed)?",
+resultFilters = ["sub(pack|s|bed)", "swesub(bed)?",
                  "(dir|sample|sub|nfo)fix", "sample", "(dvd)?extras", 
                  "dub(bed)?"]
 
