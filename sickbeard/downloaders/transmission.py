@@ -57,8 +57,12 @@ def sendTORRENT(torrent):
     ###################################################################################################
     
     host = urlparse(sickbeard.TORRENT_HOST)
-    session = torrent.provider.session
-    
+    session = None
+    if hasattr(torrent.provider, 'session'):
+        session = torrent.provider.session
+    else:
+        session = requests.Session()
+
     if torrent.url.startswith("magnet:"):
         magnet=1
         
