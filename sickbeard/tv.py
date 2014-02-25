@@ -722,7 +722,7 @@ class TVShow(object):
 
             if not cache:
                 ltvdb_api_parms['cache'] = False
- 
+
             if self.lang:
                 ltvdb_api_parms['language'] = self.lang
 
@@ -737,10 +737,15 @@ class TVShow(object):
             self.name = myEp["seriesname"].strip()
         except AttributeError:
             raise tvdb_exceptions.tvdb_attributenotfound("Found %s, but attribute 'seriesname' was empty." % (self.tvdbid))    
-            
+
         self.genre = myEp['genre']
         self.network = myEp['network']
-        self.runtime = myEp['runtime']
+
+        if myEp['runtime']:
+            self.runtime = myEp['runtime']
+        else:
+            self.runtime = 0
+
         self.imdbid = myEp['imdb_id']
 
         if myEp["airs_dayofweek"] != None and myEp["airs_time"] != None:

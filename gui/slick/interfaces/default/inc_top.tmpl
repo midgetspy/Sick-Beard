@@ -235,10 +235,14 @@ a > i.icon-question-sign { background-image: url("$sbRoot/images/glyphicons-half
                             <li><a href="$sbRoot/manage/"><img src="$sbRoot/images/menu/manage16.png" alt="" width="16" height="16" />Mass Update</a></li>
                             <li><a href="$sbRoot/manage/backlogOverview/"><img src="$sbRoot/images/menu/backlog_view16.png" alt="" width="16" height="16" />Backlog Overview</a></li>
                             <li><a href="$sbRoot/manage/manageSearches/"><img src="$sbRoot/images/menu/managesearches16.png" alt="" width="16" height="16" />Manage Searches</a></li>
-                            #if $sickbeard.USE_TORRENTS and $sickbeard.TORRENT_METHOD != 'blackhole':
+                            #if $sickbeard.USE_TORRENTS and $sickbeard.TORRENT_METHOD != 'blackhole' \
+							and ($sickbeard.ENABLE_HTTPS and $sickbeard.TORRENT_HOST[:5] == 'https' \
+							or not $sickbeard.ENABLE_HTTPS and $sickbeard.TORRENT_HOST[:5] == 'http:'):                            
                               <li><a href="$sbRoot/manage/manageTorrents/"><img src="$sbRoot/images/menu/bittorrent.png" alt="" width="16" height="16" />Manage Torrents</a></li>
                             #end if
-                            <li><a href="$sbRoot/manage/failedDownloads/"><img src="$sbRoot/images/menu/failed_download.png" alt="" width="16" height="16" />Failed Downloads</a></li>
+							#if $sickbeard.USE_FAILED_DOWNLOADS:
+                            	<li><a href="$sbRoot/manage/failedDownloads/"><img src="$sbRoot/images/menu/failed_download.png" alt="" width="16" height="16" />Failed Downloads</a></li>
+                            #end if
                             <li><a href="$sbRoot/manage/episodeStatuses/"><img src="$sbRoot/images/menu/backlog16.png" alt="" width="16" height="16" />Episode Status Management</a></li>
                             #if $sickbeard.USE_SUBTITLES:
                               <li><a href="$sbRoot/manage/subtitleMissed/"><img src="$sbRoot/images/menu/backlog16.png" alt="" width="16" height="16" />Missed Subtitle Management</a></li>
@@ -269,7 +273,6 @@ a > i.icon-question-sign { background-image: url("$sbRoot/images/glyphicons-half
     </div>
 </div>
 
-
 <div id="contentWrapper">
     <div id="content">
       #if $varExists('submenu'):
@@ -277,7 +280,6 @@ a > i.icon-question-sign { background-image: url("$sbRoot/images/glyphicons-half
       <span>
       #set $first = True
       #for $menuItem in $submenu:
-          #if 'requires' not in $menuItem or $menuItem.requires():
               #if type($menuItem.path) == dict:
                   #if $first then "" else "</span><span>"#<b>$menuItem.title</b>
                   #set $first = False
@@ -290,7 +292,6 @@ a > i.icon-question-sign { background-image: url("$sbRoot/images/glyphicons-half
                   #if $first then "" else ""#<a href="$sbRoot/$menuItem.path" #if 'confirm' in $menuItem then "class=\"confirm\"" else "" #>$menuItem.title</a>
                   #set $first = False
               #end if
-          #end if
       #end for
       </span>
       </div>

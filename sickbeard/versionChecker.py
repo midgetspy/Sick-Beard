@@ -36,6 +36,7 @@ from sickbeard import scene_exceptions
 from sickbeard.exceptions import ex
 from sickbeard import encodingKludge as ek
 from sickbeard import failed_history
+from sickbeard import network_timezones
 
 
 class CheckVersion():
@@ -60,6 +61,9 @@ class CheckVersion():
 
         # refresh scene exceptions too
         scene_exceptions.retrieve_exceptions()
+
+        # refresh network timezones
+        network_timezones.update_network_dict()
 
         # sure, why not?
         if sickbeard.USE_FAILED_DOWNLOADS:
