@@ -133,7 +133,7 @@ a > i.icon-question-sign { background-image: url("$sbRoot/images/glyphicons-half
         \$("#SubMenu a:contains('Delete')").addClass('btn').html('<span class="ui-icon ui-icon-trash pull-left"></span> Delete');
         \$("#SubMenu a:contains('Clear History')").addClass('btn confirm').html('<span class="ui-icon ui-icon-trash pull-left"></span> Clear History');
         \$("#SubMenu a:contains('Trim History')").addClass('btn confirm').html('<span class="ui-icon ui-icon-trash pull-left"></span> Trim History');
-        \$("#SubMenu a[href$='/errorlogs/clearerrors']").addClass('btn').html('<span class="ui-icon ui-icon-trash pull-left"></span> Clear Errors');
+        \$("#SubMenu a[href$='/errorlogs/clearerrors/']").addClass('btn').html('<span class="ui-icon ui-icon-trash pull-left"></span> Clear Errors');
         \$("#SubMenu a:contains('Re-scan')").addClass('btn').html('<span class="ui-icon ui-icon-refresh pull-left"></span> Re-scan');
         \$("#SubMenu a:contains('Backlog Overview')").addClass('btn').html('<span class="ui-icon ui-icon-refresh pull-left"></span> Backlog Overview');
         \$("#SubMenu a[href$='/home/updatePLEX/']").addClass('btn').html('<span class="ui-icon ui-icon-refresh pull-left"></span> Update PLEX');
@@ -280,6 +280,7 @@ a > i.icon-question-sign { background-image: url("$sbRoot/images/glyphicons-half
       <span>
       #set $first = True
       #for $menuItem in $submenu:
+	  	#if 'requires' not in $menuItem or $menuItem.requires():      
               #if type($menuItem.path) == dict:
                   #if $first then "" else "</span><span>"#<b>$menuItem.title</b>
                   #set $first = False
@@ -292,6 +293,7 @@ a > i.icon-question-sign { background-image: url("$sbRoot/images/glyphicons-half
                   #if $first then "" else ""#<a href="$sbRoot/$menuItem.path" #if 'confirm' in $menuItem then "class=\"confirm\"" else "" #>$menuItem.title</a>
                   #set $first = False
               #end if
+      	#end if
       #end for
       </span>
       </div>
