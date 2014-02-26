@@ -169,8 +169,8 @@ class XBMC_12PlusMetadata(generic.GenericMetadata):
             tvdbid.text = myShow["id"]
 
         genre = etree.SubElement(tv_node, "genre")
-        if myShow["genre"] != None:
-                genre.text = " / ".join([x for x in myShow["genre"].split('|') if x])
+        if isinstance(myShow["genre"], basestring):
+                genre.text = " / ".join(x.strip() for x in myShow["genre"].split('|') if x.strip())
 
         premiered = etree.SubElement(tv_node, "premiered")
         if myShow["firstaired"] != None:
@@ -182,16 +182,22 @@ class XBMC_12PlusMetadata(generic.GenericMetadata):
 
         for actor in myShow['_actors']:
             cur_actor = etree.SubElement(tv_node, "actor")
+
             cur_actor_name = etree.SubElement(cur_actor, "name")
-            cur_actor_name.text = actor['name'].strip()
+            cur_actor_name_text = actor['name']
+            if isinstance(cur_actor_name_text, basestring):
+                cur_actor_name.text = cur_actor_name_text.strip()
+
             cur_actor_role = etree.SubElement(cur_actor, "role")
             cur_actor_role_text = actor['role']
             if cur_actor_role_text != None:
                 cur_actor_role.text = cur_actor_role_text
+
             cur_actor_thumb = etree.SubElement(cur_actor, "thumb")
             cur_actor_thumb_text = actor['image']
             if cur_actor_thumb_text != None:
                 cur_actor_thumb.text = cur_actor_thumb_text
+
         # Make it purdy
         helpers.indentXML(tv_node)
 
@@ -321,19 +327,19 @@ class XBMC_12PlusMetadata(generic.GenericMetadata):
                 rating.text = rating_text
 
             gueststar_text = myEp['gueststars']
-            if gueststar_text != None:
-                for actor in gueststar_text.split('|'):
+            if isinstance(gueststar_text, basestring):
+                for actor in (x.strip() for x in gueststar_text.split('|') if x.strip()):
                     cur_actor = etree.SubElement(episode, "actor")
-                    cur_actor_name = etree.SubElement(
-                        cur_actor, "name"
-                       )
+                    cur_actor_name = etree.SubElement(cur_actor, "name")
                     cur_actor_name.text = actor
 
             for actor in myShow['_actors']:
                 cur_actor = etree.SubElement(episode, "actor")
 
                 cur_actor_name = etree.SubElement(cur_actor, "name")
-                cur_actor_name.text = actor['name'].strip()
+                cur_actor_name_text = actor['name']
+                if isinstance(cur_actor_name_text, basestring):
+                    cur_actor_name.text = cur_actor_name_text.strip()
 
                 cur_actor_role = etree.SubElement(cur_actor, "role")
                 cur_actor_role_text = actor['role']
