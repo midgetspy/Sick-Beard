@@ -1169,7 +1169,7 @@ class ConfigPostProcessing:
         sickbeard.EXTRA_SCRIPTS = [x.strip() for x in extra_scripts.split('|') if x.strip()]
         sickbeard.RENAME_EPISODES = config.checkbox_to_value(rename_episodes)
         sickbeard.MOVE_ASSOCIATED_FILES = config.checkbox_to_value(move_associated_files)
-        sickbeard.NAMING_CUSTOM_ABD = naming_custom_abd
+        sickbeard.NAMING_CUSTOM_ABD = config.checkbox_to_value(naming_custom_abd)
         sickbeard.NAMING_STRIP_YEAR = config.checkbox_to_value(naming_strip_year)
         sickbeard.USE_FAILED_DOWNLOADS = config.checkbox_to_value(use_failed_downloads)
         sickbeard.DELETE_FAILED = config.checkbox_to_value(delete_failed)
