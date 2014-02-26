@@ -1260,7 +1260,7 @@ class ConfigPostProcessing:
             testing = RarFile(rar_path).read_files('*test.txt')
             if testing[0][1]=='This is only a test.':
                 return 'supported'
-            logger.log(u'Rar Not Supported: Can not read the content of test file', Logger.ERROR)
+            logger.log(u'Rar Not Supported: Can not read the content of test file', logger.ERROR)
             return 'not supported'
         except Exception, e:
             logger.log(u'Rar Not Supported: ' + ex(e), logger.ERROR)
@@ -1698,7 +1698,7 @@ class ConfigNotifications:
         sickbeard.NMJ_MOUNT = nmj_mount
 
         sickbeard.USE_NMJv2 = config.checkbox_to_value(use_nmjv2)
-        sickbeard.NMJv2_HOST = cconfig.clean_host(nmjv2_host)
+        sickbeard.NMJv2_HOST = config.clean_host(nmjv2_host)
         sickbeard.NMJv2_DATABASE = nmjv2_database
         sickbeard.NMJv2_DBLOC = nmjv2_dbloc
 
@@ -1728,7 +1728,7 @@ class ConfigNotifications:
         sickbeard.EMAIL_NOTIFY_ONDOWNLOAD = config.checkbox_to_value(email_notify_ondownload)
         sickbeard.EMAIL_NOTIFY_ONSUBTITLEDOWNLOAD = config.checkbox_to_value(email_notify_onsubtitledownload)
         sickbeard.EMAIL_HOST = config.clean_host(email_host)
-        sickbeard.EMAIL_PORT = config.check_setting_int(email_port)
+        sickbeard.EMAIL_PORT = config.to_int(email_port, default=25)
         sickbeard.EMAIL_FROM = email_from
         sickbeard.EMAIL_TLS = config.checkbox_to_value(email_tls)
         sickbeard.EMAIL_USER = email_user
@@ -1808,7 +1808,7 @@ class ConfigSubtitles:
         sickbeard.SUBTITLES_LANGUAGES = [lang.alpha2 for lang in subtitles.isValidLanguage(subtitles_languages.replace(' ', '').split(','))] if subtitles_languages != ''  else ''
         sickbeard.SUBTITLES_DIR = subtitles_dir
         sickbeard.SUBTITLES_HISTORY = config.checkbox_to_value(subtitles_history)
-        sickbeard.SUBTITLES_FINDER_FREQUENCY = config.check_setting_int(subtitles_finder_frequency, default=1)
+        sickbeard.SUBTITLES_FINDER_FREQUENCY = config.to_int(subtitles_finder_frequency, default=1)
 
         # Subtitles services
         services_str_list = service_order.split()
