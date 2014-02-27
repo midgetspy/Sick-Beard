@@ -261,7 +261,7 @@ def clean_url(url):
 
     if url:
 
-        if not re.match(r'https?://.*', url):
+        if not re.match(r'(https?|scgi)://.*', url):
             url = 'http://' + url
 
         if not url.endswith('/'):
