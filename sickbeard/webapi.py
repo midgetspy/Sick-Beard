@@ -1184,9 +1184,8 @@ class CMD_Logs(ApiCall):
 
         data = []
         if os.path.isfile(logger.sb_log_instance.log_file_path):
-            f = ek.ek(open, logger.sb_log_instance.log_file_path)
-            data = f.readlines()
-            f.close()
+            with ek.ek(open, logger.sb_log_instance.log_file_path) as f:
+                data = f.readlines()
 
         regex = "^(\d\d\d\d)\-(\d\d)\-(\d\d)\s*(\d\d)\:(\d\d):(\d\d)\s*([A-Z]+)\s*(.+?)\s*\:\:\s*(.*)$"
 

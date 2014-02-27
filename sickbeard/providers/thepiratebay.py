@@ -16,6 +16,8 @@
 # You should have received a copy of the GNU General Public License
 # along with Sick Beard.  If not, see <http://www.gnu.org/licenses/>.
 
+from __future__ import with_statement
+
 import re
 import urllib, urllib2
 import sys
@@ -332,13 +334,15 @@ class ThePirateBayProvider(generic.TorrentProvider):
         magnetFileContent = r.content
 
         try:    
-            fileOut = open(magnetFileName, 'wb')
-            fileOut.write(magnetFileContent)
-            fileOut.close()
+            with open(magnetFileName, 'wb') as fileOut:
+                fileOut.write(magnetFileContent)
+                
             helpers.chmodAsParent(magnetFileName)
-        except IOError, e:
+        
+        except EnvironmentError:
             logger.log("Unable to save the file: " + ex(e), logger.ERROR)
             return False
+        
         logger.log(u"Saved magnet link to " + magnetFileName + " ", logger.MESSAGE)
         return True
 
