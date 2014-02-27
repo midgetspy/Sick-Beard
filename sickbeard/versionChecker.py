@@ -397,7 +397,7 @@ class GitUpdateManager(UpdateManager):
             return False
 
     def _find_git_branch(self):
-        branch_info, err, exit_status = self._run_git(self._git_path, 'symbolic-ref -q HEAD')
+        branch_info, err, exit_status = self._run_git(self._git_path, 'symbolic-ref -q HEAD') # @UnusedVariable
         if exit_status == 0 and branch_info:
             branch = branch_info.strip().replace('refs/heads/', '', 1)
             if branch:
@@ -530,10 +530,12 @@ class SourceUpdateManager(UpdateManager):
         if not os.path.isfile(version_file):
             self._cur_commit_hash = None
             return
-
-        fp = open(version_file, 'r')
-        self._cur_commit_hash = fp.read().strip(' \n\r')
-        fp.close()
+      
+        try:
+            with open(version_file, 'r') as fp:
+                self._cur_commit_hash = fp.read().strip(' \n\r')
+        except EnvironmentError, e:
+            logger.log(u"Unable to open 'version.txt': " + ex(e), logger.DEBUG)
 
         if not self._cur_commit_hash:
             self._cur_commit_hash = None
@@ -698,10 +700,9 @@ class SourceUpdateManager(UpdateManager):
 
             # update version.txt with commit hash
             try:
-                ver_file = open(version_path, 'w')
-                ver_file.write(self._newest_commit_hash)
-                ver_file.close()
-            except (IOError, OSError), e:
+                with open(version_path, 'w') as ver_file:
+                    ver_file.write(self._newest_commit_hash)
+            except EnvironmentError, e:
                 logger.log(u"Unable to write version file, update not complete: " + ex(e), logger.ERROR)
                 return False
 

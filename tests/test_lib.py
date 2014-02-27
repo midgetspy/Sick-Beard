@@ -17,16 +17,20 @@
 # You should have received a copy of the GNU General Public License
 # along with Sick Beard.  If not, see <http://www.gnu.org/licenses/>.
 
+from __future__ import with_statement
+
 import unittest
 
 import sqlite3
 
-import sys, os.path
+import sys
+import os.path
 sys.path.append(os.path.abspath('..'))
 sys.path.append(os.path.abspath('../lib'))
 
 import sickbeard
-import shutil, time
+import shutil
+
 from sickbeard import encodingKludge as ek, providers, tvcache
 from sickbeard import db
 from sickbeard.databases import mainDB
@@ -47,10 +51,11 @@ FILENAME = u"show name - s0" + str(SEASON) + "e0" + str(EPISODE) + ".mkv"
 FILEDIR = os.path.join(TESTDIR, SHOWNAME)
 FILEPATH = os.path.join(FILEDIR, FILENAME)
 
-SHOWDIR = os.path.join(TESTDIR, SHOWNAME +" final")
+SHOWDIR = os.path.join(TESTDIR, SHOWNAME + " final")
 
 #sickbeard.logger.sb_log_instance = sickbeard.logger.SBRotatingLogHandler(os.path.join(TESTDIR, 'sickbeard.log'), sickbeard.logger.NUM_LOGS, sickbeard.logger.LOG_SIZE)
 sickbeard.logger.SBRotatingLogHandler.log_file = os.path.join(os.path.join(TESTDIR, 'Logs'), 'test_sickbeard.log')
+
 
 #=================
 # prepare env functions
@@ -59,14 +64,14 @@ def createTestLogFolder():
     if not os.path.isdir(sickbeard.LOG_DIR):
         os.mkdir(sickbeard.LOG_DIR)
 
-# call env functions at apropriate time durin sickbeard var setup
+# call env functions at appropriate time during sickbeard var setup
 
 #=================
 # sickbeard globals
 #=================
 sickbeard.SYS_ENCODING = 'UTF-8'
 sickbeard.showList = []
-sickbeard.QUALITY_DEFAULT = 4 #hdtv
+sickbeard.QUALITY_DEFAULT = 4  # hdtv
 sickbeard.FLATTEN_FOLDERS_DEFAULT = 0
 
 sickbeard.NAMING_PATTERN = ''
@@ -75,7 +80,7 @@ sickbeard.NAMING_MULTI_EP = 1
 
 
 sickbeard.PROVIDER_ORDER = ["sick_beard_index"]
-sickbeard.newznabProviderList = providers.getNewznabProviderList("Sick Beard Index|http://momo.sickbeard.com/||1!!!NZBs.org|http://nzbs.org/||0")
+sickbeard.newznabProviderList = providers.getNewznabProviderList("Sick Beard Index|http://lolo.sickbeard.com/|0|5030,5040|0!!!NZBs.org|http://nzbs.org/||5030,5040,5070,5090|0!!!Usenet-Crawler|http://www.usenet-crawler.com/||5030,5040|0")
 sickbeard.providerList = providers.makeProviderList()
 
 sickbeard.PROG_DIR = os.path.abspath('..')
@@ -83,6 +88,7 @@ sickbeard.DATA_DIR = sickbeard.PROG_DIR
 sickbeard.LOG_DIR = os.path.join(TESTDIR, 'Logs')
 createTestLogFolder()
 sickbeard.logger.sb_log_instance.initLogging(False)
+
 
 #=================
 # dummy functions
@@ -92,6 +98,7 @@ def _dummy_saveConfig():
 # this overrides the sickbeard save_config which gets called during a db upgrade
 # this might be considered a hack
 mainDB.sickbeard.save_config = _dummy_saveConfig
+
 
 # the real one tries to contact tvdb just stop it from getting more info on the ep
 def _fake_specifyEP(self, season, episode):
@@ -171,7 +178,7 @@ def tearDown_test_db():
     """Deletes the test db
         although this seams not to work on my system it leaves me with an zero kb file
     """
-    # uncomment next line so leave the db intact beween test and at the end
+    # uncomment next line so leave the db intact between test and at the end
     #return False
     if os.path.exists(os.path.join(TESTDIR, TESTDBNAME)):
         os.remove(os.path.join(TESTDIR, TESTDBNAME))
@@ -183,9 +190,12 @@ def setUp_test_episode_file():
     if not os.path.exists(FILEDIR):
         os.makedirs(FILEDIR)
 
-    f = open(FILEPATH, "w")
-    f.write("foo bar")
-    f.close()
+    try:
+        with open(FILEPATH, 'w') as f:
+            f.write("foo bar")
+    except EnvironmentError:
+        print "Unable to set up test episode"
+        raise
 
 
 def tearDown_test_episode_file():

@@ -17,6 +17,8 @@
 # You should have received a copy of the GNU General Public License
 # along with Sick Beard.  If not, see <http://www.gnu.org/licenses/>.
 
+from __future__ import with_statement
+
 import datetime
 import os
 
@@ -25,6 +27,7 @@ import sickbeard
 from sickbeard import logger, exceptions, helpers
 from sickbeard.metadata import generic
 from sickbeard import encodingKludge as ek
+from sickbeard.exceptions import ex
 
 from lib.tvdb_api import tvdb_api, tvdb_exceptions
 
@@ -309,14 +312,15 @@ class TIVOMetadata(generic.GenericMetadata):
                 helpers.chmodAsParent(nfo_file_dir)
 
             logger.log(u"Writing episode nfo file to " + nfo_file_path, logger.DEBUG)
-            nfo_file = ek.ek(open, nfo_file_path, 'w')
 
-            # Calling encode directly, b/c often descriptions have wonky characters.
-            nfo_file.write(data.encode("utf-8"))
-            nfo_file.close()
+            with ek.ek(open, nfo_file_path, 'w') as nfo_file:
+                # Calling encode directly, b/c often descriptions have wonky characters.
+                nfo_file.write(data.encode("utf-8"))
+
             helpers.chmodAsParent(nfo_file_path)
-        except IOError, e:
-            logger.log(u"Unable to write file to " + nfo_file_path + " - are you sure the folder is writable? " + str(e).decode('utf-8'), logger.ERROR)
+
+        except EnvironmentError, e:
+            logger.log(u"Unable to write file to " + nfo_file_path + " - are you sure the folder is writable? " + ex(e), logger.ERROR)
             return False
 
         return True
