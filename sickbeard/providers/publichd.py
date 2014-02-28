@@ -16,6 +16,8 @@
 # You should have received a copy of the GNU General Public License
 # along with Sick Beard.  If not, see <http://www.gnu.org/licenses/>.
 
+from __future__ import with_statement
+
 import sys
 import os
 import traceback
@@ -212,33 +214,35 @@ class PublicHDProvider(generic.TorrentProvider):
         """
         Save the result to disk.
         """
-
+        
         torrent_hash = re.findall('urn:btih:([\w]{32,40})', result.url)[0].upper()
-
+        
         if not torrent_hash:
-           logger.log("Unable to extract torrent hash from link: " + ex(result.url), logger.ERROR)
+           logger.log("Unable to extract torrent hash from link: " + ex(result.url), logger.ERROR) 
            return False
-
+           
         try:
             r = requests.get('http://torcache.net/torrent/' + torrent_hash + '.torrent')
         except Exception, e:
             logger.log("Unable to connect to Torcache: " + ex(e), logger.ERROR)
             return False
-
+                         
         if not r.status_code == 200:
             return False
-
+            
         magnetFileName = ek.ek(os.path.join, sickbeard.TORRENT_DIR, helpers.sanitizeFileName(result.name) + '.' + self.providerType)
         magnetFileContent = r.content
 
-        try:
-            fileOut = open(magnetFileName, 'wb')
-            fileOut.write(magnetFileContent)
-            fileOut.close()
+        try:    
+            with open(magnetFileName, 'wb') as fileOut:
+                fileOut.write(magnetFileContent)
+                
             helpers.chmodAsParent(magnetFileName)
-        except IOError, e:
+        
+        except EnvironmentError:
             logger.log("Unable to save the file: " + ex(e), logger.ERROR)
             return False
+        
         logger.log(u"Saved magnet link to " + magnetFileName + " ", logger.MESSAGE)
         return True
 

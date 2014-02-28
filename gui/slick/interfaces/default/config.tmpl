@@ -14,47 +14,10 @@
 	<h1 class="title">$title</h1>
 #end if
 
-#if $hasChangeLog:
-<script type="text/javascript">
-<!--
-\$(document).ready(function()
-{
-    \$("#changelog").qtip({
-            id: 'changelog-tt',
-            content: {
-                text: '#if $logLines then $logLines else "no details listed"#',
-                title: {
-                   text: 'Changelog',
-                   button: 'Close'
-                }
-            },
-            hide: {
-                event: false
-            },
-            position: {
-                viewport: \$(window),
-                my: 'top center',
-                at: 'bottom center'
-            },
-            style: {
-                tip: {
-                    corner: true,
-                    method: 'polygon'
-                },
-                classes: 'ui-tooltip-dark ui-tooltip-rounded ui-tooltip-shadow changelog'
-            }
-    });
-});
-//-->
-</script>
-#end if
 
 <div id="summary" class="align-left">
 <table class="infoTable" cellspacing="1" border="0" cellpadding="0">
     <tr><td class="infoTableHeader">SB Version: </td><td class="infoTableCell">alpha ($sickbeard.version.SICKBEARD_VERSION) <!-- &ndash; build.date //-->
-#if $hasChangeLog:
-    &ndash; <img src="$sbRoot/images/changelog16.png" alt="[changelog]" id="changelog" />
-#end if
 	</td></tr>
     <tr><td class="infoTableHeader">SB Config file: </td><td class="infoTableCell">$sickbeard.CONFIG_FILE</td></tr>
     <tr><td class="infoTableHeader">SB Database file: </td><td class="infoTableCell">$db.dbFilename()</td></tr>

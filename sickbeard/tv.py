@@ -722,7 +722,7 @@ class TVShow(object):
 
             if not cache:
                 ltvdb_api_parms['cache'] = False
- 
+
             if self.lang:
                 ltvdb_api_parms['language'] = self.lang
 
@@ -737,10 +737,15 @@ class TVShow(object):
             self.name = myEp["seriesname"].strip()
         except AttributeError:
             raise tvdb_exceptions.tvdb_attributenotfound("Found %s, but attribute 'seriesname' was empty." % (self.tvdbid))    
-            
+
         self.genre = myEp['genre']
         self.network = myEp['network']
-        self.runtime = myEp['runtime']
+
+        if myEp['runtime']:
+            self.runtime = myEp['runtime']
+        else:
+            self.runtime = 0
+
         self.imdbid = myEp['imdb_id']
 
         if myEp["airs_dayofweek"] != None and myEp["airs_time"] != None:
@@ -1104,7 +1109,7 @@ class TVShow(object):
             return Overview.GOOD
         elif epStatus in Quality.DOWNLOADED + Quality.SNATCHED + Quality.SNATCHED_PROPER + Quality.FAILED:
 
-            anyQualities, bestQualities = Quality.splitQuality(self.quality)  #@UnusedVariable
+            anyQualities, bestQualities = Quality.splitQuality(self.quality)  # @UnusedVariable
             if bestQualities:
                 maxBestQuality = max(bestQualities)
             else:
@@ -1748,7 +1753,7 @@ class TVEpisode(object):
                 return ''
             return parse_result.release_group
 
-        epStatus, epQual = Quality.splitCompositeStatus(self.status)  #@UnusedVariable
+        epStatus, epQual = Quality.splitCompositeStatus(self.status)  # @UnusedVariable
 
         if sickbeard.NAMING_STRIP_YEAR:
             show_name = re.sub("\(\d+\)$", "", self.show.name).rstrip()

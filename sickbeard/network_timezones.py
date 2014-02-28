@@ -22,7 +22,7 @@ from sickbeard import db
 from sickbeard import helpers
 from sickbeard import logger
 from sickbeard import encodingKludge as ek
-from os.path import basename, realpath
+from os.path import basename, realpath, join, isfile
 import os
 import re
 import datetime
@@ -40,6 +40,26 @@ def _remove_zoneinfo_failed(filename):
         os.remove(filename)
     except:
         pass
+
+# helper to remove old unneeded zoneinfo files
+def _remove_old_zoneinfo():
+    if (lib.dateutil.zoneinfo.ZONEINFOFILE is not None):
+        cur_zoneinfo = ek.ek(basename, lib.dateutil.zoneinfo.ZONEINFOFILE)
+    else:
+        return
+    
+    cur_file = ek.ek(realpath, u'lib/dateutil/zoneinfo/' + cur_zoneinfo)
+    
+    for (path, dirs, files) in ek.ek(os.walk,ek.ek(realpath,u'lib/dateutil/zoneinfo/')):
+        for filename in files:
+            if filename.endswith('.tar.gz'):
+                file_w_path = ek.ek(join,path,filename)
+                if file_w_path != cur_file and ek.ek(isfile,file_w_path):
+                    try:
+                        os.remove(file_w_path)
+                        logger.log(u"Delete unneeded old zoneinfo File: " + file_w_path)
+                    except:
+                        logger.log(u"Unable to delete: " + file_w_path,logger.ERROR)
 
 # update the dateutil zoneinfo
 def _update_zoneinfo():
@@ -107,6 +127,7 @@ def _update_zoneinfo():
 # update the network timezone table
 def update_network_dict():
 
+    _remove_old_zoneinfo()
     _update_zoneinfo()
 
     d = {}

@@ -16,7 +16,7 @@
 # You should have received a copy of the GNU General Public License
 # along with Sick Beard.  If not, see <http://www.gnu.org/licenses/>.
 
-
+from __future__ import with_statement
 
 import datetime
 import os
@@ -139,11 +139,10 @@ class GenericProvider:
         logger.log(u"Saving to " + file_name, logger.DEBUG)
 
         try:
-            fileOut = open(file_name, writeMode)
-            fileOut.write(data)
-            fileOut.close()
+            with open(file_name, writeMode) as fileOut:
+                fileOut.write(data)
             helpers.chmodAsParent(file_name)
-        except IOError, e:
+        except EnvironmentError, e:
             logger.log("Unable to save the file: " + ex(e), logger.ERROR)
             return False
 

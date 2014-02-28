@@ -42,6 +42,7 @@ naming_multi_ep_type_text = ("extend", "duplicate", "repeat")
 naming_sep_type = (" - ", " ")
 naming_sep_type_text = (" - ", "space")
 
+
 def change_HTTPS_CERT(https_cert):
 
     if https_cert == '':
@@ -78,6 +79,7 @@ def change_LOG_DIR(log_dir, web_log):
 
     log_dir_changed = False
     abs_log_dir = os.path.normpath(os.path.join(sickbeard.DATA_DIR, log_dir))
+    web_log_value = checkbox_to_value(web_log)
 
     if os.path.normpath(sickbeard.LOG_DIR) != abs_log_dir:
         if helpers.makeDir(abs_log_dir):
@@ -91,10 +93,11 @@ def change_LOG_DIR(log_dir, web_log):
         else:
             return False
 
-    if sickbeard.WEB_LOG != web_log or log_dir_changed == True:
-        sickbeard.WEB_LOG = web_log
+    if sickbeard.WEB_LOG != web_log_value or log_dir_changed == True:
 
-        if sickbeard.WEB_LOG == 1:
+        sickbeard.WEB_LOG = web_log_value
+
+        if sickbeard.WEB_LOG:
             cherry_log = os.path.join(sickbeard.LOG_DIR, "cherrypy.log")
             logger.log(u"Change cherry log file to " + cherry_log)
         else:
@@ -156,31 +159,26 @@ def change_TV_DOWNLOAD_DIR(tv_download_dir):
 
 def change_SEARCH_FREQUENCY(freq):
 
-    if freq == None:
-        freq = sickbeard.DEFAULT_SEARCH_FREQUENCY
-    else:
-        freq = int(freq)
+    sickbeard.SEARCH_FREQUENCY = to_int(freq, default=sickbeard.DEFAULT_SEARCH_FREQUENCY)
 
-    if freq < sickbeard.MIN_SEARCH_FREQUENCY:
-        freq = sickbeard.MIN_SEARCH_FREQUENCY
-
-    sickbeard.SEARCH_FREQUENCY = freq
+    if sickbeard.SEARCH_FREQUENCY < sickbeard.MIN_SEARCH_FREQUENCY:
+        sickbeard.SEARCH_FREQUENCY = sickbeard.MIN_SEARCH_FREQUENCY
 
     sickbeard.currentSearchScheduler.cycleTime = datetime.timedelta(minutes=sickbeard.SEARCH_FREQUENCY)
     sickbeard.backlogSearchScheduler.cycleTime = datetime.timedelta(minutes=sickbeard.get_backlog_cycle_time())
 
 
 def change_VERSION_NOTIFY(version_notify):
-   
+
     oldSetting = sickbeard.VERSION_NOTIFY
 
     sickbeard.VERSION_NOTIFY = version_notify
 
     if version_notify == False:
-        sickbeard.NEWEST_VERSION_STRING = None;
-        
+        sickbeard.NEWEST_VERSION_STRING = None
+
     if oldSetting == False and version_notify == True:
-        sickbeard.versionCheckScheduler.action.run() #@UndefinedVariable
+        sickbeard.versionCheckScheduler.action.run()  # @UndefinedVariable
 
 
 def CheckSection(CFG, sec):
@@ -192,19 +190,113 @@ def CheckSection(CFG, sec):
         CFG[sec] = {}
         return False
 
-################################################################################
-# Check_setting_int                                                            #
-################################################################################
-def minimax(val, low, high):
-    """ Return value forced within range """
+
+def checkbox_to_value(option, value_on=1, value_off=0):
+    """
+    Turns checkbox option 'on' or 'true' to value_on (1)
+    any other value returns value_off (0)
+    """
+    if option == 'on' or option == 'true':
+        return value_on
+
+    return value_off
+
+
+def clean_host(host, default_port=None):
+    """
+    Returns host or host:port or empty string from a given url or host
+    If no port is found and default_port is given use host:default_port
+    """
+
+    host = host.strip()
+
+    if host:
+
+        match_host_port = re.search(r'(?:http.*://)?(?P<host>[^:/]+).?(?P<port>[0-9]*).*', host)
+
+        cleaned_host = match_host_port.group('host')
+        cleaned_port = match_host_port.group('port')
+
+        if cleaned_host:
+
+            if cleaned_port:
+                host = cleaned_host + ':' + cleaned_port
+
+            elif default_port:
+                host = cleaned_host + ':' + str(default_port)
+
+            else:
+                host = cleaned_host
+
+        else:
+            host = ''
+
+    return host
+
+
+def clean_hosts(hosts, default_port=None):
+
+    cleaned_hosts = []
+
+    for cur_host in [x.strip() for x in hosts.split(",")]:
+        if cur_host:
+            cleaned_host = clean_host(cur_host, default_port)
+            if cleaned_host:
+                cleaned_hosts.append(cleaned_host)
+
+    if cleaned_hosts:
+        cleaned_hosts = ",".join(cleaned_hosts)
+
+    else:
+        cleaned_hosts = ''
+
+    return cleaned_hosts
+
+
+def clean_url(url):
+    """
+    Returns an url starting with http:// or https:// and ending with /
+    or an empty string
+    """
+
+    if url:
+
+        if not re.match(r'(https?|scgi)://.*', url):
+            url = 'http://' + url
+
+        if not url.endswith('/'):
+            url = url + '/'
+
+    else:
+        url = ''
+
+    return url
+
+
+def to_int(val, default=0):
+    """ Return int value of val or default on error """
+
     try:
         val = int(val)
     except:
-        val = 0
+        val = default
+
+    return val
+
+
+################################################################################
+# Check_setting_int                                                            #
+################################################################################
+def minimax(val, default, low, high):
+    """ Return value forced within range """
+
+    val = to_int(val, default=default)
+
     if val < low:
         return low
     if val > high:
         return high
+
     return val
 
 
@@ -247,7 +339,6 @@ def check_setting_float(config, cfg_name, item_name, def_val):
 # Check_setting_str                                                            #
 ################################################################################
 def check_setting_str(config, cfg_name, item_name, def_val, log=True):
-
     # For passwords you must include the word `password` in the item_name and add `helpers.encrypt(ITEM_NAME, ENCRYPTION_VERSION)` in save_config()
     if bool(item_name.find('password') + 1):
         encryption_version = sickbeard.ENCRYPTION_VERSION
@@ -270,6 +361,7 @@ def check_setting_str(config, cfg_name, item_name, def_val, log=True):
         logger.log(item_name + " -> ******", logger.DEBUG)
     return my_val
 
+
 class ConfigMigrator():
 
     def __init__(self, config_obj):
@@ -277,7 +369,7 @@ class ConfigMigrator():
         Initializes a config migrator that can take the config from the version indicated in the config
         file up to the version required by SB
         """
-        
+
         self.config_obj = config_obj
 
         # check the version of the config
@@ -288,8 +380,7 @@ class ConfigMigrator():
                                 3: 'Rename omgwtfnzb variables',
                                 4: 'Add newznab catIDs',
                                 5: 'Metadata update'
-                                } 
-
+                                }
 
     def migrate_config(self):
         """
@@ -299,24 +390,24 @@ class ConfigMigrator():
         if self.config_version > self.expected_config_version:
             logger.log_error_and_exit(u"Your config version (" + str(self.config_version) + ") has been incremented past what this version of Sick Beard supports (" + str(self.expected_config_version) + ").\n" + \
                                       "If you have used other forks or a newer version of Sick Beard, your config file may be unusable due to their modifications.")
-        
+
         sickbeard.CONFIG_VERSION = self.config_version
-        
+
         while self.config_version < self.expected_config_version:
 
             next_version = self.config_version + 1
-            
+
             if next_version in self.migration_names:
                 migration_name = ': ' + self.migration_names[next_version]
             else:
                 migration_name = ''
-            
+
             logger.log(u"Backing up config before upgrade")
             if not helpers.backupVersionedFile(sickbeard.CONFIG_FILE, self.config_version):
                 logger.log_error_and_exit(u"Config backup failed, abort upgrading config")
             else:
-                logger.log(u"Proceeding with upgrade")  
-            
+                logger.log(u"Proceeding with upgrade")
+
             # do the migration, expect a method named _migrate_v<num>
             logger.log(u"Migrating config up to version " + str(next_version) + migration_name)
             getattr(self, '_migrate_v' + str(next_version))()
@@ -327,7 +418,7 @@ class ConfigMigrator():
             logger.log(u"Saving config file to disk")
             sickbeard.save_config()
 
-    # Migration v1: Custom naming 
+    # Migration v1: Custom naming
     def _migrate_v1(self):
         """
         Reads in the old naming settings from your config and generates a new config template from them.
@@ -437,8 +528,8 @@ class ConfigMigrator():
     # Migration v2: Dummy migration to sync backup number with config version number
     def _migrate_v2(self):
         return
- 
-    # Migration v2: Rename  omgwtfnzb variables
+
+    # Migration v2: Rename omgwtfnzb variables
     def _migrate_v3(self):
         """
         Reads in the old naming settings from your config and generates a new config template from them.
@@ -485,21 +576,21 @@ class ConfigMigrator():
 
         new | old | description (new)
         ----+-----+--------------------
-        1 | 1 | show metadata
-        2 | 2 | episode metadata
-        3 | 4 | show fanart
-        4 | 3 | show poster
-        5 | - | show banner
-        6 | 5 | episode thumb
-        7 | 6 | season poster
-        8 | - | season banner
-        9 | - | season all poster
-        10 | - | season all banner
-        
+          1 |  1  | show metadata
+          2 |  2  | episode metadata
+          3 |  4  | show fanart
+          4 |  3  | show poster
+          5 |  -  | show banner
+          6 |  5  | episode thumb
+          7 |  6  | season poster
+          8 |  -  | season banner
+          9 |  -  | season all poster
+         10 |  -  | season all banner
+
         Note that the ini places start at 1 while the list index starts at 0.
         old format: 0|0|0|0|0|0 -- 6 places
         new format: 0|0|0|0|0|0|0|0|0|0 -- 10 places
-        
+
         Drop the use of use_banner option.
         Migrate the poster override to just using the banner option (applies to xbmc only).
         """
