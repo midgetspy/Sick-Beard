@@ -833,56 +833,6 @@ class TVShow(object):
     
             logger.log(str(self.tvdbid) + u": Obtained info from IMDb ->" +  str(self.imdb_info), logger.DEBUG)
         
-    def loadNFO(self):
-
-        if not ek.ek(os.path.isdir, self._location):
-            logger.log(str(self.tvdbid) + u": Show dir doesn't exist, can't load NFO")
-            raise exceptions.NoNFOException("The show dir doesn't exist, no NFO could be loaded")
-
-        logger.log(str(self.tvdbid) + u": Loading show info from NFO")
-
-        xmlFile = ek.ek(os.path.join, self._location, "tvshow.nfo")
-
-        try:
-            xmlFileObj = open(xmlFile, 'r')
-            showXML = etree.ElementTree(file = xmlFileObj)
-
-            if showXML.findtext('title') == None or (showXML.findtext('tvdbid') == None and showXML.findtext('id') == None):
-                raise exceptions.NoNFOException("Invalid info in tvshow.nfo (missing name or id):" \
-                    + str(showXML.findtext('title')) + " " \
-                    + str(showXML.findtext('tvdbid')) + " " \
-                    + str(showXML.findtext('id')))
-
-            self.name = showXML.findtext('title')
-            if showXML.findtext('tvdbid') != None:
-                self.tvdbid = int(showXML.findtext('tvdbid'))
-            elif showXML.findtext('id'):
-                self.tvdbid = int(showXML.findtext('id'))
-            else:
-                raise exceptions.NoNFOException("Empty <id> or <tvdbid> field in NFO")
-
-        except (exceptions.NoNFOException, SyntaxError, ValueError), e:
-            logger.log(u"There was an error parsing your existing tvshow.nfo file: " + ex(e), logger.ERROR)
-            logger.log(u"Attempting to rename it to tvshow.nfo.old", logger.DEBUG)
-
-            try:
-                xmlFileObj.close()
-                ek.ek(os.rename, xmlFile, xmlFile + ".old")
-            except Exception, e:
-                logger.log(u"Failed to rename your tvshow.nfo file - you need to delete it or fix it: " + ex(e), logger.ERROR)
-            raise exceptions.NoNFOException("Invalid info in tvshow.nfo")
-
-        if showXML.findtext('studio') != None:
-            self.network = showXML.findtext('studio')
-        if self.network == None and showXML.findtext('network') != None:
-            self.network = ""
-        if showXML.findtext('genre') != None:
-            self.genre = showXML.findtext('genre')
-        else:
-            self.genre = ""
-
-        # TODO: need to validate the input, I'm assuming it's good until then
-
     def nextEpisode(self):
 
         logger.log(str(self.tvdbid) + ": Finding the episode which airs next", logger.DEBUG)
