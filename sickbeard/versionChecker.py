@@ -422,7 +422,7 @@ class GitUpdateManager(UpdateManager):
             return
 
         # get latest commit_hash from remote
-        output, err, exit_status = self._run_git(self._git_path, 'rev-parse --verify --quiet @{upstream}')
+        output, err, exit_status = self._run_git(self._git_path, 'rev-parse --verify --quiet "@{upstream}"')
 
         if exit_status == 0 and output:
             cur_commit_hash = output.strip()
@@ -437,13 +437,15 @@ class GitUpdateManager(UpdateManager):
             logger.log(u"git didn't return newest commit hash", logger.DEBUG)
             return
 
-        # get number of commits behind and ahead
-        output, err, exit_status = self._run_git(self._git_path, 'rev-list --left-right --count @{upstream}...HEAD')
+        # get number of commits behind and ahead (option --count not supported git < 1.7.2)
+        output, err, exit_status = self._run_git(self._git_path, 'rev-list --left-right "@{upstream}"...HEAD')
 
         if exit_status == 0 and output:
 
             try:
-                self._num_commits_behind, self._num_commits_ahead = map(int, output.split('\t'))
+                self._num_commits_behind = int(output.count("<"))
+                self._num_commits_ahead = int(output.count(">"))
+
             except:
                 logger.log(u"git didn't return numbers for behind and ahead, not using it", logger.DEBUG)
                 return
