@@ -43,6 +43,7 @@ class SCCProvider(generic.TorrentProvider):
             'login' : 'https://sceneaccess.eu/login',
             'detail' : 'https://www.sceneaccess.eu/details?id=%s',
             'search' : 'https://sceneaccess.eu/browse?search=%s&method=1&%s',
+            'archive' : 'https://sceneaccess.eu/archive?search=%s&method=1&c26=26',
             'download' : 'https://www.sceneaccess.eu/%s',
             }
 
@@ -155,8 +156,11 @@ class SCCProvider(generic.TorrentProvider):
 
                 if isinstance(search_string, unicode):
                     search_string = unidecode(search_string)
-
-                searchURL = self.urls['search'] % (search_string, self.categories)
+                
+                if mode == 'Season':
+                    searchURL = self.urls['archive'] % (search_string)
+                else:     
+                    searchURL = self.urls['search'] % (search_string, self.categories)
 
                 logger.log(u"Search string: " + searchURL, logger.DEBUG)
 
