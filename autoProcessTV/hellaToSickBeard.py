@@ -21,10 +21,14 @@
 
 import sys
 
-import autoProcessTV
+try:
+    import autoProcessTV
+except:
+    print ("Can't import autoProcessTV.py, make sure it's in the same folder as " + sys.argv[0])
+    sys.exit(1)
 
 if len(sys.argv) < 4:
-    print "No folder supplied - is this being called from HellaVCR?"
-    sys.exit()
+    print ("No folder supplied - is this being called from HellaVCR?")
+    sys.exit(1)
 else:
     autoProcessTV.processEpisode(sys.argv[3], sys.argv[2])
