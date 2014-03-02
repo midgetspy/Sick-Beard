@@ -28,7 +28,9 @@ import re
 import datetime
 
 # regex to parse time (12/24 hour format)
-time_regex = re.compile(r"(\d{1,2}):(\d{2,2})( [PA]M)?\b", flags=re.IGNORECASE)
+time_regex = re.compile(r"(\d{1,2})(([:.](\d{2,2}))? ?([PA][. ]? ?M)|[:.](\d{2,2}))\b", flags=re.IGNORECASE)
+am_regex = re.compile(r"(A[. ]? ?M)", flags=re.IGNORECASE)
+pm_regex = re.compile(r"(P[. ]? ?M)", flags=re.IGNORECASE)
 
 network_dict = None
 
@@ -206,20 +208,28 @@ def parse_date_time(d, t, network):
     if network_dict is None:
         load_network_dict()
     mo = time_regex.search(t)
-    if mo is not None and len(mo.groups()) >= 2:
-        try:
-            hr = helpers.tryInt(mo.group(1))
-            m = helpers.tryInt(mo.group(2))
-            ap = mo.group(3)
-            # convert am/pm to 24 hour clock
-            if ap is not None:
-                if ap.lower() == u" pm" and hr != 12:
-                    hr += 12
-                elif ap.lower() == u" am" and hr == 12:
-                    hr -= 12
-        except:
-            hr = 0
-            m = 0
+    if mo is not None and len(mo.groups()) >= 5:
+        if mo.group(5) is not None:
+            try:
+                hr = helpers.tryInt(mo.group(1))
+                m = helpers.tryInt(mo.group(4))
+                ap = mo.group(5)
+                # convert am/pm to 24 hour clock
+                if ap is not None:
+                    if pm_regex.search(ap) is not None and hr != 12:
+                        hr += 12
+                    elif am_regex.search(ap) is not None and hr == 12:
+                        hr -= 12
+            except:
+                hr = 0
+                m = 0
+        else:
+            try:
+                hr = helpers.tryInt(mo.group(1))
+                m = helpers.tryInt(mo.group(6))
+            except:
+                hr = 0
+                m = 0
     else:
         hr = 0
         m = 0
