@@ -75,7 +75,7 @@ def sendTORRENT(torrent):
             tc = transmissionrpc.Client(host.hostname, host.port, sickbeard.TORRENT_USERNAME, sickbeard.TORRENT_PASSWORD)
             logger.log("[Transmission] Login With Transmission, Successful.", logger.DEBUG)
         except transmissionrpc.TransmissionError, e:
-            logger.log("[Transmission] Login With Transmission, Failed - " + transmissionrpc.TransmissionError.message, logger.ERROR)    
+            logger.log("[Transmission] Login With Transmission, Failed.",logger.ERROR)
             return False,u"[Transmission] Login With Transmission, Failed."
             
         ###################################################################################################

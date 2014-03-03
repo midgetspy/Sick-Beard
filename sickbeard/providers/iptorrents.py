@@ -18,15 +18,17 @@
 # along with Sick Beard.  If not, see <http://www.gnu.org/licenses/>.
 ###################################################################################################
 
-import re
-import urllib, urllib2, cookielib
-import sys
-import datetime
 import os
-import exceptions
-import sickbeard
+import re
+import sys
+import urllib
 import generic
+import datetime
+import sickbeard
+import exceptions
 
+from lib import requests
+from xml.sax.saxutils import escape
 
 from sickbeard.common import Quality
 from sickbeard import logger
@@ -45,8 +47,9 @@ class IPTorrentsProvider(generic.TorrentProvider):
         self.supportsBacklog = True
         self.cache = IPTorrentsCache(self)     
         self.url = 'https://www.iptorrents.com/'
-        self.token = None
-        logger.log('[IPTorrents] Loading IPTorrents')
+        self.name = "IPTorrents"
+        self.session = None
+        logger.log("[" + self.name + "] initializing...")
     
     ###################################################################################################
     
@@ -141,73 +144,65 @@ class IPTorrentsProvider(generic.TorrentProvider):
         data = self.getURL(searchUrl)
         results = []
         if data:
-            logger.log("[IPTorrents] parseResults() URL: " + searchUrl, logger.DEBUG)
             for torrent in re.compile('<a class="t_title" href="/details\.php\?id=\d+">(?P<title>.*?)</a>.*?<a href="/download\.php/(?P<url>.*?)"><',re.MULTILINE|re.DOTALL).finditer(data):
                 item = (torrent.group('title').replace('.',' '), self.url + "download.php/" + torrent.group('url'))
-                results.append(item)                        
-                logger.log("[IPTorrents] parseResults() Title: " + torrent.group('title'), logger.DEBUG)
+                results.append(item)
             if len(results):
-                logger.log("[IPTorrents] parseResults() Some results found.")
+                logger.log("[" + self.name + "] parseResults() Some results found.")
             else:
-                logger.log("[IPTorrents] parseResults() No results found.")
+                logger.log("[" + self.name + "] parseResults() No results found.")
         else:
-            logger.log("[IPTorrents] parseResults() Error no data returned!!")
+            logger.log("[" + self.name + "] parseResults() Error no data returned!!")
         return results
     
     ###################################################################################################
     
     def getURL(self, url, headers=None):
         response = None
-        if self.doLogin():        
-            if not headers:
-                headers = []
-            headers.append(('Cookie', self.token))          
-            try:
-                response = helpers.getURL(url, headers)
-                if response.count("<title>IPT</title>") > 0:
-                    logger.log("[IPTorrents] getURL() Session expired loading " + self.name + " URL: " + url +" Let's login again.")
-                    self.token = None
-                    self.getURL(url, headers)
-            except (urllib2.HTTPError, IOError, Exception), e:
-                self.token = None
-                logger.log("[IPTorrents] getURL() Error loading " + self.name + " URL: " + str(sys.exc_info()) + " - " + ex(e), logger.ERROR)
-                return None
-        return response
+        
+        if not self.session:
+             if not self._doLogin():
+                return response
+            
+        if not headers:
+            headers = []
+            
+        try:
+            response = self.session.get(url, verify=False)
+        except (requests.exceptions.ConnectionError, requests.exceptions.HTTPError), e:
+            logger.log("[" + self.name + "] getURL() Error loading " + self.name + " URL: " + ex(e), logger.ERROR)
+            return None
+        
+        if response.status_code not in [200,302,303]:
+            logger.log("[" + self.name + "] getURL() requested URL - " + url +" returned status code is " + str(response.status_code), logger.ERROR)
+            return None
+
+        return response.content
     
     ###################################################################################################
     
-    def doLogin(self):
-        if not self.token:
-            login_params  = {
-                'username': sickbeard.IPTORRENTS_USERNAME,
-                'password': sickbeard.IPTORRENTS_PASSWORD,
-                'login': 'submit'
-            }
-            result = None
+    def _doLogin(self):
+        login_params  = {
+            'username': sickbeard.IPTORRENTS_USERNAME,
+            'password': sickbeard.IPTORRENTS_PASSWORD,
+            'login': 'submit'
+        }
             
-            cookies = cookielib.CookieJar()
-            opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(cookies))
-            try:
-                logger.log("[IPTorrents] Attempting to Login")
-                urllib2.install_opener(opener)
-                response = opener.open(self.url + "torrents/", urllib.urlencode(login_params))
-                result = response.read()
-            except (urllib2.HTTPError, IOError, Exception), e:
-                raise Exception("[IPTorrents] doLogin() Error: " + str(e.code) + " " + str(e.reason), logger.ERROR)
-                return None
-            if re.search("Password not correct|<title>IPT</title>",result):
-                response.close()
-                logger.log("[IPTorrents] Failed Login")
-                raise Exception("Invalid username or password for " + self.name + ". Check your settings.")
-                return None
-            self.token = ""
-            for cookie in cookies:
-                if not cookie.value == "deleted":
-                    self.token += str(cookie.name) + "=" + str(cookie.value) + ";"
-            logger.log("[IPTorrents] Successfully logged user '%s' in." % sickbeard.IPTORRENTS_USERNAME)
-            response.close()
+        self.session = requests.Session()
+        logger.log("[" + self.name + "] Attempting to Login")
+        
+        try:
+            response = self.session.post(self.url + "/t", data=login_params, timeout=30, verify=False)
+        except (requests.exceptions.ConnectionError, requests.exceptions.HTTPError), e:
+            raise Exception("[" + self.name + "] _doLogin() Error: " + ex(e))
+            return False
+        
+        if re.search("Password not correct|<title>IPT</title>",response.text) \
+        or response.status_code in [401,403]:
+            raise Exception("[" + self.name + "] Login Failed, Invalid username or password for " + self.name + ". Check your settings.")
+            return False
         return True
-    
+            
     ###################################################################################################
     
 class IPTorrentsCache(tvcache.TVCache):
@@ -224,25 +219,25 @@ class IPTorrentsCache(tvcache.TVCache):
         xml = ''
         if sickbeard.IPTORRENTS_UID and sickbeard.IPTORRENTS_RSSHASH:
             self.rss_url = provider.url + "torrents/rss?download;l78;l79;l5;u={0};tp={1}".format(sickbeard.IPTORRENTS_UID,sickbeard.IPTORRENTS_RSSHASH)
-            logger.log("[IPTorrents] RSS URL - {0}".format(self.rss_url))
-            xml = helpers.getURL(self.rss_url)
+            logger.log("[" + provider.name + "] RSS URL - {0}".format(self.rss_url))
+            xml = provider.getURL(self.rss_url)
         else:
-            logger.log("[IPTorrents] WARNING: RSS construction via browse since no hash or uid provided.")
+            logger.log("[" + provider.name + "] WARNING: RSS construction via browse since no hash provided.")
             url = provider.url + "torrents/?l78=&l79=&l5=&q=&qf="
             data = provider.parseResults(url)
-            xml =   "<rss xmlns:atom=\"http://www.w3.org/2005/Atom\" version=\"2.0\">" + \
-                    "<channel>" + \
-                    "<title>IPTorrents</title>" + \
-                    "<link>" + provider.url + "</link>" + \
-                    "<description>torrent search</description>" + \
-                    "<language>en-us</language>" + \
-                    "<atom:link href=\"" + provider.url + "\" rel=\"self\" type=\"application/rss+xml\"/>"
+            xml = "<rss xmlns:atom=\"http://www.w3.org/2005/Atom\" version=\"2.0\">" + \
+            "<channel>" + \
+            "<title>" + provider.name + "</title>" + \
+            "<link>" + provider.url + "</link>" + \
+            "<description>torrent search</description>" + \
+            "<language>en-us</language>" + \
+            "<atom:link href=\"" + provider.url + "\" rel=\"self\" type=\"application/rss+xml\"/>"
             
             for title, url in data:
-                xml += "<item>" + "<title>" + title + "</title>" +  "<link>"+ url + "</link>" + "</item>"
-            xml += "</channel> </rss>"
+                xml += "<item>" + "<title>" + escape(title) + "</title>" +  "<link>"+ urllib.quote(url,'/,:') + "</link>" + "</item>"
+            xml += "</channel></rss>"
         return xml
-        
+
     ###################################################################################################    
         
 provider = IPTorrentsProvider()   
