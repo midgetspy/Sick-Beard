@@ -3514,7 +3514,7 @@ class WebInterface:
 
         time_re = re.compile('([0-9]{1,2})\:([0-9]{2})(\ |)([AM|am|PM|pm]{2})')
 
-    # Create a iCal string
+        # Create a iCal string
         ical = 'BEGIN:VCALENDAR\r\n'
         ical += 'VERSION:2.0\r\n'
         ical += 'X-WR-CALNAME:Sick Beard\r\n'
@@ -3528,8 +3528,8 @@ class WebInterface:
         past_date = (datetime.date.today() + datetime.timedelta(weeks=-52)).toordinal()
         future_date = (datetime.date.today() + datetime.timedelta(weeks=52)).toordinal()
 
-        # Get all the shows that are not paused and are currently on air (from kjoconnor Fork)
-        calendar_shows = myDB.select("SELECT show_name, tvdb_id, network, airs, runtime FROM tv_shows WHERE status = 'Continuing' AND paused != '1'")
+        # Get all the shows that are not paused
+        calendar_shows = myDB.select("SELECT show_name, tvdb_id, network, airs, runtime FROM tv_shows WHERE paused != '1'")
         for show in calendar_shows:
             # Get all episodes of this show airing between today and next month
             episode_list = myDB.select("SELECT tvdbid, name, season, episode, description, airdate FROM tv_episodes WHERE airdate >= ? AND airdate < ? AND showid = ?", (past_date, future_date, int(show["tvdb_id"])))
