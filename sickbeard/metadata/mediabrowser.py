@@ -336,14 +336,15 @@ class MediaBrowserMetadata(generic.GenericMetadata):
             Zap2ItId.text = myShow['zap2it_id']
 
         Genres = etree.SubElement(tv_node, "Genres")
-        for genre in myShow['genre'].split('|'):
-            if genre:
-                cur_genre = etree.SubElement(Genres, "Genre")
-                cur_genre.text = genre
+        if myShow["genre"] != None:
+            for genre in myShow['genre'].split('|'):
+                if genre and genre.strip():
+                    cur_genre = etree.SubElement(Genres, "Genre")
+                    cur_genre.text = genre.strip()
 
         Genre = etree.SubElement(tv_node, "Genre")
-        if myShow['genre'] != None:
-            Genre.text = "|".join([x for x in myShow["genre"].split('|') if x])
+        if myShow["genre"] != None:
+            Genre.text = "|".join([x.strip() for x in myShow["genre"].split('|') if x and x.strip()])
 
         Studios = etree.SubElement(tv_node, "Studios")
         Studio = etree.SubElement(Studios, "Studio")

@@ -270,8 +270,8 @@ class TIVOMetadata(generic.GenericMetadata):
             # This field can be repeated as many times as necessary or omitted completely.
             if ep_obj.show.genre:
                 for genre in ep_obj.show.genre.split('|'):
-                    if genre:
-                        data += ("vProgramGenre : " + str(genre) + "\n")
+                    if genre and genre.strip():
+                        data += ("vProgramGenre : " + str(genre.strip()) + "\n")
 
             # NOTE: The following are metadata keywords are not used
             # displayMajorNumber

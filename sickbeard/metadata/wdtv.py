@@ -258,7 +258,7 @@ class WDTVMetadata(generic.GenericMetadata):
 
             genre = etree.SubElement(episode, "genre")
             if myShow["genre"] != None:
-                genre.text = " / ".join([x for x in myShow["genre"].split('|') if x])
+                genre.text = " / ".join([x.strip() for x in myShow["genre"].split('|') if x and x.strip()])
 
             director = etree.SubElement(episode, "director")
             director_text = myEp['director']
