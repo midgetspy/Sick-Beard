@@ -291,7 +291,7 @@ class Session(SessionRedirectMixin):
     def request(self, method, url,
         params=None,
         data=None,
-        headers={'user-agent': 'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/32.0.1700.107 Safari/537.36'},
+        headers=None,
         cookies=None,
         files=None,
         auth=None,
