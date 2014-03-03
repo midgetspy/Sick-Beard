@@ -299,8 +299,12 @@ class FailedQueueItem(generic_queue.QueueItem):
                                             [self.show.tvdbid, min_date.toordinal(), max_date.toordinal()])
             
             for result in sqlResults:
-                failed_history.revertEpisodes(self.show, self.segment, [result["episode"]])
-                failed_history.logFailed(ep_release_name)
+                try:
+                    ep_release_name = failed_history.findRelease(self.show.tvdbid, self.ep_obj.season, self.ep_obj.episode)
+                    failed_history.revertEpisodes(self.show, self.segment, [result["episode"]])
+                    failed_history.logFailed(ep_release_name)
+                except:
+                    pass
 
                 results = search.findSeason(self.show, self.segment)
 
