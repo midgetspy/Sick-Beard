@@ -384,16 +384,29 @@ class Add1080pAndRawHDQualities(RenameSeasonFolders):
         logger.log(u"Performing a vacuum on the database.", logger.DEBUG)
         self.connection.action("VACUUM")
 
-
-# included in build 502 (2013-11-24)
-class AddShowidTvdbidIndex(Add1080pAndRawHDQualities):
-    """ Adding index on tvdb_id (tv_shows) and showid (tv_episodes) to speed up searches/queries """
+class AddSubtitleColumns(Add1080pAndRawHDQualities):
 
     def test(self):
         return self.checkDBVersion() >= 13
-
+    
     def execute(self):
         backupDatabase(13)
+
+        if not self.hasColumn("tv_episodes", "hassrt"):
+            self.addColumn("tv_episodes", "hassrt")
+            logger.log(u"Adding subtitle column to episodes")
+
+        self.incDBVersion()
+
+# included in build 502 (2013-11-24)
+class AddShowidTvdbidIndex(AddSubtitleColumns):
+    """ Adding index on tvdb_id (tv_shows) and showid (tv_episodes) to speed up searches/queries """
+
+    def test(self):
+        return self.checkDBVersion() >= 14
+
+    def execute(self):
+        backupDatabase(14)
 
         logger.log(u"Check for duplicate shows before adding unique index.")
         MainSanityCheck(self.connection).fix_duplicate_shows()
@@ -412,29 +425,14 @@ class AddLastUpdateTVDB(AddShowidTvdbidIndex):
     """ Adding column last_update_tvdb to tv_shows for controlling nightly updates """
 
     def test(self):
-        return self.checkDBVersion() >= 14
+        return self.checkDBVersion() >= 15
 
     def execute(self):
-        backupDatabase(14)
+        backupDatabase(15)
 
         logger.log(u"Adding column last_update_tvdb to tvshows")
         if not self.hasColumn("tv_shows", "last_update_tvdb"):
             self.addColumn("tv_shows", "last_update_tvdb", default=1)
-
-        self.incDBVersion()
-        
-
-class AddSubtitleColumns(AddLastUpdateTVDB):
-
-    def test(self):
-        return self.checkDBVersion() >= 15
-    
-    def execute(self):
-        backupDatabase(15)
-
-        if not self.hasColumn("tv_episodes", "hassrt"):
-            self.addColumn("tv_episodes", "hassrt")
-            logger.log(u"Adding subtitle column to episodes")
 
         self.incDBVersion()
 

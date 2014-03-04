@@ -232,7 +232,7 @@ class TVShow(object):
             result = cur_provider.create_show_metadata(self) or result
 
         return result
-
+    
     def writeMetadata(self, show_only=False):
 
         if not ek.ek(os.path.isdir, self._location):
@@ -840,6 +840,7 @@ class TVShow(object):
                     curEp.location = ''
                     curEp.hasnfo = False
                     curEp.hastbn = False
+                    curEp.hassrt = False
                     curEp.release_name = ''
                     curEp.saveToDB()
 
@@ -988,6 +989,7 @@ class TVEpisode(object):
         self._airdate = datetime.date.fromordinal(1)
         self._hasnfo = False
         self._hastbn = False
+        self._hassrt = False
         self._status = UNKNOWN
         self._tvdbid = 0
         self._file_size = 0
@@ -1014,6 +1016,7 @@ class TVEpisode(object):
     airdate = property(lambda self: self._airdate, dirty_setter("_airdate"))
     hasnfo = property(lambda self: self._hasnfo, dirty_setter("_hasnfo"))
     hastbn = property(lambda self: self._hastbn, dirty_setter("_hastbn"))
+    hassrt = property(lambda self: self._hassrt, dirty_setter("_hassrt"))
     status = property(lambda self: self._status, dirty_setter("_status"))
     tvdbid = property(lambda self: self._tvdbid, dirty_setter("_tvdbid"))
     #location = property(lambda self: self._location, dirty_setter("_location"))
@@ -1037,9 +1040,11 @@ class TVEpisode(object):
 
         oldhasnfo = self.hasnfo
         oldhastbn = self.hastbn
+        oldhassrt = self.hassrt
 
         cur_nfo = False
         cur_tbn = False
+        cur_srt = False
 
         # check for nfo and tbn
         if ek.ek(os.path.isfile, self.location):
@@ -1055,12 +1060,19 @@ class TVEpisode(object):
                 else:
                     new_result = False
                 cur_tbn = new_result or cur_tbn
+                
+                if cur_provider.subtitles:
+                    new_result = cur_provider._has_episode_subtitle(self)
+                else:
+                    new_result = False
+                cur_srt = new_result or cur_srt
 
         self.hasnfo = cur_nfo
         self.hastbn = cur_tbn
+        self.hassrt = cur_srt
 
         # if either setting has changed return true, if not return false
-        return oldhasnfo != self.hasnfo or oldhastbn != self.hastbn
+        return oldhasnfo != self.hasnfo or oldhastbn != self.hastbn or oldhassrt != self.hassrt
 
     def specifyEpisode(self, season, episode):
 
@@ -1329,6 +1341,7 @@ class TVEpisode(object):
         toReturn += "airdate: " + str(self.airdate.toordinal()) + " (" + str(self.airdate) + ")\n"
         toReturn += "hasnfo: " + str(self.hasnfo) + "\n"
         toReturn += "hastbn: " + str(self.hastbn) + "\n"
+        toReturn += "hassrt: " + str(self.hassrt) + "\n"
         toReturn += "status: " + str(self.status) + "\n"
         return toReturn
 
@@ -1340,6 +1353,7 @@ class TVEpisode(object):
 
         self.createNFO(force)
         self.createThumbnail(force)
+        self.createSubtitles(force)
 
         if self.checkForMetaFiles():
             self.saveToDB()
@@ -1359,6 +1373,15 @@ class TVEpisode(object):
 
         for cur_provider in sickbeard.metadata_provider_dict.values():
             result = cur_provider.create_episode_thumb(self) or result
+
+        return result
+
+    def createSubtitles(self, force=False):
+
+        result = False
+
+        for cur_provider in sickbeard.metadata_provider_dict.values():
+            result = cur_provider.create_subtitles(self) or result
 
         return result
 
@@ -1402,6 +1425,7 @@ class TVEpisode(object):
                         "airdate": self.airdate.toordinal(),
                         "hasnfo": self.hasnfo,
                         "hastbn": self.hastbn,
+                        "hassrt": self.hassrt,
                         "status": self.status,
                         "location": self.location,
                         "file_size": self.file_size,
