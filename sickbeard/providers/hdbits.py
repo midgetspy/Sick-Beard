@@ -209,8 +209,14 @@ class HDBitsCache(tvcache.TVCache):
                     logger.log(u"Resulting JSON from " + self.provider.name + " isn't correct, not parsing it", logger.ERROR)
                     return []
 
+                ql = []
                 for item in items:
-                    self._parseItem(item)
+                    ci = self._parseItem(item)
+                    if ci is not None:
+                        ql.append(ci)
+
+                myDB = self._getDB()
+                myDB.mass_action(ql)
 
             else:
                 raise exceptions.AuthException("Your authentication info for " + self.provider.name + " is incorrect, check your config")
@@ -227,10 +233,10 @@ class HDBitsCache(tvcache.TVCache):
 
         if title and url:
             logger.log(u"Adding item to results: " + title, logger.DEBUG)
-            self._addCacheEntry(title, url)
+            return self._addCacheEntry(title, url)
         else:
             logger.log(u"The data returned from the " + self.provider.name + " is incomplete, this result is unusable", logger.ERROR)
-            return
+            return None
 
     def _checkAuth(self, data):
         return self.provider._checkAuthFromData(data)
