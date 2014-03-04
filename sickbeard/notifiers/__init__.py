@@ -27,7 +27,6 @@ import pytivo
 
 import growl
 import prowl
-import notifo
 from . import libnotify
 import pushover
 import boxcar
@@ -48,7 +47,6 @@ pytivo_notifier = pytivo.pyTivoNotifier()
 # devices
 growl_notifier = growl.GrowlNotifier()
 prowl_notifier = prowl.ProwlNotifier()
-notifo_notifier = notifo.NotifoNotifier()
 libnotify_notifier = libnotify.LibnotifyNotifier()
 pushover_notifier = pushover.PushoverNotifier()
 boxcar_notifier = boxcar.BoxcarNotifier()
@@ -67,7 +65,6 @@ notifiers = [
     pytivo_notifier,
     growl_notifier,
     prowl_notifier,
-    notifo_notifier,
     pushover_notifier,
     boxcar_notifier,
     nma_notifier,

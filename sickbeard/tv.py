@@ -68,6 +68,7 @@ class TVShow(object):
         self.paused = 0
         self.air_by_date = 0
         self.lang = lang
+        self.last_update_tvdb = 1
 
         self.lock = threading.Lock()
         self._isDirGood = False
@@ -180,6 +181,44 @@ class TVShow(object):
 
         return self.episodes[season][episode]
 
+    def should_update(self, update_date=datetime.date.today()):
+
+        # if show is not 'Ended' always update (status 'Continuing' or '')
+        if self.status != 'Ended':
+            return True
+
+        # run logic against the current show latest aired and next unaired data to see if we should bypass 'Ended' status
+        cur_tvdbid = self.tvdbid
+
+        graceperiod = datetime.timedelta(days=30)
+
+        myDB = db.DBConnection()
+        last_airdate = datetime.date.fromordinal(1)
+
+        # get latest aired episode to compare against today - graceperiod and today + graceperiod
+        sql_result = myDB.select("SELECT * FROM tv_episodes WHERE showid = ? AND season > '0' AND airdate > '1' AND status > '1' ORDER BY airdate DESC LIMIT 1", [cur_tvdbid])
+
+        if sql_result:
+            last_airdate = datetime.date.fromordinal(sql_result[0]['airdate'])
+            if last_airdate >= (update_date - graceperiod) and last_airdate <= (update_date + graceperiod):
+                return True
+
+        # get next upcoming UNAIRED episode to compare against today + graceperiod
+        sql_result = myDB.select("SELECT * FROM tv_episodes WHERE showid = ? AND season > '0' AND airdate > '1' AND status = '1' ORDER BY airdate ASC LIMIT 1", [cur_tvdbid])
+
+        if sql_result:
+            next_airdate = datetime.date.fromordinal(sql_result[0]['airdate'])
+            if next_airdate <= (update_date + graceperiod):
+                return True
+
+        last_update_tvdb = datetime.date.fromordinal(self.last_update_tvdb)
+
+        # in the first year after ended (last airdate), update every 30 days
+        if (update_date - last_airdate) < datetime.timedelta(days=450) and (update_date - last_update_tvdb) > datetime.timedelta(days=30):
+            return True
+
+        return False
+
     def writeShowNFO(self):
 
         result = False
@@ -188,11 +227,12 @@ class TVShow(object):
             logger.log(str(self.tvdbid) + u": Show dir doesn't exist, skipping NFO generation")
             return False
 
+        logger.log(str(self.tvdbid) + u": Writing NFOs for show")
         for cur_provider in sickbeard.metadata_provider_dict.values():
             result = cur_provider.create_show_metadata(self) or result
 
         return result
-    
+
     def writeMetadata(self, show_only=False):
 
         if not ek.ek(os.path.isdir, self._location):
@@ -372,6 +412,10 @@ class TVShow(object):
 
                 scannedEps[season][episode] = True
 
+        # Done updating save last update date
+        self.last_update_tvdb = datetime.date.today().toordinal()
+        self.saveToDB()
+
         return scannedEps
 
     def setTVRID(self, force=False):
@@ -391,16 +435,23 @@ class TVShow(object):
             return
 
     def getImages(self, fanart=None, poster=None):
-
-        poster_result = fanart_result = season_thumb_result = False
+        fanart_result = poster_result = banner_result = False
+        season_posters_result = season_banners_result = season_all_poster_result = season_all_banner_result = False
 
         for cur_provider in sickbeard.metadata_provider_dict.values():
-            logger.log(u"Running season folders for " + cur_provider.name, logger.DEBUG)
-            poster_result = cur_provider.create_poster(self) or poster_result
-            fanart_result = cur_provider.create_fanart(self) or fanart_result
-            season_thumb_result = cur_provider.create_season_thumbs(self) or season_thumb_result
+            # FIXME: Needs to not show this message if the option is not enabled?
+            logger.log(u"Running metadata routines for " + cur_provider.name, logger.DEBUG)
 
-        return poster_result or fanart_result or season_thumb_result
+            fanart_result = cur_provider.create_fanart(self) or fanart_result
+            poster_result = cur_provider.create_poster(self) or poster_result
+            banner_result = cur_provider.create_banner(self) or banner_result
+
+            season_posters_result = cur_provider.create_season_posters(self) or season_posters_result
+            season_banners_result = cur_provider.create_season_banners(self) or season_banners_result
+            season_all_poster_result = cur_provider.create_season_all_poster(self) or season_all_poster_result
+            season_all_banner_result = cur_provider.create_season_all_banner(self) or season_all_banner_result
+
+        return fanart_result or poster_result or banner_result or season_posters_result or season_banners_result or season_all_poster_result or season_all_banner_result
 
     def loadLatestFromTVRage(self):
 
@@ -600,6 +651,8 @@ class TVShow(object):
             if self.lang == "":
                 self.lang = sqlResults[0]["lang"]
 
+            self.last_update_tvdb = sqlResults[0]["last_update_tvdb"]
+
     def loadFromTVDB(self, cache=True, tvapi=None, cachedSeason=None):
 
         logger.log(str(self.tvdbid) + u": Loading show info from theTVDB")
@@ -649,7 +702,7 @@ class TVShow(object):
 
     def loadNFO(self):
 
-        if not os.path.isdir(self._location):
+        if not ek.ek(os.path.isdir, self._location):
             logger.log(str(self.tvdbid) + u": Show dir doesn't exist, can't load NFO")
             raise exceptions.NoNFOException("The show dir doesn't exist, no NFO could be loaded")
 
@@ -810,7 +863,8 @@ class TVShow(object):
                         "air_by_date": self.air_by_date,
                         "startyear": self.startyear,
                         "tvr_name": self.tvrname,
-                        "lang": self.lang
+                        "lang": self.lang,
+                        "last_update_tvdb": self.last_update_tvdb
                         }
 
         myDB.upsert("tv_shows", newValueDict, controlValueDict)
@@ -1004,7 +1058,7 @@ class TVEpisode(object):
                 else:
                     new_result = False
                 cur_tbn = new_result or cur_tbn
-                
+
                 if cur_provider.subtitles:
                     new_result = cur_provider._has_episode_subtitle(self)
                 else:
@@ -1215,7 +1269,7 @@ class TVEpisode(object):
 
     def loadFromNFO(self, location):
 
-        if not os.path.isdir(self.show._location):
+        if not ek.ek(os.path.isdir, self.show._location):
             logger.log(str(self.show.tvdbid) + u": The show dir is missing, not bothering to try loading the episode NFO")
             return
 
@@ -1720,7 +1774,7 @@ class TVEpisode(object):
             logger.log(str(self.tvdbid) + u": File " + self.location + " is already named correctly, skipping", logger.DEBUG)
             return
 
-        related_files = postProcessor.PostProcessor(self.location)._list_associated_files(self.location)
+        related_files = postProcessor.PostProcessor(self.location).list_associated_files(self.location, base_name_only=True)
         logger.log(u"Files associated to " + self.location + ": " + str(related_files), logger.DEBUG)
 
         # move the ep file

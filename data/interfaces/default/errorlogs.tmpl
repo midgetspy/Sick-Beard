@@ -11,7 +11,7 @@
 
 <div class="align-left"><pre>
 #if $classes.ErrorViewer.errors:
-#for $curError in sorted($classes.ErrorViewer.errors[:30], key=lambda error: error.time, reverse=True):
+#for $curError in sorted($classes.ErrorViewer.errors, key=lambda error: error.time, reverse=True)[:500]:
 $curError.time $curError.message
 #end for
 #end if

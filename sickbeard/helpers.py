@@ -139,7 +139,7 @@ def sanitizeFileName(name):
     return name
 
 
-def getURL(url, headers=[]):
+def getURL(url, post_data=None, headers=[]):
     """
     Returns a byte-string retrieved from the url provider.
     """
@@ -150,7 +150,7 @@ def getURL(url, headers=[]):
         opener.addheaders.append(cur_header)
 
     try:
-        usock = opener.open(url)
+        usock = opener.open(url, post_data)
         url = usock.geturl()
         encoding = usock.info().get("Content-Encoding")
 
@@ -782,26 +782,30 @@ def get_xml_text(element, mini_dom=False):
     return text.strip()
 
 
-def backupVersionedFile(oldFile, version):
+def backupVersionedFile(old_file, version):
+
     numTries = 0
 
-    newFile = oldFile + '.' + 'v' + str(version)
+    new_file = old_file + '.' + 'v' + str(version)
 
-    while not ek.ek(os.path.isfile, newFile):
-        if not ek.ek(os.path.isfile, oldFile):
+    while not ek.ek(os.path.isfile, new_file):
+        if not ek.ek(os.path.isfile, old_file):
+            logger.log(u"Not creating backup, " + old_file + " doesn't exist", logger.DEBUG)
             break
 
         try:
-            logger.log(u"Attempting to back up " + oldFile + " before migration...")
-            shutil.copy(oldFile, newFile)
-            logger.log(u"Done backup, proceeding with migration.")
+            logger.log(u"Trying to back up " + old_file + " to " + new_file, logger.DEBUG)
+            shutil.copy(old_file, new_file)
+            logger.log(u"Backup done", logger.DEBUG)
             break
         except Exception, e:
-            logger.log(u"Error while trying to back up " + oldFile + ": " + ex(e))
+            logger.log(u"Error while trying to back up " + old_file + " to " + new_file + " : " + ex(e), logger.WARNING)
             numTries += 1
             time.sleep(1)
-            logger.log(u"Trying again.")
+            logger.log(u"Trying again.", logger.DEBUG)
 
         if numTries >= 10:
-            logger.log(u"Unable to back up " + oldFile + ", please do it manually.")
-            sys.exit(1)
+            logger.log(u"Unable to back up " + old_file + " to " + new_file + " please do it manually.", logger.ERROR)
+            return False
+
+    return True

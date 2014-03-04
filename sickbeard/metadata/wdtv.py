@@ -31,54 +31,90 @@ from sickbeard.exceptions import ex
 
 import xml.etree.cElementTree as etree
 
+
 class WDTVMetadata(generic.GenericMetadata):
     """
     Metadata generation class for WDTV
 
     The following file structure is used:
     
-    show_root/folder.jpg                                     (poster)
-    show_root/Season 01/folder.jpg                           (season thumb)
-    show_root/Season 01/show - 1x01 - episode.metathumb      (episode thumb)
-    show_root/Season 01/show - 1x01 - episode.xml            (episode metadata)
+    show_root/folder.jpg                    (poster)
+    show_root/Season ##/folder.jpg          (season thumb)
+    show_root/Season ##/filename.ext        (*)
+    show_root/Season ##/filename.metathumb  (episode thumb)
+    show_root/Season ##/filename.xml        (episode metadata)
     """
     
     def __init__(self,
                  show_metadata=False,
                  episode_metadata=False,
-                 poster=False,
                  fanart=False,
+                 poster=False,
+                 banner=False,
                  episode_thumbnails=False,
-                 season_thumbnails=False,
-                 subtitles=False):
+                 subtitles=False,
+                 season_posters=False,
+                 season_banners=False,
+                 season_all_poster=False,
+                 season_all_banner=False):
 
         generic.GenericMetadata.__init__(self,
                                          show_metadata,
                                          episode_metadata,
-                                         poster,
                                          fanart,
+                                         poster,
+                                         banner,
                                          episode_thumbnails,
-                                         season_thumbnails,
-                                         subtitles)
+                                         subtitles,
+                                         season_posters,
+                                         season_banners,
+                                         season_all_poster,
+                                         season_all_banner)
+
+        self.name = 'WDTV'
         
         self._ep_nfo_extension = 'xml'
 
-        self.name = 'WDTV'
+        self.poster_name = "folder.jpg"
 
+        # web-ui metadata template
         self.eg_show_metadata = "<i>not supported</i>"
         self.eg_episode_metadata = "Season##\\<i>filename</i>.xml"
         self.eg_fanart = "<i>not supported</i>"
         self.eg_poster = "folder.jpg"
+        self.eg_banner = "<i>not supported</i>"
         self.eg_episode_thumbnails = "Season##\\<i>filename</i>.metathumb"
-        self.eg_season_thumbnails = "Season##\\folder.jpg"
+        self.eg_season_posters = "Season##\\folder.jpg"
+        self.eg_season_banners = "<i>not supported</i>"
+        self.eg_season_all_poster = "<i>not supported</i>"
+        self.eg_season_all_banner = "<i>not supported</i>"
+
+    # Override with empty methods for unsupported features
+    def retrieveShowMetadata(self, folder):
+        # no show metadata generated, we abort this lookup function
+        return (None, None)
     
-    # all of the following are not supported, so do nothing
     def create_show_metadata(self, show_obj):
         pass
     
+    def get_show_file_path(self, show_obj):
+        pass
+
     def create_fanart(self, show_obj):
         pass
     
+    def create_banner(self, show_obj):
+        pass
+
+    def create_season_banners(self, show_obj):
+        pass
+
+    def create_season_all_poster(self, show_obj):
+        pass
+
+    def create_season_all_banner(self, show_obj):
+        pass
+
     def get_episode_thumb_path(self, ep_obj):
         """
         Returns the path where the episode thumbnail should be stored. Defaults to
@@ -93,7 +129,7 @@ class WDTVMetadata(generic.GenericMetadata):
 
         return tbn_filename
     
-    def get_season_thumb_path(self, show_obj, season):
+    def get_season_poster_path(self, show_obj, season):
         """
         Season thumbs for WDTV go in Show Dir/Season X/folder.jpg
         
@@ -107,7 +143,7 @@ class WDTVMetadata(generic.GenericMetadata):
         season_dir = None
         
         for cur_dir in dir_list:
-            if season == 0 and cur_dir == 'Specials':
+            if season == 0 and cur_dir == "Specials":
                 season_dir = cur_dir
                 break
             
@@ -122,10 +158,10 @@ class WDTVMetadata(generic.GenericMetadata):
                 break
 
         if not season_dir:
-            logger.log(u"Unable to find a season dir for season "+str(season), logger.DEBUG)
+            logger.log(u"Unable to find a season dir for season " + str(season), logger.DEBUG)
             return None
 
-        logger.log(u"Using "+str(season_dir)+"/folder.jpg as season dir for season "+str(season), logger.DEBUG)
+        logger.log(u"Using " + str(season_dir) + "/folder.jpg as season dir for season " + str(season), logger.DEBUG)
 
         return ek.ek(os.path.join, show_obj.location, season_dir, 'folder.jpg')
 
@@ -154,7 +190,7 @@ class WDTVMetadata(generic.GenericMetadata):
         except tvdb_exceptions.tvdb_shownotfound, e:
             raise exceptions.ShowNotFoundException(e.message)
         except tvdb_exceptions.tvdb_error, e:
-            logger.log("Unable to connect to TVDB while creating meta files - skipping - "+ex(e), logger.ERROR)
+            logger.log(u"Unable to connect to TVDB while creating meta files - skipping - " + ex(e), logger.ERROR)
             return False
 
         rootNode = etree.Element("details")
@@ -165,7 +201,7 @@ class WDTVMetadata(generic.GenericMetadata):
             try:
                 myEp = myShow[curEpToWrite.season][curEpToWrite.episode]
             except (tvdb_exceptions.tvdb_episodenotfound, tvdb_exceptions.tvdb_seasonnotfound):
-                logger.log("Unable to find episode " + str(curEpToWrite.season) + "x" + str(curEpToWrite.episode) + " on tvdb... has it been removed? Should I delete from db?")
+                logger.log(u"Unable to find episode " + str(curEpToWrite.season) + "x" + str(curEpToWrite.episode) + " on tvdb... has it been removed? Should I delete from db?")
                 return None
             
             if myEp["firstaired"] == None and ep_obj.season == 0:
@@ -179,7 +215,7 @@ class WDTVMetadata(generic.GenericMetadata):
             else:
                 episode = rootNode
             
-            #To do get right EpisodeID
+            # TODO: get right EpisodeID
             episodeID = etree.SubElement(episode, "id")
             episodeID.text = str(curEpToWrite.tvdbid)
 
@@ -201,8 +237,23 @@ class WDTVMetadata(generic.GenericMetadata):
             episodeNum.text = str(curEpToWrite.episode)
             
             firstAired = etree.SubElement(episode, "firstaired")
+
             if curEpToWrite.airdate != datetime.date.fromordinal(1):
                 firstAired.text = str(curEpToWrite.airdate)
+
+            year = etree.SubElement(episode, "year")
+            if myShow["firstaired"] != None:
+                try:
+                    year_text = str(datetime.datetime.strptime(myShow["firstaired"], '%Y-%m-%d').year)
+                    if year_text:
+                        year.text = year_text
+                except:
+                    pass
+
+            runtime = etree.SubElement(episode, "runtime")
+            if curEpToWrite.season != 0:
+                if myShow["runtime"] != None:
+                    runtime.text = myShow["runtime"]
 
             genre = etree.SubElement(episode, "genre")
             if myShow["genre"] != None:
@@ -213,9 +264,14 @@ class WDTVMetadata(generic.GenericMetadata):
             if director_text != None:
                 director.text = director_text
 
-            actor = etree.SubElement(episode, "actor")
-            if myShow["actors"] != None:
-                actor.text = " / ".join([x for x in myShow["actors"].split('|') if x])
+            for actor in myShow['_actors']:
+                cur_actor = etree.SubElement(episode, "actor")
+                cur_actor_name = etree.SubElement(cur_actor, "name")
+                cur_actor_name.text = actor['name']
+                cur_actor_role = etree.SubElement(cur_actor, "role")
+                cur_actor_role_text = actor['role']
+                if cur_actor_role_text != None:
+                    cur_actor_role.text = cur_actor_role_text
 
             overview = etree.SubElement(episode, "overview")
             if curEpToWrite.description != None:
@@ -227,8 +283,6 @@ class WDTVMetadata(generic.GenericMetadata):
 
         return data
 
-    def retrieveShowMetadata(self, dir):
-        return (None, None)
 
-# present a standard "interface"
+# present a standard "interface" from the module
 metadata_class = WDTVMetadata

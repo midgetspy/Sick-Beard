@@ -19,6 +19,7 @@
 from __future__ import with_statement
 
 import os
+import sys
 import threading
 
 import logging
@@ -58,16 +59,31 @@ class SBRotatingLogHandler(object):
         self.writes_since_check = 0
 
         self.log_lock = threading.Lock()
+        self.console_logging = False
 
-    def initLogging(self, consoleLogging=True):
+    def close_log(self, handler=None):
+        if not handler:
+            handler = self.cur_handler
+
+        if handler:
+            sb_logger = logging.getLogger('sickbeard')
+            sb_logger.removeHandler(handler)
+            handler.flush()
+            handler.close()
+
+    def initLogging(self, consoleLogging=False):
+
+        if consoleLogging:
+            self.console_logging = consoleLogging
 
         old_handler = None
+
         # get old handler in case we want to close it
         if self.cur_handler:
             old_handler = self.cur_handler
         else:
             # only start consoleLogging on first initialize
-            if consoleLogging:
+            if self.console_logging:
                 # define a Handler which writes INFO messages or higher to the sys.stderr
                 console = logging.StreamHandler()
 
@@ -86,10 +102,7 @@ class SBRotatingLogHandler(object):
 
         # already logging in new log folder, close the old handler
         if old_handler:
-            old_handler.flush()
-            old_handler.close()
-            sb_logger = logging.getLogger('sickbeard')
-            sb_logger.removeHandler(old_handler)
+            self.close_log(old_handler)
 
     def _config_handler(self):
         """
@@ -126,9 +139,7 @@ class SBRotatingLogHandler(object):
 
         # delete the old handler
         if self.cur_handler:
-            self.cur_handler.flush()
-            self.cur_handler.close()
-            sb_logger.removeHandler(self.cur_handler)
+            self.close_log()
 
         # rename or delete all the old log files
         for i in range(self._num_logs(), -1, -1):
@@ -163,7 +174,7 @@ class SBRotatingLogHandler(object):
             meThread = threading.currentThread().getName()
             message = meThread + u" :: " + toLog
 
-            out_line = message.encode('utf-8')
+            out_line = message
 
             sb_logger = logging.getLogger('sickbeard')
 
@@ -184,7 +195,24 @@ class SBRotatingLogHandler(object):
             except ValueError:
                 pass
 
+    def log_error_and_exit(self, error_msg):
+        log(error_msg, ERROR)
+
+        if not self.console_logging:
+            sys.exit(error_msg.encode(sickbeard.SYS_ENCODING, 'xmlcharrefreplace'))
+        else:
+            sys.exit(1)
+
+
 sb_log_instance = SBRotatingLogHandler('sickbeard.log', NUM_LOGS, LOG_SIZE)
+
+
+def close():
+    sb_log_instance.close_log()
+
+
+def log_error_and_exit(error_msg):
+    sb_log_instance.log_error_and_exit(error_msg)
 
 
 def log(toLog, logLevel=MESSAGE):

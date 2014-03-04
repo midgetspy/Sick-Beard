@@ -141,12 +141,12 @@ class PostProcessor(object):
             self._log(u"File " + existing_file + " doesn't exist so there's no worries about replacing it", logger.DEBUG)
             return PostProcessor.DOESNT_EXIST
 
-    def _list_associated_files(self, file_path):
+    def list_associated_files(self, file_path, base_name_only=False):
         """
         For a given file path searches for files with the same name but different extension and returns their absolute paths
 
         file_path: The file to check for associated files
-
+        base_name_only: False add extra '.' (conservative search) to file_path minus extension
         Returns: A list containing all files which are associated to the given file
         """
 
@@ -154,7 +154,10 @@ class PostProcessor(object):
             return []
 
         file_path_list = []
-        base_name = file_path.rpartition('.')[0] + '.'
+        base_name = file_path.rpartition('.')[0]
+
+        if not base_name_only:
+            base_name = base_name + '.'
 
         # don't strip it all and use cwd by accident
         if not base_name:
@@ -167,7 +170,9 @@ class PostProcessor(object):
             # only add associated to list
             if associated_file_path == file_path:
                 continue
-            file_path_list.append(associated_file_path)
+
+            if ek.ek(os.path.isfile, associated_file_path):
+                file_path_list.append(associated_file_path)
 
         return file_path_list
 
@@ -185,7 +190,7 @@ class PostProcessor(object):
         # figure out which files we want to delete
         file_list = [file_path]
         if associated_files:
-            file_list = file_list + self._list_associated_files(file_path)
+            file_list = file_list + self.list_associated_files(file_path)
 
         if not file_list:
             self._log(u"There were no files associated with " + file_path + ", not deleting anything", logger.DEBUG)
@@ -217,7 +222,7 @@ class PostProcessor(object):
 
         file_list = [file_path]
         if associated_files:
-            file_list = file_list + self._list_associated_files(file_path)
+            file_list = file_list + self.list_associated_files(file_path)
 
         if not file_list:
             self._log(u"There were no files associated with " + file_path + ", not moving anything", logger.DEBUG)
@@ -649,16 +654,23 @@ class PostProcessor(object):
         for curScriptName in sickbeard.EXTRA_SCRIPTS:
 
             # generate a safe command line string to execute the script and provide all the parameters
-            script_cmd = shlex.split(curScriptName) + [ep_obj.location, self.file_path, str(ep_obj.show.tvdbid), str(ep_obj.season), str(ep_obj.episode), str(ep_obj.airdate)]
+            script_cmd = [piece for piece in re.split("( |\\\".*?\\\"|'.*?')", curScriptName) if piece.strip()]
+            script_cmd[0] = ek.ek(os.path.abspath, script_cmd[0])
+            self._log(u"Absolute path to script: " + script_cmd[0], logger.DEBUG)
+
+            script_cmd = script_cmd + [ep_obj.location, self.file_path, str(ep_obj.show.tvdbid), str(ep_obj.season), str(ep_obj.episode), str(ep_obj.airdate)]
 
             # use subprocess to run the command and capture output
             self._log(u"Executing command " + str(script_cmd))
-            self._log(u"Absolute path to script: " + ek.ek(os.path.abspath, script_cmd[0]), logger.DEBUG)
             try:
-                p = subprocess.Popen(script_cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, cwd=sickbeard.PROG_DIR)
-                out, err = p.communicate() #@UnusedVariable
+                p = subprocess.Popen(script_cmd, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, cwd=sickbeard.PROG_DIR)
+                out, err = p.communicate()  # @UnusedVariable
                 self._log(u"Script result: " + str(out), logger.DEBUG)
+
             except OSError, e:
+                self._log(u"Unable to run extra_script: " + ex(e))
+
+            except Exception, e:
                 self._log(u"Unable to run extra_script: " + ex(e))
 
     def _is_priority(self, ep_obj, new_ep_quality):

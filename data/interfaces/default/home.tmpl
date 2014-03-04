@@ -39,7 +39,7 @@
         return false;
     },
     format: function(s) { 
-        return s.replace('hd1080p',5).replace('hd720p',4).replace('hd',3).replace('sd',2).replace('any',1).replace('best',0).replace('custom',7);
+        return s.replace('hd1080p',5).replace('hd720p',4).replace('hd',3).replace('sd',2).replace('any',1).replace('custom',7);
     },
     type: 'numeric'
 });
@@ -84,7 +84,8 @@
             1: { sorter: 'loadingNames' },
             3: { sorter: 'quality' },
             4: { sorter: 'eps' }
-        }
+        },
+        sortStable: true
     });
 
 });
@@ -179,5 +180,4 @@ $myShowList.sort(lambda x, y: cmp(x.name, y.name))
 </tbody>
 </table>
 
-<script type="text/javascript" src="$sbRoot/js/tableClick.js?$sbPID"></script>
 #include $os.path.join($sickbeard.PROG_DIR, "data/interfaces/default/inc_bottom.tmpl")
