@@ -43,7 +43,6 @@ from sickbeard.config import CheckSection, check_setting_int, check_setting_str,
 
 from sickbeard import searchCurrent, searchBacklog, showUpdater, versionChecker, properFinder, autoPostProcesser
 from sickbeard import helpers, db, exceptions, show_queue, search_queue, scheduler
-from sickbeard import subtitle_queue
 from sickbeard import logger
 from sickbeard import naming
 
@@ -63,7 +62,7 @@ CFG = None
 CONFIG_FILE = None
 
 # this is the version of the config we EXPECT to find
-CONFIG_VERSION = 3
+CONFIG_VERSION = 5
 
 PROG_DIR = '.'
 MY_FULLNAME = None
@@ -85,7 +84,6 @@ showQueueScheduler = None
 searchQueueScheduler = None
 properFinderScheduler = None
 autoPostProcesserScheduler = None
-subtitleQueueScheduler = None
 
 showList = None
 loadingShowList = None
@@ -127,15 +125,13 @@ CACHE_DIR = None
 ACTUAL_CACHE_DIR = None
 ROOT_DIRS = None
 
-USE_BANNER = None
 USE_LISTVIEW = None
 METADATA_XBMC = None
+METADATA_XBMC_12PLUS = None
 METADATA_MEDIABROWSER = None
 METADATA_PS3 = None
 METADATA_WDTV = None
 METADATA_TIVO = None
-METADATA_SYNOLOGY = None
-SUBTITLE_LANGUAGES = None
 
 QUALITY_DEFAULT = None
 STATUS_DEFAULT = None
@@ -233,6 +229,8 @@ PUBLICHD = False
 
 BTN = False
 BTN_API_KEY = None
+
+NEWZNAB_DATA = None
 
 TORRENT_DIR = None
 ADD_SHOWS_WO_DIR = None
@@ -388,7 +386,7 @@ def initialize(consoleLogging=True):
                 USE_PLEX, PLEX_NOTIFY_ONSNATCH, PLEX_NOTIFY_ONDOWNLOAD, PLEX_UPDATE_LIBRARY, \
                 PLEX_SERVER_HOST, PLEX_HOST, PLEX_USERNAME, PLEX_PASSWORD, \
                 showUpdateScheduler, __INITIALIZED__, LAUNCH_BROWSER, showList, loadingShowList, \
-                NZBS, NZBS_UID, NZBS_HASH, EZRSS, HDBITS, HDBITS_USERNAME, HDBITS_PASSKEY, TVTORRENTS, TVTORRENTS_DIGEST, TVTORRENTS_HASH, BTN, BTN_API_KEY, \
+                NEWZNAB_DATA, NZBS, NZBS_UID, NZBS_HASH, EZRSS, HDBITS, HDBITS_USERNAME, HDBITS_PASSKEY, TVTORRENTS, TVTORRENTS_DIGEST, TVTORRENTS_HASH, BTN, BTN_API_KEY, \
                 TORRENT_DIR, USENET_RETENTION, SOCKET_TIMEOUT, \
                 KICKASS, TORRENTZ, TORRENTZ_VERIFIED, \
                 TORRENTLEECH, TORRENTLEECH_USERNAME, TORRENTLEECH_PASSWORD, \
@@ -419,10 +417,8 @@ def initialize(consoleLogging=True):
                 USE_BOXCAR, BOXCAR_USERNAME, BOXCAR_PASSWORD, BOXCAR_NOTIFY_ONDOWNLOAD, BOXCAR_NOTIFY_ONSNATCH, \
                 USE_PUSHOVER, PUSHOVER_USERKEY, PUSHOVER_NOTIFY_ONDOWNLOAD, PUSHOVER_NOTIFY_ONSNATCH, \
                 USE_LIBNOTIFY, LIBNOTIFY_NOTIFY_ONSNATCH, LIBNOTIFY_NOTIFY_ONDOWNLOAD, USE_NMJ, NMJ_HOST, NMJ_DATABASE, NMJ_MOUNT, USE_NMJv2, NMJv2_HOST, NMJv2_DATABASE, NMJv2_DBLOC, USE_SYNOINDEX, \
-                USE_BANNER, USE_LISTVIEW, METADATA_XBMC, METADATA_MEDIABROWSER, METADATA_PS3, METADATA_SYNOLOGY, metadata_provider_dict, \
+                USE_LISTVIEW, METADATA_XBMC, METADATA_XBMC_12PLUS, METADATA_MEDIABROWSER, METADATA_PS3, metadata_provider_dict, \
                 GIT_PATH, MOVE_ASSOCIATED_FILES, \
-                SUBTITLE_LANGUAGES, subtitleQueueScheduler, \
-                NEWZBIN, NEWZBIN_USERNAME, NEWZBIN_PASSWORD, \
                 COMING_EPS_LAYOUT, COMING_EPS_SORT, COMING_EPS_DISPLAY_PAUSED, METADATA_WDTV, METADATA_TIVO, IGNORE_WORDS, CREATE_MISSING_SHOW_DIRS, \
                 ADD_SHOWS_WO_DIR, ANON_REDIRECT
 
@@ -456,7 +452,7 @@ def initialize(consoleLogging=True):
         WEB_PASSWORD = check_setting_str(CFG, 'General', 'web_password', '')
         LAUNCH_BROWSER = bool(check_setting_int(CFG, 'General', 'launch_browser', 1))
 
-        ANON_REDIRECT = check_setting_str(CFG, 'General', 'anon_redirect', 'http://derefer.me/?')
+        ANON_REDIRECT = check_setting_str(CFG, 'General', 'anon_redirect', 'http://dereferer.org/?')
         # attempt to help prevent users from breaking links by using a bad url
         if not ANON_REDIRECT.endswith('?'):
             ANON_REDIRECT = ''
@@ -611,69 +607,16 @@ def initialize(consoleLogging=True):
 
         GIT_PATH = check_setting_str(CFG, 'General', 'git_path', '')
         IGNORE_WORDS = check_setting_str(CFG, 'General', 'ignore_words', IGNORE_WORDS)
-        EXTRA_SCRIPTS = [x for x in check_setting_str(CFG, 'General', 'extra_scripts', '').split('|') if x]
+        EXTRA_SCRIPTS = [x.strip() for x in check_setting_str(CFG, 'General', 'extra_scripts', '').split('|') if x.strip()]
 
-        USE_BANNER = bool(check_setting_int(CFG, 'General', 'use_banner', 0))
         USE_LISTVIEW = bool(check_setting_int(CFG, 'General', 'use_listview', 0))
-        METADATA_TYPE = check_setting_str(CFG, 'General', 'metadata_type', '')
-        SUBTITLE_LANGUAGES = check_setting_str(CFG, 'General', 'subtitle_languages', '')
 
-        metadata_provider_dict = metadata.get_metadata_generator_dict()
-
-        # if this exists it's legacy, use the info to upgrade metadata to the new settings
-        if METADATA_TYPE:
-
-            old_metadata_class = None
-
-            if METADATA_TYPE == 'xbmc':
-                old_metadata_class = metadata.xbmc.metadata_class
-            elif METADATA_TYPE == 'mediabrowser':
-                old_metadata_class = metadata.mediabrowser.metadata_class
-            elif METADATA_TYPE == 'ps3':
-                old_metadata_class = metadata.ps3.metadata_class
-
-            if old_metadata_class:
-
-                METADATA_SHOW = bool(check_setting_int(CFG, 'General', 'metadata_show', 1))
-                METADATA_EPISODE = bool(check_setting_int(CFG, 'General', 'metadata_episode', 1))
-
-                ART_POSTER = bool(check_setting_int(CFG, 'General', 'art_poster', 1))
-                ART_FANART = bool(check_setting_int(CFG, 'General', 'art_fanart', 1))
-                ART_THUMBNAILS = bool(check_setting_int(CFG, 'General', 'art_thumbnails', 1))
-                ART_SEASON_THUMBNAILS = bool(check_setting_int(CFG, 'General', 'art_season_thumbnails', 1))
-                SUBTITLES = bool(check_setting_int(CFG, 'General', 'subtitles', 1))
-
-                new_metadata_class = old_metadata_class(METADATA_SHOW,
-                                                        METADATA_EPISODE,
-                                                        ART_POSTER,
-                                                        ART_FANART,
-                                                        ART_THUMBNAILS,
-                                                        ART_SEASON_THUMBNAILS,
-                                                        SUBTITLES)
-
-                metadata_provider_dict[new_metadata_class.name] = new_metadata_class
-
-        # this is the normal codepath for metadata config
-        else:
-            METADATA_XBMC = check_setting_str(CFG, 'General', 'metadata_xbmc', '0|0|0|0|0|0|0')
-            METADATA_MEDIABROWSER = check_setting_str(CFG, 'General', 'metadata_mediabrowser', '0|0|0|0|0|0|0')
-            METADATA_PS3 = check_setting_str(CFG, 'General', 'metadata_ps3', '0|0|0|0|0|0|0')
-            METADATA_WDTV = check_setting_str(CFG, 'General', 'metadata_wdtv', '0|0|0|0|0|0|0')
-            METADATA_TIVO = check_setting_str(CFG, 'General', 'metadata_tivo', '0|0|0|0|0|0|0')
-            METADATA_SYNOLOGY = check_setting_str(CFG, 'General', 'metadata_synology', '0|0|0|0|0|0|0')
-
-            for cur_metadata_tuple in [(METADATA_XBMC, metadata.xbmc),
-                                       (METADATA_MEDIABROWSER, metadata.mediabrowser),
-                                       (METADATA_PS3, metadata.ps3),
-                                       (METADATA_WDTV, metadata.wdtv),
-                                       (METADATA_TIVO, metadata.tivo),
-                                       (METADATA_SYNOLOGY, metadata.synology),
-                                       ]:
-
-                (cur_metadata_config, cur_metadata_class) = cur_metadata_tuple
-                tmp_provider = cur_metadata_class.metadata_class()
-                tmp_provider.set_config(cur_metadata_config)
-                metadata_provider_dict[tmp_provider.name] = tmp_provider
+        METADATA_XBMC = check_setting_str(CFG, 'General', 'metadata_xbmc', '0|0|0|0|0|0|0|0|0|0')
+        METADATA_XBMC_12PLUS = check_setting_str(CFG, 'General', 'metadata_xbmc_12plus', '0|0|0|0|0|0|0|0|0|0')
+        METADATA_MEDIABROWSER = check_setting_str(CFG, 'General', 'metadata_mediabrowser', '0|0|0|0|0|0|0|0|0|0')
+        METADATA_PS3 = check_setting_str(CFG, 'General', 'metadata_ps3', '0|0|0|0|0|0|0|0|0|0')
+        METADATA_WDTV = check_setting_str(CFG, 'General', 'metadata_wdtv', '0|0|0|0|0|0|0|0|0|0')
+        METADATA_TIVO = check_setting_str(CFG, 'General', 'metadata_tivo', '0|0|0|0|0|0|0|0|0|0')
 
         CheckSection(CFG, 'GUI')
         COMING_EPS_LAYOUT = check_setting_str(CFG, 'GUI', 'coming_eps_layout', 'banner')
@@ -681,9 +624,7 @@ def initialize(consoleLogging=True):
         COMING_EPS_SORT = check_setting_str(CFG, 'GUI', 'coming_eps_sort', 'date')
 
         CheckSection(CFG, 'Newznab')
-        newznabData = check_setting_str(CFG, 'Newznab', 'newznab_data', '')
-        newznabProviderList = providers.getNewznabProviderList(newznabData)
-        providerList = providers.makeProviderList()
+        NEWZNAB_DATA = check_setting_str(CFG, 'Newznab', 'newznab_data', '')
 
         CheckSection(CFG, 'Blackhole')
         NZB_DIR = check_setting_str(CFG, 'Blackhole', 'nzb_dir', '')
@@ -832,6 +773,10 @@ def initialize(consoleLogging=True):
         NMA_API = check_setting_str(CFG, 'NMA', 'nma_api', '')
         NMA_PRIORITY = check_setting_str(CFG, 'NMA', 'nma_priority', "0")
 
+        if not os.path.isfile(CONFIG_FILE):
+            logger.log(u"Unable to find '" + CONFIG_FILE + "', all settings will be default!", logger.DEBUG)
+            save_config()
+
         # start up all the threads
         logger.sb_log_instance.initLogging(consoleLogging=consoleLogging)
 
@@ -848,6 +793,26 @@ def initialize(consoleLogging=True):
         migrator = ConfigMigrator(CFG)
         migrator.migrate_config()
 
+        # initialize metadata_providers
+        metadata_provider_dict = metadata.get_metadata_generator_dict()
+        for cur_metadata_tuple in [(METADATA_XBMC, metadata.xbmc),
+                                   (METADATA_XBMC_12PLUS, metadata.xbmc_12plus),
+                                   (METADATA_MEDIABROWSER, metadata.mediabrowser),
+                                   (METADATA_PS3, metadata.ps3),
+                                   (METADATA_WDTV, metadata.wdtv),
+                                   (METADATA_TIVO, metadata.tivo),
+                                   ]:
+
+            (cur_metadata_config, cur_metadata_class) = cur_metadata_tuple
+            tmp_provider = cur_metadata_class.metadata_class()
+            tmp_provider.set_config(cur_metadata_config)
+            metadata_provider_dict[tmp_provider.name] = tmp_provider
+
+        # initialize newznab providers
+        newznabProviderList = providers.getNewznabProviderList(NEWZNAB_DATA)
+        providerList = providers.makeProviderList()
+
+        # initialize schedulars
         currentSearchScheduler = scheduler.Scheduler(searchCurrent.CurrentSearcher(),
                                                      cycleTime=datetime.timedelta(minutes=SEARCH_FREQUENCY),
                                                      threadName="SEARCH",
@@ -896,11 +861,6 @@ def initialize(consoleLogging=True):
                                                                       runImmediately=True)
         backlogSearchScheduler.action.cycleTime = BACKLOG_SEARCH_FREQUENCY
 
-        subtitleQueueScheduler = scheduler.Scheduler(subtitle_queue.SubtitleQueue(),
-                                               cycleTime=datetime.timedelta(seconds=3),
-                                               threadName="SUBTITLEQUEUE",
-                                               silent=True)
-
         showList = []
         loadingShowList = {}
 
@@ -913,7 +873,6 @@ def start():
     global __INITIALIZED__, currentSearchScheduler, backlogSearchScheduler, \
             showUpdateScheduler, versionCheckScheduler, showQueueScheduler, \
             properFinderScheduler, autoPostProcesserScheduler, searchQueueScheduler, \
-            subtitleQueueScheduler, \
             started
 
     with INIT_LOCK:
@@ -932,7 +891,6 @@ def start():
             # start the version checker
             versionCheckScheduler.thread.start()
 
-
             # start the queue checker
             showQueueScheduler.thread.start()
 
@@ -944,9 +902,6 @@ def start():
 
             # start the proper finder
             autoPostProcesserScheduler.thread.start()
-            
-            #start subtitle queue
-            subtitleQueueScheduler.thread.start()
 
             started = True
 
@@ -955,7 +910,6 @@ def halt():
 
     global __INITIALIZED__, currentSearchScheduler, backlogSearchScheduler, showUpdateScheduler, \
             showQueueScheduler, properFinderScheduler, autoPostProcesserScheduler, searchQueueScheduler, \
-            subtitleQueueScheduler, \
             started
 
     with INIT_LOCK:
@@ -1022,13 +976,6 @@ def halt():
             except:
                 pass
 
-            subtitleQueueScheduler.abort = True
-            logger.log(u"Waiting for the SUBTITLEQUEUE thread to exit")
-            try:
-                subtitleQueueScheduler.thread.abort()
-            except:
-                pass
-            
             __INITIALIZED__ = False
 
 
@@ -1165,7 +1112,7 @@ def save_config():
     new_config['General']['quality_default'] = int(QUALITY_DEFAULT)
     new_config['General']['status_default'] = int(STATUS_DEFAULT)
     new_config['General']['flatten_folders_default'] = int(FLATTEN_FOLDERS_DEFAULT)
-    new_config['General']['provider_order'] = ' '.join([x.getID() for x in providers.sortedProviderList()])
+    new_config['General']['provider_order'] = ' '.join(PROVIDER_ORDER)
     new_config['General']['version_notify'] = int(VERSION_NOTIFY)
     new_config['General']['naming_pattern'] = NAMING_PATTERN
     new_config['General']['naming_custom_abd'] = int(NAMING_CUSTOM_ABD)
@@ -1173,15 +1120,13 @@ def save_config():
     new_config['General']['naming_multi_ep'] = int(NAMING_MULTI_EP)
     new_config['General']['launch_browser'] = int(LAUNCH_BROWSER)
 
-    new_config['General']['use_banner'] = int(USE_BANNER)
     new_config['General']['use_listview'] = int(USE_LISTVIEW)
-    new_config['General']['subtitle_languages'] = SUBTITLE_LANGUAGES
-    new_config['General']['metadata_xbmc'] = metadata_provider_dict['XBMC'].get_config()
-    new_config['General']['metadata_mediabrowser'] = metadata_provider_dict['MediaBrowser'].get_config()
-    new_config['General']['metadata_ps3'] = metadata_provider_dict['Sony PS3'].get_config()
-    new_config['General']['metadata_wdtv'] = metadata_provider_dict['WDTV'].get_config()
-    new_config['General']['metadata_tivo'] = metadata_provider_dict['TIVO'].get_config()
-    new_config['General']['metadata_synology'] = metadata_provider_dict['Synology'].get_config()
+    new_config['General']['metadata_xbmc'] = METADATA_XBMC
+    new_config['General']['metadata_xbmc_12plus'] = METADATA_XBMC_12PLUS
+    new_config['General']['metadata_mediabrowser'] = METADATA_MEDIABROWSER
+    new_config['General']['metadata_ps3'] = METADATA_PS3
+    new_config['General']['metadata_wdtv'] = METADATA_WDTV
+    new_config['General']['metadata_tivo'] = METADATA_TIVO
 
     new_config['General']['cache_dir'] = ACTUAL_CACHE_DIR if ACTUAL_CACHE_DIR else 'cache'
     new_config['General']['root_dirs'] = ROOT_DIRS if ROOT_DIRS else ''
@@ -1416,7 +1361,7 @@ def save_config():
     new_config['NMA']['nma_priority'] = NMA_PRIORITY
 
     new_config['Newznab'] = {}
-    new_config['Newznab']['newznab_data'] = '!!!'.join([x.configStr() for x in newznabProviderList])
+    new_config['Newznab']['newznab_data'] = NEWZNAB_DATA
 
     new_config['GUI'] = {}
     new_config['GUI']['coming_eps_layout'] = COMING_EPS_LAYOUT

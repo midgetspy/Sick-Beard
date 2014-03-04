@@ -47,11 +47,11 @@ class CacheDBConnection(db.DBConnection):
 
         # Create the table if it's not already there
         try:
-            sql = "CREATE TABLE " + providerName + " (name TEXT, season NUMERIC, episodes TEXT, tvrid NUMERIC, tvdbid NUMERIC, url TEXT, time NUMERIC, quality TEXT);"
+            sql = "CREATE TABLE [" + providerName + "] (name TEXT, season NUMERIC, episodes TEXT, tvrid NUMERIC, tvdbid NUMERIC, url TEXT, time NUMERIC, quality TEXT);"
             self.connection.execute(sql)
             self.connection.commit()
         except sqlite3.OperationalError, e:
-            if str(e) != "table " + providerName + " already exists":
+            if str(e) != "table [" + providerName + "] already exists":
                 raise
 
         # Create the table if it's not already there
@@ -80,7 +80,7 @@ class TVCache():
 
         myDB = self._getDB()
 
-        myDB.action("DELETE FROM " + self.providerID + " WHERE 1")
+        myDB.action("DELETE FROM [" + self.providerID + "] WHERE 1")
 
     def _getRSSData(self):
 
@@ -322,7 +322,7 @@ class TVCache():
         if not quality:
             quality = Quality.nameQuality(name)
 
-        myDB.action("INSERT INTO " + self.providerID + " (name, season, episodes, tvrid, tvdbid, url, time, quality) VALUES (?,?,?,?,?,?,?,?)",
+        myDB.action("INSERT INTO [" + self.providerID + "] (name, season, episodes, tvrid, tvdbid, url, time, quality) VALUES (?,?,?,?,?,?,?,?)",
                     [name, season, episodeText, tvrage_id, tvdb_id, url, curTimestamp, quality])
 
     def searchCache(self, episode, manualSearch=False):
@@ -333,7 +333,7 @@ class TVCache():
 
         myDB = self._getDB()
 
-        sql = "SELECT * FROM " + self.providerID + " WHERE name LIKE '%.PROPER.%' OR name LIKE '%.REPACK.%'"
+        sql = "SELECT * FROM [" + self.providerID + "] WHERE name LIKE '%.PROPER.%' OR name LIKE '%.REPACK.%'"
 
         if date != None:
             sql += " AND time >= " + str(int(time.mktime(date.timetuple())))
@@ -350,9 +350,9 @@ class TVCache():
         myDB = self._getDB()
 
         if not episode:
-            sqlResults = myDB.select("SELECT * FROM " + self.providerID)
+            sqlResults = myDB.select("SELECT * FROM [" + self.providerID + "]")
         else:
-            sqlResults = myDB.select("SELECT * FROM " + self.providerID + " WHERE tvdbid = ? AND season = ? AND episodes LIKE ?", [episode.show.tvdbid, episode.season, "%|" + str(episode.episode) + "|%"])
+            sqlResults = myDB.select("SELECT * FROM [" + self.providerID + "] WHERE tvdbid = ? AND season = ? AND episodes LIKE ?", [episode.show.tvdbid, episode.season, "%|" + str(episode.episode) + "|%"])
 
         # for each cache entry
         for curResult in sqlResults:

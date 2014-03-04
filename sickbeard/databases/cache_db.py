@@ -18,6 +18,7 @@
 
 from sickbeard import db
 
+
 # Add new migrations at the bottom of the list; subclass the previous migration.
 class InitialSchema (db.SchemaUpgrade):
     def test(self):
@@ -36,12 +37,14 @@ class InitialSchema (db.SchemaUpgrade):
             else:
                 self.connection.action(query[0], query[1:])
 
+
 class AddSceneExceptions(InitialSchema):
     def test(self):
         return self.hasTable("scene_exceptions")
 
     def execute(self):
-        self.connection.action("CREATE TABLE scene_exceptions (exception_id INTEGER PRIMARY KEY, tvdb_id INTEGER KEY, show_name TEXT)")
+        self.connection.action("CREATE TABLE scene_exceptions (exception_id INTEGER PRIMARY KEY, tvdb_id INTEGER KEY, show_name TEXT, provider TEXT)")
+
 
 class AddSceneNameCache(AddSceneExceptions):
     def test(self):
@@ -49,3 +52,12 @@ class AddSceneNameCache(AddSceneExceptions):
 
     def execute(self):
         self.connection.action("CREATE TABLE scene_names (tvdb_id INTEGER, name TEXT)")
+
+
+class AddSceneExceptionsProvider(AddSceneNameCache):
+    def test(self):
+        return self.hasColumn("scene_exceptions", "provider")
+
+    def execute(self):
+        if not self.hasColumn("scene_exceptions", "provider"):
+            self.addColumn("scene_exceptions", "provider", data_type='TEXT', default='sb_tvdb_scene_exceptions')
