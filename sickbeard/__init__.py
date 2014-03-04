@@ -113,6 +113,7 @@ USE_API = False
 API_KEY = None
 
 ENABLE_HTTPS = False
+DOWNLOAD_URL = None;
 HTTPS_CERT = None
 HTTPS_KEY = None
 
@@ -311,7 +312,7 @@ def initialize(consoleLogging=True):
 
     with INIT_LOCK:
 
-        global ACTUAL_LOG_DIR, LOG_DIR, WEB_PORT, WEB_LOG, WEB_ROOT, WEB_USERNAME, WEB_PASSWORD, WEB_HOST, WEB_IPV6, USE_API, API_KEY, ENABLE_HTTPS, HTTPS_CERT, HTTPS_KEY, \
+        global ACTUAL_LOG_DIR, LOG_DIR, WEB_PORT, WEB_LOG, WEB_ROOT, WEB_USERNAME, WEB_PASSWORD, WEB_HOST, WEB_IPV6, USE_API, API_KEY, ENABLE_HTTPS, DOWNLOAD_URL, HTTPS_CERT, HTTPS_KEY, \
                 USE_NZBS, USE_TORRENTS, NZB_METHOD, NZB_DIR, DOWNLOAD_PROPERS, \
                 SAB_USERNAME, SAB_PASSWORD, SAB_APIKEY, SAB_CATEGORY, SAB_HOST, \
                 NZBGET_PASSWORD, NZBGET_CATEGORY, NZBGET_HOST, currentSearchScheduler, backlogSearchScheduler, \
@@ -381,6 +382,8 @@ def initialize(consoleLogging=True):
 
         USE_API = bool(check_setting_int(CFG, 'General', 'use_api', 0))
         API_KEY = check_setting_str(CFG, 'General', 'api_key', '')
+
+        DOWNLOAD_URL = check_setting_str(CFG, 'General', 'download_url', "")
 
         ENABLE_HTTPS = bool(check_setting_int(CFG, 'General', 'enable_https', 0))
         HTTPS_CERT = check_setting_str(CFG, 'General', 'https_cert', 'server.crt')
@@ -951,6 +954,7 @@ def save_config():
     new_config['General']['use_api'] = int(USE_API)
     new_config['General']['api_key'] = API_KEY
     new_config['General']['enable_https'] = int(ENABLE_HTTPS)
+    new_config['General']['download_url'] = DOWNLOAD_URL;
     new_config['General']['https_cert'] = HTTPS_CERT
     new_config['General']['https_key'] = HTTPS_KEY
 
