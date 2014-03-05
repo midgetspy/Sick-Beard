@@ -29,7 +29,10 @@ from sickbeard import encodingKludge as ek
 from lib.tvdb_api import tvdb_api, tvdb_exceptions
 from sickbeard.exceptions import ex
 
-import xml.etree.cElementTree as etree
+try:
+    import xml.etree.cElementTree as etree
+except ImportError:
+    import elementtree.ElementTree as etree
 
 
 class WDTVMetadata(generic.GenericMetadata):
@@ -255,21 +258,26 @@ class WDTVMetadata(generic.GenericMetadata):
 
             genre = etree.SubElement(episode, "genre")
             if myShow["genre"] != None:
-                genre.text = " / ".join([x for x in myShow["genre"].split('|') if x])
+                genre.text = " / ".join([x.strip() for x in myShow["genre"].split('|') if x and x.strip()])
 
             director = etree.SubElement(episode, "director")
             director_text = myEp['director']
             if director_text != None:
                 director.text = director_text
 
-            for actor in myShow['_actors']:
-                cur_actor = etree.SubElement(episode, "actor")
-                cur_actor_name = etree.SubElement(cur_actor, "name")
-                cur_actor_name.text = actor['name']
-                cur_actor_role = etree.SubElement(cur_actor, "role")
-                cur_actor_role_text = actor['role']
-                if cur_actor_role_text != None:
-                    cur_actor_role.text = cur_actor_role_text
+            if myShow["_actors"] != None:
+                for actor in myShow["_actors"]:
+                    cur_actor_name_text = actor['name']
+
+                    if cur_actor_name_text != None and cur_actor_name_text.strip():
+                        cur_actor = etree.SubElement(episode, "actor")
+                        cur_actor_name = etree.SubElement(cur_actor, "name")
+                        cur_actor_name.text = cur_actor_name_text.strip()
+
+                        cur_actor_role = etree.SubElement(cur_actor, "role")
+                        cur_actor_role_text = actor['role']
+                        if cur_actor_role_text != None:
+                            cur_actor_role.text = cur_actor_role_text
 
             overview = etree.SubElement(episode, "overview")
             if curEpToWrite.description != None:
