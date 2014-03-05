@@ -405,13 +405,6 @@ def initialize(consoleLogging=True):
         if not re.match(r'\d+\|[^|]+(?:\|[^|]+)*', ROOT_DIRS):
             ROOT_DIRS = ''
 
-        proxies = urllib.getproxies()
-        proxy_url = None  # @UnusedVariable
-        if 'http' in proxies:
-            proxy_url = proxies['http']  # @UnusedVariable
-        elif 'ftp' in proxies:
-            proxy_url = proxies['ftp']  # @UnusedVariable
-
         # Set our common tvdb_api options here
         TVDB_API_PARMS = {'apikey': TVDB_API_KEY,
                           'language': 'en',
