@@ -116,7 +116,7 @@
 <input type="hidden" id="sbRoot" value="$sbRoot" />
 
     <table id="showListTable" class="sickbeardTable tablesorter" cellspacing="1" border="0" cellpadding="0">
-    <thead><tr><th>Airdate</th><th>Show</th><th class="nowrap">Next Ep</th><th>Next Ep Name</th><th>Network</th><th>Quality</th><th>IMDb</th><th>tvDB</th><th>Search</th></tr></thead>
+    <thead><tr><th>Airdate</th><th>Show</th><th class="nowrap">Next Ep</th><th>Next Ep Name</th><th>Network</th><th>Quality</th><th>IMDb</th><th>tvDB</th><th>TVRage</th><th>Search</th></tr></thead>
     <tbody>
 
     #for $cur_result in $sql_results:
@@ -168,6 +168,11 @@
         #end if
         </td>
         <td align="center"><a href="http://thetvdb.com/?tab=series&amp;id=${cur_result["showid"]}" rel="noreferrer" onclick="window.open('${sickbeard.ANON_REDIRECT}' + this.href, '_blank'); return false;" title="http://thetvdb.com/?tab=series&amp;id=${cur_result["showid"]}"><img alt="[tvdb]" height="16" width="16" src="$sbRoot/images/thetvdb16.png" /></a></td>
+        <td align="center">
+        #if $cur_result["tvr_id"] != 0: 
+        	<a href="http://www.tvrage.com/shows/id-${cur_result["tvr_id"]}" onclick="window.open(this.href, '_blank'); return false;" title="http://www.tvrage.com/shows/id-${cur_result["tvr_id"]}"><img alt="[tvrage]" height="16" width="16" src="$sbRoot/images/tvrage.png" /> 
+        #end if
+        </td>
         <td align="center">
         <a href="$sbRoot/home/searchEpisode?show=${cur_result["showid"]}&amp;season=$cur_result["season"]&amp;episode=$cur_result["episode"]" title="Manual Search" id="forceUpdate-${cur_result["showid"]}" class="forceUpdate epSearch"><img alt="[search]" height="16" width="16" src="$sbRoot/images/search32.png" id="forceUpdateImage-${cur_result["showid"]}" /></a>
         </td>
@@ -304,6 +309,9 @@
           	      <a href="http://www.imdb.com/title/${cur_result["imdb_id"]}" rel="noreferrer" onclick="window.open('${sickbeard.ANON_REDIRECT}' + this.href, '_blank'); return false;" title="http://www.imdb.com/title/${cur_result["imdb_id"]}"><img alt="[imdb]" height="16" width="16" src="$sbRoot/images/imdb.png" /> 
           	    #end if  
           	      <a href="http://thetvdb.com/?tab=series&amp;id=${cur_result["showid"]}" rel="noreferrer" onclick="window.open('${sickbeard.ANON_REDIRECT}' + this.href, '_blank'); return false;" title="http://thetvdb.com/?tab=series&amp;id=${cur_result["showid"]}"><img alt="[tvdb]" height="16" width="16" src="$sbRoot/images/thetvdb16.png" /></a>
+                  #if $cur_result["tvr_id"] != 0: 
+                  	<a href="http://www.tvrage.com/shows/id-${cur_result["tvr_id"]}" rel="noreferrer" onclick="window.open('${sickbeard.ANON_REDIRECT}' + this.href, '_blank'); return false;" title="http://www.tvrage.com/shows/id-${cur_result["tvr_id"]}"><img alt="[tvrage]" height="16" width="16" src="$sbRoot/images/tvrage.png" />
+                  #end if
           	      <span><a href="$sbRoot/home/searchEpisode?show=${cur_result["showid"]}&amp;season=$cur_result["season"]&amp;episode=$cur_result["episode"]" title="Manual Search" id="forceUpdate-${cur_result["showid"]}" class="epSearch forceUpdate"><img alt="[search]" height="16" width="16" src="$sbRoot/images/search32.png" id="forceUpdateImage-${cur_result["showid"]}" /></a></span>
           	  </span>
           	</div>
