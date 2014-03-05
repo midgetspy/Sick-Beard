@@ -27,6 +27,8 @@ try:
 except ImportError:
     import elementtree.ElementTree as etree
 
+from io import BytesIO
+
 import sickbeard
 import generic
 
@@ -301,7 +303,8 @@ class NewznabCache(tvcache.TVCache):
     def _getRSSData(self):
 
         params = {"t": "tvsearch",
-                  "cat": self.provider.catIDs}
+                  "cat": self.provider.catIDs,
+                  "attrs": "rageid"}
 
         if self.provider.needs_auth and self.provider.key:
             params['apikey'] = self.provider.key
@@ -324,3 +327,91 @@ class NewznabCache(tvcache.TVCache):
 
     def _checkAuth(self, parsedXML):
             return self.provider._checkAuthFromData(parsedXML)
+
+    # helper method to read the namespaces from xml
+    def parse_and_get_ns(self, data):
+        events = "start", "start-ns"
+        root = None
+        ns = {}
+        for event, elem in etree.iterparse(BytesIO(data.encode('utf-8')), events):
+            if event == "start-ns":
+                ns[elem[0]] = "{%s}" % elem[1]
+            elif event == "start":
+                if root is None:
+                    root = elem
+        return root, ns
+
+    def updateCache(self):
+
+        if not self.shouldUpdate():
+            return
+
+        if self._checkAuth(None):
+            data = self._getRSSData()
+
+            # as long as the http request worked we count this as an update
+            if data:
+                self.setLastUpdate()
+            else:
+                return []
+
+            # now that we've loaded the current RSS feed lets delete the old cache
+            logger.log(u"Clearing " + self.provider.name + " cache and updating with new information")
+            self._clearCache()
+
+            try:
+                parsedXML, n_spaces = self.parse_and_get_ns(data)
+                items = parsedXML.findall('.//item')
+            except Exception, e:
+                logger.log(u"Error trying to load "+self.provider.name+" RSS feed: "+ex(e), logger.ERROR)
+                logger.log(u"Feed contents: "+repr(data), logger.DEBUG)
+                return []
+
+            if parsedXML is None:
+                logger.log(u"Error trying to load " + self.provider.name + " RSS feed", logger.ERROR)
+                return []
+
+            if self._checkAuth(parsedXML):
+
+                if parsedXML.tag != 'rss':
+                    logger.log(u"Resulting XML from " + self.provider.name + " isn't RSS, not parsing it", logger.ERROR)
+                    return []
+
+                ql = []
+                for item in items:
+                    ci = self._parseItem(item, n_spaces)
+                    if ci is not None:
+                        ql.append(ci)
+
+                myDB = self._getDB()
+                myDB.mass_action(ql)
+
+            else:
+                raise AuthException(u"Your authentication credentials for " + self.provider.name + " are incorrect, check your config")
+
+        return []
+
+    # overwrite method with that parses the rageid from the newznab feed
+    def _parseItem(self, item, ns):
+
+        title = item.findtext('title')
+        url = item.findtext('link')
+
+        tvrageid = 0
+        # don't use xpath because of the python 2.5 compatibility
+        for subitem in item.findall(ns['newznab']+'attr'):
+            if subitem.get('name') == "rageid":
+               tvrageid = helpers.tryInt(subitem.get('value'))
+               break
+
+        self._checkItemAuth(title, url)
+
+        if not title or not url:
+            logger.log(u"The XML returned from the "+self.provider.name+" feed is incomplete, this result is unusable", logger.ERROR)
+            return
+
+        url = self._translateLinkURL(url)
+
+        logger.log(u"Adding item from RSS to cache: "+title, logger.DEBUG)
+
+        return self._addCacheEntry(title, url, tvrage_id=tvrageid)

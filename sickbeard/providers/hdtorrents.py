@@ -348,19 +348,24 @@ class HDTorrentsCache(tvcache.TVCache):
         logger.log(u"Clearing " + self.provider.name + " cache and updating with new information")
         self._clearCache()
 
+        ql = []
         for result in rss_results:
-            item = (result[0], result[1])
-            self._parseItem(item)
+            ci = self._parseItem(result)
+            if ci is not None:
+                ql.append(ci)
+
+        myDB = self._getDB()
+        myDB.mass_action(ql)
 
     def _parseItem(self, item):
 
         (title, url) = item
 
         if not title or not url:
-            return
+            return None
 
         logger.log(u"Adding item to cache: " + title, logger.DEBUG)
 
-        self._addCacheEntry(title, url)
+        return self._addCacheEntry(title, url)
 
 provider = HDTorrentsProvider()

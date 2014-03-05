@@ -70,7 +70,7 @@ class DBConnection:
 
         with db_lock:
 
-            if querylist == None:
+            if querylist == None or len(querylist) == 0:
                 return
 
             sqlResult = []

@@ -164,26 +164,32 @@ def _getEpisode(show, season, episode):
 
     return epObj
 
-def ManageMenu():
-        
-    manageMenu = [
-    { 'title': 'Backlog Overview',          'path': 'manage/backlogOverview/' },
-    { 'title': 'Manage Searches',           'path': 'manage/manageSearches/'  },
-    { 'title': 'Episode Status Management', 'path': 'manage/episodeStatuses/' },]
-
+def haveManageTorrents():
     if sickbeard.USE_TORRENTS and sickbeard.TORRENT_METHOD != 'blackhole' \
     and (sickbeard.ENABLE_HTTPS and sickbeard.TORRENT_HOST[:5] == 'https' \
     or not sickbeard.ENABLE_HTTPS and sickbeard.TORRENT_HOST[:5] == 'http:'):
-        manageMenu.append({ 'title': 'Manage Torrents', 'path': 'manage/manageTorrents/'})
+        return True
+    else:
+        return False
 
-    if sickbeard.USE_SUBTITLES:
-        manageMenu.append({ 'title': 'Missed Subtitle Management', 'path': 'manage/subtitleMissed/' })
-            
-    if sickbeard.USE_FAILED_DOWNLOADS:
-        manageMenu.append({ 'title': 'Failed Downloads', 'path': 'manage/failedDownloads/' })
+def useSubtitles():
+    return sickbeard.USE_SUBTITLES
+
+def useFailedDownload():
+    return sickbeard.USE_FAILED_DOWNLOADS
+
+def ManageMenu():
+        
+    manageMenu = [
+    { 'title': 'Backlog Overview',           'path': 'manage/backlogOverview/' },
+    { 'title': 'Manage Searches',            'path': 'manage/manageSearches/' },
+    { 'title': 'Manage Torrents',            'path': 'manage/manageTorrents/', 'requires': haveManageTorrents },
+    { 'title': 'Failed Downloads',           'path': 'manage/failedDownloads/', 'requires': useFailedDownload },
+    { 'title': 'Episode Status Management',  'path': 'manage/episodeStatuses/' },
+    { 'title': 'Missed Subtitle Management', 'path': 'manage/subtitleMissed/', 'requires': useSubtitles }
+    ]
 
     return manageMenu
-
 
 class ManageSearches:
 
@@ -1043,7 +1049,7 @@ class ConfigSearch:
         sickbeard.TORRENT_METHOD = torrent_method
         sickbeard.USENET_RETENTION = sickbeard.USENET_RETENTION = config.to_int(usenet_retention, default=500)
 
-        sickbeard.IGNORE_WORDS = ignore_words if not ignore_words else ""
+        sickbeard.IGNORE_WORDS = ignore_words if ignore_words else ""
 
         sickbeard.DOWNLOAD_PROPERS = config.checkbox_to_value(download_propers)
         if sickbeard.DOWNLOAD_PROPERS:
@@ -3514,7 +3520,7 @@ class WebInterface:
 
         time_re = re.compile('([0-9]{1,2})\:([0-9]{2})(\ |)([AM|am|PM|pm]{2})')
 
-    # Create a iCal string
+        # Create a iCal string
         ical = 'BEGIN:VCALENDAR\r\n'
         ical += 'VERSION:2.0\r\n'
         ical += 'X-WR-CALNAME:Sick Beard\r\n'
@@ -3528,8 +3534,8 @@ class WebInterface:
         past_date = (datetime.date.today() + datetime.timedelta(weeks=-52)).toordinal()
         future_date = (datetime.date.today() + datetime.timedelta(weeks=52)).toordinal()
 
-        # Get all the shows that are not paused and are currently on air (from kjoconnor Fork)
-        calendar_shows = myDB.select("SELECT show_name, tvdb_id, network, airs, runtime FROM tv_shows WHERE status = 'Continuing' AND paused != '1'")
+        # Get all the shows that are not paused
+        calendar_shows = myDB.select("SELECT show_name, tvdb_id, network, airs, runtime FROM tv_shows WHERE paused != '1'")
         for show in calendar_shows:
             # Get all episodes of this show airing between today and next month
             episode_list = myDB.select("SELECT tvdbid, name, season, episode, description, airdate FROM tv_episodes WHERE airdate >= ? AND airdate < ? AND showid = ?", (past_date, future_date, int(show["tvdb_id"])))

@@ -176,10 +176,10 @@ class TorrentRssCache(tvcache.TVCache):
         (title, url) = self.provider._get_title_and_url(item)
         if not title or not url:
             logger.log(u"The XML returned from the RSS feed is incomplete, this result is unusable", logger.ERROR)
-            return
+            return None
         
         logger.log(u"Adding item from RSS to cache: " + title, logger.DEBUG)
-        self._addCacheEntry(title, url)
+        return self._addCacheEntry(title, url)
 
     def _remove_namespace(self, item):
         """Remove namespace from the xml document in place"""

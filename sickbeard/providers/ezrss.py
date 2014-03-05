@@ -190,10 +190,10 @@ class EZRSSCache(tvcache.TVCache):
         if title and url:
             logger.log(u"Adding item from RSS to cache: " + title, logger.DEBUG)
             url = self._translateLinkURL(url)
-            self._addCacheEntry(title, url)
+            return self._addCacheEntry(title, url)
 
         else:
             logger.log(u"The XML returned from the " + self.provider.name + " feed is incomplete, this result is unusable", logger.ERROR)
-            return
+            return None
 
 provider = EZRSSProvider()

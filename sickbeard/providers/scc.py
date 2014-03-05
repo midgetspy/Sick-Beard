@@ -228,10 +228,10 @@ class SCCProvider(generic.TorrentProvider):
             self._doLogin()
 
         if not headers:
-            headers = []
+            headers = {'user-agent': 'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/32.0.1700.107 Safari/537.36'}
 
         try:
-            response = self.session.get(url, verify=False)
+            response = self.session.get(url, headers=headers, verify=False)
         except (requests.exceptions.ConnectionError, requests.exceptions.HTTPError), e:
             logger.log(u"Error loading "+self.name+" URL: " + ex(e), logger.ERROR)
             return None
@@ -292,19 +292,25 @@ class SCCCache(tvcache.TVCache):
         logger.log(u"Clearing " + self.provider.name + " cache and updating with new information")
         self._clearCache()
 
+        ql = []
         for result in rss_results:
             item = (result[0], result[1])
-            self._parseItem(item)
+            ci = self._parseItem(item)
+            if ci is not None:
+                ql.append(ci)
+
+        myDB = self._getDB()
+        myDB.mass_action(ql)
 
     def _parseItem(self, item):
 
         (title, url) = item
 
         if not title or not url:
-            return
+            return None
 
         logger.log(u"Adding item to cache: " + title, logger.DEBUG)
 
-        self._addCacheEntry(title, url)
+        return self._addCacheEntry(title, url)
 
 provider = SCCProvider()
