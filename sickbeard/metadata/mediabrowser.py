@@ -71,10 +71,10 @@ class MediaBrowserMetadata(generic.GenericMetadata):
                                          season_all_poster,
                                          season_all_banner)
 
-        self.name = 'MediaBrowser'
+        self.name = "MediaBrowser"
 
-        self._ep_nfo_extension = 'xml'
-        self._show_metadata_filename = 'series.xml'
+        self._ep_nfo_extension = "xml"
+        self._show_metadata_filename = "series.xml"
 
         self.fanart_name = "backdrop.jpg"
         self.poster_name = "folder.jpg"
