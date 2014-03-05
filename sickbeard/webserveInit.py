@@ -152,7 +152,7 @@ def initWebServer(options = {}):
 
         # auth
         if options['username'] != "" and options['password'] != "":
-            if sickbeard.CALENDAR_UNPROTECTED:
+            if sickbeard.CALENDAR_PROTECTED:
                 checkpassword = cherrypy.lib.auth_basic.checkpassword_dict({options['username']: options['password']})
                 app.merge({
                         '/': {
@@ -161,9 +161,6 @@ def initWebServer(options = {}):
                                 'tools.auth_basic.checkpassword': checkpassword
                         },
                         '/api':{
-                                'tools.auth_basic.on':            False
-                        },
-                        '/calendar':{
                                 'tools.auth_basic.on':            False
                         },
                         '/api/builder':{
@@ -183,6 +180,9 @@ def initWebServer(options = {}):
                         '/api':{
                                 'tools.auth_basic.on':            False
                         },
+                        '/calendar':{
+                                'tools.auth_basic.on':            False
+                        },
                         '/api/builder':{
                                 'tools.auth_basic.on':            True,
                                 'tools.auth_basic.realm':         'SickBeard',
@@ -193,4 +193,3 @@ def initWebServer(options = {}):
 
         cherrypy.server.start()
         cherrypy.server.wait()
-

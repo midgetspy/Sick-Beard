@@ -31,7 +31,7 @@
 					<li><a href="#core-component-group1">Misc</a></li>
 					<li><a href="#core-component-group2">Web Interface</a></li>
 					<li><a href="#core-component-group3">Date and Time</a></li>
-					<li><a href="#core-component-group4">Advanced Setting</a></li>
+					<li><a href="#core-component-group4">Advanced Settings</a></li>
 				</ul>
 				
                 <div id="core-component-group1" class="component-group clearfix">
@@ -189,8 +189,9 @@
                 <div id="core-component-group4" class="component-group clearfix">
 
                     <div class="component-group-desc">
-                        <h3>Advanced setting</h3>
-                        <p>Here you need to know what are you doing!!!</p>
+                        <h3>Advanced settings</h3>
+                        <p>Be careful.</p>
+                        <p><b>You need to know what you are doing here!</b></p>
                     </div>
 
                     <fieldset class="component-group-list">
@@ -244,21 +245,17 @@
                                 <span class="component-title">Encrypt Passwords</span>
                                 <span class="component-desc">Should Sick Beard encrypt the passwords in <code>config.ini</code> file?</span>
                             </label>
-                            <label class="nocheck clearfix">
-                                <span class="component-title">&nbsp;</span>
-                                <span class="component-desc"><b>Warning</b>: Password must be only with <a style="color: blue;" href="http://en.wikipedia.org/wiki/ASCII#ASCII_printable_characters">ASCII characters</a></span>
-                            </label>
                         </div> 
                         
                         <div class="field-pair">
-                            <input type="checkbox" name="calendar_unprotected" id="calendar_unprotected" #if $sickbeard.CALENDAR_UNPROTECTED then "checked=\"checked\"" else ""#/>
-                            <label class="clearfix" for="calendar_unprotected">
-                                <span class="component-title">Unprotected Calendar</span>
-                                <span class="component-desc">This allows to subscribe to the calendar without user and password.</span>
+                            <input type="checkbox" name="calendar_protected" id="calendar_protected" #if $sickbeard.CALENDAR_PROTECTED then "checked=\"checked\"" else ""#/>
+                            <label class="clearfix" for="calendar_protected">
+                                <span class="component-title">Protected Calendar</span>
+                                <span class="component-desc">Should the calendar be protected with user and password?</span>
                             </label>
                             <label class="nocheck clearfix">
                                 <span class="component-title">&nbsp;</span>
-                                <span class="component-desc">Some services like Google Calendar only work this way.</span>
+                                <span class="component-desc">Some services like Google Calendar are not compatible.</span>
                             </label>
                         </div>                      
 

@@ -946,7 +946,7 @@ class ConfigGeneral:
     def saveGeneral(self, log_dir=None, web_port=None, web_log=None, encryption_version=None, web_ipv6=None,
                     update_shows_on_start=None, launch_browser=None, web_username=None, use_api=None, api_key=None,
                     web_password=None, version_notify=None, enable_https=None, https_cert=None, https_key=None, sort_article=None,
-                    anon_redirect=None, git_path=None, calendar_unprotected=None, date_preset=None, time_preset=None):
+                    anon_redirect=None, git_path=None, calendar_protected=None, date_preset=None, time_preset=None):
 
         results = []
 
@@ -960,13 +960,16 @@ class ConfigGeneral:
         sickbeard.SORT_ARTICLE = config.checkbox_to_value(sort_article)
         sickbeard.ANON_REDIRECT = anon_redirect
         sickbeard.GIT_PATH = git_path
-        sickbeard.CALENDAR_UNPROTECTED = config.checkbox_to_value(calendar_unprotected)
+        
+        # Update value_on to the last encryption_version available:
+        sickbeard.ENCRYPTION_VERSION = config.checkbox_to_value(encryption_version, value_on=1, value_off=0)
+        sickbeard.CALENDAR_PROTECTED = config.checkbox_to_value(calendar_protected)
+        
         # sickbeard.LOG_DIR is set in config.change_LOG_DIR()
-
         sickbeard.WEB_PORT = config.to_int(web_port)
         sickbeard.WEB_IPV6 = config.checkbox_to_value(web_ipv6)
         # sickbeard.WEB_LOG is set in config.change_LOG_DIR()
-        sickbeard.ENCRYPTION_VERSION = config.checkbox_to_value(encryption_version)
+                
         sickbeard.WEB_USERNAME = web_username
         sickbeard.WEB_PASSWORD = web_password
 
