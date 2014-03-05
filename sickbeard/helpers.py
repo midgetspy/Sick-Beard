@@ -225,7 +225,7 @@ Returns a byte-string retrieved from the url provider.
 
 def _remove_file_failed(file):
     try:
-        os.remove(file)
+        ek.ek(os.remove,file)
     except:
         pass
 
