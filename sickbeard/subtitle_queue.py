@@ -28,12 +28,14 @@ from sickbeard import search
 import os.path
 from sickbeard import encodingKludge as ek
 from lib import subliminal
+from lib.babelfish import Language
+from subliminal.video import Episode
 import random
 import sys
 import traceback
 
 SUBTITLE_SEARCH = 35
-SUBTITLE_SERVICES = ['opensubtitles', 'addic7ed', 'tvsubtitles', 'subswiki', 'subtitulos', 'thesubdb']
+SUBTITLE_SERVICES = ['opensubtitles', 'addic7ed', 'tvsubtitles', 'thesubdb', 'podnapisi']
 
 class SubtitleQueue(generic_queue.GenericQueue):
     
@@ -89,37 +91,36 @@ class SubtitleQueueItem(generic_queue.QueueItem):
             #langS = lang.split("-")
             #if len(langS) > 1:
                 #subLanguages.append(langS[0])
-        
         try:
-            subEpisodes = subliminal.download_subtitles([ep_obj.location], 
-                                                      languages=subLanguages, 
-                                                      services=SUBTITLE_SERVICES, 
-                                                      force=force, 
-                                                      multi=True, 
-                                                      cache_dir=sickbeard.CACHE_DIR, 
-                                                      max_depth=3, 
-                                                      scan_filter=None, 
-                                                      order=None)
+            sublimLangs = set()
+            for sub in subLanguages:
+                bLang = Language.fromietf(sub)
+                sublimLangs.add(bLang)
+            sublimEpisode = set()
+            sublimEpisode.add(Episode.fromname(ep_obj.location))
+            downloadedSubs = subliminal.download_best_subtitles(
+                videos=sublimEpisode,
+                languages=sublimLangs,
+                providers=SUBTITLE_SERVICES)
+
+            subliminal.save_subtitles(downloadedSubs, directory = os.path.dirname(ep_obj.location))
+            subCount = 0
+            for video, video_subtitles in downloadedSubs.items():
+                for sub in video_subtitles:
+                    subPath = subliminal.subtitle.get_subtitle_path(ep_obj.location, sub.language)
+                    helpers.chmodAsParent(subPath)
+                    subCount += 1
         except Exception, e:
             logger.log("Error while downloading subtitles for %s: %s" % (ep_obj.prettyName(), str(e)), logger.ERROR)
             traceback.print_exc()
             return False
-        subCount = 0
-        for subEpisode in subEpisodes:
-            subtitles = subEpisodes[subEpisode]
-            for subtitle in subtitles:
-                helpers.chmodAsParent(subtitle.path)
-                subCount += 1
+
                 
         if subCount > 0:
-            for subEpisode in subEpisodes:
-                subtitles = subEpisodes[subEpisode]
-                for item in subtitles:
-                    logger.log("Downloaded subtitle for %s: %s from %s" % (ep_obj.prettyName(), item.language, item.service))
-
+            logger.log("Downloaded subtitle for %s." % ep_obj.prettyName())
             self.success = True
         else:
-            logger.log("No subtitles downloaded for " + ep_obj.prettyName())
+            logger.log("No subtitles downloaded for %s." % ep_obj.prettyName())
             self.success = False
 
     def finish(self):
