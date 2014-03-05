@@ -28,7 +28,7 @@ from lib.growl import gntp
 class GrowlNotifier:
 
     def _send_growl(self, options, message=None):
-        #Send Notification
+        # send notification
         notice = gntp.GNTPNotice()
 
         #Required
@@ -39,7 +39,7 @@ class GrowlNotifier:
         if options['password']:
             notice.set_password(options['password'])
 
-        #Optional
+        # optional
         if options['sticky']:
             notice.add_header('Notification-Sticky', options['sticky'])
         if options['priority']:
@@ -110,18 +110,19 @@ class GrowlNotifier:
 
         opts['icon'] = True
 
+        # TODO: Multi hosts does not seem to work... registration only happens for the first
         for pc in growlHosts:
             print pc
             opts['host'] = pc[0]
             opts['port'] = pc[1]
-            logger.log(u"NOTIFIER-GROWL: Sending message '" + message + "' to " + opts['host'] + ":" + str(opts['port']))
+            logger.log(u"GROWL: Sending message '" + message + "' to " + opts['host'] + ":" + str(opts['port']))
             try:
                 return self._send_growl(opts, message)
             except Exception, e:
-                logger.log(u"NOTIFIER-GROWL: Unable to send growl to " + opts['host'] + ":" + str(opts['port']) + " - " + ex(e))
+                logger.log(u"GROWL: Unable to send growl to " + opts['host'] + ":" + str(opts['port']) + " - " + ex(e))
                 return False
 
-    def _sendRegistration(self, host=None, password=None, name='Sick Beard Notification'):
+    def _sendRegistration(self, host=None, password=None, name="Sick Beard Notification"):
         opts = {}
 
         if not host:
@@ -145,7 +146,7 @@ class GrowlNotifier:
         opts['app'] = 'SickBeard'
         opts['debug'] = False
 
-        #Send Registration
+        # send registration
         register = gntp.GNTPRegister()
         register.add_header('Application-Name', opts['app'])
         register.add_header('Application-Icon', 'http://www.sickbeard.com/xbmc-notify.png')
@@ -160,7 +161,7 @@ class GrowlNotifier:
         try:
             return self._send(opts['host'], opts['port'], register.encode(), opts['debug'])
         except Exception, e:
-            logger.log(u"NOTIFIER-GROWL: Unable to send growl to " + opts['host'] + ":" + str(opts['port']) + " - " + ex(e))
+            logger.log(u"GROWL: Unable to send growl to " + opts['host'] + ":" + str(opts['port']) + " - " + ex(e))
             return False
 
 ##############################################################################
@@ -176,8 +177,11 @@ class GrowlNotifier:
             self._notify(common.notifyStrings[common.NOTIFY_DOWNLOAD], ep_name)
 
     def test_notify(self, host, password):
-        self._sendRegistration(host, password, 'Test')
-        return self._notify("Test Growl", "Testing Growl settings from Sick Beard", "Test", host, password, force=True)
+        result = self._sendRegistration(host, password, "Test")
+        if result:
+            return self._notify("Test Growl", "Testing Growl settings from Sick Beard", "Test", host, password, force=True)
+        else:
+            return result
 
     def update_library(self, showName=None):
         pass
