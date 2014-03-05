@@ -432,7 +432,7 @@ GIT_PATH = None
 
 IGNORE_WORDS = "german,french,core2hd,dutch,swedish,reenc,MrLss"
 
-CALENDAR_UNPROTECTED = False
+CALENDAR_PROTECTED = False
 
 __INITIALIZED__ = False
 
@@ -482,7 +482,7 @@ def initialize(consoleLogging=True):
                 USE_LISTVIEW, METADATA_XBMC, METADATA_XBMC_12PLUS, METADATA_MEDIABROWSER, METADATA_PS3, metadata_provider_dict, \
                 NEWZBIN, NEWZBIN_USERNAME, NEWZBIN_PASSWORD, GIT_PATH, MOVE_ASSOCIATED_FILES, \
                 GUI_NAME, HOME_LAYOUT, HISTORY_LAYOUT, DISPLAY_SHOW_SPECIALS, COMING_EPS_LAYOUT, COMING_EPS_SORT, COMING_EPS_DISPLAY_PAUSED, COMING_EPS_MISSED_RANGE, DATE_PRESET, TIME_PRESET, TIME_PRESET_W_SECONDS, \
-                METADATA_WDTV, METADATA_TIVO, IGNORE_WORDS,  CALENDAR_UNPROTECTED, CREATE_MISSING_SHOW_DIRS, \
+                METADATA_WDTV, METADATA_TIVO, IGNORE_WORDS,  CALENDAR_PROTECTED, CREATE_MISSING_SHOW_DIRS, \
                 ADD_SHOWS_WO_DIR, USE_SUBTITLES, SUBTITLES_LANGUAGES, SUBTITLES_DIR, SUBTITLES_SERVICES_LIST, SUBTITLES_SERVICES_ENABLED, SUBTITLES_HISTORY, SUBTITLES_FINDER_FREQUENCY, subtitlesFinderScheduler, \
                 USE_FAILED_DOWNLOADS, DELETE_FAILED, ANON_REDIRECT, LOCALHOST_IP
 
@@ -596,8 +596,8 @@ def initialize(consoleLogging=True):
 
         PROVIDER_ORDER = check_setting_str(CFG, 'General', 'provider_order', '').split()
 
-        NAMING_PATTERN = check_setting_str(CFG, 'General', 'naming_pattern', '')
-        NAMING_ABD_PATTERN = check_setting_str(CFG, 'General', 'naming_abd_pattern', '')
+        NAMING_PATTERN = check_setting_str(CFG, 'General', 'naming_pattern', '%SN - %Sx%0E - %EN')
+        NAMING_ABD_PATTERN = check_setting_str(CFG, 'General', 'naming_abd_pattern', '%SN - %A-D - %EN')
         NAMING_CUSTOM_ABD = check_setting_int(CFG, 'General', 'naming_custom_abd', 0)
         NAMING_MULTI_EP = check_setting_int(CFG, 'General', 'naming_multi_ep', 1)
         NAMING_FORCE_FOLDERS = naming.check_force_season_folders()
@@ -883,7 +883,7 @@ def initialize(consoleLogging=True):
 
         IGNORE_WORDS = check_setting_str(CFG, 'General', 'ignore_words', IGNORE_WORDS)
         
-        CALENDAR_UNPROTECTED = bool(check_setting_int(CFG, 'General', 'calendar_unprotected', 0))
+        CALENDAR_PROTECTED = bool(check_setting_int(CFG, 'General', 'calendar_protected', 0))
 
         EXTRA_SCRIPTS = [x.strip() for x in check_setting_str(CFG, 'General', 'extra_scripts', '').split('|') if x.strip()]
 
@@ -1321,7 +1321,7 @@ def save_config():
     new_config['General']['extra_scripts'] = '|'.join(EXTRA_SCRIPTS)
     new_config['General']['git_path'] = GIT_PATH
     new_config['General']['ignore_words'] = IGNORE_WORDS
-    new_config['General']['calendar_unprotected'] = int(CALENDAR_UNPROTECTED)
+    new_config['General']['calendar_protected'] = int(CALENDAR_PROTECTED)
 
     new_config['Blackhole'] = {}
     new_config['Blackhole']['nzb_dir'] = NZB_DIR
