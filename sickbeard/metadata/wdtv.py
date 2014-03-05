@@ -29,7 +29,10 @@ from sickbeard import encodingKludge as ek
 from lib.tvdb_api import tvdb_api, tvdb_exceptions
 from sickbeard.exceptions import ex
 
-import xml.etree.cElementTree as etree
+try:
+    import xml.etree.cElementTree as etree
+except ImportError:
+    import elementtree.ElementTree as etree
 
 
 class WDTVMetadata(generic.GenericMetadata):

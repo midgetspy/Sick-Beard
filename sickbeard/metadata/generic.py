@@ -20,7 +20,10 @@ from __future__ import with_statement
 
 import os.path
 
-import xml.etree.cElementTree as etree
+try:
+    import xml.etree.cElementTree as etree
+except ImportError:
+    import elementtree.ElementTree as etree
 
 import re
 

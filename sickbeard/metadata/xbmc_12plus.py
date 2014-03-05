@@ -25,7 +25,10 @@ import sickbeard
 from sickbeard import logger, exceptions, helpers
 from sickbeard.exceptions import ex
 
-import xml.etree.cElementTree as etree
+try:
+    import xml.etree.cElementTree as etree
+except ImportError:
+    import elementtree.ElementTree as etree
 
 
 class XBMC_12PlusMetadata(generic.GenericMetadata):
