@@ -199,7 +199,10 @@ def get_network_timezone(network, network_dict):
         return sb_timezone
 
     try:
-        return tz.gettz(network_dict[network])
+        if lib.dateutil.zoneinfo.ZONEINFOFILE is not None:
+            return tz.gettz(network_dict[network])
+        else:
+            return sb_timezone
     except:
         return sb_timezone
 

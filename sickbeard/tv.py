@@ -1747,7 +1747,6 @@ class TVEpisode(object):
 
         # do the replacements
         for cur_replacement in sorted(replace_map.keys(), reverse=True):
-            if replace_map[cur_replacement] is None: continue
             result_name = result_name.replace(cur_replacement, helpers.sanitizeFileName(replace_map[cur_replacement]))
             result_name = result_name.replace(cur_replacement.lower(), helpers.sanitizeFileName(replace_map[cur_replacement].lower()))
 
