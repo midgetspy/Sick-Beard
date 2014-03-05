@@ -114,9 +114,10 @@ class SubtitleQueueItem(generic_queue.QueueItem):
             logger.log("Error while downloading subtitles for %s: %s" % (ep_obj.prettyName(), str(e)), logger.ERROR)
             traceback.print_exc()
             return False
-
                 
         if subCount > 0:
+            ep_obj.checkForMetaFiles()
+            ep_obj.saveToDB(forceSave = True)
             logger.log("Downloaded subtitle for %s." % ep_obj.prettyName())
             self.success = True
         else:
