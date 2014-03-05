@@ -39,7 +39,7 @@ sb_timezone = tz.tzlocal()
 # helper to remove failed temp download
 def _remove_zoneinfo_failed(filename):
     try:
-        os.remove(filename)
+        ek.ek(os.remove,filename)
     except:
         pass
 
@@ -58,7 +58,7 @@ def _remove_old_zoneinfo():
                 file_w_path = ek.ek(join,path,filename)
                 if file_w_path != cur_file and ek.ek(isfile,file_w_path):
                     try:
-                        os.remove(file_w_path)
+                        ek.ek(os.remove,file_w_path)
                         logger.log(u"Delete unneeded old zoneinfo File: " + file_w_path)
                     except:
                         logger.log(u"Unable to delete: " + file_w_path,logger.ERROR)
@@ -93,9 +93,9 @@ def _update_zoneinfo():
     zonefile = ek.ek(realpath, u'lib/dateutil/zoneinfo/' + new_zoneinfo)
     zonefile_tmp = re.sub(r"\.tar\.gz$",'.tmp', zonefile)
 
-    if (os.path.exists(zonefile_tmp)):
+    if (ek.ek(os.path.exists,zonefile_tmp)):
         try:
-            os.remove(zonefile_tmp)
+            ek.ek(os.remove,zonefile_tmp)
         except:
             logger.log(u"Unable to delete: " + zonefile_tmp,logger.ERROR)
             return
@@ -111,10 +111,10 @@ def _update_zoneinfo():
             # remove the old zoneinfo file
             if (cur_zoneinfo is not None):
                 old_file = ek.ek(realpath, u'lib/dateutil/zoneinfo/' + cur_zoneinfo)
-                if (os.path.exists(old_file)):
-                    os.remove(old_file)
+                if (ek.ek(os.path.exists,old_file)):
+                    ek.ek(os.remove,old_file)
             # rename downloaded file
-            os.rename(zonefile_tmp,zonefile)
+            ek.ek(os.rename,zonefile_tmp,zonefile)
             # load the new zoneinfo
             reload(lib.dateutil.zoneinfo)
             sb_timezone = tz.tzlocal()
