@@ -82,7 +82,10 @@ class SCCProvider(generic.TorrentProvider):
         self.session = requests.Session()
 
         try:
-            response = self.session.post(self.urls['login'], data=login_params, timeout=30, verify=False)
+            headers = {
+                'user-agent': 'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/32.0.1700.107 Safari/537.36'
+            }
+            response = self.session.post(self.urls['login'], data=login_params, headers=headers, timeout=30, verify=False)
         except (requests.exceptions.ConnectionError, requests.exceptions.HTTPError), e:
             logger.log(u'Unable to connect to ' + self.name + ' provider: ' +ex(e), logger.ERROR)
             return False
@@ -176,7 +179,7 @@ class SCCProvider(generic.TorrentProvider):
 
                     #Continue only if one Release is found
                     if len(torrent_rows)<2:
-                        logger.log(u"The Data returned from " + self.name + " do not contains any torrent", logger.DEBUG)
+                        logger.log(u"The Data returned from " + self.name + " does not contain any torrent", logger.DEBUG)
                         continue
 
                     for result in torrent_table.find_all('tr')[1:]:
@@ -228,7 +231,9 @@ class SCCProvider(generic.TorrentProvider):
             self._doLogin()
 
         if not headers:
-            headers = {'user-agent': 'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/32.0.1700.107 Safari/537.36'}
+            headers = {}
+            
+        headers.update({'user-agent': 'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/32.0.1700.107 Safari/537.36'})
 
         try:
             response = self.session.get(url, headers=headers, verify=False)
