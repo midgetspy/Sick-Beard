@@ -11,7 +11,7 @@ var _disable_empty_list=false;
 var _hide_empty_list=false;
 
 function goListGroup(apikey, L7, L6, L5, L4, L3, L2, L1){
-    var GlobalOptions = "";
+    var html, GlobalOptions = "";
     $('.global').each(function(){
         var checked = $(this).prop('checked');
         if(checked) {
@@ -28,7 +28,7 @@ function goListGroup(apikey, L7, L6, L5, L4, L3, L2, L1){
     // handle the show.getposter / show.getbanner differently as they return an image and not json
     if (L1 == "?cmd=show.getposter" || L1 == "?cmd=show.getbanner") {
         var imgcache = sbRoot + "/api/" + apikey + "/" + L1 + L2 + GlobalOptions;
-        var html = imgcache + '<br/><br/><img src="' + sbRoot + '/images/loading16.gif" id="imgcache">';
+        html = imgcache + '<br/><br/><img src="' + sbRoot + '/images/loading16.gif" id="imgcache">';
         $('#apiResponse').html(html);
         $.ajax({
           url: sbRoot + "/api/" + apikey + "/" + L1 + L2 + GlobalOptions,
@@ -38,14 +38,14 @@ function goListGroup(apikey, L7, L6, L5, L4, L3, L2, L1){
           success: function (img) {
             $('#imgcache').attr('src', imgcache);
           }
-        })
+        });
     }
     else {
-        var html = sbRoot + "/api/" + apikey + "/" + L1 + L2 + L3 + L4 + L5 + L6 + L7 + GlobalOptions + "<br/><pre>";
+        html = sbRoot + "/api/" + apikey + "/" + L1 + L2 + L3 + L4 + L5 + L6 + L7 + GlobalOptions + "<br/><pre>";
         html += $.ajax({
           url: sbRoot + "/api/" + apikey + "/" + L1 + L2 + L3 + L4 + L5 + L6 + L7 + GlobalOptions,
           async: false,
-          dataType: "html",
+          dataType: "html"
         }).responseText;
 
         html += '</pre>';
