@@ -67,15 +67,15 @@ class LibnotifyNotifier:
         try:
             import pynotify
         except ImportError:
-            logger.log(u"Unable to import pynotify. libnotify notifications won't work.")
+            logger.log(u"LIBNOTIFY: Unable to import pynotify. libnotify notifications won't work.")
             return False
         try:
             import gobject
         except ImportError:
-            logger.log(u"Unable to import gobject. We can't catch a GError in display.")
+            logger.log(u"LIBNOTIFY: Unable to import gobject. We can't catch a GError in display.")
             return False
         if not pynotify.init('Sick Beard'):
-            logger.log(u"Initialization of pynotify failed. libnotify notifications won't work.")
+            logger.log(u"LIBNOTIFY: Initialization of pynotify failed. libnotify notifications won't work.")
             return False
         self.pynotify = pynotify
         self.gobject = gobject
@@ -93,7 +93,7 @@ class LibnotifyNotifier:
         # Can't make this a global constant because PROG_DIR isn't available
         # when the module is imported.
         icon_path = os.path.join(sickbeard.PROG_DIR, "data/images/sickbeard_touch_icon.png")
-        icon_uri = 'file://' + os.path.abspath(icon_path)
+        icon_uri = "file://" + os.path.abspath(icon_path)
 
         # If the session bus can't be acquired here a bunch of warning messages
         # will be printed but the call to show() will still return True.

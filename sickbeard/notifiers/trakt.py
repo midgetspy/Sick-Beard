@@ -44,7 +44,7 @@ class TraktNotifier:
 
         Returns: A boolean representing success
         """
-        logger.log(u"trakt_notifier: Calling method " + method, logger.DEBUG)
+        logger.log(u"TRAKT: Calling method " + method, logger.DEBUG)
 
         # if the API isn't given then use the config API
         if not api:
@@ -70,7 +70,7 @@ class TraktNotifier:
 
         # request the URL from trakt and parse the result as json
         try:
-            logger.log(u"trakt_notifier: Calling method http://api.trakt.tv/" + method + ", with data" + encoded_data, logger.DEBUG)
+            logger.log(u"TRAKT: Calling method http://api.trakt.tv/" + method + ", with data" + encoded_data, logger.DEBUG)
             # TODO: Use our getURL from helper?
             stream = urllib2.urlopen("http://api.trakt.tv/" + method, encoded_data)
             resp = stream.read()
@@ -81,14 +81,14 @@ class TraktNotifier:
                 raise Exception(resp["error"])
 
         except (IOError):
-            logger.log(u"trakt_notifier: Failed calling method", logger.ERROR)
+            logger.log(u"TRAKT: Failed calling method", logger.ERROR)
             return False
 
         if (resp["status"] == "success"):
-            logger.log(u"trakt_notifier: Succeeded calling method. Result: " + resp["message"], logger.DEBUG)
+            logger.log(u"TRAKT: Succeeded calling method. Result: " + resp["message"], logger.DEBUG)
             return True
 
-        logger.log(u"trakt_notifier: Failed calling method", logger.ERROR)
+        logger.log(u"TRAKT: Failed calling method", logger.ERROR)
         return False
 
 ##############################################################################

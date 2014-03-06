@@ -72,14 +72,14 @@ class BoxcarNotifier:
         except urllib2.URLError, e:
             # if we get an error back that doesn't have an error code then who knows what's really happening
             if not hasattr(e, 'code'):
-                logger.log(u"Boxcar notification failed." + ex(e), logger.ERROR)
+                logger.log(u"BOXCAR: Boxcar notification failed." + ex(e), logger.ERROR)
                 return False
             else:
-                logger.log(u"Boxcar notification failed. Error code: " + str(e.code), logger.WARNING)
+                logger.log(u"BOXCAR: Boxcar notification failed. Error code: " + str(e.code), logger.WARNING)
 
             # HTTP status 404 if the provided email address isn't a Boxcar user.
             if e.code == 404:
-                logger.log(u"Username is wrong/not a boxcar email. Boxcar will send an email to it", logger.WARNING)
+                logger.log(u"BOXCAR: Username is wrong/not a boxcar email. Boxcar will send an email to it", logger.WARNING)
                 return False
 
             # For HTTP status code 401's, it is because you are passing in either an invalid token, or the user has not added your service.
@@ -87,7 +87,7 @@ class BoxcarNotifier:
 
                 # If the user has already added your service, we'll return an HTTP status code of 401.
                 if subscribe:
-                    logger.log(u"Already subscribed to service", logger.ERROR)
+                    logger.log(u"BOXCAR: Already subscribed to service", logger.ERROR)
                     # i dont know if this is true or false ... its neither but i also dont know how we got here in the first place
                     return False
 
@@ -95,18 +95,18 @@ class BoxcarNotifier:
                 else:
                     subscribeNote = self._sendBoxcar(msg, title, email, True)
                     if subscribeNote:
-                        logger.log(u"Subscription sent", logger.DEBUG)
+                        logger.log(u"BOXCAR: Subscription sent.", logger.DEBUG)
                         return True
                     else:
-                        logger.log(u"Subscription could not be sent", logger.ERROR)
+                        logger.log(u"BOXCAR: Subscription could not be sent.", logger.ERROR)
                         return False
 
             # If you receive an HTTP status code of 400, it is because you failed to send the proper parameters
             elif e.code == 400:
-                logger.log(u"Wrong data send to boxcar", logger.ERROR)
+                logger.log(u"BOXCAR: Wrong data send to boxcar.", logger.ERROR)
                 return False
 
-        logger.log(u"Boxcar notification successful.", logger.DEBUG)
+        logger.log(u"BOXCAR: Boxcar notification successful.", logger.DEBUG)
         return True
 
     def _notify(self, title, message, username=None, force=False):
@@ -127,7 +127,7 @@ class BoxcarNotifier:
         if not username:
             username = sickbeard.BOXCAR_USERNAME
 
-        logger.log(u"Sending notification for " + message, logger.DEBUG)
+        logger.log(u"BOXCAR: Sending notification for " + message, logger.DEBUG)
 
         self._sendBoxcar(message, title, username)
         return True

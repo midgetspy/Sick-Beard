@@ -71,7 +71,7 @@ class NMJv2Notifier:
                         sickbeard.NMJv2_DATABASE = DB_path
                         return True
         except IOError, e:
-            logger.log(u"Warning: Couldn't contact Popcorn Hour on host %s: %s" % (host, e))
+            logger.log(u"NMJv2: Warning: Couldn't contact Popcorn Hour on host %s: %s" % (host, e))
             return False
 
         return False
@@ -101,21 +101,21 @@ class NMJv2Notifier:
             handle2 = urllib2.urlopen(req)
             response2 = handle2.read()
         except IOError, e:
-            logger.log(u"Warning: Couldn't contact Popcorn Hour on host %s: %s" % (host, e))
+            logger.log(u"NMJv2: Warning: Couldn't contact Popcorn Hour on host %s: %s" % (host, e))
             return False
 
         try:
             et = etree.fromstring(response1)
             result1 = et.findtext("returnValue")
         except SyntaxError, e:
-            logger.log(u"Unable to parse XML returned from the Popcorn Hour: update_scandir, %s" % (e), logger.ERROR)
+            logger.log(u"NMJv2: Unable to parse XML returned from the Popcorn Hour: update_scandir, %s" % (e), logger.ERROR)
             return False
 
         try:
             et = etree.fromstring(response2)
             result2 = et.findtext("returnValue")
         except SyntaxError, e:
-            logger.log(u"Unable to parse XML returned from the Popcorn Hour: scanner_start, %s" % (e), logger.ERROR)
+            logger.log(u"NMJv2: Unable to parse XML returned from the Popcorn Hour: scanner_start, %s" % (e), logger.ERROR)
             return False
 
         # if the result was a number then consider that an error
@@ -130,15 +130,15 @@ class NMJv2Notifier:
 
         if int(result1) > 0:
             index = error_codes.index(result1)
-            logger.log(u"Popcorn Hour returned an error: %s" % (error_messages[index]))
+            logger.log(u"NMJv2: Popcorn Hour returned an error: %s" % (error_messages[index]))
             return False
         else:
             if int(result2) > 0:
                 index = error_codes.index(result2)
-                logger.log(u"Popcorn Hour returned an error: %s" % (error_messages[index]))
+                logger.log(u"NMJv2: Popcorn Hour returned an error: %s" % (error_messages[index]))
                 return False
             else:
-                logger.log(u"NMJv2 started background scan")
+                logger.log(u"NMJv2: Started background scan.")
                 return True
 
     def _notifyNMJ(self, host=None, force=False):
@@ -158,7 +158,7 @@ class NMJv2Notifier:
         if not host:
             host = sickbeard.NMJv2_HOST
 
-        logger.log(u"Sending scan command for NMJv2", logger.DEBUG)
+        logger.log(u"NMJv2: Sending scan command.", logger.DEBUG)
 
         return self._sendNMJ(host)
 

@@ -36,10 +36,10 @@ class TwitterNotifier:
     consumer_key = "vHHtcB6WzpWDG6KYlBMr8g"
     consumer_secret = "zMqq5CB3f8cWKiRO2KzWPTlBanYmV0VYxSXZ0Pxds0E"
 
-    REQUEST_TOKEN_URL = 'https://api.twitter.com/oauth/request_token'
-    ACCESS_TOKEN_URL = 'https://api.twitter.com/oauth/access_token'
-    AUTHORIZATION_URL = 'https://api.twitter.com/oauth/authorize'
-    SIGNIN_URL = 'https://api.twitter.com/oauth/authenticate'
+    REQUEST_TOKEN_URL = "https://api.twitter.com/oauth/request_token"
+    ACCESS_TOKEN_URL = "https://api.twitter.com/oauth/access_token"
+    AUTHORIZATION_URL = "https://api.twitter.com/oauth/authorize"
+    SIGNIN_URL = "https://api.twitter.com/oauth/authenticate"
 
     def _get_authorization(self):
 
@@ -47,12 +47,12 @@ class TwitterNotifier:
         oauth_consumer = oauth.Consumer(key=self.consumer_key, secret=self.consumer_secret)
         oauth_client = oauth.Client(oauth_consumer)
 
-        logger.log(u'Requesting temp token from Twitter')
+        logger.log(u'TWITTER: Requesting temp token from Twitter')
 
         resp, content = oauth_client.request(self.REQUEST_TOKEN_URL, 'GET')
 
         if resp['status'] != '200':
-            logger.log(u'Invalid respond from Twitter requesting temp token: %s' % resp['status'])
+            logger.log(u"TWITTER: Invalid respond from Twitter requesting temp token: %s" % resp['status'])
         else:
             request_token = dict(parse_qsl(content))
 
@@ -71,26 +71,26 @@ class TwitterNotifier:
         token = oauth.Token(request_token['oauth_token'], request_token['oauth_token_secret'])
         token.set_verifier(key)
 
-        logger.log(u'Generating and signing request for an access token using key ' + key)
+        logger.log(u"TWITTER: Generating and signing request for an access token using key " + key)
 
         signature_method_hmac_sha1 = oauth.SignatureMethod_HMAC_SHA1()  # @UnusedVariable
         oauth_consumer = oauth.Consumer(key=self.consumer_key, secret=self.consumer_secret)
-        logger.log(u'oauth_consumer: ' + str(oauth_consumer))
+        logger.log(u"TWITTER: oauth_consumer: " + str(oauth_consumer))
         oauth_client = oauth.Client(oauth_consumer, token)
-        logger.log(u'oauth_client: ' + str(oauth_client))
+        logger.log(u"TWITTER: oauth_client: " + str(oauth_client))
         resp, content = oauth_client.request(self.ACCESS_TOKEN_URL, method='POST', body='oauth_verifier=%s' % key)
-        logger.log(u'resp, content: ' + str(resp) + ',' + str(content))
+        logger.log(u"TWITTER: resp, content: " + str(resp) + "," + str(content))
 
         access_token = dict(parse_qsl(content))
-        logger.log(u'access_token: ' + str(access_token))
+        logger.log(u"TWITTER: access_token: " + str(access_token))
 
-        logger.log(u'resp[status] = ' + str(resp['status']))
+        logger.log(u"TWITTER: resp[status] = " + str(resp['status']))
         if resp['status'] != '200':
-            logger.log(u'The request for a token with did not succeed: ' + str(resp['status']), logger.ERROR)
+            logger.log(u"TWITTER: The request for a token with did not succeed: " + str(resp['status']), logger.ERROR)
             return False
         else:
-            logger.log(u'Your Twitter Access Token key: %s' % access_token['oauth_token'])
-            logger.log(u'Access Token secret: %s' % access_token['oauth_token_secret'])
+            logger.log(u"TWITTER: Your Twitter Access Token key: %s" % access_token['oauth_token'])
+            logger.log(u"TWITTER: Access Token secret: %s" % access_token['oauth_token_secret'])
             sickbeard.TWITTER_USERNAME = access_token['oauth_token']
             sickbeard.TWITTER_PASSWORD = access_token['oauth_token_secret']
             return True
@@ -102,14 +102,14 @@ class TwitterNotifier:
         access_token_key = sickbeard.TWITTER_USERNAME
         access_token_secret = sickbeard.TWITTER_PASSWORD
 
-        logger.log(u"Sending tweet: " + message)
+        logger.log(u"TWITTER: Sending tweet: " + message)
 
         api = twitter.Api(username, password, access_token_key, access_token_secret)
 
         try:
             api.PostUpdate(message)
         except Exception, e:
-            logger.log(u"Error Sending Tweet: " + ex(e), logger.ERROR)
+            logger.log(u"TWITTER: Error Sending Tweet: " + ex(e), logger.ERROR)
             return False
 
         return True

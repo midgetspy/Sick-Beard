@@ -70,14 +70,14 @@ class PushoverNotifier:
         except urllib2.URLError, e:
             # if we get an error back that doesn't have an error code then who knows what's really happening
             if not hasattr(e, 'code'):
-                logger.log(u"Pushover notification failed." + ex(e), logger.ERROR)
+                logger.log(u"PUSHOVER: Notification failed." + ex(e), logger.ERROR)
                 return False
             else:
-                logger.log(u"Pushover notification failed. Error code: " + str(e.code), logger.WARNING)
+                logger.log(u"PUSHOVER: Notification failed. Error code: " + str(e.code), logger.WARNING)
 
             # HTTP status 404 if the provided email address isn't a Pushover user.
             if e.code == 404:
-                logger.log(u"Username is wrong/not a Pushover email. Pushover will send an email to it", logger.WARNING)
+                logger.log(u"PUSHOVER: Username is wrong/not a Pushover email. Pushover will send an email to it", logger.WARNING)
                 return False
 
             # For HTTP status code 401's, it is because you are passing in either an invalid token, or the user has not added your service.
@@ -86,18 +86,18 @@ class PushoverNotifier:
                 #HTTP status 401 if the user doesn't have the service added
                 subscribeNote = self._sendPushover(msg, title, userKey )
                 if subscribeNote:
-                    logger.log(u"Subscription sent", logger.DEBUG)
+                    logger.log(u"PUSHOVER: Subscription sent", logger.DEBUG)
                     return True
                 else:
-                    logger.log(u"Subscription could not be sent", logger.ERROR)
+                    logger.log(u"PUSHOVER: Subscription could not be sent", logger.ERROR)
                     return False
 
             # If you receive an HTTP status code of 400, it is because you failed to send the proper parameters
             elif e.code == 400:
-                logger.log(u"Wrong data sent to Pushover", logger.ERROR)
+                logger.log(u"PUSHOVER: Wrong data sent to Pushover", logger.ERROR)
                 return False
 
-        logger.log(u"Pushover notification successful.", logger.DEBUG)
+        logger.log(u"PUSHOVER: Notification successful.", logger.DEBUG)
         return True
 
     def _notify(self, title, message, userKey=None ):
@@ -117,7 +117,7 @@ class PushoverNotifier:
         if not userKey:
             userKey = sickbeard.PUSHOVER_USERKEY
 
-        logger.log(u"Sending notification for " + message, logger.DEBUG)
+        logger.log(u"PUSHOVER: Sending notification for " + message, logger.DEBUG)
 
         self._sendPushover(message, title)
         return True

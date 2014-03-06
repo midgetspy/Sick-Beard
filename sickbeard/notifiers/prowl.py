@@ -50,11 +50,11 @@ class ProwlNotifier:
         title = "Sick Beard"
 
         # TODO: Consolidate this to one logging dict?
-        logger.log(u"Prowl title: " + title, logger.DEBUG)
-        logger.log(u"Prowl event: " + event, logger.DEBUG)
-        logger.log(u"Prowl message: " + message, logger.DEBUG)
-        logger.log(u"Prowl api: " + prowl_api, logger.DEBUG)
-        logger.log(u"Prowl priority: " + prowl_priority, logger.DEBUG)
+        logger.log(u"PROWL: title: " + title, logger.DEBUG)
+        logger.log(u"PROWL: event: " + event, logger.DEBUG)
+        logger.log(u"PROWL: message: " + message, logger.DEBUG)
+        logger.log(u"PROWL: api: " + prowl_api, logger.DEBUG)
+        logger.log(u"PROWL: priority: " + prowl_priority, logger.DEBUG)
 
         http_handler = HTTPSConnection("api.prowlapp.com")
 
@@ -71,20 +71,20 @@ class ProwlNotifier:
                                  body=urlencode(data)
                                  )
         except (SSLError, HTTPException):
-            logger.log(u"Prowl notification failed.", logger.ERROR)
+            logger.log(u"PROWL: Notification failed.", logger.ERROR)
             return False
 
         response = http_handler.getresponse()
         request_status = response.status
 
         if request_status == 200:
-            logger.log(u"Prowl notifications sent.", logger.DEBUG)
+            logger.log(u"PROWL: Notifications sent.", logger.DEBUG)
             return True
         elif request_status == 401:
-            logger.log(u"Prowl auth failed: %s" % response.reason, logger.ERROR)
+            logger.log(u"PROWL: Auth failed: %s" % response.reason, logger.ERROR)
             return False
         else:
-            logger.log(u"Prowl notification failed.", logger.ERROR)
+            logger.log(u"PROWL: Notification failed.", logger.ERROR)
             return False
 
 ##############################################################################

@@ -74,7 +74,7 @@ class pyTivoNotifier:
         # Finally create the url and make request
         requestUrl = "http://" + host + "/TiVoConnect?" + urlencode( {'Command': 'Push', 'Container': container, 'File': mediaFile, 'tsn': tsn})
 
-        logger.log(u"pyTivo notification: Requesting " + requestUrl)
+        logger.log(u"PYTIVO: Requesting " + requestUrl)
 
         # TODO: Use our getURL from helper?
         request = Request( requestUrl )
@@ -83,15 +83,13 @@ class pyTivoNotifier:
             response = urlopen(request)  # @UnusedVariable
         except URLError, e:
             if hasattr(e, 'reason'):
-                logger.log(u"pyTivo notification: Error, failed to reach a server")
-                logger.log(u"'Error reason: " + e.reason)
+                logger.log(u"PYTIVO: Error, failed to reach a server - " + str(e.reason))
                 return False
             elif hasattr(e, 'code'):
-                logger.log(u"pyTivo notification: Error, the server couldn't fulfill the request")
-                logger.log(u"Error code: " + e.code)
+                logger.log(u"PYTIVO: Error, the server couldn't fulfill the request - " + str(e.code))
                 return False
         else:
-            logger.log(u"pyTivo notification: Successfully requested transfer of file")
+            logger.log(u"PYTIVO: Successfully requested transfer of file")
             return True
 
 notifier = pyTivoNotifier

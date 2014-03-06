@@ -8,7 +8,7 @@ class NMA_Notifier:
 
     def _sendNMA(self, nma_api=None, nma_priority=None, event=None, message=None, force=False):
 
-        title = 'Sick-Beard'
+        title = "Sick-Beard"
 
         # suppress notifications if the notifier is disabled but the notify options are checked
         if not sickbeard.USE_NMA and not force:
@@ -20,9 +20,9 @@ class NMA_Notifier:
         if nma_priority == None:
             nma_priority = sickbeard.NMA_PRIORITY
 
-        logger.log(u"NMA title: " + title, logger.DEBUG)
-        logger.log(u"NMA event: " + event, logger.DEBUG)
-        logger.log(u"NMA message: " + message, logger.DEBUG)
+        logger.log(u"NMA: title: " + title, logger.DEBUG)
+        logger.log(u"NMA: event: " + event, logger.DEBUG)
+        logger.log(u"NMA: message: " + message, logger.DEBUG)
 
         batch = False
 
@@ -36,7 +36,7 @@ class NMA_Notifier:
         response = p.push(title, event, message, priority=nma_priority, batch_mode=batch)
 
         if not response[nma_api][u'code'] == u'200':
-            logger.log(u'Could not send notification to NotifyMyAndroid', logger.ERROR)
+            logger.log(u"NMA: Could not send notification to NotifyMyAndroid", logger.ERROR)
             return False
         else:
             return True
