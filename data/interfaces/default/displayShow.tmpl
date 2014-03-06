@@ -167,7 +167,7 @@ Change selected episodes to
 	    	#set $filename = $filename.replace($rootDir, "")
 	    #end if
     	#end for
-    	#set $filename = $sickbeard.DOWNLOAD_URL + $urllib.quote($filename)
+    	#set $filename = $sickbeard.DOWNLOAD_URL + $urllib.quote($filename.encode('utf8'))
     	<center><a href="$filename">Download</a></center>
     #else
 	#if $epLoc and $show._location and $epLoc.lower().startswith($show._location.lower()):
