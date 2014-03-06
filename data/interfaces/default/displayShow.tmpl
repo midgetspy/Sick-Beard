@@ -160,7 +160,7 @@ Change selected episodes to
     </td>
     <td align="center" class="nowrap">#if int($epResult["airdate"]) == 1 then "never" else $datetime.date.fromordinal(int($epResult["airdate"]))#</td>
     <td>
-    #if len($sickbeard.DOWNLOAD_URL) > 0
+    #if len($sickbeard.DOWNLOAD_URL) > 0 and len($epResult['location']) > 0
     	#set $filename = $epResult['location']
     	#for $rootDir in $sickbeard.ROOT_DIRS.split('|')
             #if $rootDir.startswith('/')
