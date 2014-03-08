@@ -70,7 +70,7 @@ def _update_zoneinfo():
     sb_timezone = tz.tzlocal()
 
     # now check if the zoneinfo needs update
-    url_zv = 'http://github.com/Prinz23/sb_network_timezones/raw/master/zoneinfo.txt'
+    url_zv = 'https://github.com/Prinz23/sb_network_timezones/raw/master/zoneinfo.txt'
 
     url_data = helpers.getURL(url_zv)
 
@@ -89,7 +89,7 @@ def _update_zoneinfo():
         return
 
     # now load the new zoneinfo
-    url_tar = u'http://github.com/Prinz23/sb_network_timezones/raw/master/' + new_zoneinfo
+    url_tar = u'https://github.com/Prinz23/sb_network_timezones/raw/master/' + new_zoneinfo
     zonefile = ek.ek(realpath, u'lib/dateutil/zoneinfo/' + new_zoneinfo)
     zonefile_tmp = re.sub(r"\.tar\.gz$",'.tmp', zonefile)
 
@@ -135,7 +135,7 @@ def update_network_dict():
     d = {}
 
     # network timezones are stored on github pages
-    url = 'http://github.com/Prinz23/sb_network_timezones/raw/master/network_timezones.txt'
+    url = 'https://github.com/Prinz23/sb_network_timezones/raw/master/network_timezones.txt'
 
     url_data = helpers.getURL(url)
 
@@ -175,8 +175,9 @@ def update_network_dict():
         L = list(va for va in old_d)
         ql.append(["DELETE FROM network_timezones WHERE network_name IN ("+','.join(['?'] * len(L))+")", L])
     # change all network timezone infos at once (much faster)
-    myDB.mass_action(ql)
-    load_network_dict()
+    if len(ql) > 0:
+        myDB.mass_action(ql)
+        load_network_dict()
 
 # load network timezones from db into dict
 def load_network_dict():
@@ -200,7 +201,11 @@ def get_network_timezone(network, network_dict):
 
     try:
         if lib.dateutil.zoneinfo.ZONEINFOFILE is not None:
-            return tz.gettz(network_dict[network])
+            n_t =  tz.gettz(network_dict[network])
+            if n_t is not None:
+                return n_t
+            else:
+                return sb_timezone
         else:
             return sb_timezone
     except:
