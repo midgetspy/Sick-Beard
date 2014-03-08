@@ -41,7 +41,7 @@ class TorrentRssProvider(generic.TorrentProvider):
 
         generic.TorrentProvider.__init__(self, name)
         self.cache = TorrentRssCache(self)
-        self.url = url
+        self.url = re.sub('\/$', '', url)
         self.enabled = True
         self.supportsBacklog = False
         self.session = None

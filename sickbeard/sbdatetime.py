@@ -23,12 +23,13 @@ import functools
 import sickbeard
 
 date_presets = ('%Y-%m-%d',
+                '%d/%m/%Y',
+                '%m/%d/%Y',
                 '%a, %Y-%m-%d',
                 '%A, %Y-%m-%d',
                 '%y-%m-%d',
                 '%a, %y-%m-%d',
                 '%A, %y-%m-%d',
-                '%m/%d/%Y',
                 '%a, %m/%d/%Y',
                 '%A, %m/%d/%Y',
                 '%m/%d/%y',
