@@ -1348,12 +1348,18 @@ class HomePostProcess:
         return _munge(t)
 
     @cherrypy.expose
-    def processEpisode(self, dir=None, nzbName=None, jobName=None, quiet=None):
+    def processEpisode(self, dir=None, nzbName=None, method=None, jobName=None, quiet=None, *args, **kwargs):
 
         if not dir:
             redirect("/home/postprocess/")
         else:
-            result = processTV.processDir(dir, nzbName)
+            pp_options = {}
+            for key, value in kwargs.iteritems():
+                if value == 'on':
+                    value = True
+                pp_options[key] = value
+
+            result = processTV.processDir(dir, nzbName, method=method, pp_options=pp_options)
             if quiet != None and int(quiet) == 1:
                 return result
 

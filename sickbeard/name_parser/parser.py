@@ -115,19 +115,26 @@ class NameParser(object):
                 except ValueError, e:
                     raise InvalidNameException(e.message)
 
+            result.is_proper = False
+
             if 'extra_info' in named_groups:
+
                 tmp_extra_info = match.group('extra_info')
-                
+
+                # Check if it's a proper
+                if tmp_extra_info:
+                    result.is_proper = re.search('(^|[\. _-])(proper|repack)([\. _-]|$)', tmp_extra_info, re.I) is not None
+
                 # Show.S04.Special is almost certainly not every episode in the season
                 if tmp_extra_info and cur_regex_name == 'season_only' and re.match(r'([. _-]|^)(special|extra)\w*([. _-]|$)', tmp_extra_info, re.I):
                     continue
                 result.extra_info = tmp_extra_info
-            
+
             if 'release_group' in named_groups:
                 result.release_group = match.group('release_group')
 
             return result
-        
+
         return None
 
     def _combine_results(self, first, second, attr):
@@ -229,7 +236,9 @@ class NameParser(object):
         if not final_result.air_date:
             final_result.season_number = self._combine_results(file_name_result, dir_name_result, 'season_number')
             final_result.episode_numbers = self._combine_results(file_name_result, dir_name_result, 'episode_numbers')
-        
+
+        final_result.is_proper = self._combine_results(file_name_result, dir_name_result, 'is_proper')
+
         # if the dirname has a release group/show name I believe it over the filename
         final_result.series_name = self._combine_results(dir_name_result, file_name_result, 'series_name')
         final_result.extra_info = self._combine_results(dir_name_result, file_name_result, 'extra_info')
