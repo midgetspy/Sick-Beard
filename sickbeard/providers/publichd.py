@@ -142,6 +142,11 @@ class PublicHDProvider(generic.TorrentProvider):
                     logger.log(u"Search string: " + searchURL, logger.DEBUG)
 
                 html = self.getURL(searchURL)
+
+                #remove unneccecary <option> lines which are slowing down BeautifulSoup
+                optreg = re.compile( r'<option.*</option>' )
+                html = os.linesep.join([s for s in html.splitlines() if not optreg.search(s)])
+
                 if not html:
                     continue
 
