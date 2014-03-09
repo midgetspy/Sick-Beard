@@ -51,12 +51,18 @@
 	#end if
 	<span class="tvshowLink" style="vertical-align: text-top">
 		<a href="http://www.thetvdb.com/?tab=series&amp;id=$show.tvdbid" onclick="window.open(this.href, '_blank'); return false;" title="http://www.thetvdb.com/?tab=series&amp;id=$show.tvdbid"><img alt="[tvdb]" height="16" width="16" src="$sbRoot/images/thetvdb16.png" style="margin-top: -1px;"/></a>
+    #if $show.tvrid != 0:
+      <a href="http://www.tvrage.com/shows/id-$show.tvrid" onclick="window.open(this.href, '_blank'); return false;" title="http://www.tvrage.com/shows/id-$show.tvrid"><img alt="[tvrage]" height="16" width="16" src="$sbRoot/images/tvrage.png" style="margin-top: -1px;"/></a>
+    #end if
 	</span>
 #else
 	<img src="$sbRoot/images/flags/${$show.imdb_info['country_codes']}.png" width="16" height="11" style="margin-top: 3px; margin-left: 3px" /> ($show.imdb_info['year']) - $show.imdb_info['runtimes'] min - $show.imdb_info['genres'].replace('|',' | ')
 	<span class="tvshowLink" style="vertical-align: text-top">
 		<a href="http://www.imdb.com/title/$show.imdbid" rel="noreferrer" onclick="window.open('${sickbeard.ANON_REDIRECT}' + this.href, '_blank'); return false;" title="http://www.imdb.com/title/$show.imdbid"><img alt="[imdb]" height="16" width="16" src="$sbRoot/images/imdb.png" style="margin-top: -1px;"/>
 		<a href="http://www.thetvdb.com/?tab=series&amp;id=$show.tvdbid" rel="noreferrer" onclick="window.open('${sickbeard.ANON_REDIRECT}' + this.href, '_blank'); return false;" title="http://www.thetvdb.com/?tab=series&amp;id=$show.tvdbid"><img alt="[tvdb]" height="16" width="16" src="$sbRoot/images/thetvdb16.png" style="margin-top: -1px;"/></a>
+    #if $show.tvrid != 0:
+      <a href="http://www.tvrage.com/shows/id-$show.tvrid" onclick="window.open(this.href, '_blank'); return false;" title="http://www.tvrage.com/shows/id-$show.tvrid"><img alt="[tvrage]" height="16" width="16" src="$sbRoot/images/tvrage.png" style="margin-top: -1px;"/></a>
+    #end if
 	</span>
 
 #end if
