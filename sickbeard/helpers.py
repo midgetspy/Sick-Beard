@@ -588,8 +588,8 @@ def parse_json(data):
 
     try:
         parsedJSON = json.loads(data)
-    except ValueError:
-        logger.log(u"Error trying to decode json data:" + data, logger.ERROR)
+    except ValueError, e:
+        logger.log(u"Error trying to decode json data. Error: " + ex(e), logger.DEBUG)
         return None
 
     return parsedJSON
@@ -611,7 +611,7 @@ def parse_xml(data, del_xmlns=False):
     try:
         parsedXML = etree.fromstring(data)
     except Exception, e:
-        logger.log(u"Error trying to parse xml data: " + data + " to Elementtree, Error: " + ex(e), logger.DEBUG)
+        logger.log(u"Error trying to parse xml data. Error: " + ex(e), logger.DEBUG)
         parsedXML = None
 
     return parsedXML
