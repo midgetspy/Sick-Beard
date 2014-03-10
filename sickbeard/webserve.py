@@ -1047,7 +1047,7 @@ class ConfigSearch:
         sickbeard.TORRENT_METHOD = torrent_method
         sickbeard.USENET_RETENTION = sickbeard.USENET_RETENTION = config.to_int(usenet_retention, default=500)
 
-        sickbeard.IGNORE_WORDS = ignore_words if ignore_words else ""
+        sickbeard.IGNORE_WORDS = ignore_words if ignore_words else "german,french,core2hd,dutch,swedish,reenc,MrLss"
 
         sickbeard.DOWNLOAD_PROPERS = config.checkbox_to_value(download_propers)
         if sickbeard.DOWNLOAD_PROPERS:

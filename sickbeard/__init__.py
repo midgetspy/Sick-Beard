@@ -877,6 +877,8 @@ def initialize(consoleLogging=True):
         GIT_PATH = check_setting_str(CFG, 'General', 'git_path', '')
 
         IGNORE_WORDS = check_setting_str(CFG, 'General', 'ignore_words', IGNORE_WORDS)
+        if not IGNORE_WORDS:
+            IGNORE_WORDS = "german,french,core2hd,dutch,swedish,reenc,MrLss"
         
         CALENDAR_PROTECTED = bool(check_setting_int(CFG, 'General', 'calendar_protected', 0))
 
