@@ -13,10 +13,12 @@
 # You should have received a copy of the GNU General Public License
 # along with Sick Beard.  If not, see <http://www.gnu.org/licenses/>.
 
+import datetime
 import urllib
 import generic
 import sickbeard
 
+from sickbeard import classes
 from sickbeard import logger, tvcache, exceptions
 from sickbeard import helpers
 from sickbeard.common import Quality
@@ -116,7 +118,27 @@ class HDBitsProvider(generic.TorrentProvider):
 
         return results
 
-    def _make_post_data_JSON(self, show=None, episode=None, season=None):
+    def findPropers(self, search_date=None):
+        results = []
+
+        search_terms = [' proper ', ' repack ']
+
+        for term in search_terms:
+            for item in self._doSearch(self._make_post_data_JSON(search_term=term)):
+                if item['utadded']:
+                    try:
+                        result_date = datetime.datetime.fromtimestamp(int(item['utadded']))
+                    except:
+                        result_date = None
+
+                    if result_date:
+                        if not search_date or result_date > search_date:
+                            title, url = self._get_title_and_url(item)
+                            results.append(classes.Proper(title, url, result_date))
+
+        return results
+
+    def _make_post_data_JSON(self, show=None, episode=None, season=None, search_term=None):
 
         post_data = {
             'username': sickbeard.HDBITS_USERNAME,
@@ -136,6 +158,9 @@ class HDBitsProvider(generic.TorrentProvider):
                 'id': show.tvdbid,
                 'season': season,
             }
+
+        if search_term:
+            post_data['search'] = search_term
 
         return json.dumps(post_data)
 
