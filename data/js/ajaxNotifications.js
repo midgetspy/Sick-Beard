@@ -1,4 +1,4 @@
-var message_url = sbRoot + '/ui/get_messages';
+var message_url = sbRoot + '/ui/get_messages/';
 $.pnotify.defaults.width = "400px";
 $.pnotify.defaults.styling = "jqueryui";
 $.pnotify.defaults.history = false;
