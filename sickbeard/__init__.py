@@ -167,7 +167,7 @@ BACKLOG_SEARCH_FREQUENCY = 21
 
 MIN_SEARCH_FREQUENCY = 10
 
-DEFAULT_SEARCH_FREQUENCY = 60
+DEFAULT_SEARCH_FREQUENCY = 40
 
 EZRSS = False
 
@@ -574,13 +574,6 @@ def initialize(consoleLogging=True):
         ROOT_DIRS = check_setting_str(CFG, 'General', 'root_dirs', '')
         if not re.match(r'\d+\|[^|]+(?:\|[^|]+)*', ROOT_DIRS):
             ROOT_DIRS = ''
-
-        proxies = urllib.getproxies()
-        proxy_url = None
-        if 'http' in proxies:
-            proxy_url = proxies['http']
-        elif 'ftp' in proxies:
-            proxy_url = proxies['ftp']
 
         # Set our common tvdb_api options here
         TVDB_API_PARMS = {'apikey': TVDB_API_KEY,
