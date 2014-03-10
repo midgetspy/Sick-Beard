@@ -16,6 +16,8 @@
 # You should have received a copy of the GNU General Public License
 # along with Sick Beard.  If not, see <http://www.gnu.org/licenses/>.
 
+from __future__ import with_statement
+
 import sickbeard
 from sickbeard import helpers
 from sickbeard import version, ui
@@ -278,7 +280,7 @@ class GitUpdateManager(UpdateManager):
             main_git = 'git'
 
         logger.log(u"Checking if we can use git commands: " + main_git + ' ' + test_cmd, logger.DEBUG)
-        output, err, exit_status = self._run_git(main_git, test_cmd)
+        output, err, exit_status = self._run_git(main_git, test_cmd)  # @UnusedVariable
 
         if exit_status == 0:
             logger.log(u"Using: " + main_git, logger.DEBUG)
@@ -303,7 +305,7 @@ class GitUpdateManager(UpdateManager):
 
             for cur_git in alternative_git:
                 logger.log(u"Checking if we can use git commands: " + cur_git + ' ' + test_cmd, logger.DEBUG)
-                output, err, exit_status = self._run_git(cur_git, test_cmd)
+                output, err, exit_status = self._run_git(cur_git, test_cmd)  # @UnusedVariable
 
                 if exit_status == 0:
                     logger.log(u"Using: " + cur_git, logger.DEBUG)
@@ -369,7 +371,7 @@ class GitUpdateManager(UpdateManager):
         Returns: True for success or False for failure
         """
 
-        output, err, exit_status = self._run_git(self._git_path, 'rev-parse HEAD')  #@UnusedVariable
+        output, err, exit_status = self._run_git(self._git_path, 'rev-parse HEAD')  # @UnusedVariable
 
         if exit_status == 0 and output:
             cur_commit_hash = output.strip()
@@ -382,7 +384,7 @@ class GitUpdateManager(UpdateManager):
             return False
 
     def _find_git_branch(self):
-        branch_info, err, exit_status = self._run_git(self._git_path, 'symbolic-ref -q HEAD')
+        branch_info, err, exit_status = self._run_git(self._git_path, 'symbolic-ref -q HEAD')  # @UnusedVariable
         if exit_status == 0 and branch_info:
             branch = branch_info.strip().replace('refs/heads/', '', 1)
             if branch:
@@ -468,7 +470,7 @@ class GitUpdateManager(UpdateManager):
         on the call's success.
         """
 
-        output, err, exit_status = self._run_git(self._git_path, 'pull origin ' + self.branch)  #@UnusedVariable
+        output, err, exit_status = self._run_git(self._git_path, 'pull origin ' + self.branch)  # @UnusedVariable
 
         if exit_status == 0:
             return True
@@ -497,9 +499,11 @@ class SourceUpdateManager(UpdateManager):
             self._cur_commit_hash = None
             return
 
-        fp = open(version_file, 'r')
-        self._cur_commit_hash = fp.read().strip(' \n\r')
-        fp.close()
+        try:
+            with open(version_file, 'r') as fp:
+                self._cur_commit_hash = fp.read().strip(' \n\r')
+        except EnvironmentError, e:
+            logger.log(u"Unable to open 'version.txt': " + ex(e), logger.DEBUG)
 
         if not self._cur_commit_hash:
             self._cur_commit_hash = None
@@ -622,7 +626,7 @@ class SourceUpdateManager(UpdateManager):
             content_dir = os.path.join(sb_update_dir, update_dir_contents[0])
 
             # walk temp folder and move files to main folder
-            for dirname, dirnames, filenames in os.walk(content_dir):  #@UnusedVariable
+            for dirname, dirnames, filenames in os.walk(content_dir):  # @UnusedVariable
                 dirname = dirname[len(content_dir) + 1:]
                 for curfile in filenames:
                     old_path = os.path.join(content_dir, dirname, curfile)
@@ -634,10 +638,9 @@ class SourceUpdateManager(UpdateManager):
 
             # update version.txt with commit hash
             try:
-                ver_file = open(version_path, 'w')
-                ver_file.write(self._newest_commit_hash)
-                ver_file.close()
-            except (IOError, OSError), e:
+                with open(version_path, 'w') as ver_file:
+                    ver_file.write(self._newest_commit_hash)
+            except EnvironmentError, e:
                 logger.log(u"Unable to write version file, update not complete: " + ex(e), logger.ERROR)
                 return False
 
