@@ -16,9 +16,14 @@
 # You should have received a copy of the GNU General Public License
 # along with Sick Beard.  If not, see <http://www.gnu.org/licenses/>.
 
+from __future__ import with_statement
+
 import os.path
 
-import xml.etree.cElementTree as etree
+try:
+    import xml.etree.cElementTree as etree
+except ImportError:
+    import elementtree.ElementTree as etree
 
 import re
 
@@ -842,8 +847,8 @@ class GenericMetadata():
         logger.log(u"Loading show info from metadata file in " + folder, logger.DEBUG)
 
         try:
-            xmlFileObj = ek.ek(open, metadata_path, 'r')
-            showXML = etree.ElementTree(file=xmlFileObj)
+            with ek.ek(open, metadata_path, 'r') as xmlFileObj:
+                showXML = etree.ElementTree(file=xmlFileObj)
 
             if showXML.findtext('title') == None or (showXML.findtext('tvdbid') == None and showXML.findtext('id') == None):
                 logger.log(u"Invalid info in tvshow.nfo (missing name or id):" \
@@ -865,8 +870,8 @@ class GenericMetadata():
                 logger.log(u"Invalid tvdb id (" + str(tvdb_id) + "), not using metadata file", logger.WARNING)
                 return empty_return
 
-        except (exceptions.NoNFOException, SyntaxError, ValueError), e:
-            logger.log(u"There was an error parsing your existing metadata file: " + ex(e), logger.WARNING)
+        except Exception, e:
+            logger.log(u"There was an error parsing your existing metadata file: '" + metadata_path + "' error: " + ex(e), logger.WARNING)
             return empty_return
 
         return (tvdb_id, name)

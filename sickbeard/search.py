@@ -39,6 +39,7 @@ from sickbeard import providers
 from sickbeard.exceptions import ex
 from sickbeard.providers.generic import GenericProvider
 
+
 import urllib2
 
 def _downloadResult(result):
@@ -74,11 +75,12 @@ def _downloadResult(result):
 
         # save the data to disk
         try:
-            fileOut = open(fileName, "w")
-            fileOut.write(result.extraInfo[0])
-            fileOut.close()
+            with ek.ek(open, fileName, 'w') as fileOut:
+                fileOut.write(result.extraInfo[0])
+
             helpers.chmodAsParent(fileName)
-        except IOError, e:
+
+        except EnvironmentError, e:
             logger.log(u"Error trying to save NZB to black hole: "+ex(e), logger.ERROR)
             newResult = False
 
@@ -90,6 +92,7 @@ def _downloadResult(result):
         return False
 
     return newResult
+
 
 def snatchEpisode(result, endStatus=SNATCHED):
     """
@@ -162,6 +165,7 @@ def snatchEpisode(result, endStatus=SNATCHED):
 
     return True
 
+
 def searchForNeededEpisodes():
 
     logger.log(u"Searching all providers for any needed episodes")
@@ -229,7 +233,7 @@ def pickBestResult(results, quality_list=None):
     # find the best result for the current episode
     bestResult = None
     for cur_result in results:
-        logger.log("Quality of "+cur_result.name+" is "+Quality.qualityStrings[cur_result.quality])
+        logger.log(u"Quality of " + cur_result.name + " is " + Quality.qualityStrings[cur_result.quality])
         
         if quality_list and cur_result.quality not in quality_list:
             logger.log(cur_result.name+" is a quality we know we don't want, rejecting it", logger.DEBUG)
@@ -249,6 +253,7 @@ def pickBestResult(results, quality_list=None):
         logger.log(u"No result picked.", logger.DEBUG)
 
     return bestResult
+
 
 def isFinalResult(result):
     """
@@ -336,6 +341,7 @@ def findEpisode(episode, manualSearch=False):
     bestResult = pickBestResult(foundResults)
 
     return bestResult
+
 
 def findSeason(show, season):
 

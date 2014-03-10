@@ -2,11 +2,12 @@ $(document).ready(function(){
     var loading = '<img src="'+sbRoot+'/images/loading16.gif" height="16" width="16" />';
     
 	function toggle_torrent_title(){
-		if ($('#use_torrents').prop('checked'))
+        if ($('#use_torrents').prop('checked')) {
 			$('#no-torrents').show();
-		else
+        } else {
 			$('#no-torrents').hide();
 	}
+    }
 	
     $.fn.nzb_method_handler = function() {
         
@@ -32,7 +33,7 @@ $(document).ready(function(){
             $('#nzbget_settings').hide();
         }
 
-    }
+    };
     $.fn.torrent_method_handler = function() {
         
         var selectedProvider = $('#torrent_method :selected').val();
@@ -106,14 +107,14 @@ $(document).ready(function(){
     
 	$('#torrent_method').change($(this).torrent_method_handler);
 	$(this).torrent_method_handler(); 
-	
+
 	$('#testTorrent').click(function(){
         $('#testTorrent-result').html(loading);
         var torrent_method = $('#torrent_method :selected').val();        
         var torrent_host = $("input=[name='torrent_host']").val();
         var torrent_username = $("input=[name='torrent_username']").val();
         var torrent_password = $("input=[name='torrent_password']").val();
-        
+
         $.get(sbRoot+"/home/testTorrent", {'torrent_method': torrent_method, 'host': torrent_host, 'username': torrent_username, 'password': torrent_password}, 
         function (data){ $('#testTorrent-result').html(data); });
     });
