@@ -1463,7 +1463,7 @@ class NewHomeAddShows:
         root_dirs = [urllib.unquote_plus(x) for x in root_dirs]
 
         if sickbeard.ROOT_DIRS:
-        default_index = int(sickbeard.ROOT_DIRS.split('|')[0])
+            default_index = int(sickbeard.ROOT_DIRS.split('|')[0])
         else:
             default_index = 0
 
@@ -1752,7 +1752,7 @@ class ErrorLogs:
         data = []
         if os.path.isfile(logger.sb_log_instance.log_file_path):
             with ek.ek(open, logger.sb_log_instance.log_file_path) as f:
-            data = f.readlines()
+                data = f.readlines()
 
         regex = "^(\d\d\d\d)\-(\d\d)\-(\d\d)\s*(\d\d)\:(\d\d):(\d\d)\s*([A-Z]+)\s*(.+?)\s*\:\:\s*(.*)$"
 
