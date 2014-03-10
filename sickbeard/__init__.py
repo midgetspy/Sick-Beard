@@ -431,7 +431,7 @@ EXTRA_SCRIPTS = []
 
 GIT_PATH = None
 
-IGNORE_WORDS = "german,french,core2hd,dutch,swedish,reenc,MrLss"
+IGNORE_WORDS = "german,french,core2hd,swedish,reenc,MrLss"
 
 CALENDAR_PROTECTED = False
 
@@ -878,7 +878,7 @@ def initialize(consoleLogging=True):
 
         IGNORE_WORDS = check_setting_str(CFG, 'General', 'ignore_words', IGNORE_WORDS)
         if not IGNORE_WORDS:
-            IGNORE_WORDS = "german,french,core2hd,dutch,swedish,reenc,MrLss"
+            IGNORE_WORDS = "german,french,core2hd,swedish,reenc,MrLss"
         
         CALENDAR_PROTECTED = bool(check_setting_int(CFG, 'General', 'calendar_protected', 0))
 
