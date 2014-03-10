@@ -993,11 +993,6 @@ class ConfigGeneral:
         sickbeard.USE_API = config.checkbox_to_value(use_api)
         sickbeard.API_KEY = api_key
 
-        if enable_https == "on":
-            enable_https = 1
-        else:
-            enable_https = 0
-
         sickbeard.ENABLE_HTTPS = config.checkbox_to_value(enable_https)
 
         if not config.change_HTTPS_CERT(https_cert):
