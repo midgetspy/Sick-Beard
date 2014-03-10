@@ -53,7 +53,7 @@ class PublicHDProvider(generic.TorrentProvider):
 
         self.cache = PublicHDCache(self)
 
-        self.url = 'https://publichd.se/'
+        self.url = 'http://phdproxy.com/'
 
         self.searchurl = self.url + 'index.php?page=torrents&search=%s&active=0&category=%s&order=5&by=2'  #order by seed
 
@@ -119,7 +119,7 @@ class PublicHDProvider(generic.TorrentProvider):
             for show_name in set(allPossibleShowNames(ep_obj.show)):
                 ep_string = sanitizeSceneName(show_name) + ' ' + \
                 sickbeard.config.naming_ep_type[2] % {'seasonnumber': ep_obj.season, 'episodenumber': ep_obj.episode}
-                
+
                 for x in add_string.split('|'):
                     to_search = re.sub('\s+', ' ', ep_string + ' %s' %x)
                     search_string['Episode'].append(to_search)
@@ -142,6 +142,11 @@ class PublicHDProvider(generic.TorrentProvider):
                     logger.log(u"Search string: " + searchURL, logger.DEBUG)
 
                 html = self.getURL(searchURL)
+
+                #remove unneccecary <option> lines which are slowing down BeautifulSoup
+                optreg = re.compile( r'<option.*</option>' )
+                html = os.linesep.join([s for s in html.splitlines() if not optreg.search(s)])
+
                 if not html:
                     continue
 
@@ -214,35 +219,35 @@ class PublicHDProvider(generic.TorrentProvider):
         """
         Save the result to disk.
         """
-        
+
         torrent_hash = re.findall('urn:btih:([\w]{32,40})', result.url)[0].upper()
-        
+
         if not torrent_hash:
-           logger.log("Unable to extract torrent hash from link: " + ex(result.url), logger.ERROR) 
+           logger.log("Unable to extract torrent hash from link: " + ex(result.url), logger.ERROR)
            return False
-           
+
         try:
             r = requests.get('http://torcache.net/torrent/' + torrent_hash + '.torrent')
         except Exception, e:
             logger.log("Unable to connect to Torcache: " + ex(e), logger.ERROR)
             return False
-                         
+
         if not r.status_code == 200:
             return False
-            
+
         magnetFileName = ek.ek(os.path.join, sickbeard.TORRENT_DIR, helpers.sanitizeFileName(result.name) + '.' + self.providerType)
         magnetFileContent = r.content
 
-        try:    
+        try:
             with open(magnetFileName, 'wb') as fileOut:
                 fileOut.write(magnetFileContent)
-                
+
             helpers.chmodAsParent(magnetFileName)
-        
+
         except EnvironmentError:
             logger.log("Unable to save the file: " + ex(e), logger.ERROR)
             return False
-        
+
         logger.log(u"Saved magnet link to " + magnetFileName + " ", logger.MESSAGE)
         return True
 
