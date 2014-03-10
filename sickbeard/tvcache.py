@@ -171,6 +171,8 @@ class TVCache():
 
         if sqlResults:
             lastTime = int(sqlResults[0]["time"])
+            if lastTime > int(time.mktime(datetime.datetime.today().timetuple())):
+                lastTime = 0
         else:
             lastTime = 0
 
