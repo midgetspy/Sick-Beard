@@ -92,8 +92,6 @@ class TVShow(object):
 
         self.loadFromDB()
 
-        self.saveToDB()
-
     def _getLocation(self):
         # no dir check needed if missing show dirs are created during post-processing
         if sickbeard.CREATE_MISSING_SHOW_DIRS:

@@ -171,6 +171,8 @@ class TVCache():
 
         if sqlResults:
             lastTime = int(sqlResults[0]["time"])
+            if lastTime > int(time.mktime(datetime.datetime.today().timetuple())):
+                lastTime = 0
         else:
             lastTime = 0
 
@@ -264,7 +266,7 @@ class TVCache():
                     logger.log(u"Trying to look the show up in the show database", logger.DEBUG)
                     showResult = helpers.searchDBForShow(parse_result.series_name)
                     if showResult:
-                        logger.log(parse_result.series_name + " was found to be show " + showResult[1] + " ("+str(showResult[0])+") in our DB.", logger.DEBUG)
+                        logger.log(u"" + parse_result.series_name + " was found to be show " + showResult[1] + " (" + str(showResult[0]) + ") in our DB.", logger.DEBUG)
                         tvdb_id = showResult[0]
 
                 # if the DB lookup fails then do a comprehensive regex search
