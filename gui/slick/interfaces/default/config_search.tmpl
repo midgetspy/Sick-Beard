@@ -209,6 +209,18 @@
 
                         <div id="nzbget_settings">
                             <div class="field-pair">
+                                <input id="nzbget_use_https" type="checkbox" class="enabler" name="nzbget_use_https" #if $sickbeard.NZBGET_USE_HTTPS == True then "checked=\"checked\"" else ""# />
+                                <label class="clearfix" for="use_failed_downloads">
+                                    <span class="component-title">Use HTTPS (SSL)</span>
+                                    <span class="component-desc">Use HTTPS to connect to NZBGet?</span>
+                                </label>
+                                <label class="nocheck clearfix" for="nzbget_use_https">
+                                    <span class="component-title">&nbsp;</span>
+                                    <span class="component-desc"><b>NOTE:</b> You have to enable Secure control in NZBGet and set the correct Secure Port here.</span>
+                                </label>
+                            </div>
+                            
+                            <div class="field-pair">
                                 <label class="nocheck clearfix">
                                     <span class="component-title">NZBget HOST:PORT</span>
                                     <input type="text" name="nzbget_host" id="nzbget_host" value="$sickbeard.NZBGET_HOST" size="45" />
