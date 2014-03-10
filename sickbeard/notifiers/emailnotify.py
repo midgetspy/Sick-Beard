@@ -63,17 +63,17 @@ class EmailNotifier:
                   msg = MIMEMultipart('alternative')
                   msg.attach(MIMEText("<body style='font-family:Helvetica, Arial, sans-serif;'><h3>Sick Beard Notification - Snatched</h3>\n<p>Show: <b>" + re.search("(.+?) -.+", ep_name).group(1) + "</b></p>\n<p>Episode: <b>" + re.search(".+ - (.+?-.+) -.+", ep_name).group(1) + "</b></p>\n\n<footer style='margin-top: 2.5em; padding: .7em 0; color: #777; border-top: #BBB solid 1px;'>Powered by Sick Beard.</footer></body>", 'html'))
               except:
-                msg = MIMEText(ep_name)
+                  msg = MIMEText(ep_name)
 
-                msg['Subject'] = 'Snatched: ' + ep_name
-                msg['From'] = sickbeard.EMAIL_FROM
-                msg['To'] = ','.join(to)
+              msg['Subject'] = 'Snatched: ' + ep_name
+              msg['From'] = sickbeard.EMAIL_FROM
+              msg['To'] = ','.join(to)
 
-                try:
-                    self._sendmail(sickbeard.EMAIL_HOST, sickbeard.EMAIL_PORT, sickbeard.EMAIL_FROM, sickbeard.EMAIL_TLS, sickbeard.EMAIL_USER, sickbeard.EMAIL_PASSWORD, to, msg)
-                    logger.log("Download notification sent to [%s] for '%s'" % (to, ep_name), logger.DEBUG)
-                except Exception as e:
-                    logger.log("Download notification ERROR: %s" % e, logger.ERROR)
+              try:
+                  self._sendmail(sickbeard.EMAIL_HOST, sickbeard.EMAIL_PORT, sickbeard.EMAIL_FROM, sickbeard.EMAIL_TLS, sickbeard.EMAIL_USER, sickbeard.EMAIL_PASSWORD, to, msg)
+                  logger.log("Download notification sent to [%s] for '%s'" % (to, ep_name), logger.DEBUG)
+              except Exception as e:
+                  logger.log("Download notification ERROR: %s" % e, logger.ERROR)
 
     def notify_download(self, ep_name, title="Completed:"):
         """
@@ -92,17 +92,17 @@ class EmailNotifier:
                   msg = MIMEMultipart('alternative')
                   msg.attach(MIMEText("<body style='font-family:Helvetica, Arial, sans-serif;'><h3>Sick Beard Notification - Downloaded</h3>\n<p>Show: <b>" + re.search("(.+?) -.+", ep_name).group(1) + "</b></p>\n<p>Episode: <b>" + re.search(".+ - (.+?-.+) -.+", ep_name).group(1) + "</b></p>\n\n<footer style='margin-top: 2.5em; padding: .7em 0; color: #777; border-top: #BBB solid 1px;'>Powered by Sick Beard.</footer></body>", 'html'))
               except:
-                msg = MIMEText(ep_name)
+                  msg = MIMEText(ep_name)
 
-                msg['Subject'] = 'Downloaded: ' + ep_name
-                msg['From'] = sickbeard.EMAIL_FROM
-                msg['To'] = ','.join(to)
+              msg['Subject'] = 'Downloaded: ' + ep_name
+              msg['From'] = sickbeard.EMAIL_FROM
+              msg['To'] = ','.join(to)
 
-                try:
-                    self._sendmail(sickbeard.EMAIL_HOST, sickbeard.EMAIL_PORT, sickbeard.EMAIL_FROM, sickbeard.EMAIL_TLS, sickbeard.EMAIL_USER, sickbeard.EMAIL_PASSWORD, to, msg)
-                    logger.log("Download notification sent to [%s] for '%s'" % (to, ep_name), logger.DEBUG)
-                except Exception as e:
-                    logger.log("Download notification ERROR: %s" % e, logger.ERROR)
+              try:
+                  self._sendmail(sickbeard.EMAIL_HOST, sickbeard.EMAIL_PORT, sickbeard.EMAIL_FROM, sickbeard.EMAIL_TLS, sickbeard.EMAIL_USER, sickbeard.EMAIL_PASSWORD, to, msg)
+                  logger.log("Download notification sent to [%s] for '%s'" % (to, ep_name), logger.DEBUG)
+              except Exception as e:
+                  logger.log("Download notification ERROR: %s" % e, logger.ERROR)
 
     def notify_subtitle_download(self, ep_name, lang, title="Downloaded subtitle:"):
         """
@@ -121,17 +121,17 @@ class EmailNotifier:
                   msg = MIMEMultipart('alternative')
                   msg.attach(MIMEText("<body style='font-family:Helvetica, Arial, sans-serif;'><h3>Sick Beard Notification - Subtitle Downloaded</h3>\n<p>Show: <b>" + re.search("(.+?) -.+", ep_name).group(1) + "</b></p>\n<p>Episode: <b>" + re.search(".+ - (.+?-.+) -.+", ep_name).group(1) + "</b></p>\n<p>Language: <b>" + lang + "</b></p>\n\n<footer style='margin-top: 2.5em; padding: .7em 0; color: #777; border-top: #BBB solid 1px;'>Powered by Sick Beard.</footer></body>", 'html'))
               except:
-                msg = MIMEText(ep_name + ": " + lang)
+                  msg = MIMEText(ep_name + ": " + lang)
 
-                msg['Subject'] = lang + ' Subtitle Downloaded: ' + ep_name
-                msg['From'] = sickbeard.EMAIL_FROM
-                msg['To'] = ','.join(to)
+              msg['Subject'] = lang + ' Subtitle Downloaded: ' + ep_name
+              msg['From'] = sickbeard.EMAIL_FROM
+              msg['To'] = ','.join(to)
 
-                try:
-                    self._sendmail(sickbeard.EMAIL_HOST, sickbeard.EMAIL_PORT, sickbeard.EMAIL_FROM, sickbeard.EMAIL_TLS, sickbeard.EMAIL_USER, sickbeard.EMAIL_PASSWORD, to, msg)
-                    logger.log("Download notification sent to [%s] for '%s'" % (to, ep_name), logger.DEBUG)
-                except Exception as e:
-                    logger.log("Download notification ERROR: %s" % e, logger.ERROR)
+              try:
+                  self._sendmail(sickbeard.EMAIL_HOST, sickbeard.EMAIL_PORT, sickbeard.EMAIL_FROM, sickbeard.EMAIL_TLS, sickbeard.EMAIL_USER, sickbeard.EMAIL_PASSWORD, to, msg)
+                  logger.log("Download notification sent to [%s] for '%s'" % (to, ep_name), logger.DEBUG)
+              except Exception as e:
+                  logger.log("Download notification ERROR: %s" % e, logger.ERROR)
 
     def _generate_recepients(self, show):
         addrs = []

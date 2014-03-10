@@ -37,7 +37,10 @@ def sendNZB(nzb, proper = False):
 
     addToTop = False
     nzbgetprio = 0
-    nzbgetXMLrpc = "http://%(username)s:%(password)s@%(host)s/xmlrpc"
+    if sickbeard.NZBGET_USE_HTTPS:
+        nzbgetXMLrpc = "https://%(username)s:%(password)s@%(host)s/xmlrpc"
+    else:
+        nzbgetXMLrpc = "http://%(username)s:%(password)s@%(host)s/xmlrpc"
 
     if sickbeard.NZBGET_HOST == None:
         logger.log(u"No NZBget host found in configuration. Please configure it.", logger.ERROR)
