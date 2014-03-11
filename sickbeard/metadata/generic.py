@@ -21,7 +21,7 @@ from __future__ import with_statement
 import os.path
 
 try:
-import xml.etree.cElementTree as etree
+    import xml.etree.cElementTree as etree
 except ImportError:
     import elementtree.ElementTree as etree
 
@@ -875,7 +875,7 @@ class GenericMetadata():
     
         try:
             with ek.ek(open, metadata_path, 'r') as xmlFileObj:
-            showXML = etree.ElementTree(file=xmlFileObj)
+                showXML = etree.ElementTree(file=xmlFileObj)
     
             if showXML.findtext('title') == None or (showXML.findtext('tvdbid') == None and showXML.findtext('id') == None):
                 logger.log(u"Invalid info in tvshow.nfo (missing name or id):" \
