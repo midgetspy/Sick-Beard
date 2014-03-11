@@ -30,7 +30,7 @@ from sickbeard import db
 from sickbeard import classes
 from sickbeard import helpers
 from sickbeard import show_name_helpers
-from sickbeard.common import Overview 
+from sickbeard.common import Overview
 from sickbeard.exceptions import ex
 from sickbeard import clients
 from lib import requests
@@ -43,7 +43,6 @@ class HDTorrentsProvider(generic.TorrentProvider):
             'login' : 'https://hdts.ru/login.php',
             'detail' : 'https://www.hdts.ru/details.php?id=%s',
             'search' : 'https://hdts.ru/torrents.php?search=%s&active=1&options=0%s',
-            'download' : 'https://www.sceneaccess.eu/%s',
             'home' : 'https://www.hdts.ru/%s'
             }
 
@@ -60,7 +59,7 @@ class HDTorrentsProvider(generic.TorrentProvider):
         self.categories = "&category[]=59&category[]=60&category[]=30&category[]=38"
 
         self.session = requests.Session()
-        
+
         self.cookies = None
 
     def isEnabled(self):
@@ -72,42 +71,42 @@ class HDTorrentsProvider(generic.TorrentProvider):
     def getQuality(self, item):
 
         quality = Quality.sceneQuality(item[0])
-        return quality    
+        return quality
 
     def _doLogin(self):
 
         if any(requests.utils.dict_from_cookiejar(self.session.cookies).values()):
             return True
-        
+
         if sickbeard.HDTORRENTS_UID and sickbeard.HDTORRENTS_HASH:
-            
+
             requests.utils.add_dict_to_cookiejar(self.session.cookies, self.cookies)
-        
-        else:    
+
+        else:
 
             login_params = {'uid': sickbeard.HDTORRENTS_USERNAME,
                             'pwd': sickbeard.HDTORRENTS_PASSWORD,
                             'submit': 'Confirm',
                             }
-                                         
+
             try:
                 response = self.session.post(self.urls['login'],  data=login_params, timeout=30)
             except (requests.exceptions.ConnectionError, requests.exceptions.HTTPError), e:
                 logger.log(u'Unable to connect to ' + self.name + ' provider: ' + ex(e), logger.ERROR)
                 return False
-            
+
             if re.search('You need cookies enabled to log in.', response.text) \
             or response.status_code == 401:
                 logger.log(u'Invalid username or password for ' + self.name + ' Check your settings', logger.ERROR)
                 return False
-            
+
             sickbeard.HDTORRENTS_UID = requests.utils.dict_from_cookiejar(self.session.cookies)['uid']
             sickbeard.HDTORRENTS_HASH = requests.utils.dict_from_cookiejar(self.session.cookies)['pass']
-  
+
             self.cookies = {'uid': sickbeard.HDTORRENTS_UID,
                             'pass': sickbeard.HDTORRENTS_HASH
                             }
-               
+
         return True
 
     def _get_season_search_strings(self, show, season=None):
@@ -119,16 +118,16 @@ class HDTorrentsProvider(generic.TorrentProvider):
 
         seasonEp = show.getAllEpisodes(season)
 
-        wantedEp = [x for x in seasonEp if show.getOverview(x.status) in (Overview.WANTED, Overview.QUAL)]          
+        wantedEp = [x for x in seasonEp if show.getOverview(x.status) in (Overview.WANTED, Overview.QUAL)]
 
         #If Every episode in Season is a wanted Episode then search for Season first
         if wantedEp == seasonEp and not show.air_by_date:
             search_string = {'Season': [], 'Episode': []}
             for show_name in set(show_name_helpers.allPossibleShowNames(show)):
-                ep_string = show_name +' S%02d' % int(season) #1) ShowName SXX   
+                ep_string = show_name +' S%02d' % int(season) #1) ShowName SXX
                 search_string['Season'].append(ep_string)
 
-        #Building the search string with the episodes we need         
+        #Building the search string with the episodes we need
         for ep_obj in wantedEp:
             search_string['Episode'] += self._get_episode_search_strings(ep_obj)[0]['Episode']
 
@@ -154,7 +153,7 @@ class HDTorrentsProvider(generic.TorrentProvider):
                 ep_string = show_name_helpers.sanitizeSceneName(show_name) +' '+ \
                 sickbeard.config.naming_ep_type[2] % {'seasonnumber': ep_obj.season, 'episodenumber': ep_obj.episode}
 
-                search_string['Episode'].append(re.sub('\s+', ' ', ep_string))    
+                search_string['Episode'].append(re.sub('\s+', ' ', ep_string))
 
         return [search_string]
 
@@ -178,13 +177,11 @@ class HDTorrentsProvider(generic.TorrentProvider):
                 searchURL = self.urls['search'] % (search_string, self.categories)
 
                 logger.log(u"Search string: " + searchURL, logger.DEBUG)
-                
+
                 data = self.getURL(searchURL)
                 if not data:
                     continue
 
-                
-          
                 # Remove HDTorrents NEW list
                 split_data = data.partition('<!-- Show New Torrents After Last Visit -->\n\n\n\n')
                 data = split_data[2]
@@ -195,12 +192,12 @@ class HDTorrentsProvider(generic.TorrentProvider):
                     #Get first entry in table
                     entries = html.find_all('td', attrs={'align' : 'center'})
 
-                    if not entries:
+                    if len(entries) < 22:
                         logger.log(u"The Data returned from " + self.name + " do not contains any torrent", logger.DEBUG)
                         continue
 
                     try:
-                        title = entries[22].find('a')['title'].strip('History - ').replace('Blu-ray', 'bd50')
+                        title = entries[22].find('a')['title'].replace('History - ', '').replace('Blu-ray', 'bd50')
                         url = self.urls['home'] % entries[15].find('a')['href']
                         download_url = self.urls['home'] % entries[15].find('a')['href']
                         id = entries[23].find('div')['id']
@@ -210,7 +207,7 @@ class HDTorrentsProvider(generic.TorrentProvider):
                         continue
 
                     if mode != 'RSS' and seeders == 0:
-                            continue 
+                            continue
 
                     if not title or not download_url:
                             continue
@@ -232,16 +229,13 @@ class HDTorrentsProvider(generic.TorrentProvider):
                         continue
 
                     for result in entries:
-                        block2 = result.find_parent('tr').find_next_sibling('tr')
-                        if not block2:
-                            continue
-                        cells = block2.find_all('td')
-                        
+
                         try:
-                            title = cells[1].find('b').get_text().strip('\t ').replace('Blu-ray', 'bd50')
+                            cells = result.find_parent('tr').find_next_sibling('tr').find_all('td')
+                            title = cells[2].find('b').get_text().strip('\t ').replace('Blu-ray', 'bd50')
                             url = self.urls['home'] % cells[4].find('a')['href']
                             download_url = self.urls['home'] % cells[4].find('a')['href']
-                            detail = cells[1].find('a')['href']
+                            detail = cells[2].find('a')['href']
                             id = detail.replace('details.php?id=', '')
                             seeders = int(cells[9].get_text())
                             leechers = int(cells[10].get_text())
@@ -249,7 +243,7 @@ class HDTorrentsProvider(generic.TorrentProvider):
                             continue
 
                         if mode != 'RSS' and seeders == 0:
-                            continue 
+                            continue
 
                         if not title or not download_url:
                             continue
@@ -263,10 +257,10 @@ class HDTorrentsProvider(generic.TorrentProvider):
                     logger.log(u"Failed parsing " + self.name + " Traceback: "  + traceback.format_exc(), logger.ERROR)
 
             #For each search mode sort all the items by seeders
-            items[mode].sort(key=lambda tup: tup[3], reverse=True)        
+            items[mode].sort(key=lambda tup: tup[3], reverse=True)
 
-            results += items[mode]  
-                
+            results += items[mode]
+
         return results
 
     def _get_title_and_url(self, item):
@@ -339,12 +333,12 @@ class HDTorrentsCache(tvcache.TVCache):
 
         search_params = {'RSS': []}
         rss_results = self.provider._doSearch(search_params)
-        
+
         if rss_results:
             self.setLastUpdate()
         else:
             return []
-        
+
         logger.log(u"Clearing " + self.provider.name + " cache and updating with new information")
         self._clearCache()
 
