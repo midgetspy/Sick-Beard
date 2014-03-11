@@ -637,15 +637,20 @@ class PostProcessor(object):
         for curScriptName in sickbeard.EXTRA_SCRIPTS:
 
             # generate a safe command line string to execute the script and provide all the parameters
-            script_cmd = [piece for piece in re.split("( |\\\".*?\\\"|'.*?')", curScriptName) if piece.strip()]
-            script_cmd[0] = ek.ek(os.path.abspath, script_cmd[0])
-            self._log(u"Absolute path to script: " + script_cmd[0], logger.DEBUG)
-
-            script_cmd = script_cmd + [ep_obj.location, self.file_path, str(ep_obj.show.tvdbid), str(ep_obj.season), str(ep_obj.episode), str(ep_obj.airdate)]
-
-            # use subprocess to run the command and capture output
-            self._log(u"Executing command " + str(script_cmd))
             try:
+                script_cmd = [piece for piece in re.split("( |\\\".*?\\\"|'.*?')", curScriptName) if piece.strip()]
+
+                script_cmd = script_cmd + [ep_obj.location,
+                                           self.file_path,
+                                           str(ep_obj.show.tvdbid),
+                                           str(ep_obj.season),
+                                           str(ep_obj.episode),
+                                           str(ep_obj.airdate)
+                                           ]
+
+                # use subprocess to run the command and capture output
+                self._log(u"Executing command " + str(script_cmd))
+
                 p = subprocess.Popen(script_cmd, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, cwd=sickbeard.PROG_DIR)
                 out, err = p.communicate()  # @UnusedVariable
                 self._log(u"Script result: " + str(out), logger.DEBUG)
