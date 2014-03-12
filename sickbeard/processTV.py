@@ -159,6 +159,7 @@ def validateDir(path, dirName, nzbNameOriginal, failed):
         failed = True
     elif ek.ek(os.path.basename, dirName).startswith('_UNPACK_'):
         returnStr += logHelper(u"The directory name indicates that this release is in the process of being unpacked.", logger.DEBUG)
+        return False
 
     if failed:
         process_failed(os.path.join(path, dirName), nzbNameOriginal)
