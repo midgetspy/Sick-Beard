@@ -18,6 +18,7 @@
 from __future__ import with_statement
 
 import os
+import re
 from glob import glob
 
 import sickbeard
@@ -105,7 +106,7 @@ class FailedProcessor(object):
 
         if self.nzb_name is not None:
             self._log(u"Using self.nzb_name for release name.")
-            return self.nzb_name.rpartition('.')[0]
+            return re.sub(r'\.nzb$', '', self.nzb_name, flags=re.IGNORECASE)
 
         # try to get the release name from nzb/nfo
         self._log(u"No self.nzb_name given. Trying to guess release name.")
@@ -115,7 +116,7 @@ class FailedProcessor(object):
             results = ek.ek(glob, search_path)
             if len(results) == 1:
                 found_file = ek.ek(os.path.basename, results[0])
-                found_file = found_file.rpartition('.')[0]
+                found_file = re.sub(r'\.nzb$', '', found_file, flags=re.IGNORECASE)
                 if show_name_helpers.filterBadReleases(found_file):
                     self._log(u"Release name (" + found_file + ") found from file (" + results[0] + ")")
                     return found_file
