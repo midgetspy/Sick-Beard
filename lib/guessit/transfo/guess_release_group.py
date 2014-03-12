@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 #
 # GuessIt - A library for guessing information from filenames
-# Copyright (c) 2012 Nicolas Wack <wackou@gmail.com>
+# Copyright (c) 2013 Nicolas Wack <wackou@gmail.com>
 #
 # GuessIt is free software; you can redistribute it and/or modify it under
 # the terms of the Lesser GNU General Public License as published by
@@ -18,56 +18,132 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 
-from __future__ import unicode_literals
-from guessit.transfo import SingleNodeGuesser
-from guessit.patterns import properties, canonical_form
-import re
-import logging
+from __future__ import absolute_import, division, print_function, unicode_literals
 
-log = logging.getLogger(__name__)
-
-
-CODECS = properties['videoCodec']
-FORMATS = properties['format']
-
-def adjust_metadata(md):
-    codec = canonical_form(md['videoCodec'])
-    if codec in FORMATS:
-        md['format'] = codec
-        del md['videoCodec']
-    return md
+from guessit.plugins.transformers import Transformer
+from guessit.matcher import GuessFinder, found_property, found_guess
+from guessit.containers import PropertiesContainer
+from guessit.patterns import sep
+from guessit.guess import Guess
+from guessit.textutils import strip_brackets
 
 
-def guess_release_group(string):
-    group_names = [ r'\.(Xvid)-(?P<releaseGroup>.*?)[ \.]',
-                    r'\.(DivX)-(?P<releaseGroup>.*?)[\. ]',
-                    r'\.(DVDivX)-(?P<releaseGroup>.*?)[\. ]',
-                    ]
+class GuessReleaseGroup(Transformer):
+    def __init__(self):
+        Transformer.__init__(self, -190)
+        self.container = PropertiesContainer(canonical_from_pattern=False)
+        self._allowed_groupname_pattern = '[\w@#€£$&]'
+        self._forbidden_groupname_lambda = [lambda elt: elt in ['rip', 'by', 'for', 'par', 'pour', 'bonus'],
+                               lambda elt: self._is_number(elt),
+                               ]
+        # If the previous property in this list, the match will be considered as safe
+        # and group name can contain a separator.
+        self.previous_safe_properties = ['videoCodec', 'format', 'videoApi', 'audioCodec', 'audioProfile', 'videoProfile', 'audioChannels']
 
-    # first try to see whether we have both a known codec and a known release group
-    group_names = [ r'\.(?P<videoCodec>' + codec + r')-(?P<releaseGroup>.*?)[ \.]'
-                    for codec in (CODECS + FORMATS) ]
+        self.container.sep_replace_char = '-'
+        self.container.canonical_from_pattern = False
+        self.container.enhance = True
+        self.container.register_property('releaseGroup', self._allowed_groupname_pattern + '+')
+        self.container.register_property('releaseGroup', self._allowed_groupname_pattern + '+-' + self._allowed_groupname_pattern + '+')
 
-    for rexp in group_names:
-        match = re.search(rexp, string, re.IGNORECASE)
-        if match:
-            metadata = match.groupdict()
-            if canonical_form(metadata['releaseGroup']) in properties['releaseGroup']:
-                return adjust_metadata(metadata), (match.start(1), match.end(2))
+    def supported_properties(self):
+        return self.container.get_supported_properties()
 
-    # pick anything as releaseGroup as long as we have a codec in front
-    # this doesn't include a potential dash ('-') ending the release group
-    # eg: [...].X264-HiS@SiLUHD-English.[...]
-    group_names = [ r'\.(?P<videoCodec>' + codec + r')-(?P<releaseGroup>.*?)(-(.*?))?[ \.]'
-                    for codec in (CODECS + FORMATS) ]
+    def _is_number(self, s):
+        try:
+            int(s)
+            return True
+        except ValueError:
+            return False
 
-    for rexp in group_names:
-        match = re.search(rexp, string, re.IGNORECASE)
-        if match:
-            return adjust_metadata(match.groupdict()), (match.start(1), match.end(2))
+    def validate_group_name(self, guess):
+        val = guess['releaseGroup']
+        if len(val) >= 2:
 
-    return None, None
+            if '-' in val:
+                checked_val = ""
+                for elt in val.split('-'):
+                    forbidden = False
+                    for forbidden_lambda in self._forbidden_groupname_lambda:
+                        forbidden = forbidden_lambda(elt.lower())
+                        if forbidden:
+                            break
+                    if not forbidden:
+                        if checked_val:
+                            checked_val += '-'
+                        checked_val += elt
+                    else:
+                        break
+                val = checked_val
+                if not val:
+                    return False
+                guess['releaseGroup'] = val
 
+            forbidden = False
+            for forbidden_lambda in self._forbidden_groupname_lambda:
+                forbidden = forbidden_lambda(val.lower())
+                if forbidden:
+                    break
+            if not forbidden:
+                return True
+        return False
 
-def process(mtree):
-    SingleNodeGuesser(guess_release_group, 0.8, log).process(mtree)
+    def is_leaf_previous(self, leaf, node):
+        if leaf.span[1] <= node.span[0]:
+            for idx in range(leaf.span[1], node.span[0]):
+                if not leaf.root.value[idx] in sep:
+                    return False
+            return True
+        return False
+
+    def guess_release_group(self, string, node=None, options=None):
+        found = self.container.find_properties(string, node, 'releaseGroup')
+        guess = self.container.as_guess(found, string, self.validate_group_name, sep_replacement='-')
+        validated_guess = None
+        if guess:
+            explicit_group_node = node.group_node()
+            if explicit_group_node:
+                for leaf in explicit_group_node.leaves_containing(self.previous_safe_properties):
+                    if self.is_leaf_previous(leaf, node):
+                        if leaf.root.value[leaf.span[1]] == '-':
+                            guess.metadata().confidence = 1
+                        else:
+                            guess.metadata().confidence = 0.7
+                        validated_guess = guess
+
+            if not validated_guess:
+                # If previous group last leaf is identified as a safe property,
+                # consider the raw value as a releaseGroup
+                previous_group_node = node.previous_group_node()
+                if previous_group_node:
+                    for leaf in previous_group_node.leaves_containing(self.previous_safe_properties):
+                        if self.is_leaf_previous(leaf, node):
+                            guess = Guess({'releaseGroup': node.value}, confidence=1, input=node.value, span=(0, len(node.value)))
+                            if self.validate_group_name(guess):
+                                node.guess = guess
+                                validated_guess = guess
+
+            if validated_guess:
+                # If following group nodes have only one unidentified leaf, it belongs to the release group
+                next_group_node = node
+
+                while True:
+                    next_group_node = next_group_node.next_group_node()
+                    if next_group_node:
+                        leaves = next_group_node.leaves()
+                        if len(leaves) == 1 and not leaves[0].guess:
+                            validated_guess['releaseGroup'] = validated_guess['releaseGroup'] + leaves[0].value
+                            leaves[0].guess = validated_guess
+                        else:
+                            break
+                    else:
+                        break
+
+        if validated_guess:
+            # Strip brackets
+            validated_guess['releaseGroup'] = strip_brackets(validated_guess['releaseGroup'])
+
+        return validated_guess
+
+    def process(self, mtree, options=None):
+        GuessFinder(self.guess_release_group, None, self.log, options).process_nodes(mtree.unidentified_leaves())

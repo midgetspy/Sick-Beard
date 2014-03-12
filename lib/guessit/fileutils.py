@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 #
 # GuessIt - A library for guessing information from filenames
-# Copyright (c) 2011 Nicolas Wack <wackou@gmail.com>
+# Copyright (c) 2013 Nicolas Wack <wackou@gmail.com>
 #
 # GuessIt is free software; you can redistribute it and/or modify it under
 # the terms of the Lesser GNU General Public License as published by
@@ -18,10 +18,12 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 
-from __future__ import unicode_literals
+from __future__ import absolute_import, division, print_function, unicode_literals
+
 from guessit import s, u
 import os.path
 import zipfile
+import io
 
 
 def split_path(path):
@@ -44,15 +46,12 @@ def split_path(path):
     while True:
         head, tail = os.path.split(path)
 
-        # on Unix systems, the root folder is '/'
-        if head == '/' and tail == '':
-            return ['/'] + result
+        if not head and not tail:
+            return result
 
-        # on Windows, the root folder is a drive letter (eg: 'C:\') or for shares \\
-        if ((len(head) == 3 and head[1:] == ':\\') or (len(head) == 2 and head == '\\\\')) and tail == '':
-            return [head] + result
-
-        if head == '' and tail == '':
+        if not tail and head == path:
+            # Make sure we won't have an infinite loop.
+            result = [head] + result
             return result
 
         # we just split a directory ending with '/', so tail is empty
@@ -60,6 +59,7 @@ def split_path(path):
             path = head
             continue
 
+        # otherwise, add the last path fragment and keep splitting
         result = [tail] + result
         path = head
 
@@ -67,8 +67,8 @@ def split_path(path):
 def file_in_same_dir(ref_file, desired_file):
     """Return the path for a file in the same dir as a given reference file.
 
-    >>> s(file_in_same_dir('~/smewt/smewt.db', 'smewt.settings'))
-    '~/smewt/smewt.settings'
+    >>> s(file_in_same_dir('~/smewt/smewt.db', 'smewt.settings')) == os.path.normpath('~/smewt/smewt.settings')
+    True
 
     """
     return os.path.join(*(split_path(ref_file)[:-1] + [desired_file]))
@@ -84,4 +84,4 @@ def load_file_in_same_dir(ref_file, filename):
             zfile = zipfile.ZipFile(zfilename)
             return zfile.read('/'.join(path[i + 1:]))
 
-    return u(open(os.path.join(*path)).read())
+    return u(io.open(os.path.join(*path), encoding='utf-8').read())

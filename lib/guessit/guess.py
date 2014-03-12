@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 #
 # GuessIt - A library for guessing information from filenames
-# Copyright (c) 2011 Nicolas Wack <wackou@gmail.com>
+# Copyright (c) 2013 Nicolas Wack <wackou@gmail.com>
 #
 # GuessIt is free software; you can redistribute it and/or modify it under
 # the terms of the Lesser GNU General Public License as published by
@@ -18,15 +18,111 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 
-from __future__ import unicode_literals
+from __future__ import absolute_import, division, print_function, unicode_literals
+
 from guessit import UnicodeMixin, s, u, base_text_type
-from guessit.language import Language
-from guessit.country import Country
 import json
 import datetime
 import logging
 
 log = logging.getLogger(__name__)
+
+
+class GuessMetadata(object):
+    """GuessMetadata contains confidence, an input string, span and related property.
+
+    If defined on a property of Guess object, it overrides the object defined as global.
+
+    :param parent: The parent metadata, used for undefined properties in self object
+    :type parent: :class: `GuessMedata`
+    :param confidence: The confidence (from 0.0 to 1.0)
+    :type confidence: number
+    :param input: The input string
+    :type input: string
+    :param span: The input string
+    :type span: tuple (int, int)
+    :param prop: The found property definition
+    :type prop: :class `guessit.containers._Property`
+    """
+    def __init__(self, parent=None, confidence=None, input=None, span=None, prop=None, *args, **kwargs):
+        self.parent = parent
+        if confidence is None and self.parent is None:
+            self._confidence = 1.0
+        else:
+            self._confidence = confidence
+        self._input = input
+        self._span = span
+        self._prop = prop
+
+    @property
+    def confidence(self):
+        """The confidence
+
+        :rtype: int
+        :return: confidence value
+        """
+        return self._confidence if not self._confidence is None else self.parent.confidence if self.parent else None
+
+    @confidence.setter
+    def confidence(self, confidence):
+        self._confidence = confidence
+
+    @property
+    def input(self):
+        """The input
+
+        :rtype: string
+        :return: String used to find this guess value
+        """
+        return self._input if not self._input is None else self.parent.input if self.parent else None
+
+    @property
+    def span(self):
+        """The span
+
+        :rtype: tuple (int, int)
+        :return: span of input string used to find this guess value
+        """
+        return self._span if not self._span is None else self.parent.span if self.parent else None
+
+    @span.setter
+    def span(self, span):
+        """The span
+
+        :rtype: tuple (int, int)
+        :return: span of input string used to find this guess value
+        """
+        self._span = span
+
+    @property
+    def prop(self):
+        """The property
+
+        :rtype: :class:`_Property`
+        :return: The property
+        """
+        return self._prop if not self._prop is None else self.parent.prop if self.parent else None
+
+    @property
+    def raw(self):
+        """Return the raw information (original match from the string,
+        not the cleaned version) associated with the given property name."""
+        if self.input and self.span:
+            return self.input[self.span[0]:self.span[1]]
+        return None
+
+    def __repr__(self, *args, **kwargs):
+        return object.__repr__(self, *args, **kwargs)
+
+
+def _split_kwargs(**kwargs):
+    metadata_args = {}
+    for prop in dir(GuessMetadata):
+        try:
+            metadata_args[prop] = kwargs.pop(prop)
+        except KeyError:
+            pass
+    return metadata_args, kwargs
 
 
 class Guess(UnicodeMixin, dict):
@@ -37,66 +133,98 @@ class Guess(UnicodeMixin, dict):
     simple dict."""
 
     def __init__(self, *args, **kwargs):
-        try:
-            confidence = kwargs.pop('confidence')
-        except KeyError:
-            confidence = 0
-
+        metadata_kwargs, kwargs = _split_kwargs(**kwargs)
+        self._global_metadata = GuessMetadata(**metadata_kwargs)
         dict.__init__(self, *args, **kwargs)
 
-        self._confidence = {}
+        self._metadata = {}
         for prop in self:
-            self._confidence[prop] = confidence
+            self._metadata[prop] = GuessMetadata(parent=self._global_metadata)
 
+    def to_dict(self, advanced=False):
+        """Return the guess as a dict containing only base types, ie:
+        where dates, languages, countries, etc. are converted to strings.
 
-    def to_dict(self):
+        if advanced is True, return the data as a json string containing
+        also the raw information of the properties."""
         data = dict(self)
         for prop, value in data.items():
             if isinstance(value, datetime.date):
                 data[prop] = value.isoformat()
-            elif isinstance(value, (Language, Country, base_text_type)):
+            elif isinstance(value, (UnicodeMixin, base_text_type)):
                 data[prop] = u(value)
             elif isinstance(value, list):
                 data[prop] = [u(x) for x in value]
+            if advanced:
+                metadata = self.metadata(prop)
+                prop_data = {'value': data[prop]}
+                if metadata.raw:
+                    prop_data['raw'] = metadata.raw
+                if metadata.confidence:
+                    prop_data['confidence'] = metadata.confidence
+                data[prop] = prop_data
 
         return data
 
-    def nice_string(self):
-        data = self.to_dict()
+    def nice_string(self, advanced=False):
+        """Return a string with the property names and their values,
+        that also displays the associated confidence to each property.
 
-        parts = json.dumps(data, indent=4).split('\n')
-        for i, p in enumerate(parts):
-            if p[:5] != '    "':
-                continue
+        FIXME: doc with param"""
+        if advanced:
+            data = self.to_dict(advanced)
+            return json.dumps(data, indent=4)
+        else:
+            data = self.to_dict()
 
-            prop = p.split('"')[1]
-            parts[i] = ('    [%.2f] "' % self.confidence(prop)) + p[5:]
+            parts = json.dumps(data, indent=4).split('\n')
+            for i, p in enumerate(parts):
+                if p[:5] != '    "':
+                    continue
 
-        return '\n'.join(parts)
+                prop = p.split('"')[1]
+                parts[i] = ('    [%.2f] "' % self.confidence(prop)) + p[5:]
+
+            return '\n'.join(parts)
 
     def __unicode__(self):
         return u(self.to_dict())
 
-    def confidence(self, prop):
-        return self._confidence.get(prop, -1)
+    def metadata(self, prop=None):
+        """Return the metadata associated with the given property name
 
-    def set(self, prop, value, confidence=None):
-        self[prop] = value
-        if confidence is not None:
-            self._confidence[prop] = confidence
+        If no property name is given, get the global_metadata
+        """
+        if prop is None:
+            return self._global_metadata
+        if not prop in self._metadata:
+            self._metadata[prop] = GuessMetadata(parent=self._global_metadata)
+        return self._metadata[prop]
 
-    def set_confidence(self, prop, value):
-        self._confidence[prop] = value
+    def confidence(self, prop=None):
+        return self.metadata(prop).confidence
+
+    def set_confidence(self, prop, confidence):
+        self.metadata(prop).confidence = confidence
+
+    def raw(self, prop):
+        return self.metadata(prop).raw
+
+    def set(self, prop_name, value, *args, **kwargs):
+        self[prop_name] = value
+        self._metadata[prop_name] = GuessMetadata(parent=self._global_metadata, *args, **kwargs)
 
     def update(self, other, confidence=None):
         dict.update(self, other)
         if isinstance(other, Guess):
             for prop in other:
-                self._confidence[prop] = other.confidence(prop)
-
-        if confidence is not None:
+                try:
+                    self._metadata[prop] = other._metadata[prop]
+                except KeyError:
+                    pass
+        if not confidence is None:
             for prop in other:
-                self._confidence[prop] = confidence
+                self.set_confidence(prop, confidence)
 
     def update_highest_confidence(self, other):
         """Update this guess with the values from the given one. In case
@@ -106,16 +234,16 @@ class Guess(UnicodeMixin, dict):
             raise ValueError('Can only call this function on Guess instances')
 
         for prop in other:
-            if prop in self and self.confidence(prop) >= other.confidence(prop):
+            if prop in self and self.metadata(prop).confidence >= other.metadata(prop).confidence:
                 continue
             self[prop] = other[prop]
-            self._confidence[prop] = other.confidence(prop)
+            self._metadata[prop] = other.metadata(prop)
 
 
 def choose_int(g1, g2):
     """Function used by merge_similar_guesses to choose between 2 possible
     properties when they are integers."""
-    v1, c1 = g1 # value, confidence
+    v1, c1 = g1  # value, confidence
     v2, c2 = g2
     if (v1 == v2):
         return (v1, 1 - (1 - c1) * (1 - c2))
@@ -153,7 +281,7 @@ def choose_string(g1, g2):
     ('The Simpsons', 0.75)
 
     """
-    v1, c1 = g1 # value, confidence
+    v1, c1 = g1  # value, confidence
     v2, c2 = g2
 
     if not v1:
@@ -181,7 +309,7 @@ def choose_string(g1, g2):
     elif v1l in v2l:
         return (v1, combined_prob)
 
-    # in case of conflict, return the one with highest priority
+    # in case of conflict, return the one with highest confidence
     else:
         if c1 > c2:
             return (v1, c1 - c2)
@@ -253,71 +381,55 @@ def merge_similar_guesses(guesses, prop, choose):
             merge_similar_guesses(guesses, prop, choose)
 
 
-def merge_append_guesses(guesses, prop):
-    """Take a list of guesses and merge those which have the same properties by
-    appending them in a list.
-
-    DEPRECATED, remove with old guessers
-
-    """
-    similar = [guess for guess in guesses if prop in guess]
-    if not similar:
-        return
-
-    merged = similar[0]
-    merged[prop] = [merged[prop]]
-    # TODO: what to do with global confidence? mean of them all?
-
-    for m in similar[1:]:
-        for prop2 in m:
-            if prop == prop2:
-                merged[prop].append(m[prop])
-            else:
-                if prop2 in m:
-                    log.warning('overwriting property "%s" with value %s' % (prop2, m[prop2]))
-                merged[prop2] = m[prop2]
-                # TODO: confidence also
-
-        guesses.remove(m)
-
-
 def merge_all(guesses, append=None):
     """Merge all the guesses in a single result, remove very unlikely values,
     and return it.
     You can specify a list of properties that should be appended into a list
     instead of being merged.
 
-    >>> s(merge_all([ Guess({ 'season': 2 }, confidence = 0.6),
-    ...               Guess({ 'episodeNumber': 13 }, confidence = 0.8) ]))
-    {'season': 2, 'episodeNumber': 13}
+    >>> s(merge_all([ Guess({'season': 2}, confidence=0.6),
+    ...               Guess({'episodeNumber': 13}, confidence=0.8) ])
+    ... ) == {'season': 2, 'episodeNumber': 13}
+    True
 
-    >>> s(merge_all([ Guess({ 'episodeNumber': 27 }, confidence = 0.02),
-    ...               Guess({ 'season': 1 }, confidence = 0.2) ]))
-    {'season': 1}
+
+    >>> s(merge_all([ Guess({'episodeNumber': 27}, confidence=0.02),
+    ...               Guess({'season': 1}, confidence=0.2) ])
+    ... ) == {'season': 1}
+    True
+
+    >>> s(merge_all([ Guess({'other': 'PROPER'}, confidence=0.8),
+    ...               Guess({'releaseGroup': '2HD'}, confidence=0.8) ],
+    ...             append=['other'])
+    ... ) == {'releaseGroup': '2HD', 'other': ['PROPER']}
+    True
 
     """
+    result = Guess()
     if not guesses:
-        return Guess()
+        return result
 
-    result = guesses[0]
     if append is None:
         append = []
 
-    for g in guesses[1:]:
+    for g in guesses:
         # first append our appendable properties
         for prop in append:
             if prop in g:
                 result.set(prop, result.get(prop, []) + [g[prop]],
                            # TODO: what to do with confidence here? maybe an
                            # arithmetic mean...
-                           confidence=g.confidence(prop))
+                           confidence=g.metadata(prop).confidence,
+                           input=g.metadata(prop).input,
+                           span=g.metadata(prop).span,
+                           prop=g.metadata(prop).prop)
 
                 del g[prop]
 
         # then merge the remaining ones
         dups = set(result) & set(g)
         if dups:
-            log.warning('duplicate properties %s in merged result...' % dups)
+            log.warning('duplicate properties %s in merged result...' % [(result[p], g[p]) for p in dups])
 
         result.update_highest_confidence(g)
 
@@ -328,7 +440,13 @@ def merge_all(guesses, append=None):
 
     # make sure our appendable properties contain unique values
     for prop in append:
-        if prop in result:
-            result[prop] = list(set(result[prop]))
+        try:
+            value = result[prop]
+            if isinstance(value, list):
+                result[prop] = list(set(value))
+            else:
+                result[prop] = [value]
+        except KeyError:
+            pass
 
     return result

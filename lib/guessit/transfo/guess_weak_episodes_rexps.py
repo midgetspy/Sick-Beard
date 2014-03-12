@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 #
 # GuessIt - A library for guessing information from filenames
-# Copyright (c) 2012 Nicolas Wack <wackou@gmail.com>
+# Copyright (c) 2013 Nicolas Wack <wackou@gmail.com>
 #
 # GuessIt is free software; you can redistribute it and/or modify it under
 # the terms of the Lesser GNU General Public License as published by
@@ -18,45 +18,52 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 
-from __future__ import unicode_literals
-from guessit import Guess
-from guessit.transfo import SingleNodeGuesser
-from guessit.patterns import weak_episode_rexps
-import re
-import logging
+from __future__ import absolute_import, division, print_function, unicode_literals
 
-log = logging.getLogger(__name__)
-
-
-def guess_weak_episodes_rexps(string, node):
-    if 'episodeNumber' in node.root.info:
-        return None, None
-
-    for rexp, span_adjust in weak_episode_rexps:
-        match = re.search(rexp, string, re.IGNORECASE)
-        if match:
-            metadata = match.groupdict()
-            span = (match.start() + span_adjust[0],
-                    match.end() + span_adjust[1])
-
-            epnum = int(metadata['episodeNumber'])
-            if epnum > 100:
-                season, epnum = epnum // 100, epnum % 100
-                # episodes which have a season > 25 are most likely errors
-                # (Simpsons is at 23!)
-                if season > 25:
-                    continue
-                return Guess({ 'season': season,
-                               'episodeNumber': epnum },
-                             confidence=0.6), span
-            else:
-                return Guess(metadata, confidence=0.3), span
-
-    return None, None
+from guessit.plugins.transformers import Transformer
+from guessit.matcher import GuessFinder
+from guessit.patterns import sep
+from guessit.containers import PropertiesContainer
+from guessit.patterns.numeral import numeral, parse_numeral
+from guessit.date import valid_year
 
 
-guess_weak_episodes_rexps.use_node = True
+class GuessWeakEpisodesRexps(Transformer):
+    def __init__(self):
+        Transformer.__init__(self, 15)
 
+        self.properties = PropertiesContainer(enhance=False, canonical_from_pattern=False)
 
-def process(mtree):
-    SingleNodeGuesser(guess_weak_episodes_rexps, 0.6, log).process(mtree)
+        def _formater(episodeNumber):
+            epnum = parse_numeral(episodeNumber)
+            if not valid_year(epnum):
+                if epnum > 100:
+                    season, epnum = epnum // 100, epnum % 100
+                    # episodes which have a season > 50 are most likely errors
+                    # (Simpson is at 25!)
+                    if season > 50:
+                        return None
+                    return {'season': season, 'episodeNumber': epnum}
+                else:
+                    return epnum
+
+        self.properties.register_property(['episodeNumber', 'season'], '[0-9]{2,4}', confidence=0.6, formatter=_formater)
+        self.properties.register_property('episodeNumber', '(?:episode)' + sep + '(' + numeral + ')[^0-9]', confidence=0.3)
+
+    def supported_properties(self):
+        return self.properties.get_supported_properties()
+
+    def guess_weak_episodes_rexps(self, string, node=None, options=None):
+        if node and 'episodeNumber' in node.root.info:
+            return None
+
+        properties = self.properties.find_properties(string, node)
+        guess = self.properties.as_guess(properties, string)
+
+        return guess
+
+    def should_process(self, mtree, options=None):
+        return mtree.guess.get('type', '').startswith('episode')
+
+    def process(self, mtree, options=None):
+        GuessFinder(self.guess_weak_episodes_rexps, 0.6, self.log, options).process_nodes(mtree.unidentified_leaves())

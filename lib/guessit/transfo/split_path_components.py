@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 #
 # GuessIt - A library for guessing information from filenames
-# Copyright (c) 2012 Nicolas Wack <wackou@gmail.com>
+# Copyright (c) 2013 Nicolas Wack <wackou@gmail.com>
 #
 # GuessIt is free software; you can redistribute it and/or modify it under
 # the terms of the Lesser GNU General Public License as published by
@@ -18,19 +18,28 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 
-from __future__ import unicode_literals
+from __future__ import absolute_import, division, print_function, unicode_literals
+
+from guessit.plugins.transformers import Transformer
 from guessit import fileutils
-import os.path
-import logging
-
-log = logging.getLogger(__name__)
+from os.path import splitext
 
 
-def process(mtree):
-    """Returns the filename split into [ dir*, basename, ext ]."""
-    components = fileutils.split_path(mtree.value)
-    basename = components.pop(-1)
-    components += list(os.path.splitext(basename))
-    components[-1] = components[-1][1:] # remove the '.' from the extension
+class SplitPathComponents(Transformer):
+    def __init__(self):
+        Transformer.__init__(self, 255)
 
-    mtree.split_on_components(components)
+    def process(self, mtree, options=None):
+        """first split our path into dirs + basename + ext
+
+        :return: the filename split into [ dir*, basename, ext ]
+        """
+        if not options.get('name_only'):
+            components = fileutils.split_path(mtree.value)
+            basename = components.pop(-1)
+            components += list(splitext(basename))
+            components[-1] = components[-1][1:]  # remove the '.' from the extension
+
+            mtree.split_on_components(components)
+        else:
+            mtree.split_on_components([mtree.value, ''])
