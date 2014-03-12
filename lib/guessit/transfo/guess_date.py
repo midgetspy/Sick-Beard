@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 #
 # GuessIt - A library for guessing information from filenames
-# Copyright (c) 2012 Nicolas Wack <wackou@gmail.com>
+# Copyright (c) 2013 Nicolas Wack <wackou@gmail.com>
 #
 # GuessIt is free software; you can redistribute it and/or modify it under
 # the terms of the Lesser GNU General Public License as published by
@@ -18,21 +18,26 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 
-from __future__ import unicode_literals
-from guessit.transfo import SingleNodeGuesser
+from __future__ import absolute_import, division, print_function, unicode_literals
+
+from guessit.plugins.transformers import Transformer
+from guessit.matcher import GuessFinder
 from guessit.date import search_date
-import logging
-
-log = logging.getLogger(__name__)
 
 
-def guess_date(string):
-    date, span = search_date(string)
-    if date:
-        return { 'date': date }, span
-    else:
-        return None, None
+class GuessDate(Transformer):
+    def __init__(self):
+        Transformer.__init__(self, 50)
 
+    def supported_properties(self):
+        return ['date']
 
-def process(mtree):
-    SingleNodeGuesser(guess_date, 1.0, log).process(mtree)
+    def guess_date(self, string, node=None, options=None):
+        date, span = search_date(string)
+        if date:
+            return {'date': date}, span
+        else:
+            return None, None
+
+    def process(self, mtree, options=None):
+        GuessFinder(self.guess_date, 1.0, self.log, options).process_nodes(mtree.unidentified_leaves())

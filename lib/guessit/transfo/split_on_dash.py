@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 #
 # GuessIt - A library for guessing information from filenames
-# Copyright (c) 2012 Nicolas Wack <wackou@gmail.com>
+# Copyright (c) 2013 Nicolas Wack <wackou@gmail.com>
 #
 # GuessIt is free software; you can redistribute it and/or modify it under
 # the terms of the Lesser GNU General Public License as published by
@@ -18,35 +18,30 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 
-from __future__ import unicode_literals
+from __future__ import absolute_import, division, print_function, unicode_literals
+
+from guessit.plugins.transformers import Transformer
 from guessit.patterns import sep
 import re
-import logging
-
-log = logging.getLogger(__name__)
 
 
-def process(mtree):
-    for node in mtree.unidentified_leaves():
-        indices = []
+class SplitOnDash(Transformer):
+    def __init__(self):
+        Transformer.__init__(self, 190)
 
-        didx = 0
-        pattern = re.compile(sep + '-' + sep)
-        match = pattern.search(node.value)
-        while match:
-            span = match.span()
-            indices.extend([ span[0], span[1] ])
-            match = pattern.search(node.value, span[1])
+    def process(self, mtree, options=None):
+        """split into '-' separated subgroups (with required separator chars
+        around the dash)
+        """
+        for node in mtree.unidentified_leaves():
+            indices = []
 
-        didx = node.value.find('-')
-        while didx > 0:
-            if (didx > 10 and
-                (didx - 1 not in indices and
-                 didx + 2 not in indices)):
+            pattern = re.compile(sep + '-' + sep)
+            match = pattern.search(node.value)
+            while match:
+                span = match.span()
+                indices.extend([span[0], span[1]])
+                match = pattern.search(node.value, span[1])
 
-                indices.extend([ didx, didx + 1 ])
-
-            didx = node.value.find('-', didx + 1)
-
-        if indices:
-            node.partition(indices)
+            if indices:
+                node.partition(indices)

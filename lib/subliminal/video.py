@@ -108,6 +108,7 @@ class Episode(Video):
 
     @classmethod
     def fromguess(cls, name, guess):
+        guess['type'] = 'episode' #hack. sb only downloads episodes, some avis was guesses as a movie with season and episode.
         if guess['type'] != 'episode':
             raise ValueError('The guess must be an episode guess')
         if 'series' not in guess or 'season' not in guess or 'episodeNumber' not in guess:

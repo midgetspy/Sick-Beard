@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 #
 # GuessIt - A library for guessing information from filenames
-# Copyright (c) 2011 Nicolas Wack <wackou@gmail.com>
+# Copyright (c) 2013 Nicolas Wack <wackou@gmail.com>
 #
 # GuessIt is free software; you can redistribute it and/or modify it under
 # the terms of the Lesser GNU General Public License as published by
@@ -18,7 +18,8 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 
-from __future__ import unicode_literals
+from __future__ import absolute_import, division, print_function, unicode_literals
+
 from guessit import s, to_hex
 import hashlib
 import os.path
@@ -27,8 +28,9 @@ import os.path
 def hash_file(filename):
     """Returns the ed2k hash of a given file.
 
-    >>> s(hash_file('tests/dummy.srt'))
-    'ed2k://|file|dummy.srt|44|1CA0B9DED3473B926AA93A0A546138BB|/'
+    >>> testfile = os.path.join(os.path.dirname(__file__), 'test/dummy.srt')
+    >>> s(hash_file(testfile))
+    'ed2k://|file|dummy.srt|59|41F58B913AB3973F593BEBA8B8DF6510|/'
     """
     return 'ed2k://|file|%s|%d|%s|/' % (os.path.basename(filename),
                                         os.path.getsize(filename),

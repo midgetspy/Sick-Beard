@@ -29,13 +29,14 @@ from . import constants
 import sys
 from .charsetprober import CharSetProber
 
+
 class CharSetGroupProber(CharSetProber):
     def __init__(self):
         CharSetProber.__init__(self)
         self._mActiveNum = 0
         self._mProbers = []
         self._mBestGuessProber = None
-        
+
     def reset(self):
         CharSetProber.reset(self)
         self._mActiveNum = 0
@@ -49,16 +50,20 @@ class CharSetGroupProber(CharSetProber):
     def get_charset_name(self):
         if not self._mBestGuessProber:
             self.get_confidence()
-            if not self._mBestGuessProber: return None
+            if not self._mBestGuessProber:
+                return None
 #                self._mBestGuessProber = self._mProbers[0]
         return self._mBestGuessProber.get_charset_name()
 
     def feed(self, aBuf):
         for prober in self._mProbers:
-            if not prober: continue
-            if not prober.active: continue
+            if not prober:
+                continue
+            if not prober.active:
+                continue
             st = prober.feed(aBuf)
-            if not st: continue
+            if not st:
+                continue
             if st == constants.eFoundIt:
                 self._mBestGuessProber = prober
                 return self.get_state()
@@ -79,18 +84,22 @@ class CharSetGroupProber(CharSetProber):
         bestConf = 0.0
         self._mBestGuessProber = None
         for prober in self._mProbers:
-            if not prober: continue
+            if not prober:
+                continue
             if not prober.active:
                 if constants._debug:
-                    sys.stderr.write(prober.get_charset_name() + ' not active\n')
+                    sys.stderr.write(prober.get_charset_name()
+                                     + ' not active\n')
                 continue
             cf = prober.get_confidence()
             if constants._debug:
-                sys.stderr.write('%s confidence = %s\n' % (prober.get_charset_name(), cf))
+                sys.stderr.write('%s confidence = %s\n' %
+                                 (prober.get_charset_name(), cf))
             if bestConf < cf:
                 bestConf = cf
                 self._mBestGuessProber = prober
-        if not self._mBestGuessProber: return 0.0
+        if not self._mBestGuessProber:
+            return 0.0
         return bestConf
 #        else:
 #            self._mBestGuessProber = self._mProbers[0]

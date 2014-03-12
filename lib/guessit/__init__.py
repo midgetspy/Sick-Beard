@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 #
 # GuessIt - A library for guessing information from filenames
-# Copyright (c) 2011 Nicolas Wack <wackou@gmail.com>
+# Copyright (c) 2013 Nicolas Wack <wackou@gmail.com>
 #
 # GuessIt is free software; you can redistribute it and/or modify it under
 # the terms of the Lesser GNU General Public License as published by
@@ -18,8 +18,11 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 
+from __future__ import absolute_import, division, print_function, unicode_literals
 
-__version__ = '0.5.2'
+import pkg_resources
+from .__version__ import __version__
+
 __all__ = ['Guess', 'Language',
            'guess_file_info', 'guess_video_info',
            'guess_movie_info', 'guess_episode_info']
@@ -29,54 +32,68 @@ __all__ = ['Guess', 'Language',
 # it will then always be available
 # with code from http://lucumr.pocoo.org/2011/1/22/forwards-compatible-python/
 import sys
-if sys.version_info[0] >= 3:
-    PY3 = True
+if sys.version_info[0] >= 3:  # pragma: no cover
+    PY2, PY3 = False, True
     unicode_text_type = str
     native_text_type = str
     base_text_type = str
+
     def u(x):
         return str(x)
+
     def s(x):
         return x
+
     class UnicodeMixin(object):
         __str__ = lambda x: x.__unicode__()
     import binascii
+
     def to_hex(x):
         return binascii.hexlify(x).decode('utf-8')
 
-else:
-    PY3 = False
-    __all__ = [ str(s) for s in __all__ ] # fix imports for python2
+else:   # pragma: no cover
+    PY2, PY3 = True, False
+    __all__ = [str(s) for s in __all__]  # fix imports for python2
     unicode_text_type = unicode
     native_text_type = str
     base_text_type = basestring
+
     def u(x):
         if isinstance(x, str):
             return x.decode('utf-8')
+        if isinstance(x, list):
+            return [u(s) for s in x]
         return unicode(x)
+
     def s(x):
         if isinstance(x, unicode):
             return x.encode('utf-8')
         if isinstance(x, list):
-            return [ s(y) for y in x ]
+            return [s(y) for y in x]
         if isinstance(x, tuple):
             return tuple(s(y) for y in x)
         if isinstance(x, dict):
             return dict((s(key), s(value)) for key, value in x.items())
         return x
+
     class UnicodeMixin(object):
         __str__ = lambda x: unicode(x).encode('utf-8')
+
     def to_hex(x):
         return x.encode('hex')
+
+    range = xrange
 
 
 from guessit.guess import Guess, merge_all
 from guessit.language import Language
 from guessit.matcher import IterativeMatcher
+from guessit.textutils import clean_string, is_camel, from_camel
+import os.path
 import logging
+import json
 
 log = logging.getLogger(__name__)
-
 
 
 class NullHandler(logging.Handler):
@@ -88,31 +105,74 @@ h = NullHandler()
 log.addHandler(h)
 
 
-def guess_file_info(filename, filetype, info=None):
+def _guess_filename(filename, options=None, **kwargs):
+    mtree = _build_filename_mtree(filename, options=options, **kwargs)
+    _add_camel_properties(mtree, options=options)
+    return mtree.matched()
+
+
+def _build_filename_mtree(filename, options=None, **kwargs):
+    mtree = IterativeMatcher(filename, options=options, **kwargs)
+    second_pass_options = mtree.second_pass_options
+    if second_pass_options:
+        log.info("Running 2nd pass")
+        merged_options = dict(options)
+        merged_options.update(second_pass_options)
+        mtree = IterativeMatcher(filename, options=merged_options, **kwargs)
+    return mtree
+
+
+def _add_camel_properties(mtree, options=None, **kwargs):
+    prop = 'title' if mtree.matched().get('type') != 'episode' else 'series'
+    value = mtree.matched().get(prop)
+    _guess_camel_string(mtree, value, options=options, skip_title=False, **kwargs)
+
+    for leaf in mtree.match_tree.unidentified_leaves():
+        value = leaf.value
+        _guess_camel_string(mtree, value, options=options, skip_title=True, **kwargs)
+
+
+def _guess_camel_string(mtree, string, options=None, skip_title=False, **kwargs):
+    if string and is_camel(string):
+        log.info('"%s" is camel cased. Try to detect more properties.' % (string,))
+        uncameled_value = from_camel(string)
+        camel_tree = _build_filename_mtree(uncameled_value, options=options, name_only=True, skip_title=skip_title, **kwargs)
+        if len(camel_tree.matched()) > 0:
+            # Title has changed.
+            mtree.matched().update(camel_tree.matched())
+            return True
+    return False
+
+
+def guess_file_info(filename, info=None, options=None, **kwargs):
     """info can contain the names of the various plugins, such as 'filename' to
     detect filename info, or 'hash_md5' to get the md5 hash of the file.
 
-    >>> guess_file_info('tests/dummy.srt', 'autodetect', info = ['hash_md5', 'hash_sha1'])
-    {'hash_md5': 'e781de9b94ba2753a8e2945b2c0a123d', 'hash_sha1': 'bfd18e2f4e5d59775c2bc14d80f56971891ed620'}
+    >>> testfile = os.path.join(os.path.dirname(__file__), 'test/dummy.srt')
+    >>> g = guess_file_info(testfile, info = ['hash_md5', 'hash_sha1'])
+    >>> g['hash_md5'], g['hash_sha1']
+    ('64de6b5893cac24456c46a935ef9c359', 'a703fc0fa4518080505809bf562c6fc6f7b3c98c')
     """
+    info = info or 'filename'
+    options = options or {}
+
     result = []
     hashers = []
 
-    if info is None:
-        info = ['filename']
+    # Force unicode as soon as possible
+    filename = u(filename)
 
     if isinstance(info, base_text_type):
         info = [info]
 
     for infotype in info:
         if infotype == 'filename':
-            m = IterativeMatcher(filename, filetype=filetype)
-            result.append(m.matched())
+            result.append(_guess_filename(filename, options, **kwargs))
 
         elif infotype == 'hash_mpc':
             from guessit.hash_mpc import hash_file
             try:
-                result.append(Guess({'hash_mpc': hash_file(filename)},
+                result.append(Guess({infotype: hash_file(filename)},
                                     confidence=1.0))
             except Exception as e:
                 log.warning('Could not compute MPC-style hash because: %s' % e)
@@ -120,7 +180,7 @@ def guess_file_info(filename, filetype, info=None):
         elif infotype == 'hash_ed2k':
             from guessit.hash_ed2k import hash_file
             try:
-                result.append(Guess({'hash_ed2k': hash_file(filename)},
+                result.append(Guess({infotype: hash_file(filename)},
                                     confidence=1.0))
             except Exception as e:
                 log.warning('Could not compute ed2k hash because: %s' % e)
@@ -158,23 +218,16 @@ def guess_file_info(filename, filetype, info=None):
 
     result = merge_all(result)
 
-    # last minute adjustments
-
-    # if country is in the guessed properties, make it part of the filename
-    if 'country' in result:
-        result['series'] += ' (%s)' % result['country'].alpha2.upper()
-
-
     return result
 
 
-def guess_video_info(filename, info=None):
-    return guess_file_info(filename, 'autodetect', info)
+def guess_video_info(filename, info=None, options=None, **kwargs):
+    return guess_file_info(filename, info=info, options=options, type='video', **kwargs)
 
 
-def guess_movie_info(filename, info=None):
-    return guess_file_info(filename, 'movie', info)
+def guess_movie_info(filename, info=None, options=None, **kwargs):
+    return guess_file_info(filename, info=info, options=options, type='movie', **kwargs)
 
 
-def guess_episode_info(filename, info=None):
-    return guess_file_info(filename, 'episode', info)
+def guess_episode_info(filename, info=None, options=None, **kwargs):
+    return guess_file_info(filename, info=info, options=options, type='episode', **kwargs)

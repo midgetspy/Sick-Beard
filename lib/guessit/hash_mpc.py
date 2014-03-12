@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 #
 # GuessIt - A library for guessing information from filenames
-# Copyright (c) 2011 Nicolas Wack <wackou@gmail.com>
+# Copyright (c) 2013 Nicolas Wack <wackou@gmail.com>
 #
 # GuessIt is free software; you can redistribute it and/or modify it under
 # the terms of the Lesser GNU General Public License as published by
@@ -18,7 +18,8 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 
-from __future__ import unicode_literals
+from __future__ import absolute_import, division, print_function, unicode_literals
+
 import struct
 import os
 
@@ -28,7 +29,7 @@ def hash_file(filename):
     http://trac.opensubtitles.org/projects/opensubtitles/wiki/HashSourceCodes
     and is licensed under the GPL."""
 
-    longlongformat = 'q'  # long long
+    longlongformat = b'q'  # long long
     bytesize = struct.calcsize(longlongformat)
 
     f = open(filename, "rb")
@@ -39,14 +40,14 @@ def hash_file(filename):
     if filesize < 65536 * 2:
         raise Exception("SizeError: size is %d, should be > 132K..." % filesize)
 
-    for x in range(65536 / bytesize):
+    for x in range(int(65536 / bytesize)):
         buf = f.read(bytesize)
         (l_value,) = struct.unpack(longlongformat, buf)
         hash_value += l_value
-        hash_value = hash_value & 0xFFFFFFFFFFFFFFFF #to remain as 64bit number
+        hash_value = hash_value & 0xFFFFFFFFFFFFFFFF  # to remain as 64bit number
 
     f.seek(max(0, filesize - 65536), 0)
-    for x in range(65536 / bytesize):
+    for x in range(int(65536 / bytesize)):
         buf = f.read(bytesize)
         (l_value,) = struct.unpack(longlongformat, buf)
         hash_value += l_value
