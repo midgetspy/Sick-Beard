@@ -505,7 +505,7 @@ class PostProcessor(object):
             if cur_quality and not (self.in_history and quality):
                 quality = cur_quality
 
-            if cur_season:
+            if cur_season is not None:
                 season = cur_season
 
             if cur_episodes:
