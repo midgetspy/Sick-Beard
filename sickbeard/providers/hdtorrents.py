@@ -229,12 +229,9 @@ class HDTorrentsProvider(generic.TorrentProvider):
                         continue
 
                     for result in entries:
-                        block2 = result.find_parent('tr').find_next_sibling('tr')
-                        if not block2:
-                            continue
-                        cells = block2.find_all('td')
 
                         try:
+                            cells = result.find_parent('tr').find_next_sibling('tr').find_all('td')
                             title = cells[2].find('b').get_text().strip('\t ').replace('Blu-ray', 'bd50')
                             url = self.urls['home'] % cells[4].find('a')['href']
                             download_url = self.urls['home'] % cells[4].find('a')['href']
@@ -295,22 +292,27 @@ class HDTorrentsProvider(generic.TorrentProvider):
 
         return response.content
 
-    def findPropers(self, search_date=None):
+    def findPropers(self, search_date=datetime.datetime.today()):
 
         results = []
 
-        sqlResults = db.DBConnection().select('SELECT s.show_name, e.showid, e.season, e.episode, e.status, e.airdate FROM tv_episodes AS e INNER JOIN tv_shows AS s ON (e.showid = s.tvdb_id) WHERE e.airdate >= ? AND (e.status IN ('+','.join([str(x) for x in Quality.DOWNLOADED])+') OR (e.status IN ('+','.join([str(x) for x in Quality.SNATCHED ])+')))', [search_date.toordinal()])
+        sqlResults = db.DBConnection().select('SELECT s.show_name, e.showid, e.season, e.episode, e.status, e.airdate FROM tv_episodes AS e' +
+                                              ' INNER JOIN tv_shows AS s ON (e.showid = s.tvdb_id)' +
+                                              ' WHERE e.airdate >= ' + str(search_date.toordinal()) +
+                                              ' AND (e.status IN (' + ','.join([str(x) for x in Quality.DOWNLOADED]) + ')' +
+                                              ' OR (e.status IN (' + ','.join([str(x) for x in Quality.SNATCHED]) + ')))'
+                                              )
         if not sqlResults:
             return []
 
         for sqlShow in sqlResults:
             curShow = helpers.findCertainShow(sickbeard.showList, int(sqlShow["showid"]))
-            curEp = curShow.getEpisode(int(sqlShow["season"]),int(sqlShow["episode"]))
+            curEp = curShow.getEpisode(int(sqlShow["season"]), int(sqlShow["episode"]))
             searchString = self._get_episode_search_strings(curEp, add_string='PROPER|REPACK')
 
             for item in self._doSearch(searchString[0]):
                 title, url = self._get_title_and_url(item)
-                results.append(classes.Proper(title, url, datetime.datetime.today().toordinal()))
+                results.append(classes.Proper(title, url, datetime.datetime.today()))
 
         return results
 
@@ -340,19 +342,24 @@ class HDTorrentsCache(tvcache.TVCache):
         logger.log(u"Clearing " + self.provider.name + " cache and updating with new information")
         self._clearCache()
 
+        ql = []
         for result in rss_results:
-            item = (result[0], result[1])
-            self._parseItem(item)
+            ci = self._parseItem(result)
+            if ci is not None:
+                ql.append(ci)
+
+        myDB = self._getDB()
+        myDB.mass_action(ql)
 
     def _parseItem(self, item):
 
         (title, url) = item
 
         if not title or not url:
-            return
+            return None
 
         logger.log(u"Adding item to cache: " + title, logger.DEBUG)
 
-        self._addCacheEntry(title, url)
+        return self._addCacheEntry(title, url)
 
 provider = HDTorrentsProvider()
