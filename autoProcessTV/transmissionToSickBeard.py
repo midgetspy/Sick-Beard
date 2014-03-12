@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-# Author: Ryan Snyder
+# Author: Marcos Junior
 #
 # This file is part of Sick Beard.
 #
@@ -34,41 +34,67 @@ folders exist.
 import sys, os, re, subprocess
 import transmissionrpc as trpc
 import autoProcessTV ,ConfigParser
+import logging
+
+logger = logging.getLogger('transmissionToSickBeard')
+logger.setLevel(logging.DEBUG)
+loggerFormat = logging.Formatter('%(asctime)s %(levelname)s     TRANSMISSION-TO-SB :: %(message)s', '%Y-%m-%d %H:%M:%S')
+
+loggerStd = logging.StreamHandler() #console output
+loggerStd.setFormatter(loggerFormat)
+loggerStd.setLevel(logging.DEBUG)
+
+#loggerHdlr = logging.FileHandler(logfile) #file output
+#loggerHdlr.setFormatter(loggerFormat)
+#loggerHdlr.setLevel(logging.DEBUG)
+
+logger.addHandler(loggerStd) 
+#logger.addHandler(loggerHdlr) 
+
+try:
+    import syslog, logging.handlers, socket
+    sysloggerFormat = logging.Formatter('transmissionToSickBeard[%(process)d]: %(message)s', '%Y-%m-%d %H:%M:%S')
+    loggerSyslog = logging.handlers.SysLogHandler(facility=logging.handlers.SysLogHandler.LOG_DAEMON, address="/dev/log") #syslog output
+    loggerSyslog.setLevel(logging.DEBUG)
+    loggerSyslog.setFormatter(sysloggerFormat)
+    logger.addHandler(loggerSyslog) 
+except ImportError:
+    pass
 
 try:
     dir = os.environ['TR_TORRENT_DIR']
     torrent = os.environ['TR_TORRENT_NAME']
     hash = os.environ['TR_TORRENT_HASH']
-    print dir
     
     if 'movies' in dir:
         type = 'movies/'
     elif 'tv_shows' in dir:
         type = 'tv_shows/'
     else:
-        exit()
+        logger.warning("Invalid torrent dir structure. Please read transmissionToSickBeard.py file.")
+        sys.exit(1)
     
     config = ConfigParser.ConfigParser()
     configFilename = os.path.join(os.path.dirname(sys.argv[0]), "autoProcessTV.cfg")
-    print "Loading config from", configFilename
+    logger.info("Loading config from {}".format(configFilename))
     
     if not os.path.isfile(configFilename):
-        print "ERROR: You need an autoProcessTV.cfg file - did you rename and edit the .sample?"
-        sys.exit(-1)
+        logger.error("You need an autoProcessTV.cfg file - did you rename and edit the .sample?")
+        sys.exit(1)
     
     try:
         fp = open(configFilename, "r")
         config.readfp(fp)
         fp.close()
     except IOError, e:
-        print "Could not read configuration file: ", str(e)
+        logger.error("Could not read configuration file: {}".format(str(e)))
         sys.exit(1)
     
     host = config.get("Transmission", "host")
     port = config.get("Transmission", "port")
     user = config.get("Transmission", "username")
     password = config.get("Transmission", "password")
-    output = config.get("Transmission", "output") + type
+    output = os.path.join(config.get("Transmission", "output"), type)
     
 
     tc = trpc.Client(host, port, user, password)
@@ -76,22 +102,25 @@ try:
     for each in torrent.files().values():
         if each['completed'] == each['size']:
             if each['name'].endswith(('.rar','.avi','.mkv','.mp4')) and 'sample' not in each['name'].lower() and '/subs' not in each['name'].lower():
+                rarfile = os.path.join(dir, each['name'])
                 if each['name'].endswith('.rar'):
                     file = os.path.basename(each['name'])
                     if 'part' not in each['name'] or 'part01' in each['name']:
-                        print file
-                        print dir + each['name']
-                        print output
-                        subprocess.call(['7z', 'x', dir + each['name'], '-aos', '-o' + output])
-                        print 'Successfully extracted {}'.format(dir + each['name'])
-                        if 'tv_shows' in type:
-                            autoProcessTV.processEpisode(output)                       
+                        logger.info('Extracting {}...'.format(rarfile))
+                        retcode = subprocess.call(['7z', 'x', rarfile, '-aos', '-o' + output])
+                        if retcode == 0:
+                            logger.info('Successfully extracted {}'.format(rarfile))
+                            if 'tv_shows' in type:
+                                autoProcessTV.processEpisode(output)
+                        else:
+                            logger.error('Cannot extract {}'.format(rarfile))
                 else:
                     file = os.path.basename(each['name'])
-                    os.link(dir + each['name'], output + file)
+                    os.link(rarfile, os.path.join(output, file))
+                    logger.info('Successfully created symlink to {}'.format(rarfile))
                     if 'tv_shows' in type:
                         autoProcessTV.processEpisode(output, file)
 
 except KeyError, e:
-    print "Environment Variables not supplied - is this being called from Transmission?"
-    sys.exit()
+    logger.error("Environment Variables not supplied - is this being called from Transmission?")
+    sys.exit(1)
