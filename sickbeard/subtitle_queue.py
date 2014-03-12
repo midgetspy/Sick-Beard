@@ -80,7 +80,9 @@ class SubtitleQueueItem(generic_queue.QueueItem):
             return
         
         epName = ep_obj.location.rpartition(".")[0]
-        subLanguages = sickbeard.SUBTITLE_LANGUAGES.split(",")
+        subLanguages = []
+        if sickbeard.SUBTITLE_LANGUAGES <> '':
+            subLanguages = sickbeard.SUBTITLE_LANGUAGES.split(",")
         if len(subLanguages) < 1 and ep_obj.show.lang:
             subLanguages.append(ep_obj.show.lang)
         
