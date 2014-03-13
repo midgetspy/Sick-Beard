@@ -1846,7 +1846,7 @@ class HomePostProcess:
         return _munge(t)
 
     @cherrypy.expose
-    def processEpisode(self, dir=None, nzbName=None, jobName=None, quiet=None, process_method=None, force=None, is_priority=None, failed="0", type="auto"):
+    def processEpisode(self, dir=None, nzbName=None, jobName=None, quiet=None, process_method=None, force=None, is_priority=None, failed="0", type="automatic"):
 
         if failed == "0":
             failed = False
@@ -3283,26 +3283,6 @@ class Home:
 
         return json.dumps({'result': 'failure'})
             
-#        try:
-#            
-#                
-#            ui.notifications.message('Info', pp.log)
-#        except exceptions.FailedHistoryNotFoundException:
-#            ui.notifications.error('Not Found Error', 'Couldn\'t find release in history. (Has it been over 30 days?)\n'
-#                                   'Can\'t mark it as bad.')
-#            return json.dumps({'result': 'failure'})
-#        except exceptions.FailedHistoryMultiSnatchException:
-#            ui.notifications.error('Multi-Snatch Error', 'The same episode was snatched again before the first one was done.\n'
-#                                   'Please cancel any downloads of this episode and then set it back to wanted.\n Can\'t continue.')
-#            return json.dumps({'result': 'failure'})
-#        except exceptions.FailedProcessingFailed:
-#            ui.notifications.error('Processing Failed', pp.log)
-#            return json.dumps({'result': 'failure'})
-#        except Exception as e:
-#            ui.notifications.error('Unknown Error', 'Unknown exception: ' + str(e))
-#            return json.dumps({'result': 'failure'})
-#
-#        return json.dumps({'result': 'success'})
 
 class UI:
 
@@ -3474,8 +3454,6 @@ class WebInterface:
         sql_results.sort(sorts[sickbeard.COMING_EPS_SORT])
 
         t = PageTemplate(file="comingEpisodes.tmpl")
-#        paused_item = { 'title': '', 'path': 'toggleComingEpsDisplayPaused' }
-#        paused_item['title'] = 'Hide Paused' if sickbeard.COMING_EPS_DISPLAY_PAUSED else 'Show Paused'
         paused_item = { 'title': 'View Paused:', 'path': {'': ''} }
         paused_item['path'] = {'Hide': 'toggleComingEpsDisplayPaused'} if sickbeard.COMING_EPS_DISPLAY_PAUSED else {'Show': 'toggleComingEpsDisplayPaused'}
         t.submenu = [

@@ -40,7 +40,7 @@ def logHelper (logMessage, logLevel=logger.MESSAGE):
     logger.log(logMessage, logLevel)
     return logMessage + u"\n"
 
-def processDir(dirName, nzbName=None, process_method=None, force=False, is_priority=None, failed=False, type="auto"):
+def processDir(dirName, nzbName=None, process_method=None, force=False, is_priority=None, failed=False, type="automatic"):
     """
     Scans through the files in dirName and processes whatever media files it finds
 
@@ -48,7 +48,7 @@ def processDir(dirName, nzbName=None, process_method=None, force=False, is_prior
     nzbName: The NZB name which resulted in this folder being downloaded
     force: True to postprocess already postprocessed files
     failed: Boolean for whether or not the download failed
-    type: Type of postprocessing auto or manual
+    type: Type of postprocessing automatic or manual
     """
 
     global process_result, returnStr
@@ -65,7 +65,7 @@ def processDir(dirName, nzbName=None, process_method=None, force=False, is_prior
 
     # if the client and Sickbeard are not on the same machine translate the Dir in a network dir
     elif sickbeard.TV_DOWNLOAD_DIR and ek.ek(os.path.isdir, sickbeard.TV_DOWNLOAD_DIR) \
-            and ek.ek(os.path.normpath, dirName) != ek.ek(os.path.normpath, sickbeard.TV_DOWNLOAD_DIR):
+    and helpers.real_path(dirName) != helpers.real_path(sickbeard.TV_DOWNLOAD_DIR):
         dirName = ek.ek(os.path.join, sickbeard.TV_DOWNLOAD_DIR, ek.ek(os.path.abspath, dirName).split(os.path.sep)[-1])
         returnStr += logHelper(u"Trying to use folder " + dirName, logger.DEBUG)
 
@@ -139,10 +139,10 @@ def processDir(dirName, nzbName=None, process_method=None, force=False, is_prior
     
                 delete_files(processPath, notwantedFiles)
     
-                if process_method == "move" and \
-                ek.ek(os.path.normpath, processPath) != ek.ek(os.path.normpath, sickbeard.TV_DOWNLOAD_DIR):
+                if process_method == "move" \
+                and helpers.real_path(processPath) != helpers.real_path(sickbeard.TV_DOWNLOAD_DIR):
                     delete_dir(processPath)
-        
+
     return returnStr
 
 def validateDir(path, dirName, nzbNameOriginal, failed):
@@ -159,9 +159,14 @@ def validateDir(path, dirName, nzbNameOriginal, failed):
         failed = True
     elif ek.ek(os.path.basename, dirName).startswith('_UNPACK_'):
         returnStr += logHelper(u"The directory name indicates that this release is in the process of being unpacked.", logger.DEBUG)
+        return False
 
     if failed:
         process_failed(os.path.join(path, dirName), nzbNameOriginal)
+        return False
+
+    if helpers.is_hidden_folder(dirName):
+        returnStr += logHelper(u"Ignoring hidden folder: " + dirName, logger.DEBUG)
         return False
 
     # make sure the dir isn't inside a show dir
