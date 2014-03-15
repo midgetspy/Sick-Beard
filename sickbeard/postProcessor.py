@@ -640,8 +640,8 @@ class PostProcessor(object):
             try:
                 script_cmd = [piece for piece in re.split("( |\\\".*?\\\"|'.*?')", curScriptName) if piece.strip()]
 
-                script_cmd = script_cmd + [ep_obj.location,
-                                           self.file_path,
+                script_cmd = script_cmd + [ep_obj.location.encode(sickbeard.SYS_ENCODING),
+                                           self.file_path.encode(sickbeard.SYS_ENCODING),
                                            str(ep_obj.show.tvdbid),
                                            str(ep_obj.season),
                                            str(ep_obj.episode),
@@ -654,9 +654,6 @@ class PostProcessor(object):
                 p = subprocess.Popen(script_cmd, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, cwd=sickbeard.PROG_DIR)
                 out, err = p.communicate()  # @UnusedVariable
                 self._log(u"Script result: " + str(out), logger.DEBUG)
-
-            except OSError, e:
-                self._log(u"Unable to run extra_script: " + ex(e))
 
             except Exception, e:
                 self._log(u"Unable to run extra_script: " + ex(e))
