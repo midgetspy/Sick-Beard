@@ -68,7 +68,7 @@ def retrieve_exceptions():
     exception_dict = {}
 
     # exceptions are stored on github pages
-    url = 'http://nivong.github.io/sb_tvdb_scene_exceptions/exceptions.txt'
+    url = 'https://raw.github.com/nivong/sb_tvdb_scene_exceptions/master/exceptions.txt'
 
     logger.log(u"Check scene exceptions update")
     url_data = helpers.getURL(url)
