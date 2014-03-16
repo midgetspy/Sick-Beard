@@ -103,6 +103,10 @@ def _update_zoneinfo():
     if not helpers.download_file(url_tar, zonefile_tmp):
         return
 
+    if not ek.ek(os.path.exists,zonefile_tmp):
+        logger.log(u"Download of " + zonefile_tmp + " failed.",logger.ERROR)
+        return
+
     new_hash = str(helpers.md5_for_file(zonefile_tmp))
 
     if (zoneinfo_md5.upper() == new_hash.upper()):
