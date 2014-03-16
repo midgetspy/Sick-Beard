@@ -22,7 +22,7 @@ from sickbeard import db
 from sickbeard import helpers
 from sickbeard import logger
 from sickbeard import encodingKludge as ek
-from os.path import basename, realpath, join, isfile
+from os.path import basename, join, isfile
 import os
 import re
 import datetime
@@ -50,9 +50,9 @@ def _remove_old_zoneinfo():
     else:
         return
     
-    cur_file = ek.ek(realpath, u'lib/dateutil/zoneinfo/' + cur_zoneinfo)
+    cur_file = helpers.real_path(u'lib/dateutil/zoneinfo/' + cur_zoneinfo)
     
-    for (path, dirs, files) in ek.ek(os.walk,ek.ek(realpath,u'lib/dateutil/zoneinfo/')):
+    for (path, dirs, files) in ek.ek(os.walk,helpers.real_path(u'lib/dateutil/zoneinfo/')):
         for filename in files:
             if filename.endswith('.tar.gz'):
                 file_w_path = ek.ek(join,path,filename)
@@ -90,7 +90,7 @@ def _update_zoneinfo():
 
     # now load the new zoneinfo
     url_tar = u'https://github.com/Prinz23/sb_network_timezones/raw/master/' + new_zoneinfo
-    zonefile = ek.ek(realpath, u'lib/dateutil/zoneinfo/' + new_zoneinfo)
+    zonefile = helpers.real_path(u'lib/dateutil/zoneinfo/' + new_zoneinfo)
     zonefile_tmp = re.sub(r"\.tar\.gz$",'.tmp', zonefile)
 
     if (ek.ek(os.path.exists,zonefile_tmp)):
@@ -103,6 +103,10 @@ def _update_zoneinfo():
     if not helpers.download_file(url_tar, zonefile_tmp):
         return
 
+    if not ek.ek(os.path.exists,zonefile_tmp):
+        logger.log(u"Download of " + zonefile_tmp + " failed.",logger.ERROR)
+        return
+
     new_hash = str(helpers.md5_for_file(zonefile_tmp))
 
     if (zoneinfo_md5.upper() == new_hash.upper()):
@@ -110,7 +114,7 @@ def _update_zoneinfo():
         try:
             # remove the old zoneinfo file
             if (cur_zoneinfo is not None):
-                old_file = ek.ek(realpath, u'lib/dateutil/zoneinfo/' + cur_zoneinfo)
+                old_file = helpers.real_path(u'lib/dateutil/zoneinfo/' + cur_zoneinfo)
                 if (ek.ek(os.path.exists,old_file)):
                     ek.ek(os.remove,old_file)
             # rename downloaded file
