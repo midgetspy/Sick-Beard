@@ -53,7 +53,7 @@ class KATProvider(generic.TorrentProvider):
 
         self.cache = KATCache(self)
         
-        self.url = 'http://proxykat.eu/'
+        self.url = 'http://kickass.to/'
 
         self.searchurl = self.url+'usearch/%s/?field=seeders&sorder=desc'  #order by seed       
 
@@ -203,9 +203,9 @@ class KATProvider(generic.TorrentProvider):
                 search_string['Episode'].append(ep_string)
         else:
             for show_name in set(allPossibleShowNames(ep_obj.show)):
-                ep_string = sanitizeSceneName(show_name) +' '+ \
-                sickbeard.config.naming_ep_type[0] % {'seasonnumber': ep_obj.season, 'episodenumber': ep_obj.episode} +'|'+\
-                sickbeard.config.naming_ep_type[3] % {'seasonnumber': ep_obj.season, 'episodenumber': ep_obj.episode} + ' %s category:tv' %add_string \
+                ep_string = sanitizeSceneName(show_name) +' '+'season:'+str(ep_obj.season)+' episode:'+str(ep_obj.episode) \
+                #sickbeard.config.naming_ep_type[0] % {'season:'+ ep_obj.season +'episode:'+ ep_obj.episode} +' category:tv'\
+                #sickbeard.config.naming_ep_type[0] % {'seasonnumber': ep_obj.season, 'episodenumber': ep_obj.episode} + ' %s category:tv' %add_string \
                 
                 search_string['Episode'].append(re.sub('\s+', ' ', ep_string))
     
