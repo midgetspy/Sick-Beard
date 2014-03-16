@@ -50,9 +50,9 @@ def _remove_old_zoneinfo():
     else:
         return
     
-    cur_file = helpers.real_path(u'lib/dateutil/zoneinfo/' + cur_zoneinfo)
+    cur_file = helpers.real_path(ek.ek(join,ek.ek(os.path.dirname, lib.dateutil.zoneinfo.__file__), cur_zoneinfo))
     
-    for (path, dirs, files) in ek.ek(os.walk,helpers.real_path(u'lib/dateutil/zoneinfo/')):
+    for (path, dirs, files) in ek.ek(os.walk,helpers.real_path(ek.ek(os.path.dirname, lib.dateutil.zoneinfo.__file__))):
         for filename in files:
             if filename.endswith('.tar.gz'):
                 file_w_path = ek.ek(join,path,filename)
@@ -90,7 +90,8 @@ def _update_zoneinfo():
 
     # now load the new zoneinfo
     url_tar = u'https://github.com/Prinz23/sb_network_timezones/raw/master/' + new_zoneinfo
-    zonefile = helpers.real_path(u'lib/dateutil/zoneinfo/' + new_zoneinfo)
+    
+    zonefile = helpers.real_path(ek.ek(join,ek.ek(os.path.dirname, lib.dateutil.zoneinfo.__file__), new_zoneinfo))
     zonefile_tmp = re.sub(r"\.tar\.gz$",'.tmp', zonefile)
 
     if (ek.ek(os.path.exists,zonefile_tmp)):
@@ -114,7 +115,7 @@ def _update_zoneinfo():
         try:
             # remove the old zoneinfo file
             if (cur_zoneinfo is not None):
-                old_file = helpers.real_path(u'lib/dateutil/zoneinfo/' + cur_zoneinfo)
+                old_file = helpers.real_path(ek.ek(join,ek.ek(os.path.dirname, lib.dateutil.zoneinfo.__file__), cur_zoneinfo))
                 if (ek.ek(os.path.exists,old_file)):
                     ek.ek(os.remove,old_file)
             # rename downloaded file
