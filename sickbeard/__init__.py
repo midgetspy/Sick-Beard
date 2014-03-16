@@ -38,6 +38,7 @@ from providers import ezrss, tvtorrents, torrentleech, btn, newznab, womble, omg
 
 from providers import kickass, torrentz, dtt, thepiratebay, publichd, torrentday
 from providers import sceneaccess, iptorrents, bithdtv, fucklimits, btdigg, torrentshack
+from providers import speed
 
 from sickbeard.config import CheckSection, check_setting_int, check_setting_str, ConfigMigrator
 
@@ -225,6 +226,11 @@ TORRENTSHACK_AUTH = None
 TORRENTSHACK_PASS_KEY = None
 TORRENTSHACK_AUTH_KEY = None
 
+SPEED = False
+SPEED_USERNAME = None
+SPEED_PASSWORD = None
+SPEED_RSSHASH = None
+
 PUBLICHD = False
 
 BTN = False
@@ -396,6 +402,7 @@ def initialize(consoleLogging=True):
                 BITHDTV, BITHDTV_USERNAME, BITHDTV_PASSWORD, \
                 FUCKLIMITS, FUCKLIMITS_USERNAME, FUCKLIMITS_PASSWORD, \
                 TORRENTSHACK, TORRENTSHACK_USERNAME, TORRENTSHACK_PASSWORD, TORRENTSHACK_UID, TORRENTSHACK_AUTH, TORRENTSHACK_PASS_KEY ,TORRENTSHACK_AUTH_KEY, \
+                SPEED, SPEED_USERNAME, SPEED_PASSWORD, SPEED_RSSHASH, \
                 BTDIGG, \
                 PUBLICHD, \
                 NZBS, NZBS_UID, NZBS_HASH, EZRSS, DTT, DTT_NORAR, DTT_SINGLE, \
@@ -600,6 +607,11 @@ def initialize(consoleLogging=True):
         TORRENTSHACK_AUTH = check_setting_str(CFG, 'TORRENTSHACK', 'torrentshack_auth', '')
         TORRENTSHACK_PASS_KEY = check_setting_str(CFG, 'TORRENTSHACK', 'torrentshack_pass_key', '')
         TORRENTSHACK_AUTH_KEY = check_setting_str(CFG, 'TORRENTSHACK', 'torrentshack_auth_key', '')
+        
+        SPEED = bool(check_setting_int(CFG, 'SPEED', 'speed', 0))
+        SPEED_USERNAME = check_setting_str(CFG, 'SPEED', 'speed_username', '')
+        SPEED_PASSWORD = check_setting_str(CFG, 'SPEED', 'speed_password', '')
+        SPEED_RSSHASH = check_setting_str(CFG, 'SPEED', 'speed_rsshash', '')
         
         BTDIGG = bool(check_setting_int(CFG, 'BTDIGG', 'btdigg', 0))
         
@@ -1207,6 +1219,12 @@ def save_config():
     new_config['TORRENTSHACK']['torrentshack_auth'] = TORRENTSHACK_AUTH
     new_config['TORRENTSHACK']['torrentshack_pass_key'] = TORRENTSHACK_PASS_KEY
     new_config['TORRENTSHACK']['torrentshack_auth_key'] = TORRENTSHACK_AUTH_KEY
+
+    new_config['SPEED'] = {}
+    new_config['SPEED']['speed'] = int(SPEED)
+    new_config['SPEED']['speed_username'] = SPEED_USERNAME
+    new_config['SPEED']['speed_password'] = SPEED_PASSWORD
+    new_config['SPEED']['speed_rsshash'] = SPEED_RSSHASH
     
     new_config['BTDIGG'] = {}
     new_config['BTDIGG']['btdigg'] = int(BTDIGG)
