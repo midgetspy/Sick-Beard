@@ -189,7 +189,7 @@ class PostProcessor(object):
         # figure out which files we want to delete
         file_list = [file_path]
         if associated_files:
-            file_list = file_list + self.list_associated_files(file_path)
+            file_list = file_list + self.list_associated_files(file_path, base_name_only=True)
 
         if not file_list:
             self._log(u"There were no files associated with " + file_path + ", not deleting anything", logger.DEBUG)
