@@ -112,6 +112,7 @@ def initWebServer(options={}):
         'tools.gzip.mime_types': mime_gzip,
         'error_page.401': http_error_401_hander,
         'error_page.404': http_error_404_hander,
+        'tools.proxy.on': sickbeard.BEHIND_PROXY,
     }
 
     if enable_https:
