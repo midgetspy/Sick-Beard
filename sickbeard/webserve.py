@@ -1017,6 +1017,7 @@ class ConfigProviders:
                       fucklimits_username = None, fucklimits_password = None,
                       torrentshack_username = None, torrentshack_password = None, torrentshack_uid = None, torrentshack_auth = None, torrentshack_pass_key = None, torrentshack_auth_key = None,
                       torrentz_verified = None,
+                      speed_username = None, speed_password = None, speed_rsshash = None,
                       provider_order=None):
 
         results = []
@@ -1104,6 +1105,8 @@ class ConfigProviders:
                 sickbeard.BTDIGG = curEnabled
             elif curProvider == 'torrentshack':
                 sickbeard.TORRENTSHACK = curEnabled
+            elif curProvider == 'speed':
+                sickbeard.SPEED = curEnabled
             elif curProvider == 'publichd':
                 sickbeard.PUBLICHD = curEnabled
             elif curProvider == 'btn':
@@ -1186,6 +1189,10 @@ class ConfigProviders:
         sickbeard.TORRENTSHACK_AUTH = torrentshack_auth.strip()
         sickbeard.TORRENTSHACK_PASS_KEY = torrentshack_pass_key.strip()
         sickbeard.TORRENTSHACK_AUTH_KEY = torrentshack_auth_key.strip()
+        
+        sickbeard.SPEED_USERNAME = speed_username.strip()
+        sickbeard.SPEED_PASSWORD = speed_password.strip()
+        sickbeard.SPEED_RSSHASH = speed_rsshash.strip()
         
         if torrentz_verified == "on":
             torrentz_verified = 1
