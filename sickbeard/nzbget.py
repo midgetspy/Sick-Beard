@@ -20,6 +20,7 @@
 import httplib
 import datetime
 import re
+import urlparse
 
 import sickbeard
 
@@ -27,7 +28,7 @@ from base64 import standard_b64encode
 import xmlrpclib
 
 from sickbeard.providers.generic import GenericProvider
-
+from sickbeard import config
 from sickbeard import logger
 
 
@@ -35,32 +36,40 @@ def sendNZB(nzb):
 
     addToTop = False
     nzbgetprio = 0
-    # TODO: add support for https
-    nzbgetXMLrpc = "http://%(username)s:%(password)s@%(host)s/xmlrpc"
 
     if sickbeard.NZBGET_HOST == None:
         logger.log(u"No NZBGet host found in configuration. Please configure it.", logger.ERROR)
         return False
 
-    # TODO: add auth to header
-    url = nzbgetXMLrpc % {"host": sickbeard.NZBGET_HOST, "username": sickbeard.NZBGET_USERNAME, "password": sickbeard.NZBGET_PASSWORD}
+    url = config.clean_url(sickbeard.NZBGET_HOST)
 
-    nzbGetRPC = xmlrpclib.ServerProxy(url)
+    if sickbeard.NZBGET_USERNAME or sickbeard.NZBGET_PASSWORD:
+        scheme, netloc, path, query, fragment = urlparse.urlsplit(url)
+        netloc = sickbeard.NZBGET_USERNAME + ":" + sickbeard.NZBGET_PASSWORD + "@" + netloc
+        url = urlparse.urlunsplit((scheme, netloc, path, query, fragment))
+
+    url = urlparse.urljoin(url, "/xmlrpc")
+
     try:
-        if nzbGetRPC.writelog("INFO", "SickBeard connected to drop off %s any moment now." % (nzb.name + ".nzb")):
+        nzbGetRPC = xmlrpclib.ServerProxy(url)
+
+        if nzbGetRPC.writelog("INFO", "SickBeard connected to drop off " + nzb.name + ".nzb" + " any moment now."):
             logger.log(u"Successful connected to NZBGet", logger.DEBUG)
+
         else:
-            logger.log(u"Successful connected to NZBGet, but unable to send a message" % (nzb.name + ".nzb"), logger.ERROR)
+            logger.log(u"Successful connected to NZBGet, but unable to send a message", logger.ERROR)
 
     except httplib.socket.error:
-        logger.log(u"Please check your NZBGet host and port (if it is running). NZBGet is not responding.", logger.ERROR)
+        logger.log(u"Please check if NZBGet is running. NZBGet is not responding.", logger.ERROR)
         return False
 
     except xmlrpclib.ProtocolError, e:
         if (e.errmsg == "Unauthorized"):
             logger.log(u"NZBGet username or password is incorrect.", logger.ERROR)
+
         else:
             logger.log(u"Protocol Error: " + e.errmsg, logger.ERROR)
+
         return False
 
     # if it aired recently make it high priority
@@ -95,8 +104,10 @@ def sendNZB(nzb):
         if nzbget_result:
             logger.log(u"NZB sent to NZBGet successfully", logger.DEBUG)
             return True
+
         else:
             logger.log(u"NZBGet could not add %s to the queue" % (nzb.name + ".nzb"), logger.ERROR)
             return False
+
     except:
         logger.log(u"Connect Error to NZBGet: could not add %s to the queue" % (nzb.name + ".nzb"), logger.ERROR)
