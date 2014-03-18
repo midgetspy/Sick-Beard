@@ -737,7 +737,7 @@ class ConfigSearch:
     @cherrypy.expose
     def saveSearch(self, use_nzbs=None, use_torrents=None, nzb_dir=None, sab_username=None, sab_password=None,
                        sab_apikey=None, sab_category=None, sab_host=None, nzbget_username=None, nzbget_password=None, nzbget_category=None, nzbget_host=None,
-                       torrent_dir=None, nzb_method=None, usenet_retention=None, search_frequency=None, download_propers=None):
+                       torrent_dir=None, nzb_method=None, usenet_retention=None, search_frequency=None, download_propers=None, ignore_words=None):
 
         results = []
 
@@ -751,6 +751,8 @@ class ConfigSearch:
 
         config.change_SEARCH_FREQUENCY(search_frequency)
         sickbeard.USENET_RETENTION = config.to_int(usenet_retention, default=500)
+
+        sickbeard.IGNORE_WORDS = ignore_words
 
         # NZB Search
         sickbeard.USE_NZBS = config.checkbox_to_value(use_nzbs)
@@ -1212,7 +1214,7 @@ class ConfigHidden:
         return _munge(t)
 
     @cherrypy.expose
-    def saveHidden(self, anon_redirect=None, git_path=None, extra_scripts=None, create_missing_show_dirs=None, add_shows_wo_dir=None, ignore_words=None):
+    def saveHidden(self, anon_redirect=None, git_path=None, extra_scripts=None, create_missing_show_dirs=None, add_shows_wo_dir=None):
 
         results = []
 
@@ -1221,7 +1223,6 @@ class ConfigHidden:
         sickbeard.EXTRA_SCRIPTS = [x.strip() for x in extra_scripts.split('|') if x.strip()]
         sickbeard.CREATE_MISSING_SHOW_DIRS = config.checkbox_to_value(create_missing_show_dirs)
         sickbeard.ADD_SHOWS_WO_DIR = config.checkbox_to_value(add_shows_wo_dir)
-        sickbeard.IGNORE_WORDS = ignore_words
 
         sickbeard.save_config()
 
