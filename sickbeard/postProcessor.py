@@ -829,15 +829,16 @@ class PostProcessor(object):
         try:
             proper_path = ep_obj.proper_path()
             proper_absolute_path = ek.ek(os.path.join, ep_obj.show.location, proper_path)
-
             dest_path = ek.ek(os.path.dirname, proper_absolute_path)
+
         except exceptions.ShowDirNotFoundException:
             raise exceptions.PostProcessingFailed(u"Unable to post-process an episode if the show dir doesn't exist, quitting")
 
         self._log(u"Destination folder for this episode: " + dest_path, logger.DEBUG)
 
         # create any folders we need
-        helpers.make_dirs(dest_path)
+        if not helpers.make_dirs(dest_path):
+            raise exceptions.PostProcessingFailed("Unable to create destination folder: " + dest_path)
 
         # figure out the base name of the resulting episode file
         if sickbeard.RENAME_EPISODES:
@@ -857,7 +858,7 @@ class PostProcessor(object):
             else:
                 self._move(self.file_path, dest_path, new_base_name, sickbeard.MOVE_ASSOCIATED_FILES)
         except (OSError, IOError):
-            raise exceptions.PostProcessingFailed("Unable to move the files to their new home")
+            raise exceptions.PostProcessingFailed("Unable to move the files to destination folder: " + dest_path)
 
         # put the new location in the database
         for cur_ep in [ep_obj] + ep_obj.relatedEps:
