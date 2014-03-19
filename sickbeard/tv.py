@@ -1018,11 +1018,11 @@ class TVShow(object):
         epStatus = int(sqlResults[0]["status"])
         epStatus_text = statusStrings[epStatus]
 
-        logger.log(u"current episode status: " + str(epStatus), logger.DEBUG)
+        logger.log(u"Existing episode status: " + str(epStatus) + " (" + epStatus_text + ")", logger.DEBUG)
 
         # if we know we don't want it then just say no
         if epStatus in (SKIPPED, IGNORED, ARCHIVED) and not manualSearch:
-            logger.log(u"Existing episode status: " + str(epStatus) + " (" + epStatus_text + ")", logger.DEBUG)
+            logger.log(u"Existing episode status is skipped/ignored/archived, ignoring found episode", logger.DEBUG)
             return False
 
         # if it's one of these then we want it as long as it's in our allowed initial qualities
