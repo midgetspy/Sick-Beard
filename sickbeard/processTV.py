@@ -52,7 +52,7 @@ def processDir(dirName, nzbName=None, process_method=None, force=False, is_prior
     """
 
     global process_result, returnStr
-    
+
     returnStr = ''
 
     returnStr += logHelper(u"Processing folder " + dirName, logger.DEBUG)
@@ -103,7 +103,7 @@ def processDir(dirName, nzbName=None, process_method=None, force=False, is_prior
     #Don't Link media when the media is extracted from a rar in the same path
     if process_method in ('hardlink', 'symlink') and videoInRar:
         process_media(path, videoInRar, nzbName, 'move', force, is_priority)
-        delete_files(path, rarContent) 
+        delete_files(path, rarContent)
         for video in set(videoFiles) - set(videoInRar):
             process_media(path, [video], nzbName, process_method, force, is_priority)
     else:
@@ -128,17 +128,17 @@ def processDir(dirName, nzbName=None, process_method=None, force=False, is_prior
             if process_method in ('hardlink', 'symlink') and videoInRar:
                 process_media(processPath, videoInRar, nzbName, 'move', force, is_priority)
                 process_media(processPath, set(videoFiles) - set(videoInRar), nzbName, process_method, force, is_priority)
-                delete_files(processPath, rarContent) 
+                delete_files(processPath, rarContent)
             else:
                 process_media(processPath, videoFiles, nzbName, process_method, force, is_priority)
 
-                #Delete all file not needed
+                #Avoid to delete files
                 if process_method != "move" or not process_result \
-                or type=="manual": #Avoid to delete files if is Manual PostProcessing  
+                or type == "manual":
                     continue
-    
+
                 delete_files(processPath, notwantedFiles)
-    
+
                 if process_method == "move" \
                 and helpers.real_path(processPath) != helpers.real_path(sickbeard.TV_DOWNLOAD_DIR):
                     delete_dir(processPath)
@@ -162,7 +162,7 @@ def validateDir(path, dirName, nzbNameOriginal, failed):
         return False
 
     if failed:
-        process_failed(os.path.join(path, dirName), nzbNameOriginal)
+        process_failed(ek.ek(os.path.join, path, dirName), nzbNameOriginal)
         return False
 
     if helpers.is_hidden_folder(dirName):
@@ -186,7 +186,7 @@ def validateDir(path, dirName, nzbNameOriginal, failed):
 
     videoFiles = filter(helpers.isMediaFile, allFiles)
     allDirs.append(dirName)
-    
+
     #check if the dir have at least one tv video file
     for video in videoFiles:
         try:
@@ -230,21 +230,20 @@ def unRAR(path, rarFiles, force):
             returnStr += logHelper(u"Unpacking archive: " + archive, logger.DEBUG)
 
             try:
-                rar_handle = RarFile(os.path.join(path, archive))
-
+                rar_handle = RarFile(ek.ek(os.path.join, path, archive))
                 # Skip extraction if any file in archive has previously been extracted
                 skip_file = False
-                for file_in_archive in [os.path.basename(x.filename) for x in rar_handle.infolist() if not x.isdir]:
+                for file_in_archive in [ek.ek(os.path.basename, x.filename) for x in rar_handle.infolist() if not x.isdir]:
                     if already_postprocessed(path, file_in_archive, force):
                         returnStr += logHelper(u"Archive file already post-processed, extraction skipped: " + file_in_archive, logger.DEBUG)
                         skip_file = True
                         break
 
                 if skip_file:
-                    continue    
-                
+                    continue
+
                 rar_handle.extract(path = path, withSubpath = False, overwrite = False)
-                unpacked_files += [os.path.basename(x.filename) for x in rar_handle.infolist() if not x.isdir]
+                unpacked_files += [ek.ek(os.path.basename, x.filename) for x in rar_handle.infolist() if not x.isdir]
                 del rar_handle
             except Exception, e:
                  returnStr += logHelper(u"Failed Unrar archive " + archive + ': ' + ex(e), logger.ERROR)
@@ -341,7 +340,7 @@ def delete_files(processPath, notwantedFiles):
 
         returnStr += logHelper(u"Deleting file " + cur_file, logger.DEBUG)
 
-                #check first the read-only attribute
+        #check first the read-only attribute
         file_attribute = ek.ek(os.stat, cur_file_path)[0]
         if (not file_attribute & stat.S_IWRITE):
             # File is read-only, so make it writeable
@@ -378,9 +377,9 @@ def get_path_dir_files(dirName, nzbName, type):
             break
     else:
         path, dirs = ek.ek(os.path.split, dirName) #Script Post Processing
-        if not nzbName is None and not nzbName.endswith('.nzb') and os.path.isfile(os.path.join(dirName, nzbName)): #For single torrent file without Dir
+        if not nzbName is None and not nzbName.endswith('.nzb') and ek.ek(os.path.isfile, ek.ek(os.path.join, dirName, nzbName)): #For single torrent file without Dir
             dirs = []
-            files = [os.path.join(dirName, nzbName)]
+            files = [ek.ek(os.path.join, dirName, nzbName)]
         else:
             dirs = [dirs]
             files = []

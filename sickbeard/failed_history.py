@@ -23,7 +23,8 @@ import datetime
 
 from sickbeard import db
 from sickbeard import logger
-from sickbeard import common
+from sickbeard.common import Quality
+from sickbeard.common import WANTED, FAILED
 from sickbeard import exceptions
 from sickbeard.history import dateFormat
 
@@ -131,7 +132,7 @@ def revertEpisodes(show_obj, season, episodes):
                     ep_obj.status = history_eps[cur_episode]['old_status']
                 else:
                     log_str += _log_helper(u"WARNING: Episode not found in history. Setting it back to WANTED", logger.WARNING)
-                    ep_obj.status = common.WANTED
+                    ep_obj.status = WANTED
 
                 ep_obj.saveToDB()
     else:
@@ -145,7 +146,7 @@ def revertEpisodes(show_obj, season, episodes):
                     ep_obj.status = history_eps[ep_obj]['old_status']
                 else:
                     log_str += _log_helper(u"WARNING: Episode not found in history. Setting it back to WANTED", logger.WARNING)
-                    ep_obj.status = common.WANTED
+                    ep_obj.status = WANTED
 
                 ep_obj.saveToDB()
 
@@ -163,13 +164,15 @@ def markFailed(show_obj, season, episodes):
                 continue
 
             with ep_obj.lock:
-                ep_obj.status = common.FAILED
+                quality = Quality.splitCompositeStatus(ep_obj.status)[1]
+                ep_obj.status = Quality.compositeStatus(FAILED, quality)
                 ep_obj.saveToDB()
     else:
         # Whole season
         for ep_obj in show_obj.getAllEpisodes(season):
             with ep_obj.lock:
-                ep_obj.status = common.FAILED
+                quality = Quality.splitCompositeStatus(ep_obj.status)[1]
+                ep_obj.status = Quality.compositeStatus(FAILED, quality)
                 ep_obj.saveToDB()
 
     return log_str
