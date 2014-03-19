@@ -133,6 +133,7 @@ METADATA_MEDIABROWSER = None
 METADATA_PS3 = None
 METADATA_WDTV = None
 METADATA_TIVO = None
+METADATA_MEDE8ER = None
 
 QUALITY_DEFAULT = None
 STATUS_DEFAULT = None
@@ -483,7 +484,7 @@ def initialize(consoleLogging=True):
                 USE_LISTVIEW, METADATA_XBMC, METADATA_XBMC_12PLUS, METADATA_MEDIABROWSER, METADATA_PS3, metadata_provider_dict, \
                 NEWZBIN, NEWZBIN_USERNAME, NEWZBIN_PASSWORD, GIT_PATH, MOVE_ASSOCIATED_FILES, \
                 GUI_NAME, HOME_LAYOUT, HISTORY_LAYOUT, DISPLAY_SHOW_SPECIALS, COMING_EPS_LAYOUT, COMING_EPS_SORT, COMING_EPS_DISPLAY_PAUSED, COMING_EPS_MISSED_RANGE, DATE_PRESET, TIME_PRESET, TIME_PRESET_W_SECONDS, \
-                METADATA_WDTV, METADATA_TIVO, IGNORE_WORDS,  CALENDAR_PROTECTED, CREATE_MISSING_SHOW_DIRS, \
+                METADATA_WDTV, METADATA_TIVO, METADATA_MEDE8ER, IGNORE_WORDS,  CALENDAR_PROTECTED, CREATE_MISSING_SHOW_DIRS, \
                 ADD_SHOWS_WO_DIR, USE_SUBTITLES, SUBTITLES_LANGUAGES, SUBTITLES_DIR, SUBTITLES_SERVICES_LIST, SUBTITLES_SERVICES_ENABLED, SUBTITLES_HISTORY, SUBTITLES_FINDER_FREQUENCY, subtitlesFinderScheduler, \
                 USE_FAILED_DOWNLOADS, DELETE_FAILED, ANON_REDIRECT, LOCALHOST_IP
 
@@ -892,6 +893,7 @@ def initialize(consoleLogging=True):
         METADATA_PS3 = check_setting_str(CFG, 'General', 'metadata_ps3', '0|0|0|0|0|0|0|0|0|0')
         METADATA_WDTV = check_setting_str(CFG, 'General', 'metadata_wdtv', '0|0|0|0|0|0|0|0|0|0')
         METADATA_TIVO = check_setting_str(CFG, 'General', 'metadata_tivo', '0|0|0|0|0|0|0|0|0|0')
+        METADATA_MEDE8ER = check_setting_str(CFG, 'General', 'metadata_mede8er', '0|0|0|0|0|0|0|0|0|0')
 
         GUI_NAME = check_setting_str(CFG, 'GUI', 'gui_name', 'slick')
 
@@ -943,6 +945,7 @@ def initialize(consoleLogging=True):
                                    (METADATA_PS3, metadata.ps3),
                                    (METADATA_WDTV, metadata.wdtv),
                                    (METADATA_TIVO, metadata.tivo),
+                                   (METADATA_MEDE8ER, metadata.mede8er)
                                    ]:
 
             (cur_metadata_config, cur_metadata_class) = cur_metadata_tuple
@@ -1302,6 +1305,7 @@ def save_config():
     new_config['General']['metadata_ps3'] = METADATA_PS3
     new_config['General']['metadata_wdtv'] = METADATA_WDTV
     new_config['General']['metadata_tivo'] = METADATA_TIVO
+    new_config['General']['metadata_mede8er'] = METADATA_MEDE8ER
 
     new_config['General']['cache_dir'] = ACTUAL_CACHE_DIR if ACTUAL_CACHE_DIR else 'cache'
     new_config['General']['root_dirs'] = ROOT_DIRS if ROOT_DIRS else ''

@@ -928,7 +928,8 @@ class PostProcessor(object):
         self._log(u"Destination folder for this episode: " + dest_path, logger.DEBUG)
 
         # create any folders we need
-        helpers.make_dirs(dest_path)
+        if not helpers.make_dirs(dest_path):
+            raise exceptions.PostProcessingFailed("Unable to create destination folder: " + dest_path)
 
         # figure out the base name of the resulting episode file
         if sickbeard.RENAME_EPISODES:
@@ -955,7 +956,7 @@ class PostProcessor(object):
               logger.log(u"Unknown process method: " + sickbeard.PROCESS_METHOD, logger.ERROR)
               raise exceptions.PostProcessingFailed("Unable to move the files to their new home")
         except (OSError, IOError):
-            raise exceptions.PostProcessingFailed("Unable to move the files to their new home")
+            raise exceptions.PostProcessingFailed("Unable to move the files to destination folder: " + dest_path)
 
         # download subtitles
         if sickbeard.USE_SUBTITLES and ep_obj.show.subtitles:

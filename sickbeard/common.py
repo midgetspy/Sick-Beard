@@ -278,7 +278,7 @@ class StatusStrings:
             else:
                 return self.statusStrings[status] + " (" + Quality.qualityStrings[quality] + ")"
         else:
-            return self.statusStrings[name]
+            return self.statusStrings[name] if self.statusStrings.has_key(name) else ''
 
     def has_key(self, name):
         return name in self.statusStrings or name in Quality.DOWNLOADED or name in Quality.SNATCHED or name in Quality.SNATCHED_PROPER

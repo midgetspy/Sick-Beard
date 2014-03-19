@@ -1,7 +1,24 @@
+# Sick Beard autoProcessTV configuration file
+# Used in combination with scripts like sabToSickBeard that call autoProcessTV
+#
+# Rename (or copy) autoProcessTV.cfg.sample to autoProcessTV.cfg
+# Change the host, port, username, and password values
+# to the appropriate settings for your Sick Beard server.
+#
+# Example:  Sick Beard can be accessed on http://localhost:8081
+#           without username/password
+#
+# host=localhost    # Sick Beard host (localhost or IP address)
+# port=8081         # Sick Beard port
+# username=         # Credentials for logging into Sick Beard
+# password=         # Credentials for logging into Sick Beard (don't use special characters)
+# web_root=         # Sick Beard web_root
+# ssl=0             # http (ssl=0) (for https use ssl=1)
+
 [SickBeard]
 host=localhost
 port=8081
 username=
 password=
-web_root=
+web_root=/
 ssl=0

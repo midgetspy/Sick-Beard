@@ -601,6 +601,7 @@ class ConfigMigrator():
         metadata_ps3 = check_setting_str(self.config_obj, 'General', 'metadata_ps3', '0|0|0|0|0|0')
         metadata_wdtv = check_setting_str(self.config_obj, 'General', 'metadata_wdtv', '0|0|0|0|0|0')
         metadata_tivo = check_setting_str(self.config_obj, 'General', 'metadata_tivo', '0|0|0|0|0|0')
+        metadata_mede8er = check_setting_str(self.config_obj, 'General', 'metadata_mede8er', '0|0|0|0|0|0')
 
         use_banner = bool(check_setting_int(self.config_obj, 'General', 'use_banner', 0))
 
@@ -622,6 +623,10 @@ class ConfigMigrator():
                 metadata = '|'.join(cur_metadata)
                 logger.log(u"Upgrading " + metadata_name + " metadata, new value: " + metadata)
 
+            elif len(cur_metadata) == 10:
+                metadata = '|'.join(cur_metadata)
+                logger.log(u"Keeping " + metadata_name + " metadata, value: " + metadata)
+
             else:
                 logger.log(u"Skipping " + metadata_name + " metadata: '" + metadata + "', incorrect format", logger.ERROR)
                 metadata = '0|0|0|0|0|0|0|0|0|0'
@@ -635,3 +640,4 @@ class ConfigMigrator():
         sickbeard.METADATA_PS3 = _migrate_metadata(metadata_ps3, 'PS3', use_banner)
         sickbeard.METADATA_WDTV = _migrate_metadata(metadata_wdtv, 'WDTV', use_banner)
         sickbeard.METADATA_TIVO = _migrate_metadata(metadata_tivo, 'TIVO', use_banner)
+        sickbeard.METADATA_MEDE8ER = _migrate_metadata(metadata_mede8er, 'Mede8er', use_banner)
