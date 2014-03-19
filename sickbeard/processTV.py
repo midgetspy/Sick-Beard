@@ -77,7 +77,7 @@ def processDir(dirName, nzbName=None, method=None, recurse=False, pp_options={})
     recurse: Boolean for whether we should descend into subfolders or not
     """
 
-    returnStr = ''
+    returnStr = u""
 
     returnStr += logHelper(u"Processing folder: " + dirName, logger.DEBUG)
 

@@ -779,7 +779,7 @@ class PostProcessor(object):
                 if cur_ep.location:
                     helpers.delete_empty_folders(ek.ek(os.path.dirname, cur_ep.location), keep_dir=ep_obj.show._location)
             except (OSError, IOError):
-                raise exceptions.PostProcessingFailed("Unable to delete the existing files")
+                raise exceptions.PostProcessingFailed(u"Unable to delete the existing files")
 
         # if the show directory doesn't exist then make it if allowed
         if not ek.ek(os.path.isdir, ep_obj.show._location) and sickbeard.CREATE_MISSING_SHOW_DIRS:
@@ -790,7 +790,7 @@ class PostProcessor(object):
                 notifiers.synoindex_notifier.addFolder(ep_obj.show._location)
 
             except (OSError, IOError):
-                raise exceptions.PostProcessingFailed("Unable to create the show directory: " + ep_obj.show._location)
+                raise exceptions.PostProcessingFailed(u"Unable to create the show directory: " + ep_obj.show._location)
 
             # get metadata for the show (but not episode because it hasn't been fully processed)
             ep_obj.show.writeMetadata(True)
@@ -838,7 +838,7 @@ class PostProcessor(object):
 
         # create any folders we need
         if not helpers.make_dirs(dest_path):
-            raise exceptions.PostProcessingFailed("Unable to create destination folder: " + dest_path)
+            raise exceptions.PostProcessingFailed(u"Unable to create destination folder: " + dest_path)
 
         # figure out the base name of the resulting episode file
         if sickbeard.RENAME_EPISODES:
@@ -858,7 +858,7 @@ class PostProcessor(object):
             else:
                 self._move(self.file_path, dest_path, new_base_name, sickbeard.MOVE_ASSOCIATED_FILES)
         except (OSError, IOError):
-            raise exceptions.PostProcessingFailed("Unable to move the files to destination folder: " + dest_path)
+            raise exceptions.PostProcessingFailed(u"Unable to move the files to destination folder: " + dest_path)
 
         # put the new location in the database
         for cur_ep in [ep_obj] + ep_obj.relatedEps:
