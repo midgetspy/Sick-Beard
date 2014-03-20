@@ -756,15 +756,10 @@ class ConfigSearch:
                 logger.log("Unknown search setting: " + key, logger.ERROR)
 
         # handle some special cases
-        sickbeard.USE_TORRENTS = 1 if postData.get('use_torrents') == "on" else 0
-        sickbeard.TORRENT_PAUSED = 1 if postData.get('torrent_paused') == "on" else 0
-        sickbeard.PREFER_EPISODE_RELEASES = 1 if postData.get('prefer_episode_releases') == "on" else 0
-        sickbeard.SAB_APIKEY = postData.get('sab_apikey').strip()
-        if sickbeard.TORRENT_RATIO == "":
-            sickbeard.TORRENT_RATIO = None
-        else:
-            sickbeard.TORRENT_RATIO = float(sickbeard.TORRENT_RATIO)
-
+        sickbeard.TORRENT_PAUSED = config.checkbox_to_value(postData.get("torrent_paused"))
+        sickbeard.PREFER_EPISODE_RELEASES = config.checkbox_to_value(postData.get("prefer_episode_releases"))
+        sickbeard.SAB_APIKEY = postData.get('sab_apikey', '').strip()
+        sickbeard.TORRENT_RATIO = config.to_float(postData.get("torrent_ratio"), default=1.0)
 
         # this regex will match http or https urls or just a domain/address
         regex = re.compile(r'^(http)?(?P<s>s|)?(://)?(?P<addr>[^/]*)/?')
@@ -773,37 +768,33 @@ class ConfigSearch:
 
 
         # Episode Search
-        sickbeard.DOWNLOAD_PROPERS = config.checkbox_to_value(download_propers)
+        sickbeard.DOWNLOAD_PROPERS = config.checkbox_to_value(postData.get("download_propers"))
 
         if sickbeard.DOWNLOAD_PROPERS:
             sickbeard.properFinderScheduler.silent = False
         else:
             sickbeard.properFinderScheduler.silent = True
 
-        config.change_SEARCH_FREQUENCY(search_frequency)
-        sickbeard.USENET_RETENTION = config.to_int(usenet_retention, default=500)
+        config.change_SEARCH_FREQUENCY(postData.get("search_frequency"))
+        sickbeard.USENET_RETENTION = config.to_int(postData.get("usenet_retention"), default=500)
 
         # NZB Search
-        sickbeard.USE_NZBS = config.checkbox_to_value(use_nzbs)
-        sickbeard.NZB_METHOD = nzb_method
+        sickbeard.USE_NZBS = config.checkbox_to_value(postData.get("use_nzbs"))
 
         sab_host = postData.get('sab_host')
         sickbeard.SAB_HOST = config.clean_url(sab_host)
 
-        if not config.change_NZB_DIR(nzb_dir):
-            results += ["Unable to create directory " + os.path.normpath(nzb_dir) + ", directory not changed."]
+        if not config.change_NZB_DIR(postData.get("nzb_dir")):
+            results += ["Unable to create directory " + os.path.normpath(postData.get("nzb_dir")) + ", directory not changed."]
 
-        sickbeard.NZBGET_HOST = config.clean_host(nzbget_host)
-        sickbeard.TORRENT_HOST = re.sub(regex, regex_sub, postData.get('torrent_host', ''))
-
-        sickbeard.NZBGET_PASSWORD = nzbget_password
-        sickbeard.NZBGET_CATEGORY = nzbget_category
+        sickbeard.NZBGET_HOST = config.clean_host(postData.get("nzb_host", ""))
+        sickbeard.TORRENT_HOST = re.sub(regex, regex_sub, postData.get("torrent_host", ""))
 
         # Torrent Search
-        sickbeard.USE_TORRENTS = config.checkbox_to_value(use_torrents)
+        sickbeard.USE_TORRENTS = config.checkbox_to_value(postData.get("use_torrents"))
 
-        if not config.change_TORRENT_DIR(torrent_dir):
-            results += ["Unable to create directory " + os.path.normpath(torrent_dir) + ", directory not changed."]
+        if not config.change_TORRENT_DIR(postData.get("torrent_dir")):
+            results += ["Unable to create directory " + os.path.normpath(postData.get("torrent_dir")) + ", directory not changed."]
 
         sickbeard.save_config()
 

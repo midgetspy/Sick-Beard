@@ -284,6 +284,15 @@ def to_int(val, default=0):
 
     return val
 
+def to_float(val, default=0.0):
+    """ Return int value of val or default on error """
+
+    try:
+        val = float(val)
+    except:
+        val = default
+
+    return val
 
 ################################################################################
 # Check_setting_int                                                            #
