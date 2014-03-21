@@ -37,6 +37,7 @@ from sickbeard.show_name_helpers import allPossibleShowNames, sanitizeSceneName
 from sickbeard.common import Overview 
 from sickbeard.exceptions import ex
 from sickbeard import encodingKludge as ek
+from sickbeard import clients
 from lib import requests
 from lib.unidecode import unidecode
 
@@ -64,7 +65,7 @@ class ThePirateBayProvider(generic.TorrentProvider):
         
         self.proxy = ThePirateBayWebproxy() 
         
-        self.url = 'http://pirateproxy.net/'
+        self.url = 'http://thepiratebay.se/'
 
         self.searchurl = self.url + 'search/%s/0/7/200'  # order by seed       
 
