@@ -752,7 +752,7 @@ class ConfigSearch:
                 setattr(sickbeard, key.upper(), val)
             elif hasattr(sickbeard, key.lower()):
                 setattr(sickbeard, key.lower(), val)
-        else:
+            else:
                 logger.log("Unknown search setting: " + key, logger.ERROR)
 
         # handle some special cases
