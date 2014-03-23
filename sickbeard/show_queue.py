@@ -306,7 +306,7 @@ class QueueItemAdd(ShowQueueItem):
             logger.log(u" IMDb_api parser error: " + ex(e), logger.WARNING)
         except Exception, e:
             logger.log(u"Error loading IMDb info: " + ex(e), logger.ERROR)
-            logger.log(traceback.format_exc(), logger.DEBUG)
+#            logger.log(traceback.format_exc(), logger.DEBUG)
 
         try:
             self.show.saveToDB()
