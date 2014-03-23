@@ -202,12 +202,15 @@ class IPTorrentsProvider(generic.TorrentProvider):
                         if not torrent_name or not torrent_download_url:
                             continue
 
-                        item = torrent_name, torrent_download_url
+                        item = torrent_name, torrent_download_url, torrent_seeders
                         logger.log(u"Found result: " + torrent_name + " (" + torrent_details_url + ")", logger.DEBUG)
                         items[mode].append(item)
 
                 except Exception, e:
                     logger.log(u"Failed parsing " + self.name + " Traceback: "  + traceback.format_exc(), logger.ERROR)
+
+            #For each search mode sort all the items by seeders
+            items[mode].sort(key=lambda tup: tup[2], reverse=True)
 
             results += items[mode]  
                 
@@ -215,7 +218,7 @@ class IPTorrentsProvider(generic.TorrentProvider):
 
     def _get_title_and_url(self, item):
         
-        title, url = item
+        title, url, __ = item
         
         if url:
             url = str(url).replace('&amp;','&')
@@ -303,7 +306,7 @@ class IPTorrentsCache(tvcache.TVCache):
 
     def _parseItem(self, item):
 
-        (title, url) = item
+        (title, url, __) = item
 
         if not title or not url:
             return None
