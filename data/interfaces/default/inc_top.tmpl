@@ -87,11 +87,13 @@
     //-->
     </script>
     <script type="text/javascript" src="$sbRoot/js/lib/jquery.scrolltopcontrol-1.1.js?$sbPID"></script>
+    <script type="text/javascript" src="$sbRoot/js/lib/jquery.stayInWebApp.min.js?$sbPID"></script>
     <script type="text/javascript" src="$sbRoot/js/browser.js?$sbPID"></script>
     <script type="text/javascript" src="$sbRoot/js/ajaxNotifications.js?$sbPID"></script>
     <script type="text/javascript">
     <!--
         \$(document).ready(function() {
+            \$.stayInWebApp();
             \$("#NAV$topmenu").addClass("active");
 
             \$("a.confirm").bind("click",function(e) {
