@@ -143,12 +143,12 @@ class PublicHDProvider(generic.TorrentProvider):
 
                 html = self.getURL(searchURL)
 
+                if not html:
+                    continue
+
                 #remove unneccecary <option> lines which are slowing down BeautifulSoup
                 optreg = re.compile( r'<option.*</option>' )
                 html = os.linesep.join([s for s in html.splitlines() if not optreg.search(s)])
-
-                if not html:
-                    continue
 
                 try:
                     soup = BeautifulSoup(html, features=["html5lib", "permissive"])
