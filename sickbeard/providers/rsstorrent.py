@@ -17,9 +17,7 @@
 
 
 import os
-import xml.dom.minidom
 import re
-from urlparse import urlparse, urljoin
 
 import sickbeard
 import generic
@@ -32,7 +30,6 @@ from sickbeard import clients
 from sickbeard.exceptions import ex
 
 from lib import requests
-from bs4 import BeautifulSoup
 from lib.bencode import bdecode
 
 class TorrentRssProvider(generic.TorrentProvider):
@@ -41,7 +38,7 @@ class TorrentRssProvider(generic.TorrentProvider):
 
         generic.TorrentProvider.__init__(self, name)
         self.cache = TorrentRssCache(self)
-        self.url = re.sub('\/$', '', url)
+        self.url = url
         self.enabled = True
         self.supportsBacklog = False
         self.session = None
@@ -138,7 +135,7 @@ class TorrentRssProvider(generic.TorrentProvider):
             return None
             
         if response.status_code != 200:
-            logger.log(self.name + u" page requested with url " + url +" returned status code is " + str(response.status_code) + ': ' + clients.http_error_code[response.status_code], logger.WARNING)
+            logger.log(self.name + u" page requested with url " + url + " returned status code is " + str(response.status_code) + ': ' + clients.http_error_code[response.status_code], logger.WARNING)
             return None
 
         return response.content
