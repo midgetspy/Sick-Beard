@@ -249,9 +249,7 @@ class ProperFinder():
                 result.quality = curProper.quality
 
                 # snatch it
-                downloadResult = search.snatchEpisode(result, SNATCHED_PROPER)
-
-                return downloadResult
+                search.snatchEpisode(result, SNATCHED_PROPER)
 
     def _genericName(self, name):
         return name.replace(".", " ").replace("-", " ").replace("_", " ").lower()
