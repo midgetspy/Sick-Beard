@@ -1369,6 +1369,7 @@ class ConfigProviders:
                       hdbits_username=None, hdbits_passkey=None,
 					  nextgen_username=None, nextgen_password=None,
                       speedcd_username=None, speedcd_password=None, speedcd_freeleech=None,
+                      binsearch_max=None, binsearch_alt=None,
                       newzbin_username=None, newzbin_password=None,
                       provider_order=None):
 
@@ -1499,6 +1500,8 @@ class ConfigProviders:
                 sickbeard.NEXTGEN = curEnabled
             elif curProvider == 'speedcd':
                 sickbeard.SPEEDCD = curEnabled
+            elif curProvider == 'binsearch':
+            	sickbeard.BINSEARCH = curEnabled
             elif curProvider in newznabProviderDict:
                 newznabProviderDict[curProvider].enabled = bool(curEnabled)
             elif curProvider in torrentRssProviderDict:
@@ -1555,6 +1558,9 @@ class ConfigProviders:
         sickbeard.SPEEDCD_USERNAME = speedcd_username.strip()
         sickbeard.SPEEDCD_PASSWORD = speedcd_password.strip()
         sickbeard.SPEEDCD_FREELEECH = config.checkbox_to_value(speedcd_freeleech)
+        
+        sickbeard.BINSEARCH_MAX = binsearch_max
+        sickbeard.BINSEARCH_ALT = binsearch_alt.strip()
 
         sickbeard.NEWZNAB_DATA = '!!!'.join([x.configStr() for x in sickbeard.newznabProviderList])
         sickbeard.PROVIDER_ORDER = provider_list
