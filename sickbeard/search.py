@@ -20,6 +20,7 @@ from __future__ import with_statement
 
 import os
 import traceback
+import re
 
 import sickbeard
 
@@ -181,7 +182,7 @@ def searchForNeededEpisodes():
                 if not bestResult or bestResult.quality < curResult.quality:
                     bestResult = curResult
 
-            bestResult = pickBestResult(curFoundResults[curEp])
+            bestResult = pickBestResult(curFoundResults[curEp], curEp.show)
 
             # if all results were rejected move on to the next episode
             if not bestResult:
@@ -200,7 +201,28 @@ def searchForNeededEpisodes():
     return foundResults.values()
 
 
-def pickBestResult(results, quality_list=None):
+def filter_release_name(name, filter_words):
+    """
+    Filters out results based on filter_words
+
+    name: name to check
+    filter_words : Words to filter on, separated by comma
+
+    Returns: False if the release name is OK, True if it contains one of the filter_words
+    """
+    if filter_words:
+        for test_word in filter_words.split(','):
+            test_word = test_word.strip()
+
+            if test_word:
+                if re.search('(^|[\W_])' + test_word + '($|[\W_])', name, re.I):
+                    logger.log(u"" + name + " contains word: " + test_word, logger.DEBUG)
+                    return True
+
+    return False
+
+
+def pickBestResult(results, show, quality_list=None):
 
     logger.log(u"Picking the best result out of " + str([x.name for x in results]), logger.DEBUG)
 
@@ -213,8 +235,17 @@ def pickBestResult(results, quality_list=None):
             logger.log(cur_result.name + " is a quality we know we don't want, rejecting it", logger.DEBUG)
             continue
 
+        if show.rls_ignore_words and filter_release_name(cur_result.name, show.rls_ignore_words):
+            logger.log(u"Ignoring " + cur_result.name + " based on ignored words filter: " + show.rls_ignore_words, logger.MESSAGE)
+            continue
+
+        if show.rls_require_words and not filter_release_name(cur_result.name, show.rls_require_words):
+            logger.log(u"Ignoring " + cur_result.name + " based on required words filter: " + show.rls_require_words, logger.MESSAGE)
+            continue
+
         if not bestResult or bestResult.quality < cur_result.quality and cur_result.quality != Quality.UNKNOWN:
             bestResult = cur_result
+
         elif bestResult.quality == cur_result.quality:
             if "proper" in cur_result.name.lower() or "repack" in cur_result.name.lower():
                 bestResult = cur_result
@@ -222,7 +253,7 @@ def pickBestResult(results, quality_list=None):
                 bestResult = cur_result
 
     if bestResult:
-        logger.log(u"Picked " + bestResult.name + " as the best", logger.DEBUG)
+        logger.log(u"Picked " + bestResult.name + " as the best", logger.MESSAGE)
     else:
         logger.log(u"No result picked.", logger.DEBUG)
 
@@ -312,7 +343,7 @@ def findEpisode(episode, manualSearch=False):
     if not didSearch:
         logger.log(u"No NZB/Torrent providers found or enabled in the sickbeard config. Please check your settings.", logger.ERROR)
 
-    bestResult = pickBestResult(foundResults)
+    bestResult = pickBestResult(foundResults, episode.show)
 
     return bestResult
 
@@ -364,7 +395,7 @@ def findSeason(show, season):
     # pick the best season NZB
     bestSeasonNZB = None
     if SEASON_RESULT in foundResults:
-        bestSeasonNZB = pickBestResult(foundResults[SEASON_RESULT], anyQualities + bestQualities)
+        bestSeasonNZB = pickBestResult(foundResults[SEASON_RESULT], show, anyQualities + bestQualities)
 
     highest_quality_overall = 0
     for cur_season in foundResults:
@@ -456,11 +487,6 @@ def findSeason(show, season):
                 epNum = epObj.episode
                 # if we have results for the episode
                 if epNum in foundResults and len(foundResults[epNum]) > 0:
-                    # but the multi-ep is worse quality, we don't want it
-                    # TODO: wtf is this False for
-                    #if False and multiResult.quality <= pickBestResult(foundResults[epNum]):
-                    #    notNeededEps.append(epNum)
-                    #else:
                     neededEps.append(epNum)
                 else:
                     neededEps.append(epNum)
@@ -508,6 +534,6 @@ def findSeason(show, season):
         if len(foundResults[curEp]) == 0:
             continue
 
-        finalResults.append(pickBestResult(foundResults[curEp]))
+        finalResults.append(pickBestResult(foundResults[curEp], show))
 
     return finalResults
