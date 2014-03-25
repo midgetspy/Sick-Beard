@@ -67,6 +67,7 @@ class TVShow(object):
         self.startyear = 0
         self.paused = 0
         self.air_by_date = 0
+        self.dvdorder = 0
         self.lang = lang
         self.last_update_tvdb = 1
 
@@ -323,6 +324,9 @@ class TVShow(object):
         if self.lang:
             ltvdb_api_parms['language'] = self.lang
 
+        if self.dvdorder != 0:
+            ltvdb_api_parms['dvdorder'] = True
+
         t = tvdb_api.Tvdb(**ltvdb_api_parms)
 
         cachedShow = t[self.tvdbid]
@@ -373,6 +377,9 @@ class TVShow(object):
 
         if self.lang:
             ltvdb_api_parms['language'] = self.lang
+
+        if self.dvdorder != 0:
+            ltvdb_api_parms['dvdorder'] = True
 
         try:
             t = tvdb_api.Tvdb(**ltvdb_api_parms)
@@ -504,6 +511,9 @@ class TVShow(object):
 
                 if self.lang:
                     ltvdb_api_parms['language'] = self.lang
+
+                if self.dvdorder != 0:
+                    ltvdb_api_parms['dvdorder'] = True
 
                 t = tvdb_api.Tvdb(**ltvdb_api_parms)
 
@@ -639,6 +649,10 @@ class TVShow(object):
             if self.air_by_date == None:
                 self.air_by_date = 0
 
+            self.dvdorder = sqlResults[0]["dvdorder"]
+            if self.dvdorder == None:
+                self.dvdorder = 0
+
             self.quality = int(sqlResults[0]["quality"])
             self.flatten_folders = int(sqlResults[0]["flatten_folders"])
             self.paused = int(sqlResults[0]["paused"])
@@ -667,6 +681,9 @@ class TVShow(object):
 
             if self.lang:
                 ltvdb_api_parms['language'] = self.lang
+
+            if self.dvdorder != 0:
+                ltvdb_api_parms['dvdorder'] = True
 
             t = tvdb_api.Tvdb(**ltvdb_api_parms)
 
@@ -810,6 +827,7 @@ class TVShow(object):
                         "flatten_folders": self.flatten_folders,
                         "paused": self.paused,
                         "air_by_date": self.air_by_date,
+                        "dvdorder": self.dvdorder,
                         "startyear": self.startyear,
                         "tvr_name": self.tvrname,
                         "lang": self.lang,
@@ -1104,7 +1122,10 @@ class TVEpisode(object):
                         ltvdb_api_parms['cache'] = False
 
                     if tvdb_lang:
-                            ltvdb_api_parms['language'] = tvdb_lang
+                        ltvdb_api_parms['language'] = tvdb_lang
+
+                    if self.dvdorder != 0:
+                        ltvdb_api_parms['dvdorder'] = True
 
                     t = tvdb_api.Tvdb(**ltvdb_api_parms)
                 else:

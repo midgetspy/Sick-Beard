@@ -26,7 +26,7 @@ from sickbeard import encodingKludge as ek
 from sickbeard.name_parser.parser import NameParser, InvalidNameException
 
 MIN_DB_VERSION = 9  # oldest db version we support migrating from
-MAX_DB_VERSION = 14
+MAX_DB_VERSION = 15
 
 
 class MainSanityCheck(db.DBSanityCheck):
@@ -421,4 +421,13 @@ class AddLastUpdateTVDB(AddShowidTvdbidIndex):
         if not self.hasColumn("tv_shows", "last_update_tvdb"):
             self.addColumn("tv_shows", "last_update_tvdb", default=1)
 
+        self.incDBVersion()
+
+
+class AddDvdOrderOption(UpgradeHistoryForGenericProviders):
+    def test(self):
+        return self.checkDBVersion() >= 13
+
+    def execute(self):
+        self.connection.action("ALTER TABLE tv_shows ADD dvdorder NUMERIC")
         self.incDBVersion()

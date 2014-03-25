@@ -175,6 +175,9 @@ class TIVOMetadata(generic.GenericMetadata):
             if tvdb_lang and not tvdb_lang == 'en':
                 ltvdb_api_parms['language'] = tvdb_lang
 
+            if ep_obj.show.dvdorder != 0:
+                ltvdb_api_parms['dvdorder'] = True
+
             t = tvdb_api.Tvdb(actors=True, **ltvdb_api_parms)
             myShow = t[ep_obj.show.tvdbid]
         except tvdb_exceptions.tvdb_shownotfound, e:

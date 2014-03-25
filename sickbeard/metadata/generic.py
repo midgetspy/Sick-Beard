@@ -346,6 +346,9 @@ class GenericMetadata():
             if tvdb_lang and not tvdb_lang == 'en':
                 ltvdb_api_parms['language'] = tvdb_lang
 
+            if ep_obj.show.dvdorder != 0:
+                ltvdb_api_parms['dvdorder'] = True
+
             t = tvdb_api.Tvdb(actors=True, **ltvdb_api_parms)
             tvdb_show_obj = t[ep_obj.show.tvdbid]
         except tvdb_exceptions.tvdb_shownotfound, e:
@@ -721,6 +724,9 @@ class GenericMetadata():
             if tvdb_lang and not tvdb_lang == 'en':
                 ltvdb_api_parms['language'] = tvdb_lang
 
+            if show_obj.dvdorder != 0:
+                ltvdb_api_parms['dvdorder'] = True
+
             t = tvdb_api.Tvdb(banners=True, **ltvdb_api_parms)
             tvdb_show_obj = t[show_obj.tvdbid]
         except (tvdb_exceptions.tvdb_error, IOError), e:
@@ -757,6 +763,9 @@ class GenericMetadata():
 
             if tvdb_lang and not tvdb_lang == 'en':
                 ltvdb_api_parms['language'] = tvdb_lang
+
+            if ep_obj.show.dvdorder != 0:
+                ltvdb_api_parms['dvdorder'] = True
 
             t = tvdb_api.Tvdb(banners=True, **ltvdb_api_parms)
             tvdb_show_obj = t[show_obj.tvdbid]
