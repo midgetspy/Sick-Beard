@@ -756,16 +756,16 @@ class ConfigSearch:
         sickbeard.USE_NZBS = config.checkbox_to_value(use_nzbs)
         sickbeard.NZB_METHOD = nzb_method
 
+        sickbeard.SAB_HOST = config.clean_url(sab_host)
         sickbeard.SAB_USERNAME = sab_username
         sickbeard.SAB_PASSWORD = sab_password
         sickbeard.SAB_APIKEY = sab_apikey.strip()
         sickbeard.SAB_CATEGORY = sab_category
-        sickbeard.SAB_HOST = config.clean_url(sab_host)
 
         if not config.change_NZB_DIR(nzb_dir):
             results += ["Unable to create directory " + os.path.normpath(nzb_dir) + ", directory not changed."]
 
-        sickbeard.NZBGET_HOST = config.clean_host(nzbget_host)
+        sickbeard.NZBGET_HOST = config.clean_url(nzbget_host)
         sickbeard.NZBGET_USERNAME = nzbget_username
         sickbeard.NZBGET_PASSWORD = nzbget_password
         sickbeard.NZBGET_CATEGORY = nzbget_category
