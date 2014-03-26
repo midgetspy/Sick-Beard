@@ -40,6 +40,9 @@ class BinSearchProvider(generic.NZBProvider):
         def isEnabled(self):
                 return sickbeard.BINSEARCH
 
+        def imageName(self):
+            return 'binsearch.png'
+
         def _checkAuth(self):
                 if sickbeard.BINSEARCH_MAX in (None, "") or sickbeard.BINSEARCH_ALT in (None, ""):
                         raise exceptions.AuthException("binsearch parameters details are empty, check your config")
