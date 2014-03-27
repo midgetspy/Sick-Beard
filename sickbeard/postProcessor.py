@@ -205,7 +205,7 @@ class PostProcessor(object):
         # figure out which files we want to delete
         file_list = [file_path]
         if associated_files:
-            file_list = file_list + self.list_associated_files(file_path)
+            file_list = file_list + self.list_associated_files(file_path, base_name_only=True)
 
         if not file_list:
             self._log(u"There were no files associated with " + file_path + ", not deleting anything", logger.DEBUG)
@@ -858,7 +858,7 @@ class PostProcessor(object):
                 if cur_ep.location:
                     helpers.delete_empty_folders(ek.ek(os.path.dirname, cur_ep.location), keep_dir=ep_obj.show._location)
             except (OSError, IOError):
-                raise exceptions.PostProcessingFailed("Unable to delete the existing files")
+                raise exceptions.PostProcessingFailed(u"Unable to delete the existing files")
 
         # if the show directory doesn't exist then make it if allowed
         if not ek.ek(os.path.isdir, ep_obj.show._location) and sickbeard.CREATE_MISSING_SHOW_DIRS:
@@ -868,7 +868,7 @@ class PostProcessor(object):
                 # do the library update for synoindex
                 notifiers.synoindex_notifier.addFolder(ep_obj.show._location)
             except (OSError, IOError):
-                raise exceptions.PostProcessingFailed("Unable to create the show directory: " + ep_obj.show._location)
+                raise exceptions.PostProcessingFailed(u"Unable to create the show directory: " + ep_obj.show._location)
 
             # get metadata for the show (but not episode because it hasn't been fully processed)
             ep_obj.show.writeMetadata(True)
@@ -929,7 +929,7 @@ class PostProcessor(object):
 
         # create any folders we need
         if not helpers.make_dirs(dest_path):
-            raise exceptions.PostProcessingFailed("Unable to create destination folder: " + dest_path)
+            raise exceptions.PostProcessingFailed(u"Unable to create destination folder: " + dest_path)
 
         # figure out the base name of the resulting episode file
         if sickbeard.RENAME_EPISODES:
@@ -954,9 +954,9 @@ class PostProcessor(object):
               self._moveAndSymlink(self.file_path, dest_path, new_base_name, sickbeard.MOVE_ASSOCIATED_FILES, sickbeard.USE_SUBTITLES and ep_obj.show.subtitles)
             else:
               logger.log(u"Unknown process method: " + sickbeard.PROCESS_METHOD, logger.ERROR)
-              raise exceptions.PostProcessingFailed("Unable to move the files to their new home")
+              raise exceptions.PostProcessingFailed(u"Unable to move the files to their new home")
         except (OSError, IOError):
-            raise exceptions.PostProcessingFailed("Unable to move the files to destination folder: " + dest_path)
+            raise exceptions.PostProcessingFailed(u"Unable to move the files to destination folder: " + dest_path)
 
         # download subtitles
         if sickbeard.USE_SUBTITLES and ep_obj.show.subtitles:
