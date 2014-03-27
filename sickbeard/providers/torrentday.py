@@ -204,6 +204,9 @@ class TorrentDayProvider(generic.TorrentProvider):
                     item = title, url, seeders, leechers
                     items[mode].append(item)
 
+            #For each search mode sort all the items by seeders
+            items[mode].sort(key=lambda tup: tup[2], reverse=True)
+
             results += items[mode]  
                 
         return results
