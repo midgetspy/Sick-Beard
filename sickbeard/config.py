@@ -20,7 +20,9 @@ import cherrypy
 import os.path
 import datetime
 import re
+import urlparse
 
+from sickbeard import encodingKludge as ek
 from sickbeard import helpers
 from sickbeard import logger
 from sickbeard import naming
@@ -255,22 +257,31 @@ def clean_hosts(hosts, default_port=None):
 
 def clean_url(url):
     """
-    Returns an url starting with http:// or https:// and ending with /
+    Returns an cleaned url starting with a scheme and folder with trailing /
     or an empty string
     """
 
-    if url:
+    if url and url.strip():
 
-        if not re.match(r'(https?|scgi)://.*', url):
-            url = 'http://' + url
+        url = url.strip()
 
-        if not url.endswith('/'):
-            url = url + '/'
+        if '://' not in url:
+            url = '//' + url
+
+        scheme, netloc, path, query, fragment = urlparse.urlsplit(url, 'http')
+
+        if not path.endswith('/'):
+            basename, ext = ek.ek(os.path.splitext, ek.ek(os.path.basename, path))  # @UnusedVariable
+            if not ext:
+                path = path + '/'
+
+        cleaned_url = urlparse.urlunsplit((scheme, netloc, path, query, fragment))
 
     else:
-        url = ''
+        cleaned_url = ''
 
-    return url
+    return cleaned_url
+
 
 
 def to_int(val, default=0):
