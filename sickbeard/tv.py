@@ -81,6 +81,9 @@ class TVShow(object):
         self.lang = lang
         self.last_update_tvdb = 1
 
+        self.rls_ignore_words = ""
+        self.rls_require_words = ""
+
         self.lock = threading.Lock()
         self._isDirGood = False
 
@@ -697,6 +700,9 @@ class TVShow(object):
 
             self.last_update_tvdb = sqlResults[0]["last_update_tvdb"]
 
+            self.rls_ignore_words = sqlResults[0]["rls_ignore_words"]
+            self.rls_require_words = sqlResults[0]["rls_require_words"]
+
             if self.imdbid == "":
                 self.imdbid = sqlResults[0]["imdb_id"]                    
 
@@ -967,7 +973,9 @@ class TVShow(object):
                         "tvr_name": self.tvrname,
                         "lang": self.lang,
                         "imdb_id": self.imdbid,
-                        "last_update_tvdb": self.last_update_tvdb
+                        "last_update_tvdb": self.last_update_tvdb,
+                        "rls_ignore_words": self.rls_ignore_words,
+                        "rls_require_words": self.rls_require_words
                         }
 
         myDB.upsert("tv_shows", newValueDict, controlValueDict)
