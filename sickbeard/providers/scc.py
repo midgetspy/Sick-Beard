@@ -166,10 +166,9 @@ class SCCProvider(generic.TorrentProvider):
                     searchURL = self.urls['search'] % (search_string, self.categories)
                     nonsceneSearchURL = self.urls['nonscene'] % (search_string)
                     data = [self.getURL(searchURL), self.getURL(nonsceneSearchURL)]
+                    logger.log(u"Search string: " + nonsceneSearchURL, logger.DEBUG)
 
                 logger.log(u"Search string: " + searchURL, logger.DEBUG)
-                if nonsceneSearchURL:
-                    logger.log(u"Search string: " + nonsceneSearchURL, logger.DEBUG)
 
                 if not data:
                     continue
