@@ -1,4 +1,4 @@
-# Author: Nic Wolfe <nic@wolfeden.ca>
+    # Author: Nic Wolfe <nic@wolfeden.ca>
 # URL: http://code.google.com/p/sickbeard/
 #
 # This file is part of Sick Beard.
@@ -955,7 +955,7 @@ class PostProcessor(object):
             elif self.process_method == "symlink":
               self._moveAndSymlink(self.file_path, dest_path, new_base_name, sickbeard.MOVE_ASSOCIATED_FILES, sickbeard.USE_SUBTITLES and ep_obj.show.subtitles)
             else:
-              logger.log(u"Unknown process method: " + sickbeard.PROCESS_METHOD, logger.ERROR)
+              logger.log(u"Unknown process method: " + str(self.process_method), logger.ERROR)
               raise exceptions.PostProcessingFailed(u"Unable to move the files to their new home")
         except (OSError, IOError):
             raise exceptions.PostProcessingFailed(u"Unable to move the files to destination folder: " + dest_path)
