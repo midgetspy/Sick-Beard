@@ -167,8 +167,9 @@ class SCCProvider(generic.TorrentProvider):
                     nonsceneSearchURL = self.urls['nonscene'] % (search_string)
                     data = [self.getURL(searchURL), self.getURL(nonsceneSearchURL)]
 
-                logger.log(u"Search Scene String: " + searchURL, logger.DEBUG)
-                logger.log(u"Search NonScene string: " + nonsceneSearchURL, logger.DEBUG)
+                logger.log(u"Search string: " + searchURL, logger.DEBUG)
+                if nonsceneSearchURL:
+                    logger.log(u"Search string: " + nonsceneSearchURL, logger.DEBUG)
 
                 if not data:
                     continue
@@ -182,7 +183,7 @@ class SCCProvider(generic.TorrentProvider):
 
                         #Continue only if one Release is found
                         if len(torrent_rows)<2:
-                            logger.log(u"The Data returned from " + self.name + " does not contain any torrent", logger.DEBUG)
+                            logger.log(u"The Data returned from " + self.name + " (" + html.title.string + ") does not contain any torrent", logger.DEBUG)
                             continue
 
                         for result in torrent_table.find_all('tr')[1:]:
@@ -191,6 +192,10 @@ class SCCProvider(generic.TorrentProvider):
                                 link = result.find('td', attrs={'class': 'ttr_name'}).find('a')
                                 url = result.find('td', attrs={'class': 'td_dl'}).find('a')
                                 title = link.string
+                                if re.search('\.\.\.', title):
+                                    details_html = BeautifulSoup(self.getURL(self.url + "/" + link['href']))
+                                    title = re.search('(?<=").+(?<!")', details_html.title.string).group(0)
+
                                 download_url = self.urls['download'] % url['href']
                                 id = int(link['href'].replace('details?id=', ''))
                                 seeders = int(result.find('td', attrs={'class': 'ttr_seeders'}).string)
