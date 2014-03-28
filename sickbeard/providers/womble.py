@@ -32,7 +32,7 @@ class WombleProvider(generic.NZBProvider):
 
         self.cache = WombleCache(self)
 
-        self.url = 'http://nzb.isasecret.com/'
+        self.url = 'http://newshost.co.za/'
 
     def isEnabled(self):
         return sickbeard.WOMBLE
