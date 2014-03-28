@@ -29,7 +29,7 @@ from sickbeard import db
 from sickbeard import classes
 from sickbeard import helpers
 from sickbeard import show_name_helpers
-from sickbeard.common import Overview 
+from sickbeard.common import Overview
 from sickbeard.exceptions import ex
 from sickbeard import clients
 from lib import requests
@@ -48,27 +48,27 @@ class TorrentLeechProvider(generic.TorrentProvider):
     def __init__(self):
 
         generic.TorrentProvider.__init__(self, "TorrentLeech")
-        
+
         self.supportsBacklog = True
 
         self.cache = TorrentLeechCache(self)
-        
+
         self.url = self.urls['base_url']
-        
-        self.categories = "2,26,27,32"
-        
+
+        self.categories = {'Season': '2,27', 'Episode': '2,26,32', 'RSS': '2,26,32'}
+
         self.session = None
 
     def isEnabled(self):
         return sickbeard.TORRENTLEECH
-        
+
     def imageName(self):
         return 'torrentleech.png'
-    
+
     def getQuality(self, item):
-        
+
         quality = Quality.sceneQuality(item[0])
-        return quality    
+        return quality
 
     def _doLogin(self):
 
@@ -77,58 +77,58 @@ class TorrentLeechProvider(generic.TorrentProvider):
                         'remember_me': 'on',
                         'login': 'submit',
                         }
-        
+
         self.session = requests.Session()
-        
+
         try:
             response = self.session.post(self.urls['login'], data=login_params, timeout=30)
         except (requests.exceptions.ConnectionError, requests.exceptions.HTTPError), e:
             logger.log(u'Unable to connect to ' + self.name + ' provider: ' +ex(e), logger.ERROR)
             return False
-        
+
         if re.search('Invalid Username/password', response.text) \
         or re.search('<title>Login :: TorrentLeech.org</title>', response.text) \
         or response.status_code == 401:
-            logger.log(u'Invalid username or password for ' + self.name + ' Check your settings', logger.ERROR)       
+            logger.log(u'Invalid username or password for ' + self.name + ' Check your settings', logger.ERROR)
             return False
-        
+
         return True
 
     def _get_season_search_strings(self, show, season=None):
 
         search_string = {'Episode': []}
-    
+
         if not show:
             return []
 
         seasonEp = show.getAllEpisodes(season)
 
-        wantedEp = [x for x in seasonEp if show.getOverview(x.status) in (Overview.WANTED, Overview.QUAL)]          
+        wantedEp = [x for x in seasonEp if show.getOverview(x.status) in (Overview.WANTED, Overview.QUAL)]
 
         #If Every episode in Season is a wanted Episode then search for Season first
         if wantedEp == seasonEp and not show.air_by_date:
             search_string = {'Season': [], 'Episode': []}
             for show_name in set(show_name_helpers.allPossibleShowNames(show)):
-                ep_string = show_name +' S%02d' % int(season) #1) ShowName SXX   
+                ep_string = show_name +' S%02d' % int(season) #1) ShowName SXX
                 search_string['Season'].append(ep_string)
-                      
-        #Building the search string with the episodes we need         
+
+        #Building the search string with the episodes we need
         for ep_obj in wantedEp:
             search_string['Episode'] += self._get_episode_search_strings(ep_obj)[0]['Episode']
-        
+
         #If no Episode is needed then return an empty list
         if not search_string['Episode']:
             return []
-        
+
         return [search_string]
 
     def _get_episode_search_strings(self, ep_obj, add_string=''):
-       
+
         search_string = {'Episode': []}
-       
+
         if not ep_obj:
             return []
-                
+
         if ep_obj.show.air_by_date:
             for show_name in set(show_name_helpers.allPossibleShowNames(ep_obj.show)):
                 ep_string = show_name_helpers.sanitizeSceneName(show_name) +' '+ str(ep_obj.airdate)
@@ -137,40 +137,40 @@ class TorrentLeechProvider(generic.TorrentProvider):
             for show_name in set(show_name_helpers.allPossibleShowNames(ep_obj.show)):
                 ep_string = show_name_helpers.sanitizeSceneName(show_name) +' '+ \
                 sickbeard.config.naming_ep_type[2] % {'seasonnumber': ep_obj.season, 'episodenumber': ep_obj.episode}
-                
+
                 search_string['Episode'].append(re.sub('\s+', ' ', ep_string))
-    
+
         return [search_string]
 
     def _doSearch(self, search_params, show=None):
-    
+
         results = []
         items = {'Season': [], 'Episode': [], 'RSS': []}
-        
+
         if not self._doLogin():
             return []
-        
+
         for mode in search_params.keys():
             for search_string in search_params[mode]:
-                
+
                 if isinstance(search_string, unicode):
                     search_string = unidecode(search_string)
-                
-                searchURL = self.urls['search'] % (search_string, self.categories)
+
+                searchURL = self.urls['search'] % (search_string, self.categories[mode])
 
                 logger.log(u"Search string: " + searchURL, logger.DEBUG)
-        
+
                 data = self.getURL(searchURL)
                 if not data:
                     continue
 
                 try:
                     html = BeautifulSoup(data, features=["html5lib", "permissive"])
-                    
+
                     torrent_table = html.find('table', attrs = {'id' : 'torrenttable'})
                     torrent_rows = torrent_table.find_all('tr') if torrent_table else []
 
-                    #Continue only if one Release is found                    
+                    #Continue only if one Release is found
                     if len(torrent_rows)<2:
                         logger.log(u"The Data returned from " + self.name + " do not contains any torrent", logger.DEBUG)
                         continue
@@ -190,7 +190,7 @@ class TorrentLeechProvider(generic.TorrentProvider):
 
                         #Filter unseeded torrent
                         if mode != 'RSS' and seeders == 0:
-                            continue 
+                            continue
 
                         if not title or not download_url:
                             continue
@@ -204,16 +204,16 @@ class TorrentLeechProvider(generic.TorrentProvider):
                     logger.log(u"Failed parsing " + self.name + " Traceback: "  + traceback.format_exc(), logger.ERROR)
 
             #For each search mode sort all the items by seeders
-            items[mode].sort(key=lambda tup: tup[3], reverse=True)        
+            items[mode].sort(key=lambda tup: tup[3], reverse=True)
 
-            results += items[mode]  
-                
+            results += items[mode]
+
         return results
 
     def _get_title_and_url(self, item):
-        
+
         title, url, id, seeders, leechers = item
-        
+
         if url:
             url = str(url).replace('&amp;','&')
 
