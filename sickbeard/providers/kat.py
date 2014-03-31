@@ -21,9 +21,10 @@ from __future__ import with_statement
 import sys
 import os
 import traceback
-import urllib, urllib2
+import urllib
 import re
 import datetime
+import urlparse
 
 import sickbeard
 import generic
@@ -245,7 +246,7 @@ class KATProvider(generic.TorrentProvider):
                     for tr in torrent_rows[1:]:
 
                         try:
-                            link = self.url + (tr.find('div', {'class': 'torrentname'}).find_all('a')[1])['href']
+                            link = urlparse.urljoin(self.url, (tr.find('div', {'class': 'torrentname'}).find_all('a')[1])['href'])
                             id = tr.get('id')[-7:]
                             title = (tr.find('div', {'class': 'torrentname'}).find_all('a')[1]).text
                             url = tr.find('a', 'imagnet')['href']

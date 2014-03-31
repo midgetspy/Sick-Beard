@@ -53,7 +53,7 @@ def processDir(dirName, nzbName=None, process_method=None, force=False, is_prior
 
     global process_result, returnStr
 
-    returnStr = ''
+    returnStr = u""
 
     returnStr += logHelper(u"Processing folder " + dirName, logger.DEBUG)
 

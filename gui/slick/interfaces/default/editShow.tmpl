@@ -108,6 +108,17 @@ This <b>DOES NOT</b> allow Sick Beard to download non-english TV episodes!<br />
 <input type="checkbox" name="air_by_date" #if $show.air_by_date == 1 then "checked=\"checked\"" else ""# /><br />
 (check this if the show is released as Show.03.02.2010 rather than Show.S02E03) 
 <br /><br />
+
+<b>Ignored Words:</b>  <input type="text" name="rls_ignore_words" id="rls_ignore_words" value="$show.rls_ignore_words" size="50" /><br />
+Results with any of these words in the title will be filtered out <br />
+Separate words with a comma, e.g. "word1,word2,word3"
+<br /><br />
+
+<b>Required Words:</b> <input type="text" name="rls_require_words" id="rls_require_words" value="$show.rls_require_words" size="50" /><br />
+Results without one of these words in the title will be filtered out <br />
+Separate words with a comma, e.g. "word1,word2,word3"
+<br /><br />
+
 <input type="submit" id="submit" value="Submit" class="btn btn-primary" />
 </form>
 

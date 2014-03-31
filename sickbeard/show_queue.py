@@ -274,6 +274,8 @@ class QueueItemAdd(ShowQueueItem):
             # be smartish about this
             if self.show.genre and "talk show" in self.show.genre.lower():
                 self.show.air_by_date = 1
+            if self.show.genre and "documentary" in self.show.genre.lower():
+                self.show.air_by_date = 0
 
         except tvdb_exceptions.tvdb_exception, e:
             logger.log(u"Unable to add show due to an error with TVDB: " + ex(e), logger.ERROR)
