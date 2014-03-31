@@ -18,7 +18,8 @@
 # You should have received a copy of the GNU General Public License
 # along with Sick Beard.  If not, see <http://www.gnu.org/licenses/>.
 
-import urllib, urllib2
+import urllib
+import urllib2
 import time
 
 import sickbeard
@@ -30,25 +31,23 @@ from sickbeard.exceptions import ex
 API_URL = "https://api.pushover.net/1/messages.json"
 API_KEY = "OKCXmkvHN1syU2e8xvpefTnyvVWGv5"
 
+
 class PushoverNotifier:
 
-    def test_notify(self, userKey=None):
-        return self._sendPushover("This is a test notification from SickBeard", 'Test', userKey )
-
-    def _sendPushover(self, msg, title, userKey=None ):
+    def _sendPushover(self, msg, title, userKey=None):
         """
         Sends a pushover notification to the address provided
-        
+
         msg: The message to send (unicode)
         title: The title of the message
         userKey: The pushover user id to send the message to (or to subscribe with)
-        
+
         returns: True if the message succeeded, False otherwise
         """
 
         if not userKey:
             userKey = sickbeard.PUSHOVER_USERKEY
-        
+
         # build up the URL and parameters
         msg = msg.strip()
         curUrl = API_URL
@@ -59,78 +58,86 @@ class PushoverNotifier:
             'user': userKey,
             'message': msg.encode('utf-8'),
             'timestamp': int(time.time())
-			})
-
+            })
 
         # send the request to pushover
         try:
+            # TODO: Use our getURL from helper?
             req = urllib2.Request(curUrl)
             handle = urllib2.urlopen(req, data)
             handle.close()
-            
+
         except urllib2.URLError, e:
             # if we get an error back that doesn't have an error code then who knows what's really happening
             if not hasattr(e, 'code'):
-                logger.log("Pushover notification failed." + ex(e), logger.ERROR)
+                logger.log(u"PUSHOVER: Notification failed." + ex(e), logger.ERROR)
                 return False
             else:
-                logger.log("Pushover notification failed. Error code: " + str(e.code), logger.WARNING)
+                logger.log(u"PUSHOVER: Notification failed. Error code: " + str(e.code), logger.WARNING)
 
             # HTTP status 404 if the provided email address isn't a Pushover user.
             if e.code == 404:
-                logger.log("Username is wrong/not a pushover email. Pushover will send an email to it", logger.WARNING)
+                logger.log(u"PUSHOVER: Username is wrong/not a Pushover email. Pushover will send an email to it", logger.WARNING)
                 return False
-            
+
             # For HTTP status code 401's, it is because you are passing in either an invalid token, or the user has not added your service.
             elif e.code == 401:
-                
+
                 #HTTP status 401 if the user doesn't have the service added
                 subscribeNote = self._sendPushover(msg, title, userKey )
                 if subscribeNote:
-                    logger.log("Subscription send", logger.DEBUG)
+                    logger.log(u"PUSHOVER: Subscription sent", logger.DEBUG)
                     return True
                 else:
-                    logger.log("Subscription could not be send", logger.ERROR)
+                    logger.log(u"PUSHOVER: Subscription could not be sent", logger.ERROR)
                     return False
-            
+
             # If you receive an HTTP status code of 400, it is because you failed to send the proper parameters
             elif e.code == 400:
-                logger.log("Wrong data sent to pushover", logger.ERROR)
+                logger.log(u"PUSHOVER: Wrong data sent to Pushover", logger.ERROR)
                 return False
 
-        logger.log("Pushover notification successful.", logger.DEBUG)
+        logger.log(u"PUSHOVER: Notification successful.", logger.DEBUG)
         return True
 
-    def notify_snatch(self, ep_name, title=notifyStrings[NOTIFY_SNATCH]):
-        if sickbeard.PUSHOVER_NOTIFY_ONSNATCH:
-            self._notifyPushover(title, ep_name)
-            
-
-    def notify_download(self, ep_name, title=notifyStrings[NOTIFY_DOWNLOAD]):
-        if sickbeard.PUSHOVER_NOTIFY_ONDOWNLOAD:
-            self._notifyPushover(title, ep_name)
-
-    def _notifyPushover(self, title, message, userKey=None ):
+    def _notify(self, title, message, userKey=None ):
         """
         Sends a pushover notification based on the provided info or SB config
 
         title: The title of the notification to send
         message: The message string to send
-        userKey: The userKey to send the notification to 
+        userKey: The userKey to send the notification to
         """
 
+        # suppress notifications if the notifier is disabled but the notify options are checked
         if not sickbeard.USE_PUSHOVER:
-            logger.log("Notification for Pushover not enabled, skipping this notification", logger.DEBUG)
             return False
 
-        # if no userKey was given then use the one from the config
+        # fill in omitted parameters
         if not userKey:
             userKey = sickbeard.PUSHOVER_USERKEY
 
-        logger.log("Sending notification for " + message, logger.DEBUG)
+        logger.log(u"PUSHOVER: Sending notification for " + message, logger.DEBUG)
 
-        # self._sendPushover(message, title, userKey)
         self._sendPushover(message, title)
         return True
+
+##############################################################################
+# Public functions
+##############################################################################
+
+    def notify_snatch(self, ep_name):
+        if sickbeard.PUSHOVER_NOTIFY_ONSNATCH:
+            self._notify(notifyStrings[NOTIFY_SNATCH], ep_name)
+
+    def notify_download(self, ep_name):
+        if sickbeard.PUSHOVER_NOTIFY_ONDOWNLOAD:
+            self._notify(notifyStrings[NOTIFY_DOWNLOAD], ep_name)
+
+    def test_notify(self, userKey=None):
+        return self._sendPushover("This is a test notification from SickBeard", 'Test', userKey)
+
+    def update_library(self, showName=None):
+        pass
 
 notifier = PushoverNotifier

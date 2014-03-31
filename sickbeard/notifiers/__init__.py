@@ -81,3 +81,8 @@ def notify_download(ep_name):
 def notify_snatch(ep_name):
     for n in notifiers:
         n.notify_snatch(ep_name)
+
+
+def update_library(ep_obj):
+    for n in notifiers:
+        n.update_library(ep_obj)
