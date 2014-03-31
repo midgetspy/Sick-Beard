@@ -182,7 +182,11 @@ class SCCProvider(generic.TorrentProvider):
 
                         #Continue only if one Release is found
                         if len(torrent_rows)<2:
-                            logger.log(u"The Data returned from " + self.name + " (" + html.title.string + ") does not contain any torrent", logger.DEBUG)
+                            if html.title:
+                                source = self.name + " (" + html.title.string + ")"
+                            else:
+                                source = self.name
+                            logger.log(u"The Data returned from " + source + " does not contain any torrent", logger.DEBUG)
                             continue
 
                         for result in torrent_table.find_all('tr')[1:]:
