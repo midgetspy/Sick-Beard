@@ -30,7 +30,7 @@ from sickbeard import db
 from sickbeard import classes
 from sickbeard import helpers
 from sickbeard import show_name_helpers
-from sickbeard.common import Overview 
+from sickbeard.common import Overview
 from sickbeard.exceptions import ex
 from sickbeard import clients
 from lib import requests
@@ -43,6 +43,7 @@ class SCCProvider(generic.TorrentProvider):
             'login' : 'https://sceneaccess.eu/login',
             'detail' : 'https://www.sceneaccess.eu/details?id=%s',
             'search' : 'https://sceneaccess.eu/browse?search=%s&method=1&%s',
+            'nonscene' : 'https://sceneaccess.eu/nonscene?search=%s&method=1&c44=44&c45=44',
             'archive' : 'https://sceneaccess.eu/archive?search=%s&method=1&c26=26',
             'download' : 'https://www.sceneaccess.eu/%s',
             }
@@ -70,7 +71,7 @@ class SCCProvider(generic.TorrentProvider):
     def getQuality(self, item):
 
         quality = Quality.sceneQuality(item[0])
-        return quality    
+        return quality
 
     def _doLogin(self):
 
@@ -82,9 +83,7 @@ class SCCProvider(generic.TorrentProvider):
         self.session = requests.Session()
 
         try:
-            headers = {
-                'user-agent': 'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/32.0.1700.107 Safari/537.36'
-            }
+            headers = {'user-agent': 'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/32.0.1700.107 Safari/537.36'}
             response = self.session.post(self.urls['login'], data=login_params, headers=headers, timeout=30, verify=False)
         except (requests.exceptions.ConnectionError, requests.exceptions.HTTPError), e:
             logger.log(u'Unable to connect to ' + self.name + ' provider: ' +ex(e), logger.ERROR)
@@ -93,7 +92,7 @@ class SCCProvider(generic.TorrentProvider):
         if re.search('Username or password incorrect', response.text) \
         or re.search('<title>SceneAccess \| Login</title>', response.text) \
         or response.status_code == 401:
-            logger.log(u'Invalid username or password for ' + self.name + ' Check your settings', logger.ERROR)       
+            logger.log(u'Invalid username or password for ' + self.name + ' Check your settings', logger.ERROR)
             return False
 
         return True
@@ -107,16 +106,16 @@ class SCCProvider(generic.TorrentProvider):
 
         seasonEp = show.getAllEpisodes(season)
 
-        wantedEp = [x for x in seasonEp if show.getOverview(x.status) in (Overview.WANTED, Overview.QUAL)]          
+        wantedEp = [x for x in seasonEp if show.getOverview(x.status) in (Overview.WANTED, Overview.QUAL)]
 
         #If Every episode in Season is a wanted Episode then search for Season first
         if wantedEp == seasonEp and not show.air_by_date:
             search_string = {'Season': [], 'Episode': []}
             for show_name in set(show_name_helpers.allPossibleShowNames(show)):
-                ep_string = show_name +' S%02d' % int(season) #1) ShowName SXX   
+                ep_string = show_name +' S%02d' % int(season) #1) ShowName SXX
                 search_string['Season'].append(ep_string)
 
-        #Building the search string with the episodes we need         
+        #Building the search string with the episodes we need
         for ep_obj in wantedEp:
             search_string['Episode'] += self._get_episode_search_strings(ep_obj)[0]['Episode']
 
@@ -142,7 +141,7 @@ class SCCProvider(generic.TorrentProvider):
                 ep_string = show_name_helpers.sanitizeSceneName(show_name) +' '+ \
                 sickbeard.config.naming_ep_type[2] % {'seasonnumber': ep_obj.season, 'episodenumber': ep_obj.episode}
 
-                search_string['Episode'].append(re.sub('\s+', ' ', ep_string))    
+                search_string['Episode'].append(re.sub('\s+', ' ', ep_string))
 
         return [search_string]
 
@@ -159,61 +158,77 @@ class SCCProvider(generic.TorrentProvider):
 
                 if isinstance(search_string, unicode):
                     search_string = unidecode(search_string)
-                
+
                 if mode == 'Season':
                     searchURL = self.urls['archive'] % (search_string)
-                else:     
+                    data = self.getURL(searchURL)
+                else:
                     searchURL = self.urls['search'] % (search_string, self.categories)
+                    nonsceneSearchURL = self.urls['nonscene'] % (search_string)
+                    data = [self.getURL(searchURL), self.getURL(nonsceneSearchURL)]
+                    logger.log(u"Search string: " + nonsceneSearchURL, logger.DEBUG)
 
                 logger.log(u"Search string: " + searchURL, logger.DEBUG)
 
-                data = self.getURL(searchURL)
                 if not data:
                     continue
 
                 try:
-                    html = BeautifulSoup(data, features=["html5lib", "permissive"])
+                    for dataItem in data:
+                        html = BeautifulSoup(dataItem, features=["html5lib", "permissive"])
 
-                    torrent_table = html.find('table', attrs = {'id' : 'torrents-table'})
-                    torrent_rows = torrent_table.find_all('tr') if torrent_table else []
+                        torrent_table = html.find('table', attrs = {'id' : 'torrents-table'})
+                        torrent_rows = torrent_table.find_all('tr') if torrent_table else []
 
-                    #Continue only if one Release is found
-                    if len(torrent_rows)<2:
-                        logger.log(u"The Data returned from " + self.name + " does not contain any torrent", logger.DEBUG)
-                        continue
-
-                    for result in torrent_table.find_all('tr')[1:]:
-
-                        try:
-                            link = result.find('td', attrs = {'class' : 'ttr_name'}).find('a')
-                            url = result.find('td', attrs = {'class' : 'td_dl'}).find('a')
-                            title = link.string
-                            download_url = self.urls['download'] % url['href']
-                            id = int(link['href'].replace('details?id=', ''))
-                            seeders = int(result.find('td', attrs = {'class' : 'ttr_seeders'}).string)
-                            leechers = int(result.find('td', attrs = {'class' : 'ttr_leechers'}).string)
-                        except (AttributeError, TypeError):
+                        #Continue only if one Release is found
+                        if len(torrent_rows)<2:
+                            if html.title:
+                                source = self.name + " (" + html.title.string + ")"
+                            else:
+                                source = self.name
+                            logger.log(u"The Data returned from " + source + " does not contain any torrent", logger.DEBUG)
                             continue
 
-                        if mode != 'RSS' and seeders == 0:
-                            continue 
+                        for result in torrent_table.find_all('tr')[1:]:
 
-                        if not title or not download_url:
-                            continue
+                            try:
+                                link = result.find('td', attrs={'class': 'ttr_name'}).find('a')
+                                url = result.find('td', attrs={'class': 'td_dl'}).find('a')
+                                title = link.string
+                                if re.search('\.\.\.', title):
+                                    details_html = BeautifulSoup(self.getURL(self.url + "/" + link['href']))
+                                    title = re.search('(?<=").+(?<!")', details_html.title.string).group(0)
 
-                        item = title, download_url, id, seeders, leechers
-                        logger.log(u"Found result: " + title + "(" + searchURL + ")", logger.DEBUG)
+                                download_url = self.urls['download'] % url['href']
+                                id = int(link['href'].replace('details?id=', ''))
+                                seeders = int(result.find('td', attrs={'class': 'ttr_seeders'}).string)
+                                leechers = int(result.find('td', attrs={'class': 'ttr_leechers'}).string)
+                            except (AttributeError, TypeError):
+                                continue
 
-                        items[mode].append(item)
+                            if mode != 'RSS' and seeders == 0:
+                                continue
+
+                            if not title or not download_url:
+                                continue
+
+                            item = title, download_url, id, seeders, leechers
+
+                            if re.search('<title>SceneAccess \| Non-Scene</title>', dataItem):
+                                logger.log(u"Found result: " + title + "(" + nonsceneSearchURL + ")", logger.DEBUG)
+                            else:
+                                logger.log(u"Found result: " + title + "(" + searchURL + ")", logger.DEBUG)
+
+                            items[mode].append(item)
 
                 except Exception, e:
                     logger.log(u"Failed parsing " + self.name + " Traceback: "  + traceback.format_exc(), logger.ERROR)
 
             #For each search mode sort all the items by seeders
-            items[mode].sort(key=lambda tup: tup[3], reverse=True)        
+            items[mode].sort(key=lambda tup: tup[3], reverse=True)
 
-            results += items[mode]  
-                
+            results += items[mode]
+
         return results
 
     def _get_title_and_url(self, item):
@@ -232,7 +247,7 @@ class SCCProvider(generic.TorrentProvider):
 
         if not headers:
             headers = {}
-            
+
         headers.update({'user-agent': 'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/32.0.1700.107 Safari/537.36'})
 
         try:
@@ -288,12 +303,12 @@ class SCCCache(tvcache.TVCache):
 
         search_params = {'RSS': ['']}
         rss_results = self.provider._doSearch(search_params)
-        
+
         if rss_results:
             self.setLastUpdate()
         else:
             return []
-        
+
         logger.log(u"Clearing " + self.provider.name + " cache and updating with new information")
         self._clearCache()
 
