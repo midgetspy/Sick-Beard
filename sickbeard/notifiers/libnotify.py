@@ -22,13 +22,14 @@ import sickbeard
 
 from sickbeard import logger, common
 
+
 def diagnose():
     '''
     Check the environment for reasons libnotify isn't working.  Return a
     user-readable message indicating possible issues.
     '''
     try:
-        import pynotify  #@UnusedImport
+        import pynotify  # @UnusedImport
     except ImportError:
         return (u"<p>Error: pynotify isn't installed.  On Ubuntu/Debian, install the "
                 u"<a href=\"apt:python-notify\">python-notify</a> package.")
@@ -80,17 +81,6 @@ class LibnotifyNotifier:
         self.gobject = gobject
         return True
 
-    def notify_snatch(self, ep_name):
-        if sickbeard.LIBNOTIFY_NOTIFY_ONSNATCH:
-            self._notify(common.notifyStrings[common.NOTIFY_SNATCH], ep_name)
-
-    def notify_download(self, ep_name):
-        if sickbeard.LIBNOTIFY_NOTIFY_ONDOWNLOAD:
-            self._notify(common.notifyStrings[common.NOTIFY_DOWNLOAD], ep_name)
-
-    def test_notify(self):
-        return self._notify('Test notification', "This is a test notification from Sick Beard", force=True)
-
     def _notify(self, title, message, force=False):
         if not sickbeard.USE_LIBNOTIFY and not force:
             return False
@@ -110,5 +100,23 @@ class LibnotifyNotifier:
             return n.show()
         except self.gobject.GError:
             return False
+
+##############################################################################
+# Public functions
+##############################################################################
+
+    def notify_snatch(self, ep_name):
+        if sickbeard.LIBNOTIFY_NOTIFY_ONSNATCH:
+            self._notify(common.notifyStrings[common.NOTIFY_SNATCH], ep_name)
+
+    def notify_download(self, ep_name):
+        if sickbeard.LIBNOTIFY_NOTIFY_ONDOWNLOAD:
+            self._notify(common.notifyStrings[common.NOTIFY_DOWNLOAD], ep_name)
+
+    def test_notify(self):
+        return self._notify('Test notification', "This is a test notification from Sick Beard", force=True)
+
+    def update_library(self, showName=None):
+        pass
 
 notifier = LibnotifyNotifier

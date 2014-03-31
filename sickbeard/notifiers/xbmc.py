@@ -347,7 +347,7 @@ class XBMCNotifier:
                 result = json.load(response)
                 response.close()
                 logger.log(u"XBMC JSON response: " + str(result), logger.DEBUG)
-                return result # need to return response for parsing
+                return result  # need to return response for parsing
             except ValueError, e:
                 logger.log(u"Unable to decode JSON: " + response, logger.WARNING)
                 return False
@@ -395,7 +395,7 @@ class XBMCNotifier:
             for show in shows:
                 if (show["label"] == showName):
                     tvshowid = show["tvshowid"]
-                    break # exit out of loop otherwise the label and showname will not match up
+                    break  # exit out of loop otherwise the label and showname will not match up
 
             # this can be big, so free some memory
             del shows
