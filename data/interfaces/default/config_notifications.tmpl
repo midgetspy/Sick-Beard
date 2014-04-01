@@ -39,6 +39,13 @@
 
                         <div id="content_use_xbmc">
                             <div class="field-pair">
+                                <input type="checkbox" name="xbmc_always_on" id="xbmc_always_on" #if $sickbeard.XBMC_ALWAYS_ON then "checked=\"checked\"" else ""# />
+                                <label class="clearfix" for="xbmc_always_on">
+                                    <span class="component-title">Always On</span>
+                                    <span class="component-desc">Log errors when unreachable?</span>
+                                </label>
+                            </div>
+                            <div class="field-pair">
                                 <input type="checkbox" name="xbmc_notify_onsnatch" id="xbmc_notify_onsnatch" #if $sickbeard.XBMC_NOTIFY_ONSNATCH then "checked=\"checked\"" else ""# />
                                 <label class="clearfix" for="xbmc_notify_onsnatch">
                                     <span class="component-title">Notify on Snatch</span>
