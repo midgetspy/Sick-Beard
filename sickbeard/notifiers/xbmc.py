@@ -104,7 +104,7 @@ class XBMCNotifier:
             host: XBMC webserver host:port
             username: XBMC webserver username
             password: XBMC webserver password
-            force: Used for the Test method to override config saftey checks
+            force: Used for the Test method to override config safety checks
 
         Returns:
             Returns a list results in the format of host:ip:result
@@ -174,7 +174,7 @@ class XBMCNotifier:
             password = sickbeard.XBMC_PASSWORD
 
         if not host:
-            logger.log(u'XBMC: No XBMC host passed, aborting update', logger.DEBUG)
+            logger.log(u"XBMC: No XBMC host passed, aborting update", logger.DEBUG)
             return False
 
         for key in command:
@@ -192,9 +192,6 @@ class XBMCNotifier:
                 base64string = base64.encodestring('%s:%s' % (username, password))[:-1]
                 authheader = "Basic %s" % base64string
                 req.add_header("Authorization", authheader)
-                logger.log(u"XBMC: Contacting XBMC (with auth header) via url: " + fixStupidEncodings(url), logger.DEBUG)
-            else:
-                logger.log(u"XBMC: Contacting XBMC via url: " + fixStupidEncodings(url), logger.DEBUG)
 
             response = urllib2.urlopen(req)
             result = response.read().decode(sickbeard.SYS_ENCODING)
@@ -271,7 +268,7 @@ class XBMCNotifier:
             for path in paths:
                 # we do not need it double-encoded, gawd this is dumb
                 unEncPath = urllib.unquote(path.text).decode(sickbeard.SYS_ENCODING)
-                logger.log(u"XBMC: XBMC Updating " + showName + " on " + host + " at " + unEncPath, logger.DEBUG)
+                logger.log(u"XBMC: XBMC Updating " + showName + " on " + host + " at " + unEncPath, logger.MESSAGE)
                 updateCommand = {'command': 'ExecBuiltIn', 'parameter': 'XBMC.updatelibrary(video, %s)' % (unEncPath)}
                 request = self._send_to_xbmc(updateCommand, host)
                 if not request:
@@ -332,9 +329,6 @@ class XBMCNotifier:
                 base64string = base64.encodestring('%s:%s' % (username, password))[:-1]
                 authheader = "Basic %s" % base64string
                 req.add_header("Authorization", authheader)
-                logger.log(u"XBMC: Contacting XBMC (with auth header) via url: " + fixStupidEncodings(url), logger.DEBUG)
-            else:
-                logger.log(u"XBMC: Contacting XBMC via url: " + fixStupidEncodings(url), logger.DEBUG)
 
             try:
                 response = urllib2.urlopen(req)
@@ -389,7 +383,7 @@ class XBMCNotifier:
             if showsResponse and "result" in showsResponse and "tvshows" in showsResponse["result"]:
                 shows = showsResponse["result"]["tvshows"]
             else:
-                logger.log(u"No tvshows in XBMC TV show list", logger.DEBUG)
+                logger.log(u"XBMC: No tvshows in XBMC TV show list", logger.DEBUG)
                 return False
 
             for show in shows:
@@ -416,7 +410,7 @@ class XBMCNotifier:
                 logger.log(u"XBMC: No valid path found for " + showName + " with ID: " + str(tvshowid) + " on " + host, logger.WARNING)
                 return False
 
-            logger.log(u"XBMC: XBMC Updating " + showName + " on " + host + " at " + path, logger.DEBUG)
+            logger.log(u"XBMC: XBMC Updating " + showName + " on " + host + " at " + path, logger.MESSAGE)
             updateCommand = '{"jsonrpc":"2.0","method":"VideoLibrary.Scan","params":{"directory":%s},"id":1}' % (json.dumps(path))
             request = self._send_to_xbmc_json(updateCommand, host)
             if not request:
@@ -460,9 +454,9 @@ class XBMCNotifier:
         """Public wrapper for the update library functions to branch the logic for JSON-RPC or legacy HTTP API
 
         Checks the XBMC API version to branch the logic to call either the legacy HTTP API or the newer JSON-RPC over HTTP methods.
-        Do the ability of accepting a list of hosts deliminated by comma, we split off the first host to send the update to.
+        Do the ability of accepting a list of hosts delimited by comma, we split off the first host to send the update to.
         This is a workaround for SQL backend users as updating multiple clients causes duplicate entries.
-        Future plan is to revist how we store the host/ip/username/pw/options so that it may be more flexible.
+        Future plan is to revisit how we store the host/ip/username/pw/options so that it may be more flexible.
 
         Args:
             showName: Name of a TV show to specifically target the library update for
