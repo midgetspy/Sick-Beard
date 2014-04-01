@@ -1089,7 +1089,7 @@ class ConfigNotifications:
         return _munge(t)
 
     @cherrypy.expose
-    def saveNotifications(self, use_xbmc=None, xbmc_notify_onsnatch=None, xbmc_notify_ondownload=None, xbmc_update_onlyfirst=None,
+    def saveNotifications(self, use_xbmc=None, xbmc_always_on=None, xbmc_notify_onsnatch=None, xbmc_notify_ondownload=None, xbmc_update_onlyfirst=None,
                           xbmc_update_library=None, xbmc_update_full=None, xbmc_host=None, xbmc_username=None, xbmc_password=None,
                           use_plex=None, plex_notify_onsnatch=None, plex_notify_ondownload=None, plex_update_library=None,
                           plex_server_host=None, plex_host=None, plex_username=None, plex_password=None,
@@ -1110,6 +1110,7 @@ class ConfigNotifications:
 
         # Home Theater
         sickbeard.USE_XBMC = config.checkbox_to_value(use_xbmc)
+        sickbeard.XBMC_ALWAYS_ON = config.checkbox_to_value(xbmc_always_on)
         sickbeard.XBMC_NOTIFY_ONSNATCH = config.checkbox_to_value(xbmc_notify_onsnatch)
         sickbeard.XBMC_NOTIFY_ONDOWNLOAD = config.checkbox_to_value(xbmc_notify_ondownload)
         sickbeard.XBMC_UPDATE_LIBRARY = config.checkbox_to_value(xbmc_update_library)
@@ -1919,7 +1920,7 @@ class Home:
         if result:
             return "Tweet successful, check your twitter to make sure it worked"
         else:
-            return "Error sending tweet"
+            return "Error sending Tweet"
 
     @cherrypy.expose
     def testXBMC(self, host=None, username=None, password=None):
@@ -1971,9 +1972,9 @@ class Home:
         host = config.clean_host(host)
         result = notifiers.nmj_notifier.test_notify(urllib.unquote_plus(host), database, mount)
         if result:
-            return "Successfully started the scan update"
+            return "Successfully started the scan update for NMJ"
         else:
-            return "Test failed to start the scan update"
+            return "Failed to start the scan update for NMJ"
 
     @cherrypy.expose
     def settingsNMJ(self, host=None):
@@ -1993,9 +1994,9 @@ class Home:
         host = config.clean_host(host)
         result = notifiers.nmjv2_notifier.test_notify(urllib.unquote_plus(host))
         if result:
-            return "Test notice sent successfully to " + urllib.unquote_plus(host)
+            return "Successfully started the scan update for NMJv2"
         else:
-            return "Test notice failed to " + urllib.unquote_plus(host)
+            return "Failed to start the scan update for NMJv2"
 
     @cherrypy.expose
     def settingsNMJv2(self, host=None, dbloc=None, instance=None):
@@ -2004,9 +2005,9 @@ class Home:
         host = config.clean_host(host)
         result = notifiers.nmjv2_notifier.notify_settings(urllib.unquote_plus(host), dbloc, instance)
         if result:
-            return '{"message": "NMJ Database found at: %(host)s", "database": "%(database)s"}' % {"host": host, "database": sickbeard.NMJv2_DATABASE}
+            return '{"message": "NMJv2 Database found at: %(host)s", "database": "%(database)s"}' % {"host": host, "database": sickbeard.NMJv2_DATABASE}
         else:
-            return '{"message": "Unable to find NMJ Database at location: %(dbloc)s. Is the right location selected and PCH running?", "database": ""}' % {"dbloc": dbloc}
+            return '{"message": "Unable to find NMJv2 Database at location: %(dbloc)s. Is the right location selected and PCH running?", "database": ""}' % {"dbloc": dbloc}
 
     @cherrypy.expose
     def testTrakt(self, api=None, username=None, password=None):

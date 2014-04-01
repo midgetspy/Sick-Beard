@@ -39,6 +39,13 @@
 
                         <div id="content_use_xbmc">
                             <div class="field-pair">
+                                <input type="checkbox" name="xbmc_always_on" id="xbmc_always_on" #if $sickbeard.XBMC_ALWAYS_ON then "checked=\"checked\"" else ""# />
+                                <label class="clearfix" for="xbmc_always_on">
+                                    <span class="component-title">Always On</span>
+                                    <span class="component-desc">Log errors when unreachable?</span>
+                                </label>
+                            </div>
+                            <div class="field-pair">
                                 <input type="checkbox" name="xbmc_notify_onsnatch" id="xbmc_notify_onsnatch" #if $sickbeard.XBMC_NOTIFY_ONSNATCH then "checked=\"checked\"" else ""# />
                                 <label class="clearfix" for="xbmc_notify_onsnatch">
                                     <span class="component-title">Notify on Snatch</span>
@@ -455,6 +462,7 @@
                         <img class="notifier-icon" src="$sbRoot/images/notifiers/growl.png" alt="" title="Growl" />
                         <h3><a href="http://growl.info/" rel="noreferrer" onclick="window.open('${sickbeard.ANON_REDIRECT}' + this.href, '_blank'); return false;">Growl</a></h3>
                         <p>A cross-platform unobtrusive global notification system.</p>
+                        <p>For more information visit our <a href="https://github.com/midgetspy/Sick-Beard/wiki/Notifiers:-Growl" rel="noreferrer" onclick="window.open('${sickbeard.ANON_REDIRECT}' + this.href, '_blank'); return false;">Wiki</a>.</p>
                     </div>
                     <fieldset class="component-group-list">
                         <div class="field-pair">
@@ -669,7 +677,7 @@
                     <div class="component-group-desc">
                         <img class="notifier-icon" src="$sbRoot/images/notifiers/boxcar.png" alt="" title="Boxcar" />
                         <h3><a href="http://boxcar.io/" rel="noreferrer" onclick="window.open('${sickbeard.ANON_REDIRECT}' + this.href, '_blank'); return false;">Boxcar</a></h3>
-                        <p>Read your messages where and when you want them! A subscription will be send if needed.</p>
+                        <p>Read your messages where and when you want them! A subscription will be sent if needed.</p>
                     </div>
                     <fieldset class="component-group-list">
                         <div class="field-pair">
