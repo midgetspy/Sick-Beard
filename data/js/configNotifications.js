@@ -49,7 +49,8 @@ $(document).ready(function () {
     $('#testPushover').click(function () {
         $('#testPushover-result').html(loading);
         var pushover_userkey = $("#pushover_userkey").val();
-        $.get(sbRoot + "/home/testPushover", {'userKey': pushover_userkey},
+        var pushover_customsound = $("#pushover_customsound").val();
+        $.get(sbRoot + "/home/testPushover", {'userKey': pushover_userkey, 'customSound': pushover_customsound},
             function (data) { $('#testPushover-result').html(data); });
     });
 
