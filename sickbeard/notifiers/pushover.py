@@ -32,22 +32,25 @@ API_KEY = "OKCXmkvHN1syU2e8xvpefTnyvVWGv5"
 
 class PushoverNotifier:
 
-    def test_notify(self, userKey=None):
-        return self._sendPushover("This is a test notification from SickBeard", 'Test', userKey )
+    def test_notify(self, userKey=None, customSound=None):
+        return self._sendPushover("This is a test notification from SickBeard", 'Test', userKey, customSound )
 
-    def _sendPushover(self, msg, title, userKey=None ):
+    def _sendPushover(self, msg, title, userKey=None, customSound=None ):
         """
         Sends a pushover notification to the address provided
         
         msg: The message to send (unicode)
         title: The title of the message
         userKey: The pushover user id to send the message to (or to subscribe with)
+        customSound: The pushover sound to play on target device. Missing or incorrect value results in default Pushover tone playing.
         
         returns: True if the message succeeded, False otherwise
         """
 
         if not userKey:
             userKey = sickbeard.PUSHOVER_USERKEY
+        if not customSound:
+            customSound = sickbeard.PUSHOVER_CUSTOMSOUND
         
         # build up the URL and parameters
         msg = msg.strip()
@@ -57,6 +60,7 @@ class PushoverNotifier:
             'token': API_KEY,
             'title': title,
             'user': userKey,
+            'sound': customSound,
             'message': msg.encode('utf-8'),
             'timestamp': int(time.time())
 			})
@@ -85,7 +89,7 @@ class PushoverNotifier:
             elif e.code == 401:
                 
                 #HTTP status 401 if the user doesn't have the service added
-                subscribeNote = self._sendPushover(msg, title, userKey )
+                subscribeNote = self._sendPushover(msg, title, userKey, customSound )
                 if subscribeNote:
                     logger.log("Subscription send", logger.DEBUG)
                     return True
@@ -110,13 +114,14 @@ class PushoverNotifier:
         if sickbeard.PUSHOVER_NOTIFY_ONDOWNLOAD:
             self._notifyPushover(title, ep_name)
 
-    def _notifyPushover(self, title, message, userKey=None ):
+    def _notifyPushover(self, title, message, userKey=None, customSound=None ):
         """
         Sends a pushover notification based on the provided info or SB config
 
         title: The title of the notification to send
         message: The message string to send
         userKey: The userKey to send the notification to 
+        customSound: The pushover sound to play on target device. Missing or incorrect value results in default Pushover tone playing.
         """
 
         if not sickbeard.USE_PUSHOVER:
@@ -126,6 +131,9 @@ class PushoverNotifier:
         # if no userKey was given then use the one from the config
         if not userKey:
             userKey = sickbeard.PUSHOVER_USERKEY
+        # if no customSound was given then use the one from the config
+        if not customSound:
+            customSound = sickbeard.PUSHOVER_CUSTOMSOUND
 
         logger.log("Sending notification for " + message, logger.DEBUG)
 
