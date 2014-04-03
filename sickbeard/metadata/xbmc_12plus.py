@@ -173,7 +173,7 @@ class XBMC_12PlusMetadata(generic.GenericMetadata):
 
         genre = etree.SubElement(tv_node, "genre")
         if myShow["genre"] != None:
-                genre.text = " / ".join([x.strip() for x in myShow["genre"].split('|') if x and x.strip()])
+            genre.text = " / ".join([x.strip() for x in myShow["genre"].split('|') if x and x.strip()])
 
         premiered = etree.SubElement(tv_node, "premiered")
         if myShow["firstaired"] != None:
