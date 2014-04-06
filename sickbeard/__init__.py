@@ -299,7 +299,7 @@ EXTRA_SCRIPTS = []
 
 GIT_PATH = None
 
-IGNORE_WORDS = "german,french,core2hd,dutch,swedish,480p"
+IGNORE_WORDS = "german,french,core2hd,dutch,swedish,480p,promo"
 
 __INITIALIZED__ = False
 
