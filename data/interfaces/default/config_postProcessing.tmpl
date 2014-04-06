@@ -62,9 +62,13 @@
                                 <span class="component-title">Move Associated Files</span>
                                 <span class="component-desc">Move srr/srt/sfv/etc files with the episode when processed?</span>
                             </label>
-                            <label class="nocheck clearfix" for="move_associated_files">
-                                <span class="component-title">&nbsp;</span>
-                                <span class="component-desc"><b>NOTE:</b> <i>.nfo</i> will be renamed to <i>.nfo-orig</i> when moved.</span>
+                        </div>
+
+                         <div class="field-pair">
+                            <input type="checkbox" name="nfo_rename" id="nfo_rename" #if $sickbeard.NFO_RENAME == True then "checked=\"checked\"" else ""# />
+                            <label class="clearfix" for="nfo_rename">
+                                <span class="component-title">Rename .nfo file</span>
+                                <span class="component-desc">Rename the original .nfo file to .nfo-orig to avoid conflicts?</span>
                             </label>
                         </div>
 

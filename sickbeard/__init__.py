@@ -184,6 +184,7 @@ PROCESS_AUTOMATICALLY = False
 KEEP_PROCESSED_DIR = False
 MOVE_ASSOCIATED_FILES = False
 FILTER_ASSOCIATED_FILES = None
+NFO_RENAME = True
 TV_DOWNLOAD_DIR = None
 
 NZBS = False
@@ -348,7 +349,7 @@ def initialize(consoleLogging=True):
                 USE_LIBNOTIFY, LIBNOTIFY_NOTIFY_ONSNATCH, LIBNOTIFY_NOTIFY_ONDOWNLOAD, USE_NMJ, NMJ_HOST, NMJ_DATABASE, NMJ_MOUNT, USE_NMJv2, NMJv2_HOST, NMJv2_DATABASE, NMJv2_DBLOC, \
                 USE_SYNOINDEX, SYNOINDEX_NOTIFY_ONSNATCH, SYNOINDEX_NOTIFY_ONDOWNLOAD, SYNOINDEX_UPDATE_LIBRARY, \
                 USE_LISTVIEW, METADATA_XBMC, METADATA_XBMC_12PLUS, METADATA_MEDIABROWSER, METADATA_MEDE8ER, METADATA_PS3, metadata_provider_dict, \
-                GIT_PATH, MOVE_ASSOCIATED_FILES, FILTER_ASSOCIATED_FILES, \
+                GIT_PATH, MOVE_ASSOCIATED_FILES, FILTER_ASSOCIATED_FILES, NFO_RENAME, \
                 COMING_EPS_LAYOUT, COMING_EPS_SORT, COMING_EPS_DISPLAY_PAUSED, METADATA_WDTV, METADATA_TIVO, IGNORE_WORDS, CREATE_MISSING_SHOW_DIRS, \
                 ADD_SHOWS_WO_DIR, ANON_REDIRECT
 
@@ -455,6 +456,7 @@ def initialize(consoleLogging=True):
         KEEP_PROCESSED_DIR = check_setting_int(CFG, 'General', 'keep_processed_dir', 1)
         MOVE_ASSOCIATED_FILES = check_setting_int(CFG, 'General', 'move_associated_files', 0)
         FILTER_ASSOCIATED_FILES = check_setting_str(CFG, 'General', 'filter_associated_files', '')
+        NFO_RENAME = check_setting_int(CFG, 'General', 'nfo_rename', 1)
         CREATE_MISSING_SHOW_DIRS = check_setting_int(CFG, 'General', 'create_missing_show_dirs', 0)
         ADD_SHOWS_WO_DIR = check_setting_int(CFG, 'General', 'add_shows_wo_dir', 0)
 
@@ -1002,6 +1004,7 @@ def save_config():
     new_config['General']['keep_processed_dir'] = int(KEEP_PROCESSED_DIR)
     new_config['General']['move_associated_files'] = int(MOVE_ASSOCIATED_FILES)
     new_config['General']['filter_associated_files'] = FILTER_ASSOCIATED_FILES
+    new_config['General']['nfo_rename'] = int(NFO_RENAME)
     new_config['General']['process_automatically'] = int(PROCESS_AUTOMATICALLY)
     new_config['General']['rename_episodes'] = int(RENAME_EPISODES)
     new_config['General']['create_missing_show_dirs'] = int(CREATE_MISSING_SHOW_DIRS)
