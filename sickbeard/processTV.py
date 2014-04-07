@@ -103,7 +103,7 @@ def processDir(dirName, nzbName=None, method=None, recurse=False, pp_options={})
     elif ek.ek(os.path.basename, dirName).startswith('_UNDERSIZED_'):
         returnStr += logHelper(u"The directory name indicates that it was previously rejected for being undersized, cancelling", logger.DEBUG)
         return returnStr
-    elif ek.ek(os.path.basename, dirName).startswith('_UNPACK_'):
+    elif ek.ek(os.path.basename, dirName).upper().startswith('_UNPACK'):
         returnStr += logHelper(u"The directory name indicates that this release is in the process of being unpacked, skipping", logger.DEBUG)
         return returnStr
 
