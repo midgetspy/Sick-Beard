@@ -51,6 +51,8 @@ def sendNZB(nzb):
     url = urlparse.urljoin(url, "/xmlrpc")
 
     try:
+        logger.log(u"Connecting to NZBGet: " + url, logger.DEBUG)
+
         nzbGetRPC = xmlrpclib.ServerProxy(url)
 
         if nzbGetRPC.writelog("INFO", "SickBeard connected to drop off " + nzb.name + ".nzb" + " any moment now."):
