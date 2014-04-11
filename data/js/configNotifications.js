@@ -146,7 +146,7 @@ $(document).ready(function () {
             var JSONData = $.parseJSON(data);
             $('#testNMJv2-result').html(JSONData.message);
             $('#nmjv2_database').val(JSONData.database);
-            
+
             if (JSONData.database) {
                 $('#nmjv2_database').attr('readonly', true);
             } else {
@@ -158,7 +158,7 @@ $(document).ready(function () {
     $('#testNMJv2').click(function () {
         $('#testNMJv2-result').html(loading);
         var nmjv2_host = $("#nmjv2_host").val();
-        
+
         $.get(sbRoot + "/home/testNMJv2", {'host': nmjv2_host},
             function (data){ $('#testNMJv2-result').html(data); });
     });
@@ -172,6 +172,16 @@ $(document).ready(function () {
         $.get(sbRoot + "/home/testTrakt", {'api': trakt_api, 'username': trakt_username, 'password': trakt_password},
             function (data) { $('#testTrakt-result').html(data); });
     });
+
+    $('#testXmpp').click(function () {
+        $('#testXmpp-result').html(loading);
+        var xmpp_target = $("#xmpp_target").val();
+        var xmpp_username = $("#xmpp_username").val();
+        var xmpp_password = $("#xmpp_password").val();
+        $.get(sbRoot + "/home/testXmpp", {'username': xmpp_username, 'password': xmpp_password, 'target': xmpp_target},
+            function (data) { $('#testXmpp-result').html(data); });
+    });
+
 
     $('#testNMA').click(function () {
         $('#testNMA-result').html(loading);

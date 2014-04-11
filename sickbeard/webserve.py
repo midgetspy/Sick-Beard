@@ -1102,6 +1102,7 @@ class ConfigNotifications:
                           use_nmj=None, nmj_host=None, nmj_database=None, nmj_mount=None, use_synoindex=None,
                           use_nmjv2=None, nmjv2_host=None, nmjv2_dbloc=None, nmjv2_database=None,
                           use_trakt=None, trakt_username=None, trakt_password=None, trakt_api=None,
+                          use_xmpp=None, xmpp_username=None, xmpp_password=None, xmpp_target=None, xmpp_notify_ondownload=None, xmpp_notify_onsnatch=None,
                           use_pytivo=None, pytivo_notify_onsnatch=None, pytivo_notify_ondownload=None, pytivo_update_library=None,
                           pytivo_host=None, pytivo_share_name=None, pytivo_tivo_name=None,
                           use_nma=None, nma_notify_onsnatch=None, nma_notify_ondownload=None, nma_api=None, nma_priority=0):
@@ -1190,6 +1191,13 @@ class ConfigNotifications:
         sickbeard.TRAKT_USERNAME = trakt_username
         sickbeard.TRAKT_PASSWORD = trakt_password
         sickbeard.TRAKT_API = trakt_api
+
+        sickbeard.USE_XMPP = config.checkbox_to_value(use_xmpp)
+        sickbeard.XMPP_USERNAME = xmpp_username
+        sickbeard.XMPP_PASSWORD = xmpp_password
+        sickbeard.XMPP_TARGET = xmpp_target
+        sickbeard.XMPP_NOTIFY_ONDOWNLOAD = config.checkbox_to_value(xmpp_notify_ondownload)
+        sickbeard.XMPP_NOTIFY_ONSNATCH = config.checkbox_to_value(xmpp_notify_onsnatch)
 
         sickbeard.save_config()
 
@@ -2017,6 +2025,16 @@ class Home:
             return "Test notice sent successfully to Trakt"
         else:
             return "Test notice failed to Trakt"
+
+    @cherrypy.expose
+    def testXmpp(self, username=None, password=None, target=None):
+        cherrypy.response.headers['Cache-Control'] = "max-age=0,no-cache,no-store"
+
+        result = notifiers.xmpp_notifier.test_notify(username, password, target, force=True)
+        if result:
+            return "Test notice sent successfully"
+        else:
+            return "Failed to send test notice."
 
     @cherrypy.expose
     def testNMA(self, nma_api=None, nma_priority=0):

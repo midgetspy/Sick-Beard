@@ -291,6 +291,13 @@ NMA_NOTIFY_ONDOWNLOAD = False
 NMA_API = None
 NMA_PRIORITY = 0
 
+USE_XMPP = False
+XMPP_USERNAME = None
+XMPP_PASSWORD = None
+XMPP_TARGET = None
+XMPP_NOTIFY_ONDOWNLOAD = False
+XMPP_NOTIFY_ONSNATCH = False
+
 COMING_EPS_LAYOUT = None
 COMING_EPS_DISPLAY_PAUSED = None
 COMING_EPS_SORT = None
@@ -320,6 +327,7 @@ def initialize(consoleLogging=True):
                 USE_XBMC, XBMC_NOTIFY_ONSNATCH, XBMC_NOTIFY_ONDOWNLOAD, XBMC_UPDATE_FULL, XBMC_UPDATE_ONLYFIRST, \
                 XBMC_UPDATE_LIBRARY, XBMC_HOST, XBMC_USERNAME, XBMC_PASSWORD, \
                 USE_TRAKT, TRAKT_USERNAME, TRAKT_PASSWORD, TRAKT_API, \
+                USE_XMPP, XMPP_USERNAME, XMPP_PASSWORD, XMPP_TARGET, XMPP_NOTIFY_ONDOWNLOAD, XMPP_NOTIFY_ONSNATCH,\
                 USE_PLEX, PLEX_NOTIFY_ONSNATCH, PLEX_NOTIFY_ONDOWNLOAD, PLEX_UPDATE_LIBRARY, \
                 PLEX_SERVER_HOST, PLEX_HOST, PLEX_USERNAME, PLEX_PASSWORD, \
                 showUpdateScheduler, __INITIALIZED__, LAUNCH_BROWSER, showList, loadingShowList, \
@@ -606,6 +614,14 @@ def initialize(consoleLogging=True):
         TRAKT_USERNAME = check_setting_str(CFG, 'Trakt', 'trakt_username', '')
         TRAKT_PASSWORD = check_setting_str(CFG, 'Trakt', 'trakt_password', '')
         TRAKT_API = check_setting_str(CFG, 'Trakt', 'trakt_api', '')
+
+        CheckSection(CFG, 'Xmpp')
+        USE_XMPP = bool(check_setting_int(CFG, 'Xmpp', 'use_xmpp', 0))
+        XMPP_USERNAME = check_setting_str(CFG, 'Xmpp', 'xmpp_username', '')
+        XMPP_PASSWORD = check_setting_str(CFG, 'Xmpp', 'xmpp_password', '')
+        XMPP_TARGET = check_setting_str(CFG, 'Xmpp', 'xmpp_target', '')
+        XMPP_NOTIFY_ONDOWNLOAD = bool(check_setting_int(CFG, 'Xmpp', 'xmpp_notify_ondownload', 0))
+        XMPP_NOTIFY_ONSNATCH = bool(check_setting_int(CFG, 'Xmpp', 'xmpp_notify_onsnatch', 0))
 
         CheckSection(CFG, 'pyTivo')
         USE_PYTIVO = bool(check_setting_int(CFG, 'pyTivo', 'use_pytivo', 0))
@@ -1123,6 +1139,14 @@ def save_config():
     new_config['Trakt']['trakt_username'] = TRAKT_USERNAME
     new_config['Trakt']['trakt_password'] = TRAKT_PASSWORD
     new_config['Trakt']['trakt_api'] = TRAKT_API
+
+    new_config['Xmpp'] = {}
+    new_config['Xmpp']['use_xmpp'] = int(USE_XMPP)
+    new_config['Xmpp']['xmpp_username'] = XMPP_USERNAME
+    new_config['Xmpp']['xmpp_password'] = XMPP_PASSWORD
+    new_config['Xmpp']['xmpp_target'] = XMPP_TARGET
+    new_config['Xmpp']['xmpp_notify_ondownload'] = int(XMPP_NOTIFY_ONDOWNLOAD)
+    new_config['Xmpp']['xmpp_notify_onsnatch'] = int(XMPP_NOTIFY_ONSNATCH)
 
     new_config['pyTivo'] = {}
     new_config['pyTivo']['use_pytivo'] = int(USE_PYTIVO)
