@@ -27,6 +27,8 @@ import sickbeard
 from base64 import standard_b64encode
 import xmlrpclib
 
+from sickbeard import encodingKludge as ek
+from sickbeard.exceptions import ex
 from sickbeard.providers.generic import GenericProvider
 from sickbeard import config
 from sickbeard import logger
@@ -41,16 +43,19 @@ def sendNZB(nzb):
         logger.log(u"No NZBGet host found in configuration. Please configure it.", logger.ERROR)
         return False
 
-    url = config.clean_url(sickbeard.NZBGET_HOST)
-
-    if sickbeard.NZBGET_USERNAME or sickbeard.NZBGET_PASSWORD:
-        scheme, netloc, path, query, fragment = urlparse.urlsplit(url)
-        netloc = sickbeard.NZBGET_USERNAME + ":" + sickbeard.NZBGET_PASSWORD + "@" + netloc
-        url = urlparse.urlunsplit((scheme, netloc, path, query, fragment))
-
-    url = urlparse.urljoin(url, "/xmlrpc")
-
     try:
+        url = config.clean_url(sickbeard.NZBGET_HOST)
+
+        if sickbeard.NZBGET_USERNAME or sickbeard.NZBGET_PASSWORD:
+            scheme, netloc, path, query, fragment = urlparse.urlsplit(url)
+            netloc = sickbeard.NZBGET_USERNAME + ":" + sickbeard.NZBGET_PASSWORD + "@" + netloc
+            url = urlparse.urlunsplit((scheme, netloc, path, query, fragment))
+
+        url = urlparse.urljoin(url, u"/xmlrpc")
+        url = url.encode('utf-8', 'ignore')
+
+        logger.log(u"Connecting to NZBGet: " + url, logger.DEBUG)
+
         nzbGetRPC = xmlrpclib.ServerProxy(url)
 
         if nzbGetRPC.writelog("INFO", "SickBeard connected to drop off " + nzb.name + ".nzb" + " any moment now."):
@@ -68,8 +73,12 @@ def sendNZB(nzb):
             logger.log(u"NZBGet username or password is incorrect.", logger.ERROR)
 
         else:
-            logger.log(u"Protocol Error: " + e.errmsg, logger.ERROR)
+            logger.log(u"NZBGet protocol error: " + e.errmsg, logger.ERROR)
 
+        return False
+
+    except Exception, e:
+        logger.log(u"NZBGet sendNZB failed. Error: " + ex(e), logger.ERROR)
         return False
 
     # if it aired recently make it high priority
