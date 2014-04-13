@@ -63,7 +63,7 @@ For example, to find out what network Scrubs is aired:
 The data is stored in an attribute named `data`, within the Show instance:
 
     >>> t['scrubs'].data.keys()
-    ['networkid', 'rating', 'airs_dayofweek', 'contentrating', 'seriesname', 'id', 'airs_time', 'network', 'fanart', 'lastupdated', 'actors', 'ratingcount', 'status', 'added', 'poster', 'imdb_id', 'genre', 'banner', 'seriesid', 'language', 'zap2it_id', 'addedby', 'firstaired', 'runtime', 'overview']
+    ['networkid', 'rating', 'airs_dayofweek', 'contentrating', 'seriesname', 'id', 'airs_time', 'network', 'fanart', 'lastupdated', 'actors', 'ratingcount', 'status', 'added', 'poster', 'imdb_id', 'genre', 'banner', 'seriesid', 'language', 'zap2it_id', 'addedby', 'tms_wanted', 'firstaired', 'runtime', 'overview']
 
 Although each element is also accessible via `t['scrubs']` for ease-of-use:
 
