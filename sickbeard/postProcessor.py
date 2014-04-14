@@ -700,9 +700,14 @@ class PostProcessor(object):
             return True
 
         # if the file processed is higher quality than the existing episode then it's safe
-        if new_ep_quality > old_ep_quality and new_ep_quality != common.Quality.UNKNOWN:
-            self._log(u"Existing episode status is not snatched but new file appears to be better quality than existing episode, marking it safe to replace", logger.DEBUG)
-            return True
+        if new_ep_quality > old_ep_quality:
+            if new_ep_quality != common.Quality.UNKNOWN:
+                self._log(u"Existing episode status is not snatched but processed episode appears to be better quality than existing episode, marking it safe to replace", logger.DEBUG)
+                return True
+
+            else:
+                self._log(u"Episode already exists in database and processed episode has unknown quality, marking it unsafe to replace", logger.DEBUG)
+                return False
 
         # if there's an existing downloaded file with same quality, check filesize to decide
         if new_ep_quality == old_ep_quality:
