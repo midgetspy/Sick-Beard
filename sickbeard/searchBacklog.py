@@ -151,6 +151,8 @@ class BacklogSearcher:
             lastBacklog = 1
         else:
             lastBacklog = int(sqlResults[0]["last_backlog"])
+            if lastBacklog > datetime.date.today().toordinal():
+                lastBacklog = 1
 
         self._lastBacklog = lastBacklog
         return self._lastBacklog

@@ -57,6 +57,17 @@
                             </label>
                         </div>
 
+                        <div class="field-pair">
+                            <label class="nocheck clearfix">
+                                <span class="component-title">Ignore Words</span>
+                                <input type="text" name="ignore_words" value="$sickbeard.IGNORE_WORDS" size="40" />
+                            </label>
+                            <label class="nocheck clearfix">
+                                <span class="component-title">&nbsp;</span>
+                                <span class="component-desc">Case insensitive words separated by <b>,</b> that you wish to ignore in releases.</span>
+                            </label>
+                        </div>
+
                         <div class="clearfix"></div>
                         <input type="submit" class="btn config_submitter" value="Save Changes" /><br/>
                         
@@ -86,7 +97,7 @@
                                 <span class="component-title jumbo">NZB Method:</span>
                                 <span class="component-desc">
                                     <select name="nzb_method" id="nzb_method" class="input-medium" >
-                                    #set $nzb_method_text = {'blackhole': "Black Hole", 'sabnzbd': "SABnzbd", 'nzbget': "NZBget"}
+                                    #set $nzb_method_text = {'blackhole': "Black Hole", 'sabnzbd': "SABnzbd", 'nzbget': "NZBGet"}
                                     #for $curAction in ('sabnzbd', 'blackhole', 'nzbget'):
                                       #if $sickbeard.NZB_METHOD == $curAction:
                                         #set $nzb_method = "selected=\"selected\""
@@ -177,33 +188,48 @@
                         <div id="nzbget_settings">
                             <div class="field-pair">
                                 <label class="nocheck clearfix">
-                                    <span class="component-title">NZBget HOST:PORT</span>
+                                    <span class="component-title">NZBGet URL</span>
                                     <input type="text" name="nzbget_host" value="$sickbeard.NZBGET_HOST" size="45" />
                                 </label>
                                 <label class="nocheck clearfix">
                                     <span class="component-title">&nbsp;</span>
-                                    <span class="component-desc">Hostname and portnumber of the NZBget RPC (not NZBgetweb!)</span>
+                                    <span class="component-desc">URL of your NZBGet install</span>
                                 </label>
                                 <label class="nocheck clearfix">
                                     <span class="component-title">&nbsp;</span>
-                                    <span class="component-desc">(eg. localhost:6789)</span>
-                                </label>
-                            </div>
-                            
-                            <div class="field-pair">
-                                <label class="nocheck clearfix">
-                                    <span class="component-title">NZBget Password</span>
-                                    <input type="password" name="nzbget_password" value="$sickbeard.NZBGET_PASSWORD" size="20" />
-                                </label>
-                                <label class="nocheck clearfix">
-                                    <span class="component-title">&nbsp;</span>
-                                    <span class="component-desc">Password found in nzbget.conf (by default tegbzn6789)</span>
+                                    <span class="component-desc">(eg. http://localhost:6789/)</span>
                                 </label>
                             </div>
 
                             <div class="field-pair">
                                 <label class="nocheck clearfix">
-                                    <span class="component-title">NZBget Category</span>
+                                    <span class="component-title">NZBGet Username</span>
+                                    <input type="text" name="nzbget_username" value="$sickbeard.NZBGET_USERNAME" size="20" />
+                                </label>
+                                <label class="nocheck clearfix">
+                                    <span class="component-title">&nbsp;</span>
+                                    <span class="component-desc">ControlUsername found in nzbget.conf (eg. nzbget)</span>
+                                </label>
+                                <label class="nocheck clearfix">
+                                    <span class="component-title">&nbsp;</span>
+                                    <span class="component-desc">Prior to NZBGet 11, 'nzbget' user name was not changeable.</span>
+                                </label>
+                            </div>
+
+                            <div class="field-pair">
+                                <label class="nocheck clearfix">
+                                    <span class="component-title">NZBGet Password</span>
+                                    <input type="password" name="nzbget_password" value="$sickbeard.NZBGET_PASSWORD" size="20" />
+                                </label>
+                                <label class="nocheck clearfix">
+                                    <span class="component-title">&nbsp;</span>
+                                    <span class="component-desc">ControlPassword found in nzbget.conf (eg. tegbzn6789)</span>
+                                </label>
+                            </div>
+
+                            <div class="field-pair">
+                                <label class="nocheck clearfix">
+                                    <span class="component-title">NZBGet Category</span>
                                     <input type="text" name="nzbget_category" value="$sickbeard.NZBGET_CATEGORY" size="20" />
                                 </label>
                                 <label class="nocheck clearfix">

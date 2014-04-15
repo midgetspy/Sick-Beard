@@ -20,8 +20,9 @@ import cherrypy
 import os.path
 import datetime
 import re
-import sys
+import urlparse
 
+from sickbeard import encodingKludge as ek
 from sickbeard import helpers
 from sickbeard import logger
 from sickbeard import naming
@@ -80,6 +81,7 @@ def change_LOG_DIR(log_dir, web_log):
 
     log_dir_changed = False
     abs_log_dir = os.path.normpath(os.path.join(sickbeard.DATA_DIR, log_dir))
+    web_log_value = checkbox_to_value(web_log)
 
     if os.path.normpath(sickbeard.LOG_DIR) != abs_log_dir:
         if helpers.makeDir(abs_log_dir):
@@ -93,10 +95,11 @@ def change_LOG_DIR(log_dir, web_log):
         else:
             return False
 
-    if sickbeard.WEB_LOG != web_log or log_dir_changed == True:
-        sickbeard.WEB_LOG = web_log
+    if sickbeard.WEB_LOG != web_log_value or log_dir_changed == True:
 
-        if sickbeard.WEB_LOG == 1:
+        sickbeard.WEB_LOG = web_log_value
+
+        if sickbeard.WEB_LOG:
             cherry_log = os.path.join(sickbeard.LOG_DIR, "cherrypy.log")
             logger.log(u"Change cherry log file to " + cherry_log)
         else:
@@ -158,15 +161,10 @@ def change_TV_DOWNLOAD_DIR(tv_download_dir):
 
 def change_SEARCH_FREQUENCY(freq):
 
-    if freq == None:
-        freq = sickbeard.DEFAULT_SEARCH_FREQUENCY
-    else:
-        freq = int(freq)
+    sickbeard.SEARCH_FREQUENCY = to_int(freq, default=sickbeard.DEFAULT_SEARCH_FREQUENCY)
 
-    if freq < sickbeard.MIN_SEARCH_FREQUENCY:
-        freq = sickbeard.MIN_SEARCH_FREQUENCY
-
-    sickbeard.SEARCH_FREQUENCY = freq
+    if sickbeard.SEARCH_FREQUENCY < sickbeard.MIN_SEARCH_FREQUENCY:
+        sickbeard.SEARCH_FREQUENCY = sickbeard.MIN_SEARCH_FREQUENCY
 
     sickbeard.currentSearchScheduler.cycleTime = datetime.timedelta(minutes=sickbeard.SEARCH_FREQUENCY)
     sickbeard.backlogSearchScheduler.cycleTime = datetime.timedelta(minutes=sickbeard.get_backlog_cycle_time())
@@ -195,19 +193,120 @@ def CheckSection(CFG, sec):
         return False
 
 
-################################################################################
-# Check_setting_int                                                            #
-################################################################################
-def minimax(val, low, high):
-    """ Return value forced within range """
+def checkbox_to_value(option, value_on=1, value_off=0):
+    """
+    Turns checkbox option 'on' or 'true' to value_on (1)
+    any other value returns value_off (0)
+    """
+    if option == 'on' or option == 'true':
+        return value_on
+
+    return value_off
+
+
+def clean_host(host, default_port=None):
+    """
+    Returns host or host:port or empty string from a given url or host
+    If no port is found and default_port is given use host:default_port
+    """
+
+    host = host.strip()
+
+    if host:
+
+        match_host_port = re.search(r'(?:http.*://)?(?P<host>[^:/]+).?(?P<port>[0-9]*).*', host)
+
+        cleaned_host = match_host_port.group('host')
+        cleaned_port = match_host_port.group('port')
+
+        if cleaned_host:
+
+            if cleaned_port:
+                host = cleaned_host + ':' + cleaned_port
+
+            elif default_port:
+                host = cleaned_host + ':' + str(default_port)
+
+            else:
+                host = cleaned_host
+
+        else:
+            host = ''
+
+    return host
+
+
+def clean_hosts(hosts, default_port=None):
+
+    cleaned_hosts = []
+
+    for cur_host in [x.strip() for x in hosts.split(",")]:
+        if cur_host:
+            cleaned_host = clean_host(cur_host, default_port)
+            if cleaned_host:
+                cleaned_hosts.append(cleaned_host)
+
+    if cleaned_hosts:
+        cleaned_hosts = ",".join(cleaned_hosts)
+
+    else:
+        cleaned_hosts = ''
+
+    return cleaned_hosts
+
+
+def clean_url(url):
+    """
+    Returns an cleaned url starting with a scheme and folder with trailing /
+    or an empty string
+    """
+
+    if url and url.strip():
+
+        url = url.strip()
+
+        if '://' not in url:
+            url = '//' + url
+
+        scheme, netloc, path, query, fragment = urlparse.urlsplit(url, 'http')
+
+        if not path.endswith('/'):
+            basename, ext = ek.ek(os.path.splitext, ek.ek(os.path.basename, path))  # @UnusedVariable
+            if not ext:
+                path = path + '/'
+
+        cleaned_url = urlparse.urlunsplit((scheme, netloc, path, query, fragment))
+
+    else:
+        cleaned_url = ''
+
+    return cleaned_url
+
+
+def to_int(val, default=0):
+    """ Return int value of val or default on error """
+
     try:
         val = int(val)
     except:
-        val = 0
+        val = default
+
+    return val
+
+
+################################################################################
+# Check_setting_int                                                            #
+################################################################################
+def minimax(val, default, low, high):
+    """ Return value forced within range """
+
+    val = to_int(val, default=default)
+
     if val < low:
         return low
     if val > high:
         return high
+
     return val
 
 
@@ -506,6 +605,7 @@ class ConfigMigrator():
         metadata_ps3 = check_setting_str(self.config_obj, 'General', 'metadata_ps3', '0|0|0|0|0|0')
         metadata_wdtv = check_setting_str(self.config_obj, 'General', 'metadata_wdtv', '0|0|0|0|0|0')
         metadata_tivo = check_setting_str(self.config_obj, 'General', 'metadata_tivo', '0|0|0|0|0|0')
+        metadata_mede8er = check_setting_str(self.config_obj, 'General', 'metadata_mede8er', '0|0|0|0|0|0')
 
         use_banner = bool(check_setting_int(self.config_obj, 'General', 'use_banner', 0))
 
@@ -527,6 +627,10 @@ class ConfigMigrator():
                 metadata = '|'.join(cur_metadata)
                 logger.log(u"Upgrading " + metadata_name + " metadata, new value: " + metadata)
 
+            elif len(cur_metadata) == 10:
+                metadata = '|'.join(cur_metadata)
+                logger.log(u"Keeping " + metadata_name + " metadata, value: " + metadata)
+
             else:
                 logger.log(u"Skipping " + metadata_name + " metadata: '" + metadata + "', incorrect format", logger.ERROR)
                 metadata = '0|0|0|0|0|0|0|0|0|0'
@@ -540,3 +644,4 @@ class ConfigMigrator():
         sickbeard.METADATA_PS3 = _migrate_metadata(metadata_ps3, 'PS3', use_banner)
         sickbeard.METADATA_WDTV = _migrate_metadata(metadata_wdtv, 'WDTV', use_banner)
         sickbeard.METADATA_TIVO = _migrate_metadata(metadata_tivo, 'TIVO', use_banner)
+        sickbeard.METADATA_MEDE8ER = _migrate_metadata(metadata_mede8er, 'Mede8er', use_banner)

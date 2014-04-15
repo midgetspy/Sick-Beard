@@ -254,7 +254,7 @@ $(document).ready(function () {
             $(this).showHideMetadata();
         }
 
-    }
+    };
 
     $(this).refreshMetadataConfig(true);
     $('img[title]').qtip( {

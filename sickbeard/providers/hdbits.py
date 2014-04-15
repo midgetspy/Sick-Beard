@@ -13,10 +13,12 @@
 # You should have received a copy of the GNU General Public License
 # along with Sick Beard.  If not, see <http://www.gnu.org/licenses/>.
 
+import datetime
 import urllib
 import generic
 import sickbeard
 
+from sickbeard import classes
 from sickbeard import logger, tvcache, exceptions
 from sickbeard import helpers
 from sickbeard.common import Quality
@@ -35,7 +37,7 @@ class HDBitsProvider(generic.TorrentProvider):
 
         generic.TorrentProvider.__init__(self, "HDBits")
 
-        self.supportsBacklog = False
+        self.supportsBacklog = True
 
         self.cache = HDBitsCache(self)
 
@@ -66,21 +68,31 @@ class HDBitsProvider(generic.TorrentProvider):
 
         return True
 
-    def findEpisode(self, episode, manualSearch=False):
+    def _get_season_search_strings(self, show, season):
+        season_search_string = [self._make_post_data_JSON(show=show, season=season)]
+        return season_search_string
 
-        logger.log(u"Searching " + self.name + " for " + episode.prettyName())
+    def _get_episode_search_strings(self, episode):
+        episode_search_string = [self._make_post_data_JSON(show=episode.show, episode=episode)]
+        return episode_search_string
 
-        self.cache.updateCache()
-        results = self.cache.searchCache(episode, manualSearch)
-        logger.log(u"Cache results: " + str(results), logger.DEBUG)
+    def _get_title_and_url(self, item):
 
-        # if we got some results then use them no matter what.
-        # OR
-        # return anyway unless we're doing a manual search
-        if results or not manualSearch:
-            return results
+        title = item['name']
+        if title:
+            title = title.replace(' ', '.')
 
-        data = self.getURL(self.search_url, post_data=self._make_post_data_JSON(show=episode.show, episode=episode))
+        url = self.download_url + urllib.urlencode({'id': item['id'], 'passkey': sickbeard.HDBITS_PASSKEY})
+
+        return (title, url)
+
+    def _doSearch(self, search_params, show=None):
+
+        self._checkAuth()
+
+        logger.log(u"Search url: " + self.search_url + " search_params: " + search_params, logger.DEBUG)
+
+        data = self.getURL(self.search_url, post_data=search_params)
 
         if not data:
             logger.log(u"No data returned from " + self.search_url, logger.ERROR)
@@ -102,50 +114,31 @@ class HDBitsProvider(generic.TorrentProvider):
                 items = []
 
             for item in items:
-
-                (title, url) = self._get_title_and_url(item)
-
-                # parse the file name
-                try:
-                    myParser = NameParser()
-                    parse_result = myParser.parse(title)
-                except InvalidNameException:
-                    logger.log(u"Unable to parse the filename " + title + " into a valid episode", logger.WARNING)
-                    continue
-
-                if episode.show.air_by_date:
-                    if parse_result.air_date != episode.airdate:
-                        logger.log(u"Episode " + title + " didn't air on " + str(episode.airdate) + ", skipping it", logger.DEBUG)
-                        continue
-                elif parse_result.season_number != episode.season or episode.episode not in parse_result.episode_numbers:
-                    logger.log(u"Episode " + title + " isn't " + str(episode.season) + "x" + str(episode.episode) + ", skipping it", logger.DEBUG)
-                    continue
-
-                quality = self.getQuality(item)
-
-                if not episode.show.wantEpisode(episode.season, episode.episode, quality, manualSearch):
-                    logger.log(u"Ignoring result " + title + " because we don't want an episode that is " + Quality.qualityStrings[quality], logger.DEBUG)
-                    continue
-
-                logger.log(u"Found result " + title + " at " + url, logger.DEBUG)
-
-                result = self.getResult([episode])
-                result.url = url
-                result.name = title
-                result.quality = quality
-
-                results.append(result)
+                results.append(item)
 
         return results
 
-    def _get_title_and_url(self, item):
+    def findPropers(self, search_date=None):
+        results = []
 
-        title = item['name']
-        url = self.download_url + urllib.urlencode({'id': item['id'], 'passkey': sickbeard.HDBITS_PASSKEY})
+        search_terms = [' proper ', ' repack ']
 
-        return (title, url)
+        for term in search_terms:
+            for item in self._doSearch(self._make_post_data_JSON(search_term=term)):
+                if item['utadded']:
+                    try:
+                        result_date = datetime.datetime.fromtimestamp(int(item['utadded']))
+                    except:
+                        result_date = None
 
-    def _make_post_data_JSON(self, show=None, episode=None, season=None):
+                    if result_date:
+                        if not search_date or result_date > search_date:
+                            title, url = self._get_title_and_url(item)
+                            results.append(classes.Proper(title, url, result_date))
+
+        return results
+
+    def _make_post_data_JSON(self, show=None, episode=None, season=None, search_term=None):
 
         post_data = {
             'username': sickbeard.HDBITS_USERNAME,
@@ -165,6 +158,9 @@ class HDBitsProvider(generic.TorrentProvider):
                 'id': show.tvdbid,
                 'season': season,
             }
+
+        if search_term:
+            post_data['search'] = search_term
 
         return json.dumps(post_data)
 
