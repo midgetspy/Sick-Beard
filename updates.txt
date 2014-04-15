@@ -1,4 +1,3 @@
-http://sickbeard.googlecode.com/files/SickBeard-win32-alpha-build504.zip
 http://sickbeard.googlecode.com/files/SickBeard-win32-alpha-build503.zip
 http://sickbeard.googlecode.com/files/SickBeard-win32-alpha-build502.zip
 http://sickbeard.googlecode.com/files/SickBeard-win32-alpha-build501.zip
