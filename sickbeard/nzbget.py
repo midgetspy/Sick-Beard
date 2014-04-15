@@ -19,6 +19,7 @@
 
 import httplib
 import datetime
+import urllib
 import urlparse
 
 import sickbeard
@@ -26,7 +27,6 @@ import sickbeard
 from base64 import standard_b64encode
 import xmlrpclib
 
-from sickbeard import encodingKludge as ek
 from sickbeard.exceptions import ex
 from sickbeard.providers.generic import GenericProvider
 from sickbeard import config
@@ -36,7 +36,7 @@ from common import Quality
 
 def sendNZB(nzb):
 
-    if sickbeard.NZBGET_HOST == None:
+    if not sickbeard.NZBGET_HOST:
         logger.log(u"No NZBGet host found in configuration. Please configure it.", logger.ERROR)
         return False
 
@@ -45,18 +45,17 @@ def sendNZB(nzb):
     try:
         url = config.clean_url(sickbeard.NZBGET_HOST)
 
-        if sickbeard.NZBGET_USERNAME or sickbeard.NZBGET_PASSWORD:
-            scheme, netloc, path, query, fragment = urlparse.urlsplit(url)
-            netloc = sickbeard.NZBGET_USERNAME + ":" + sickbeard.NZBGET_PASSWORD + "@" + netloc
-            url = urlparse.urlunsplit((scheme, netloc, path, query, fragment))
+        scheme, netloc, path, query, fragment = urlparse.urlsplit(url)  # @UnusedVariable
 
-        url = urlparse.urljoin(url, u"/xmlrpc")
-        url = url.encode('utf-8', 'ignore')
+        if sickbeard.NZBGET_USERNAME or sickbeard.NZBGET_PASSWORD:
+            netloc = urllib.quote_plus(sickbeard.NZBGET_USERNAME.encode("utf-8", 'ignore')) + u":" + urllib.quote_plus(sickbeard.NZBGET_PASSWORD.encode("utf-8", 'ignore')) + u"@" + netloc
+
+        url = urlparse.urlunsplit((scheme, netloc, u"/xmlrpc", "", ""))
 
         logger.log(u"Sending NZB to NZBGet")
         logger.log(u"NZBGet URL: " + url, logger.DEBUG)
 
-        nzbGetRPC = xmlrpclib.ServerProxy(url)
+        nzbGetRPC = xmlrpclib.ServerProxy(url.encode("utf-8", 'ignore'))
 
         if nzbGetRPC.writelog("INFO", "SickBeard connected to drop off " + nzb_filename + " any moment now."):
             logger.log(u"Successful connected to NZBGet", logger.DEBUG)
