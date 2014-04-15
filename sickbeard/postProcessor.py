@@ -713,9 +713,9 @@ class PostProcessor(object):
                 self._log(u"File already exists and new file is larger, marking it safe to replace", logger.DEBUG)
                 return True
 
-            elif existing_file_status != PostProcessor.DOESNT_EXIST:
-                self._log(u"Unknown existing file status. This should never happen, please log this as a bug.", logger.ERROR)
-                return False
+            elif existing_file_status == PostProcessor.DOESNT_EXIST:
+                self._log(u"File doesn't already exist, marking it safe to replace", logger.DEBUG)
+                return True
 
         # if there's an existing file with better quality
         if new_ep_quality < old_ep_quality and old_ep_quality != common.Quality.UNKNOWN:
