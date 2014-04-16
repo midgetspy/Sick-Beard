@@ -842,6 +842,7 @@ class PostProcessor(object):
                 cur_ep.release_name = cur_release_name
             else:
                 logger.log(u"good results: " + repr(self.good_results), logger.DEBUG)
+                cur_ep.release_name = ""
 
             cur_ep.status = common.Quality.compositeStatus(common.DOWNLOADED, new_ep_quality)
 
