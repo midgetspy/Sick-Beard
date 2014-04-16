@@ -820,33 +820,30 @@ class PostProcessor(object):
 
         # update the ep info before we rename so the quality & release name go into the name properly
         for cur_ep in [ep_obj] + ep_obj.relatedEps:
-            with cur_ep.lock:
-                cur_release_name = None
+            cur_release_name = None
 
-                # use the best possible representation of the release name
-                if self.good_results[self.NZB_NAME]:
-                    cur_release_name = self.nzb_name
-                    if cur_release_name.lower().endswith('.nzb'):
-                        cur_release_name = cur_release_name.rpartition('.')[0]
+            # use the best possible representation of the release name
+            if self.good_results[self.NZB_NAME]:
+                cur_release_name = self.nzb_name
+                if cur_release_name.lower().endswith('.nzb'):
+                    cur_release_name = cur_release_name.rpartition('.')[0]
 
-                elif self.good_results[self.FILE_NAME]:
-                    cur_release_name = self.file_name
-                    # take the extension off the filename, it's not needed
-                    if '.' in self.file_name:
-                        cur_release_name = self.file_name.rpartition('.')[0]
+            elif self.good_results[self.FILE_NAME]:
+                cur_release_name = self.file_name
+                # take the extension off the filename, it's not needed
+                if '.' in self.file_name:
+                    cur_release_name = self.file_name.rpartition('.')[0]
 
-                elif self.good_results[self.FOLDER_NAME]:
-                    cur_release_name = self.folder_name
+            elif self.good_results[self.FOLDER_NAME]:
+                cur_release_name = self.folder_name
 
-                if cur_release_name:
-                    self._log("Found release name " + cur_release_name, logger.DEBUG)
-                    cur_ep.release_name = cur_release_name
-                else:
-                    logger.log(u"good results: " + repr(self.good_results), logger.DEBUG)
+            if cur_release_name:
+                self._log("Found release name " + cur_release_name, logger.DEBUG)
+                cur_ep.release_name = cur_release_name
+            else:
+                logger.log(u"good results: " + repr(self.good_results), logger.DEBUG)
 
-                cur_ep.status = common.Quality.compositeStatus(common.DOWNLOADED, new_ep_quality)
-
-                cur_ep.saveToDB()
+            cur_ep.status = common.Quality.compositeStatus(common.DOWNLOADED, new_ep_quality)
 
         # find the destination folder
         try:
