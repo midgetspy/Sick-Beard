@@ -711,27 +711,36 @@ class PostProcessor(object):
 
         # if there's an existing downloaded file with same quality, check filesize to decide
         if new_ep_quality == old_ep_quality:
-            self._log(u"File already exists in database and has same quality as new file", logger.DEBUG)
+            self._log(u"Episode already exists in database and has same quality as processed episode", logger.DEBUG)
 
             # check for an existing file
-            self._log(u"Checking existing file size", logger.DEBUG)
+            self._log(u"Checking size of existing file: " + ep_obj.location, logger.DEBUG)
             existing_file_status = self._checkForExistingFile(ep_obj.location)
 
             if existing_file_status in (PostProcessor.EXISTS_LARGER, PostProcessor.EXISTS_SAME):
-                self._log(u"File already exists and new file is same/smaller, marking it unsafe to replace", logger.DEBUG)
+                self._log(u"File exists and new file is same/smaller, marking it unsafe to replace", logger.DEBUG)
                 return False
 
             elif existing_file_status == PostProcessor.EXISTS_SMALLER:
-                self._log(u"File already exists and new file is larger, marking it safe to replace", logger.DEBUG)
+                self._log(u"File exists and new file is larger, marking it safe to replace", logger.DEBUG)
                 return True
 
-            elif existing_file_status != PostProcessor.DOESNT_EXIST:
-                self._log(u"Unknown existing file status. This should never happen, please log this as a bug.", logger.ERROR)
+            elif existing_file_status == PostProcessor.DOESNT_EXIST:
+                if not ek.ek(os.path.isdir, ep_obj.show._location) and not sickbeard.CREATE_MISSING_SHOW_DIRS:
+                    self._log(u"File and Show location doesn't exist, marking it unsafe to replace", logger.DEBUG)
+                    return False
+
+                else:
+                    self._log(u"File doesn't exist, marking it safe to replace", logger.DEBUG)
+                    return True
+
+            else:
+                self._log(u"Unknown file status for: " + ep_obj.location + "This should never happen, please log this as a bug.", logger.ERROR)
                 return False
 
         # if there's an existing file with better quality
         if new_ep_quality < old_ep_quality and old_ep_quality != common.Quality.UNKNOWN:
-            self._log(u"File already exists and new file has lower quality, marking it unsafe to replace", logger.DEBUG)
+            self._log(u"Episode already exists in database and processed episode has lower quality, marking it unsafe to replace", logger.DEBUG)
             return False
 
         self._log(u"None of the conditions were met, marking it unsafe to replace", logger.DEBUG)
