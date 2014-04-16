@@ -71,7 +71,7 @@ class XBMCNotifier:
 
         """
 
-        # since we need to maintain python 2.5 compatability we can not pass a timeout delay to urllib2 directly (python 2.6+)
+        # since we need to maintain python 2.5 compatibility we can not pass a timeout delay to urllib2 directly (python 2.6+)
         # override socket timeout to reduce delay for this call alone
         socket.setdefaulttimeout(10)
 
