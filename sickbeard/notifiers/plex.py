@@ -108,6 +108,7 @@ class PLEXNotifier:
             The result will either be 'OK' or False, this is used to be parsed by the calling function.
 
         """
+
         # suppress notifications if the notifier is disabled but the notify options are checked
         if not sickbeard.USE_PLEX and not force:
             return False
