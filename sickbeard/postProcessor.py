@@ -337,13 +337,6 @@ class PostProcessor(object):
             to_return = (tvdb_id, season, [], quality)
             self._log("Found result in history: " + str(to_return), logger.DEBUG)
 
-            if curName == self.nzb_name:
-                self.good_results[self.NZB_NAME] = True
-            elif curName == self.folder_name:
-                self.good_results[self.FOLDER_NAME] = True
-            elif curName == self.file_name:
-                self.good_results[self.FILE_NAME] = True
-
             return to_return
 
         self.in_history = False
