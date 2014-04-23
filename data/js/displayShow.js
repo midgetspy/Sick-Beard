@@ -14,9 +14,9 @@ $(document).ready(function(){
     $("#prevShow").click(function() {
         var show = $('#pickShow option:selected');
         if (show.prev('option').length < 1){
-            show.parent().children('option:last').attr('selected', 'selected');
+            show.parent().children('option:last').prop('selected', true);
         } else{
-            show.prev('option').attr('selected', 'selected');
+            show.prev('option').prop('selected', true);
         }
         $("#pickShow").change();
     });
@@ -24,9 +24,9 @@ $(document).ready(function(){
     $("#nextShow").click(function() {
         var show = $('#pickShow option:selected');
         if (show.next('option').length < 1) {
-            show.parent().children('option:first').attr('selected', 'selected');
+            show.parent().children('option:first').prop('selected', true);
         } else{
-            show.next('option').attr('selected', 'selected');
+            show.next('option').prop('selected', true);
         }
         $("#pickShow").change();
     });
@@ -113,7 +113,7 @@ $(document).ready(function(){
     // handle the show selection dropbox
     $('#pickShow').change(function() {
         var sbRoot = $('#sbRoot').val();
-        var val = $(this).attr('value');
+        var val = $(this).val();
         if (val == 0) {
             return;
         }

@@ -198,7 +198,7 @@ $(document).ready(function () {
             if (data == null) {
                 $("#nmjv2_database").removeAttr("readonly");
             }
-            var JSONData = $.parseJSON(data);
+            var JSONData = $.parseJSON(data || "null");
             $("#testNMJv2-result").html(JSONData.message);
             $("#nmjv2_database").val(JSONData.database);
 
