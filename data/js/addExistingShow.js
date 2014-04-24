@@ -1,15 +1,15 @@
 $(document).ready(function() { 
 
-    $('#checkAll').live('click', function(){
+    $('#tableDiv').on('click', '#checkAll', function() {
 
         var seasCheck = this;
 
-        $('.dirCheck').each(function(){
+        $('.dirCheck').each(function() {
             this.checked = seasCheck.checked;
         });
     });
 
-    $('#submitShowDirs').click(function(){
+    $('#submitShowDirs').click(function() {
 
         var dirArr = new Array();
 
@@ -35,7 +35,7 @@ $(document).ready(function() {
 
     function loadContent() {
         var url = '';
-        $('.dir_check').each(function(i,w){
+        $('.dir_check').each(function(i,w) {
             if ($(w).is(':checked')) {
                 if (url.length) {
                     url += '&';
@@ -72,10 +72,12 @@ $(document).ready(function() {
         loadContent();
     });
 
-    $('.dir_check').live('click', loadContent);
+    $('#rootDirStaticList').on('click', '.dir_check', loadContent);
 
-    $('.showManage').live('click', function() {
-        $("#tabs").tabs( 'select', 0);
+    $('#tableDiv').on('click', '.showManage', function(event) {
+        event.preventDefault();
+        $("#tabs").tabs('option', 'active', 0);
+        $('html,body').animate({scrollTop:0}, 1000);
     });
 
 });
