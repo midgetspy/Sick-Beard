@@ -139,9 +139,9 @@ def _findTorrentHash(url):
     for i in range(0, 15):
         try:
             if url.startswith('magnet'):
-                token_re = "&dn=([^<>]+)&tr="
+                token_re = "&dn=([^<>&]+)"
                 match = re.search(token_re, url)
-                name = match.group(1)[0:match.group(1).find('&tr=')].replace('_','.').replace('+','.')
+                name = match.group(1).replace('_','.').replace('+','.')
             else:
                 real_name = url[url.rfind('/') + 1:url.rfind('.torrent')]
                 real_name = real_name[real_name.rfind('=') + 1:url.rfind('.torrent')]
