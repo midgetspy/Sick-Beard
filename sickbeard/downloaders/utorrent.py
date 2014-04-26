@@ -150,12 +150,12 @@ def _findTorrentHash(url):
             logger.log("Unable to retrieve episode name from " + url, logger.WARNING)
             return False
 
+        parse_result = False
         try:
             myParser = NameParser()
             parse_result = myParser.parse(name)
         except:
             logger.log(u"Unable to parse the filename " + name + " into a valid episode", logger.WARNING)
-            return False
         
         success, torrent_list = _action('&list=1', sickbeard.TORRENT_HOST, sickbeard.TORRENT_USERNAME, sickbeard.TORRENT_PASSWORD)
         
@@ -172,7 +172,7 @@ def _findTorrentHash(url):
                     continue
                 #If that fails try to parse the name of the torrent
                 torrent_result = myParser.parse(torrent[2])
-                if torrent_result.series_name == parse_result.series_name and torrent_result.season_number == parse_result.season_number and torrent_result.episode_numbers == parse_result.episode_numbers:
+                if parse_result and torrent_result.series_name == parse_result.series_name and torrent_result.season_number == parse_result.season_number and torrent_result.episode_numbers == parse_result.episode_numbers:
                     return torrent[0]                
             except InvalidNameException:
                 pass
