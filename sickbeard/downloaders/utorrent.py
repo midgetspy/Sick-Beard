@@ -139,9 +139,9 @@ def _findTorrentHash(url):
     for i in range(0, 15):
         try:
             if url.startswith('magnet'):
-                token_re = "&dn=([^<>]+)&tr="
+                token_re = "&dn=([^<>&]+)"
                 match = re.search(token_re, url)
-                name = match.group(1)[0:match.group(1).find('&tr=')].replace('_','.').replace('+','.')
+                name = match.group(1).replace('_','.').replace('+','.')
             else:
                 real_name = url[url.rfind('/') + 1:url.rfind('.torrent')]
                 real_name = real_name[real_name.rfind('=') + 1:url.rfind('.torrent')]
@@ -150,12 +150,12 @@ def _findTorrentHash(url):
             logger.log("Unable to retrieve episode name from " + url, logger.WARNING)
             return False
 
+        parse_result = False
         try:
             myParser = NameParser()
             parse_result = myParser.parse(name)
         except:
             logger.log(u"Unable to parse the filename " + name + " into a valid episode", logger.WARNING)
-            return False
         
         success, torrent_list = _action('&list=1', sickbeard.TORRENT_HOST, sickbeard.TORRENT_USERNAME, sickbeard.TORRENT_PASSWORD)
         
@@ -172,7 +172,7 @@ def _findTorrentHash(url):
                     continue
                 #If that fails try to parse the name of the torrent
                 torrent_result = myParser.parse(torrent[2])
-                if torrent_result.series_name == parse_result.series_name and torrent_result.season_number == parse_result.season_number and torrent_result.episode_numbers == parse_result.episode_numbers:
+                if parse_result and torrent_result.series_name == parse_result.series_name and torrent_result.season_number == parse_result.season_number and torrent_result.episode_numbers == parse_result.episode_numbers:
                     return torrent[0]                
             except InvalidNameException:
                 pass
@@ -181,7 +181,14 @@ def _findTorrentHash(url):
     return False
 
 def testAuthentication(host=None, username=None, password=None):
-    success, result = _action('', host, username, password)
+    try:
+        success, result = _action('', host, username, password)
+        if result and result["build"]:
+            result = "[uTorrent] Build: " + str(result["build"])
+        return success, result
+    except Exception, e:
+        return False, u"[uTorrent] testAuthentication() Error: " + ex(e)
+
 
     if not success:
         return False, result
