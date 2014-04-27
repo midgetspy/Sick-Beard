@@ -181,7 +181,14 @@ def _findTorrentHash(url):
     return False
 
 def testAuthentication(host=None, username=None, password=None):
-    success, result = _action('', host, username, password)
+    try:
+        success, result = _action('', host, username, password)
+        if result and result["build"]:
+            result = "[uTorrent] Build: " + str(result["build"])
+        return success, result
+    except Exception, e:
+        return False, u"[uTorrent] testAuthentication() Error: " + ex(e)
+
 
     if not success:
         return False, result
