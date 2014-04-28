@@ -197,8 +197,8 @@ class PostProcessor(object):
 
         # delete the file and any other files which we want to delete
         for cur_file in file_list:
-            self._log(u"Deleting file " + cur_file, logger.DEBUG)
             if ek.ek(os.path.isfile, cur_file):
+                self._log(u"Deleting file " + cur_file, logger.DEBUG)
                 ek.ek(os.remove, cur_file)
                 # do the library update for synoindex
                 notifiers.synoindex_notifier.deleteFile(cur_file)
@@ -336,13 +336,6 @@ class PostProcessor(object):
             self.in_history = True
             to_return = (tvdb_id, season, [], quality)
             self._log("Found result in history: " + str(to_return), logger.DEBUG)
-
-            if curName == self.nzb_name:
-                self.good_results[self.NZB_NAME] = True
-            elif curName == self.folder_name:
-                self.good_results[self.FOLDER_NAME] = True
-            elif curName == self.file_name:
-                self.good_results[self.FILE_NAME] = True
 
             return to_return
 
@@ -700,33 +693,47 @@ class PostProcessor(object):
             return True
 
         # if the file processed is higher quality than the existing episode then it's safe
-        if new_ep_quality > old_ep_quality and new_ep_quality != common.Quality.UNKNOWN:
-            self._log(u"Existing episode status is not snatched but new file appears to be better quality than existing episode, marking it safe to replace", logger.DEBUG)
-            return True
+        if new_ep_quality > old_ep_quality:
+            if new_ep_quality != common.Quality.UNKNOWN:
+                self._log(u"Existing episode status is not snatched but processed episode appears to be better quality than existing episode, marking it safe to replace", logger.DEBUG)
+                return True
+
+            else:
+                self._log(u"Episode already exists in database and processed episode has unknown quality, marking it unsafe to replace", logger.DEBUG)
+                return False
 
         # if there's an existing downloaded file with same quality, check filesize to decide
         if new_ep_quality == old_ep_quality:
-            self._log(u"File already exists in database and has same quality as new file", logger.DEBUG)
+            self._log(u"Episode already exists in database and has same quality as processed episode", logger.DEBUG)
 
             # check for an existing file
-            self._log(u"Checking existing file size", logger.DEBUG)
+            self._log(u"Checking size of existing file: " + ep_obj.location, logger.DEBUG)
             existing_file_status = self._checkForExistingFile(ep_obj.location)
 
             if existing_file_status in (PostProcessor.EXISTS_LARGER, PostProcessor.EXISTS_SAME):
-                self._log(u"File already exists and new file is same/smaller, marking it unsafe to replace", logger.DEBUG)
+                self._log(u"File exists and new file is same/smaller, marking it unsafe to replace", logger.DEBUG)
                 return False
 
             elif existing_file_status == PostProcessor.EXISTS_SMALLER:
-                self._log(u"File already exists and new file is larger, marking it safe to replace", logger.DEBUG)
+                self._log(u"File exists and new file is larger, marking it safe to replace", logger.DEBUG)
                 return True
 
-            elif existing_file_status != PostProcessor.DOESNT_EXIST:
-                self._log(u"Unknown existing file status. This should never happen, please log this as a bug.", logger.ERROR)
+            elif existing_file_status == PostProcessor.DOESNT_EXIST:
+                if not ek.ek(os.path.isdir, ep_obj.show._location) and not sickbeard.CREATE_MISSING_SHOW_DIRS:
+                    self._log(u"File and Show location doesn't exist, marking it unsafe to replace", logger.DEBUG)
+                    return False
+
+                else:
+                    self._log(u"File doesn't exist, marking it safe to replace", logger.DEBUG)
+                    return True
+
+            else:
+                self._log(u"Unknown file status for: " + ep_obj.location + "This should never happen, please log this as a bug.", logger.ERROR)
                 return False
 
         # if there's an existing file with better quality
         if new_ep_quality < old_ep_quality and old_ep_quality != common.Quality.UNKNOWN:
-            self._log(u"File already exists and new file has lower quality, marking it unsafe to replace", logger.DEBUG)
+            self._log(u"Episode already exists in database and processed episode has lower quality, marking it unsafe to replace", logger.DEBUG)
             return False
 
         self._log(u"None of the conditions were met, marking it unsafe to replace", logger.DEBUG)
@@ -806,33 +813,31 @@ class PostProcessor(object):
 
         # update the ep info before we rename so the quality & release name go into the name properly
         for cur_ep in [ep_obj] + ep_obj.relatedEps:
-            with cur_ep.lock:
-                cur_release_name = None
+            cur_release_name = None
 
-                # use the best possible representation of the release name
-                if self.good_results[self.NZB_NAME]:
-                    cur_release_name = self.nzb_name
-                    if cur_release_name.lower().endswith('.nzb'):
-                        cur_release_name = cur_release_name.rpartition('.')[0]
+            # use the best possible representation of the release name
+            if self.good_results[self.NZB_NAME]:
+                cur_release_name = self.nzb_name
+                if cur_release_name.lower().endswith('.nzb'):
+                    cur_release_name = cur_release_name.rpartition('.')[0]
 
-                elif self.good_results[self.FILE_NAME]:
-                    cur_release_name = self.file_name
-                    # take the extension off the filename, it's not needed
-                    if '.' in self.file_name:
-                        cur_release_name = self.file_name.rpartition('.')[0]
+            elif self.good_results[self.FILE_NAME]:
+                cur_release_name = self.file_name
+                # take the extension off the filename, it's not needed
+                if '.' in self.file_name:
+                    cur_release_name = self.file_name.rpartition('.')[0]
 
-                elif self.good_results[self.FOLDER_NAME]:
-                    cur_release_name = self.folder_name
+            elif self.good_results[self.FOLDER_NAME]:
+                cur_release_name = self.folder_name
 
-                if cur_release_name:
-                    self._log("Found release name " + cur_release_name, logger.DEBUG)
-                    cur_ep.release_name = cur_release_name
-                else:
-                    logger.log(u"good results: " + repr(self.good_results), logger.DEBUG)
+            if cur_release_name:
+                self._log("Found release name " + cur_release_name, logger.DEBUG)
+                cur_ep.release_name = cur_release_name
+            else:
+                logger.log(u"good results: " + repr(self.good_results), logger.DEBUG)
+                cur_ep.release_name = ""
 
-                cur_ep.status = common.Quality.compositeStatus(common.DOWNLOADED, new_ep_quality)
-
-                cur_ep.saveToDB()
+            cur_ep.status = common.Quality.compositeStatus(common.DOWNLOADED, new_ep_quality)
 
         # find the destination folder
         try:
