@@ -294,18 +294,18 @@ class TVShow(object):
 
             # see if we should save the release name in the db
             ep_file_name = ek.ek(os.path.basename, curEpisode.location)
-            ep_file_name = ek.ek(os.path.splitext, ep_file_name)[0]
+            ep_base_name = helpers.remove_non_release_groups(helpers.remove_extension(ep_file_name))
 
             parse_result = None
             try:
                 np = NameParser(False)
-                parse_result = np.parse(ep_file_name)
+                parse_result = np.parse(ep_base_name)
             except InvalidNameException:
                 pass
 
-            if not ' ' in ep_file_name and parse_result and parse_result.release_group:
-                logger.log(u"Name " + ep_file_name + u" gave release group of " + parse_result.release_group + ", seems valid", logger.DEBUG)
-                curEpisode.release_name = ep_file_name
+            if not ' ' in ep_base_name and parse_result and parse_result.release_group:
+                logger.log(u"Name " + ep_base_name + u" gave release group of " + parse_result.release_group + ", seems valid", logger.DEBUG)
+                curEpisode.release_name = ep_base_name
 
             # store the reference in the show
             if curEpisode != None:
@@ -1446,24 +1446,28 @@ class TVEpisode(object):
             return re.sub('[ -]', '_', name)
 
         def release_name(name):
-            if name and name.lower().endswith('.nzb'):
-                name = name.rpartition('.')[0]
+            if name:
+                name = helpers.remove_non_release_groups(helpers.remove_extension(name))
             return name
 
         def release_group(name):
-            if not name:
-                return ''
 
-            np = NameParser(name)
+            if name:
+                name = helpers.remove_non_release_groups(helpers.remove_extension(name))
+            else:
+                return ""
+
+            np = NameParser(False)
 
             try:
                 parse_result = np.parse(name)
             except InvalidNameException, e:
                 logger.log(u"Unable to get parse release_group: " + ex(e), logger.DEBUG)
-                return ''
+                return ""
 
             if not parse_result.release_group:
-                return ''
+                return ""
+
             return parse_result.release_group
 
         epStatus, epQual = Quality.splitCompositeStatus(self.status)  # @UnusedVariable

@@ -25,12 +25,14 @@ import regexes
 import sickbeard
 
 from sickbeard import logger
+from sickbeard import encodingKludge as ek
+from sickbeard import helpers
 
 
 class NameParser(object):
-    def __init__(self, file_name=True):
+    def __init__(self, is_file_name=True):
 
-        self.file_name = file_name
+        self.is_file_name = is_file_name
         self.compiled_regexes = []
         self._compile_regexes()
 
@@ -212,15 +214,15 @@ class NameParser(object):
             return cached
 
         # break it into parts if there are any (dirname, file name, extension)
-        dir_name, file_name = os.path.split(name)
-        ext_match = re.match('(.*)\.\w{3,4}$', file_name)
-        if ext_match and self.file_name:
-            base_file_name = ext_match.group(1)
+        dir_name, file_name = ek.ek(os.path.split, name)
+
+        if self.is_file_name:
+            base_file_name = helpers.remove_extension(file_name)
         else:
             base_file_name = file_name
 
         # use only the direct parent dir
-        dir_name = os.path.basename(dir_name)
+        dir_name = ek.ek(os.path.basename, dir_name)
 
         # set up a result to use
         final_result = ParseResult(name)

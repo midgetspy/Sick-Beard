@@ -83,12 +83,12 @@ class PostProcessor(object):
         self.force_replace = pp_options.get('force_replace', False)
 
         self.in_history = False
-        self.release_group = None
-        self.is_proper = False
 
-        self.good_results = {self.NZB_NAME: False,
-                             self.FOLDER_NAME: False,
-                             self.FILE_NAME: False}
+        self.release_group = None
+
+        self.release_name = None
+
+        self.is_proper = False
 
         self.log = ''
 
@@ -359,8 +359,10 @@ class PostProcessor(object):
         if not name:
             return to_return
 
+        name = helpers.remove_non_release_groups(helpers.remove_extension(name))
+
         # parse the name to break it into show name, season, and episode
-        np = NameParser(file_name)
+        np = NameParser(False)
         parse_result = np.parse(name)
         self._log(u"Parsed " + name + " into " + str(parse_result).decode('utf-8', 'xmlcharrefreplace'), logger.DEBUG)
 
@@ -437,16 +439,10 @@ class PostProcessor(object):
         self.is_proper = parse_result.is_proper
 
         # if the result is complete then remember that for later
-        if parse_result.series_name and parse_result.season_number != None and parse_result.episode_numbers and parse_result.release_group:
-            test_name = ek.ek(os.path.basename, parse_result.original_name)
-            if test_name == self.nzb_name:
-                self.good_results[self.NZB_NAME] = True
-            elif test_name == self.folder_name:
-                self.good_results[self.FOLDER_NAME] = True
-            elif test_name == self.file_name:
-                self.good_results[self.FILE_NAME] = True
-            else:
-                logger.log(u"Nothing was good, found " + repr(test_name) + " and wanted either " + repr(self.nzb_name) + ", " + repr(self.folder_name) + ", or " + repr(self.file_name))
+        if parse_result.series_name and parse_result.season_number is not None and parse_result.episode_numbers and parse_result.release_group:
+            if not self.release_name:
+                self.release_name = helpers.remove_extension(ek.ek(os.path.basename, parse_result.original_name))
+
         else:
             logger.log(u"Parse result not sufficient (all following have to be set). will not save release name", logger.DEBUG)
             logger.log(u"Parse result(series_name): " + str(parse_result.series_name), logger.DEBUG)
@@ -813,28 +809,11 @@ class PostProcessor(object):
 
         # update the ep info before we rename so the quality & release name go into the name properly
         for cur_ep in [ep_obj] + ep_obj.relatedEps:
-            cur_release_name = None
 
-            # use the best possible representation of the release name
-            if self.good_results[self.NZB_NAME]:
-                cur_release_name = self.nzb_name
-                if cur_release_name.lower().endswith('.nzb'):
-                    cur_release_name = cur_release_name.rpartition('.')[0]
-
-            elif self.good_results[self.FILE_NAME]:
-                cur_release_name = self.file_name
-                # take the extension off the filename, it's not needed
-                if '.' in self.file_name:
-                    cur_release_name = self.file_name.rpartition('.')[0]
-
-            elif self.good_results[self.FOLDER_NAME]:
-                cur_release_name = self.folder_name
-
-            if cur_release_name:
-                self._log("Found release name " + cur_release_name, logger.DEBUG)
-                cur_ep.release_name = cur_release_name
+            if self.release_name:
+                self._log("Found release name " + self.release_name, logger.DEBUG)
+                cur_ep.release_name = self.release_name
             else:
-                logger.log(u"good results: " + repr(self.good_results), logger.DEBUG)
                 cur_ep.release_name = ""
 
             cur_ep.status = common.Quality.compositeStatus(common.DOWNLOADED, new_ep_quality)
