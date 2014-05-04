@@ -136,8 +136,8 @@ class WindowsUpdateManager(UpdateManager):
         self._cur_commit_hash = None
         self._newest_version = None
 
-        self.gc_url = 'http://code.google.com/p/sickbeard/downloads/list'
-        self.version_url = 'https://raw.github.com/' + self.github_repo_user + '/' + self.github_repo + '/' + self.branch + '/updates.txt'
+        self.releases_url = "https://github.com/" + self.github_repo_user + "/" + self.github_repo + "/" + "releases" + "/"
+        self.version_url = "https://raw.github.com/" + self.github_repo_user + "/" + self.github_repo + "/" + self.branch + "/updates.txt"
 
     def _find_installed_version(self):
         try:
@@ -193,7 +193,7 @@ class WindowsUpdateManager(UpdateManager):
         if not self._cur_version:
             newest_text = "Unknown SickBeard Windows binary version. Not updating with original version."
         else:
-            newest_text = 'There is a <a href="' + self.gc_url + '" onclick="window.open(this.href); return false;">newer version available</a> (build ' + str(self._newest_version) + ')'
+            newest_text = 'There is a <a href="' + self.releases_url + '" onclick="window.open(this.href); return false;">newer version available</a> (build ' + str(self._newest_version) + ')'
             newest_text += "&mdash; <a href=\"" + self.get_update_url() + "\">Update Now</a>"
 
         sickbeard.NEWEST_VERSION_STRING = newest_text
@@ -204,7 +204,7 @@ class WindowsUpdateManager(UpdateManager):
         logger.log(u"new_link: " + repr(zip_download_url), logger.DEBUG)
 
         if not zip_download_url:
-            logger.log(u"Unable to find a new version link on google code, not updating")
+            logger.log(u"Unable to find a new version link, not updating")
             return False
 
         try:
