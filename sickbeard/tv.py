@@ -292,20 +292,20 @@ class TVShow(object):
             if curEpisode is None:
                 continue
 
-            # see if we should save the release name in the db
-            ep_file_name = ek.ek(os.path.basename, curEpisode.location)
-            ep_base_name = helpers.remove_non_release_groups(helpers.remove_extension(ep_file_name))
+            if not curEpisode.release_name:
+                ep_file_name = ek.ek(os.path.basename, curEpisode.location)
+                ep_base_name = helpers.remove_non_release_groups(helpers.remove_extension(ep_file_name))
 
-            parse_result = None
-            try:
-                np = NameParser(False)
-                parse_result = np.parse(ep_base_name)
-            except InvalidNameException:
-                pass
+                parse_result = None
+                try:
+                    np = NameParser(False)
+                    parse_result = np.parse(ep_base_name)
+                except InvalidNameException:
+                    pass
 
-            if not ' ' in ep_base_name and parse_result and parse_result.release_group:
-                logger.log(u"Name " + ep_base_name + u" gave release group of " + parse_result.release_group + ", seems valid", logger.DEBUG)
-                curEpisode.release_name = ep_base_name
+                if not ' ' in ep_base_name and parse_result and parse_result.release_group:
+                    logger.log(u"Name " + ep_base_name + u" gave release group of " + parse_result.release_group + ", seems valid", logger.DEBUG)
+                    curEpisode.release_name = ep_base_name
 
             # store the reference in the show
             if curEpisode != None:
