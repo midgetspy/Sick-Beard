@@ -42,12 +42,7 @@ class ProwlNotifier:
 
         title = "Sick Beard"
 
-        # TODO: Consolidate this to one logging dict?
-        logger.log(u"PROWL: title: " + title, logger.DEBUG)
-        logger.log(u"PROWL: event: " + event, logger.DEBUG)
-        logger.log(u"PROWL: message: " + message, logger.DEBUG)
-        logger.log(u"PROWL: api: " + prowl_api, logger.DEBUG)
-        logger.log(u"PROWL: priority: " + prowl_priority, logger.DEBUG)
+        logger.log("PROWL: Sending notice with details: event=\"%s\", message=\"%s\", priority=%s, api=%s" % (event, message, prowl_priority, prowl_api), logger.DEBUG)
 
         try:
 
@@ -74,7 +69,7 @@ class ProwlNotifier:
             return False
 
         if request_status == 200:
-            logger.log(u"PROWL: Notifications sent.", logger.DEBUG)
+            logger.log(u"PROWL: Notifications sent.", logger.MESSAGE)
             return True
         elif request_status == 401:
             logger.log(u"PROWL: Auth failed: %s" % response.reason, logger.ERROR)
@@ -98,7 +93,7 @@ class ProwlNotifier:
     def test_notify(self, prowl_api, prowl_priority):
         return self._notify(prowl_api, prowl_priority, event="Test", message="Testing Prowl settings from Sick Beard", force=True)
 
-    def update_library(self, showName=None):
+    def update_library(self, ep_obj=None):
         pass
 
 notifier = ProwlNotifier

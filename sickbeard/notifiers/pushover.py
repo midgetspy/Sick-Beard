@@ -62,7 +62,6 @@ class PushoverNotifier:
 
         # send the request to pushover
         try:
-            # TODO: Use our getURL from helper?
             req = urllib2.Request(curUrl)
             handle = urllib2.urlopen(req, data)
             handle.close()
@@ -73,7 +72,7 @@ class PushoverNotifier:
                 logger.log(u"PUSHOVER: Notification failed." + ex(e), logger.ERROR)
                 return False
             else:
-                logger.log(u"PUSHOVER: Notification failed. Error code: " + str(e.code), logger.WARNING)
+                logger.log(u"PUSHOVER: Notification failed. Error code: " + str(e.code), logger.ERROR)
 
             # HTTP status 404 if the provided email address isn't a Pushover user.
             if e.code == 404:
@@ -97,10 +96,10 @@ class PushoverNotifier:
                 logger.log(u"PUSHOVER: Wrong data sent to Pushover", logger.ERROR)
                 return False
 
-        logger.log(u"PUSHOVER: Notification successful.", logger.DEBUG)
+        logger.log(u"PUSHOVER: Notification successful.", logger.MESSAGE)
         return True
 
-    def _notify(self, title, message, userKey=None ):
+    def _notify(self, title, message, userKey=None, force=False):
         """
         Sends a pushover notification based on the provided info or SB config
 
@@ -110,7 +109,7 @@ class PushoverNotifier:
         """
 
         # suppress notifications if the notifier is disabled but the notify options are checked
-        if not sickbeard.USE_PUSHOVER:
+        if not sickbeard.USE_PUSHOVER and not force:
             return False
 
         # fill in omitted parameters
@@ -119,8 +118,7 @@ class PushoverNotifier:
 
         logger.log(u"PUSHOVER: Sending notification for " + message, logger.DEBUG)
 
-        self._sendPushover(message, title)
-        return True
+        return self._sendPushover(message, title)
 
 ##############################################################################
 # Public functions
@@ -135,9 +133,9 @@ class PushoverNotifier:
             self._notify(notifyStrings[NOTIFY_DOWNLOAD], ep_name)
 
     def test_notify(self, userKey=None):
-        return self._sendPushover("This is a test notification from SickBeard", 'Test', userKey)
+        return self._notify("This is a test notification from Sick Beard", "Test", userKey, force=True)
 
-    def update_library(self, showName=None):
+    def update_library(self, ep_obj=None):
         pass
 
 notifier = PushoverNotifier

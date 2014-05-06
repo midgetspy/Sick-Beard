@@ -257,4 +257,15 @@ $(document).ready(function () {
                 $("#testNMA").attr("disabled", false);
             });
     });
+
+    $("#testSynoNotify").click(function () {
+        $(this).attr("disabled", true);
+        $("#testSynoNotify-result").html(loading);
+        $.get(sbRoot + "/home/testSynoNotify")
+            .done(function (data) {
+                $("#testSynoNotify-result").html(data);
+                $("#testSynoNotify").attr("disabled", false);
+            });
+    });
+
 });

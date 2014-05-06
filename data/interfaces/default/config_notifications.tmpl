@@ -17,7 +17,7 @@
 
 
             <br />
-            <h2>Home Theater</h2>
+            <h2>Home Theater / NAS</h2>
             <br />
 
 
@@ -366,17 +366,18 @@
 
                 <div class="component-group clearfix">
                     <div class="component-group-desc">
-                        <img class="notifier-icon" src="$sbRoot/images/notifiers/synoindex.png" alt="" title="Synology Indexer" />
-                        <h3><a href="http://synology.com/" rel="noreferrer" onclick="window.open('${sickbeard.ANON_REDIRECT}' + this.href, '_blank'); return false;">Synology Indexer</a></h3>
+                        <img class="notifier-icon" src="$sbRoot/images/notifiers/synoindex.png" alt="" title="Synology" />
+                        <h3><a href="http://synology.com/" rel="noreferrer" onclick="window.open('${sickbeard.ANON_REDIRECT}' + this.href, '_blank'); return false;">Synology</a></h3>
+                        <p>The Synology DiskStation NAS.</p>
                         <p>Synology Indexer is the daemon running on the Synology NAS to build its media database.</p>
+                        <p>Synology Notifier is the notification system of Synology DSM.</p>
                     </div>
-
                     <fieldset class="component-group-list">
                         <div class="field-pair">
                             <input type="checkbox" class="enabler" name="use_synoindex" id="use_synoindex" #if $sickbeard.USE_SYNOINDEX then "checked=\"checked\"" else ""# />
                             <label class="clearfix" for="use_synoindex">
                                 <span class="component-title">Enable</span>
-                                <span class="component-desc">Should Sick Beard send notifications to the synoindex daemon?<br /><br />
+                                <span class="component-desc">Should Sick Beard send Synology commands?<br /><br />
                                 </span>
                             </label>
                             <label class="nocheck clearfix" for="use_synoindex">
@@ -386,8 +387,31 @@
                         </div>
 
                         <div id="content_use_synoindex">
+                            <div class="field-pair">
+                                <input type="checkbox" name="synoindex_notify_onsnatch" id="synoindex_notify_onsnatch" #if $sickbeard.SYNOINDEX_NOTIFY_ONSNATCH then "checked=\"checked\"" else ""# />
+                                <label class="clearfix" for="synoindex_notify_onsnatch">
+                                    <span class="component-title">Notify on Snatch</span>
+                                    <span class="component-desc">Send notification when we start a download?</span>
+                                </label>
+                            </div>
+                            <div class="field-pair">
+                                <input type="checkbox" name="synoindex_notify_ondownload" id="synoindex_notify_ondownload" #if $sickbeard.SYNOINDEX_NOTIFY_ONDOWNLOAD then "checked=\"checked\"" else ""# />
+                                <label class="clearfix" for="synoindex_notify_ondownload">
+                                    <span class="component-title">Notify on Download</span>
+                                    <span class="component-desc">Send notification when we finish a download?</span>
+                                </label>
+                            </div>
+                            <div class="field-pair">
+                                <input type="checkbox" name="synoindex_update_library" id="synoindex_update_library" #if $sickbeard.SYNOINDEX_UPDATE_LIBRARY then "checked=\"checked\"" else ""# />
+                                <label class="clearfix" for="synoindex_update_library">
+                                    <span class="component-title">Update Library</span>
+                                    <span class="component-desc">Update Synology library when we finish a download?</span>
+                                </label>
+                            </div>
+                            <div class="testNotification" id="testSynoNotify-result">Click below to test.</div>
+                            <input type="button" class="btn" value="Test Notice (SynoDSMnotify)" id="testSynoNotify" />
                             <input type="submit" class="btn config_submitter" value="Save Changes" />
-                        </div><!-- /content_use_pytivo //-->
+                        </div><!-- /content_use_synoindex //-->
 
                     </fieldset>
                 </div><!-- /synoindex component-group //-->
@@ -397,14 +421,14 @@
                     <div class="component-group-desc">
                         <img class="notifier-icon" src="$sbRoot/images/notifiers/pytivo.png" alt="" title="pyTivo" />
                         <h3><a href="http://pytivo.sourceforge.net/wiki/index.php/PyTivo" rel="noreferrer" onclick="window.open('${sickbeard.ANON_REDIRECT}' + this.href, '_blank'); return false;">pyTivo</a></h3>
-                        <p>pyTivo is both an HMO and GoBack server.  This notifier will load the completed downloads to your Tivo.</p>
+                        <p>pyTivo is both an HMO and GoBack server. This notifier will load the completed downloads to your Tivo.</p>
                     </div>
                     <fieldset class="component-group-list">
                         <div class="field-pair">
                             <input type="checkbox" class="enabler" name="use_pytivo" id="use_pytivo" #if $sickbeard.USE_PYTIVO then "checked=\"checked\"" else ""# />
                             <label class="clearfix" for="use_pytivo">
                                 <span class="component-title">Enable</span>
-                                <span class="component-desc">Should Sick Beard send notifications to pyTivo?<br /><br /></span>
+                                <span class="component-desc">Should Sick Beard update commands to pyTivo?<br /><br /></span>
                             </label>
                             <label class="nocheck clearfix" for="use_pytivo">
                                 <span class="component-title">&nbsp;</span>
@@ -637,7 +661,7 @@
                             <input type="checkbox" class="enabler" name="use_pushover" id="use_pushover" #if $sickbeard.USE_PUSHOVER then "checked=\"checked\"" else ""# />
                             <label class="clearfix" for="use_pushover">
                                 <span class="component-title">Enable</span>
-                                <span class="component-desc">Should Sick Beard send notifications through Pushover?</span>
+                                <span class="component-desc">Should Sick Beard send Pushover notifications?</span>
                             </label>
                         </div>
 
@@ -678,14 +702,14 @@
                     <div class="component-group-desc">
                         <img class="notifier-icon" src="$sbRoot/images/notifiers/boxcar.png" alt="" title="Boxcar" />
                         <h3><a href="http://boxcar.io/" rel="noreferrer" onclick="window.open('${sickbeard.ANON_REDIRECT}' + this.href, '_blank'); return false;">Boxcar</a></h3>
-                        <p>Read your messages where and when you want them! A subscription will be sent if needed.</p>
+                        <p>Universal push notification for iOS. Read your messages where and when you want them! A subscription will be sent if needed.</p>
                     </div>
                     <fieldset class="component-group-list">
                         <div class="field-pair">
                             <input type="checkbox" class="enabler" name="use_boxcar" id="use_boxcar" #if $sickbeard.USE_BOXCAR then "checked=\"checked\"" else ""# />
                             <label class="clearfix" for="use_boxcar">
                                 <span class="component-title">Enable</span>
-                                <span class="component-desc">Should Sick Beard send notifications through Boxcar?</span>
+                                <span class="component-desc">Should Sick Beard send Boxcar notifications?</span>
                             </label>
                         </div>
 
@@ -792,7 +816,7 @@
                 </div><br />
 
                 <br />
-                <h2>Online</h2>
+                <h2>Social</h2>
                 <br />
 
 

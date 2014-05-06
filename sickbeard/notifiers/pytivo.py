@@ -20,9 +20,10 @@ import os
 import sickbeard
 
 from urllib import urlencode
-from urllib2 import Request, urlopen, URLError
+from urllib2 import Request, urlopen
 
 from sickbeard import logger
+from sickbeard.exceptions import ex
 from sickbeard import encodingKludge as ek
 
 
@@ -38,7 +39,7 @@ class pyTivoNotifier:
     def notify_download(self, ep_name):
         pass
 
-    def update_library(self, ep_obj):
+    def update_library(self, ep_obj=None):
 
         if not sickbeard.USE_PYTIVO:
             return False
@@ -74,22 +75,23 @@ class pyTivoNotifier:
         # Finally create the url and make request
         requestUrl = "http://" + host + "/TiVoConnect?" + urlencode( {'Command': 'Push', 'Container': container, 'File': mediaFile, 'tsn': tsn})
 
-        logger.log(u"PYTIVO: Requesting " + requestUrl)
+        logger.log(u"PYTIVO: Requesting " + requestUrl, logger.DEBUG)
 
-        # TODO: Use our getURL from helper?
-        request = Request( requestUrl )
+        request = Request(requestUrl)
 
         try:
             response = urlopen(request)  # @UnusedVariable
-        except URLError, e:
+        except IOError, e:
             if hasattr(e, 'reason'):
-                logger.log(u"PYTIVO: Error, failed to reach a server - " + str(e.reason))
-                return False
+                logger.log(u"PYTIVO: Failed to reach server '%s' - %s" % (host, e.reason), logger.WARNING)
             elif hasattr(e, 'code'):
-                logger.log(u"PYTIVO: Error, the server couldn't fulfill the request - " + str(e.code))
-                return False
+                logger.log(u"PYTIVO: The server could not fulfill the request '%s' - %s" % (host, e.code), logger.WARNING)
+            return False
+        except Exception, e:
+            logger.log(u"PYTIVO: Unknown exception: " + ex(e), logger.ERROR)
+            return False
         else:
-            logger.log(u"PYTIVO: Successfully requested transfer of file")
+            logger.log(u"PYTIVO: Successfully requested transfer of file", logger.MESSAGE)
             return True
 
 notifier = pyTivoNotifier

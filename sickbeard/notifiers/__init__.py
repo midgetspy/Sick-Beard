@@ -39,12 +39,12 @@ from sickbeard.common import *
 from sickbeard import logger
 from sickbeard.exceptions import ex
 
-# home theater
+# home theater/nas
 xbmc_notifier = xbmc.XBMCNotifier()
 plex_notifier = plex.PLEXNotifier()
 nmj_notifier = nmj.NMJNotifier()
-synoindex_notifier = synoindex.synoIndexNotifier()
 nmjv2_notifier = nmjv2.NMJv2Notifier()
+synoindex_notifier = synoindex.synoIndexNotifier()
 pytivo_notifier = pytivo.pyTivoNotifier()
 # devices
 growl_notifier = growl.GrowlNotifier()
@@ -53,7 +53,7 @@ libnotify_notifier = libnotify.LibnotifyNotifier()
 pushover_notifier = pushover.PushoverNotifier()
 boxcar_notifier = boxcar.BoxcarNotifier()
 nma_notifier = nma.NMA_Notifier()
-# online
+# social
 twitter_notifier = tweet.TwitterNotifier()
 trakt_notifier = trakt.TraktNotifier()
 
