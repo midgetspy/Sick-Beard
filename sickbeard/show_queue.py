@@ -98,7 +98,7 @@ class ShowQueue(generic_queue.GenericQueue):
             raise exceptions.CantRefreshException("This show is already being refreshed, not refreshing again.")
 
         if (self.isBeingUpdated(show) or self.isInUpdateQueue(show)) and not force:
-            logger.log(u"A refresh was attempted but there is already an update queued or in progress. Since updates do a refres at the end anyway I'm skipping this request.", logger.DEBUG)
+            logger.log(u"A refresh was attempted but there is already an update queued or in progress. Since updates do a refresh at the end anyway I'm skipping this request.", logger.DEBUG)
             return
 
         queueItemObj = QueueItemRefresh(show)
@@ -116,6 +116,7 @@ class ShowQueue(generic_queue.GenericQueue):
         return queueItemObj
 
     def addShow(self, tvdb_id, showDir, default_status=None, quality=None, flatten_folders=None, lang="en"):
+
         queueItemObj = QueueItemAdd(tvdb_id, showDir, default_status, quality, flatten_folders, lang)
 
         self.add_item(queueItemObj)
@@ -131,11 +132,11 @@ class ShowQueueActions:
     RENAME = 5
 
     names = {REFRESH: 'Refresh',
-                    ADD: 'Add',
-                    UPDATE: 'Update',
-                    FORCEUPDATE: 'Force Update',
-                    RENAME: 'Rename',
-                    }
+             ADD: 'Add',
+             UPDATE: 'Update',
+             FORCEUPDATE: 'Force Update',
+             RENAME: 'Rename',
+             }
 
 
 class ShowQueueItem(generic_queue.QueueItem):
@@ -153,7 +154,7 @@ class ShowQueueItem(generic_queue.QueueItem):
         self.show = show
 
     def isInQueue(self):
-        return self in sickbeard.showQueueScheduler.action.queue + [sickbeard.showQueueScheduler.action.currentItem] #@UndefinedVariable
+        return self in sickbeard.showQueueScheduler.action.queue + [sickbeard.showQueueScheduler.action.currentItem]  # @UndefinedVariable
 
     def _getName(self):
         return str(self.show.tvdbid)
@@ -316,12 +317,12 @@ class QueueItemAdd(ShowQueueItem):
         if self.default_status != SKIPPED:
             logger.log(u"Setting all episodes to the specified default status: " + str(self.default_status))
             myDB = db.DBConnection()
-            myDB.action("UPDATE tv_episodes SET status = ? WHERE status = ? AND showid = ? AND season != 0", [self.default_status, SKIPPED, self.show.tvdbid])
+            myDB.action("UPDATE tv_episodes SET status = ? WHERE status = ? AND showid = ? AND season > 0", [self.default_status, SKIPPED, self.show.tvdbid])
 
         # if they started with WANTED eps then run the backlog
         if self.default_status == WANTED:
             logger.log(u"Launching backlog for this show since its episodes are WANTED")
-            sickbeard.backlogSearchScheduler.action.searchBacklog([self.show]) #@UndefinedVariable
+            sickbeard.backlogSearchScheduler.action.searchBacklog([self.show])  # @UndefinedVariable
 
         self.show.writeMetadata()
         self.show.populateCache()
@@ -368,7 +369,7 @@ class QueueItemRename(ShowQueueItem):
         logger.log(u"Performing rename on " + self.show.name)
 
         try:
-            show_loc = self.show.location
+            show_loc = self.show.location  # @UnusedVariable
         except exceptions.ShowDirNotFoundException:
             logger.log(u"Can't perform rename on " + self.show.name + " when the show dir is missing.", logger.WARNING)
             return
@@ -463,7 +464,7 @@ class QueueItemUpdate(ShowQueueItem):
             if self.show.tvrid == 0:
                 self.show.setTVRID()
 
-        sickbeard.showQueueScheduler.action.refreshShow(self.show, True) #@UndefinedVariable
+        sickbeard.showQueueScheduler.action.refreshShow(self.show, True)  # @UndefinedVariable
 
 
 class QueueItemForceUpdate(QueueItemUpdate):
