@@ -58,7 +58,7 @@ CFG = None
 CONFIG_FILE = None
 
 # this is the version of the config we EXPECT to find
-CONFIG_VERSION = 5
+CONFIG_VERSION = 6
 
 PROG_DIR = '.'
 MY_FULLNAME = None
@@ -267,6 +267,9 @@ NMJ_DATABASE = None
 NMJ_MOUNT = None
 
 USE_SYNOINDEX = False
+SYNOINDEX_NOTIFY_ONSNATCH = False
+SYNOINDEX_NOTIFY_ONDOWNLOAD = False
+SYNOINDEX_UPDATE_LIBRARY = False
 
 USE_NMJv2 = False
 NMJv2_HOST = None
@@ -341,7 +344,8 @@ def initialize(consoleLogging=True):
                 EXTRA_SCRIPTS, USE_TWITTER, TWITTER_USERNAME, TWITTER_PASSWORD, TWITTER_PREFIX, \
                 USE_BOXCAR, BOXCAR_USERNAME, BOXCAR_PASSWORD, BOXCAR_NOTIFY_ONDOWNLOAD, BOXCAR_NOTIFY_ONSNATCH, \
                 USE_PUSHOVER, PUSHOVER_USERKEY, PUSHOVER_NOTIFY_ONDOWNLOAD, PUSHOVER_NOTIFY_ONSNATCH, \
-                USE_LIBNOTIFY, LIBNOTIFY_NOTIFY_ONSNATCH, LIBNOTIFY_NOTIFY_ONDOWNLOAD, USE_NMJ, NMJ_HOST, NMJ_DATABASE, NMJ_MOUNT, USE_NMJv2, NMJv2_HOST, NMJv2_DATABASE, NMJv2_DBLOC, USE_SYNOINDEX, \
+                USE_LIBNOTIFY, LIBNOTIFY_NOTIFY_ONSNATCH, LIBNOTIFY_NOTIFY_ONDOWNLOAD, USE_NMJ, NMJ_HOST, NMJ_DATABASE, NMJ_MOUNT, USE_NMJv2, NMJv2_HOST, NMJv2_DATABASE, NMJv2_DBLOC, \
+                USE_SYNOINDEX, SYNOINDEX_NOTIFY_ONSNATCH, SYNOINDEX_NOTIFY_ONDOWNLOAD, SYNOINDEX_UPDATE_LIBRARY, \
                 USE_LISTVIEW, METADATA_XBMC, METADATA_XBMC_12PLUS, METADATA_MEDIABROWSER, METADATA_MEDE8ER, METADATA_PS3, metadata_provider_dict, \
                 GIT_PATH, MOVE_ASSOCIATED_FILES, \
                 COMING_EPS_LAYOUT, COMING_EPS_SORT, COMING_EPS_DISPLAY_PAUSED, METADATA_WDTV, METADATA_TIVO, IGNORE_WORDS, CREATE_MISSING_SHOW_DIRS, \
@@ -602,6 +606,9 @@ def initialize(consoleLogging=True):
 
         CheckSection(CFG, 'Synology')
         USE_SYNOINDEX = bool(check_setting_int(CFG, 'Synology', 'use_synoindex', 0))
+        SYNOINDEX_NOTIFY_ONSNATCH = bool(check_setting_int(CFG, 'Synology', 'synoindex_notify_onsnatch', 0))
+        SYNOINDEX_NOTIFY_ONDOWNLOAD = bool(check_setting_int(CFG, 'Synology', 'synoindex_notify_ondownload', 0))
+        SYNOINDEX_UPDATE_LIBRARY = bool(check_setting_int(CFG, 'Synology', 'synoindex_update_library', 0))
 
         CheckSection(CFG, 'Trakt')
         USE_TRAKT = bool(check_setting_int(CFG, 'Trakt', 'use_trakt', 0))
@@ -1114,6 +1121,9 @@ def save_config():
 
     new_config['Synology'] = {}
     new_config['Synology']['use_synoindex'] = int(USE_SYNOINDEX)
+    new_config['Synology']['synoindex_notify_onsnatch'] = int(SYNOINDEX_NOTIFY_ONSNATCH)
+    new_config['Synology']['synoindex_notify_ondownload'] = int(SYNOINDEX_NOTIFY_ONDOWNLOAD)
+    new_config['Synology']['synoindex_update_library'] = int(SYNOINDEX_UPDATE_LIBRARY)
 
     new_config['NMJv2'] = {}
     new_config['NMJv2']['use_nmjv2'] = int(USE_NMJv2)
