@@ -196,7 +196,6 @@ class SceneAccessProvider(generic.TorrentProvider):
             raise Exception("[" + self.name + "] _doLogin() Error: " + ex(e))
             return False
         
-        logger.log(response.text)
         if re.search("Username or password incorrect|<title>SceneAccess \| Login</title>",response.text) \
         or response.status_code in [401,403]:
             raise Exception("[" + self.name + "] Login Failed, Invalid username or password for " + self.name + ". Check your settings.")
