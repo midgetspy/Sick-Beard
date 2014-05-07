@@ -29,7 +29,7 @@ import datetime
 
 from name_parser.parser import NameParser, InvalidNameException
 
-resultFilters = ["sub(pack|s|bed)", "nlsub(bed|s)?", "swesub(bed)?",
+resultFilters = ["sub(bed|ed|pack|s)", "(dk|fin|heb|kor|nl|nor|nordic|pl|swe)sub(bed|ed|s)?",
                  "(dir|sample|sub|nfo)fix", "sample", "(dvd)?extras",
                  "dub(bed)?"]
 
