@@ -313,7 +313,7 @@ class GenericProvider:
                     continue
 
                 myDB = db.DBConnection()
-                sql_results = myDB.select("SELECT season, episode FROM tv_episodes WHERE showid = ? AND airdate = ?", [show.tvdbid, parse_result.air_date.toordinal()])
+                sql_results = myDB.select("SELECT season, episode FROM tv_episodes WHERE season != 0 AND showid = ? AND airdate = ?", [show.tvdbid, parse_result.air_date.toordinal()])
 
                 if len(sql_results) != 1:
                     logger.log(u"Tried to look up the date for the episode " + title + " but the database didn't give proper results, skipping it", logger.WARNING)
