@@ -224,6 +224,7 @@ class BitHDTVCache(tvcache.TVCache):
     ###################################################################################################
         
     def _getRSSData(self):
+        provider.search_results = []
         provider.parseResults(provider.url + "torrents.php?cat=10")
         provider.parseResults(provider.url + "torrents.php?cat=12")
         

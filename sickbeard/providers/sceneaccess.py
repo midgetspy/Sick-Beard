@@ -43,6 +43,7 @@ class SceneAccessProvider(generic.TorrentProvider):
     def __init__(self):
         generic.TorrentProvider.__init__(self, "SceneAccess")
         self.cache = SceneAccessCache(self)     
+        self.header = {'user-agent': 'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/32.0.1700.107 Safari/537.36'}
         self.name = "SceneAccess"
         self.session = None
         self.supportsBacklog = True
@@ -166,7 +167,7 @@ class SceneAccessProvider(generic.TorrentProvider):
             headers = []
             
         try:
-            response = self.session.get(url, verify=False)
+            response = self.session.get(url, headers=self.header, verify=False)
         except (requests.exceptions.ConnectionError, requests.exceptions.HTTPError), e:
             logger.log("[" + self.name + "] getURL() Error loading " + self.name + " URL: " + ex(e), logger.ERROR)
             return None
@@ -183,19 +184,19 @@ class SceneAccessProvider(generic.TorrentProvider):
         login_params  = {
             'username': sickbeard.SCENEACCESS_USERNAME,
             'password': sickbeard.SCENEACCESS_PASSWORD,
-            'login': 'submit'
+            'submit': 'come on in'
         }
         
         self.session = requests.Session()
         logger.log("[" + self.name + "] Attempting to Login")
         
         try:
-            response = self.session.post(self.url + "login", data=login_params, timeout=30, verify=False)
+            response = self.session.post(self.url + "login", data=login_params, headers=self.header, timeout=30, verify=False)
         except (requests.exceptions.ConnectionError, requests.exceptions.HTTPError), e:
             raise Exception("[" + self.name + "] _doLogin() Error: " + ex(e))
             return False
         
-        if re.search("Invalid Username/password|<title>SceneAccess \| Login</title>",response.text) \
+        if re.search("Username or password incorrect|<title>SceneAccess \| Login</title>",response.text) \
         or response.status_code in [401,403]:
             raise Exception("[" + self.name + "] Login Failed, Invalid username or password for " + self.name + ". Check your settings.")
             return False
