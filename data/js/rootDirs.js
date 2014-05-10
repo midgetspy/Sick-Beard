@@ -35,7 +35,7 @@ $(document).ready(function() {
             is_default = true;
         }
 
-        $('#rootDirs').append('<option value="'+path+'">'+path+'</option>');
+        $('#rootDirs').append('<option value="' + path + '">' + path + '</option>');
 
         syncOptionIDs();
 

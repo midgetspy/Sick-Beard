@@ -34,6 +34,8 @@
                 return i++ != 0;
             });
             $('<h2>').text(first_val.current_path).appendTo(fileBrowserDialog);
+            // set current path to what we path we actually did load (in case the previous dir is no longer there)
+            currentBrowserPath = first_val.current_path;
             list = $('<ul>').appendTo(fileBrowserDialog);
             $.each(data, function (i, entry) {
                 link = $("<a href='javascript:void(0)' />").click(function () { browse(entry.path, endpoint); }).text(entry.name);
@@ -92,6 +94,10 @@
         var initialDir = '';
         if (options.initialDir) {
             initialDir = options.initialDir;
+        }
+        // HACK to allow users to specify \\server\path to override use of stored values
+        if (options.field && options.field.val().indexOf('\\') == 0) {
+            initialDir = options.field.val()
         }
         browse(initialDir, options.url);
         fileBrowserDialog.dialog('open');

@@ -206,6 +206,9 @@ thead.tablesorter-stickyHeader {
   background-color: #dfdacf;
 }
 /* filter widget */
+.tablesorter .filtered {
+  display: none;
+}
 .tablesorter input.tablesorter-filter {
   width: 98%;
   height: auto;
@@ -981,7 +984,6 @@ td.tvShow a {
   text-decoration: none;
   display: block;
   width: 100%;
-  height: 100%;
 }
 td.tvShow:hover a {
   color:#000;
