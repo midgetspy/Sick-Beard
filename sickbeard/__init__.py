@@ -682,7 +682,8 @@ def initialize(consoleLogging=True):
         showUpdateScheduler = scheduler.Scheduler(showUpdaterInstance,
                                                   cycleTime=showUpdaterInstance.updateInterval,
                                                   threadName="SHOWUPDATER",
-                                                  run_delay=showUpdaterInstance.updateInterval
+                                                  run_delay=showUpdaterInstance.updateInterval,
+                                                  silent=True
                                                   )
 
         # searchers
@@ -710,11 +711,9 @@ def initialize(consoleLogging=True):
         properFinderScheduler = scheduler.Scheduler(properFinderInstance,
                                                     cycleTime=properFinderInstance.updateInterval,
                                                     threadName="FINDPROPERS",
-                                                    run_delay=properFinderInstance.updateInterval
+                                                    run_delay=properFinderInstance.updateInterval,
+                                                    silent=True
                                                     )
-
-        if not DOWNLOAD_PROPERS:
-            properFinderScheduler.silent = True
 
         # processors
         autoPostProcesserScheduler = scheduler.Scheduler(autoPostProcesser.PostProcesser(),

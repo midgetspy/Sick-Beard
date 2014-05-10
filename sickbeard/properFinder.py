@@ -48,9 +48,6 @@ class ProperFinder():
 
         # look for propers every night at 1 AM
         updateTime = datetime.time(hour=1)
-
-        logger.log(u"Checking proper time", logger.DEBUG)
-
         hourDiff = datetime.datetime.today().time().hour - updateTime.hour
 
         # if it's less than an interval after the update time then do an update
