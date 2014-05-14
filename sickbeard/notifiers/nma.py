@@ -8,7 +8,7 @@ class NMA_Notifier:
 
     def _sendNMA(self, nma_api=None, nma_priority=None, event=None, message=None, force=False):
 
-        title = "Sick-Beard"
+        title = "Sick Beard"
 
         # suppress notifications if the notifier is disabled but the notify options are checked
         if not sickbeard.USE_NMA and not force:
@@ -20,10 +20,6 @@ class NMA_Notifier:
         if nma_priority == None:
             nma_priority = sickbeard.NMA_PRIORITY
 
-        logger.log(u"NMA: title: " + title, logger.DEBUG)
-        logger.log(u"NMA: event: " + event, logger.DEBUG)
-        logger.log(u"NMA: message: " + message, logger.DEBUG)
-
         batch = False
 
         p = pynma.PyNMA()
@@ -33,12 +29,14 @@ class NMA_Notifier:
         if len(keys) > 1:
             batch = True
 
+        logger.log("NMA: Sending notice with details: event=\"%s\", message=\"%s\", priority=%s, batch=%s" % (event, message, nma_priority, batch), logger.DEBUG)
         response = p.push(title, event, message, priority=nma_priority, batch_mode=batch)
 
         if not response[nma_api][u'code'] == u'200':
             logger.log(u"NMA: Could not send notification to NotifyMyAndroid", logger.ERROR)
             return False
         else:
+            logger.log(u"NMA: Notification sent to NotifyMyAndroid", logger.MESSAGE)
             return True
 
 ##############################################################################
@@ -56,7 +54,7 @@ class NMA_Notifier:
     def test_notify(self, nma_api, nma_priority):
         return self._sendNMA(nma_api, nma_priority, event="Test", message="Testing NMA settings from Sick Beard", force=True)
 
-    def update_library(self, showName=None):
+    def update_library(self, ep_obj=None):
         pass
 
 notifier = NMA_Notifier

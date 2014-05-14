@@ -64,7 +64,6 @@ class BoxcarNotifier:
 
         # send the request to boxcar
         try:
-            # TODO: Use our getURL from helper?
             req = urllib2.Request(curUrl)
             handle = urllib2.urlopen(req, data)
             handle.close()
@@ -72,10 +71,10 @@ class BoxcarNotifier:
         except urllib2.URLError, e:
             # if we get an error back that doesn't have an error code then who knows what's really happening
             if not hasattr(e, 'code'):
-                logger.log(u"BOXCAR: Boxcar notification failed." + ex(e), logger.ERROR)
+                logger.log(u"BOXCAR: Notification failed." + ex(e), logger.ERROR)
                 return False
             else:
-                logger.log(u"BOXCAR: Boxcar notification failed. Error code: " + str(e.code), logger.WARNING)
+                logger.log(u"BOXCAR: Notification failed. Error code: " + str(e.code), logger.ERROR)
 
             # HTTP status 404 if the provided email address isn't a Boxcar user.
             if e.code == 404:
@@ -103,10 +102,10 @@ class BoxcarNotifier:
 
             # If you receive an HTTP status code of 400, it is because you failed to send the proper parameters
             elif e.code == 400:
-                logger.log(u"BOXCAR: Wrong data send to boxcar.", logger.ERROR)
+                logger.log(u"BOXCAR: Wrong data sent to boxcar.", logger.ERROR)
                 return False
 
-        logger.log(u"BOXCAR: Boxcar notification successful.", logger.DEBUG)
+        logger.log(u"BOXCAR: Notification successful.", logger.MESSAGE)
         return True
 
     def _notify(self, title, message, username=None, force=False):
@@ -129,8 +128,7 @@ class BoxcarNotifier:
 
         logger.log(u"BOXCAR: Sending notification for " + message, logger.DEBUG)
 
-        self._sendBoxcar(message, title, username)
-        return True
+        return self._sendBoxcar(message, title, username)
 
 ##############################################################################
 # Public functions
@@ -144,10 +142,10 @@ class BoxcarNotifier:
         if sickbeard.BOXCAR_NOTIFY_ONDOWNLOAD:
             self._notify(notifyStrings[NOTIFY_DOWNLOAD], ep_name)
 
-    def test_notify(self, email, title="Test"):
-        return self._sendBoxcar("This is a test notification from SickBeard", title, email)
+    def test_notify(self, boxcar_username):
+        return self._notify("This is a test notification from Sick Beard", "Test", boxcar_username, force=True)
 
-    def update_library(self, showName=None):
+    def update_library(self, ep_obj=None):
         pass
 
 notifier = BoxcarNotifier
