@@ -43,7 +43,7 @@ class PushbulletNotifier:
         """
 
         if not apiKey:
-            apiKey = sickbeard.PUSHBULLET_apiKey
+            apiKey = sickbeard.PUSHBULLET_userKey
 
         # build up the URL and parameters
         msg = msg.strip()
