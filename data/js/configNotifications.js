@@ -97,6 +97,21 @@ $(document).ready(function () {
             });
     });
 
+    $("#testPushbullet").click(function () {
+        var pushbullet_userkey = $.trim($("#pushbullet_userkey").val());
+        if (!pushbullet_userkey) {
+            $("#testPushbullet-result").html("Please fill out the necessary fields above.");
+            return;
+        }
+        $(this).attr("disabled", true);
+        $("#testPushbullet-result").html(loading);
+        $.get(sbRoot + "/home/testPushbullet", {'userKey': pushbullet_userkey})
+            .done(function (data) {
+                $("#testPushbullet-result").html(data);
+                $("#testPushbullet").attr("disabled", false);
+            });
+    });
+
     $("#testLibnotify").click(function () {
         $("#testLibnotify-result").html(loading);
         $.get(sbRoot + "/home/testLibnotify",
