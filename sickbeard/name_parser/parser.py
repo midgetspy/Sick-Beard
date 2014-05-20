@@ -29,6 +29,7 @@ from sickbeard import encodingKludge as ek
 from sickbeard import helpers
 
 
+
 class NameParser(object):
     def __init__(self, is_file_name=True):
 
@@ -168,42 +169,38 @@ class NameParser(object):
                 obj = unicode(obj, encoding)
         return obj
 
-    def _convert_number(self, number):
-        if type(number) == int:
-            return number
+    def _convert_number(self, org_number):
+        """
+        Convert org_number into an integer
+        org_number: integer or representation of a number: string or unicode
+        Try force converting to int first, on error try converting from Roman numerals
+        returns integer or 0
+        """
 
-        # good lord I'm lazy
-        if number.lower() == 'i': return 1
-        if number.lower() == 'ii': return 2
-        if number.lower() == 'iii': return 3
-        if number.lower() == 'iv': return 4
-        if number.lower() == 'v': return 5
-        if number.lower() == 'vi': return 6
-        if number.lower() == 'vii': return 7
-        if number.lower() == 'viii': return 8
-        if number.lower() == 'ix': return 9
-        if number.lower() == 'x': return 10
-        if number.lower() == 'xi': return 11
-        if number.lower() == 'xii': return 12
-        if number.lower() == 'xiii': return 13
-        if number.lower() == 'xiv': return 14
-        if number.lower() == 'xv': return 15
-        if number.lower() == 'xvi': return 16
-        if number.lower() == 'xvii': return 17
-        if number.lower() == 'xviii': return 18
-        if number.lower() == 'xix': return 19
-        if number.lower() == 'xx': return 20
-        if number.lower() == 'xxi': return 21
-        if number.lower() == 'xxii': return 22
-        if number.lower() == 'xxiii': return 23
-        if number.lower() == 'xxiv': return 24
-        if number.lower() == 'xxv': return 25
-        if number.lower() == 'xxvi': return 26
-        if number.lower() == 'xxvii': return 27
-        if number.lower() == 'xxviii': return 28
-        if number.lower() == 'xxix': return 29
+        try:
+            # try forcing to int
+            if org_number:
+                number = int(org_number)
+            else:
+                number = 0
 
-        return int(number)
+        except:
+            # on error try converting from Roman numerals
+            roman_to_int_map = (('M', 1000), ('CM', 900), ('D', 500), ('CD', 400), ('C', 100),
+                                ('XC', 90), ('L', 50), ('XL', 40), ('X', 10),
+                                ('IX', 9), ('V', 5), ('IV', 4), ('I', 1)
+                               )
+
+            roman_numeral = str(org_number).upper()
+            number = 0
+            index = 0
+
+            for numeral, integer in roman_to_int_map:
+                while roman_numeral[index:index + len(numeral)] == numeral:
+                    number += integer
+                    index += len(numeral)
+
+        return number
 
     def parse(self, name):
 
