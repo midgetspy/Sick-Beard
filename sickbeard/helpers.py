@@ -50,6 +50,7 @@ import sickbeard
 from sickbeard.exceptions import MultipleShowObjectsException, ex
 from sickbeard import logger, classes
 from sickbeard.common import USER_AGENT, mediaExtensions, XML_NSMAP
+from sickbeard.common import mediaExtensions
 
 from sickbeard import db
 from sickbeard import encodingKludge as ek
@@ -80,6 +81,32 @@ def indentXML(elem, level=0):
             elem.text = elem.text.replace('\n', ' ')
         if level and (not elem.tail or not elem.tail.strip()):
             elem.tail = i
+
+
+def remove_extension(name):
+    """
+    Remove download or media extension from name (if any)
+    """
+
+    if name and "." in name:
+        base_name, sep, extension = name.rpartition('.')  # @UnusedVariable
+        if base_name and extension.lower() in ['nzb', 'torrent'] + mediaExtensions:
+            name = base_name
+
+    return name
+
+
+def remove_non_release_groups(name):
+    """
+    Remove non release groups from name
+    """
+
+    if name and "-" in name:
+        name_group = name.rsplit('-', 1)
+        if name_group[-1].upper() in ["RP", "NZBGEEK"]:
+            name = name_group[0]
+
+    return name
 
 
 def replaceExtension(filename, newExt):
