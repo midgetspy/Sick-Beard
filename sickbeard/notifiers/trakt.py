@@ -32,7 +32,7 @@ from sickbeard import logger
 
 class TraktNotifier:
 
-    def _notifyTrakt(self, method, api, username, password, data={}):
+    def _notifyTrakt(self, method, api, username, password, data={}, force=False):
         """
         A generic method for communicating with trakt. Uses the method and data provided along
         with the auth info to send the command.
@@ -44,6 +44,10 @@ class TraktNotifier:
 
         Returns: A boolean representing success
         """
+        # suppress notifications if the notifier is disabled but the notify options are checked
+        if not sickbeard.USE_TRAKT and not force:
+            return False
+
         logger.log(u"TRAKT: Calling method " + method, logger.DEBUG)
 
         # if the API isn't given then use the config API
@@ -71,7 +75,6 @@ class TraktNotifier:
         # request the URL from trakt and parse the result as json
         try:
             logger.log(u"TRAKT: Calling method http://api.trakt.tv/" + method + ", with data" + encoded_data, logger.DEBUG)
-            # TODO: Use our getURL from helper?
             stream = urllib2.urlopen("http://api.trakt.tv/" + method, encoded_data)
             resp = stream.read()
 
@@ -85,7 +88,7 @@ class TraktNotifier:
             return False
 
         if (resp["status"] == "success"):
-            logger.log(u"TRAKT: Succeeded calling method. Result: " + resp["message"], logger.DEBUG)
+            logger.log(u"TRAKT: Succeeded calling method. Result: " + resp["message"], logger.MESSAGE)
             return True
 
         logger.log(u"TRAKT: Failed calling method", logger.ERROR)
@@ -114,9 +117,9 @@ class TraktNotifier:
         """
 
         method = "account/test/"
-        return self._notifyTrakt(method, api, username, password, {})
+        return self._notifyTrakt(method, api, username, password, {}, force=True)
 
-    def update_library(self, ep_obj):
+    def update_library(self, ep_obj=None):
         """
         Sends a request to trakt indicating that the given episode is part of our library.
 

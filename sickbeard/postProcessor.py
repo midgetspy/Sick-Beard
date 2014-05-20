@@ -862,30 +862,15 @@ class PostProcessor(object):
         # log it to history
         history.logDownload(ep_obj, self.file_path, new_ep_quality, self.release_group)
 
-        # send notifications
+        # send notifiers download notification
         notifiers.notify_download(ep_obj.prettyName())
 
         # generate nfo/tbn
         ep_obj.createMetaFiles()
         ep_obj.saveToDB()
 
-        # do the library update for XBMC
-        notifiers.xbmc_notifier.update_library(ep_obj.show.name)
-
-        # do the library update for Plex
-        notifiers.plex_notifier.update_library()
-
-        # do the library update for NMJ
-        # nmj_notifier kicks off its library update when the notify_download is issued (inside notifiers)
-
-        # do the library update for Synology Indexer
-        notifiers.synoindex_notifier.addFile(ep_obj.location)
-
-        # do the library update for pyTivo
-        notifiers.pytivo_notifier.update_library(ep_obj)
-
-        # do the library update for Trakt
-        notifiers.trakt_notifier.update_library(ep_obj)
+        # send notifiers library update
+        notifiers.update_library(ep_obj)
 
         self._run_extra_scripts(ep_obj)
 
