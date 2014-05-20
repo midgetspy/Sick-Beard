@@ -744,11 +744,6 @@ class ConfigSearch:
         # Episode Search
         sickbeard.DOWNLOAD_PROPERS = config.checkbox_to_value(download_propers)
 
-        if sickbeard.DOWNLOAD_PROPERS:
-            sickbeard.properFinderScheduler.silent = False
-        else:
-            sickbeard.properFinderScheduler.silent = True
-
         config.change_SEARCH_FREQUENCY(search_frequency)
         sickbeard.USENET_RETENTION = config.to_int(usenet_retention, default=500)
 

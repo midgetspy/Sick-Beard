@@ -665,54 +665,65 @@ def initialize(consoleLogging=True):
         newznabProviderList = providers.getNewznabProviderList(NEWZNAB_DATA)
         providerList = providers.makeProviderList()
 
-        # initialize schedulars
+        # initialize schedulers
+
+        # updaters
+        versionCheckScheduler = scheduler.Scheduler(versionChecker.CheckVersion(),
+                                                    cycleTime=datetime.timedelta(hours=12),
+                                                    threadName="CHECKVERSION"
+                                                    )
+
+        showQueueScheduler = scheduler.Scheduler(show_queue.ShowQueue(),
+                                                 cycleTime=datetime.timedelta(seconds=3),
+                                                 threadName="SHOWQUEUE",
+                                                 silent=True)
+
+        showUpdaterInstance = showUpdater.ShowUpdater()  # the interval for this is stored inside the class
+        showUpdateScheduler = scheduler.Scheduler(showUpdaterInstance,
+                                                  cycleTime=showUpdaterInstance.updateInterval,
+                                                  threadName="SHOWUPDATER",
+                                                  run_delay=showUpdaterInstance.updateInterval,
+                                                  silent=True
+                                                  )
+
+        # searchers
+        searchQueueScheduler = scheduler.Scheduler(search_queue.SearchQueue(),
+                                                   cycleTime=datetime.timedelta(seconds=3),
+                                                   threadName="SEARCHQUEUE",
+                                                   silent=True
+                                                   )
+
         currentSearchScheduler = scheduler.Scheduler(searchCurrent.CurrentSearcher(),
                                                      cycleTime=datetime.timedelta(minutes=SEARCH_FREQUENCY),
                                                      threadName="SEARCH",
-                                                     runImmediately=True)
-
-        # the interval for this is stored inside the ShowUpdater class
-        showUpdaterInstance = showUpdater.ShowUpdater()
-        showUpdateScheduler = scheduler.Scheduler(showUpdaterInstance,
-                                               cycleTime=showUpdaterInstance.updateInterval,
-                                               threadName="SHOWUPDATER",
-                                               runImmediately=False)
-
-        versionCheckScheduler = scheduler.Scheduler(versionChecker.CheckVersion(),
-                                                     cycleTime=datetime.timedelta(hours=12),
-                                                     threadName="CHECKVERSION",
-                                                     runImmediately=True)
-
-        showQueueScheduler = scheduler.Scheduler(show_queue.ShowQueue(),
-                                               cycleTime=datetime.timedelta(seconds=3),
-                                               threadName="SHOWQUEUE",
-                                               silent=True)
-
-        searchQueueScheduler = scheduler.Scheduler(search_queue.SearchQueue(),
-                                               cycleTime=datetime.timedelta(seconds=3),
-                                               threadName="SEARCHQUEUE",
-                                               silent=True)
-
-        properFinderInstance = properFinder.ProperFinder()
-        properFinderScheduler = scheduler.Scheduler(properFinderInstance,
-                                                     cycleTime=properFinderInstance.updateInterval,
-                                                     threadName="FINDPROPERS",
-                                                     runImmediately=False)
-        if not DOWNLOAD_PROPERS:
-            properFinderScheduler.silent = True
-
-        autoPostProcesserScheduler = scheduler.Scheduler(autoPostProcesser.PostProcesser(),
-                                                     cycleTime=datetime.timedelta(minutes=10),
-                                                     threadName="POSTPROCESSER",
-                                                     runImmediately=True)
-        if not PROCESS_AUTOMATICALLY:
-            autoPostProcesserScheduler.silent = True
+                                                     run_delay=datetime.timedelta(minutes=5)
+                                                     )
 
         backlogSearchScheduler = searchBacklog.BacklogSearchScheduler(searchBacklog.BacklogSearcher(),
                                                                       cycleTime=datetime.timedelta(minutes=get_backlog_cycle_time()),
                                                                       threadName="BACKLOG",
-                                                                      runImmediately=True)
+                                                                      run_delay=datetime.timedelta(minutes=17)
+                                                                      )
+
         backlogSearchScheduler.action.cycleTime = BACKLOG_SEARCH_FREQUENCY
+
+        properFinderInstance = properFinder.ProperFinder()  # the interval for this is stored inside the class
+        properFinderScheduler = scheduler.Scheduler(properFinderInstance,
+                                                    cycleTime=properFinderInstance.updateInterval,
+                                                    threadName="FINDPROPERS",
+                                                    run_delay=properFinderInstance.updateInterval,
+                                                    silent=True
+                                                    )
+
+        # processors
+        autoPostProcesserScheduler = scheduler.Scheduler(autoPostProcesser.PostProcesser(),
+                                                         cycleTime=datetime.timedelta(minutes=10),
+                                                         threadName="POSTPROCESSER",
+                                                         run_delay=datetime.timedelta(minutes=5)
+                                                         )
+
+        if not PROCESS_AUTOMATICALLY:
+            autoPostProcesserScheduler.silent = True
 
         showList = []
         loadingShowList = {}
