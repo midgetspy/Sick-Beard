@@ -24,7 +24,7 @@ import re
 
 import sickbeard
 
-from common import SNATCHED, Quality, SEASON_RESULT, MULTI_EP_RESULT
+from common import SNATCHED, WANTED, Quality, SEASON_RESULT, MULTI_EP_RESULT
 
 from sickbeard import logger, db, show_name_helpers, exceptions, helpers
 from sickbeard import sab
@@ -397,44 +397,44 @@ def findSeason(show, season):
     if SEASON_RESULT in foundResults:
         bestSeasonNZB = pickBestResult(foundResults[SEASON_RESULT], show, anyQualities + bestQualities)
 
-    highest_quality_overall = 0
+    highest_wanted_quality_overall = 0
     for cur_season in foundResults:
         for cur_result in foundResults[cur_season]:
-            if cur_result.quality != Quality.UNKNOWN and cur_result.quality > highest_quality_overall:
-                highest_quality_overall = cur_result.quality
-    logger.log(u"The highest quality of any match is " + Quality.qualityStrings[highest_quality_overall], logger.DEBUG)
+            if cur_result.quality != Quality.UNKNOWN and cur_result.quality in anyQualities + bestQualities and cur_result.quality > highest_wanted_quality_overall:
+                highest_wanted_quality_overall = cur_result.quality
+
+    logger.log(u"The highest wanted quality of any match is " + Quality.qualityStrings[highest_wanted_quality_overall], logger.DEBUG)
 
     # see if every episode is wanted
     if bestSeasonNZB:
 
         # get the quality of the season nzb
-        seasonQual = Quality.nameQuality(bestSeasonNZB.name)
         seasonQual = bestSeasonNZB.quality
-        logger.log(u"The quality of the season NZB is " + Quality.qualityStrings[seasonQual], logger.DEBUG)
+        logger.log(u"The quality of the season result is " + Quality.qualityStrings[seasonQual], logger.DEBUG)
 
         myDB = db.DBConnection()
         allEps = [int(x["episode"]) for x in myDB.select("SELECT episode FROM tv_episodes WHERE showid = ? AND season = ?", [show.tvdbid, season])]
         logger.log(u"Episode list: " + str(allEps), logger.DEBUG)
 
-        allWanted = True
-        anyWanted = False
+        want_all_eps = True
+        want_some_eps = False
         for curEpNum in allEps:
             if not show.wantEpisode(season, curEpNum, seasonQual):
-                allWanted = False
+                want_all_eps = False
             else:
-                anyWanted = True
+                want_some_eps = True
 
         # if we need every ep in the season and there's nothing better then just download this and be done with it
-        if allWanted and bestSeasonNZB.quality == highest_quality_overall:
-            logger.log(u"Every ep in this season is needed, downloading the whole NZB " + bestSeasonNZB.name)
+        if want_all_eps and bestSeasonNZB.quality == highest_wanted_quality_overall:
+            logger.log(u"Every episode in this season is needed, downloading the whole season " + bestSeasonNZB.name)
             epObjs = []
             for curEpNum in allEps:
                 epObjs.append(show.getEpisode(season, curEpNum))
             bestSeasonNZB.episodes = epObjs
             return [bestSeasonNZB]
 
-        elif not anyWanted:
-            logger.log(u"No eps from this season are wanted at this quality, ignoring the result of " + bestSeasonNZB.name, logger.DEBUG)
+        elif not want_some_eps:
+            logger.log(u"No episodes from this season are wanted at this quality, ignoring the result of " + bestSeasonNZB.name, logger.DEBUG)
 
         else:
 
@@ -460,41 +460,43 @@ def findSeason(show, season):
             # If this is a torrent all we can do is leech the entire torrent, user will have to select which eps not do download in his torrent client
             else:
 
-                # Season result from BTN must be a full-season torrent, creating multi-ep result for it.
+                # Creating a multi-ep result from a torrent Season result
                 logger.log(u"Adding multi-ep result for full-season torrent. Set the episodes you don't want to 'don't download' in your torrent client if desired!")
                 epObjs = []
                 for curEpNum in allEps:
-                    epObjs.append(show.getEpisode(season, curEpNum))
+                    # only add wanted episodes for comparing/filter later with single results
+                    if show.wantEpisode(season, curEpNum, bestSeasonNZB.quality):
+                        epObjs.append(show.getEpisode(season, curEpNum))
+
                 bestSeasonNZB.episodes = epObjs
 
-                epNum = MULTI_EP_RESULT
-                if epNum in foundResults:
-                    foundResults[epNum].append(bestSeasonNZB)
+                if MULTI_EP_RESULT in foundResults:
+                    foundResults[MULTI_EP_RESULT].append(bestSeasonNZB)
                 else:
-                    foundResults[epNum] = [bestSeasonNZB]
+                    foundResults[MULTI_EP_RESULT] = [bestSeasonNZB]
 
     # go through multi-ep results and see if we really want them or not, get rid of the rest
     multiResults = {}
     if MULTI_EP_RESULT in foundResults:
         for multiResult in foundResults[MULTI_EP_RESULT]:
 
-            logger.log(u"Seeing if we want to bother with multi-episode result " + multiResult.name, logger.DEBUG)
+            logger.log(u"Check multi-episode result against single episode results" + multiResult.name, logger.DEBUG)
 
             # see how many of the eps that this result covers aren't covered by single results
-            neededEps = []
-            notNeededEps = []
+            in_single_results = []
+            not_in_single_results = []
             for epObj in multiResult.episodes:
                 epNum = epObj.episode
                 # if we have results for the episode
                 if epNum in foundResults and len(foundResults[epNum]) > 0:
-                    neededEps.append(epNum)
+                    in_single_results.append(epNum)
                 else:
-                    neededEps.append(epNum)
+                    not_in_single_results.append(epNum)
 
-            logger.log(u"Single-ep check result is neededEps: " + str(neededEps) + ", notNeededEps: " + str(notNeededEps), logger.DEBUG)
+            logger.log(u"Multi-episode check result, episodes not in single results: " + str(not_in_single_results) + ", episodes in single results: " + str(in_single_results), logger.DEBUG)
 
-            if not neededEps:
-                logger.log(u"All of these episodes were covered by single nzbs, ignoring this multi-ep result", logger.DEBUG)
+            if not not_in_single_results:
+                logger.log(u"All of these episodes were covered by single episode results, ignoring this multi-episode result", logger.DEBUG)
                 continue
 
             # check if these eps are already covered by another multi-result
