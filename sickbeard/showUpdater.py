@@ -28,6 +28,7 @@ from sickbeard.exceptions import ex
 from sickbeard import encodingKludge as ek
 from sickbeard import db
 
+import sys
 
 class ShowUpdater():
 
@@ -36,8 +37,9 @@ class ShowUpdater():
 
     def run(self, force=False):
 
-        # update at 3 AM
-        run_updater_time = datetime.time(hour=3)
+        # update at specified time.
+        run_updater_time = datetime.time(hour=sickbeard.UPDATE_TIME)
+        sys.exit(str(run_updater_time))
 
         update_datetime = datetime.datetime.today()
         update_date = update_datetime.date()
