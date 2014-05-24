@@ -158,6 +158,7 @@ def help_message():
     help_msg += "                                    to load configuration from \n"
     help_msg += "                                    Default: config.ini in " + sickbeard.PROG_DIR + " or --datadir location\n"
     help_msg += "                --noresize          Prevent resizing of the banner/posters even if PIL is installed\n"
+    help_msg += "    -u <time>   --updatetime=<time> Override default/configured time to do daily full updates\n"
 
     return help_msg
 
@@ -206,7 +207,7 @@ def main():
     threading.currentThread().name = "MAIN"
 
     try:
-        opts, args = getopt.getopt(sys.argv[1:], "hfqdp::", ['help', 'forceupdate', 'quiet', 'nolaunch', 'daemon', 'pidfile=', 'port=', 'datadir=', 'config=', 'noresize'])  # @UnusedVariable
+        opts, args = getopt.getopt(sys.argv[1:], "hfqdpu::", ['help', 'forceupdate', 'quiet', 'nolaunch', 'daemon', 'pidfile=', 'port=', 'datadir=', 'config=', 'noresize', 'updatetime='])  # @UnusedVariable
     except getopt.GetoptError:
         sys.exit(help_message())
 
@@ -215,7 +216,7 @@ def main():
     noLaunch = False
 
     for o, a in opts:
-
+        
         # Prints help message
         if o in ('-h', '--help'):
             sys.exit(help_message())
@@ -233,6 +234,13 @@ def main():
         # Prevent duplicate browser window when restarting in the app
         if o in ('--nolaunch',):
             noLaunch = True
+
+        # Do the daily full update at a different time.
+        if o in ('-u', '--updatetime='):
+            enteredTime = int(a)
+            if enteredTime > 23 or enteredTime < 0:
+                sys.exit("Invalid Time for updates.")
+            sickbeard.UPDATE_TIME = int(a)
 
         # Run as a double forked daemon
         if o in ('-d', '--daemon'):
