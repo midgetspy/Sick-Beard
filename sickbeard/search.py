@@ -17,7 +17,7 @@
 # along with Sick Beard.  If not, see <http://www.gnu.org/licenses/>.
 
 from __future__ import with_statement
-
+import datetime
 import os
 import traceback
 import re
@@ -393,9 +393,9 @@ def findSeason(show, season):
     anyQualities, bestQualities = Quality.splitQuality(show.quality)
 
     # pick the best season NZB
-    bestSeasonNZB = None
+    BestSeasonResult = None
     if SEASON_RESULT in foundResults:
-        bestSeasonNZB = pickBestResult(foundResults[SEASON_RESULT], show, anyQualities + bestQualities)
+        BestSeasonResult = pickBestResult(foundResults[SEASON_RESULT], show, anyQualities + bestQualities)
 
     highest_wanted_quality_overall = 0
     for cur_season in foundResults:
@@ -405,44 +405,66 @@ def findSeason(show, season):
 
     logger.log(u"The highest wanted quality of any match is " + Quality.qualityStrings[highest_wanted_quality_overall], logger.DEBUG)
 
-    # see if every episode is wanted
-    if bestSeasonNZB:
+    # check if complete season pack can be used
+    if BestSeasonResult:
 
         # get the quality of the season nzb
-        seasonQual = bestSeasonNZB.quality
+        seasonQual = BestSeasonResult.quality
         logger.log(u"The quality of the season result is " + Quality.qualityStrings[seasonQual], logger.DEBUG)
 
+        # get all episodes in season from db
         myDB = db.DBConnection()
-        allEps = [int(x["episode"]) for x in myDB.select("SELECT episode FROM tv_episodes WHERE showid = ? AND season = ?", [show.tvdbid, season])]
-        logger.log(u"Episode list: " + str(allEps), logger.DEBUG)
+        sql_result = myDB.select("SELECT episode, airdate FROM tv_episodes WHERE showid = ? AND season = ? ORDER BY episode DESC;", [show.tvdbid, season])
 
+        if sql_result:
+            last_airdate = datetime.date.fromordinal(sql_result[0]['airdate'])
+            all_episodes = sorted([int(x['episode']) for x in sql_result])
+
+        else:
+            last_airdate = datetime.date.fromordinal(1)
+            all_episodes = []
+
+        logger.log(u"Episode list: " + str(all_episodes), logger.DEBUG)
+
+        today = datetime.date.today()
+
+        # only use complete season packs if season stopped > 7 days ago
+        if last_airdate == datetime.date.fromordinal(1) or last_airdate > today - datetime.timedelta(days=7):
+            logger.log(u"Ignoring " + BestSeasonResult.name + ", airdate of last episode in season: " + str(last_airdate) + " is never of < 7 days ago", logger.DEBUG)
+            use_complete_season = False
+        else:
+            use_complete_season = True
+
+        # check if all or some episodes of the season are wanted
         want_all_eps = True
         want_some_eps = False
-        for curEpNum in allEps:
-            if not show.wantEpisode(season, curEpNum, seasonQual):
+
+        for cur_ep_num in all_episodes:
+            if not show.wantEpisode(season, cur_ep_num, seasonQual):
                 want_all_eps = False
             else:
                 want_some_eps = True
 
-        # if we need every ep in the season and there's nothing better then just download this and be done with it
-        if want_all_eps and bestSeasonNZB.quality == highest_wanted_quality_overall:
-            logger.log(u"Every episode in this season is needed, downloading the whole season " + bestSeasonNZB.name)
+        # if every episode is needed in the season and there's nothing better then just download this and be done with it
+        if use_complete_season and want_all_eps and BestSeasonResult.quality == highest_wanted_quality_overall:
+            logger.log(u"Every episode in this season is needed, downloading the whole season " + BestSeasonResult.name)
             epObjs = []
-            for curEpNum in allEps:
-                epObjs.append(show.getEpisode(season, curEpNum))
-            bestSeasonNZB.episodes = epObjs
-            return [bestSeasonNZB]
+            for cur_ep_num in all_episodes:
+                epObjs.append(show.getEpisode(season, cur_ep_num))
+            BestSeasonResult.episodes = epObjs
+            return [BestSeasonResult]
 
         elif not want_some_eps:
-            logger.log(u"No episodes from this season are wanted at this quality, ignoring the result of " + bestSeasonNZB.name, logger.DEBUG)
+            logger.log(u"No episodes from this season are wanted at this quality, ignoring the result of " + BestSeasonResult.name, logger.DEBUG)
 
         else:
 
-            if bestSeasonNZB.provider.providerType == GenericProvider.NZB:
-                logger.log(u"Breaking apart the NZB and adding the individual ones to our results", logger.DEBUG)
+            # if not all episodes are wanted try splitting up the complete season pack
+            if BestSeasonResult.provider.providerType == GenericProvider.NZB:
+                logger.log(u"Try breaking apart the NZB and adding the individual ones to our results", logger.DEBUG)
 
-                # if not, break it apart and add them as the lowest priority results
-                individualResults = nzbSplitter.splitResult(bestSeasonNZB)
+                # break it apart and add them as the lowest priority results
+                individualResults = nzbSplitter.splitResult(BestSeasonResult)
 
                 individualResults = filter(lambda x: show_name_helpers.filterBadReleases(x.name) and show_name_helpers.isGoodResult(x.name, show), individualResults)
 
@@ -457,23 +479,27 @@ def findSeason(show, season):
                     else:
                         foundResults[epNum] = [curResult]
 
-            # If this is a torrent all we can do is leech the entire torrent, user will have to select which eps not do download in his torrent client
             else:
 
-                # Creating a multi-ep result from a torrent Season result
-                logger.log(u"Adding multi-ep result for full-season torrent. Set the episodes you don't want to 'don't download' in your torrent client if desired!")
-                epObjs = []
-                for curEpNum in allEps:
-                    # only add wanted episodes for comparing/filter later with single results
-                    if show.wantEpisode(season, curEpNum, bestSeasonNZB.quality):
-                        epObjs.append(show.getEpisode(season, curEpNum))
+                # if not all episodes are wanted, splitting up the complete season pack for torrents is not possible
+                # all we can do is leech the entire torrent, user will have to select which episodes not do download in his torrent client
 
-                bestSeasonNZB.episodes = epObjs
+                if use_complete_season:
+                    # Creating a multi-ep result from a torrent Season result
+                    logger.log(u"Adding multi-ep result for full-season torrent. Set the episodes you don't want to 'don't download' in your torrent client if desired!")
+                    epObjs = []
 
-                if MULTI_EP_RESULT in foundResults:
-                    foundResults[MULTI_EP_RESULT].append(bestSeasonNZB)
-                else:
-                    foundResults[MULTI_EP_RESULT] = [bestSeasonNZB]
+                    for cur_ep_num in all_episodes:
+                        # only add wanted episodes for comparing/filter later with single results
+                        if show.wantEpisode(season, cur_ep_num, BestSeasonResult.quality):
+                            epObjs.append(show.getEpisode(season, cur_ep_num))
+
+                    BestSeasonResult.episodes = epObjs
+
+                    if MULTI_EP_RESULT in foundResults:
+                        foundResults[MULTI_EP_RESULT].append(BestSeasonResult)
+                    else:
+                        foundResults[MULTI_EP_RESULT] = [BestSeasonResult]
 
     # go through multi-ep results and see if we really want them or not, get rid of the rest
     multiResults = {}
