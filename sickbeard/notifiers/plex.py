@@ -56,7 +56,7 @@ class PLEXNotifier:
             password = sickbeard.PLEX_PASSWORD
 
         if not host:
-            logger.log(u"PLEX: No Plex host specified, check your settings", logger.DEBUG)
+            logger.log(u"PLEX: No host specified, check your settings", logger.ERROR)
             return False
 
         for key in command:
@@ -64,7 +64,7 @@ class PLEXNotifier:
                 command[key] = command[key].encode('utf-8')
 
         enc_command = urllib.urlencode(command)
-        logger.log(u"PLEX: Plex encoded API command: " + enc_command, logger.DEBUG)
+        logger.log(u"PLEX: Encoded API command: " + enc_command, logger.DEBUG)
 
         url = 'http://%s/xbmcCmds/xbmcHttp/?%s' % (host, enc_command)
         try:
@@ -74,17 +74,16 @@ class PLEXNotifier:
                 base64string = base64.encodestring('%s:%s' % (username, password))[:-1]
                 authheader = "Basic %s" % base64string
                 req.add_header("Authorization", authheader)
-                logger.log(u"PLEX: Contacting Plex (with auth header) via url: " + url, logger.DEBUG)
+                logger.log(u"PLEX: Contacting (with auth header) via url: " + url, logger.DEBUG)
             else:
-                logger.log(u"PLEX: Contacting Plex via url: " + url, logger.DEBUG)
+                logger.log(u"PLEX: Contacting via url: " + url, logger.DEBUG)
 
-            # TODO: Use our getURL from helper?
             response = urllib2.urlopen(req)
 
             result = response.read().decode(sickbeard.SYS_ENCODING)
             response.close()
 
-            logger.log(u"PLEX: Plex HTTP response: " + result.replace('\n', ''), logger.DEBUG)
+            logger.log(u"PLEX: HTTP response: " + result.replace('\n', ''), logger.DEBUG)
             # could return result response = re.compile('<html><li>(.+\w)</html>').findall(result)
             return 'OK'
 
@@ -101,7 +100,7 @@ class PLEXNotifier:
             host: Plex Media Client(s) host:port
             username: Plex username
             password: Plex password
-            force: Used for the Test method to override config saftey checks
+            force: Used for the Test method to override config safety checks
 
         Returns:
             Returns a list results in the format of host:ip:result
@@ -123,7 +122,7 @@ class PLEXNotifier:
 
         result = ''
         for curHost in [x.strip() for x in host.split(",")]:
-            logger.log(u"PLEX: Sending Plex notification to '" + curHost + "' - " + message, logger.MESSAGE)
+            logger.log(u"PLEX: Sending notification to '" + curHost + "' - " + message, logger.MESSAGE)
 
             command = {'command': 'ExecBuiltIn', 'parameter': 'Notification(' + title.encode("utf-8") + ',' + message.encode("utf-8") + ')'}
             notifyResult = self._send_to_plex(command, curHost, username, password)
@@ -147,7 +146,7 @@ class PLEXNotifier:
     def test_notify(self, host, username, password):
         return self._notify("Testing Plex notifications from Sick Beard", "Test Notification", host, username, password, force=True)
 
-    def update_library(self):
+    def update_library(self, ep_obj=None):
         """Handles updating the Plex Media Server host via HTTP API
 
         Plex Media Server currently only supports updating the whole video library and not a specific path.
@@ -159,14 +158,13 @@ class PLEXNotifier:
 
         if sickbeard.USE_PLEX and sickbeard.PLEX_UPDATE_LIBRARY:
             if not sickbeard.PLEX_SERVER_HOST:
-                logger.log(u"PLEX: No Plex Server host specified, check your settings", logger.DEBUG)
+                logger.log(u"PLEX: No Plex Media Server host specified, check your settings", logger.DEBUG)
                 return False
 
             logger.log(u"PLEX: Updating library for the Plex Media Server host: " + sickbeard.PLEX_SERVER_HOST, logger.MESSAGE)
 
             url = "http://%s/library/sections" % sickbeard.PLEX_SERVER_HOST
             try:
-                # TODO: Use our getURL from helper?
                 xml_tree = etree.parse(urllib.urlopen(url))
                 media_container = xml_tree.getroot()
             except IOError, e:

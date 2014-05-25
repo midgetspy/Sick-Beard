@@ -44,7 +44,6 @@ class NMJv2Notifier:
         """
         try:
             url_loc = "http://" + host + ":8008/file_operation?arg0=list_user_storage_file&arg1=&arg2=" + instance + "&arg3=20&arg4=true&arg5=true&arg6=true&arg7=all&arg8=name_asc&arg9=false&arg10=false"
-            # TODO: Use our getURL from helper?
             req = urllib2.Request(url_loc)
             handle1 = urllib2.urlopen(req)
             response1 = handle1.read()
@@ -71,7 +70,7 @@ class NMJv2Notifier:
                         sickbeard.NMJv2_DATABASE = DB_path
                         return True
         except IOError, e:
-            logger.log(u"NMJv2: Warning: Couldn't contact Popcorn Hour on host %s: %s" % (host, e))
+            logger.log(u"NMJv2: Could not contact Popcorn Hour on host %s: %s" % (host, e), logger.WARNING)
             return False
 
         return False
@@ -90,9 +89,9 @@ class NMJv2Notifier:
         #if a host is provided then attempt to open a handle to that URL
         try:
             url_scandir = "http://" + host + ":8008/metadata_database?arg0=update_scandir&arg1=" + sickbeard.NMJv2_DATABASE + "&arg2=&arg3=update_all"
-            logger.log(u"NMJv2 scan update command send to host: %s" % (host))
+            logger.log(u"NMJv2: Scan update command send to host: %s" % (host), logger.DEBUG)
             url_updatedb = "http://" + host + ":8008/metadata_database?arg0=scanner_start&arg1=" + sickbeard.NMJv2_DATABASE + "&arg2=background&arg3="
-            logger.log(u"Try to mount network drive via url: %s" % (host), logger.DEBUG)
+            logger.log(u"NMJv2: Try to mount network drive via url: %s" % (host), logger.DEBUG)
             prereq = urllib2.Request(url_scandir)
             req = urllib2.Request(url_updatedb)
             handle1 = urllib2.urlopen(prereq)
@@ -101,7 +100,7 @@ class NMJv2Notifier:
             handle2 = urllib2.urlopen(req)
             response2 = handle2.read()
         except IOError, e:
-            logger.log(u"NMJv2: Warning: Couldn't contact Popcorn Hour on host %s: %s" % (host, e))
+            logger.log(u"NMJv2: Could not contact Popcorn Hour on host %s: %s" % (host, e), logger.WARNING)
             return False
 
         try:
@@ -130,15 +129,15 @@ class NMJv2Notifier:
 
         if int(result1) > 0:
             index = error_codes.index(result1)
-            logger.log(u"NMJv2: Popcorn Hour returned an error: %s" % (error_messages[index]))
+            logger.log(u"NMJv2: Popcorn Hour returned an error: %s" % (error_messages[index]), logger.ERROR)
             return False
         else:
             if int(result2) > 0:
                 index = error_codes.index(result2)
-                logger.log(u"NMJv2: Popcorn Hour returned an error: %s" % (error_messages[index]))
+                logger.log(u"NMJv2: Popcorn Hour returned an error: %s" % (error_messages[index]), logger.ERROR)
                 return False
             else:
-                logger.log(u"NMJv2: Started background scan.")
+                logger.log(u"NMJv2: Started background scan.", logger.MESSAGE)
                 return True
 
     def _notifyNMJ(self, host=None, force=False):
@@ -170,14 +169,12 @@ class NMJv2Notifier:
         pass
 
     def notify_download(self, ep_name):
-        # TODO: Drop this and use update_library
-        if sickbeard.USE_NMJv2:
-            self._notifyNMJ()
+        pass
 
     def test_notify(self, host):
-        return self._sendNMJ(host)
+        return self._notifyNMJ(host, force=True)
 
-    def update_library(self, showName=None):
+    def update_library(self, ep_obj=None):
         if sickbeard.USE_NMJv2:
             self._notifyNMJ()
 

@@ -58,7 +58,7 @@ CFG = None
 CONFIG_FILE = None
 
 # this is the version of the config we EXPECT to find
-CONFIG_VERSION = 5
+CONFIG_VERSION = 6
 
 PROG_DIR = '.'
 MY_FULLNAME = None
@@ -267,6 +267,9 @@ NMJ_DATABASE = None
 NMJ_MOUNT = None
 
 USE_SYNOINDEX = False
+SYNOINDEX_NOTIFY_ONSNATCH = False
+SYNOINDEX_NOTIFY_ONDOWNLOAD = False
+SYNOINDEX_UPDATE_LIBRARY = False
 
 USE_NMJv2 = False
 NMJv2_HOST = None
@@ -341,7 +344,8 @@ def initialize(consoleLogging=True):
                 EXTRA_SCRIPTS, USE_TWITTER, TWITTER_USERNAME, TWITTER_PASSWORD, TWITTER_PREFIX, \
                 USE_BOXCAR, BOXCAR_USERNAME, BOXCAR_PASSWORD, BOXCAR_NOTIFY_ONDOWNLOAD, BOXCAR_NOTIFY_ONSNATCH, \
                 USE_PUSHOVER, PUSHOVER_USERKEY, PUSHOVER_NOTIFY_ONDOWNLOAD, PUSHOVER_NOTIFY_ONSNATCH, \
-                USE_LIBNOTIFY, LIBNOTIFY_NOTIFY_ONSNATCH, LIBNOTIFY_NOTIFY_ONDOWNLOAD, USE_NMJ, NMJ_HOST, NMJ_DATABASE, NMJ_MOUNT, USE_NMJv2, NMJv2_HOST, NMJv2_DATABASE, NMJv2_DBLOC, USE_SYNOINDEX, \
+                USE_LIBNOTIFY, LIBNOTIFY_NOTIFY_ONSNATCH, LIBNOTIFY_NOTIFY_ONDOWNLOAD, USE_NMJ, NMJ_HOST, NMJ_DATABASE, NMJ_MOUNT, USE_NMJv2, NMJv2_HOST, NMJv2_DATABASE, NMJv2_DBLOC, \
+                USE_SYNOINDEX, SYNOINDEX_NOTIFY_ONSNATCH, SYNOINDEX_NOTIFY_ONDOWNLOAD, SYNOINDEX_UPDATE_LIBRARY, \
                 USE_LISTVIEW, METADATA_XBMC, METADATA_XBMC_12PLUS, METADATA_MEDIABROWSER, METADATA_MEDE8ER, METADATA_PS3, metadata_provider_dict, \
                 GIT_PATH, MOVE_ASSOCIATED_FILES, \
                 COMING_EPS_LAYOUT, COMING_EPS_SORT, COMING_EPS_DISPLAY_PAUSED, METADATA_WDTV, METADATA_TIVO, IGNORE_WORDS, CREATE_MISSING_SHOW_DIRS, \
@@ -602,6 +606,9 @@ def initialize(consoleLogging=True):
 
         CheckSection(CFG, 'Synology')
         USE_SYNOINDEX = bool(check_setting_int(CFG, 'Synology', 'use_synoindex', 0))
+        SYNOINDEX_NOTIFY_ONSNATCH = bool(check_setting_int(CFG, 'Synology', 'synoindex_notify_onsnatch', 0))
+        SYNOINDEX_NOTIFY_ONDOWNLOAD = bool(check_setting_int(CFG, 'Synology', 'synoindex_notify_ondownload', 0))
+        SYNOINDEX_UPDATE_LIBRARY = bool(check_setting_int(CFG, 'Synology', 'synoindex_update_library', 0))
 
         CheckSection(CFG, 'Trakt')
         USE_TRAKT = bool(check_setting_int(CFG, 'Trakt', 'use_trakt', 0))
@@ -665,54 +672,65 @@ def initialize(consoleLogging=True):
         newznabProviderList = providers.getNewznabProviderList(NEWZNAB_DATA)
         providerList = providers.makeProviderList()
 
-        # initialize schedulars
+        # initialize schedulers
+
+        # updaters
+        versionCheckScheduler = scheduler.Scheduler(versionChecker.CheckVersion(),
+                                                    cycleTime=datetime.timedelta(hours=12),
+                                                    threadName="CHECKVERSION"
+                                                    )
+
+        showQueueScheduler = scheduler.Scheduler(show_queue.ShowQueue(),
+                                                 cycleTime=datetime.timedelta(seconds=3),
+                                                 threadName="SHOWQUEUE",
+                                                 silent=True)
+
+        showUpdaterInstance = showUpdater.ShowUpdater()  # the interval for this is stored inside the class
+        showUpdateScheduler = scheduler.Scheduler(showUpdaterInstance,
+                                                  cycleTime=showUpdaterInstance.updateInterval,
+                                                  threadName="SHOWUPDATER",
+                                                  run_delay=showUpdaterInstance.updateInterval,
+                                                  silent=True
+                                                  )
+
+        # searchers
+        searchQueueScheduler = scheduler.Scheduler(search_queue.SearchQueue(),
+                                                   cycleTime=datetime.timedelta(seconds=3),
+                                                   threadName="SEARCHQUEUE",
+                                                   silent=True
+                                                   )
+
         currentSearchScheduler = scheduler.Scheduler(searchCurrent.CurrentSearcher(),
                                                      cycleTime=datetime.timedelta(minutes=SEARCH_FREQUENCY),
                                                      threadName="SEARCH",
-                                                     runImmediately=True)
-
-        # the interval for this is stored inside the ShowUpdater class
-        showUpdaterInstance = showUpdater.ShowUpdater()
-        showUpdateScheduler = scheduler.Scheduler(showUpdaterInstance,
-                                               cycleTime=showUpdaterInstance.updateInterval,
-                                               threadName="SHOWUPDATER",
-                                               runImmediately=False)
-
-        versionCheckScheduler = scheduler.Scheduler(versionChecker.CheckVersion(),
-                                                     cycleTime=datetime.timedelta(hours=12),
-                                                     threadName="CHECKVERSION",
-                                                     runImmediately=True)
-
-        showQueueScheduler = scheduler.Scheduler(show_queue.ShowQueue(),
-                                               cycleTime=datetime.timedelta(seconds=3),
-                                               threadName="SHOWQUEUE",
-                                               silent=True)
-
-        searchQueueScheduler = scheduler.Scheduler(search_queue.SearchQueue(),
-                                               cycleTime=datetime.timedelta(seconds=3),
-                                               threadName="SEARCHQUEUE",
-                                               silent=True)
-
-        properFinderInstance = properFinder.ProperFinder()
-        properFinderScheduler = scheduler.Scheduler(properFinderInstance,
-                                                     cycleTime=properFinderInstance.updateInterval,
-                                                     threadName="FINDPROPERS",
-                                                     runImmediately=False)
-        if not DOWNLOAD_PROPERS:
-            properFinderScheduler.silent = True
-
-        autoPostProcesserScheduler = scheduler.Scheduler(autoPostProcesser.PostProcesser(),
-                                                     cycleTime=datetime.timedelta(minutes=10),
-                                                     threadName="POSTPROCESSER",
-                                                     runImmediately=True)
-        if not PROCESS_AUTOMATICALLY:
-            autoPostProcesserScheduler.silent = True
+                                                     run_delay=datetime.timedelta(minutes=5)
+                                                     )
 
         backlogSearchScheduler = searchBacklog.BacklogSearchScheduler(searchBacklog.BacklogSearcher(),
                                                                       cycleTime=datetime.timedelta(minutes=get_backlog_cycle_time()),
                                                                       threadName="BACKLOG",
-                                                                      runImmediately=True)
+                                                                      run_delay=datetime.timedelta(minutes=17)
+                                                                      )
+
         backlogSearchScheduler.action.cycleTime = BACKLOG_SEARCH_FREQUENCY
+
+        properFinderInstance = properFinder.ProperFinder()  # the interval for this is stored inside the class
+        properFinderScheduler = scheduler.Scheduler(properFinderInstance,
+                                                    cycleTime=properFinderInstance.updateInterval,
+                                                    threadName="FINDPROPERS",
+                                                    run_delay=properFinderInstance.updateInterval,
+                                                    silent=True
+                                                    )
+
+        # processors
+        autoPostProcesserScheduler = scheduler.Scheduler(autoPostProcesser.PostProcesser(),
+                                                         cycleTime=datetime.timedelta(minutes=10),
+                                                         threadName="POSTPROCESSER",
+                                                         run_delay=datetime.timedelta(minutes=5)
+                                                         )
+
+        if not PROCESS_AUTOMATICALLY:
+            autoPostProcesserScheduler.silent = True
 
         showList = []
         loadingShowList = {}
@@ -1114,6 +1132,9 @@ def save_config():
 
     new_config['Synology'] = {}
     new_config['Synology']['use_synoindex'] = int(USE_SYNOINDEX)
+    new_config['Synology']['synoindex_notify_onsnatch'] = int(SYNOINDEX_NOTIFY_ONSNATCH)
+    new_config['Synology']['synoindex_notify_ondownload'] = int(SYNOINDEX_NOTIFY_ONDOWNLOAD)
+    new_config['Synology']['synoindex_update_library'] = int(SYNOINDEX_UPDATE_LIBRARY)
 
     new_config['NMJv2'] = {}
     new_config['NMJv2']['use_nmjv2'] = int(USE_NMJv2)
