@@ -39,7 +39,6 @@ class ShowUpdater():
 
         # update at specified time.
         run_updater_time = datetime.time(hour=sickbeard.UPDATE_TIME)
-        sys.exit(str(run_updater_time))
 
         update_datetime = datetime.datetime.today()
         update_date = update_datetime.date()

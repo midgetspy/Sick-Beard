@@ -240,7 +240,10 @@ def main():
             enteredTime = int(a)
             if enteredTime > 23 or enteredTime < 0:
                 sys.exit("Invalid Time for updates.")
-            sickbeard.UPDATE_TIME = int(a)
+            try:            
+                sickbeard.UPDATE_TIME = int(a)
+            except ValueError:
+                sys.exit("Update Time: " + str(a) + " is not a number. Exiting.")
 
         # Run as a double forked daemon
         if o in ('-d', '--daemon'):
