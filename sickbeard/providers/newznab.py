@@ -208,49 +208,58 @@ class NewznabProvider(generic.NZBProvider):
         if self.needs_auth and self.key:
             params['apikey'] = self.key
 
-        search_url = self.url + 'api?' + urllib.urlencode(params)
+        results = []
+        total = 0
+        offset = 0
+        limit = int(params['limit'])
 
-        logger.log(u"Search url: " + search_url, logger.DEBUG)
+        while (offset == 0 or offset < total):
+            params['offset'] = offset
 
-        data = self.getURL(search_url)
+            search_url = self.url + 'api?' + urllib.urlencode(params)
 
-        if not data:
-            logger.log(u"No data returned from " + search_url, logger.ERROR)
-            return []
+            logger.log(u"Search url: " + search_url, logger.DEBUG)
 
-        # hack this in until it's fixed server side
-        if not data.startswith('<?xml'):
-            data = '<?xml version="1.0" encoding="ISO-8859-1" ?>' + data
+            data = self.getURL(search_url)
 
-        parsedXML = helpers.parse_xml(data)
+            if not data:
+                logger.log(u"No data returned from " + search_url, logger.ERROR)
+                return results
 
-        if parsedXML is None:
-            logger.log(u"Error trying to load " + self.name + " XML data", logger.ERROR)
-            return []
+            # hack this in until it's fixed server side
+            if not data.startswith('<?xml'):
+                data = '<?xml version="1.0" encoding="ISO-8859-1" ?>' + data
 
-        if self._checkAuthFromData(parsedXML):
+            parsedXML = helpers.parse_xml(data)
 
-            if parsedXML.tag == 'rss':
-                items = parsedXML.findall('.//item')
+            if parsedXML is None:
+                logger.log(u"Error trying to load " + self.name + " XML data", logger.ERROR)
+                return results
 
-            else:
-                logger.log(u"Resulting XML from " + self.name + " isn't RSS, not parsing it", logger.ERROR)
-                return []
+            if self._checkAuthFromData(parsedXML):
 
-            results = []
+                if parsedXML.tag == 'rss':
+                    items = parsedXML.findall('.//item')
+                    response = parsedXML.find('.//{http://www.newznab.com/DTD/2010/feeds/attributes/}response')
+                    #logger.log(u"Offset: " + response.get('offset') + " total: " + response.get('total'), logger.DEBUG)
 
-            for curItem in items:
-                (title, url) = self._get_title_and_url(curItem)
-
-                if title and url:
-                    logger.log(u"Adding item from RSS to results: " + title, logger.DEBUG)
-                    results.append(curItem)
                 else:
-                    logger.log(u"The XML returned from the " + self.name + " RSS feed is incomplete, this result is unusable", logger.DEBUG)
+                    logger.log(u"Resulting XML from " + self.name + " isn't RSS, not parsing it", logger.ERROR)
+                    return results
 
-            return results
+                for curItem in items:
+                    (title, url) = self._get_title_and_url(curItem)
 
-        return []
+                    if title and url:
+                        logger.log(u"Adding item from RSS to results: " + title, logger.DEBUG)
+                        results.append(curItem)
+                    else:
+                        logger.log(u"The XML returned from the " + self.name + " RSS feed is incomplete, this result is unusable", logger.DEBUG)
+
+                total = int(response.get('total'))
+                offset += limit
+               
+        return results
 
     def findPropers(self, search_date=None):
 
