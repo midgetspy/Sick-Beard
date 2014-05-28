@@ -38,23 +38,12 @@ from name_parser.parser import NameParser, InvalidNameException
 
 class ProperFinder():
 
-    def __init__(self):
-        self.updateInterval = datetime.timedelta(hours=1)
-
     def run(self):
 
         if not sickbeard.DOWNLOAD_PROPERS:
             return
 
-        # look for propers every night at 1 AM
-        updateTime = datetime.time(hour=1)
-        hourDiff = datetime.datetime.today().time().hour - updateTime.hour
-
-        # if it's less than an interval after the update time then do an update
-        if hourDiff >= 0 and hourDiff < self.updateInterval.seconds / 3600:
-            logger.log(u"Beginning the search for new propers")
-        else:
-            return
+        logger.log(u"Beginning the search for new propers")
 
         propers = self._getProperList()
 

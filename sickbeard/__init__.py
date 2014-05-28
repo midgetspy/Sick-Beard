@@ -685,12 +685,10 @@ def initialize(consoleLogging=True):
                                                  threadName="SHOWQUEUE",
                                                  silent=True)
 
-        showUpdaterInstance = showUpdater.ShowUpdater()  # the interval for this is stored inside the class
-        showUpdateScheduler = scheduler.Scheduler(showUpdaterInstance,
-                                                  cycleTime=showUpdaterInstance.updateInterval,
+        showUpdateScheduler = scheduler.Scheduler(showUpdater.ShowUpdater(),
+                                                  cycleTime=datetime.timedelta(hours=1),
                                                   threadName="SHOWUPDATER",
-                                                  run_delay=showUpdaterInstance.updateInterval,
-                                                  silent=True
+                                                  start_time=datetime.time(hour=3)  # 3 AM
                                                   )
 
         # searchers
@@ -714,12 +712,10 @@ def initialize(consoleLogging=True):
 
         backlogSearchScheduler.action.cycleTime = BACKLOG_SEARCH_FREQUENCY
 
-        properFinderInstance = properFinder.ProperFinder()  # the interval for this is stored inside the class
-        properFinderScheduler = scheduler.Scheduler(properFinderInstance,
-                                                    cycleTime=properFinderInstance.updateInterval,
+        properFinderScheduler = scheduler.Scheduler(properFinder.ProperFinder(),
+                                                    cycleTime=datetime.timedelta(hours=1),
                                                     threadName="FINDPROPERS",
-                                                    run_delay=properFinderInstance.updateInterval,
-                                                    silent=True
+                                                    start_time=datetime.time(hour=1)  # 1 AM
                                                     )
 
         # processors

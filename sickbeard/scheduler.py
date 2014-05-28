@@ -27,12 +27,13 @@ from sickbeard.exceptions import ex
 
 class Scheduler:
 
-    def __init__(self, action, cycleTime=datetime.timedelta(minutes=10), run_delay=datetime.timedelta(minutes=0), threadName="ScheduledThread", silent=False):
+    def __init__(self, action, cycleTime=datetime.timedelta(minutes=10), run_delay=datetime.timedelta(minutes=0), start_time=None, threadName="ScheduledThread", silent=False):
 
         self.lastRun = datetime.datetime.now() + run_delay - cycleTime
 
         self.action = action
         self.cycleTime = cycleTime
+        self.start_time = start_time
 
         self.thread = None
         self.threadName = threadName
@@ -59,10 +60,22 @@ class Scheduler:
 
         while True:
 
-            currentTime = datetime.datetime.now()
+            current_time = datetime.datetime.now()
+            should_run = False
 
-            if currentTime - self.lastRun >= self.cycleTime:
-                self.lastRun = currentTime
+            # check if interval has passed
+            if current_time - self.lastRun >= self.cycleTime:
+                # check if wanting to start around certain time taking interval into account
+                if self.start_time:
+                    hour_diff = current_time.time().hour - self.start_time.hour
+                    if hour_diff >= 0 and hour_diff < self.cycleTime.seconds / 3600:
+                        should_run = True
+
+                else:
+                    should_run = True
+
+            if should_run:
+                self.lastRun = current_time
                 try:
                     if not self.silent:
                         logger.log(u"Starting new thread: " + self.threadName, logger.DEBUG)
