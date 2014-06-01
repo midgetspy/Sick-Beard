@@ -70,7 +70,9 @@ class Scheduler:
                     hour_diff = current_time.time().hour - self.start_time.hour
                     if hour_diff >= 0 and hour_diff < self.cycleTime.seconds / 3600:
                         should_run = True
-
+                    else:
+                        # set lastRun to only check start_time after another cycleTime
+                        self.lastRun = current_time
                 else:
                     should_run = True
 
