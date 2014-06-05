@@ -744,11 +744,6 @@ class ConfigSearch:
         # Episode Search
         sickbeard.DOWNLOAD_PROPERS = config.checkbox_to_value(download_propers)
 
-        if sickbeard.DOWNLOAD_PROPERS:
-            sickbeard.properFinderScheduler.silent = False
-        else:
-            sickbeard.properFinderScheduler.silent = True
-
         config.change_SEARCH_FREQUENCY(search_frequency)
         sickbeard.USENET_RETENTION = config.to_int(usenet_retention, default=500)
 
@@ -1089,27 +1084,30 @@ class ConfigNotifications:
         return _munge(t)
 
     @cherrypy.expose
-    def saveNotifications(self, use_xbmc=None, xbmc_notify_onsnatch=None, xbmc_notify_ondownload=None, xbmc_update_onlyfirst=None,
-                          xbmc_update_library=None, xbmc_update_full=None, xbmc_host=None, xbmc_username=None, xbmc_password=None,
+    def saveNotifications(self,
+                          use_xbmc=None, xbmc_always_on=None, xbmc_notify_onsnatch=None, xbmc_notify_ondownload=None, xbmc_update_onlyfirst=None,
+                              xbmc_update_library=None, xbmc_update_full=None, xbmc_host=None, xbmc_username=None, xbmc_password=None,
                           use_plex=None, plex_notify_onsnatch=None, plex_notify_ondownload=None, plex_update_library=None,
-                          plex_server_host=None, plex_host=None, plex_username=None, plex_password=None,
+                              plex_server_host=None, plex_host=None, plex_username=None, plex_password=None,
                           use_growl=None, growl_notify_onsnatch=None, growl_notify_ondownload=None, growl_host=None, growl_password=None,
                           use_prowl=None, prowl_notify_onsnatch=None, prowl_notify_ondownload=None, prowl_api=None, prowl_priority=0,
                           use_twitter=None, twitter_notify_onsnatch=None, twitter_notify_ondownload=None,
                           use_boxcar=None, boxcar_notify_onsnatch=None, boxcar_notify_ondownload=None, boxcar_username=None,
                           use_pushover=None, pushover_notify_onsnatch=None, pushover_notify_ondownload=None, pushover_userkey=None,
                           use_libnotify=None, libnotify_notify_onsnatch=None, libnotify_notify_ondownload=None,
-                          use_nmj=None, nmj_host=None, nmj_database=None, nmj_mount=None, use_synoindex=None,
+                          use_nmj=None, nmj_host=None, nmj_database=None, nmj_mount=None,
+                          use_synoindex=None, synoindex_notify_onsnatch=None, synoindex_notify_ondownload=None, synoindex_update_library=None,
                           use_nmjv2=None, nmjv2_host=None, nmjv2_dbloc=None, nmjv2_database=None,
                           use_trakt=None, trakt_username=None, trakt_password=None, trakt_api=None,
                           use_pytivo=None, pytivo_notify_onsnatch=None, pytivo_notify_ondownload=None, pytivo_update_library=None,
-                          pytivo_host=None, pytivo_share_name=None, pytivo_tivo_name=None,
+                              pytivo_host=None, pytivo_share_name=None, pytivo_tivo_name=None,
                           use_nma=None, nma_notify_onsnatch=None, nma_notify_ondownload=None, nma_api=None, nma_priority=0):
 
         results = []
 
-        # Home Theater
+        # Home Theater / NAS
         sickbeard.USE_XBMC = config.checkbox_to_value(use_xbmc)
+        sickbeard.XBMC_ALWAYS_ON = config.checkbox_to_value(xbmc_always_on)
         sickbeard.XBMC_NOTIFY_ONSNATCH = config.checkbox_to_value(xbmc_notify_onsnatch)
         sickbeard.XBMC_NOTIFY_ONDOWNLOAD = config.checkbox_to_value(xbmc_notify_ondownload)
         sickbeard.XBMC_UPDATE_LIBRARY = config.checkbox_to_value(xbmc_update_library)
@@ -1139,6 +1137,9 @@ class ConfigNotifications:
         sickbeard.NMJv2_DBLOC = nmjv2_dbloc
 
         sickbeard.USE_SYNOINDEX = config.checkbox_to_value(use_synoindex)
+        sickbeard.SYNOINDEX_NOTIFY_ONSNATCH = config.checkbox_to_value(synoindex_notify_onsnatch)
+        sickbeard.SYNOINDEX_NOTIFY_ONDOWNLOAD = config.checkbox_to_value(synoindex_notify_ondownload)
+        sickbeard.SYNOINDEX_UPDATE_LIBRARY = config.checkbox_to_value(synoindex_update_library)
 
         sickbeard.USE_PYTIVO = config.checkbox_to_value(use_pytivo)
         # sickbeard.PYTIVO_NOTIFY_ONSNATCH = config.checkbox_to_value(pytivo_notify_onsnatch)
@@ -1919,7 +1920,7 @@ class Home:
         if result:
             return "Tweet successful, check your twitter to make sure it worked"
         else:
-            return "Error sending tweet"
+            return "Error sending Tweet"
 
     @cherrypy.expose
     def testXBMC(self, host=None, username=None, password=None):
@@ -1971,9 +1972,9 @@ class Home:
         host = config.clean_host(host)
         result = notifiers.nmj_notifier.test_notify(urllib.unquote_plus(host), database, mount)
         if result:
-            return "Successfully started the scan update"
+            return "Successfully started the scan update for NMJ"
         else:
-            return "Test failed to start the scan update"
+            return "Failed to start the scan update for NMJ"
 
     @cherrypy.expose
     def settingsNMJ(self, host=None):
@@ -1993,9 +1994,9 @@ class Home:
         host = config.clean_host(host)
         result = notifiers.nmjv2_notifier.test_notify(urllib.unquote_plus(host))
         if result:
-            return "Test notice sent successfully to " + urllib.unquote_plus(host)
+            return "Successfully started the scan update for NMJv2"
         else:
-            return "Test notice failed to " + urllib.unquote_plus(host)
+            return "Failed to start the scan update for NMJv2"
 
     @cherrypy.expose
     def settingsNMJv2(self, host=None, dbloc=None, instance=None):
@@ -2004,9 +2005,9 @@ class Home:
         host = config.clean_host(host)
         result = notifiers.nmjv2_notifier.notify_settings(urllib.unquote_plus(host), dbloc, instance)
         if result:
-            return '{"message": "NMJ Database found at: %(host)s", "database": "%(database)s"}' % {"host": host, "database": sickbeard.NMJv2_DATABASE}
+            return '{"message": "NMJv2 Database found at: %(host)s", "database": "%(database)s"}' % {"host": host, "database": sickbeard.NMJv2_DATABASE}
         else:
-            return '{"message": "Unable to find NMJ Database at location: %(dbloc)s. Is the right location selected and PCH running?", "database": ""}' % {"dbloc": dbloc}
+            return '{"message": "Unable to find NMJv2 Database at location: %(dbloc)s. Is the right location selected and PCH running?", "database": ""}' % {"dbloc": dbloc}
 
     @cherrypy.expose
     def testTrakt(self, api=None, username=None, password=None):
@@ -2027,6 +2028,16 @@ class Home:
             return "Test NMA notice sent successfully"
         else:
             return "Test NMA notice failed"
+
+    @cherrypy.expose
+    def testSynoNotify(self):
+        cherrypy.response.headers['Cache-Control'] = "max-age=0,no-cache,no-store"
+
+        result = notifiers.synoindex_notifier.test_notify()
+        if result:
+            return "Test Synology notice sent successfully"
+        else:
+            return "Test Synology notice failed"
 
     @cherrypy.expose
     def shutdown(self, pid=None):
@@ -2124,7 +2135,7 @@ class Home:
                 t.submenu.append({ 'title': 'Delete',               'path': 'home/deleteShow?show=%d' % showObj.tvdbid, 'confirm': True })
                 t.submenu.append({ 'title': 'Re-scan files',        'path': 'home/refreshShow?show=%d' % showObj.tvdbid })
                 t.submenu.append({ 'title': 'Force Full Update',    'path': 'home/updateShow?show=%d&amp;force=1' % showObj.tvdbid })
-                t.submenu.append({ 'title': 'Update show in XBMC',  'path': 'home/updateXBMC?showName=%s' % urllib.quote_plus(showObj.name.encode('utf-8')), 'requires': haveXBMC })
+                t.submenu.append({ 'title': 'Update show in XBMC',  'path': 'home/updateXBMC?show=%d' % showObj.tvdbid, 'requires': haveXBMC })
                 t.submenu.append({ 'title': 'Preview Rename',       'path': 'home/testRename?show=%d' % showObj.tvdbid })
 
         t.show = showObj
@@ -2342,14 +2353,19 @@ class Home:
         redirect("/home/displayShow?show=" + str(showObj.tvdbid))
 
     @cherrypy.expose
-    def updateXBMC(self, showName=None):
+    def updateXBMC(self, show=None):
         if sickbeard.XBMC_UPDATE_ONLYFIRST:
             # only send update to first host in the list -- workaround for xbmc sql backend users
             host = sickbeard.XBMC_HOST.split(",")[0].strip()
         else:
             host = sickbeard.XBMC_HOST
 
-        if notifiers.xbmc_notifier.update_library(showName=showName):
+        if show:
+            show_obj = sickbeard.helpers.findCertainShow(sickbeard.showList, int(show))
+        else:
+            show_obj = None
+
+        if notifiers.xbmc_notifier.update_library(show_obj=show_obj):
             ui.notifications.message("Library update command sent to XBMC host(s): " + host)
         else:
             ui.notifications.error("Unable to contact one or more XBMC host(s): " + host)

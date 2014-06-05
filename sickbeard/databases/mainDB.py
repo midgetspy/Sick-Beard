@@ -424,7 +424,7 @@ class AddLastUpdateTVDB(AddShowidTvdbidIndex):
         self.incDBVersion()
 
 
-# included in build 504 (2014-03-??)
+# included in build 504 (2014-04-14)
 class AddRequireAndIgnoreWords(AddLastUpdateTVDB):
     """ Adding column rls_require_words and rls_ignore_words to tv_shows """
 
