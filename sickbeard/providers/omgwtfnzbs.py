@@ -145,8 +145,8 @@ class OmgwtfnzbsProvider(generic.NZBProvider):
 
                     title, url = self._get_title_and_url(item)
                     try:
-                        result_date = datetime.fromtimestamp(item['usenetage'])
-                    except TypeError:
+                        result_date = datetime.fromtimestamp(int(item['usenetage']))
+                    except:
                         result_date = None
 
                     if result_date:
