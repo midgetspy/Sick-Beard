@@ -118,7 +118,7 @@ class BTNProvider(generic.TorrentProvider):
 
             results = []
 
-            for torrentid, torrent_info in found_torrents.iteritems():
+            for torrentid, torrent_info in found_torrents.iteritems():  # @UnusedVariable
                 (title, url) = self._get_title_and_url(torrent_info)
 
                 if title and url:
@@ -211,7 +211,7 @@ class BTNProvider(generic.TorrentProvider):
                 # Search by name if we don't have tvdb or tvrage id
                 current_params['series'] = sanitizeSceneName(name)
 
-            if season != None:
+            if season is not None:
                 whole_season_params = current_params.copy()
                 partial_season_params = current_params.copy()
                 # Search for entire seasons: no need to do special things for air by date shows
@@ -225,10 +225,10 @@ class BTNProvider(generic.TorrentProvider):
 
                 if show.air_by_date:
                     # Search for the year of the air by date show
-                    partial_season_params['name'] = str(season.split('-')[0])
+                    partial_season_params['name'] = str(season.split('-')[0]) + "%"
                 else:
                     # Search for any result which has Sxx in the name
-                    partial_season_params['name'] = 'S%02d' % int(season)
+                    partial_season_params['name'] = "S" + str(season).zfill(2) + "%"
 
                 search_params.append(partial_season_params)
 
