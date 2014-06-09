@@ -9,16 +9,40 @@
     <div class="container footer">
         #set $myDB = $db.DBConnection()
         #set $today = str($datetime.date.today().toordinal())
-        #set $numShows = len($sickbeard.showList)
-        #set $numGoodShows = len([x for x in $sickbeard.showList if x.paused == 0 and x.status != "Ended"])
-        #set $numDLEpisodes = $myDB.select("SELECT COUNT(*) FROM tv_episodes WHERE status IN ("+",".join([str(x) for x in $Quality.DOWNLOADED + [$ARCHIVED]])+") AND season != 0 and episode != 0 AND airdate <= " + $today + "")[0][0]
-        #set $numEpisodes = $myDB.select("SELECT COUNT(*) FROM tv_episodes WHERE season != 0 and episode != 0 AND (airdate != 1 OR status IN ("+",".join([str(x) for x in ($Quality.DOWNLOADED + $Quality.SNATCHED + $Quality.SNATCHED_PROPER) + [$ARCHIVED]]) + ")) AND airdate <= " + $today + " AND status != " + str($IGNORED) + "")[0][0]
-        <b>$numShows shows</b> ($numGoodShows active) | <b>$numDLEpisodes/$numEpisodes</b> episodes downloaded 
+        #set status_quality = '(' + ','.join([str(quality) for quality in $Quality.SNATCHED + $Quality.SNATCHED_PROPER]) + ')'
+        #set status_download = '(' + ','.join([str(quality) for quality in $Quality.DOWNLOADED + [$ARCHIVED]]) + ')'
+
+        #set $sql_statement = 'SELECT '
+
+        #set $sql_statement += '(SELECT COUNT(*) FROM tv_episodes WHERE season > 0 AND episode > 0 AND airdate > 1 AND status IN ' + $status_quality + ') AS ep_snatched, '
+        #set $sql_statement += '(SELECT COUNT(*) FROM tv_episodes WHERE season > 0 AND episode > 0 AND airdate > 1 AND status IN ' + $status_download + ') AS ep_downloaded, '
+
+        #set $sql_statement += '(SELECT COUNT(*) FROM tv_episodes WHERE season > 0 AND episode > 0 AND airdate > 1 '
+        #set $sql_statement += ' AND ((airdate <= ' + $today + ' AND (status = ' + str($SKIPPED) + ' OR status = ' + str($WANTED) + ')) '
+        #set $sql_statement += ' OR (status IN ' + status_quality + ') OR (status IN ' + status_download + '))) AS ep_total '
+
+        #set $sql_statement += ' FROM tv_episodes tv_eps LIMIT 1'
+
+        #set $sql_result = $myDB.select($sql_statement)
+
+        #set $shows_total = len($sickbeard.showList)
+        #set $shows_active = len([show for show in $sickbeard.showList if show.paused == 0 and show.status != "Ended"])
+
+        #if $sql_result:
+            #set $ep_snatched = $sql_result[0]['ep_snatched']
+            #set $ep_downloaded = $sql_result[0]['ep_downloaded']
+            #set $ep_total = $sql_result[0]['ep_total']
+        #else
+            #set $ep_snatched = 0
+            #set $ep_downloaded = 0
+            #set $ep_total = 0
+        #end if
+
+        <b>$shows_total shows</b> ($shows_active active) | <b><%=ep_downloaded%></b>#if $ep_snatched > 0 then " (+" + str($ep_snatched) + " snatched)" else ""#<b> / $ep_total</b> episodes downloaded
         <br />
         <b>Search</b>: <%=str(sickbeard.currentSearchScheduler.timeLeft()).split('.')[0]%> |
-        <b>Backlog</b>: $sickbeard.backlogSearchScheduler.nextRun().strftime("%Y-%m-%d").decode($sickbeard.SYS_ENCODING)
+        <b>Backlog</b>: $sickbeard.backlogSearchScheduler.nextRun().strftime("%Y-%m-%d")
     </div> <!-- /container footer -->
 </footer>
-
 </body>
 </html>

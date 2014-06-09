@@ -2269,7 +2269,7 @@ class CMD_ShowStats(ApiCall):
             episode_qualities_counts_snatch[statusCode] = 0
 
         myDB = db.DBConnection(row_type="dict")
-        sqlResults = myDB.select("SELECT status, season FROM tv_episodes WHERE season != 0 AND showid = ?", [self.tvdbid])
+        sqlResults = myDB.select("SELECT status, season FROM tv_episodes WHERE season > 0 AND episode > 0 AND airdate > 1 AND showid = ?", [self.tvdbid])
         # the main loop that goes through all episodes
         for row in sqlResults:
             status, quality = Quality.splitCompositeStatus(int(row["status"]))
@@ -2297,22 +2297,23 @@ class CMD_ShowStats(ApiCall):
                 episodes_stats["downloaded"]["total"] = episode_qualities_counts_download[statusCode]
                 continue
             status, quality = Quality.splitCompositeStatus(int(statusCode))
-            statusString = Quality.qualityStrings[quality].lower().replace(" ", "_").replace("(", "").replace(")", "")
-            episodes_stats["downloaded"][statusString] = episode_qualities_counts_download[statusCode]
+            quality_string = Quality.qualityStrings[quality].lower().replace(" ", "_").replace("(", "").replace(")", "")
+            episodes_stats["downloaded"][quality_string] = episode_qualities_counts_download[statusCode]
 
         episodes_stats["snatched"] = {}
-        # truning codes into strings
-        # and combining proper and normal
+        # turning codes into strings
         for statusCode in episode_qualities_counts_snatch:
             if statusCode is "total":
                 episodes_stats["snatched"]["total"] = episode_qualities_counts_snatch[statusCode]
                 continue
             status, quality = Quality.splitCompositeStatus(int(statusCode))
-            statusString = Quality.qualityStrings[quality].lower().replace(" ", "_").replace("(", "").replace(")", "")
-            if Quality.qualityStrings[quality] in episodes_stats["snatched"]:
-                episodes_stats["snatched"][statusString] += episode_qualities_counts_snatch[statusCode]
+            quality_string = Quality.qualityStrings[quality].lower().replace(" ", "_").replace("(", "").replace(")", "")
+
+            # count qualities for snatched and snatched_proper
+            if quality_string in episodes_stats["snatched"]:
+                episodes_stats["snatched"][quality_string] += episode_qualities_counts_snatch[statusCode]
             else:
-                episodes_stats["snatched"][statusString] = episode_qualities_counts_snatch[statusCode]
+                episodes_stats["snatched"][quality_string] = episode_qualities_counts_snatch[statusCode]
 
         #episodes_stats["total"] = {}
         for statusCode in episode_status_counts_total:
@@ -2418,10 +2419,33 @@ class CMD_ShowsStats(ApiCall):
 
         myDB = db.DBConnection()
         today = str(datetime.date.today().toordinal())
+        status_quality = '(' + ','.join([str(quality) for quality in Quality.SNATCHED + Quality.SNATCHED_PROPER]) + ')'
+        status_download = '(' + ','.join([str(quality) for quality in Quality.DOWNLOADED + [ARCHIVED]]) + ')'
+
+        sql_statement = 'SELECT '
+
+        sql_statement += '(SELECT COUNT(*) FROM tv_episodes WHERE season > 0 AND episode > 0 AND airdate > 1 AND status IN ' + status_quality + ') AS ep_snatched, '
+        sql_statement += '(SELECT COUNT(*) FROM tv_episodes WHERE season > 0 AND episode > 0 AND airdate > 1 AND status IN ' + status_download + ') AS ep_downloaded, '
+
+        sql_statement += '(SELECT COUNT(*) FROM tv_episodes WHERE season > 0 AND episode > 0 AND airdate > 1 '
+        sql_statement += ' AND ((airdate <= ' + today + ' AND (status = ' + str(SKIPPED) + ' OR status = ' + str(WANTED) + ')) '
+        sql_statement += ' OR (status IN ' + status_quality + ') OR (status IN ' + status_download + '))) AS ep_total '
+
+        sql_statement += ' FROM tv_episodes tv_eps LIMIT 1'
+
+        sql_result = myDB.select(sql_statement)
+
         stats["shows_total"] = len(sickbeard.showList)
         stats["shows_active"] = len([show for show in sickbeard.showList if show.paused == 0 and show.status != "Ended"])
-        stats["ep_downloaded"] = myDB.select("SELECT COUNT(*) FROM tv_episodes WHERE status IN (" + ",".join([str(show) for show in Quality.DOWNLOADED + [ARCHIVED]]) + ") AND season != 0 and episode != 0 AND airdate <= " + today + "")[0][0]
-        stats["ep_total"] = myDB.select("SELECT COUNT(*) FROM tv_episodes WHERE season != 0 AND episode != 0 AND (airdate != 1 OR status IN (" + ",".join([str(show) for show in (Quality.DOWNLOADED + Quality.SNATCHED + Quality.SNATCHED_PROPER) + [ARCHIVED]]) + ")) AND airdate <= " + today + " AND status != " + str(IGNORED) + "")[0][0]
+
+        if sql_result:
+            stats["ep_snatched"] = sql_result[0]['ep_snatched']
+            stats["ep_downloaded"] = sql_result[0]['ep_downloaded']
+            stats["ep_total"] = sql_result[0]['ep_total']
+        else:
+            stats["ep_snatched"] = 0
+            stats["ep_downloaded"] = 0
+            stats["ep_total"] = 0
 
         myDB.connection.close()
         return _responds(RESULT_SUCCESS, stats)
