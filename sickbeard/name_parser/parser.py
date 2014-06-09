@@ -20,14 +20,13 @@ import datetime
 import os.path
 import re
 
-import regexes
-
 import sickbeard
 
-from sickbeard import logger
 from sickbeard import encodingKludge as ek
 from sickbeard import helpers
-
+from sickbeard import logger
+from sickbeard.exceptions import ex
+from sickbeard.name_parser import regexes
 
 
 class NameParser(object):
@@ -97,11 +96,15 @@ class NameParser(object):
                 result.season_number = tmp_season
 
             if 'ep_num' in named_groups:
-                ep_num = self._convert_number(match.group('ep_num'))
-                if 'extra_ep_num' in named_groups and match.group('extra_ep_num'):
-                    result.episode_numbers = range(ep_num, self._convert_number(match.group('extra_ep_num')) + 1)
-                else:
-                    result.episode_numbers = [ep_num]
+                try:
+                    ep_num = self._convert_number(match.group('ep_num'))
+                    if 'extra_ep_num' in named_groups and match.group('extra_ep_num'):
+                        result.episode_numbers = range(ep_num, self._convert_number(match.group('extra_ep_num')) + 1)
+                    else:
+                        result.episode_numbers = [ep_num]
+
+                except ValueError, e:
+                    raise InvalidNameException(ex(e))
 
             if 'air_year' in named_groups and 'air_month' in named_groups and 'air_day' in named_groups:
                 year = int(match.group('air_year'))
@@ -117,7 +120,7 @@ class NameParser(object):
                 try:
                     result.air_date = datetime.date(year, month, day)
                 except ValueError, e:
-                    raise InvalidNameException(e.message)
+                    raise InvalidNameException(ex(e))
 
             result.is_proper = False
 
@@ -169,38 +172,51 @@ class NameParser(object):
                 obj = unicode(obj, encoding)
         return obj
 
-    def _convert_number(self, org_number):
+    def _convert_number(self, number):
         """
-        Convert org_number into an integer
-        org_number: integer or representation of a number: string or unicode
-        Try force converting to int first, on error try converting from Roman numerals
-        returns integer or 0
+        Convert number into an integer. Try force converting into integer first,
+        on error try converting from Roman numerals.
+
+        Args:
+            number: int or representation of a number: string or unicode
+
+        Returns:
+            integer: int number
+
+        Raises:
+            ValueError
         """
 
         try:
             # try forcing to int
-            if org_number:
-                number = int(org_number)
-            else:
-                number = 0
+            integer = int(number)
 
         except:
             # on error try converting from Roman numerals
-            roman_to_int_map = (('M', 1000), ('CM', 900), ('D', 500), ('CD', 400), ('C', 100),
-                                ('XC', 90), ('L', 50), ('XL', 40), ('X', 10),
-                                ('IX', 9), ('V', 5), ('IV', 4), ('I', 1)
-                               )
+            roman_numeral_map = (
+                                 ('M', 1000, 3),
+                                 ('CM', 900, 1), ('D', 500, 1), ('CD', 400, 1), ('C', 100, 3),
+                                 ('XC', 90, 1), ('L', 50, 1), ('XL', 40, 1), ('X', 10, 3),
+                                 ('IX', 9, 1), ('V', 5, 1), ('IV', 4, 1), ('I', 1, 3)
+                                )
 
-            roman_numeral = str(org_number).upper()
-            number = 0
+            roman_numeral = str(number).upper()
+            integer = 0
             index = 0
 
-            for numeral, integer in roman_to_int_map:
+            for numeral, value, max_count in roman_numeral_map:
+                count = 0
                 while roman_numeral[index:index + len(numeral)] == numeral:
-                    number += integer
+                    count += 1
+                    if count > max_count:
+                        raise ValueError('not a roman numeral')
+                    integer += value
                     index += len(numeral)
 
-        return number
+            if index < len(roman_numeral):
+                raise ValueError('not a roman numeral')
+
+        return integer
 
     def parse(self, name):
 
