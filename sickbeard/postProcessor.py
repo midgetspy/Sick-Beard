@@ -440,7 +440,7 @@ class PostProcessor(object):
         self.is_proper = parse_result.is_proper
 
         # if the result is complete then set release name
-        if parse_result.series_name and ((parse_result.season_number and parse_result.episode_numbers)
+        if parse_result.series_name and ((parse_result.season_number is not None and parse_result.episode_numbers)
                                           or parse_result.air_date
                                         ) and parse_result.release_group:
 
@@ -529,7 +529,7 @@ class PostProcessor(object):
                     self._log(u"Don't have a season number, but this show appears to only have 1 season, setting seasonnumber to 1...", logger.DEBUG)
                     season = 1
 
-            if tvdb_id and season and episodes:
+            if tvdb_id and season is not None and episodes:
                 return (tvdb_id, season, episodes, quality)
 
         return (tvdb_id, season, episodes, quality)
@@ -768,7 +768,7 @@ class PostProcessor(object):
         (tvdb_id, season, episodes, quality) = self._find_info()
 
         # if we don't have it then give up
-        if not tvdb_id or season == None or not episodes:
+        if not tvdb_id or season is None or not episodes:
             self._log(u"Not enough information to determine what episode this is", logger.DEBUG)
             self._log(u"Quitting post-processing", logger.DEBUG)
             return False
