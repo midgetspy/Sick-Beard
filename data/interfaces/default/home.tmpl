@@ -167,6 +167,7 @@ $myShowList.sort(lambda x, y: cmp(x.name, y.name))
     #set $cur_snatched = 0
     #set $cur_downloaded = 0
     #set $cur_total = 0
+    #set $download_stat_tip = ''
 
     #if $curShow.tvdbid in $show_stat:
         #set $cur_airs_next = $show_stat[$curShow.tvdbid]['ep_airs_next']
@@ -189,12 +190,16 @@ $myShowList.sort(lambda x, y: cmp(x.name, y.name))
 
     #if $cur_total != 0:
         #set $download_stat = str($cur_downloaded)
+        #set $download_stat_tip = "Downloaded: " + str($cur_downloaded)
         #if $cur_snatched > 0:
             #set $download_stat = download_stat + "+" + str($cur_snatched)
+            #set $download_stat_tip = download_stat_tip + "&#013;" + "Snatched: " + str($cur_snatched)
         #end if
         #set $download_stat = download_stat + " / " + str($cur_total)
+        #set $download_stat_tip = download_stat_tip + "&#013;" + "Total: " + str($cur_total)
     #else
         #set $download_stat = '?'
+        #set $download_stat_tip = "no data"
     #end if
 
     #set $nom = $cur_downloaded
@@ -221,7 +226,7 @@ $myShowList.sort(lambda x, y: cmp(x.name, y.name))
                  \$("\#progressbar$curShow.tvdbid").progressbar({
                      value: $progressbar_percent
                  });
-                 \$("\#progressbar$curShow.tvdbid").append( "<div class='progressbarText'>$download_stat</div>" )
+                 \$("\#progressbar$curShow.tvdbid").append("<div class='progressbarText' title='$download_stat_tip'>$download_stat</div>")
                 });
           //-->
           </script>
