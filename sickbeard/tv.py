@@ -1195,7 +1195,11 @@ class TVEpisode(object):
             # if we don't have the file and the airdate is in the past
             else:
                 if self.status == UNAIRED:
-                    self.status = WANTED
+                    if self.season > 0:
+                        self.status = WANTED
+                    else:
+                        # if it's a special then just skip it
+                        self.status = SKIPPED
 
                 # if we somehow are still UNKNOWN then just skip it
                 elif self.status == UNKNOWN:
