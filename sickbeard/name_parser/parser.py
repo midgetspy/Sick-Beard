@@ -357,7 +357,7 @@ class ParseResult(object):
 
 
 class NameParserCache(object):
-    #TODO: check if the fifo list can beskiped and only use one dict
+    #TODO: check if the fifo list can be skipped and only use one dict
     _previous_parsed_list = []  # keep a fifo list of the cached items
     _previous_parsed = {}
     _cache_size = 100
@@ -371,7 +371,7 @@ class NameParserCache(object):
 
     def get(self, name):
         if name in self._previous_parsed:
-            logger.log("Using cached parse result for: " + name, logger.DEBUG)
+            logger.log(u"Using cached parse result for: " + name, logger.DEBUG)
             return self._previous_parsed[name]
         else:
             return None
