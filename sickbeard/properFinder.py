@@ -211,10 +211,12 @@ class ProperFinder():
             else:
 
                 # make sure that none of the existing history downloads are the same proper we're trying to download
+                clean_proper_name = self._genericName(helpers.remove_non_release_groups(curProper.name))
                 isSame = False
+
                 for curResult in historyResults:
                     # if the result exists in history already we need to skip it
-                    if self._genericName(curResult["resource"]) == self._genericName(curProper.name):
+                    if self._genericName(helpers.remove_non_release_groups(curResult["resource"])) == clean_proper_name:
                         isSame = True
                         break
                 if isSame:
