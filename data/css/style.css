@@ -361,7 +361,18 @@ home.tmpl
   height: 20px;
   line-height: 18px;
 }
-.progressbarText {
+.progressbarTextComplete {
+  position: absolute;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  text-align: center;
+  text-shadow: 0 0 0.1em #fff;
+  vertical-align: middle;
+  background-color: #64be64;
+}
+.progressbarTextIncomplete {
   position: absolute;
   top: 0;
   width: 100%;
