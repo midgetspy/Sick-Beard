@@ -197,6 +197,7 @@ class BTNProvider(generic.TorrentProvider):
         search_params = []
 
         name_exceptions = scene_exceptions.get_scene_exceptions(show.tvdbid) + [show.name]
+
         for name in name_exceptions:
 
             current_params = {}
@@ -218,7 +219,8 @@ class BTNProvider(generic.TorrentProvider):
                 whole_season_params['category'] = 'Season'
                 whole_season_params['name'] = 'Season ' + str(season)
 
-                search_params.append(whole_season_params)
+                if whole_season_params not in search_params:
+                    search_params.append(whole_season_params)
 
                 # Search for episodes in the season
                 partial_season_params['category'] = 'Episode'
@@ -230,10 +232,12 @@ class BTNProvider(generic.TorrentProvider):
                     # Search for any result which has Sxx in the name
                     partial_season_params['name'] = "S" + str(season).zfill(2) + "%"
 
-                search_params.append(partial_season_params)
+                if partial_season_params not in search_params:
+                    search_params.append(partial_season_params)
 
             else:
-                search_params.append(current_params)
+                if current_params not in search_params:
+                    search_params.append(current_params)
 
         return search_params
 
