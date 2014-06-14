@@ -220,16 +220,31 @@ $myShowList.sort(lambda x, y: cmp(x.name, y.name))
         <td align="center"><span class="quality Custom">Custom</span></td>
     #end if
         <td align="center"><span style="display: none;">$download_stat</span><div id="progressbar$curShow.tvdbid" style="position:relative;"></div>
+          
+    #if $cur_total != $cur_downloaded
           <script type="text/javascript">
           <!--
                 \$(function() {
                  \$("\#progressbar$curShow.tvdbid").progressbar({
                      value: $progressbar_percent
                  });
-                 \$("\#progressbar$curShow.tvdbid").append("<div class='progressbarText' title='$download_stat_tip'>$download_stat</div>")
+                 \$("\#progressbar$curShow.tvdbid").append("<div class='progressbarTextIncomplete' title='$download_stat_tip'>$download_stat</div>")
                 });
           //-->
           </script>
+    #else
+        <script type="text/javascript">
+          <!--
+                \$(function() {
+                 \$("\#progressbar$curShow.tvdbid").progressbar({
+                     value: $progressbar_percent
+                 });
+                 \$("\#progressbar$curShow.tvdbid").append("<div class='progressbarTextComplete' title='$download_stat_tip'>$download_stat</div>")
+                });
+          //-->
+          </script>
+    #end if
+    
         </td>
         <td align="center"><img src="$sbRoot/images/#if int($curShow.paused) == 0 and $curShow.status != "Ended" then "yes16.png\" alt=\"Y\"" else "no16.png\" alt=\"N\""# width="16" height="16" /></td>
         <td align="center">$curShow.status</td>
