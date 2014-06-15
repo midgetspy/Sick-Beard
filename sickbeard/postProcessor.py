@@ -18,7 +18,6 @@
 
 from __future__ import with_statement
 
-import glob
 import os
 import re
 import subprocess
@@ -140,41 +139,6 @@ class PostProcessor(object):
             self._log(u"File " + existing_file + " doesn't exist", logger.DEBUG)
             return PostProcessor.DOESNT_EXIST
 
-    def list_associated_files(self, file_path, base_name_only=False):
-        """
-        For a given file path searches for files with the same name but different extension and returns their absolute paths
-
-        file_path: The file to check for associated files
-        base_name_only: False add extra '.' (conservative search) to file_path minus extension
-        Returns: A list containing all files which are associated to the given file
-        """
-
-        if not file_path:
-            return []
-
-        file_path_list = []
-        base_name = file_path.rpartition('.')[0]
-
-        if not base_name_only:
-            base_name = base_name + '.'
-
-        # don't strip it all and use cwd by accident
-        if not base_name:
-            return []
-
-        # don't confuse glob with chars we didn't mean to use
-        base_name = re.sub(r'[\[\]\*\?]', r'[\g<0>]', base_name)
-
-        for associated_file_path in ek.ek(glob.glob, base_name + '*'):
-            # only add associated to list
-            if associated_file_path == file_path:
-                continue
-
-            if ek.ek(os.path.isfile, associated_file_path):
-                file_path_list.append(associated_file_path)
-
-        return file_path_list
-
     def _delete(self, file_path, associated_files=False):
         """
         Deletes the file and optionally all associated files.
@@ -189,7 +153,7 @@ class PostProcessor(object):
         # figure out which files we want to delete
         file_list = [file_path]
         if associated_files:
-            file_list = file_list + self.list_associated_files(file_path, base_name_only=True)
+            file_list = file_list + helpers.list_associated_files(file_path, base_name_only=True)
 
         if not file_list:
             self._log(u"There were no files associated with " + file_path + ", not deleting anything", logger.DEBUG)
@@ -221,7 +185,7 @@ class PostProcessor(object):
 
         file_list = [file_path]
         if associated_files:
-            file_list = file_list + self.list_associated_files(file_path)
+            file_list = file_list + helpers.list_associated_files(file_path, filter_ext=sickbeard.FILTER_ASSOCIATED_FILES)
 
         if not file_list:
             self._log(u"There were no files associated with " + file_path + ", not moving anything", logger.DEBUG)

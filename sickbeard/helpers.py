@@ -18,6 +18,7 @@
 
 from __future__ import with_statement
 
+import glob
 import gzip
 import os
 import re
@@ -257,6 +258,52 @@ def findCertainTVRageShow(showList, tvrid):
         raise MultipleShowObjectsException()
     else:
         return results[0]
+
+
+def list_associated_files(file_path, base_name_only=False, filter_ext=""):
+    """
+    For a given file path searches for files with the same name but different extension and returns their absolute paths
+
+    file_path: The file to check for associated files
+    base_name_only: False add extra '.' (conservative search) to file_path minus extension
+    filter_ext: A comma separated string with extensions to include or empty string to include all matches
+    Returns: A list containing all files which are associated to the given file
+    """
+
+    if not file_path:
+        return []
+
+    file_path_list = []
+    base_name = file_path.rpartition('.')[0]
+
+    if not base_name_only:
+        base_name = base_name + '.'
+
+    # don't strip it all and use cwd by accident
+    if not base_name:
+        return []
+
+    # don't confuse glob with chars we didn't mean to use
+    base_name = re.sub(r'[\[\]\*\?]', r'[\g<0>]', base_name)
+
+    if filter_ext:
+        # convert to tuple of extensions to restrict to
+        filter_ext = tuple(x.lower().strip() for x in filter_ext.split(','))
+
+    for associated_file_path in ek.ek(glob.glob, base_name + '*'):
+        # only add associated to list
+        if associated_file_path == file_path:
+            continue
+
+        if ek.ek(os.path.isfile, associated_file_path):
+            if filter_ext:
+                if associated_file_path.lower().endswith(filter_ext):
+                    file_path_list.append(associated_file_path)
+
+            else:
+                file_path_list.append(associated_file_path)
+
+    return file_path_list
 
 
 def makeDir(path):

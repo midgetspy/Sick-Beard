@@ -37,7 +37,6 @@ from sickbeard import helpers, exceptions, logger
 from sickbeard.exceptions import ex
 from sickbeard import tvrage
 from sickbeard import image_cache
-from sickbeard import postProcessor
 
 from sickbeard import encodingKludge as ek
 
@@ -1725,7 +1724,7 @@ class TVEpisode(object):
             logger.log(str(self.tvdbid) + u": File " + self.location + " is already named correctly, skipping", logger.DEBUG)
             return
 
-        related_files = postProcessor.PostProcessor(self.location).list_associated_files(self.location, base_name_only=True)
+        related_files = helpers.list_associated_files(self.location, base_name_only=True)
         logger.log(u"Files associated to " + self.location + ": " + str(related_files), logger.DEBUG)
 
         # move the ep file
