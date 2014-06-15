@@ -165,13 +165,22 @@ class PostProcessor(object):
         # don't confuse glob with chars we didn't mean to use
         base_name = re.sub(r'[\[\]\*\?]', r'[\g<0>]', base_name)
 
+        # build tuple of extensions to restrict to
+        filter_ext = tuple(x.lower().strip() for x in sickbeard.FILTER_ASSOCIATED_FILES.split(','))
+
         for associated_file_path in ek.ek(glob.glob, base_name + '*'):
             # only add associated to list
             if associated_file_path == file_path:
                 continue
 
-            if ek.ek(os.path.isfile, associated_file_path):
-                file_path_list.append(associated_file_path)
+            # filter matches by extensions if specified
+            if filter_ext:
+                if ek.ek(os.path.isfile, associated_file_path) and associated_file_path.lower().endswith(filter_ext):
+                    file_path_list.append(associated_file_path)
+            # no filter to apply, take all matches
+            else:
+                if ek.ek(os.path.isfile, associated_file_path):
+                    file_path_list.append(associated_file_path)
 
         return file_path_list
 

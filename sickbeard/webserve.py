@@ -799,7 +799,7 @@ class ConfigPostProcessing:
     def savePostProcessing(self, naming_pattern=None, naming_multi_ep=None,
                     xbmc_data=None, xbmc_12plus_data=None, mediabrowser_data=None, sony_ps3_data=None, wdtv_data=None, tivo_data=None, mede8er_data=None,
                     keep_processed_dir=None, process_automatically=None, rename_episodes=None,
-                    move_associated_files=None, tv_download_dir=None, naming_custom_abd=None, naming_abd_pattern=None):
+                    move_associated_files=None, filter_associated_files=None, tv_download_dir=None, naming_custom_abd=None, naming_abd_pattern=None):
 
         results = []
 
@@ -809,6 +809,7 @@ class ConfigPostProcessing:
 
         sickbeard.KEEP_PROCESSED_DIR = config.checkbox_to_value(keep_processed_dir)
         sickbeard.MOVE_ASSOCIATED_FILES = config.checkbox_to_value(move_associated_files)
+        sickbeard.FILTER_ASSOCIATED_FILES = filter_associated_files
         sickbeard.RENAME_EPISODES = config.checkbox_to_value(rename_episodes)
 
         sickbeard.PROCESS_AUTOMATICALLY = config.checkbox_to_value(process_automatically)

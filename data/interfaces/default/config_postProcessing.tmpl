@@ -69,6 +69,17 @@
                         </div>
 
                         <div class="field-pair">
+                            <label class="nocheck clearfix" for="filter_associated_files">
+                                <span class="component-title">Filter Associated Files</span>
+                                <input type="text" name="filter_associated_files" id="filter_associated_files" value="$sickbeard.FILTER_ASSOCIATED_FILES" size="35" />
+                            </label>
+                            <label class="nocheck clearfix">
+                                <span class="component-title">&nbsp;</span>
+                                <span class="component-desc">Filter associated files by specific non-media file extensions (separated with coma). (eg. .idx, .sub, .en.srt)</span>
+                            </label>
+                        </div>
+
+                        <div class="field-pair">
                             <input type="checkbox" name="rename_episodes" id="rename_episodes" #if $sickbeard.RENAME_EPISODES == True then "checked=\"checked\"" else ""# />
                             <label class="clearfix" for="rename_episodes">
                                 <span class="component-title">Rename Episodes</span>
