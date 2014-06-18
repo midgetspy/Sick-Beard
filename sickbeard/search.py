@@ -428,12 +428,22 @@ def findSeason(show, season):
 
         today = datetime.date.today()
 
-        # only use complete season packs if season stopped > 7 days ago
-        if last_airdate == datetime.date.fromordinal(1) or last_airdate > today - datetime.timedelta(days=7):
-            logger.log(u"Ignoring " + BestSeasonResult.name + ", airdate of last episode in season: " + str(last_airdate) + " is never of < 7 days ago", logger.DEBUG)
-            use_complete_season = False
-        else:
-            use_complete_season = True
+        # only use complete season packs if season ended
+        # only use complete season as fallback if season ended > 7 days
+
+        season_ended = False
+        use_season_fallback = False
+
+        if last_airdate == datetime.date.fromordinal(1) or last_airdate > today:
+            logger.log(u"Ignoring " + BestSeasonResult.name + ", airdate of last episode in season: " + str(last_airdate) + " is never or > today", logger.DEBUG)
+
+        elif last_airdate + datetime.timedelta(days=7) <= today:
+            season_ended = True
+            use_season_fallback = True
+
+        elif last_airdate < today:
+            season_ended = True
+            logger.log(u"Ignoring " + BestSeasonResult.name + " as fallback, airdate of last episode in season: " + str(last_airdate) + " is < 7 days", logger.DEBUG)
 
         # check if all or some episodes of the season are wanted
         want_all_eps = True
@@ -446,7 +456,7 @@ def findSeason(show, season):
                 want_some_eps = True
 
         # if every episode is needed in the season and there's nothing better then just download this and be done with it
-        if use_complete_season and want_all_eps and BestSeasonResult.quality == highest_wanted_quality_overall:
+        if season_ended and want_all_eps and BestSeasonResult.quality == highest_wanted_quality_overall:
             logger.log(u"Every episode in this season is needed, downloading the whole season " + BestSeasonResult.name)
             epObjs = []
             for cur_ep_num in all_episodes:
@@ -484,7 +494,7 @@ def findSeason(show, season):
                 # if not all episodes are wanted, splitting up the complete season pack for torrents is not possible
                 # all we can do is leech the entire torrent, user will have to select which episodes not do download in his torrent client
 
-                if use_complete_season:
+                if use_season_fallback:
                     # Creating a multi-ep result from a torrent Season result
                     logger.log(u"Adding multi-ep result for full-season torrent. Set the episodes you don't want to 'don't download' in your torrent client if desired!")
                     epObjs = []
