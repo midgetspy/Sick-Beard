@@ -17,6 +17,7 @@
 # along with Sick Beard.  If not, see <http://www.gnu.org/licenses/>.
 
 __all__ = ['ezrss',
+           'kat',
            'hdbits',
            'tvtorrents',
            'torrentleech',
