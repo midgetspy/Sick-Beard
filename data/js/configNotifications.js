@@ -81,6 +81,13 @@ $(document).ready(function () {
                 $("#testBoxcar").attr("disabled", false);
             });
     });
+    
+    $('#testBoxcar2').click(function () {
+        $('#testBoxcar2-result').html(loading);
+        var boxcar2_access_token = $("#boxcar2_access_token").val();
+        $.get(sbRoot + "/home/testBoxcar2", {'accessToken': boxcar2_access_token},
+            function (data) { $('#testBoxcar2-result').html(data); });
+    });
 
     $("#testPushover").click(function () {
         var pushover_userkey = $.trim($("#pushover_userkey").val());
