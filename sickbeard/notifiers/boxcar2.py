@@ -32,12 +32,9 @@ API_URL = "https://new.boxcar.io/api/notifications"
 
 class Boxcar2Notifier:
 
-    def test_notify(self, accessToken, title="Test"):
-        return self._sendBoxcar2("This is a test notification from SickBeard", title, accessToken)
-
-    def _sendBoxcar2(self, msg, title, accessToken):
+    def _sendBoxcar2(self, msg, title, accessToken, sound):
         """
-        Sends a boxcar notification to the address provided
+        Sends a boxcar2 notification to the address provided
 
         msg: The message to send (unicode)
         title: The title of the message
@@ -47,62 +44,50 @@ class Boxcar2Notifier:
         """
 
         # build up the URL and parameters
-        msg = msg.strip()
-        curUrl = API_URL
+        msg = msg.strip().encode('utf-8')
 
         data = urllib.urlencode({
             'user_credentials': accessToken,
-            'notification[title]': "SickBeard - " + title + " - " + msg.encode('utf-8'),
-            'notification[long_message]': msg.encode('utf-8'),
-            'notification[sound]': "done"
+            'notification[title]': title + " - " + msg,
+            'notification[long_message]': msg,
+            'notification[sound]': sound,
+            'notification[source_name]': "SickBeard"
             })
 
-        # send the request to boxcar
+        # send the request to boxcar2
         try:
-            req = urllib2.Request(curUrl)
+            req = urllib2.Request(API_URL)
             handle = urllib2.urlopen(req, data)
             handle.close()
 
         except urllib2.URLError, e:
+            # FIXME: Python 2.5 hack, it wrongly reports 201 as an error
+            if hasattr(e, 'code') and e.code == 201:
+                logger.log(u"BOXCAR2: Notification successful.", logger.MESSAGE)
+                return True
+
             # if we get an error back that doesn't have an error code then who knows what's really happening
             if not hasattr(e, 'code'):
-                logger.log("Boxcar2 notification failed." + ex(e), logger.ERROR)
-                return False
+                logger.log(u"BOXCAR2: Notification failed." + ex(e), logger.ERROR)
             else:
-                logger.log("Boxcar2 notification failed. Error code: " + str(e.code), logger.WARNING)
+                logger.log(u"BOXCAR2: Notification failed. Error code: " + str(e.code), logger.ERROR)
 
-            # HTTP status 404 if the provided access token isn't a Boxcar token.
             if e.code == 404:
-                logger.log("Access Token is wrong/not a boxcar2 token.", logger.WARNING)
-                return False
-
-            # For HTTP status code 401's, it is because you are passing in either an invalid token, or the user has not added your service.
+                logger.log(u"BOXCAR2: Access token is wrong/not associated to a device.", logger.ERROR)
             elif e.code == 401:
-
-                # Return an HTTP status code of 401.
-                logger.log("Already subscribed to service", logger.ERROR)
-                # i dont know if this is true or false ... its neither but i also dont know how we got here in the first place
-                return False
-
-            # If you receive an HTTP status code of 400, it is because you failed to send the proper parameters
+                logger.log(u"BOXCAR2: Access token not recognized.", logger.ERROR)
             elif e.code == 400:
-                logger.log("Wrong data send to boxcar2", logger.ERROR)
-                return False
+                logger.log(u"BOXCAR2: Wrong data sent to boxcar.", logger.ERROR)
+            elif e.code == 503:
+                logger.log(u"BOXCAR2: Boxcar server to busy to handle the request at this time.", logger.WARNING)
+            return False
 
-        logger.log("Boxcar2 notification successful.", logger.DEBUG)
+        logger.log(u"BOXCAR2: Notification successful.", logger.MESSAGE)
         return True
 
-    def notify_snatch(self, ep_name, title=notifyStrings[NOTIFY_SNATCH]):
-        if sickbeard.BOXCAR2_NOTIFY_ONSNATCH:
-            self._notifyBoxcar2(title, ep_name)
-
-    def notify_download(self, ep_name, title=notifyStrings[NOTIFY_DOWNLOAD]):
-        if sickbeard.BOXCAR2_NOTIFY_ONDOWNLOAD:
-            self._notifyBoxcar2(title, ep_name)
-
-    def _notifyBoxcar2(self, title, message, accessToken=None, force=False):
+    def _notify(self, title, message, accessToken=None, sound=None, force=False):
         """
-        Sends a boxcar notification based on the provided info or SB config
+        Sends a boxcar2 notification based on the provided info or SB config
 
         title: The title of the notification to send
         message: The message string to send
@@ -110,17 +95,36 @@ class Boxcar2Notifier:
         force: If True then the notification will be sent even if Boxcar is disabled in the config
         """
 
+        # suppress notifications if the notifier is disabled but the notify options are checked
         if not sickbeard.USE_BOXCAR2 and not force:
-            logger.log("Notification for Boxcar2 not enabled, skipping this notification", logger.DEBUG)
             return False
 
-        # if no accessToken was given then use the one from the config
+        # fill in omitted parameters
         if not accessToken:
             accessToken = sickbeard.BOXCAR2_ACCESS_TOKEN
+        if not sound:
+            sound = sickbeard.BOXCAR2_SOUND
 
-        logger.log("Sending notification for " + message, logger.DEBUG)
+        logger.log(u"BOXCAR2: Sending notification for " + message, logger.DEBUG)
 
-        self._sendBoxcar2(message, title, accessToken)
-        return True
+        return self._sendBoxcar2(message, title, accessToken, sound)
+
+##############################################################################
+# Public functions
+##############################################################################
+
+    def notify_snatch(self, ep_name):
+        if sickbeard.BOXCAR2_NOTIFY_ONSNATCH:
+            self._notify(notifyStrings[NOTIFY_SNATCH], ep_name)
+
+    def notify_download(self, ep_name):
+        if sickbeard.BOXCAR2_NOTIFY_ONDOWNLOAD:
+            self._notify(notifyStrings[NOTIFY_DOWNLOAD], ep_name)
+
+    def test_notify(self, accessToken, sound):
+        return self._notify(message="This is a test notification from Sick Beard", title="Test", accessToken=accessToken, sound=sound, force=True)
+
+    def update_library(self, ep_obj=None):
+        pass
 
 notifier = Boxcar2Notifier

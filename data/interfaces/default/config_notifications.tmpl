@@ -750,14 +750,14 @@
                     <div class="component-group-desc">
                         <img class="notifier-icon" src="$sbRoot/images/notifiers/boxcar2.png" alt="" title="Boxcar2" />
                         <h3><a href="http://boxcar.io/" rel="noreferrer" onclick="window.open('${sickbeard.ANON_REDIRECT}' + this.href, '_blank'); return false;">Boxcar2</a></h3>
-                        <p>Read your messages where and when you want them!</p>
+                        <p>Personalized Push and Alerts Inbox for your iPhone that lets you manage and live news in real-time.</p>
                     </div>
                     <fieldset class="component-group-list">
                         <div class="field-pair">
                             <input type="checkbox" class="enabler" name="use_boxcar2" id="use_boxcar2" #if $sickbeard.USE_BOXCAR2 then "checked=\"checked\"" else ""# />
                             <label class="clearfix" for="use_boxcar2">
                                 <span class="component-title">Enable</span>
-                                <span class="component-desc">Should Sick Beard send notifications through Boxcar2?</span>
+                                <span class="component-desc">Should Sick Beard send Boxcar2 notifications?</span>
                             </label>
                         </div>
 
@@ -774,6 +774,47 @@
                                 <label class="clearfix" for="boxcar2_notify_ondownload">
                                     <span class="component-title">Notify on Download</span>
                                     <span class="component-desc">Send notification when we finish a download?</span>
+                                </label>
+                            </div>
+                            <div class="field-pair">
+                                <label class="nocheck clearfix">
+                                    <span class="component-title">Custom Sound</span>
+                                    <select id="boxcar2_sound" name="boxcar2_sound">
+                                        <option value="default" #if $sickbeard.BOXCAR2_SOUND == "default" then 'selected="selected"' else ""#>Default (General)</option>
+                                        <option value="no-sound" #if $sickbeard.BOXCAR2_SOUND == "no-sound" then 'selected="selected"' else ""#>Silent</option>
+                                        <option value="beep-crisp" #if $sickbeard.BOXCAR2_SOUND == "beep-crisp" then 'selected="selected"' else ""#>Beep Crisp</option>
+                                        <option value="beep-soft" #if $sickbeard.BOXCAR2_SOUND == "beep-soft" then 'selected="selected"' else ""#>Beep Soft</option>
+                                        <option value="bell-modern" #if $sickbeard.BOXCAR2_SOUND == "bell-modern" then 'selected="selected"' else ""#>Bell Modern</option>
+                                        <option value="bell-one-tone" #if $sickbeard.BOXCAR2_SOUND == "bell-one-tone" then 'selected="selected"' else ""#>Bell One Tone</option>
+                                        <option value="bell-simple" #if $sickbeard.BOXCAR2_SOUND == "bell-simple" then 'selected="selected"' else ""#>Bell Simple</option>
+                                        <option value="bell-triple" #if $sickbeard.BOXCAR2_SOUND == "bell-triple" then 'selected="selected"' else ""#>Bell Triple</option>
+                                        <option value="bird-1" #if $sickbeard.BOXCAR2_SOUND == "bird-1" then 'selected="selected"' else ""#>Bird 1</option>
+                                        <option value="bird-2" #if $sickbeard.BOXCAR2_SOUND == "bird-2" then 'selected="selected"' else ""#>Bird 2</option>
+                                        <option value="boing" #if $sickbeard.BOXCAR2_SOUND == "boing" then 'selected="selected"' else ""#>Boing</option>
+                                        <option value="cash" #if $sickbeard.BOXCAR2_SOUND == "cash" then 'selected="selected"' else ""#>Cash</option>
+                                        <option value="clanging" #if $sickbeard.BOXCAR2_SOUND == "clanging" then 'selected="selected"' else ""#>Clanging</option>
+                                        <option value="detonator-charge" #if $sickbeard.BOXCAR2_SOUND == "detonator-charge" then 'selected="selected"' else ""#>Detonator Charge</option>
+                                        <option value="digital-alarm" #if $sickbeard.BOXCAR2_SOUND == "digital-alarm" then 'selected="selected"' else ""#>Digital Alarm</option>
+                                        <option value="done" #if $sickbeard.BOXCAR2_SOUND == "done" then 'selected="selected"' else ""#>Done</option>
+                                        <option value="echo" #if $sickbeard.BOXCAR2_SOUND == "echo" then 'selected="selected"' else ""#>Echo</option>
+                                        <option value="flourish" #if $sickbeard.BOXCAR2_SOUND == "flourish" then 'selected="selected"' else ""#>Flourish</option>
+                                        <option value="harp" #if $sickbeard.BOXCAR2_SOUND == "harp" then 'selected="selected"' else ""#>Harp</option>
+                                        <option value="light" #if $sickbeard.BOXCAR2_SOUND == "light" then 'selected="selected"' else ""#>Light</option>
+                                        <option value="magic-chime" #if $sickbeard.BOXCAR2_SOUND == "magic-chime" then 'selected="selected"' else ""#>Magic Chime</option>
+                                        <option value="magic-coin" #if $sickbeard.BOXCAR2_SOUND == "magic-coin" then 'selected="selected"' else ""#>Magic Coin 1</option>
+                                        <option value="notifier-1" #if $sickbeard.BOXCAR2_SOUND == "notifier-1" then 'selected="selected"' else ""#>Notifier 1</option>
+                                        <option value="notifier-2" #if $sickbeard.BOXCAR2_SOUND == "notifier-2" then 'selected="selected"' else ""#>Notifier 2</option>
+                                        <option value="notifier-3" #if $sickbeard.BOXCAR2_SOUND == "notifier-3" then 'selected="selected"' else ""#>Notifier 3</option>
+                                        <option value="orchestral-long" #if $sickbeard.BOXCAR2_SOUND == "orchestral-long" then 'selected="selected"' else ""#>Orchestral Long</option>
+                                        <option value="orchestral-short" #if $sickbeard.BOXCAR2_SOUND == "orchestral-short" then 'selected="selected"' else ""#>Orchestral Short</option>
+                                        <option value="score" #if $sickbeard.BOXCAR2_SOUND == "score" then 'selected="selected"' else ""#>Score</option>
+                                        <option value="success" #if $sickbeard.BOXCAR2_SOUND == "success" then 'selected="selected"' else ""#>Success</option>
+                                        <option value="up" #if $sickbeard.BOXCAR2_SOUND == "up" then 'selected="selected"' else ""#>Up</option>
+                                    </select>
+                                </label>
+                                <label class="nocheck clearfix">
+                                    <span class="component-title">&nbsp;</span>
+                                    <span class="component-desc">Override the default sound selected for the General notification.</span>
                                 </label>
                             </div>
                             <div class="field-pair">

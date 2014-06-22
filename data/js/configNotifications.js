@@ -8,12 +8,12 @@ $(document).ready(function () {
             $("#testGrowl-result").html("Please fill out the necessary fields above.");
             return;
         }
-        $(this).attr("disabled", true);
+        $(this).prop("disabled", true);
         $("#testGrowl-result").html(loading);
         $.get(sbRoot + "/home/testGrowl", {'host': growl_host, 'password': growl_password})
             .done(function (data) {
                 $("#testGrowl-result").html(data);
-                $("#testGrowl").attr("disabled", false);
+                $("#testGrowl").prop("disabled", false);
             });
     });
 
@@ -24,12 +24,12 @@ $(document).ready(function () {
             $("#testProwl-result").html("Please fill out the necessary fields above.");
             return;
         }
-        $(this).attr("disabled", true);
+        $(this).prop("disabled", true);
         $("#testProwl-result").html(loading);
         $.get(sbRoot + "/home/testProwl", {'prowl_api': prowl_api, 'prowl_priority': prowl_priority})
             .done(function (data) {
                 $("#testProwl-result").html(data);
-                $("#testProwl").attr("disabled", false);
+                $("#testProwl").prop("disabled", false);
             });
     });
 
@@ -41,12 +41,12 @@ $(document).ready(function () {
             $("#testXBMC-result").html("Please fill out the necessary fields above.");
             return;
         }
-        $(this).attr("disabled", true);
+        $(this).prop("disabled", true);
         $("#testXBMC-result").html(loading);
         $.get(sbRoot + "/home/testXBMC", {'host': xbmc_host, 'username': xbmc_username, 'password': xbmc_password})
             .done(function (data) {
                 $("#testXBMC-result").html(data);
-                $("#testXBMC").attr("disabled", false);
+                $("#testXBMC").prop("disabled", false);
             });
     });
 
@@ -58,12 +58,12 @@ $(document).ready(function () {
             $("#testPLEX-result").html("Please fill out the necessary fields above.");
             return;
         }
-        $(this).attr("disabled", true);
+        $(this).prop("disabled", true);
         $("#testPLEX-result").html(loading);
         $.get(sbRoot + "/home/testPLEX", {'host': plex_host, 'username': plex_username, 'password': plex_password})
             .done(function (data) {
                 $("#testPLEX-result").html(data);
-                $("#testPLEX").attr("disabled", false);
+                $("#testPLEX").prop("disabled", false);
             });
     });
 
@@ -73,20 +73,29 @@ $(document).ready(function () {
             $("#testBoxcar-result").html("Please fill out the necessary fields above.");
             return;
         }
-        $(this).attr("disabled", true);
+        $(this).prop("disabled", true);
         $("#testBoxcar-result").html(loading);
         $.get(sbRoot + "/home/testBoxcar", {'username': boxcar_username})
             .done(function (data) {
                 $("#testBoxcar-result").html(data);
-                $("#testBoxcar").attr("disabled", false);
+                $("#testBoxcar").prop("disabled", false);
             });
     });
-    
-    $('#testBoxcar2').click(function () {
-        $('#testBoxcar2-result').html(loading);
-        var boxcar2_access_token = $("#boxcar2_access_token").val();
-        $.get(sbRoot + "/home/testBoxcar2", {'accessToken': boxcar2_access_token},
-            function (data) { $('#testBoxcar2-result').html(data); });
+
+    $("#testBoxcar2").click(function () {
+        var boxcar2_access_token = $.trim($("#boxcar2_access_token").val());
+        var boxcar2_sound = $("#boxcar2_sound").val() || "default";
+        if (!boxcar2_access_token) {
+            $("#testBoxcar2-result").html("Please fill out the necessary fields above.");
+            return;
+        }
+        $(this).prop("disabled", true);
+        $("#testBoxcar2-result").html(loading);
+        $.get(sbRoot + "/home/testBoxcar2", {'accessToken': boxcar2_access_token, 'sound': boxcar2_sound})
+            .done(function (data) {
+                $("#testBoxcar2-result").html(data);
+                $("#testBoxcar2").prop("disabled", false);
+            });
     });
 
     $("#testPushover").click(function () {
@@ -95,12 +104,12 @@ $(document).ready(function () {
             $("#testPushover-result").html("Please fill out the necessary fields above.");
             return;
         }
-        $(this).attr("disabled", true);
+        $(this).prop("disabled", true);
         $("#testPushover-result").html(loading);
         $.get(sbRoot + "/home/testPushover", {'userKey': pushover_userkey})
             .done(function (data) {
                 $("#testPushover-result").html(data);
-                $("#testPushover").attr("disabled", false);
+                $("#testPushover").prop("disabled", false);
             });
     });
 
@@ -143,8 +152,8 @@ $(document).ready(function () {
         $.get(sbRoot + "/home/settingsNMJ", {'host': nmj_host},
             function (data) {
                 if (data === null) {
-                    $("#nmj_database").removeAttr("readonly");
-                    $("#nmj_mount").removeAttr("readonly");
+                    $("#nmj_database").prop("readonly", false);
+                    $("#nmj_mount").prop("readonly", false);
                 }
                 var JSONData = $.parseJSON(data);
                 $("#testNMJ-result").html(JSONData.message);
@@ -152,14 +161,14 @@ $(document).ready(function () {
                 $("#nmj_mount").val(JSONData.mount);
 
                 if (JSONData.database) {
-                    $("#nmj_database").attr("readonly", true);
+                    $("#nmj_database").prop("readonly", true);
                 } else {
-                    $("#nmj_database").removeAttr("readonly");
+                    $("#nmj_database").prop("readonly", false);
                 }
                 if (JSONData.mount) {
-                    $("#nmj_mount").attr("readonly", true);
+                    $("#nmj_mount").prop("readonly", true);
                 } else {
-                    $("#nmj_mount").removeAttr("readonly");
+                    $("#nmj_mount").prop("readonly", false);
                 }
             });
     });
@@ -172,12 +181,12 @@ $(document).ready(function () {
             $("#testNMJ-result").html("Please fill out the necessary fields above.");
             return;
         }
-        $(this).attr("disabled", true);
+        $(this).prop("disabled", true);
         $("#testNMJ-result").html(loading);
         $.get(sbRoot + "/home/testNMJ", {'host': nmj_host, 'database': nmj_database, 'mount': nmj_mount})
             .done(function (data) {
                 $("#testNMJ-result").html(data);
-                $("#testNMJ").attr("disabled", false);
+                $("#testNMJ").prop("disabled", false);
             });
     });
 
@@ -203,16 +212,16 @@ $(document).ready(function () {
         $.get(sbRoot + "/home/settingsNMJv2", {'host': nmjv2_host, 'dbloc': nmjv2_dbloc, 'instance': nmjv2_dbinstance},
         function (data) {
             if (data == null) {
-                $("#nmjv2_database").removeAttr("readonly");
+                $("#nmjv2_database").prop("readonly", false);
             }
             var JSONData = $.parseJSON(data || "null");
             $("#testNMJv2-result").html(JSONData.message);
             $("#nmjv2_database").val(JSONData.database);
 
             if (JSONData.database) {
-                $("#nmjv2_database").attr("readonly", true);
+                $("#nmjv2_database").prop("readonly", true);
             } else {
-                $("#nmjv2_database").removeAttr("readonly");
+                $("#nmjv2_database").prop("readonly", false);
             }
         });
     });
@@ -223,12 +232,12 @@ $(document).ready(function () {
             $("#testNMJv2-result").html("Please fill out the necessary fields above.");
             return;
         }
-        $(this).attr("disabled", true);
+        $(this).prop("disabled", true);
         $("#testNMJv2-result").html(loading);
         $.get(sbRoot + "/home/testNMJv2", {'host': nmjv2_host})
             .done(function (data) {
                 $("#testNMJv2-result").html(data);
-                $("#testNMJv2").attr("disabled", false);
+                $("#testNMJv2").prop("disabled", false);
             });
     });
 
@@ -240,12 +249,12 @@ $(document).ready(function () {
             $("#testTrakt-result").html("Please fill out the necessary fields above.");
             return;
         }
-        $(this).attr("disabled", true);
+        $(this).prop("disabled", true);
         $("#testTrakt-result").html(loading);
         $.get(sbRoot + "/home/testTrakt", {'api': trakt_api, 'username': trakt_username, 'password': trakt_password})
             .done(function (data) {
                 $("#testTrakt-result").html(data);
-                $("#testTrakt").attr("disabled", false);
+                $("#testTrakt").prop("disabled", false);
             });
     });
 
@@ -256,22 +265,22 @@ $(document).ready(function () {
             $("#testNMA-result").html("Please fill out the necessary fields above.");
             return;
         }
-        $(this).attr("disabled", true);
+        $(this).prop("disabled", true);
         $("#testNMA-result").html(loading);
         $.get(sbRoot + "/home/testNMA", {'nma_api': nma_api, 'nma_priority': nma_priority})
             .done(function (data) {
                 $("#testNMA-result").html(data);
-                $("#testNMA").attr("disabled", false);
+                $("#testNMA").prop("disabled", false);
             });
     });
 
     $("#testSynoNotify").click(function () {
-        $(this).attr("disabled", true);
+        $(this).prop("disabled", true);
         $("#testSynoNotify-result").html(loading);
         $.get(sbRoot + "/home/testSynoNotify")
             .done(function (data) {
                 $("#testSynoNotify-result").html(data);
-                $("#testSynoNotify").attr("disabled", false);
+                $("#testSynoNotify").prop("disabled", false);
             });
     });
 

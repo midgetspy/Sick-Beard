@@ -24,18 +24,16 @@ from lib.pynma import pynma
 
 class NMA_Notifier:
 
-    def _sendNMA(self, nma_api=None, nma_priority=None, event=None, message=None, force=False):
-
-        title = "Sick Beard"
+    def _notify(self, nma_api=None, nma_priority=None, event=None, message=None, force=False):
 
         # suppress notifications if the notifier is disabled but the notify options are checked
         if not sickbeard.USE_NMA and not force:
             return False
 
-        if nma_api == None:
+        # fill in omitted parameters
+        if not nma_api:
             nma_api = sickbeard.NMA_API
-
-        if nma_priority == None:
+        if not nma_priority:
             nma_priority = sickbeard.NMA_PRIORITY
 
         batch = False
@@ -47,8 +45,8 @@ class NMA_Notifier:
         if len(keys) > 1:
             batch = True
 
-        logger.log("NMA: Sending notice with details: event=\"%s\", message=\"%s\", priority=%s, batch=%s" % (event, message, nma_priority, batch), logger.DEBUG)
-        response = p.push(title, event, message, priority=nma_priority, batch_mode=batch)
+        logger.log(u"NMA: Sending notice with details: event=\"%s\", message=\"%s\", priority=%s, batch=%s" % (event, message, nma_priority, batch), logger.DEBUG)
+        response = p.push("Sick Beard", event, message, priority=nma_priority, batch_mode=batch)
 
         if not response[nma_api][u'code'] == u'200':
             logger.log(u"NMA: Could not send notification to NotifyMyAndroid", logger.ERROR)
@@ -63,14 +61,14 @@ class NMA_Notifier:
 
     def notify_snatch(self, ep_name):
         if sickbeard.NMA_NOTIFY_ONSNATCH:
-            self._sendNMA(nma_api=None, nma_priority=None, event=common.notifyStrings[common.NOTIFY_SNATCH], message=ep_name)
+            self._notify(nma_api=None, nma_priority=None, event=common.notifyStrings[common.NOTIFY_SNATCH], message=ep_name)
 
     def notify_download(self, ep_name):
         if sickbeard.NMA_NOTIFY_ONDOWNLOAD:
-            self._sendNMA(nma_api=None, nma_priority=None, event=common.notifyStrings[common.NOTIFY_DOWNLOAD], message=ep_name)
+            self._notify(nma_api=None, nma_priority=None, event=common.notifyStrings[common.NOTIFY_DOWNLOAD], message=ep_name)
 
     def test_notify(self, nma_api, nma_priority):
-        return self._sendNMA(nma_api, nma_priority, event="Test", message="Testing NMA settings from Sick Beard", force=True)
+        return self._notify(nma_api, nma_priority, event="Test", message="This is a test notification from Sick Beard", force=True)
 
     def update_library(self, ep_obj=None):
         pass
