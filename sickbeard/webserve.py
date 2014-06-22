@@ -1094,6 +1094,7 @@ class ConfigNotifications:
                           use_prowl=None, prowl_notify_onsnatch=None, prowl_notify_ondownload=None, prowl_api=None, prowl_priority=0,
                           use_twitter=None, twitter_notify_onsnatch=None, twitter_notify_ondownload=None,
                           use_boxcar=None, boxcar_notify_onsnatch=None, boxcar_notify_ondownload=None, boxcar_username=None,
+                          use_boxcar2=None, boxcar2_notify_onsnatch=None, boxcar2_notify_ondownload=None, boxcar2_access_token=None,
                           use_pushover=None, pushover_notify_onsnatch=None, pushover_notify_ondownload=None, pushover_userkey=None,
                           use_libnotify=None, libnotify_notify_onsnatch=None, libnotify_notify_ondownload=None,
                           use_nmj=None, nmj_host=None, nmj_database=None, nmj_mount=None,
@@ -1176,6 +1177,11 @@ class ConfigNotifications:
         sickbeard.BOXCAR_NOTIFY_ONSNATCH = config.checkbox_to_value(boxcar_notify_onsnatch)
         sickbeard.BOXCAR_NOTIFY_ONDOWNLOAD = config.checkbox_to_value(boxcar_notify_ondownload)
         sickbeard.BOXCAR_USERNAME = boxcar_username
+
+        sickbeard.USE_BOXCAR2 = config.checkbox_to_value(use_boxcar2)
+        sickbeard.BOXCAR2_NOTIFY_ONSNATCH = config.checkbox_to_value(boxcar2_notify_onsnatch)
+        sickbeard.BOXCAR2_NOTIFY_ONDOWNLOAD = config.checkbox_to_value(boxcar2_notify_ondownload)
+        sickbeard.BOXCAR2_ACCESS_TOKEN = boxcar2_access_token
 
         sickbeard.USE_NMA = config.checkbox_to_value(use_nma)
         sickbeard.NMA_NOTIFY_ONSNATCH = config.checkbox_to_value(nma_notify_onsnatch)
@@ -1885,6 +1891,16 @@ class Home:
             return "Boxcar notification succeeded. Check your Boxcar clients to make sure it worked"
         else:
             return "Error sending Boxcar notification"
+
+    @cherrypy.expose
+    def testBoxcar2(self, accessToken=None):
+        cherrypy.response.headers['Cache-Control'] = "max-age=0,no-cache,no-store"
+
+        result = notifiers.boxcar2_notifier.test_notify(accessToken)
+        if result:
+            return "Boxcar2 notification succeeded. Check your Boxcar2 clients to make sure it worked"
+        else:
+            return "Error sending Boxcar2 notification"
 
     @cherrypy.expose
     def testPushover(self, userKey=None):

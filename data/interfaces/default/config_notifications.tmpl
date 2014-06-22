@@ -746,6 +746,53 @@
                     </fieldset>
                 </div><!-- /boxcar component-group //-->
 
+                <div class="component-group clearfix">
+                    <div class="component-group-desc">
+                        <img class="notifier-icon" src="$sbRoot/images/notifiers/boxcar2.png" alt="" title="Boxcar2" />
+                        <h3><a href="http://boxcar.io/" rel="noreferrer" onclick="window.open('${sickbeard.ANON_REDIRECT}' + this.href, '_blank'); return false;">Boxcar2</a></h3>
+                        <p>Read your messages where and when you want them!</p>
+                    </div>
+                    <fieldset class="component-group-list">
+                        <div class="field-pair">
+                            <input type="checkbox" class="enabler" name="use_boxcar2" id="use_boxcar2" #if $sickbeard.USE_BOXCAR2 then "checked=\"checked\"" else ""# />
+                            <label class="clearfix" for="use_boxcar2">
+                                <span class="component-title">Enable</span>
+                                <span class="component-desc">Should Sick Beard send notifications through Boxcar2?</span>
+                            </label>
+                        </div>
+
+                        <div id="content_use_boxcar2">
+                            <div class="field-pair">
+                                <input type="checkbox" name="boxcar2_notify_onsnatch" id="boxcar2_notify_onsnatch" #if $sickbeard.BOXCAR2_NOTIFY_ONSNATCH then "checked=\"checked\"" else ""# />
+                                <label class="clearfix" for="boxcar2_notify_onsnatch">
+                                    <span class="component-title">Notify on Snatch</span>
+                                    <span class="component-desc">Send notification when we start a download?</span>
+                                </label>
+                            </div>
+                            <div class="field-pair">
+                                <input type="checkbox" name="boxcar2_notify_ondownload" id="boxcar2_notify_ondownload" #if $sickbeard.BOXCAR2_NOTIFY_ONDOWNLOAD then "checked=\"checked\"" else ""# />
+                                <label class="clearfix" for="boxcar2_notify_ondownload">
+                                    <span class="component-title">Notify on Download</span>
+                                    <span class="component-desc">Send notification when we finish a download?</span>
+                                </label>
+                            </div>
+                            <div class="field-pair">
+                                <label class="nocheck clearfix">
+                                    <span class="component-title">Boxcar2 Access Token</span>
+                                    <input type="text" name="boxcar2_access_token" id="boxcar2_access_token" value="$sickbeard.BOXCAR2_ACCESS_TOKEN" size="35" />
+                                </label>
+                                <label class="nocheck clearfix">
+                                    <span class="component-title">&nbsp;</span>
+                                    <span class="component-desc">Access Token of your Boxcar2 account</span>
+                                </label>
+                            </div>
+                            <div class="testNotification" id="testBoxcar2-result">Click below to test.</div>
+                            <input type="button" class="btn" value="Test Boxcar2" id="testBoxcar2" />
+                            <input type="submit" class="btn config_submitter" value="Save Changes" />
+                        </div><!-- /content_use_boxcar2 //-->
+
+                    </fieldset>
+                </div><!-- /boxcar2 component-group //-->
 
                 <div class="component-group clearfix">
                     <div class="component-group-desc">
