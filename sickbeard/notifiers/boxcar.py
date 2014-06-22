@@ -69,6 +69,11 @@ class BoxcarNotifier:
             handle.close()
 
         except urllib2.URLError, e:
+            # FIXME: Python 2.5 hack, it wrongly reports 201 as an error
+            if hasattr(e, 'code') and e.code == 201:
+                logger.log(u"PUSHOVER: Notification successful.", logger.MESSAGE)
+                return True
+
             # if we get an error back that doesn't have an error code then who knows what's really happening
             if not hasattr(e, 'code'):
                 logger.log(u"BOXCAR: Notification failed." + ex(e), logger.ERROR)

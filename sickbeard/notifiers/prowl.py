@@ -40,8 +40,6 @@ class ProwlNotifier:
         if not prowl_priority:
             prowl_priority = sickbeard.PROWL_PRIORITY
 
-        title = "Sick Beard"
-
         logger.log("PROWL: Sending notice with details: event=\"%s\", message=\"%s\", priority=%s, api=%s" % (event, message, prowl_priority, prowl_api), logger.DEBUG)
 
         try:
@@ -49,7 +47,7 @@ class ProwlNotifier:
             http_handler = HTTPSConnection("api.prowlapp.com")
 
             data = {'apikey': prowl_api,
-                    'application': title,
+                    'application': "Sick Beard",
                     'event': event,
                     'description': message.encode('utf-8'),
                     'priority': prowl_priority
@@ -91,7 +89,7 @@ class ProwlNotifier:
             self._notify(prowl_api=None, prowl_priority=None, event=common.notifyStrings[common.NOTIFY_DOWNLOAD], message=ep_name)
 
     def test_notify(self, prowl_api, prowl_priority):
-        return self._notify(prowl_api, prowl_priority, event="Test", message="Testing Prowl settings from Sick Beard", force=True)
+        return self._notify(prowl_api, prowl_priority, event="Test", message="This is a test notification from Sick Beard", force=True)
 
     def update_library(self, ep_obj=None):
         pass
