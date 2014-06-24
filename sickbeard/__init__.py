@@ -183,6 +183,7 @@ RENAME_EPISODES = False
 PROCESS_AUTOMATICALLY = False
 KEEP_PROCESSED_DIR = False
 MOVE_ASSOCIATED_FILES = False
+FILTER_ASSOCIATED_FILES = None
 TV_DOWNLOAD_DIR = None
 
 NZBS = False
@@ -347,7 +348,7 @@ def initialize(consoleLogging=True):
                 USE_LIBNOTIFY, LIBNOTIFY_NOTIFY_ONSNATCH, LIBNOTIFY_NOTIFY_ONDOWNLOAD, USE_NMJ, NMJ_HOST, NMJ_DATABASE, NMJ_MOUNT, USE_NMJv2, NMJv2_HOST, NMJv2_DATABASE, NMJv2_DBLOC, \
                 USE_SYNOINDEX, SYNOINDEX_NOTIFY_ONSNATCH, SYNOINDEX_NOTIFY_ONDOWNLOAD, SYNOINDEX_UPDATE_LIBRARY, \
                 USE_LISTVIEW, METADATA_XBMC, METADATA_XBMC_12PLUS, METADATA_MEDIABROWSER, METADATA_MEDE8ER, METADATA_PS3, metadata_provider_dict, \
-                GIT_PATH, MOVE_ASSOCIATED_FILES, \
+                GIT_PATH, MOVE_ASSOCIATED_FILES, FILTER_ASSOCIATED_FILES, \
                 COMING_EPS_LAYOUT, COMING_EPS_SORT, COMING_EPS_DISPLAY_PAUSED, METADATA_WDTV, METADATA_TIVO, IGNORE_WORDS, CREATE_MISSING_SHOW_DIRS, \
                 ADD_SHOWS_WO_DIR, ANON_REDIRECT
 
@@ -453,6 +454,7 @@ def initialize(consoleLogging=True):
         RENAME_EPISODES = check_setting_int(CFG, 'General', 'rename_episodes', 1)
         KEEP_PROCESSED_DIR = check_setting_int(CFG, 'General', 'keep_processed_dir', 1)
         MOVE_ASSOCIATED_FILES = check_setting_int(CFG, 'General', 'move_associated_files', 0)
+        FILTER_ASSOCIATED_FILES = check_setting_str(CFG, 'General', 'filter_associated_files', '')
         CREATE_MISSING_SHOW_DIRS = check_setting_int(CFG, 'General', 'create_missing_show_dirs', 0)
         ADD_SHOWS_WO_DIR = check_setting_int(CFG, 'General', 'add_shows_wo_dir', 0)
 
@@ -685,12 +687,10 @@ def initialize(consoleLogging=True):
                                                  threadName="SHOWQUEUE",
                                                  silent=True)
 
-        showUpdaterInstance = showUpdater.ShowUpdater()  # the interval for this is stored inside the class
-        showUpdateScheduler = scheduler.Scheduler(showUpdaterInstance,
-                                                  cycleTime=showUpdaterInstance.updateInterval,
+        showUpdateScheduler = scheduler.Scheduler(showUpdater.ShowUpdater(),
+                                                  cycleTime=datetime.timedelta(hours=1),
                                                   threadName="SHOWUPDATER",
-                                                  run_delay=showUpdaterInstance.updateInterval,
-                                                  silent=True
+                                                  start_time=datetime.time(hour=3)  # 3 AM
                                                   )
 
         # searchers
@@ -714,12 +714,10 @@ def initialize(consoleLogging=True):
 
         backlogSearchScheduler.action.cycleTime = BACKLOG_SEARCH_FREQUENCY
 
-        properFinderInstance = properFinder.ProperFinder()  # the interval for this is stored inside the class
-        properFinderScheduler = scheduler.Scheduler(properFinderInstance,
-                                                    cycleTime=properFinderInstance.updateInterval,
+        properFinderScheduler = scheduler.Scheduler(properFinder.ProperFinder(),
+                                                    cycleTime=datetime.timedelta(hours=1),
                                                     threadName="FINDPROPERS",
-                                                    run_delay=properFinderInstance.updateInterval,
-                                                    silent=True
+                                                    start_time=datetime.time(hour=1)  # 1 AM
                                                     )
 
         # processors
@@ -1003,6 +1001,7 @@ def save_config():
     new_config['General']['tv_download_dir'] = TV_DOWNLOAD_DIR
     new_config['General']['keep_processed_dir'] = int(KEEP_PROCESSED_DIR)
     new_config['General']['move_associated_files'] = int(MOVE_ASSOCIATED_FILES)
+    new_config['General']['filter_associated_files'] = FILTER_ASSOCIATED_FILES
     new_config['General']['process_automatically'] = int(PROCESS_AUTOMATICALLY)
     new_config['General']['rename_episodes'] = int(RENAME_EPISODES)
     new_config['General']['create_missing_show_dirs'] = int(CREATE_MISSING_SHOW_DIRS)
