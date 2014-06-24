@@ -50,7 +50,6 @@ class PushoverNotifier:
 
         # build up the URL and parameters
         msg = msg.strip()
-        curUrl = API_URL
 
         data = urllib.urlencode({
             'token': API_KEY,
@@ -62,11 +61,16 @@ class PushoverNotifier:
 
         # send the request to pushover
         try:
-            req = urllib2.Request(curUrl)
+            req = urllib2.Request(API_URL)
             handle = urllib2.urlopen(req, data)
             handle.close()
 
         except urllib2.URLError, e:
+            # FIXME: Python 2.5 hack, it wrongly reports 201 as an error
+            if hasattr(e, 'code') and e.code == 201:
+                logger.log(u"PUSHOVER: Notification successful.", logger.MESSAGE)
+                return True
+
             # if we get an error back that doesn't have an error code then who knows what's really happening
             if not hasattr(e, 'code'):
                 logger.log(u"PUSHOVER: Notification failed." + ex(e), logger.ERROR)
@@ -118,7 +122,7 @@ class PushoverNotifier:
 
         logger.log(u"PUSHOVER: Sending notification for " + message, logger.DEBUG)
 
-        return self._sendPushover(message, title)
+        return self._sendPushover(message, title, userKey)
 
 ##############################################################################
 # Public functions
