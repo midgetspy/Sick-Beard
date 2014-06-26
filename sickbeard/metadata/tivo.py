@@ -200,8 +200,8 @@ class TIVOMetadata(generic.GenericMetadata):
             if myShow["seriesname"] != None:
                 data += ("title : " + myShow["seriesname"] + "\n")
                 data += ("seriesTitle : " + myShow["seriesname"] + "\n")
-
-            data += ("episodeTitle : " + curEpToWrite._format_pattern('%Sx%0E %EN') + "\n")
+			#CHANGE: changed episode title
+            data += ("episodeTitle : " + curEpToWrite._format_pattern('%0E %EN') + "\n")
 
             # This should be entered for episodic shows and omitted for movies. The standard tivo format is to enter
             # the season number followed by the episode number for that season. For example, enter 201 for season 2
