@@ -274,6 +274,21 @@ $(document).ready(function () {
             });
     });
 
+    $("#testPushalot").click(function () {
+        var pushalot_authorizationtoken = $.trim($("#pushalot_authorizationtoken").val());
+        if (!pushalot_authorizationtoken) {
+            $("#testPushalot-result").html("Please fill out the necessary fields above.");
+            return;
+        }
+        $(this).prop("disabled", true);
+        $("#testPushalot-result").html(loading);
+        $.get(sbRoot + "/home/testPushalot", {'authorizationtoken': pushalot_authorizationtoken})
+            .done(function (data) {
+                $("#testPushalot-result").html(data);
+                $("#testPushalot").prop("disabled", false);
+            });
+    });
+
     $("#testSynoNotify").click(function () {
         $(this).prop("disabled", true);
         $("#testSynoNotify-result").html(loading);

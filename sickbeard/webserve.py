@@ -1103,7 +1103,8 @@ class ConfigNotifications:
                           use_trakt=None, trakt_username=None, trakt_password=None, trakt_api=None,
                           use_pytivo=None, pytivo_notify_onsnatch=None, pytivo_notify_ondownload=None, pytivo_update_library=None,
                               pytivo_host=None, pytivo_share_name=None, pytivo_tivo_name=None,
-                          use_nma=None, nma_notify_onsnatch=None, nma_notify_ondownload=None, nma_api=None, nma_priority=0):
+                          use_nma=None, nma_notify_onsnatch=None, nma_notify_ondownload=None, nma_api=None, nma_priority=0,
+                          use_pushalot=None, pushalot_notify_onsnatch=None, pushalot_notify_ondownload=None, pushalot_authorizationtoken=None):
 
         results = []
 
@@ -1189,6 +1190,11 @@ class ConfigNotifications:
         sickbeard.NMA_NOTIFY_ONDOWNLOAD = config.checkbox_to_value(nma_notify_ondownload)
         sickbeard.NMA_API = nma_api
         sickbeard.NMA_PRIORITY = nma_priority
+
+        sickbeard.USE_PUSHALOT = config.checkbox_to_value(use_pushalot)
+        sickbeard.PUSHALOT_NOTIFY_ONSNATCH = config.checkbox_to_value(pushalot_notify_onsnatch)
+        sickbeard.PUSHALOT_NOTIFY_ONDOWNLOAD = config.checkbox_to_value(pushalot_notify_ondownload)
+        sickbeard.PUSHALOT_AUTHORIZATIONTOKEN = pushalot_authorizationtoken
 
         # Online
         sickbeard.USE_TWITTER = config.checkbox_to_value(use_twitter)
@@ -2046,6 +2052,16 @@ class Home:
             return "Test NMA notice sent successfully"
         else:
             return "Test NMA notice failed"
+
+    @cherrypy.expose
+    def testPushalot(self, authorizationtoken=None):
+        cherrypy.response.headers['Cache-Control'] = "max-age=0,no-cache,no-store"
+
+        result = notifiers.pushalot_notifier.test_notify(authorizationtoken)
+        if result:
+            return "Pushalot notification succeeded. Check your Pushalot clients to make sure it worked"
+        else:
+            return "Error sending Pushalot notification"
 
     @cherrypy.expose
     def testSynoNotify(self):
