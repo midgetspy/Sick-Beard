@@ -899,6 +899,54 @@
                     </fieldset>
                 </div><!-- /nma component-group //-->
 
+                <div class="component-group clearfix">
+                    <div class="component-group-desc">
+                        <img class="notifier-icon" src="$sbRoot/images/notifiers/pushalot.png" alt="" title="Pushalot" />
+                        <h3><a href="https://pushalot.com" rel="noreferrer" onclick="window.open('${sickbeard.ANON_REDIRECT}' + this.href, '_blank'); return false;">Pushalot</a></h3>
+                        <p>Pushalot is a platform for receiving custom push notifications to connected devices running Windows Phone or Windows 8.</p>
+                    </div>
+                    <fieldset class="component-group-list">
+                        <div class="field-pair">
+                            <input type="checkbox" class="enabler" name="use_pushalot" id="use_pushalot" #if $sickbeard.USE_PUSHALOT then "checked=\"checked\"" else ""# />
+                            <label class="clearfix" for="use_pushalot">
+                                <span class="component-title">Enable</span>
+                                <span class="component-desc">Should Sick Beard send Pushalot notifications?</span>
+                            </label>
+                        </div>
+
+                        <div id="content_use_pushalot">
+                            <div class="field-pair">
+                                <input type="checkbox" name="pushalot_notify_onsnatch" id="pushalot_notify_onsnatch" #if $sickbeard.PUSHALOT_NOTIFY_ONSNATCH then "checked=\"checked\"" else ""# />
+                                <label class="clearfix" for="pushalot_notify_onsnatch">
+                                    <span class="component-title">Notify on Snatch</span>
+                                    <span class="component-desc">Send notification when we start a download?</span>
+                                </label>
+                            </div>
+                            <div class="field-pair">
+                                <input type="checkbox" name="pushalot_notify_ondownload" id="pushalot_notify_ondownload" #if $sickbeard.PUSHALOT_NOTIFY_ONDOWNLOAD then "checked=\"checked\"" else ""# />
+                                <label class="clearfix" for="pushalot_notify_ondownload">
+                                    <span class="component-title">Notify on Download</span>
+                                    <span class="component-desc">Send notification when we finish a download?</span>
+                                </label>
+                            </div>
+                            <div class="field-pair">
+                                <label class="nocheck clearfix">
+                                    <span class="component-title">Pushalot Authorization Token</span>
+                                    <input type="text" name="pushalot_authorizationtoken" id="pushalot_authorizationtoken" value="$sickbeard.PUSHALOT_AUTHORIZATIONTOKEN" size="35" />
+                                </label>
+                                <label class="nocheck clearfix">
+                                    <span class="component-title">&nbsp;</span>
+                                    <span class="component-desc">Authorization Token of your Pushalot account</span>
+                                </label>
+                            </div>
+                            <div class="testNotification" id="testPushalot-result">Click below to test.</div>
+                            <input type="button" class="btn" value="Test Pushalot" id="testPushalot" />
+                            <input type="submit" class="btn config_submitter" value="Save Changes" />
+                        </div><!-- /content_use_pushalot //-->
+
+                    </fieldset>
+                </div><!-- /pushalot component-group //-->
+
                 <div class="component-group-save">
                     <input type="submit" class="btn config_submitter" value="Save Changes" />
                 </div><br />
