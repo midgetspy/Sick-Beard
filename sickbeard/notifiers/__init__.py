@@ -32,6 +32,7 @@ import pushover
 import boxcar
 import boxcar2
 import nma
+import pushalot
 
 import tweet
 import trakt
@@ -55,6 +56,7 @@ pushover_notifier = pushover.PushoverNotifier()
 boxcar_notifier = boxcar.BoxcarNotifier()
 boxcar2_notifier = boxcar2.Boxcar2Notifier()
 nma_notifier = nma.NMA_Notifier()
+pushalot_notifier = pushalot.PushalotNotifier()
 # social
 twitter_notifier = tweet.TwitterNotifier()
 trakt_notifier = trakt.TraktNotifier()
@@ -73,6 +75,7 @@ notifiers = [
     boxcar_notifier,
     boxcar2_notifier,
     nma_notifier,
+    pushalot_notifier,
     twitter_notifier,
     trakt_notifier,
 ]
