@@ -444,7 +444,7 @@ class XBMCNotifier:
             self._notify(ep_name, common.notifyStrings[common.NOTIFY_DOWNLOAD])
 
     def test_notify(self, host, username, password):
-        return self._notify("Testing XBMC notifications from Sick Beard", "Test Notification", host, username, password, force=True)
+        return self._notify("This is a test notification from Sick Beard", "Test", host, username, password, force=True)
 
     def update_library(self, ep_obj=None, show_obj=None):
         """Public wrapper for the update library functions to branch the logic for JSON-RPC or legacy HTTP API

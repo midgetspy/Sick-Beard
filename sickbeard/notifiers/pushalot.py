@@ -29,7 +29,7 @@ from sickbeard import logger
 
 class PushalotNotifier:
 
-    def _notify(self, pushalot_authorizationtoken=None, event=None, message=None, force=False):
+    def _notify(self, title, message, pushalot_authorizationtoken=None, force=False):
 
         # suppress notifications if the notifier is disabled but the notify options are checked
         if not sickbeard.USE_PUSHALOT and not force:
@@ -39,14 +39,14 @@ class PushalotNotifier:
         if not pushalot_authorizationtoken:
             pushalot_authorizationtoken = sickbeard.PUSHALOT_AUTHORIZATIONTOKEN
 
-        logger.log("PUSHALOT: Sending notice with details: event=\"%s\", message=\"%s\", authorizationtoken=%s" % (event, message, pushalot_authorizationtoken), logger.DEBUG)
+        logger.log("PUSHALOT: Sending notice with details: title=\"%s\", message=\"%s\", authorizationtoken=%s" % (title, message, pushalot_authorizationtoken), logger.DEBUG)
 
         try:
 
             http_handler = HTTPSConnection("pushalot.com")
 
             data = {'AuthorizationToken': pushalot_authorizationtoken,
-                    'Title': event.encode('utf-8'),
+                    'Title': title.encode('utf-8'),
                     'Body': message.encode('utf-8'),
                     'Source': 'SickBeard'
                     }
@@ -70,7 +70,7 @@ class PushalotNotifier:
             logger.log(u"PUSHALOT: Auth failed: %s" % response.reason, logger.ERROR)
             return False
         elif request_status == 406:
-            logger.log(u"PUSHALOT: Message throttle limit reached.", logger.ERROR)
+            logger.log(u"PUSHALOT: Message throttle limit reached.", logger.WARNING)
             return False
         elif request_status == 410:
             logger.log(u"PUSHALOT: The AuthorizationToken is invalid.", logger.ERROR)
@@ -88,14 +88,14 @@ class PushalotNotifier:
 
     def notify_snatch(self, ep_name):
         if sickbeard.PUSHALOT_NOTIFY_ONSNATCH:
-            self._notify(pushalot_authorizationtoken=None, event=common.notifyStrings[common.NOTIFY_SNATCH], message=ep_name)
+            self._notify(common.notifyStrings[common.NOTIFY_SNATCH], ep_name)
 
     def notify_download(self, ep_name):
         if sickbeard.PUSHALOT_NOTIFY_ONDOWNLOAD:
-            self._notify(pushalot_authorizationtoken=None, event=common.notifyStrings[common.NOTIFY_DOWNLOAD], message=ep_name)
+            self._notify(common.notifyStrings[common.NOTIFY_DOWNLOAD], ep_name)
 
     def test_notify(self, pushalot_authorizationtoken):
-        return self._notify(pushalot_authorizationtoken, event="Test", message="This is a test notification from Sick Beard", force=True)
+        return self._notify("Test", "This is a test notification from Sick Beard", pushalot_authorizationtoken, force=True)
 
     def update_library(self, ep_obj=None):
         pass
