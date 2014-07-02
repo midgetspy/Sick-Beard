@@ -519,7 +519,7 @@ def initialize(consoleLogging=True):
         NZBS_HASH = check_setting_str(CFG, 'NZBs', 'nzbs_hash', '')
 
         CheckSection(CFG, 'Womble')
-        WOMBLE = bool(check_setting_int(CFG, 'Womble', 'womble', 1))
+        WOMBLE = bool(check_setting_int(CFG, 'Womble', 'womble', 0))
 
         CheckSection(CFG, 'omgwtfnzbs')
         OMGWTFNZBS = bool(check_setting_int(CFG, 'omgwtfnzbs', 'omgwtfnzbs', 0))
