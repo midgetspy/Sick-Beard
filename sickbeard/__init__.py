@@ -436,8 +436,8 @@ def initialize(consoleLogging=True):
 
         PROVIDER_ORDER = check_setting_str(CFG, 'General', 'provider_order', '').split()
 
-        NAMING_PATTERN = check_setting_str(CFG, 'General', 'naming_pattern', '')
-        NAMING_ABD_PATTERN = check_setting_str(CFG, 'General', 'naming_abd_pattern', '')
+        NAMING_PATTERN = check_setting_str(CFG, 'General', 'naming_pattern', '%SN - %Sx%0E - %EN')
+        NAMING_ABD_PATTERN = check_setting_str(CFG, 'General', 'naming_abd_pattern', '%SN - %A-D - %EN')
         NAMING_CUSTOM_ABD = check_setting_int(CFG, 'General', 'naming_custom_abd', 0)
         NAMING_MULTI_EP = check_setting_int(CFG, 'General', 'naming_multi_ep', 1)
         NAMING_FORCE_FOLDERS = naming.check_force_season_folders()
