@@ -34,7 +34,7 @@ API_KEY = "OKCXmkvHN1syU2e8xvpefTnyvVWGv5"
 
 class PushoverNotifier:
 
-    def _sendPushover(self, msg, title, userKey=None):
+    def _sendPushover(self, title, msg, userKey=None):
         """
         Sends a pushover notification to the address provided
 
@@ -86,8 +86,8 @@ class PushoverNotifier:
             # For HTTP status code 401's, it is because you are passing in either an invalid token, or the user has not added your service.
             elif e.code == 401:
 
-                #HTTP status 401 if the user doesn't have the service added
-                subscribeNote = self._sendPushover(msg, title, userKey )
+                # HTTP status 401 if the user doesn't have the service added
+                subscribeNote = self._sendPushover(title, msg, userKey)
                 if subscribeNote:
                     logger.log(u"PUSHOVER: Subscription sent", logger.DEBUG)
                     return True
@@ -122,7 +122,7 @@ class PushoverNotifier:
 
         logger.log(u"PUSHOVER: Sending notification for " + message, logger.DEBUG)
 
-        return self._sendPushover(message, title, userKey)
+        return self._sendPushover(title, message, userKey)
 
 ##############################################################################
 # Public functions
@@ -136,8 +136,8 @@ class PushoverNotifier:
         if sickbeard.PUSHOVER_NOTIFY_ONDOWNLOAD:
             self._notify(notifyStrings[NOTIFY_DOWNLOAD], ep_name)
 
-    def test_notify(self, userKey=None):
-        return self._notify("This is a test notification from Sick Beard", "Test", userKey, force=True)
+    def test_notify(self, userKey):
+        return self._notify("Test", "This is a test notification from Sick Beard", userKey, force=True)
 
     def update_library(self, ep_obj=None):
         pass
