@@ -140,7 +140,7 @@ class TraktNotifier:
                                    } ]
                     }
 
-            if data is not None:
+            if data:
                 self._notifyTrakt(method, None, None, None, data)
 
 notifier = TraktNotifier

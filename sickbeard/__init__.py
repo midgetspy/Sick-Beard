@@ -251,7 +251,12 @@ BOXCAR_NOTIFY_ONSNATCH = False
 BOXCAR_NOTIFY_ONDOWNLOAD = False
 BOXCAR_USERNAME = None
 BOXCAR_PASSWORD = None
-BOXCAR_PREFIX = None
+
+USE_BOXCAR2 = False
+BOXCAR2_NOTIFY_ONSNATCH = False
+BOXCAR2_NOTIFY_ONDOWNLOAD = False
+BOXCAR2_ACCESS_TOKEN = None
+BOXCAR2_SOUND = None
 
 USE_PUSHOVER = False
 PUSHOVER_NOTIFY_ONSNATCH = False
@@ -296,6 +301,11 @@ NMA_NOTIFY_ONDOWNLOAD = False
 NMA_API = None
 NMA_PRIORITY = 0
 
+USE_PUSHALOT = False
+PUSHALOT_NOTIFY_ONSNATCH = False
+PUSHALOT_NOTIFY_ONDOWNLOAD = False
+PUSHALOT_AUTHORIZATIONTOKEN = None
+
 COMING_EPS_LAYOUT = None
 COMING_EPS_DISPLAY_PAUSED = None
 COMING_EPS_SORT = None
@@ -336,6 +346,7 @@ def initialize(consoleLogging=True):
                 USE_GROWL, GROWL_HOST, GROWL_PASSWORD, USE_PROWL, PROWL_NOTIFY_ONSNATCH, PROWL_NOTIFY_ONDOWNLOAD, PROWL_API, PROWL_PRIORITY, PROG_DIR, \
                 USE_PYTIVO, PYTIVO_NOTIFY_ONSNATCH, PYTIVO_NOTIFY_ONDOWNLOAD, PYTIVO_UPDATE_LIBRARY, PYTIVO_HOST, PYTIVO_SHARE_NAME, PYTIVO_TIVO_NAME, \
                 USE_NMA, NMA_NOTIFY_ONSNATCH, NMA_NOTIFY_ONDOWNLOAD, NMA_API, NMA_PRIORITY, \
+                USE_PUSHALOT, PUSHALOT_NOTIFY_ONSNATCH, PUSHALOT_NOTIFY_ONDOWNLOAD, PUSHALOT_AUTHORIZATIONTOKEN, \
                 versionCheckScheduler, VERSION_NOTIFY, PROCESS_AUTOMATICALLY, \
                 KEEP_PROCESSED_DIR, TV_DOWNLOAD_DIR, TVDB_BASE_URL, MIN_SEARCH_FREQUENCY, \
                 showQueueScheduler, searchQueueScheduler, ROOT_DIRS, CACHE_DIR, ACTUAL_CACHE_DIR, TVDB_API_PARMS, \
@@ -344,6 +355,7 @@ def initialize(consoleLogging=True):
                 WOMBLE, OMGWTFNZBS, OMGWTFNZBS_USERNAME, OMGWTFNZBS_APIKEY, providerList, newznabProviderList, \
                 EXTRA_SCRIPTS, USE_TWITTER, TWITTER_USERNAME, TWITTER_PASSWORD, TWITTER_PREFIX, \
                 USE_BOXCAR, BOXCAR_USERNAME, BOXCAR_PASSWORD, BOXCAR_NOTIFY_ONDOWNLOAD, BOXCAR_NOTIFY_ONSNATCH, \
+                USE_BOXCAR2, BOXCAR2_ACCESS_TOKEN, BOXCAR2_NOTIFY_ONDOWNLOAD, BOXCAR2_NOTIFY_ONSNATCH, BOXCAR2_SOUND, \
                 USE_PUSHOVER, PUSHOVER_USERKEY, PUSHOVER_NOTIFY_ONDOWNLOAD, PUSHOVER_NOTIFY_ONSNATCH, \
                 USE_LIBNOTIFY, LIBNOTIFY_NOTIFY_ONSNATCH, LIBNOTIFY_NOTIFY_ONDOWNLOAD, USE_NMJ, NMJ_HOST, NMJ_DATABASE, NMJ_MOUNT, USE_NMJv2, NMJv2_HOST, NMJv2_DATABASE, NMJv2_DBLOC, \
                 USE_SYNOINDEX, SYNOINDEX_NOTIFY_ONSNATCH, SYNOINDEX_NOTIFY_ONDOWNLOAD, SYNOINDEX_UPDATE_LIBRARY, \
@@ -430,8 +442,8 @@ def initialize(consoleLogging=True):
 
         PROVIDER_ORDER = check_setting_str(CFG, 'General', 'provider_order', '').split()
 
-        NAMING_PATTERN = check_setting_str(CFG, 'General', 'naming_pattern', '')
-        NAMING_ABD_PATTERN = check_setting_str(CFG, 'General', 'naming_abd_pattern', '')
+        NAMING_PATTERN = check_setting_str(CFG, 'General', 'naming_pattern', '%SN - %Sx%0E - %EN')
+        NAMING_ABD_PATTERN = check_setting_str(CFG, 'General', 'naming_abd_pattern', '%SN - %A-D - %EN')
         NAMING_CUSTOM_ABD = check_setting_int(CFG, 'General', 'naming_custom_abd', 0)
         NAMING_MULTI_EP = check_setting_int(CFG, 'General', 'naming_multi_ep', 1)
         NAMING_FORCE_FOLDERS = naming.check_force_season_folders()
@@ -513,7 +525,7 @@ def initialize(consoleLogging=True):
         NZBS_HASH = check_setting_str(CFG, 'NZBs', 'nzbs_hash', '')
 
         CheckSection(CFG, 'Womble')
-        WOMBLE = bool(check_setting_int(CFG, 'Womble', 'womble', 1))
+        WOMBLE = bool(check_setting_int(CFG, 'Womble', 'womble', 0))
 
         CheckSection(CFG, 'omgwtfnzbs')
         OMGWTFNZBS = bool(check_setting_int(CFG, 'omgwtfnzbs', 'omgwtfnzbs', 0))
@@ -583,6 +595,13 @@ def initialize(consoleLogging=True):
         BOXCAR_NOTIFY_ONDOWNLOAD = bool(check_setting_int(CFG, 'Boxcar', 'boxcar_notify_ondownload', 0))
         BOXCAR_USERNAME = check_setting_str(CFG, 'Boxcar', 'boxcar_username', '')
 
+        CheckSection(CFG, 'Boxcar2')
+        USE_BOXCAR2 = bool(check_setting_int(CFG, 'Boxcar2', 'use_boxcar2', 0))
+        BOXCAR2_NOTIFY_ONSNATCH = bool(check_setting_int(CFG, 'Boxcar2', 'boxcar2_notify_onsnatch', 0))
+        BOXCAR2_NOTIFY_ONDOWNLOAD = bool(check_setting_int(CFG, 'Boxcar2', 'boxcar2_notify_ondownload', 0))
+        BOXCAR2_ACCESS_TOKEN = check_setting_str(CFG, 'Boxcar2', 'boxcar2_access_token', '')
+        BOXCAR2_SOUND = check_setting_str(CFG, 'Boxcar2', 'boxcar2_sound', 'default')
+
         CheckSection(CFG, 'Pushover')
         USE_PUSHOVER = bool(check_setting_int(CFG, 'Pushover', 'use_pushover', 0))
         PUSHOVER_NOTIFY_ONSNATCH = bool(check_setting_int(CFG, 'Pushover', 'pushover_notify_onsnatch', 0))
@@ -633,6 +652,12 @@ def initialize(consoleLogging=True):
         NMA_NOTIFY_ONDOWNLOAD = bool(check_setting_int(CFG, 'NMA', 'nma_notify_ondownload', 0))
         NMA_API = check_setting_str(CFG, 'NMA', 'nma_api', '')
         NMA_PRIORITY = check_setting_str(CFG, 'NMA', 'nma_priority', "0")
+
+        CheckSection(CFG, 'Pushalot')
+        USE_PUSHALOT = bool(check_setting_int(CFG, 'Pushalot', 'use_pushalot', 0))
+        PUSHALOT_NOTIFY_ONSNATCH = bool(check_setting_int(CFG, 'Pushalot', 'pushalot_notify_onsnatch', 0))
+        PUSHALOT_NOTIFY_ONDOWNLOAD = bool(check_setting_int(CFG, 'Pushalot', 'pushalot_notify_ondownload', 0))
+        PUSHALOT_AUTHORIZATIONTOKEN = check_setting_str(CFG, 'Pushalot', 'pushalot_authorizationtoken', '')
 
         if not os.path.isfile(CONFIG_FILE):
             logger.log(u"Unable to find '" + CONFIG_FILE + "', all settings will be default!", logger.DEBUG)
@@ -1112,6 +1137,13 @@ def save_config():
     new_config['Boxcar']['boxcar_notify_ondownload'] = int(BOXCAR_NOTIFY_ONDOWNLOAD)
     new_config['Boxcar']['boxcar_username'] = BOXCAR_USERNAME
 
+    new_config['Boxcar2'] = {}
+    new_config['Boxcar2']['use_boxcar2'] = int(USE_BOXCAR2)
+    new_config['Boxcar2']['boxcar2_notify_onsnatch'] = int(BOXCAR2_NOTIFY_ONSNATCH)
+    new_config['Boxcar2']['boxcar2_notify_ondownload'] = int(BOXCAR2_NOTIFY_ONDOWNLOAD)
+    new_config['Boxcar2']['boxcar2_access_token'] = BOXCAR2_ACCESS_TOKEN
+    new_config['Boxcar2']['boxcar2_sound'] = BOXCAR2_SOUND
+
     new_config['Pushover'] = {}
     new_config['Pushover']['use_pushover'] = int(USE_PUSHOVER)
     new_config['Pushover']['pushover_notify_onsnatch'] = int(PUSHOVER_NOTIFY_ONSNATCH)
@@ -1163,6 +1195,12 @@ def save_config():
     new_config['NMA']['nma_api'] = NMA_API
     new_config['NMA']['nma_priority'] = NMA_PRIORITY
 
+    new_config['Pushalot'] = {}
+    new_config['Pushalot']['use_pushalot'] = int(USE_PUSHALOT)
+    new_config['Pushalot']['pushalot_notify_onsnatch'] = int(PUSHALOT_NOTIFY_ONSNATCH)
+    new_config['Pushalot']['pushalot_notify_ondownload'] = int(PUSHALOT_NOTIFY_ONDOWNLOAD)
+    new_config['Pushalot']['pushalot_authorizationtoken'] = PUSHALOT_AUTHORIZATIONTOKEN
+
     new_config['Newznab'] = {}
     new_config['Newznab']['newznab_data'] = NEWZNAB_DATA
 
@@ -1191,13 +1229,13 @@ def launchBrowser(startPort=None):
 
 
 def getEpList(epIDs, showid=None):
-    if epIDs == None or len(epIDs) == 0:
+    if epIDs is None or len(epIDs) == 0:
         return []
 
     query = "SELECT * FROM tv_episodes WHERE tvdbid in (%s)" % (",".join(['?'] * len(epIDs)),)
     params = epIDs
 
-    if showid != None:
+    if showid is not None:
         query += " AND showid = ?"
         params.append(showid)
 

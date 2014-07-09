@@ -1094,6 +1094,7 @@ class ConfigNotifications:
                           use_prowl=None, prowl_notify_onsnatch=None, prowl_notify_ondownload=None, prowl_api=None, prowl_priority=0,
                           use_twitter=None, twitter_notify_onsnatch=None, twitter_notify_ondownload=None,
                           use_boxcar=None, boxcar_notify_onsnatch=None, boxcar_notify_ondownload=None, boxcar_username=None,
+                          use_boxcar2=None, boxcar2_notify_onsnatch=None, boxcar2_notify_ondownload=None, boxcar2_access_token=None, boxcar2_sound=None,
                           use_pushover=None, pushover_notify_onsnatch=None, pushover_notify_ondownload=None, pushover_userkey=None,
                           use_libnotify=None, libnotify_notify_onsnatch=None, libnotify_notify_ondownload=None,
                           use_nmj=None, nmj_host=None, nmj_database=None, nmj_mount=None,
@@ -1102,7 +1103,8 @@ class ConfigNotifications:
                           use_trakt=None, trakt_username=None, trakt_password=None, trakt_api=None,
                           use_pytivo=None, pytivo_notify_onsnatch=None, pytivo_notify_ondownload=None, pytivo_update_library=None,
                               pytivo_host=None, pytivo_share_name=None, pytivo_tivo_name=None,
-                          use_nma=None, nma_notify_onsnatch=None, nma_notify_ondownload=None, nma_api=None, nma_priority=0):
+                          use_nma=None, nma_notify_onsnatch=None, nma_notify_ondownload=None, nma_api=None, nma_priority=0,
+                          use_pushalot=None, pushalot_notify_onsnatch=None, pushalot_notify_ondownload=None, pushalot_authorizationtoken=None):
 
         results = []
 
@@ -1177,11 +1179,22 @@ class ConfigNotifications:
         sickbeard.BOXCAR_NOTIFY_ONDOWNLOAD = config.checkbox_to_value(boxcar_notify_ondownload)
         sickbeard.BOXCAR_USERNAME = boxcar_username
 
+        sickbeard.USE_BOXCAR2 = config.checkbox_to_value(use_boxcar2)
+        sickbeard.BOXCAR2_NOTIFY_ONSNATCH = config.checkbox_to_value(boxcar2_notify_onsnatch)
+        sickbeard.BOXCAR2_NOTIFY_ONDOWNLOAD = config.checkbox_to_value(boxcar2_notify_ondownload)
+        sickbeard.BOXCAR2_ACCESS_TOKEN = boxcar2_access_token
+        sickbeard.BOXCAR2_SOUND = boxcar2_sound
+
         sickbeard.USE_NMA = config.checkbox_to_value(use_nma)
         sickbeard.NMA_NOTIFY_ONSNATCH = config.checkbox_to_value(nma_notify_onsnatch)
         sickbeard.NMA_NOTIFY_ONDOWNLOAD = config.checkbox_to_value(nma_notify_ondownload)
         sickbeard.NMA_API = nma_api
         sickbeard.NMA_PRIORITY = nma_priority
+
+        sickbeard.USE_PUSHALOT = config.checkbox_to_value(use_pushalot)
+        sickbeard.PUSHALOT_NOTIFY_ONSNATCH = config.checkbox_to_value(pushalot_notify_onsnatch)
+        sickbeard.PUSHALOT_NOTIFY_ONDOWNLOAD = config.checkbox_to_value(pushalot_notify_ondownload)
+        sickbeard.PUSHALOT_AUTHORIZATIONTOKEN = pushalot_authorizationtoken
 
         # Online
         sickbeard.USE_TWITTER = config.checkbox_to_value(use_twitter)
@@ -1887,6 +1900,16 @@ class Home:
             return "Error sending Boxcar notification"
 
     @cherrypy.expose
+    def testBoxcar2(self, accessToken=None, sound=None):
+        cherrypy.response.headers['Cache-Control'] = "max-age=0,no-cache,no-store"
+
+        result = notifiers.boxcar2_notifier.test_notify(accessToken, sound)
+        if result:
+            return "Boxcar2 notification succeeded. Check your Boxcar2 clients to make sure it worked"
+        else:
+            return "Error sending Boxcar2 notification"
+
+    @cherrypy.expose
     def testPushover(self, userKey=None):
         cherrypy.response.headers['Cache-Control'] = "max-age=0,no-cache,no-store"
 
@@ -2029,6 +2052,16 @@ class Home:
             return "Test NMA notice sent successfully"
         else:
             return "Test NMA notice failed"
+
+    @cherrypy.expose
+    def testPushalot(self, authorizationtoken=None):
+        cherrypy.response.headers['Cache-Control'] = "max-age=0,no-cache,no-store"
+
+        result = notifiers.pushalot_notifier.test_notify(authorizationtoken)
+        if result:
+            return "Pushalot notification succeeded. Check your Pushalot clients to make sure it worked"
+        else:
+            return "Error sending Pushalot notification"
 
     @cherrypy.expose
     def testSynoNotify(self):

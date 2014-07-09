@@ -179,7 +179,7 @@ class GrowlNotifier:
     def test_notify(self, host, password):
         result = self._sendRegistration(host, password, "Test")
         if result:
-            return self._notify("Test Growl", "Testing Growl settings from Sick Beard", "Test", host, password, force=True)
+            return self._notify("Test Growl", "This is a test notification from Sick Beard", "Test", host, password, force=True)
         else:
             return result
 
