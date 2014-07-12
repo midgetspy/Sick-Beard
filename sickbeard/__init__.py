@@ -715,13 +715,13 @@ def initialize(consoleLogging=True):
         currentSearchScheduler = scheduler.Scheduler(searchCurrent.CurrentSearcher(),
                                                      cycleTime=datetime.timedelta(minutes=SEARCH_FREQUENCY),
                                                      threadName="SEARCH",
-                                                     run_delay=datetime.timedelta(minutes=5)
+                                                     run_delay=datetime.timedelta(minutes=1)
                                                      )
 
         backlogSearchScheduler = searchBacklog.BacklogSearchScheduler(searchBacklog.BacklogSearcher(),
                                                                       cycleTime=datetime.timedelta(minutes=get_backlog_cycle_time()),
                                                                       threadName="BACKLOG",
-                                                                      run_delay=datetime.timedelta(minutes=17)
+                                                                      run_delay=datetime.timedelta(minutes=7)
                                                                       )
 
         backlogSearchScheduler.action.cycleTime = BACKLOG_SEARCH_FREQUENCY
