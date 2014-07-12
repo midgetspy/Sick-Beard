@@ -67,21 +67,6 @@ $(document).ready(function () {
             });
     });
 
-    $("#testBoxcar").click(function () {
-        var boxcar_username = $.trim($("#boxcar_username").val());
-        if (!boxcar_username) {
-            $("#testBoxcar-result").html("Please fill out the necessary fields above.");
-            return;
-        }
-        $(this).prop("disabled", true);
-        $("#testBoxcar-result").html(loading);
-        $.get(sbRoot + "/home/testBoxcar", {'username': boxcar_username})
-            .done(function (data) {
-                $("#testBoxcar-result").html(data);
-                $("#testBoxcar").prop("disabled", false);
-            });
-    });
-
     $("#testBoxcar2").click(function () {
         var boxcar2_access_token = $.trim($("#boxcar2_access_token").val());
         var boxcar2_sound = $("#boxcar2_sound").val() || "default";

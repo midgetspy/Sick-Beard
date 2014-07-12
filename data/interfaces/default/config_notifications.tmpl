@@ -700,54 +700,6 @@
 
                 <div class="component-group clearfix">
                     <div class="component-group-desc">
-                        <img class="notifier-icon" src="$sbRoot/images/notifiers/boxcar.png" alt="" title="Boxcar" />
-                        <h3><a href="http://boxcar.io/" rel="noreferrer" onclick="window.open('${sickbeard.ANON_REDIRECT}' + this.href, '_blank'); return false;">Boxcar</a></h3>
-                        <p>Universal push notification for iOS. Read your messages where and when you want them! A subscription will be sent if needed.</p>
-                    </div>
-                    <fieldset class="component-group-list">
-                        <div class="field-pair">
-                            <input type="checkbox" class="enabler" name="use_boxcar" id="use_boxcar" #if $sickbeard.USE_BOXCAR then "checked=\"checked\"" else ""# />
-                            <label class="clearfix" for="use_boxcar">
-                                <span class="component-title">Enable</span>
-                                <span class="component-desc">Should Sick Beard send Boxcar notifications?</span>
-                            </label>
-                        </div>
-
-                        <div id="content_use_boxcar">
-                            <div class="field-pair">
-                                <input type="checkbox" name="boxcar_notify_onsnatch" id="boxcar_notify_onsnatch" #if $sickbeard.BOXCAR_NOTIFY_ONSNATCH then "checked=\"checked\"" else ""# />
-                                <label class="clearfix" for="boxcar_notify_onsnatch">
-                                    <span class="component-title">Notify on Snatch</span>
-                                    <span class="component-desc">Send notification when we start a download?</span>
-                                </label>
-                            </div>
-                            <div class="field-pair">
-                                <input type="checkbox" name="boxcar_notify_ondownload" id="boxcar_notify_ondownload" #if $sickbeard.BOXCAR_NOTIFY_ONDOWNLOAD then "checked=\"checked\"" else ""# />
-                                <label class="clearfix" for="boxcar_notify_ondownload">
-                                    <span class="component-title">Notify on Download</span>
-                                    <span class="component-desc">Send notification when we finish a download?</span>
-                                </label>
-                            </div>
-                            <div class="field-pair">
-                                <label class="nocheck clearfix">
-                                    <span class="component-title">Boxcar Username</span>
-                                    <input type="text" name="boxcar_username" id="boxcar_username" value="$sickbeard.BOXCAR_USERNAME" size="35" />
-                                </label>
-                                <label class="nocheck clearfix">
-                                    <span class="component-title">&nbsp;</span>
-                                    <span class="component-desc">Username of your Boxcar account</span>
-                                </label>
-                            </div>
-                            <div class="testNotification" id="testBoxcar-result">Click below to test.</div>
-                            <input type="button" class="btn" value="Test Boxcar" id="testBoxcar" />
-                            <input type="submit" class="btn config_submitter" value="Save Changes" />
-                        </div><!-- /content_use_boxcar //-->
-
-                    </fieldset>
-                </div><!-- /boxcar component-group //-->
-
-                <div class="component-group clearfix">
-                    <div class="component-group-desc">
                         <img class="notifier-icon" src="$sbRoot/images/notifiers/boxcar2.png" alt="" title="Boxcar2" />
                         <h3><a href="http://boxcar.io/" rel="noreferrer" onclick="window.open('${sickbeard.ANON_REDIRECT}' + this.href, '_blank'); return false;">Boxcar2</a></h3>
                         <p>Personalized Push and Alerts Inbox for your iPhone that lets you manage and live news in real-time.</p>
