@@ -2269,7 +2269,7 @@ class CMD_ShowStats(ApiCall):
             episode_qualities_counts_snatch[statusCode] = 0
 
         myDB = db.DBConnection(row_type="dict")
-        sqlResults = myDB.select("SELECT status, season FROM tv_episodes WHERE season > 0 AND episode > 0 AND airdate > 1 AND showid = ?", [self.tvdbid])
+        sqlResults = myDB.select("SELECT status, season, airdate FROM tv_episodes WHERE season > 0 AND episode > 0 AND showid = ?", [self.tvdbid])
         # the main loop that goes through all episodes
         for row in sqlResults:
             status, quality = Quality.splitCompositeStatus(int(row["status"]))
@@ -2283,8 +2283,8 @@ class CMD_ShowStats(ApiCall):
                 episode_qualities_counts_snatch["total"] += 1
                 episode_qualities_counts_snatch[int(row["status"])] += 1
             # we dont count NONE = 0 = N/A
-            elif status == 0:
-                pass
+            elif status == 0 or row["airdate"] == 1:
+                episode_status_counts_total["total"] -= 1
             else:
                 episode_status_counts_total[status] += 1
 
@@ -2424,11 +2424,11 @@ class CMD_ShowsStats(ApiCall):
 
         sql_statement = 'SELECT '
 
-        sql_statement += '(SELECT COUNT(*) FROM tv_episodes WHERE season > 0 AND episode > 0 AND airdate > 1 AND status IN ' + status_quality + ') AS ep_snatched, '
-        sql_statement += '(SELECT COUNT(*) FROM tv_episodes WHERE season > 0 AND episode > 0 AND airdate > 1 AND status IN ' + status_download + ') AS ep_downloaded, '
+        sql_statement += '(SELECT COUNT(*) FROM tv_episodes WHERE season > 0 AND episode > 0 AND status IN ' + status_quality + ') AS ep_snatched, '
+        sql_statement += '(SELECT COUNT(*) FROM tv_episodes WHERE season > 0 AND episode > 0 AND status IN ' + status_download + ') AS ep_downloaded, '
 
-        sql_statement += '(SELECT COUNT(*) FROM tv_episodes WHERE season > 0 AND episode > 0 AND airdate > 1 '
-        sql_statement += ' AND ((airdate <= ' + today + ' AND (status = ' + str(SKIPPED) + ' OR status = ' + str(WANTED) + ')) '
+        sql_statement += '(SELECT COUNT(*) FROM tv_episodes WHERE season > 0 AND episode > 0 '
+        sql_statement += ' AND ((airdate > 1 AND airdate <= ' + today + ' AND (status = ' + str(SKIPPED) + ' OR status = ' + str(WANTED) + ')) '
         sql_statement += ' OR (status IN ' + status_quality + ') OR (status IN ' + status_download + '))) AS ep_total '
 
         sql_statement += ' FROM tv_episodes tv_eps LIMIT 1'
