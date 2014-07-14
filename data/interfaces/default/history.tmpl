@@ -69,9 +69,9 @@
       #if $len($hItem["provider"]) > 0
         #set $provider = $providers.getProviderClass($generic.GenericProvider.makeID($hItem["provider"]))
         #if $provider != None: 
-        <img src="$sbRoot/images/providers/<%=provider.imageName()%>" width="16" height="16" alt="$provider.name" title="$provider.name"/>
+        <img src="$sbRoot/images/providers/<%=provider.imageName()%>" width="16" height="16" alt="$provider.name" title="$provider.name"/> $provider.name
         #else:
-        <img src="$sbRoot/images/providers/missing.png" width="16" height="16" alt="missing provider" title="missing provider"/>
+        <img src="$sbRoot/images/providers/missing.png" width="16" height="16" alt="missing provider" title="missing provider"/> $hItem["provider"]
         #end if
       #end if
     #end if
