@@ -41,6 +41,15 @@ class GenericProvider:
     NZB = "nzb"
     TORRENT = "torrent"
 
+    defunct = { "Bin-Req": "bin_req",
+                "TVBinz": "tvbinz",
+                "NZBs.org Old": "nzbs_org_old",
+                "NZBMatrix": "nzbmatrix",
+                "NZBs'R'US": "nzbs_r_us",
+                "Newzbin": "newzbin",
+                "nzbX": "nzbx",
+                }
+
     def __init__(self, name):
 
         # these need to be set in the subclass
@@ -58,6 +67,11 @@ class GenericProvider:
     @staticmethod
     def makeID(name):
         return re.sub("[^\w\d_]", "_", name.strip().lower())
+
+    @staticmethod
+    def checkID(name):
+        if name in GenericProvider.defunct.keys():
+            return GenericProvider.defunct[name] + '.png'
 
     def imageName(self):
         return self.getID() + '.png'
