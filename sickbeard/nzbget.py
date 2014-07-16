@@ -129,8 +129,21 @@ def sendNZB(nzb):
                         nzbcontent64 = standard_b64encode(data)
                         nzbget_result = nzbGetRPC.append(nzb_filename, sickbeard.NZBGET_CATEGORY, add_to_top, nzbcontent64)
 
-        # v12+ pass dupekey + dupescore
-        elif nzbget_version >= 12:
+        # v13+ has a new combined append method that accepts both (url and content)
+        elif nzbget_version >= 13:
+            if nzbcontent64:
+                nzbget_result = nzbGetRPC.append(nzb_filename, nzbcontent64, sickbeard.NZBGET_CATEGORY, nzbgetprio, False, False, dupekey, dupescore, "score")
+            else:
+                nzbget_result = nzbGetRPC.append(nzb_filename, nzb.url, sickbeard.NZBGET_CATEGORY, nzbgetprio, False, False, dupekey, dupescore, "score")
+
+            # the return value has changed from boolean to integer (Positive number representing NZBID of the queue item. 0 and negative numbers represent error codes.)
+            if nzbget_result > 0:
+                nzbget_result = True
+            else:
+                nzbget_result = False
+
+        # v12 pass dupekey + dupescore
+        elif nzbget_version == 12:
             if nzbcontent64:
                 nzbget_result = nzbGetRPC.append(nzb_filename, sickbeard.NZBGET_CATEGORY, nzbgetprio, False, nzbcontent64, False, dupekey, dupescore, "score")
             else:

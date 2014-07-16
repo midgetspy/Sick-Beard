@@ -19,11 +19,11 @@
 
 #set $sql_statement = 'SELECT showid, '
 
-#set $sql_statement += '(SELECT COUNT(*) FROM tv_episodes WHERE showid=tv_eps.showid AND season > 0 AND episode > 0 AND airdate > 1 AND status IN ' + $status_quality + ') AS ep_snatched, '
-#set $sql_statement += '(SELECT COUNT(*) FROM tv_episodes WHERE showid=tv_eps.showid AND season > 0 AND episode > 0 AND airdate > 1 AND status IN ' + $status_download + ') AS ep_downloaded, '
+#set $sql_statement += '(SELECT COUNT(*) FROM tv_episodes WHERE showid=tv_eps.showid AND season > 0 AND episode > 0 AND status IN ' + $status_quality + ') AS ep_snatched, '
+#set $sql_statement += '(SELECT COUNT(*) FROM tv_episodes WHERE showid=tv_eps.showid AND season > 0 AND episode > 0 AND status IN ' + $status_download + ') AS ep_downloaded, '
 
-#set $sql_statement += '(SELECT COUNT(*) FROM tv_episodes WHERE showid=tv_eps.showid AND season > 0 AND episode > 0 AND airdate > 1 '
-#set $sql_statement += ' AND ((airdate <= ' + $today + ' AND (status = ' + str($SKIPPED) + ' OR status = ' + str($WANTED) + ')) '
+#set $sql_statement += '(SELECT COUNT(*) FROM tv_episodes WHERE showid=tv_eps.showid AND season > 0 AND episode > 0 '
+#set $sql_statement += ' AND ((airdate > 1 AND airdate <= ' + $today + ' AND (status = ' + str($SKIPPED) + ' OR status = ' + str($WANTED) + ')) '
 #set $sql_statement += ' OR (status IN ' + status_quality + ') OR (status IN ' + status_download + '))) AS ep_total, '
 
 #set $sql_statement += ' (SELECT airdate FROM tv_episodes WHERE showid=tv_eps.showid AND airdate >= ' + $today + ' AND status = ' + str($UNAIRED) + ' ORDER BY airdate ASC LIMIT 1) AS ep_airs_next '
@@ -189,10 +189,9 @@ $myShowList.sort(lambda x, y: cmp(x.name, y.name))
     #end if
 
     #if $cur_total != 0:
-        #set $download_stat = str($cur_downloaded)
+        #set $download_stat = str($cur_downloaded + $cur_snatched)
         #set $download_stat_tip = "Downloaded: " + str($cur_downloaded)
         #if $cur_snatched > 0:
-            #set $download_stat = download_stat + "+" + str($cur_snatched)
             #set $download_stat_tip = download_stat_tip + "&#013;" + "Snatched: " + str($cur_snatched)
         #end if
         #set $download_stat = download_stat + " / " + str($cur_total)

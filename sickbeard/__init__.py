@@ -246,12 +246,6 @@ TWITTER_USERNAME = None
 TWITTER_PASSWORD = None
 TWITTER_PREFIX = None
 
-USE_BOXCAR = False
-BOXCAR_NOTIFY_ONSNATCH = False
-BOXCAR_NOTIFY_ONDOWNLOAD = False
-BOXCAR_USERNAME = None
-BOXCAR_PASSWORD = None
-
 USE_BOXCAR2 = False
 BOXCAR2_NOTIFY_ONSNATCH = False
 BOXCAR2_NOTIFY_ONDOWNLOAD = False
@@ -354,7 +348,6 @@ def initialize(consoleLogging=True):
                 RENAME_EPISODES, properFinderScheduler, PROVIDER_ORDER, autoPostProcesserScheduler, \
                 WOMBLE, OMGWTFNZBS, OMGWTFNZBS_USERNAME, OMGWTFNZBS_APIKEY, providerList, newznabProviderList, \
                 EXTRA_SCRIPTS, USE_TWITTER, TWITTER_USERNAME, TWITTER_PASSWORD, TWITTER_PREFIX, \
-                USE_BOXCAR, BOXCAR_USERNAME, BOXCAR_PASSWORD, BOXCAR_NOTIFY_ONDOWNLOAD, BOXCAR_NOTIFY_ONSNATCH, \
                 USE_BOXCAR2, BOXCAR2_ACCESS_TOKEN, BOXCAR2_NOTIFY_ONDOWNLOAD, BOXCAR2_NOTIFY_ONSNATCH, BOXCAR2_SOUND, \
                 USE_PUSHOVER, PUSHOVER_USERKEY, PUSHOVER_NOTIFY_ONDOWNLOAD, PUSHOVER_NOTIFY_ONSNATCH, \
                 USE_LIBNOTIFY, LIBNOTIFY_NOTIFY_ONSNATCH, LIBNOTIFY_NOTIFY_ONDOWNLOAD, USE_NMJ, NMJ_HOST, NMJ_DATABASE, NMJ_MOUNT, USE_NMJv2, NMJv2_HOST, NMJv2_DATABASE, NMJv2_DBLOC, \
@@ -589,12 +582,6 @@ def initialize(consoleLogging=True):
         TWITTER_PASSWORD = check_setting_str(CFG, 'Twitter', 'twitter_password', '')
         TWITTER_PREFIX = check_setting_str(CFG, 'Twitter', 'twitter_prefix', 'Sick Beard')
 
-        CheckSection(CFG, 'Boxcar')
-        USE_BOXCAR = bool(check_setting_int(CFG, 'Boxcar', 'use_boxcar', 0))
-        BOXCAR_NOTIFY_ONSNATCH = bool(check_setting_int(CFG, 'Boxcar', 'boxcar_notify_onsnatch', 0))
-        BOXCAR_NOTIFY_ONDOWNLOAD = bool(check_setting_int(CFG, 'Boxcar', 'boxcar_notify_ondownload', 0))
-        BOXCAR_USERNAME = check_setting_str(CFG, 'Boxcar', 'boxcar_username', '')
-
         CheckSection(CFG, 'Boxcar2')
         USE_BOXCAR2 = bool(check_setting_int(CFG, 'Boxcar2', 'use_boxcar2', 0))
         BOXCAR2_NOTIFY_ONSNATCH = bool(check_setting_int(CFG, 'Boxcar2', 'boxcar2_notify_onsnatch', 0))
@@ -728,13 +715,13 @@ def initialize(consoleLogging=True):
         currentSearchScheduler = scheduler.Scheduler(searchCurrent.CurrentSearcher(),
                                                      cycleTime=datetime.timedelta(minutes=SEARCH_FREQUENCY),
                                                      threadName="SEARCH",
-                                                     run_delay=datetime.timedelta(minutes=5)
+                                                     run_delay=datetime.timedelta(minutes=1)
                                                      )
 
         backlogSearchScheduler = searchBacklog.BacklogSearchScheduler(searchBacklog.BacklogSearcher(),
                                                                       cycleTime=datetime.timedelta(minutes=get_backlog_cycle_time()),
                                                                       threadName="BACKLOG",
-                                                                      run_delay=datetime.timedelta(minutes=17)
+                                                                      run_delay=datetime.timedelta(minutes=7)
                                                                       )
 
         backlogSearchScheduler.action.cycleTime = BACKLOG_SEARCH_FREQUENCY
@@ -1130,12 +1117,6 @@ def save_config():
     new_config['Twitter']['twitter_username'] = TWITTER_USERNAME
     new_config['Twitter']['twitter_password'] = TWITTER_PASSWORD
     new_config['Twitter']['twitter_prefix'] = TWITTER_PREFIX
-
-    new_config['Boxcar'] = {}
-    new_config['Boxcar']['use_boxcar'] = int(USE_BOXCAR)
-    new_config['Boxcar']['boxcar_notify_onsnatch'] = int(BOXCAR_NOTIFY_ONSNATCH)
-    new_config['Boxcar']['boxcar_notify_ondownload'] = int(BOXCAR_NOTIFY_ONDOWNLOAD)
-    new_config['Boxcar']['boxcar_username'] = BOXCAR_USERNAME
 
     new_config['Boxcar2'] = {}
     new_config['Boxcar2']['use_boxcar2'] = int(USE_BOXCAR2)
