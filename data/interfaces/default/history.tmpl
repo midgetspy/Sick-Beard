@@ -67,12 +67,18 @@
         $hItem["provider"]
     #else
       #if $len($hItem["provider"]) > 0
-        #set $provider = $providers.getProviderClass($generic.GenericProvider.makeID($hItem["provider"]))
-        #if $provider != None: 
-        <img src="$sbRoot/images/providers/<%=provider.imageName()%>" width="16" height="16" alt="$provider.name" title="$provider.name"/>
+        #set provider_id = $generic.GenericProvider.makeID($hItem["provider"])
+        #set $provider = $providers.getProviderClass($provider_id)
+        #if $provider is not None:
+            #set image_name = provider.imageName()
         #else:
-        <img src="$sbRoot/images/providers/missing.png" width="16" height="16" alt="missing provider" title="missing provider"/>
+            #if $hItem["provider"] in ["Bin-Req", "TVBinz", "NZBs.org Old", "NZBMatrix", "NZBs'R'US", "Newzbin", "nzbX"]
+                #set image_name = $provider_id + '.png'
+            #else:
+                #set image_name = 'missing.png'
+            #end if
         #end if
+        <img src="$sbRoot/images/providers/$image_name" width="16" height="16" alt="$hItem["provider"]" title="$hItem["provider"]"/> $hItem["provider"]
       #end if
     #end if
     </td>
