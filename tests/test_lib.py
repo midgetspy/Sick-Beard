@@ -20,7 +20,7 @@
 from __future__ import with_statement
 
 import unittest
-
+import yaml
 import sqlite3
 
 import sys
@@ -123,12 +123,38 @@ class SickbeardTestDBCase(unittest.TestCase):
         tearDown_test_episode_file()
         tearDown_test_show_dir()
 
+    def loadFixtures(self):
+        ep_data = yaml.load(
+            open(
+                os.path.join(TESTDIR, 'fixtures/tv_episodes.yaml')).read())
+        show_data = yaml.load(
+            open(
+                os.path.join(TESTDIR, 'fixtures/tv_show_fixtures.yaml')).read())
+        history_data = yaml.load(
+            open(
+                os.path.join(TESTDIR, 'fixtures/history.yaml')).read())
+
+        myDB = db.DBConnection()
+        for show in show_data:
+          myDB.insert('tv_shows', show_data[show])
+
+        for ep in ep_data:
+          myDB.insert('tv_episodes', ep_data[ep])
+
+        for history in history_data:
+          myDB.insert('history', history_data[history])
+
 
 class TestDBConnection(db.DBConnection, object):
 
-    def __init__(self, dbFileName=TESTDBNAME):
+    def __init__(self, dbFileName=TESTDBNAME, row_type=None):
         dbFileName = os.path.join(TESTDIR, dbFileName)
-        super(TestDBConnection, self).__init__(dbFileName)
+        super(TestDBConnection, self).__init__(dbFileName, row_type=row_type)
+
+    def insert(self, table_name, valueDict):
+      query = ("INSERT INTO "+table_name+" (" + ", ".join(valueDict.keys()) + ")" +
+               " VALUES (" + ", ".join(["?"] * len(valueDict.keys())) + ")")
+      self.action(query, valueDict.values())
 
 
 class TestCacheDBConnection(TestDBConnection, object):
