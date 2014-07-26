@@ -883,12 +883,26 @@
                             </div>
                             <div class="field-pair">
                                 <label class="nocheck clearfix">
-                                    <span class="component-title">Pushalot Authorization Token</span>
+                                    <span class="component-title">Pushalot Auth Token</span>
                                     <input type="text" name="pushalot_authorizationtoken" id="pushalot_authorizationtoken" value="$sickbeard.PUSHALOT_AUTHORIZATIONTOKEN" size="35" />
                                 </label>
                                 <label class="nocheck clearfix">
                                     <span class="component-title">&nbsp;</span>
                                     <span class="component-desc">Authorization Token of your Pushalot account</span>
+                                </label>
+                            </div>
+                            <div class="field-pair">
+                                <input type="checkbox" name="pushalot_silent" id="pushalot_silent" #if $sickbeard.PUSHALOT_SILENT then "checked=\"checked\"" else ""# />
+                                <label class="clearfix" for="pushalot_silent">
+                                    <span class="component-title">Silent</span>
+                                    <span class="component-desc">Don't send Toast notifications and Only update Live Tile?</span>
+                                </label>
+                            </div>
+                            <div class="field-pair">
+                                <input type="checkbox" name="pushalot_important" id="pushalot_important" #if $sickbeard.PUSHALOT_IMPORTANT then "checked=\"checked\"" else ""# />
+                                <label class="clearfix" for="pushalot_important">
+                                    <span class="component-title">Important</span>
+                                    <span class="component-desc">Mark visually as important within the client?</span>
                                 </label>
                             </div>
                             <div class="testNotification" id="testPushalot-result">Click below to test.</div>

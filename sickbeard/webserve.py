@@ -1103,7 +1103,9 @@ class ConfigNotifications:
                           use_pytivo=None, pytivo_notify_onsnatch=None, pytivo_notify_ondownload=None, pytivo_update_library=None,
                               pytivo_host=None, pytivo_share_name=None, pytivo_tivo_name=None,
                           use_nma=None, nma_notify_onsnatch=None, nma_notify_ondownload=None, nma_api=None, nma_priority=0,
-                          use_pushalot=None, pushalot_notify_onsnatch=None, pushalot_notify_ondownload=None, pushalot_authorizationtoken=None):
+                          use_pushalot=None, pushalot_notify_onsnatch=None, pushalot_notify_ondownload=None, pushalot_authorizationtoken=None,
+                              pushalot_silent=None, pushalot_important=None
+                          ):
 
         results = []
 
@@ -1189,6 +1191,8 @@ class ConfigNotifications:
         sickbeard.PUSHALOT_NOTIFY_ONSNATCH = config.checkbox_to_value(pushalot_notify_onsnatch)
         sickbeard.PUSHALOT_NOTIFY_ONDOWNLOAD = config.checkbox_to_value(pushalot_notify_ondownload)
         sickbeard.PUSHALOT_AUTHORIZATIONTOKEN = pushalot_authorizationtoken
+        sickbeard.PUSHALOT_SILENT = config.checkbox_to_value(pushalot_silent)
+        sickbeard.PUSHALOT_IMPORTANT = config.checkbox_to_value(pushalot_important)
 
         # Online
         sickbeard.USE_TWITTER = config.checkbox_to_value(use_twitter)
@@ -2038,10 +2042,10 @@ class Home:
             return "Test NMA notice failed"
 
     @cherrypy.expose
-    def testPushalot(self, authorizationtoken=None):
+    def testPushalot(self, authtoken=None, silent=None, important=None):
         cherrypy.response.headers['Cache-Control'] = "max-age=0,no-cache,no-store"
 
-        result = notifiers.pushalot_notifier.test_notify(authorizationtoken)
+        result = notifiers.pushalot_notifier.test_notify(authtoken, silent, important)
         if result:
             return "Pushalot notification succeeded. Check your Pushalot clients to make sure it worked"
         else:
