@@ -1027,15 +1027,9 @@ h1 a:hover, h2 a:hover, span a:hover, div.h2footer a:hover, .notify-text a:hover
 }
 /* used on displayShow and comingEp list */
 .plotInfo {
-  position: relative;
-  float: right;
-  margin-left: 8px;
   cursor: help;
 }
 .plotInfoNone {
-  position: relative;
-  float: right;
-  margin-left: 8px;
   opacity: 0.25;
 }
 div select option {
