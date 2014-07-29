@@ -83,6 +83,21 @@ $(document).ready(function () {
             });
     });
 
+    $("#testPushbullet").click(function () {
+        var pushbullet_access_token = $.trim($("#pushbullet_access_token").val());
+        if (!pushbullet_access_token) {
+            $("#testPushbullet-result").html("Please fill out the necessary fields above.");
+            return;
+        }
+        $(this).prop("disabled", true);
+        $("#testPushbullet-result").html(loading);
+        $.get(sbRoot + "/home/testPushbullet", {'accessToken': pushbullet_access_token})
+            .done(function (data) {
+                $("#testPushbullet-result").html(data);
+                $("#testPushbullet").prop("disabled", false);
+            });
+    });
+
     $("#testPushover").click(function () {
         var pushover_userkey = $.trim($("#pushover_userkey").val());
         if (!pushover_userkey) {

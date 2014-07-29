@@ -252,6 +252,11 @@ BOXCAR2_NOTIFY_ONDOWNLOAD = False
 BOXCAR2_ACCESS_TOKEN = None
 BOXCAR2_SOUND = None
 
+USE_PUSHBULLET = False
+PUSHBULLET_NOTIFY_ONSNATCH = False
+PUSHBULLET_NOTIFY_ONDOWNLOAD = False
+PUSHBULLET_ACCESS_TOKEN = None
+
 USE_PUSHOVER = False
 PUSHOVER_NOTIFY_ONSNATCH = False
 PUSHOVER_NOTIFY_ONDOWNLOAD = False
@@ -349,6 +354,7 @@ def initialize(consoleLogging=True):
                 WOMBLE, OMGWTFNZBS, OMGWTFNZBS_USERNAME, OMGWTFNZBS_APIKEY, providerList, newznabProviderList, \
                 EXTRA_SCRIPTS, USE_TWITTER, TWITTER_USERNAME, TWITTER_PASSWORD, TWITTER_PREFIX, \
                 USE_BOXCAR2, BOXCAR2_ACCESS_TOKEN, BOXCAR2_NOTIFY_ONDOWNLOAD, BOXCAR2_NOTIFY_ONSNATCH, BOXCAR2_SOUND, \
+                USE_PUSHBULLET, PUSHBULLET_ACCESS_TOKEN, PUSHBULLET_NOTIFY_ONDOWNLOAD, PUSHBULLET_NOTIFY_ONSNATCH, \
                 USE_PUSHOVER, PUSHOVER_USERKEY, PUSHOVER_NOTIFY_ONDOWNLOAD, PUSHOVER_NOTIFY_ONSNATCH, \
                 USE_LIBNOTIFY, LIBNOTIFY_NOTIFY_ONSNATCH, LIBNOTIFY_NOTIFY_ONDOWNLOAD, USE_NMJ, NMJ_HOST, NMJ_DATABASE, NMJ_MOUNT, USE_NMJv2, NMJv2_HOST, NMJv2_DATABASE, NMJv2_DBLOC, \
                 USE_SYNOINDEX, SYNOINDEX_NOTIFY_ONSNATCH, SYNOINDEX_NOTIFY_ONDOWNLOAD, SYNOINDEX_UPDATE_LIBRARY, \
@@ -588,6 +594,12 @@ def initialize(consoleLogging=True):
         BOXCAR2_NOTIFY_ONDOWNLOAD = bool(check_setting_int(CFG, 'Boxcar2', 'boxcar2_notify_ondownload', 0))
         BOXCAR2_ACCESS_TOKEN = check_setting_str(CFG, 'Boxcar2', 'boxcar2_access_token', '')
         BOXCAR2_SOUND = check_setting_str(CFG, 'Boxcar2', 'boxcar2_sound', 'default')
+
+        CheckSection(CFG, 'Pushbullet')
+        USE_PUSHBULLET = bool(check_setting_int(CFG, 'Pushbullet', 'use_pushbullet', 0))
+        PUSHBULLET_NOTIFY_ONSNATCH = bool(check_setting_int(CFG, 'Pushbullet', 'pushbullet_notify_onsnatch', 0))
+        PUSHBULLET_NOTIFY_ONDOWNLOAD = bool(check_setting_int(CFG, 'Pushbullet', 'pushbullet_notify_ondownload', 0))
+        PUSHBULLET_ACCESS_TOKEN = check_setting_str(CFG, 'Pushbullet', 'pushbullet_access_token', '')
 
         CheckSection(CFG, 'Pushover')
         USE_PUSHOVER = bool(check_setting_int(CFG, 'Pushover', 'use_pushover', 0))
@@ -1124,6 +1136,12 @@ def save_config():
     new_config['Boxcar2']['boxcar2_notify_ondownload'] = int(BOXCAR2_NOTIFY_ONDOWNLOAD)
     new_config['Boxcar2']['boxcar2_access_token'] = BOXCAR2_ACCESS_TOKEN
     new_config['Boxcar2']['boxcar2_sound'] = BOXCAR2_SOUND
+
+    new_config['Pushbullet'] = {}
+    new_config['Pushbullet']['use_pushbullet'] = int(USE_PUSHBULLET)
+    new_config['Pushbullet']['pushbullet_notify_onsnatch'] = int(PUSHBULLET_NOTIFY_ONSNATCH)
+    new_config['Pushbullet']['pushbullet_notify_ondownload'] = int(PUSHBULLET_NOTIFY_ONDOWNLOAD)
+    new_config['Pushbullet']['pushbullet_access_token'] = PUSHBULLET_ACCESS_TOKEN
 
     new_config['Pushover'] = {}
     new_config['Pushover']['use_pushover'] = int(USE_PUSHOVER)
