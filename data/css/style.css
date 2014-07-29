@@ -1351,10 +1351,11 @@ td.col-metadata {
 th.col-ep,
 td.col-ep {
   width: 50px;
+  white-space: nowrap;
 }
 th.col-name,
 td.col-name {
-  width: auto;
+  min-width: 100px;
   text-align: left;
 }
 th.col-plotinfo,
@@ -1365,18 +1366,25 @@ td.col-plotinfo {
 th.col-airdate,
 td.col-airdate {
   width: 86px;
+  white-space: nowrap;
 }
 th.col-filename,
 td.col-filename {
-  width: auto;
   text-align: left;
 }
 th.col-status,
 td.col-status {
-  width: auto;
   text-align: left;
 }
 th.col-search,
 td.col-search {
   width: 46px;
+}
+/* need to remove when we upgrade bootstrap */
+.btn-block {
+  box-sizing: border-box;
+  display: block;
+  padding-left: 0;
+  padding-right: 0;
+  width: 100%;
 }

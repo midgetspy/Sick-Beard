@@ -11,9 +11,6 @@
 #set global $topmenu="manageShows"#
 #include $os.path.join($sickbeard.PROG_DIR, "data/interfaces/default/inc_top.tmpl")
 
-<script type="text/javascript" src="$sbRoot/js/lib/jquery.bookmarkscroll.js?$sbPID"></script>
-
-
 <div class="h2footer align-right">
 #if (len($seasonResults) > 14):
     <select id="seasonJump">
@@ -44,10 +41,6 @@
 #end if
 
 <input type="hidden" id="sbRoot" value="$sbRoot" />
-
-<script type="text/javascript" src="$sbRoot/js/displayShow.js?$sbPID"></script>
-<script type="text/javascript" src="$sbRoot/js/plotTooltip.js?$sbPID"></script>
-<script type="text/javascript" src="$sbRoot/js/ajaxEpSearch.js?$sbPID"></script>
 
 <div class="align-left"><b>Change Show:</b>
 <div class="navShow"><img id="prevShow" width="16" height="18" src="$sbRoot/images/prev.gif" alt="&lt;&lt;" title="Prev Show" /></div>
@@ -126,12 +119,19 @@ Change selected episodes to
 <table class="sickbeardTable2" style="text-align: center;">
 
 #set $curSeason = -1
+#set $seasonCount = 0
 #for $epResult in $sqlResults:
 
   #if int($epResult["season"]) != $curSeason:
     #set $curSeason = int($epResult["season"])
 
     #if $curSeason != -1:
+
+      #set $seasonCount = $seasonCount + 1
+      #if $seasonCount == 2:
+      <tbody id="segment" class="hide">
+      #end if
+
       <!-- start season $epResult["season"] -->
       <tr>
         <th class="row-seasonheader" colspan="10" style="width: auto;"><a name="season-$epResult["season"]"></a>#if int($epResult["season"]) == 0 then "Specials" else "Season " + str($epResult["season"])#</th>
@@ -184,6 +184,18 @@ Change selected episodes to
   </tr>
 
 #end for
+#if $seasonCount > 1:
+    </tbody>
+#end if
 </table><br />
 
+#if $seasonCount > 1:
+    <button class="btn btn-large btn-block btn-inverse" id="showAllSeasons"><i class="icon-chevron-down icon-white"></i> Show All Seasons <i class="icon-chevron-down icon-white"></i></button>
+#end if
+
 #include $os.path.join($sickbeard.PROG_DIR, "data/interfaces/default/inc_bottom.tmpl")
+
+<script type="text/javascript" src="$sbRoot/js/lib/jquery.bookmarkscroll.js?$sbPID"></script>
+<script type="text/javascript" src="$sbRoot/js/displayShow.js?$sbPID"></script>
+<script type="text/javascript" src="$sbRoot/js/plotTooltip.js?$sbPID"></script>
+<script type="text/javascript" src="$sbRoot/js/ajaxEpSearch.js?$sbPID"></script>
