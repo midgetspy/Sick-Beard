@@ -37,7 +37,6 @@ from sickbeard import helpers, exceptions, logger
 from sickbeard.exceptions import ex
 from sickbeard import tvrage
 from sickbeard import image_cache
-from sickbeard import postProcessor
 
 from sickbeard import encodingKludge as ek
 
@@ -1169,20 +1168,21 @@ class TVEpisode(object):
         #early conversion to int so that episode doesn't get marked dirty
         self.tvdbid = int(myEp["id"])
 
-        #don't update show status if show dir is missing, unless missing show dirs are created during post-processing
-        if not ek.ek(os.path.isdir, self.show._location) and not sickbeard.CREATE_MISSING_SHOW_DIRS:
+        # don't update show status if show dir is missing, unless it's missing on purpose
+        if not ek.ek(os.path.isdir, self.show._location) and not sickbeard.CREATE_MISSING_SHOW_DIRS and not sickbeard.ADD_SHOWS_WO_DIR:
             logger.log(u"The show dir is missing, not bothering to change the episode statuses since it'd probably be invalid")
             return
 
         logger.log(str(self.show.tvdbid) + u": Setting status for " + str(season) + "x" + str(episode) + " based on status " + str(self.status) + " and existence of " + self.location, logger.DEBUG)
 
+        # if we don't have the file
         if not ek.ek(os.path.isfile, self.location):
 
-            # if we don't have the file
-            if self.airdate >= datetime.date.today() and self.status not in Quality.SNATCHED + Quality.SNATCHED_PROPER:
-                # and it hasn't aired yet set the status to UNAIRED
-                logger.log(u"Episode airs in the future, changing status from " + str(self.status) + " to " + str(UNAIRED), logger.DEBUG)
+            # if it hasn't aired yet set the status to UNAIRED
+            if self.airdate >= datetime.date.today() and self.status in [SKIPPED, UNAIRED, UNKNOWN, WANTED]:
+                logger.log(u"Episode airs in the future, marking it " + str(UNAIRED), logger.DEBUG)
                 self.status = UNAIRED
+
             # if there's no airdate then set it to skipped (and respect ignored)
             elif self.airdate == datetime.date.fromordinal(1):
                 if self.status == IGNORED:
@@ -1190,10 +1190,15 @@ class TVEpisode(object):
                 else:
                     logger.log(u"Episode has no air date, automatically marking it skipped", logger.DEBUG)
                     self.status = SKIPPED
+
             # if we don't have the file and the airdate is in the past
             else:
                 if self.status == UNAIRED:
-                    self.status = WANTED
+                    if self.season > 0:
+                        self.status = WANTED
+                    else:
+                        # if it's a special then just skip it
+                        self.status = SKIPPED
 
                 # if we somehow are still UNKNOWN then just skip it
                 elif self.status == UNKNOWN:
@@ -1719,7 +1724,7 @@ class TVEpisode(object):
             logger.log(str(self.tvdbid) + u": File " + self.location + " is already named correctly, skipping", logger.DEBUG)
             return
 
-        related_files = postProcessor.PostProcessor(self.location).list_associated_files(self.location, base_name_only=True)
+        related_files = helpers.list_associated_files(self.location, base_name_only=True)
         logger.log(u"Files associated to " + self.location + ": " + str(related_files), logger.DEBUG)
 
         # move the ep file

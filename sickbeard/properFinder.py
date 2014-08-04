@@ -38,23 +38,12 @@ from name_parser.parser import NameParser, InvalidNameException
 
 class ProperFinder():
 
-    def __init__(self):
-        self.updateInterval = datetime.timedelta(hours=1)
-
     def run(self):
 
         if not sickbeard.DOWNLOAD_PROPERS:
             return
 
-        # look for propers every night at 1 AM
-        updateTime = datetime.time(hour=1)
-        hourDiff = datetime.datetime.today().time().hour - updateTime.hour
-
-        # if it's less than an interval after the update time then do an update
-        if hourDiff >= 0 and hourDiff < self.updateInterval.seconds / 3600:
-            logger.log(u"Beginning the search for new propers")
-        else:
-            return
+        logger.log(u"Beginning the search for new propers")
 
         propers = self._getProperList()
 
@@ -222,10 +211,12 @@ class ProperFinder():
             else:
 
                 # make sure that none of the existing history downloads are the same proper we're trying to download
+                clean_proper_name = self._genericName(helpers.remove_non_release_groups(curProper.name))
                 isSame = False
+
                 for curResult in historyResults:
                     # if the result exists in history already we need to skip it
-                    if self._genericName(curResult["resource"]) == self._genericName(curProper.name):
+                    if self._genericName(helpers.remove_non_release_groups(curResult["resource"])) == clean_proper_name:
                         isSame = True
                         break
                 if isSame:

@@ -1,4 +1,5 @@
-# Author: Nic Wolfe <nic@wolfeden.ca>
+# Author: Maciej Olesinski (https://github.com/molesinski/)
+# Based on prowl.py by Nic Wolfe <nic@wolfeden.ca>
 # URL: http://code.google.com/p/sickbeard/
 #
 # This file is part of Sick Beard.
@@ -26,35 +27,31 @@ from sickbeard import common
 from sickbeard import logger
 
 
-class ProwlNotifier:
+class PushalotNotifier:
 
-    def _notify(self, event, message, prowl_api=None, prowl_priority=None, force=False):
+    def _notify(self, title, message, pushalot_authorizationtoken=None, force=False):
 
         # suppress notifications if the notifier is disabled but the notify options are checked
-        if not sickbeard.USE_PROWL and not force:
+        if not sickbeard.USE_PUSHALOT and not force:
             return False
 
         # fill in omitted parameters
-        if not prowl_api:
-            prowl_api = sickbeard.PROWL_API
-        if not prowl_priority:
-            prowl_priority = sickbeard.PROWL_PRIORITY
+        if not pushalot_authorizationtoken:
+            pushalot_authorizationtoken = sickbeard.PUSHALOT_AUTHORIZATIONTOKEN
 
-        logger.log("PROWL: Sending notice with details: event=\"%s\", message=\"%s\", priority=%s, api=%s" % (event, message, prowl_priority, prowl_api), logger.DEBUG)
+        logger.log("PUSHALOT: Sending notice with details: title=\"%s\", message=\"%s\", authorizationtoken=%s" % (title, message, pushalot_authorizationtoken), logger.DEBUG)
 
         try:
 
-            http_handler = HTTPSConnection("api.prowlapp.com")
+            http_handler = HTTPSConnection("pushalot.com")
 
-            data = {'apikey': prowl_api,
-                    'application': "SickBeard",
-                    'event': event,
-                    'description': message.encode('utf-8'),
-                    'priority': prowl_priority
+            data = {'AuthorizationToken': pushalot_authorizationtoken,
+                    'Title': title.encode('utf-8'),
+                    'Body': message.encode('utf-8'),
+                    'Source': 'SickBeard'
                     }
 
-            http_handler.request("POST",
-                                 "/publicapi/add",
+            http_handler.request("POST", "/api/sendmessage",
                                  headers={'Content-type': "application/x-www-form-urlencoded"},
                                  body=urlencode(data)
                                  )
@@ -63,20 +60,26 @@ class ProwlNotifier:
             request_status = response.status
 
         except Exception, e:
-            logger.log(u"PROWL: Notification failed: " + ex(e), logger.ERROR)
+            logger.log(u"PUSHALOT: Notification failed: " + ex(e), logger.ERROR)
             return False
 
         if request_status == 200:
-            logger.log(u"PROWL: Notifications sent.", logger.MESSAGE)
+            logger.log(u"PUSHALOT: Notifications sent.", logger.MESSAGE)
             return True
-        elif request_status == 401:
-            logger.log(u"PROWL: Auth failed: %s" % response.reason, logger.ERROR)
+        elif request_status == 400:
+            logger.log(u"PUSHALOT: Auth failed: %s" % response.reason, logger.ERROR)
             return False
         elif request_status == 406:
-            logger.log(u"PROWL: Message throttle limit reached.", logger.WARNING)
+            logger.log(u"PUSHALOT: Message throttle limit reached.", logger.WARNING)
+            return False
+        elif request_status == 410:
+            logger.log(u"PUSHALOT: The AuthorizationToken is invalid.", logger.ERROR)
+            return False
+        elif request_status == 503:
+            logger.log(u"PUSHALOT: Notification servers are currently overloaded with requests. Try again later.", logger.ERROR)
             return False
         else:
-            logger.log(u"PROWL: Notification failed.", logger.ERROR)
+            logger.log(u"PUSHALOT: Notification failed.", logger.ERROR)
             return False
 
 ##############################################################################
@@ -84,17 +87,17 @@ class ProwlNotifier:
 ##############################################################################
 
     def notify_snatch(self, ep_name):
-        if sickbeard.PROWL_NOTIFY_ONSNATCH:
+        if sickbeard.PUSHALOT_NOTIFY_ONSNATCH:
             self._notify(common.notifyStrings[common.NOTIFY_SNATCH], ep_name)
 
     def notify_download(self, ep_name):
-        if sickbeard.PROWL_NOTIFY_ONDOWNLOAD:
+        if sickbeard.PUSHALOT_NOTIFY_ONDOWNLOAD:
             self._notify(common.notifyStrings[common.NOTIFY_DOWNLOAD], ep_name)
 
-    def test_notify(self, prowl_api, prowl_priority):
-        return self._notify("Test", "This is a test notification from Sick Beard", prowl_api, prowl_priority, force=True)
+    def test_notify(self, pushalot_authorizationtoken):
+        return self._notify("Test", "This is a test notification from Sick Beard", pushalot_authorizationtoken, force=True)
 
     def update_library(self, ep_obj=None):
         pass
 
-notifier = ProwlNotifier
+notifier = PushalotNotifier

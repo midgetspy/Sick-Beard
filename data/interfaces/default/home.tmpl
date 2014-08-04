@@ -14,8 +14,34 @@
 
 #set $myDB = $db.DBConnection()
 #set $today = str($datetime.date.today().toordinal())
-#set $downloadedEps = $myDB.select("SELECT showid, COUNT(*) FROM tv_episodes WHERE (status IN ("+",".join([str(x) for x in $Quality.DOWNLOADED + [$ARCHIVED]])+") OR (status IN ("+",".join([str(x) for x in $Quality.SNATCHED + $Quality.SNATCHED_PROPER])+") AND location != '')) AND season != 0 and episode != 0 AND airdate <= "+$today+" GROUP BY showid")
-#set $allEps = $myDB.select("SELECT showid, COUNT(*) FROM tv_episodes WHERE season != 0 and episode != 0 AND (airdate != 1 OR status IN ("+",".join([str(x) for x in ($Quality.DOWNLOADED + $Quality.SNATCHED + $Quality.SNATCHED_PROPER) + [$ARCHIVED]])+")) AND airdate <= "+$today+" AND status != "+str($IGNORED)+" GROUP BY showid")
+#set status_quality = '(' + ','.join([str(x) for x in $Quality.SNATCHED + $Quality.SNATCHED_PROPER]) + ')'
+#set status_download = '(' + ','.join([str(x) for x in $Quality.DOWNLOADED + [$ARCHIVED]]) + ')'
+
+#set $sql_statement = 'SELECT showid, '
+
+#set $sql_statement += '(SELECT COUNT(*) FROM tv_episodes WHERE showid=tv_eps.showid AND season > 0 AND episode > 0 AND status IN ' + $status_quality + ') AS ep_snatched, '
+#set $sql_statement += '(SELECT COUNT(*) FROM tv_episodes WHERE showid=tv_eps.showid AND season > 0 AND episode > 0 AND status IN ' + $status_download + ') AS ep_downloaded, '
+
+#set $sql_statement += '(SELECT COUNT(*) FROM tv_episodes WHERE showid=tv_eps.showid AND season > 0 AND episode > 0 '
+#set $sql_statement += ' AND ((airdate > 1 AND airdate <= ' + $today + ' AND (status = ' + str($SKIPPED) + ' OR status = ' + str($WANTED) + ')) '
+#set $sql_statement += ' OR (status IN ' + status_quality + ') OR (status IN ' + status_download + '))) AS ep_total, '
+
+#set $sql_statement += ' (SELECT airdate FROM tv_episodes WHERE showid=tv_eps.showid AND airdate >= ' + $today + ' AND status = ' + str($UNAIRED) + ' ORDER BY airdate ASC LIMIT 1) AS ep_airs_next '
+#set $sql_statement += ' FROM tv_episodes tv_eps GROUP BY showid'
+
+#set $sql_result = $myDB.select($sql_statement)
+
+#set $show_stat = {}
+#set $max_download_count = 1000
+
+#for $cur_result in $sql_result:
+    #set $show_stat[$cur_result['showid']] = $cur_result
+    #if $cur_result['ep_total'] > $max_download_count:
+        #set $max_download_count = $cur_result['ep_total']
+    #end if
+#end for
+
+#set $max_download_count = $max_download_count * 100
 
 <script type="text/javascript" charset="utf-8">
 <!--
@@ -27,7 +53,7 @@
     },
     format: function(s) {
         if (s.indexOf('Loading...') == 0)
-            return s.replace('Loading...','000');
+          return s.replace('Loading...','000');
         return (s || '').replace(/^(The|A)\s/i,'');
     },
     type: 'text'
@@ -53,16 +79,23 @@
         match = s.match(/^(.*)/);
 
         if (match == null || match[1] == "?")
-            return -10;
+          return -10;
 
         var nums = match[1].split(" / ");
+        if (nums[0].indexOf("+") != -1) {
+            var num_parts = nums[0].split("+");
+            nums[0] = num_parts[0];
+        }
 
-        if (parseInt(nums[0]) === 0)
-            return parseInt(nums[1]);
+        nums[0] = parseInt(nums[0])
+        nums[1] = parseInt(nums[1])
 
-        var finalNum = parseInt((nums[0]/nums[1])*1000)*100;
+        if (nums[0] === 0)
+          return nums[1];
+
+        var finalNum = parseInt($max_download_count*nums[0]/nums[1]);
         if (finalNum > 0)
-            finalNum += parseInt(nums[0]);
+          finalNum += nums[0];
 
         return finalNum;
     },
@@ -74,16 +107,16 @@
     \$("#showListTable:has(tbody tr)").tablesorter({
         sortList: [[5,1],[1,0]],
         textExtraction: {
-            3: function(node) { return \$(node).find("span").text().toLowerCase(); },
-            4: function(node) { return \$(node).find("span").text(); },
-            5: function(node) { return \$(node).find("img").attr("alt"); }
+          3: function(node) { return \$(node).find("span").text().toLowerCase(); },
+          4: function(node) { return \$(node).find("span").text(); },
+          5: function(node) { return \$(node).find("img").attr("alt"); }
         },
         widgets: ['saveSort', 'zebra', 'stickyHeaders'],
         headers: {
-            0: { sorter: 'isoDate' },
-            1: { sorter: 'loadingNames' },
-            3: { sorter: 'quality' },
-            4: { sorter: 'eps' }
+          0: { sorter: 'isoDate' },
+          1: { sorter: 'loadingNames' },
+          3: { sorter: 'quality' },
+          4: { sorter: 'eps' }
         },
         sortStable: true
     });
@@ -94,14 +127,14 @@
 
 <table id="showListTable" class="tablesorter" cellspacing="1" border="0" cellpadding="0">
 
-  <thead><tr><th class="nowrap">Next Ep</th><th>Show</th><th>Network</th><th>Quality</th><th>Downloads</th><th>Active</th><th>Status</th></tr></thead>
-  <tfoot>
-    <tr>
-      <th rowspan="1" colspan="1" align="center"><a href="$sbRoot/home/addShows/">Add Show</a></th>
-      <th rowspan="1" colspan="6"></th>
-    </tr>
-  </tfoot>
-  <tbody>
+    <thead><tr><th class="nowrap">Next Ep</th><th>Show</th><th>Network</th><th>Quality</th><th>Downloads</th><th>Active</th><th>Status</th></tr></thead>
+    <tfoot>
+        <tr>
+        <th rowspan="1" colspan="1" align="center"><a href="$sbRoot/home/addShows/">Add Show</a></th>
+        <th rowspan="1" colspan="6"></th>
+        </tr>
+    </tfoot>
+    <tbody>
 
 #for $curLoadingShow in $sickbeard.showQueueScheduler.action.loadingShowList:
 
@@ -109,72 +142,97 @@
     #continue
   #end if
 
-  <tr>
-    <td align="center">(loading)</td>
-    <td>
-    #if $curLoadingShow.show == None:
-    Loading... ($curLoadingShow.show_name)
-    #else:
-    <a href="displayShow?show=$curLoadingShow.show.tvdbid">$curLoadingShow.show.name</a>
-    #end if
-    </td>
-    <td></td>
-    <td></td>
-    <td></td>
-    <td></td>
-    <td></td>
-  </tr>
+    <tr>
+        <td align="center">(loading)</td>
+        <td>
+        #if $curLoadingShow.show == None:
+        Loading... ($curLoadingShow.show_name)
+        #else:
+        <a href="displayShow?show=$curLoadingShow.show.tvdbid">$curLoadingShow.show.name</a>
+        #end if
+        </td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+    </tr>
 #end for
 
 #set $myShowList = $list($sickbeard.showList)
 $myShowList.sort(lambda x, y: cmp(x.name, y.name))
 #for $curShow in $myShowList:
-#set $curEp = $curShow.nextEpisode()
 
-#set $curShowDownloads = [x[1] for x in $downloadedEps if int(x[0]) == $curShow.tvdbid]
-#set $curShowAll = [x[1] for x in $allEps if int(x[0]) == $curShow.tvdbid]
-#if len($curShowAll) != 0:
-  #if len($curShowDownloads) != 0:
-    #set $dlStat = str($curShowDownloads[0])+" / "+str($curShowAll[0])
-    #set $nom = $curShowDownloads[0]
-    #set $den = $curShowAll[0]
-  #else
-    #set $dlStat = "0 / "+str($curShowAll[0])
-    #set $nom = 0
-    #set $den = $curShowAll[0]
-  #end if
-#else
-  #set $dlStat = "?"
-  #set $nom = 0
-  #set $den = 1
-#end if
+    #set $cur_airs_next = ''
+    #set $cur_snatched = 0
+    #set $cur_downloaded = 0
+    #set $cur_total = 0
+    #set $download_stat_tip = ''
 
+    #if $curShow.tvdbid in $show_stat:
+        #set $cur_airs_next = $show_stat[$curShow.tvdbid]['ep_airs_next']
 
-  <tr>
-    <td align="center" class="nowrap">#if len($curEp) != 0 then $curEp[0].airdate else ""#</td>
-    <td class="tvShow"><a href="$sbRoot/home/displayShow?show=$curShow.tvdbid">$curShow.name</a></td>
-    <td>$curShow.network</td>
-#if $curShow.quality in $qualityPresets:
-    <td align="center"><span class="quality $qualityPresetStrings[$curShow.quality]">$qualityPresetStrings[$curShow.quality]</span></td>
-#else:
-    <td align="center"><span class="quality Custom">Custom</span></td>
-#end if
-    <td align="center"><span style="display: none;">$dlStat</span><div id="progressbar$curShow.tvdbid" style="position:relative;"></div>
-        <script type="text/javascript">
-        <!--
-            \$(function() {
-               \$("\#progressbar$curShow.tvdbid").progressbar({
-                   value: parseInt($nom) * 100 / parseInt($den)
-               });
-               \$("\#progressbar$curShow.tvdbid").append( "<div class='progressbarText'>$dlStat</div>" )
-            });
-        //-->
-        </script>
-    </td>
-    <td align="center"><img src="$sbRoot/images/#if int($curShow.paused) == 0 and $curShow.status != "Ended" then "yes16.png\" alt=\"Y\"" else "no16.png\" alt=\"N\""# width="16" height="16" /></td>
-    <td align="center">$curShow.status</td>
-  </tr>
+        #set $cur_snatched = $show_stat[$curShow.tvdbid]['ep_snatched']
+        #if not $cur_snatched:
+            #set $cur_snatched = 0
+        #end if
 
+        #set $cur_downloaded = $show_stat[$curShow.tvdbid]['ep_downloaded']
+        #if not $cur_downloaded:
+            #set $cur_downloaded = 0
+        #end if
+
+        #set $cur_total = $show_stat[$curShow.tvdbid]['ep_total']
+        #if not $cur_total:
+            #set $cur_total = 0
+        #end if
+    #end if
+
+    #if $cur_total != 0:
+        #set $download_stat = str($cur_downloaded + $cur_snatched)
+        #set $download_stat_tip = "Downloaded: " + str($cur_downloaded)
+        #if $cur_snatched > 0:
+            #set $download_stat_tip = download_stat_tip + "&#013;" + "Snatched: " + str($cur_snatched)
+        #end if
+        #set $download_stat = download_stat + " / " + str($cur_total)
+        #set $download_stat_tip = download_stat_tip + "&#013;" + "Total: " + str($cur_total)
+    #else
+        #set $download_stat = '?'
+        #set $download_stat_tip = "no data"
+    #end if
+
+    #set $nom = $cur_downloaded
+    #set $den = $cur_total
+    #if $den == 0:
+        #set $den = 1
+    #end if
+
+    #set $progressbar_percent = $nom * 100 / $den
+
+    <tr>
+        <td align="center" class="nowrap">#if $cur_airs_next then datetime.date.fromordinal($cur_airs_next).strftime('%Y-%m-%d') else ""#</td>
+        <td class="tvShow"><a href="$sbRoot/home/displayShow?show=$curShow.tvdbid">$curShow.name</a></td>
+        <td>$curShow.network</td>
+    #if $curShow.quality in $qualityPresets:
+        <td align="center"><span class="quality $qualityPresetStrings[$curShow.quality]">$qualityPresetStrings[$curShow.quality]</span></td>
+    #else:
+        <td align="center"><span class="quality Custom">Custom</span></td>
+    #end if
+        <td align="center"><span style="display: none;">$download_stat</span><div id="progressbar$curShow.tvdbid" style="position:relative;"></div>
+          <script type="text/javascript">
+          <!--
+                \$(function() {
+                 \$("\#progressbar$curShow.tvdbid").progressbar({
+                     value: $progressbar_percent
+                 });
+                 \$("\#progressbar$curShow.tvdbid").append("<div class='progressbarText' title='$download_stat_tip'>$download_stat</div>")
+                });
+          //-->
+          </script>
+        </td>
+        <td align="center"><img src="$sbRoot/images/#if int($curShow.paused) == 0 and $curShow.status != "Ended" then "yes16.png\" alt=\"Y\"" else "no16.png\" alt=\"N\""# width="16" height="16" /></td>
+        <td align="center">$curShow.status</td>
+    </tr>
 
 #end for
 </tbody>

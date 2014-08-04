@@ -19,8 +19,14 @@
 import sickbeard
 import generic
 
+from sickbeard import helpers
 from sickbeard import logger
 from sickbeard import tvcache
+
+try:
+    import xml.etree.cElementTree as etree
+except ImportError:
+    import elementtree.ElementTree as etree
 
 
 class WombleProvider(generic.NZBProvider):
@@ -42,10 +48,29 @@ class WombleCache(tvcache.TVCache):
         self.minTime = 15
 
     def _getRSSData(self):
-        url = self.provider.url + 'rss/?sec=TV-x264&fr=false'
-        logger.log(u"Womble's Index cache update URL: " + url, logger.DEBUG)
-        data = self.provider.getURL(url)
-        return data
+
+        RSS_data = None
+        xml_element_tree = None
+
+        for url in [self.provider.url + 'rss/?sec=tv-sd&fr=false', self.provider.url + 'rss/?sec=tv-hd&fr=false']:
+            logger.log(u"Womble's Index cache update URL: " + url, logger.DEBUG)
+            data = self.provider.getURL(url)
+
+            if data:
+                parsedXML = helpers.parse_xml(data)
+                if parsedXML:
+                    if xml_element_tree is None:
+                        xml_element_tree = parsedXML
+                    else:
+                        items = parsedXML.findall('.//item')
+                        if items:
+                            for item in items:
+                                xml_element_tree.append(item)
+
+        if xml_element_tree is not None:
+            RSS_data = etree.tostring(xml_element_tree)
+
+        return RSS_data
 
     def _checkAuth(self, data):
         return data != 'Invalid Link'
