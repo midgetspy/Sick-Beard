@@ -19,10 +19,13 @@
 import sickbeard
 
 from sickbeard import logger, common
-from lib.pushbullet import PushBullet
+
+try:
+	from lib.pushbullet import PushBullet
+except:
+        from lib.pushbullet25 import PushBullet
 
 class PushbulletNotifier:
-
     def _notify(self, title, message, pushbullet_access_token=None, force=False):
         """
             Sends a message via the Pushbullet API
@@ -50,7 +53,7 @@ class PushbulletNotifier:
         if success:
             logger.log(u"Pushbullet: Notification sent successfully", logger.MESSAGE)
         else:
-            logger.log(u"Pushbullet: Error sending notification: %s" % (push.error.message), logger.ERROR)
+            logger.log(u"Pushbullet: Error sending notification: %s" % (push['error']['message']), logger.ERROR)
 
         return success
 
