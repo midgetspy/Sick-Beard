@@ -157,7 +157,7 @@ def help_message():
     help_msg += "                --config=<path>     Override config filename (full path including filename)\n"
     help_msg += "                                    to load configuration from \n"
     help_msg += "                                    Default: config.ini in " + sickbeard.PROG_DIR + " or --datadir location\n"
-    help_msg += "                --noresize          Prevent resizing of the banner/posters even if PIL is installed\n"
+    help_msg += "                --noresize          Ignored for backward compatibility.\n"
 
     return help_msg
 
@@ -268,9 +268,8 @@ def main():
         if o in ('--config',):
             sickbeard.CONFIG_FILE = os.path.abspath(a)
 
-        # Prevent resizing of the banner/posters even if PIL is installed
         if o in ('--noresize',):
-            sickbeard.NO_RESIZE = True
+            pass  # Ignored for backwards compatibility.
 
     # The pidfile is only useful in daemon mode, make sure we can write the file properly
     if sickbeard.CREATEPID:
