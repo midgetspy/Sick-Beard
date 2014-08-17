@@ -23,9 +23,9 @@
     <b>Season:</b>
     #for $seasonNum in $seasonResults:
         #if int($seasonNum["season"]) == 0:
-            <a href="#season-$seasonNum["season"]">Specials</a>
+            <a href="#season-$seasonNum["season"]" class="seasonJump">Specials</a>
         #else:
-            <a href="#season-$seasonNum["season"]">${str($seasonNum["season"])}</a>
+            <a href="#season-$seasonNum["season"]" class="seasonJump">${str($seasonNum["season"])}</a>
         #end if
         #if $seasonNum != $seasonResults[-1]:
             <span class="separator">|</span>
@@ -106,9 +106,9 @@ Change selected episodes to
     <div style="padding-bottom: 5px;">
         <label for="wanted" class="checkbox inline wanted"><input type="checkbox" id="wanted" checked="checked" /> Wanted: <b>$epCounts[$Overview.WANTED]</b></label>
         <label for="qual" class="checkbox inline qual"><input type="checkbox" id="qual" checked="checked" /> Low Quality: <b>$epCounts[$Overview.QUAL]</b></label>
+        <label for="snatched" class="checkbox inline snatched"><input type="checkbox" id="snatched" checked="checked" /> Snatched: <b>$epCounts[$Overview.SNATCHED]</b></label>
         <label for="good" class="checkbox inline good"><input type="checkbox" id="good" checked="checked" /> Downloaded: <b>$epCounts[$Overview.GOOD]</b></label>
         <label for="skipped" class="checkbox inline skipped"><input type="checkbox" id="skipped" checked="checked" /> Skipped: <b>$epCounts[$Overview.SKIPPED]</b></label>
-        <label for="snatched" class="checkbox inline snatched"><input type="checkbox" id="snatched" checked="checked" /> Snatched: <b>$epCounts[$Overview.SNATCHED]</b></label>
     </div>
     <div class="pull-right" style="padding-bottom: 5px;">
         <button class="btn btn-mini seriesCheck"><a href="#" onclick="return false;">Select Filtered Episodes</a></button> 
@@ -133,7 +133,7 @@ Change selected episodes to
       #end if
 
       <!-- start season $epResult["season"] -->
-      <tr>
+      <tr id="season-$epResult["season"]">
         <th class="row-seasonheader" colspan="10" style="width: auto;"><a name="season-$epResult["season"]"></a>#if int($epResult["season"]) == 0 then "Specials" else "Season " + str($epResult["season"])#</th>
       </tr>
     #end if
