@@ -261,13 +261,15 @@ $(document).ready(function () {
 
     $("#testPushalot").click(function () {
         var pushalot_authorizationtoken = $.trim($("#pushalot_authorizationtoken").val());
+        var pushalot_silent = ($("#pushalot_silent").prop('checked') == true) ? 'True' : 'False';
+        var pushalot_important = ($("#pushalot_important").prop('checked') == true) ? 'True' : 'False';
         if (!pushalot_authorizationtoken) {
             $("#testPushalot-result").html("Please fill out the necessary fields above.");
             return;
         }
         $(this).prop("disabled", true);
         $("#testPushalot-result").html(loading);
-        $.get(sbRoot + "/home/testPushalot", {'authorizationtoken': pushalot_authorizationtoken})
+        $.get(sbRoot + "/home/testPushalot", {'authtoken': pushalot_authorizationtoken, 'silent': pushalot_silent, 'important': pushalot_important})
             .done(function (data) {
                 $("#testPushalot-result").html(data);
                 $("#testPushalot").prop("disabled", false);
