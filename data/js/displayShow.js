@@ -139,6 +139,13 @@ $(document).ready(function(){
         });
     });
 
+
+    // show the rest of the seasons
+    $("#showAllSeasons").click(function() {
+        $(this).hide();
+        $('#segment').show();
+    });
+
     $.fn.showHideRows = function(whichClass) {
 
         var status = $('#checkboxControls > input, #' + whichClass).prop('checked');
