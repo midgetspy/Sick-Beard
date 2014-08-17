@@ -160,7 +160,7 @@ class NameParser(object):
         b = getattr(second, attr)
 
         # if a is good use it
-        if a != None or (type(a) == list and len(a)):
+        if a is not None or (type(a) == list and len(a)):
             return a
         # if not use b (if b isn't set it'll just be default)
         else:
@@ -230,7 +230,7 @@ class NameParser(object):
         dir_name, file_name = ek.ek(os.path.split, name)
 
         if self.is_file_name:
-            base_file_name = helpers.remove_extension(file_name)
+            base_file_name = helpers.remove_non_release_groups(helpers.remove_extension(file_name))
         else:
             base_file_name = file_name
 
@@ -272,7 +272,7 @@ class NameParser(object):
                 final_result.which_regex += dir_name_result.which_regex
 
         # if there's no useful info in it then raise an exception
-        if final_result.season_number == None and not final_result.episode_numbers and final_result.air_date == None and not final_result.series_name:
+        if final_result.season_number is None and not final_result.episode_numbers and final_result.air_date is None and not final_result.series_name:
             raise InvalidNameException("Unable to parse " + name.encode(sickbeard.SYS_ENCODING, 'xmlcharrefreplace'))
 
         name_parser_cache.add(name, final_result)
@@ -327,11 +327,11 @@ class ParseResult(object):
         return True
 
     def __str__(self):
-        if self.series_name != None:
+        if self.series_name is not None:
             to_return = self.series_name + u' - '
         else:
             to_return = u''
-        if self.season_number != None:
+        if self.season_number is not None:
             to_return += 'S' + str(self.season_number)
         if self.episode_numbers and len(self.episode_numbers):
             for e in self.episode_numbers:
@@ -350,14 +350,14 @@ class ParseResult(object):
         return to_return.encode('utf-8')
 
     def _is_air_by_date(self):
-        if self.season_number == None and len(self.episode_numbers) == 0 and self.air_date:
+        if self.season_number is None and len(self.episode_numbers) == 0 and self.air_date:
             return True
         return False
     air_by_date = property(_is_air_by_date)
 
 
 class NameParserCache(object):
-    #TODO: check if the fifo list can be skipped and only use one dict
+    # TODO: check if the fifo list can be skipped and only use one dict
     _previous_parsed_list = []  # keep a fifo list of the cached items
     _previous_parsed = {}
     _cache_size = 100
