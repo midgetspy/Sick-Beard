@@ -153,6 +153,15 @@ NZB_DIR = None
 USENET_RETENTION = None
 DOWNLOAD_PROPERS = None
 
+TORRENT_METHOD = None
+
+TRANSMISSION_HOST = None
+TRANSMISSION_PORT = None
+TRANSMISSION_RPC_PATH = None
+TRANSMISSION_USERNAME = None
+TRANSMISSION_PASSWORD = None
+TRANSMISSION_DIRECTORY = None
+
 SEARCH_FREQUENCY = None
 BACKLOG_SEARCH_FREQUENCY = 21
 MIN_SEARCH_FREQUENCY = 10
@@ -325,9 +334,10 @@ def initialize(consoleLogging=True):
     with INIT_LOCK:
 
         global ACTUAL_LOG_DIR, LOG_DIR, WEB_PORT, WEB_LOG, WEB_ROOT, WEB_USERNAME, WEB_PASSWORD, WEB_HOST, WEB_IPV6, USE_API, API_KEY, ENABLE_HTTPS, HTTPS_CERT, HTTPS_KEY, \
-                USE_NZBS, USE_TORRENTS, NZB_METHOD, NZB_DIR, DOWNLOAD_PROPERS, \
+                USE_NZBS, USE_TORRENTS, NZB_METHOD, NZB_DIR, TORRENT_METHOD, DOWNLOAD_PROPERS, \
                 SAB_USERNAME, SAB_PASSWORD, SAB_APIKEY, SAB_CATEGORY, SAB_HOST, \
                 NZBGET_USERNAME, NZBGET_PASSWORD, NZBGET_CATEGORY, NZBGET_HOST, currentSearchScheduler, backlogSearchScheduler, \
+                TRANSMISSION_HOST, TRANSMISSION_PORT, TRANSMISSION_RPC_PATH, TRANSMISSION_USERNAME, TRANSMISSION_PASSWORD, TRANSMISSION_DIRECTORY, \
                 USE_XBMC, XBMC_ALWAYS_ON, XBMC_NOTIFY_ONSNATCH, XBMC_NOTIFY_ONDOWNLOAD, XBMC_UPDATE_FULL, XBMC_UPDATE_ONLYFIRST, \
                 XBMC_UPDATE_LIBRARY, XBMC_HOST, XBMC_USERNAME, XBMC_PASSWORD, \
                 USE_TRAKT, TRAKT_USERNAME, TRAKT_PASSWORD, TRAKT_API, \
@@ -450,6 +460,10 @@ def initialize(consoleLogging=True):
         if NZB_METHOD not in ('blackhole', 'sabnzbd', 'nzbget'):
             NZB_METHOD = 'blackhole'
 
+        TORRENT_METHOD = check_setting_str(CFG, 'General', 'torrent_method', 'blackhole')
+        if TORRENT_METHOD not in ('blackhole', 'transmission'):
+            TORRENT_METHOD = 'blackhole'
+
         DOWNLOAD_PROPERS = bool(check_setting_int(CFG, 'General', 'download_propers', 1))
         USENET_RETENTION = check_setting_int(CFG, 'General', 'usenet_retention', 500)
         SEARCH_FREQUENCY = check_setting_int(CFG, 'General', 'search_frequency', DEFAULT_SEARCH_FREQUENCY)
@@ -539,6 +553,14 @@ def initialize(consoleLogging=True):
         NZBGET_PASSWORD = check_setting_str(CFG, 'NZBget', 'nzbget_password', 'tegbzn6789')
         NZBGET_CATEGORY = check_setting_str(CFG, 'NZBget', 'nzbget_category', 'tv')
         NZBGET_HOST = check_setting_str(CFG, 'NZBget', 'nzbget_host', '')
+
+        CheckSection(CFG, 'Transmission')
+        TRANSMISSION_HOST = check_setting_str(CFG, 'Transmission', 'transmission_host', 'localhost')
+        TRANSMISSION_PORT = check_setting_int(CFG, 'Transmission', 'transmission_port', '9091')
+        TRANSMISSION_RPC_PATH = check_setting_str(CFG, 'Transmission', 'transmission_rpc_path', '/transmission/rpc')
+        TRANSMISSION_USERNAME = check_setting_str(CFG, 'Transmission', 'transmission_username', '')
+        TRANSMISSION_PASSWORD = check_setting_str(CFG, 'Transmission', 'transmission_password', '')
+        TRANSMISSION_DIRECTORY = check_setting_str(CFG, 'Transmission', 'transmission_directory', '')
 
         CheckSection(CFG, 'XBMC')
         USE_XBMC = bool(check_setting_int(CFG, 'XBMC', 'use_xbmc', 0))
@@ -989,6 +1011,7 @@ def save_config():
     new_config['General']['use_nzbs'] = int(USE_NZBS)
     new_config['General']['use_torrents'] = int(USE_TORRENTS)
     new_config['General']['nzb_method'] = NZB_METHOD
+    new_config['General']['torrent_method'] = TORRENT_METHOD
     new_config['General']['usenet_retention'] = int(USENET_RETENTION)
     new_config['General']['search_frequency'] = int(SEARCH_FREQUENCY)
     new_config['General']['download_propers'] = int(DOWNLOAD_PROPERS)
@@ -1077,6 +1100,14 @@ def save_config():
     new_config['NZBget']['nzbget_password'] = NZBGET_PASSWORD
     new_config['NZBget']['nzbget_category'] = NZBGET_CATEGORY
     new_config['NZBget']['nzbget_host'] = NZBGET_HOST
+
+    new_config['Transmission'] = {}
+    new_config['Transmission']['transmission_host'] = TRANSMISSION_HOST
+    new_config['Transmission']['transmission_port'] = int(TRANSMISSION_PORT)
+    new_config['Transmission']['transmission_rpc_path'] = TRANSMISSION_RPC_PATH
+    new_config['Transmission']['transmission_username'] = TRANSMISSION_USERNAME
+    new_config['Transmission']['transmission_password'] = TRANSMISSION_PASSWORD
+    new_config['Transmission']['transmission_directory'] = TRANSMISSION_DIRECTORY
 
     new_config['XBMC'] = {}
     new_config['XBMC']['use_xbmc'] = int(USE_XBMC)

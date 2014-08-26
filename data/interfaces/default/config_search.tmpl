@@ -111,7 +111,7 @@
                             </label>
                         </div>
 
-                        <div id="blackhole_settings">
+                        <div id="nzb_blackhole_settings">
                             <div class="field-pair">
                                 <label class="nocheck clearfix">
                                     <span class="component-title">NZB Black Hole</span>
@@ -273,17 +273,120 @@
 
                         <div id="content_use_torrents">
                         <div class="field-pair">
-                            <label class="nocheck clearfix">
-                                <span class="component-title">Torrent Black Hole</span>
-                                <input type="text" name="torrent_dir" id="torrent_dir" value="$sickbeard.TORRENT_DIR" size="35" />
-                            </label>
-                            <label class="nocheck clearfix">
-                                <span class="component-title">&nbsp;</span>
-                                <span class="component-desc">The directory where Sick Beard should store your <i>Torrent</i> files.</span>
+                            <label class="clearfix" for="torrent_method">
+                                <span class="component-title jumbo">Torrent Method:</span>
+                                <span class="component-desc">
+                                    <select name="torrent_method" id="torrent_method" class="input-medium" >
+                                    #set $torrent_method_text = {'blackhole': "Black Hole", 'transmission': "Transmission"}
+                                    #for $curAction in ('transmission', 'blackhole'):
+                                      #if $sickbeard.TORRENT_METHOD == $curAction:
+                                        #set $torrent_method = "selected=\"selected\""
+                                      #else
+                                        #set $torrent_method = ""
+                                      #end if
+                                    <option value="$curAction" $torrent_method>$torrent_method_text[$curAction]</option>
+                                    #end for
+                                    </select>
+                                </span>
                             </label>
                         </div>
-                        
+
+                        <div id="torrent_blackhole_settings">
+                            <div class="field-pair">
+                                <label class="nocheck clearfix">
+                                    <span class="component-title">Torrent Black Hole</span>
+                                    <input type="text" name="torrent_dir" id="torrent_dir" value="$sickbeard.TORRENT_DIR" size="35" />
+                                </label>
+                                <label class="nocheck clearfix">
+                                    <span class="component-title">&nbsp;</span>
+                                    <span class="component-desc">The directory where Sick Beard should store your <i>Torrent</i> files.</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div id="transmission_settings">
+                            <div class="field-pair">
+                                <label class="nocheck clearfix">
+                                    <span class="component-title">Transmission Host</span>
+                                    <input type="text" name="transmission_host" value="$sickbeard.TRANSMISSION_HOST" size="45" />
+                                </label>
+                                <label class="nocheck clearfix">
+                                    <span class="component-title">&nbsp;</span>
+                                    <span class="component-desc">IP or hostname of host running Transmission</span>
+                                </label>
+                                <label class="nocheck clearfix">
+                                    <span class="component-title">&nbsp;</span>
+                                    <span class="component-desc">(eg. localhost)</span>
+                                </label>
+                            </div>
+
+                            <div class="field-pair">
+                                <label class="nocheck clearfix">
+                                    <span class="component-title">Transmission Port</span>
+                                    <input type="text" name="transmission_port" value="$sickbeard.TRANSMISSION_PORT" size="10" />
+                                </label>
+                                <label class="nocheck clearfix">
+                                    <span class="component-title">&nbsp;</span>
+                                    <span class="component-desc">TCP port Transmission listens to</span>
+                                </label>
+                                <label class="nocheck clearfix">
+                                    <span class="component-title">&nbsp;</span>
+                                    <span class="component-desc">(eg. 9091)</span>
+                                </label>
+                            </div>
+
+                            <div class="field-pair">
+                                <label class="nocheck clearfix">
+                                    <span class="component-title">Transmission RPC Path</span>
+                                    <input type="text" name="transmission_rpc_path" value="$sickbeard.TRANSMISSION_RPC_PATH" size="45" />
+                                </label>
+                                <label class="nocheck clearfix">
+                                    <span class="component-title">&nbsp;</span>
+                                    <span class="component-desc">URL to your Transmission install</span>
+                                </label>
+                                <label class="nocheck clearfix">
+                                    <span class="component-title">&nbsp;</span>
+                                    <span class="component-desc">(eg. /transmission/rpc/)</span>
+                                </label>
+                            </div>
+
+                            <div class="field-pair">
+                                <label class="nocheck clearfix">
+                                    <span class="component-title">Transmission Username</span>
+                                    <input type="text" name="transmission_username" value="$sickbeard.TRANSMISSION_USERNAME" size="20" />
+                                </label>
+                                <label class="nocheck clearfix">
+                                    <span class="component-title">&nbsp;</span>
+                                    <span class="component-desc">Username of your Transmission server (blank for none)</span>
+                                </label>
+                            </div>
+
+                            <div class="field-pair">
+                                <label class="nocheck clearfix">
+                                    <span class="component-title">Transmission Password</span>
+                                    <input type="password" name="transmission_password" value="$sickbeard.TRANSMISSION_PASSWORD" size="20" />
+                                </label>
+                                <label class="nocheck clearfix">
+                                    <span class="component-title">&nbsp;</span>
+                                    <span class="component-desc">Password of your Transmission server (blank for none)</span>
+                                </label>
+                            </div>
+
+                            <div class="field-pair">
+                                <label class="nocheck clearfix">
+                                    <span class="component-title">Download directory</span>
+                                    <input type="text" name="transmission_directory" value="$sickbeard.TRANSMISSION_DIRECTORY" size="20" />
+                                </label>
+                                <label class="nocheck clearfix">
+                                    <span class="component-title">&nbsp;</span>
+                                    <span class="component-desc">Directory to download torrents to (black for default download directory of Transmission)</span>
+                                </label>
+                            </div>
+                        </div>
+
                         <div class="clearfix"></div>
+                        <div class="testNotification" id="testTransmission-result">Click below to test.</div>
+                        <input type="button" value="Test Transmission" id="testTransmission" class="btn test-button"/>
                         <input type="submit" class="btn config_submitter" value="Save Changes" /><br/>
                         </div><!-- /content_use_torrents //-->
                         

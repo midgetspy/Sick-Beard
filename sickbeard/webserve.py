@@ -32,7 +32,7 @@ import cherrypy.lib
 
 import sickbeard
 
-from sickbeard import config, sab
+from sickbeard import config, sab, transmission
 from sickbeard import history, notifiers, processTV
 from sickbeard import ui
 from sickbeard import logger, helpers, exceptions, classes, db
@@ -737,7 +737,8 @@ class ConfigSearch:
     @cherrypy.expose
     def saveSearch(self, use_nzbs=None, use_torrents=None, nzb_dir=None, sab_username=None, sab_password=None,
                        sab_apikey=None, sab_category=None, sab_host=None, nzbget_username=None, nzbget_password=None, nzbget_category=None, nzbget_host=None,
-                       torrent_dir=None, nzb_method=None, usenet_retention=None, search_frequency=None, download_propers=None, ignore_words=None):
+                       transmission_host=None, transmission_port=None, transmission_rpc_path = None, transmission_username=None, transmission_password = None, transmission_directory = None,
+                       torrent_dir=None, nzb_method=None, torrent_method=None, usenet_retention=None, search_frequency=None, download_propers=None, ignore_words=None):
 
         results = []
 
@@ -769,6 +770,14 @@ class ConfigSearch:
 
         # Torrent Search
         sickbeard.USE_TORRENTS = config.checkbox_to_value(use_torrents)
+        sickbeard.TORRENT_METHOD = torrent_method
+
+        sickbeard.TRANSMISSION_HOST = transmission_host
+        sickbeard.TRANSMISSION_PORT = transmission_port
+        sickbeard.TRANSMISSION_RPC_PATH = transmission_rpc_path
+        sickbeard.TRANSMISSION_USERNAME = transmission_username
+        sickbeard.TRANSMISSION_PASSWORD = transmission_password
+        sickbeard.TRANSMISSION_DIRECTORY = transmission_directory
 
         if not config.change_TORRENT_DIR(torrent_dir):
             results += ["Unable to create directory " + os.path.normpath(torrent_dir) + ", directory not changed."]
@@ -1859,6 +1868,12 @@ class Home:
                 return "Authentication failed. SABnzbd expects '" + accesMsg + "' as authentication method"
         else:
             return "Unable to connect to host"
+
+    @cherrypy.expose
+    def testTransmission(self, host=None, port=None, username=None, password=None, rpc_path=None):
+        if not transmission.testAuthentication(host, port, username, password, rpc_path):
+            return 'Failed. Could not connect or authenticate'
+        return 'Success. Connected and authenticated'
 
     @cherrypy.expose
     def testGrowl(self, host=None, password=None):
