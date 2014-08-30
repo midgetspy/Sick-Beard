@@ -37,7 +37,7 @@ from sickbeard import providers, metadata
 from providers import ezrss, tvtorrents, torrentleech, btn, newznab, womble, omgwtfnzbs, hdbits
 
 from providers import kickass, torrentz, dtt, thepiratebay, torrentday
-from providers import sceneaccess, iptorrents, bithdtv, fucklimits, btdigg, torrentshack
+from providers import sceneaccess, iptorrents, bithdtv, btdigg, torrentshack
 from providers import speed
 
 from sickbeard.config import CheckSection, check_setting_int, check_setting_str, ConfigMigrator
@@ -211,10 +211,6 @@ IPTORRENTS_RSSHASH = None
 BITHDTV = False
 BITHDTV_USERNAME = None
 BITHDTV_PASSWORD = None
-
-FUCKLIMITS = False
-FUCKLIMITS_USERNAME = None
-FUCKLIMITS_PASSWORD = None
 
 BTDIGG = False
 
@@ -398,7 +394,6 @@ def initialize(consoleLogging=True):
                 SCENEACCESS, SCENEACCESS_USERNAME, SCENEACCESS_PASSWORD, SCENEACCESS_RSSHASH, \
                 IPTORRENTS, IPTORRENTS_USERNAME, IPTORRENTS_PASSWORD, IPTORRENTS_UID, IPTORRENTS_RSSHASH, \
                 BITHDTV, BITHDTV_USERNAME, BITHDTV_PASSWORD, \
-                FUCKLIMITS, FUCKLIMITS_USERNAME, FUCKLIMITS_PASSWORD, \
                 TORRENTSHACK, TORRENTSHACK_USERNAME, TORRENTSHACK_PASSWORD, TORRENTSHACK_UID, TORRENTSHACK_AUTH, TORRENTSHACK_PASS_KEY ,TORRENTSHACK_AUTH_KEY, \
                 SPEED, SPEED_USERNAME, SPEED_PASSWORD, SPEED_RSSHASH, \
                 BTDIGG, \
@@ -592,10 +587,6 @@ def initialize(consoleLogging=True):
         BITHDTV = bool(check_setting_int(CFG, 'BITHDTV', 'bithdtv', 0))
         BITHDTV_USERNAME = check_setting_str(CFG, 'BITHDTV', 'bithdtv_username', '')
         BITHDTV_PASSWORD = check_setting_str(CFG, 'BITHDTV', 'bithdtv_password', '')
-        
-        FUCKLIMITS = bool(check_setting_int(CFG, 'FUCKLIMITS', 'fucklimits', 0))
-        FUCKLIMITS_USERNAME = check_setting_str(CFG, 'FUCKLIMITS', 'fucklimits_username', '')
-        FUCKLIMITS_PASSWORD = check_setting_str(CFG, 'FUCKLIMITS', 'fucklimits_password', '')
         
         TORRENTSHACK = bool(check_setting_int(CFG, 'TORRENTSHACK', 'torrentshack', 0))
         TORRENTSHACK_USERNAME = check_setting_str(CFG, 'TORRENTSHACK', 'torrentshack_username', '')
@@ -1200,11 +1191,6 @@ def save_config():
     new_config['BITHDTV']['bithdtv'] = int(BITHDTV)
     new_config['BITHDTV']['bithdtv_username'] = BITHDTV_USERNAME
     new_config['BITHDTV']['bithdtv_password'] = BITHDTV_PASSWORD
-
-    new_config['FUCKLIMITS'] = {}
-    new_config['FUCKLIMITS']['fucklimits'] = int(FUCKLIMITS)
-    new_config['FUCKLIMITS']['fucklimits_username'] = FUCKLIMITS_USERNAME
-    new_config['FUCKLIMITS']['fucklimits_password'] = FUCKLIMITS_PASSWORD
     
     new_config['TORRENTSHACK'] = {}
     new_config['TORRENTSHACK']['torrentshack'] = int(TORRENTSHACK)

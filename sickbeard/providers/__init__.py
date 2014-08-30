@@ -31,7 +31,6 @@ __all__ = ['ezrss',
            'sceneaccess',
            'iptorrents',
            'bithdtv',
-           'fucklimits',
            'btdigg',
            'torrentshack',
            'speed'

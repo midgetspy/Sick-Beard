@@ -1002,7 +1002,6 @@ class ConfigProviders:
                       sceneaccess_username = None, sceneaccess_password = None, sceneaccess_rsshash = None,
                       iptorrents_username = None, iptorrents_password = None,iptorrents_uid = None, iptorrents_rsshash = None,
                       bithdtv_username = None, bithdtv_password = None,
-                      fucklimits_username = None, fucklimits_password = None,
                       torrentshack_username = None, torrentshack_password = None, torrentshack_uid = None, torrentshack_auth = None, torrentshack_pass_key = None, torrentshack_auth_key = None,
                       torrentz_verified = None,
                       speed_username = None, speed_password = None, speed_rsshash = None,
@@ -1087,8 +1086,6 @@ class ConfigProviders:
                 sickbeard.IPTORRENTS = curEnabled
             elif curProvider == 'bithdtv':
                 sickbeard.BITHDTV = curEnabled
-            elif curProvider == 'fucklimits':
-                sickbeard.FUCKLIMITS = curEnabled
             elif curProvider == 'btdigg':
                 sickbeard.BTDIGG = curEnabled
             elif curProvider == 'torrentshack':
@@ -1165,9 +1162,6 @@ class ConfigProviders:
         
         sickbeard.BITHDTV_USERNAME = bithdtv_username.strip()
         sickbeard.BITHDTV_PASSWORD = bithdtv_password.strip()
-        
-        sickbeard.FUCKLIMITS_USERNAME = fucklimits_username.strip()
-        sickbeard.FUCKLIMITS_PASSWORD = fucklimits_password.strip()
         
         sickbeard.TORRENTSHACK_USERNAME = torrentshack_username.strip()
         sickbeard.TORRENTSHACK_PASSWORD = torrentshack_password.strip()
