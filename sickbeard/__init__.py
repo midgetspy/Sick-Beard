@@ -36,7 +36,7 @@ from sickbeard import providers, metadata
 
 from providers import ezrss, tvtorrents, torrentleech, btn, newznab, womble, omgwtfnzbs, hdbits
 
-from providers import kickass, torrentz, dtt, thepiratebay, publichd, torrentday
+from providers import kickass, torrentz, dtt, thepiratebay, torrentday
 from providers import sceneaccess, iptorrents, bithdtv, fucklimits, btdigg, torrentshack
 from providers import speed
 
@@ -231,8 +231,6 @@ SPEED_USERNAME = None
 SPEED_PASSWORD = None
 SPEED_RSSHASH = None
 
-PUBLICHD = False
-
 BTN = False
 BTN_API_KEY = None
 
@@ -404,7 +402,6 @@ def initialize(consoleLogging=True):
                 TORRENTSHACK, TORRENTSHACK_USERNAME, TORRENTSHACK_PASSWORD, TORRENTSHACK_UID, TORRENTSHACK_AUTH, TORRENTSHACK_PASS_KEY ,TORRENTSHACK_AUTH_KEY, \
                 SPEED, SPEED_USERNAME, SPEED_PASSWORD, SPEED_RSSHASH, \
                 BTDIGG, \
-                PUBLICHD, \
                 NZBS, NZBS_UID, NZBS_HASH, EZRSS, DTT, DTT_NORAR, DTT_SINGLE, \
                 THEPIRATEBAY, THEPIRATEBAY_TRUSTED, THEPIRATEBAY_PROXY, THEPIRATEBAY_PROXY_URL, THEPIRATEBAY_URL_OVERRIDE, \
                 TVTORRENTS, TVTORRENTS_DIGEST, TVTORRENTS_HASH, BTN, BTN_API_KEY, TORRENT_DIR, USENET_RETENTION, SOCKET_TIMEOUT, \
@@ -615,8 +612,6 @@ def initialize(consoleLogging=True):
         
         BTDIGG = bool(check_setting_int(CFG, 'BTDIGG', 'btdigg', 0))
         
-        PUBLICHD = bool(check_setting_int(CFG, 'PUBLICHD', 'publichd', 0))    
-
         GIT_PATH = check_setting_str(CFG, 'General', 'git_path', '')
         IGNORE_WORDS = check_setting_str(CFG, 'General', 'ignore_words', IGNORE_WORDS)
         EXTRA_SCRIPTS = [x.strip() for x in check_setting_str(CFG, 'General', 'extra_scripts', '').split('|') if x.strip()]
@@ -1228,9 +1223,6 @@ def save_config():
     
     new_config['BTDIGG'] = {}
     new_config['BTDIGG']['btdigg'] = int(BTDIGG)
-    
-    new_config['PUBLICHD'] = {}
-    new_config['PUBLICHD']['publichd'] = int(PUBLICHD)
     
     new_config['THEPIRATEBAY'] = {}
     new_config['THEPIRATEBAY']['thepiratebay'] = int(THEPIRATEBAY)

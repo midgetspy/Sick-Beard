@@ -1095,8 +1095,6 @@ class ConfigProviders:
                 sickbeard.TORRENTSHACK = curEnabled
             elif curProvider == 'speed':
                 sickbeard.SPEED = curEnabled
-            elif curProvider == 'publichd':
-                sickbeard.PUBLICHD = curEnabled
             elif curProvider == 'btn':
                 sickbeard.BTN = curEnabled
             elif curProvider in newznabProviderDict:
