@@ -1112,7 +1112,7 @@ class CMD_HistoryClear(ApiCall):
         """ clear sickbeard's history """
         myDB = db.DBConnection()
         myDB.action("DELETE FROM history WHERE 1=1")
-
+        myDB.action("VACUUM")
         myDB.connection.close()
         return _responds(RESULT_SUCCESS, msg="History cleared")
 
@@ -1131,7 +1131,7 @@ class CMD_HistoryTrim(ApiCall):
         """ trim sickbeard's history """
         myDB = db.DBConnection()
         myDB.action("DELETE FROM history WHERE date < " + str((datetime.datetime.today() - datetime.timedelta(days=30)).strftime(history.dateFormat)))
-
+        myDB.action("VACUUM")
         myDB.connection.close()
         return _responds(RESULT_SUCCESS, msg="Removed history entries greater than 30 days old")
 
