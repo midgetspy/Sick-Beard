@@ -996,7 +996,6 @@ class ConfigProviders:
                       torrentleech_key=None,
                       btn_api_key=None, hdbits_username=None, hdbits_passkey=None,
                       thepiratebay_trusted = None, thepiratebay_proxy = None, thepiratebay_proxy_url = None,thepiratebay_url_override = None, thepiratebay_url_override_enable = None,
-                      dtt_norar = None, dtt_single = None, 
                       torrentleech_username = None, torrentleech_password = None,
                       torrentday_username = None, torrentday_password = None,
                       sceneaccess_username = None, sceneaccess_password = None, sceneaccess_rsshash = None,
@@ -1074,8 +1073,6 @@ class ConfigProviders:
                 sickbeard.THEPIRATEBAY = curEnabled 
             elif curProvider == 'tvtorrents':
                 sickbeard.TVTORRENTS = curEnabled
-            elif curProvider == 'dailytvtorrents':
-                sickbeard.DTT = curEnabled
             elif curProvider == 'torrentleech':
                 sickbeard.TORRENTLEECH = curEnabled
             elif curProvider == 'torrentday':
@@ -1131,20 +1128,6 @@ class ConfigProviders:
             thepiratebay_url_override_enable = 0
             sickbeard.THEPIRATEBAY_URL_OVERRIDE = ""
             
-        if dtt_norar == "on":
-            dtt_norar = 1
-        else:
-            dtt_norar = 0
-
-        sickbeard.DTT_NORAR = dtt_norar
-            
-        if dtt_single == "on":
-            dtt_single = 1
-        else:
-            dtt_single = 0
-
-        sickbeard.DTT_SINGLE = dtt_single
-        
         sickbeard.TORRENTLEECH_USERNAME = torrentleech_username
         sickbeard.TORRENTLEECH_PASSWORD = torrentleech_password
         

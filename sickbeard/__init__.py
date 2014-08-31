@@ -36,7 +36,7 @@ from sickbeard import providers, metadata
 
 from providers import ezrss, tvtorrents, torrentleech, btn, newznab, womble, omgwtfnzbs, hdbits
 
-from providers import kickass, torrentz, dtt, thepiratebay, torrentday
+from providers import kickass, torrentz, thepiratebay, torrentday
 from providers import sceneaccess, iptorrents, bithdtv, btdigg, torrentshack
 from providers import speed
 
@@ -169,10 +169,6 @@ EZRSS = False
 HDBITS = False
 HDBITS_USERNAME = None
 HDBITS_PASSKEY = None
-
-DTT = False
-DTT_NORAR = False
-DTT_SINGLE = False
 
 THEPIRATEBAY = False
 THEPIRATEBAY_TRUSTED = False
@@ -397,7 +393,7 @@ def initialize(consoleLogging=True):
                 TORRENTSHACK, TORRENTSHACK_USERNAME, TORRENTSHACK_PASSWORD, TORRENTSHACK_UID, TORRENTSHACK_AUTH, TORRENTSHACK_PASS_KEY ,TORRENTSHACK_AUTH_KEY, \
                 SPEED, SPEED_USERNAME, SPEED_PASSWORD, SPEED_RSSHASH, \
                 BTDIGG, \
-                NZBS, NZBS_UID, NZBS_HASH, EZRSS, DTT, DTT_NORAR, DTT_SINGLE, \
+                NZBS, NZBS_UID, NZBS_HASH, EZRSS, \
                 THEPIRATEBAY, THEPIRATEBAY_TRUSTED, THEPIRATEBAY_PROXY, THEPIRATEBAY_PROXY_URL, THEPIRATEBAY_URL_OVERRIDE, \
                 TVTORRENTS, TVTORRENTS_DIGEST, TVTORRENTS_HASH, BTN, BTN_API_KEY, TORRENT_DIR, USENET_RETENTION, SOCKET_TIMEOUT, \
                 SEARCH_FREQUENCY, DEFAULT_SEARCH_FREQUENCY, BACKLOG_SEARCH_FREQUENCY, \
@@ -543,10 +539,7 @@ def initialize(consoleLogging=True):
             CheckSection(CFG, 'EZRSS')
             EZRSS = bool(check_setting_int(CFG, 'EZRSS', 'ezrss', 0))
         
-        DTT = bool(check_setting_int(CFG, 'DTT', 'dtt', 0))
-        DTT_NORAR = bool(check_setting_int(CFG, 'DTT', 'dtt_norar', 0))
-        DTT_SINGLE = bool(check_setting_int(CFG, 'DTT', 'dtt_single', 0))
-            
+        
         TVTORRENTS = bool(check_setting_int(CFG, 'TVTORRENTS', 'tvtorrents', 0))    
         TVTORRENTS_DIGEST = check_setting_str(CFG, 'TVTORRENTS', 'tvtorrents_digest', '')
         TVTORRENTS_HASH = check_setting_str(CFG, 'TVTORRENTS', 'tvtorrents_hash', '')
@@ -1216,11 +1209,6 @@ def save_config():
     new_config['THEPIRATEBAY']['thepiratebay_proxy'] = int(THEPIRATEBAY_PROXY)
     new_config['THEPIRATEBAY']['thepiratebay_proxy_url'] = THEPIRATEBAY_PROXY_URL
     new_config['THEPIRATEBAY']['thepiratebay_url_override'] = THEPIRATEBAY_URL_OVERRIDE
-    
-    new_config['DTT'] = {}
-    new_config['DTT']['dtt'] = int(DTT)
-    new_config['DTT']['dtt_norar'] = int(DTT_NORAR)
-    new_config['DTT']['dtt_single'] = int(DTT_SINGLE)
     
     new_config['BTN'] = {}
     new_config['BTN']['btn'] = int(BTN)
