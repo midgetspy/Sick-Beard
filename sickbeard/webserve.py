@@ -211,14 +211,20 @@ class Manage:
         return _munge(t)
 
     @cherrypy.expose
-    def showEpisodeStatuses(self, tvdb_id, whichStatus):
+    def showEpisodeStatuses(self, tvdb_id, whichStatus, includeSpecials, excludeNoAirdate):
         myDB = db.DBConnection()
 
         status_list = [int(whichStatus)]
         if status_list[0] == SNATCHED:
             status_list = Quality.SNATCHED + Quality.SNATCHED_PROPER
 
-        cur_show_results = myDB.select("SELECT season, episode, name FROM tv_episodes WHERE showid = ? AND season > 0 AND status IN (" + ','.join(['?'] * len(status_list)) + ")", [int(tvdb_id)] + status_list)
+        sqlStatement = "SELECT season, episode, name FROM tv_episodes WHERE showid = ?"
+        if includeSpecials == "False":
+            sqlStatement += " AND season > 0"
+        if excludeNoAirdate == "True":
+            sqlStatement += " AND airdate > 1"
+
+        cur_show_results = myDB.select(sqlStatement + " AND status IN (" + ','.join(['?'] * len(status_list)) + ")", [int(tvdb_id)] + status_list)
 
         result = {}
         for cur_result in cur_show_results:
@@ -233,7 +239,7 @@ class Manage:
         return json.dumps(result)
 
     @cherrypy.expose
-    def episodeStatuses(self, whichStatus=None):
+    def episodeStatuses(self, whichStatus=None, includeSpecials=False, excludeNoAirdate=False):
 
         if whichStatus:
             whichStatus = int(whichStatus)
@@ -246,13 +252,21 @@ class Manage:
         t = PageTemplate(file="manage_episodeStatuses.tmpl")
         t.submenu = ManageMenu
         t.whichStatus = whichStatus
+        t.includeSpecials = includeSpecials
+        t.excludeNoAirdate = excludeNoAirdate
 
         # if we have no status then this is as far as we need to go
         if not status_list:
             return _munge(t)
 
+        sqlStatement = ""
+        if not includeSpecials:
+            sqlStatement += " AND season > 0"
+        if excludeNoAirdate:
+            sqlStatement += " AND airdate > 1"
+
         myDB = db.DBConnection()
-        status_results = myDB.select("SELECT show_name, tv_shows.tvdb_id as tvdb_id FROM tv_episodes, tv_shows WHERE tv_episodes.status IN (" + ','.join(['?'] * len(status_list)) + ") AND season > 0 AND tv_episodes.showid = tv_shows.tvdb_id ORDER BY show_name", status_list)
+        status_results = myDB.select("SELECT show_name, tv_shows.tvdb_id as tvdb_id FROM tv_episodes, tv_shows WHERE tv_episodes.status IN (" + ','.join(['?'] * len(status_list)) + ")" + sqlStatement + " AND tv_episodes.showid = tv_shows.tvdb_id ORDER BY show_name", status_list)
 
         ep_counts = {}
         show_names = {}
@@ -274,7 +288,7 @@ class Manage:
         return _munge(t)
 
     @cherrypy.expose
-    def changeEpisodeStatuses(self, oldStatus, newStatus, *args, **kwargs):
+    def changeEpisodeStatuses(self, oldStatus, newStatus, opt_includeSpecials, opt_excludeNoAirdate, *args, **kwargs):
 
         status_list = [int(oldStatus)]
         if status_list[0] == SNATCHED:
@@ -295,13 +309,19 @@ class Manage:
 
             to_change[tvdb_id].append(what)
 
+        sqlStatement = ""
+        if opt_includeSpecials == "False":
+            sqlStatement += " AND season > 0"
+        if opt_excludeNoAirdate == "True":
+            sqlStatement += " AND airdate > 1"
+
         myDB = db.DBConnection()
 
         for cur_tvdb_id in to_change:
 
             # get a list of all the eps we want to change if they just said "all"
             if 'all' in to_change[cur_tvdb_id]:
-                all_eps_results = myDB.select("SELECT season, episode FROM tv_episodes WHERE status IN (" + ','.join(['?'] * len(status_list)) + ") AND season > 0 AND showid = ?", status_list + [cur_tvdb_id])
+                all_eps_results = myDB.select("SELECT season, episode FROM tv_episodes WHERE status IN (" + ','.join(['?'] * len(status_list)) + ")" + sqlStatement + " AND showid = ?", status_list + [cur_tvdb_id])
                 all_eps = [str(x["season"]) + 'x' + str(x["episode"]) for x in all_eps_results]
                 to_change[cur_tvdb_id] = all_eps
 
