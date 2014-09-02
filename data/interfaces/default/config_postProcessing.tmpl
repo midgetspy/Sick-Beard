@@ -44,7 +44,7 @@
                             </label>
                             <label class="nocheck clearfix">
                                 <span class="component-title">&nbsp;</span>
-                                <span class="component-desc"><b>NOTE:</b> Used with option Scan an Process or Manual Post-Processing.</span>
+                                <span class="component-desc"><b>NOTE:</b> Used with option Scan and Process or Manual Post-Processing.</span>
                             </label>
                         </div>
 
@@ -475,7 +475,7 @@
                             <span>Toggle the metadata options that you wish to be created. <b>Multiple targets may be used.</b></span>
                         </div>
 
-#for ($cur_name, $cur_generator) in $m_dict.items(): 
+#for ($cur_name, $cur_generator) in $m_dict.items():
 #set $cur_metadata_inst = $sickbeard.metadata_provider_dict[$cur_generator.name]
 #set $cur_id = $cur_generator.get_id()
 <div class="metadataDiv clearfix" id="$cur_id">

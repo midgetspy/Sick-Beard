@@ -599,6 +599,7 @@ class History:
 
         myDB = db.DBConnection()
         myDB.action("DELETE FROM history WHERE 1=1")
+        myDB.action("VACUUM")
         ui.notifications.message('History cleared')
         redirect("/history/")
 
@@ -607,6 +608,7 @@ class History:
 
         myDB = db.DBConnection()
         myDB.action("DELETE FROM history WHERE date < " + str((datetime.datetime.today() - datetime.timedelta(days=30)).strftime(history.dateFormat)))
+        myDB.action("VACUUM")
         ui.notifications.message('Removed history entries greater than 30 days old')
         redirect("/history/")
 
