@@ -47,7 +47,7 @@ class TorrentShackProvider(generic.TorrentProvider):
         self.name = "TorrentShack"
         self.session = None
         self.supportsBacklog = True
-        self.url = 'https://torrentshack.net/'
+        self.url = 'https://torrentshack.eu/'
         logger.log("[" + self.name + "] initializing...")
     
     ###################################################################################################
@@ -201,7 +201,7 @@ class TorrentShackProvider(generic.TorrentProvider):
             raise Exception("[" + self.name + "] _doLogin() Error: " + ex(e))
             return False
         
-        if re.search("Your username or password was incorrect|<title>Login :: Torrent Shack</title>",response.text) \
+        if re.search("Your username or password was incorrect|<title>Login :: TorrentShack.eu</title>|<title>TorrentShack.eu</title>",response.text) \
         or response.status_code in [401,403]:
             raise Exception("[" + self.name + "] Login Failed, Invalid username or password for " + self.name + ". Check your settings.")
             return False
@@ -223,7 +223,7 @@ class TorrentShackCache(tvcache.TVCache):
         if sickbeard.TORRENTSHACK_UID and sickbeard.TORRENTSHACK_AUTH and sickbeard.TORRENTSHACK_PASS_KEY and sickbeard.TORRENTSHACK_AUTH_KEY:
             self.rss_url = "{0}feeds.php?feed=torrents&cat=600,620,700,980,981&user={1}&auth={2}&passkey={3}&authkey={4}".format(provider.url,sickbeard.TORRENTSHACK_UID, sickbeard.TORRENTSHACK_AUTH, sickbeard.TORRENTSHACK_PASS_KEY, sickbeard.TORRENTSHACK_AUTH_KEY)
             logger.log("[" + provider.name + "] RSS URL - {0}".format(self.rss_url))
-            xml = provider.getURL(self.rss_url)
+            xml = provider.getURL(self.rss_url).replace('http:','https:')
         else:
             logger.log("[" + provider.name + "] WARNING: RSS construction via browse since no RSS variables provided.") 
             xml = "<rss xmlns:atom=\"http://www.w3.org/2005/Atom\" version=\"2.0\">" + \

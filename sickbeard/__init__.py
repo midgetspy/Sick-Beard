@@ -36,8 +36,8 @@ from sickbeard import providers, metadata
 
 from providers import ezrss, tvtorrents, torrentleech, btn, newznab, womble, omgwtfnzbs, hdbits
 
-from providers import kickass, torrentz, dtt, thepiratebay, publichd, torrentday
-from providers import sceneaccess, iptorrents, bithdtv, fucklimits, btdigg, torrentshack
+from providers import kickass, torrentz, thepiratebay, torrentday
+from providers import sceneaccess, iptorrents, bithdtv, btdigg, torrentshack
 from providers import speed
 
 from sickbeard.config import CheckSection, check_setting_int, check_setting_str, ConfigMigrator
@@ -174,10 +174,6 @@ HDBITS = False
 HDBITS_USERNAME = None
 HDBITS_PASSKEY = None
 
-DTT = False
-DTT_NORAR = False
-DTT_SINGLE = False
-
 THEPIRATEBAY = False
 THEPIRATEBAY_TRUSTED = False
 THEPIRATEBAY_PROXY = False
@@ -216,10 +212,6 @@ BITHDTV = False
 BITHDTV_USERNAME = None
 BITHDTV_PASSWORD = None
 
-FUCKLIMITS = False
-FUCKLIMITS_USERNAME = None
-FUCKLIMITS_PASSWORD = None
-
 BTDIGG = False
 
 TORRENTSHACK = False
@@ -234,8 +226,6 @@ SPEED = False
 SPEED_USERNAME = None
 SPEED_PASSWORD = None
 SPEED_RSSHASH = None
-
-PUBLICHD = False
 
 BTN = False
 BTN_API_KEY = None
@@ -404,12 +394,10 @@ def initialize(consoleLogging=True):
                 SCENEACCESS, SCENEACCESS_USERNAME, SCENEACCESS_PASSWORD, SCENEACCESS_RSSHASH, \
                 IPTORRENTS, IPTORRENTS_USERNAME, IPTORRENTS_PASSWORD, IPTORRENTS_UID, IPTORRENTS_RSSHASH, \
                 BITHDTV, BITHDTV_USERNAME, BITHDTV_PASSWORD, \
-                FUCKLIMITS, FUCKLIMITS_USERNAME, FUCKLIMITS_PASSWORD, \
                 TORRENTSHACK, TORRENTSHACK_USERNAME, TORRENTSHACK_PASSWORD, TORRENTSHACK_UID, TORRENTSHACK_AUTH, TORRENTSHACK_PASS_KEY ,TORRENTSHACK_AUTH_KEY, \
                 SPEED, SPEED_USERNAME, SPEED_PASSWORD, SPEED_RSSHASH, \
                 BTDIGG, \
-                PUBLICHD, \
-                NZBS, NZBS_UID, NZBS_HASH, EZRSS, DTT, DTT_NORAR, DTT_SINGLE, \
+                NZBS, NZBS_UID, NZBS_HASH, EZRSS, \
                 THEPIRATEBAY, THEPIRATEBAY_TRUSTED, THEPIRATEBAY_PROXY, THEPIRATEBAY_PROXY_URL, THEPIRATEBAY_URL_OVERRIDE, \
                 TVTORRENTS, TVTORRENTS_DIGEST, TVTORRENTS_HASH, BTN, BTN_API_KEY, TORRENT_DIR, USENET_RETENTION, SOCKET_TIMEOUT, \
                 SEARCH_FREQUENCY, DEFAULT_SEARCH_FREQUENCY, BACKLOG_SEARCH_FREQUENCY, \
@@ -556,9 +544,6 @@ def initialize(consoleLogging=True):
             CheckSection(CFG, 'EZRSS')
             EZRSS = bool(check_setting_int(CFG, 'EZRSS', 'ezrss', 0))
 
-        DTT = bool(check_setting_int(CFG, 'DTT', 'dtt', 0))
-        DTT_NORAR = bool(check_setting_int(CFG, 'DTT', 'dtt_norar', 0))
-        DTT_SINGLE = bool(check_setting_int(CFG, 'DTT', 'dtt_single', 0))
 
         SUBTITLE_LANGUAGES = check_setting_str(CFG, 'General', 'subtitle_languages', '')
 
@@ -603,10 +588,6 @@ def initialize(consoleLogging=True):
         BITHDTV_USERNAME = check_setting_str(CFG, 'BITHDTV', 'bithdtv_username', '')
         BITHDTV_PASSWORD = check_setting_str(CFG, 'BITHDTV', 'bithdtv_password', '')
         
-        FUCKLIMITS = bool(check_setting_int(CFG, 'FUCKLIMITS', 'fucklimits', 0))
-        FUCKLIMITS_USERNAME = check_setting_str(CFG, 'FUCKLIMITS', 'fucklimits_username', '')
-        FUCKLIMITS_PASSWORD = check_setting_str(CFG, 'FUCKLIMITS', 'fucklimits_password', '')
-        
         TORRENTSHACK = bool(check_setting_int(CFG, 'TORRENTSHACK', 'torrentshack', 0))
         TORRENTSHACK_USERNAME = check_setting_str(CFG, 'TORRENTSHACK', 'torrentshack_username', '')
         TORRENTSHACK_PASSWORD = check_setting_str(CFG, 'TORRENTSHACK', 'torrentshack_password', '')
@@ -622,8 +603,6 @@ def initialize(consoleLogging=True):
         
         BTDIGG = bool(check_setting_int(CFG, 'BTDIGG', 'btdigg', 0))
         
-        PUBLICHD = bool(check_setting_int(CFG, 'PUBLICHD', 'publichd', 0))    
-
         GIT_PATH = check_setting_str(CFG, 'General', 'git_path', '')
         IGNORE_WORDS = check_setting_str(CFG, 'General', 'ignore_words', IGNORE_WORDS)
         EXTRA_SCRIPTS = [x.strip() for x in check_setting_str(CFG, 'General', 'extra_scripts', '').split('|') if x.strip()]
@@ -1229,11 +1208,6 @@ def save_config():
     new_config['BITHDTV']['bithdtv'] = int(BITHDTV)
     new_config['BITHDTV']['bithdtv_username'] = BITHDTV_USERNAME
     new_config['BITHDTV']['bithdtv_password'] = BITHDTV_PASSWORD
-
-    new_config['FUCKLIMITS'] = {}
-    new_config['FUCKLIMITS']['fucklimits'] = int(FUCKLIMITS)
-    new_config['FUCKLIMITS']['fucklimits_username'] = FUCKLIMITS_USERNAME
-    new_config['FUCKLIMITS']['fucklimits_password'] = FUCKLIMITS_PASSWORD
     
     new_config['TORRENTSHACK'] = {}
     new_config['TORRENTSHACK']['torrentshack'] = int(TORRENTSHACK)
@@ -1253,20 +1227,12 @@ def save_config():
     new_config['BTDIGG'] = {}
     new_config['BTDIGG']['btdigg'] = int(BTDIGG)
     
-    new_config['PUBLICHD'] = {}
-    new_config['PUBLICHD']['publichd'] = int(PUBLICHD)
-    
     new_config['THEPIRATEBAY'] = {}
     new_config['THEPIRATEBAY']['thepiratebay'] = int(THEPIRATEBAY)
     new_config['THEPIRATEBAY']['thepiratebay_trusted'] = int(THEPIRATEBAY_TRUSTED)    
     new_config['THEPIRATEBAY']['thepiratebay_proxy'] = int(THEPIRATEBAY_PROXY)
     new_config['THEPIRATEBAY']['thepiratebay_proxy_url'] = THEPIRATEBAY_PROXY_URL
     new_config['THEPIRATEBAY']['thepiratebay_url_override'] = THEPIRATEBAY_URL_OVERRIDE
-    
-    new_config['DTT'] = {}
-    new_config['DTT']['dtt'] = int(DTT)
-    new_config['DTT']['dtt_norar'] = int(DTT_NORAR)
-    new_config['DTT']['dtt_single'] = int(DTT_SINGLE)
     
     new_config['BTN'] = {}
     new_config['BTN']['btn'] = int(BTN)
