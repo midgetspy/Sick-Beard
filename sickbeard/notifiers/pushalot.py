@@ -39,9 +39,9 @@ class PushalotNotifier:
         if not authtoken:
             authtoken = sickbeard.PUSHALOT_AUTHORIZATIONTOKEN
         if not important:
-            important = sickbeard.PUSHALOT_IMPORTANT
+            important = bool(sickbeard.PUSHALOT_IMPORTANT)
         if not silent:
-            silent = sickbeard.PUSHALOT_SILENT
+            silent = bool(sickbeard.PUSHALOT_SILENT)
 
         logger.log("PUSHALOT: Sending notice with details: title=\"%s\", message=\"%s\", silent=%s, important=%s, authtoken=%s" % (title, message, silent, important, authtoken), logger.DEBUG)
 
