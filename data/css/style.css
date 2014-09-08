@@ -752,6 +752,26 @@ span.pause {
 }
 
 /* =======================================================================
+history.tmpl
+========================================================================== */
+th.col-src,
+td.col-src {
+  width: 45px;
+  text-align: center;
+}
+th.col-time,
+td.col-time {
+  width: 155px;
+  white-space: nowrap;
+  text-align: center;
+}
+th.col-action,
+td.col-action {
+  width: 110px;
+  text-align: center;
+}
+
+/* =======================================================================
 config.tmpl
 ========================================================================== */
 .infoTable td {
