@@ -87,7 +87,7 @@
                                 <span class="component-title jumbo">Configure Provider:</span>
                                 <span class="component-desc">
                                     #set $provider_config_list = []
-                                    #for $cur_provider in ("btn", "hdbits", "omgwtfnzbs", "tvtorrents", "torrentleech", "thepiratebay", "torrentz", "torrentday", "sceneaccess", "iptorrents", "bithdtv", "torrentshack","speed"):
+                                    #for $cur_provider in ("btn", "hdbits", "omgwtfnzbs", "tvtorrents", "torrentleech", "thepiratebay", "torrentz", "torrentday", "sceneaccess", "iptorrents", "bithdtv", "torrentshack","speed","kickass"):
                                         #set $cur_provider_obj = $sickbeard.providers.getProviderClass($cur_provider)
                                         #if $cur_provider_obj.providerType == $GenericProvider.NZB and not $sickbeard.USE_NZBS:
                                             #continue
@@ -252,6 +252,21 @@
                             </label>
                         </div>
 		    </div><!-- /torrentzDiv //-->
+                    
+                    <div class="providerDiv" id="kickassDiv">
+                        <div class="field-pair">
+                            <label class="clearfix">
+                                <span class="component-title">Alt Proxy URL:</span>
+                                <input class="component-desc" type="text" name="kickass_alt_url" value="$sickbeard.KICKASS_ALT_URL" size="40" />
+                            </label>
+                        </div>
+                        <div class="field-pair">
+                            <label class="clearfix">
+                                <span class="component-title">&nbsp;</span>
+                                <span class="component-desc"><i>Example:</i> <a href="http://katproxy.com/" target="_blank">http://katproxy.com/</a></span>
+                            </label>
+                        </div>
+                    </div><!-- /KickAssDiv //-->
                     
                     <div class="providerDiv" id="torrentdayDiv">
                         <div class="field-pair">

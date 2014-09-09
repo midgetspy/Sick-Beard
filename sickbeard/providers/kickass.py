@@ -1,5 +1,6 @@
-# Author: Marcos Almeida Jr. <junalmeida@gmail.com>
-# URL: https://github.com/junalmeida/Sick-Beard
+###################################################################################################
+# Author: Jodi Jones <venom@gen-x.co.nz>
+# URL: https://github.com/VeNoMouS/Sick-Beard
 #
 # This file is part of Sick Beard.
 #
@@ -15,190 +16,211 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with Sick Beard.  If not, see <http://www.gnu.org/licenses/>.
+###################################################################################################
 
-
-
-import traceback
-import urllib
+import os
 import re
-
-import xml.etree.cElementTree as etree
-
-import sickbeard
+import sys
+import json
+import urllib
 import generic
+import datetime
+import sickbeard
+import exceptions
 
-from sickbeard import encodingKludge as ek
-from sickbeard.common import *
-from sickbeard import logger, helpers
+from lib import requests
+from xml.sax.saxutils import escape
+
+from sickbeard import db
+from sickbeard import logger
 from sickbeard import tvcache
-from sickbeard.helpers import sanitizeSceneName
+from sickbeard.exceptions import ex
+from sickbeard.common import Quality
+from sickbeard.common import Overview
+from sickbeard import show_name_helpers
 
-class KICKASSProvider(generic.TorrentProvider):
+class KickAssProvider(generic.TorrentProvider):
 
+    ###################################################################################################
     def __init__(self):
-        generic.TorrentProvider.__init__(self, "Kickass")
-        
+        generic.TorrentProvider.__init__(self, "KickAss")
+        self.cache = KickAssCache(self)     
+        self.name = "KickAss"
+        self.session = None
         self.supportsBacklog = True
-
-        self.cache = KICKASSCache(self)
-
-        self.url = 'http://kickass.to/'
-
+        self.url = "http://kickass.to/"
+        logger.log("[" + self.name + "] initializing...")
+        
+    ###################################################################################################
+    
     def isEnabled(self):
         return sickbeard.KICKASS
-        
+    
+    ###################################################################################################
+    
     def imageName(self):
         return 'kickass.png'
     
-    def findSeasonResults(self, show, season):
-        
-        results = {}
-       
-        results = generic.TorrentProvider.findSeasonResults(self, show, season)
-        
-        return results
-        
-    def _get_season_search_strings(self, show, season=None):
+    ###################################################################################################
+
+    def getQuality(self, item):        
+        quality = Quality.nameQuality(item[0])
+        return quality 
     
-        params = {}
+    ###################################################################################################
+
+    def _get_title_and_url(self, item):
+        return item
+
+    ###################################################################################################
+
+    def _get_airbydate_season_range(self, season):        
+        if season == None:
+            return ()        
+        year, month = map(int, season.split('-'))
+        min_date = datetime.date(year, month, 1)
+        if month == 12:
+            max_date = datetime.date(year, month, 31)
+        else:    
+            max_date = datetime.date(year, month+1, 1) -  datetime.timedelta(days=1)
+        return (min_date, max_date)    
+
+    ###################################################################################################
+
+    def _get_season_search_strings(self, show, season=None):
+        search_string = []
     
         if not show:
-            return params
-
-        params['show_name'] = self._sanitizeNameToSearch(show.name)
-          
-        if season != None:
-            params['season'] = season
-    
-        return [params]    
-    
-    def _get_episode_search_strings(self, ep_obj):
-    
-        params = {}
+            return []
+      
+        myDB = db.DBConnection()
         
-        if not ep_obj:
-            return params
-                   
-        params['show_name'] = self._sanitizeNameToSearch(ep_obj.show.name)
-        
-        if ep_obj.show.air_by_date:
-            params['date'] = str(ep_obj.airdate)
+        if show.air_by_date:
+            (min_date, max_date) = self._get_airbydate_season_range(season)
+            sqlResults = myDB.select("SELECT * FROM tv_episodes WHERE showid = ? AND airdate >= ? AND airdate <= ?", [show.tvdbid,  min_date.toordinal(), max_date.toordinal()])
         else:
-            params['season'] = ep_obj.season
-            params['episode'] = ep_obj.episode
-    
-        return [params]
-    def _sanitizeNameToSearch(self, text):
-        text = re.sub(r'\([^)]*\)', '', text)
-        return sanitizeSceneName(text, ezrss=True).replace('.',' ').replace('-',' ').encode('utf-8')
-                  
+            sqlResults = myDB.select("SELECT * FROM tv_episodes WHERE showid = ? AND season = ?", [show.tvdbid, season])
+            
+        for sqlEp in sqlResults:
+            if show.getOverview(int(sqlEp["status"])) in (Overview.WANTED, Overview.QUAL):
+                if show.air_by_date:
+                    for show_name in set(show_name_helpers.allPossibleShowNames(show)):
+                        ep_string = show_name_helpers.sanitizeSceneName(show_name) +' '+ str(datetime.date.fromordinal(sqlEp["airdate"])).replace('-', '.')
+                        search_string.append(ep_string)
+                else:
+                    for show_name in set(show_name_helpers.allPossibleShowNames(show)):
+                        ep_string = show_name_helpers.sanitizeSceneName(show_name) +' '+ sickbeard.config.naming_ep_type[2] % {'seasonnumber': season, 'episodenumber': int(sqlEp["episode"])}
+                        search_string.append(ep_string)                       
+        return search_string
+
+    ###################################################################################################
+
+    def _get_episode_search_strings(self, ep_obj):    
+        search_string = []
+       
+        if not ep_obj:
+            return []
+        if ep_obj.show.air_by_date:
+            for show_name in set(show_name_helpers.allPossibleShowNames(ep_obj.show)):
+                ep_string = show_name_helpers.sanitizeSceneName(show_name) +' '+ str(ep_obj.airdate).replace('-', '.')
+                search_string.append(ep_string)
+        else:
+            for show_name in set(show_name_helpers.allPossibleShowNames(ep_obj.show)):
+                ep_string = show_name_helpers.sanitizeSceneName(show_name) +' '+ sickbeard.config.naming_ep_type[2] % {'seasonnumber': ep_obj.season, 'episodenumber': ep_obj.episode}
+                search_string.append(ep_string)
+        return search_string    
+ 
+    ###################################################################################################
+
     def _doSearch(self, search_params, show=None):
-        try:
-            params = {"rss": "1"}
-        
-            if search_params:
-                params.update(search_params)
-
-            searchURL = ''
+        results = []
+        logger.log("[" + self.name + "] Performing Search: {0}".format(search_params))
+        for page in range(1,3):
+            searchData = None
             
-            if not 'episode' in params:
-                ep_number = "S%(seasonnumber)02d" % {'seasonnumber': params['season']}
-                searchURL = self.url +'search/' + params['show_name'] + ' ' + ep_number
+            if len(sickbeard.KICKASS_ALT_URL):
+                self.url = sickbeard.KICKASS_ALT_URL
+                
+            SearchURL = self.url + "json.php?q=" + search_params.replace(':','') + "%20category:tv&order=desc&page=" + str(page) + "&field="
+            
+            if len(search_params):
+                SearchURL +=  "seeders"
             else:
-                ep_number = "S%(seasonnumber)02dE%(episodenumber)02d" % {'seasonnumber': params['season'], 'episodenumber': params['episode']}
-                searchURL = self.url +'search/' + params['show_name'] + ' ' + ep_number 
-            searchURL = searchURL + '/?rss=1&field=seeders&sorder=desc'
-            searchURL = searchURL.lower()
+                SearchURL +=  "time_add"
             
-            logger.log(u"Search string: " + searchURL, logger.DEBUG)
-            #data = self.getURL(searchURL)
-
-            items = []
-            for index in [1,2,3,4,5]:
+            searchData = self.getURL(SearchURL)
+              
+            if searchData:
                 try:
-                    data = self.getURL(searchURL + "&page=%(page)d" % {'page': index })
-                    if data and data.startswith("<?xml"):
-                        data = self.sanitiseXml(data)
-                        responseSoup = etree.ElementTree(etree.XML(data))
-                        newItems = responseSoup.getiterator('item')
-                        oldCount = len(items)
-                        items.extend(newItems)
-                        if len(items) - oldCount < 25:
-                            break
-                except Exception, e:
-                    logger.log(u"Error trying to load " + self.name + " RSS feed: "+str(e).decode('utf-8'), logger.ERROR)
-                    traceback.print_exc()
-           
-            results = []
-            for curItem in items:
-                try:
-                    (title, url) = self._get_title_and_url(curItem)
-                    if not title or not url:
-                        logger.log(u"The XML returned from the KICKASS RSS feed is incomplete, this result is unusable: "+data, logger.ERROR)
-                        continue
-                    results.append(curItem)
-                except Exception, e:
-                    logger.log(u"Error trying to load KICKASS RSS feed item: "+str(e).decode('utf-8'), logger.ERROR)
-               
-            logger.log("KICKASS total torrents: %(count)d" % { 'count' : len(results) }, logger.DEBUG)
-            
-            return results
-        except Exception, e:
-            logger.log(u"Error trying to load KICKASS: "+str(e).decode('utf-8'), logger.ERROR)
-            traceback.print_exc()
-            raise 
-        
-    def _get_title_and_url(self, item):
-        title = item.findtext('title')
-        url = item.find('enclosure').attrib["url"].replace('&amp;','&')
-
-        return (title, url)
-
-    def _extract_name_from_filename(self, filename):
-        name_regex = '(.*?)\.?(\[.*]|\d+\.TPB)\.torrent$'
-        logger.log(u"Comparing "+name_regex+" against "+filename, logger.DEBUG)
-        match = re.match(name_regex, filename, re.I)
-        if match:
-            return match.group(1)
-        return None
-    def sanitiseXml(self, data):
-        regex = re.compile('<content\:encoded>.*?<\/content\:encoded>', flags = re.S)
-        return regex.sub("", data)
-
-        
-class KICKASSCache(tvcache.TVCache):
-
-    def __init__(self, provider):
-
-        tvcache.TVCache.__init__(self, provider)
-
-        # only poll KICKASS every 15 minutes max
-        self.minTime = 15
-
-    def _getRSSData(self):
-        url = self.provider.url + 'tv/?rss=1'
-
-        #logger.log(u"KICKASS cache update URL: " + url)
-
-        data = self.provider.getURL(url)
-        data = self.provider.sanitiseXml(data)
-        return data
+                    jdata = json.loads(searchData)
+                except ValueError, e:
+                    logger.log("[" + self.name + "] _doSearch() invalid data on search page " + str(page))
+                    continue
+                
+                torrents = jdata.get('list', [0])
+                
+                for torrent in torrents:
+                    item = (torrent['title'].replace('.',' '), torrent['torrentLink'])
+                    logger.log("[" + self.name + "] _doSearch() Title: " + torrent['title'], logger.DEBUG)
+                    results.append(item)
+                    
+        if not len(results):
+            logger.log("[" + self.name + "] _doSearch() No results found.", logger.DEBUG)
+        return results
     
-    def _parseItem(self, item):
-        try:      
-            title = helpers.get_xml_text(item.findall('title')[0])
-            url = item.findall('enclosure')[0].get("url").replace('&amp;','&')
-
-            if not title or not url:
-                logger.log(u"The XML returned from the KICKASS RSS feed is incomplete, this result is unusable", logger.ERROR)
-                return
-
-            logger.log(u"Adding item from KICKASS RSS to cache: "+title, logger.DEBUG)
-            
-            self._addCacheEntry(title, url)
+    ###################################################################################################
+    
+    def getURL(self, url, headers=None):
+        response = None
         
-        except Exception, e:
-            logger.log(u"Error trying to parse KICKASS cache: "+str(e).decode('utf-8'), logger.ERROR)
-            traceback.print_exc()
-            raise 
-provider = KICKASSProvider()
+        if not self.session:
+            self.session = requests.Session()
+            
+        if not headers:
+            headers = []
+            
+        try:
+            response = self.session.get(url, verify=False)
+        except (requests.exceptions.ConnectionError, requests.exceptions.HTTPError), e:
+            logger.log("[" + self.name + "] getURL() Error loading " + self.name + " URL: " + ex(e), logger.ERROR)
+            return None
+        
+        if response.status_code not in [200,302,303]:
+            logger.log("[" + self.name + "] getURL() requested URL - " + url +" returned status code is " + str(response.status_code), logger.ERROR)
+            return None
+
+        return response.content
+    
+    ###################################################################################################
+
+class KickAssCache(tvcache.TVCache):
+    
+    ###################################################################################################
+    
+    def __init__(self, provider):
+        tvcache.TVCache.__init__(self, provider)
+        # only poll KAT every 15 minutes max
+        self.minTime = 15
+        
+    ###################################################################################################
+    
+    def _getRSSData(self):
+        logger.log("[" + provider.name + "] Retriving RSS")
+        
+        xml = "<rss xmlns:atom=\"http://www.w3.org/2005/Atom\" version=\"2.0\">" + \
+            "<channel>" + \
+            "<title>" + provider.name + "</title>" + \
+            "<link>" + provider.url + "</link>" + \
+            "<description>torrent search</description>" + \
+            "<language>en-us</language>" + \
+            "<atom:link href=\"" + provider.url + "\" rel=\"self\" type=\"application/rss+xml\"/>"
+        data = provider._doSearch("")
+        if data:
+            for title, url in data:
+                xml += "<item>" + "<title>" + escape(title) + "</title>" +  "<link>"+ urllib.quote(url,'/,:') + "</link>" + "</item>"
+        xml += "</channel></rss>"
+        return xml
+    
+    ###################################################################################################
+
+provider = KickAssProvider()

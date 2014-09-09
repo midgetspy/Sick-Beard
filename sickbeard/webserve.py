@@ -1004,6 +1004,7 @@ class ConfigProviders:
                       torrentshack_username = None, torrentshack_password = None, torrentshack_uid = None, torrentshack_auth = None, torrentshack_pass_key = None, torrentshack_auth_key = None,
                       torrentz_verified = None,
                       speed_username = None, speed_password = None, speed_rsshash = None,
+                      kickass_alt_url = None,
                       provider_order=None):
 
         results = []
@@ -1128,6 +1129,8 @@ class ConfigProviders:
             thepiratebay_url_override_enable = 0
             sickbeard.THEPIRATEBAY_URL_OVERRIDE = ""
             
+        sickbeard.KICKASS_ALT_URL = kickass_alt_url.strip()
+ 
         sickbeard.TORRENTLEECH_USERNAME = torrentleech_username
         sickbeard.TORRENTLEECH_PASSWORD = torrentleech_password
         
