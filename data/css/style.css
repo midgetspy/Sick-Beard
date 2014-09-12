@@ -49,10 +49,14 @@ browser.css
 .ui-menu .ui-menu-item-alternate {
   background-color: #fff;
 }
-.ui-autocomplete .ui-menu-item .ui-state-focus {
+.ui-autocomplete .ui-menu-item.ui-state-focus,
+.ui-autocomplete .ui-menu-item.ui-state-active {
   color: #fff;
   background: none;
   background-color: #0a246a;
+  margin: 0;
+  border: none;
+  font-weight: normal;
 }
 /* restore 1.8.x resize handle on dialog button pane */
 .ui-dialog .ui-resizable-se {
