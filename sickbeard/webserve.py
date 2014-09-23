@@ -1133,6 +1133,7 @@ class ConfigNotifications:
                           use_prowl=None, prowl_notify_onsnatch=None, prowl_notify_ondownload=None, prowl_api=None, prowl_priority=0,
                           use_twitter=None, twitter_notify_onsnatch=None, twitter_notify_ondownload=None,
                           use_boxcar2=None, boxcar2_notify_onsnatch=None, boxcar2_notify_ondownload=None, boxcar2_access_token=None, boxcar2_sound=None,
+                          use_pushbullet=None, pushbullet_notify_onsnatch=None, pushbullet_notify_ondownload=None, pushbullet_access_token=None,
                           use_pushover=None, pushover_notify_onsnatch=None, pushover_notify_ondownload=None, pushover_userkey=None,
                           use_libnotify=None, libnotify_notify_onsnatch=None, libnotify_notify_ondownload=None,
                           use_nmj=None, nmj_host=None, nmj_database=None, nmj_mount=None,
@@ -1208,6 +1209,11 @@ class ConfigNotifications:
         sickbeard.USE_LIBNOTIFY = config.checkbox_to_value(use_libnotify)
         sickbeard.LIBNOTIFY_NOTIFY_ONSNATCH = config.checkbox_to_value(libnotify_notify_onsnatch)
         sickbeard.LIBNOTIFY_NOTIFY_ONDOWNLOAD = config.checkbox_to_value(libnotify_notify_ondownload)
+
+        sickbeard.USE_PUSHBULLET = config.checkbox_to_value(use_pushbullet)
+        sickbeard.PUSHBULLET_NOTIFY_ONSNATCH = config.checkbox_to_value(pushbullet_notify_onsnatch)
+        sickbeard.PUSHBULLET_NOTIFY_ONDOWNLOAD = config.checkbox_to_value(pushbullet_notify_ondownload)
+        sickbeard.PUSHBULLET_ACCESS_TOKEN = pushbullet_access_token
 
         sickbeard.USE_PUSHOVER = config.checkbox_to_value(use_pushover)
         sickbeard.PUSHOVER_NOTIFY_ONSNATCH = config.checkbox_to_value(pushover_notify_onsnatch)
@@ -1945,6 +1951,16 @@ class Home:
             return "Pushover notification succeeded. Check your Pushover clients to make sure it worked"
         else:
             return "Error sending Pushover notification"
+
+    @cherrypy.expose
+    def testPushbullet(self, accessToken=None):
+        cherrypy.response.headers['Cache-Control'] = "max-age=0,no-cache,no-store"
+
+        result = notifiers.pushbullet_notifier.test_notify(accessToken)
+        if result:
+            return "Pushbullet notification succeeded. Check your Pushbullet clients to make sure it worked"
+        else:
+            return "Error sending Pushbullet notification"
 
     @cherrypy.expose
     def twitterStep1(self):
