@@ -38,7 +38,10 @@
                               },
             5: function(node) { return \$(node).find("span").text().toLowerCase(); }
         },
-        widgetOptions : { filter_useParsedData : true }
+        widgetOptions : {
+            filter_useParsedData : true,
+            filter_defaultFilter : { 2 : '/{query}/' }
+        }
     });
     \$('#limit').change(function(){
         url = '$sbRoot/history/?limit=' + \$(this).val()

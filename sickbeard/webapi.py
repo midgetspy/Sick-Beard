@@ -136,10 +136,12 @@ class Api:
         def titler(x):
             if not x:
                 return x
-            if x.lower().startswith('a '):
-                x = x[2:]
+            if not x.lower().startswith('a to ') and x.lower().startswith('a '):
+                    x = x[2:]
+            elif x.lower().startswith('an '):
+                    x = x[3:]
             elif x.lower().startswith('the '):
-                x = x[4:]
+                    x = x[4:]
             return x
 
         # enforce a 100 show limit to ensure performance
