@@ -98,6 +98,13 @@ $(document).ready(function () {
             });
     });
 
+    $('#testPushbullet').click(function () {
+        $('#testPushbullet-result').html(loading);
+        var pushbullet_apikey = $("#pushbullet_apikey").val();
+        $.get(sbRoot + "/home/testPushbullet", {'apiKey': pushbullet_apikey},
+            function (data) { $('#testPushbullet-result').html(data); });
+    });
+
     $("#testLibnotify").click(function () {
         $("#testLibnotify-result").html(loading);
         $.get(sbRoot + "/home/testLibnotify",
