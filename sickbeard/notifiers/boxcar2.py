@@ -32,7 +32,7 @@ API_URL = "https://new.boxcar.io/api/notifications"
 
 class Boxcar2Notifier:
 
-    def _sendBoxcar2(self, msg, title, accessToken, sound):
+    def _sendBoxcar2(self, title, msg, accessToken, sound):
         """
         Sends a boxcar2 notification to the address provided
 
@@ -107,7 +107,7 @@ class Boxcar2Notifier:
 
         logger.log(u"BOXCAR2: Sending notification for " + message, logger.DEBUG)
 
-        return self._sendBoxcar2(message, title, accessToken, sound)
+        return self._sendBoxcar2(title, message, accessToken, sound)
 
 ##############################################################################
 # Public functions
@@ -122,7 +122,7 @@ class Boxcar2Notifier:
             self._notify(notifyStrings[NOTIFY_DOWNLOAD], ep_name)
 
     def test_notify(self, accessToken, sound):
-        return self._notify(message="This is a test notification from Sick Beard", title="Test", accessToken=accessToken, sound=sound, force=True)
+        return self._notify("Test", "This is a test notification from Sick Beard", accessToken, sound, force=True)
 
     def update_library(self, ep_obj=None):
         pass

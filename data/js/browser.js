@@ -61,7 +61,6 @@
             fileBrowserDialog = $('<div id="fileBrowserDialog" style="display:hidden"></div>').appendTo('body').dialog({
                 dialogClass: 'browserDialog',
                 title:       options.title,
-                position:    ['center', 40],
                 minWidth:    Math.min($(document).width() - 80, 650),
                 height:      Math.min($(document).height() - 80, $(window).height() - 80),
                 maxHeight:   Math.min($(document).height() - 80, $(window).height() - 80),
@@ -132,8 +131,7 @@
                     });
                 },
                 open: function (event, ui) {
-                    $(".ui-autocomplete li.ui-menu-item a").removeClass("ui-corner-all");
-                    $(".ui-autocomplete li.ui-menu-item:odd a").addClass("ui-menu-item-alternate");
+                    $(".ui-autocomplete li.ui-menu-item:odd").addClass("ui-menu-item-alternate");
                 }
             })
                 .data("ui-autocomplete")._renderItem = function (ul, item) {
@@ -145,7 +143,7 @@
                     });
                     return $("<li></li>")
                         .data("ui-autocomplete-item", item)
-                        .append("<a class='nowrap'>" + result_item + "</a>")
+                        .append(result_item)
                         .appendTo(ul);
                 };
         }

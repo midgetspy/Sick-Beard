@@ -1,6 +1,6 @@
-/*! jQuery UI - v1.10.4 - 2014-02-03
+/*! jQuery UI - v1.11.1 - 2014-09-08
 * http://jqueryui.com
-* Includes: jquery.ui.core.css, jquery.ui.resizable.css, jquery.ui.selectable.css, jquery.ui.autocomplete.css, jquery.ui.button.css, jquery.ui.dialog.css, jquery.ui.menu.css, jquery.ui.progressbar.css, jquery.ui.tabs.css, jquery.ui.theme.css
+* Includes: core.css, draggable.css, resizable.css, selectable.css, sortable.css, autocomplete.css, button.css, dialog.css, menu.css, progressbar.css, tabs.css, theme.css
 * To view and modify this theme, visit http://jqueryui.com/themeroller/?ffDefault=Verdana%2CArial%2Csans-serif&fwDefault=bold&fsDefault=1.1em&cornerRadius=4px&bgColorHeader=%23ffffff&bgTextureHeader=flat&bgImgOpacityHeader=0&borderColorHeader=%23aaaaaa&fcHeader=%23222222&iconColorHeader=%23222222&bgColorContent=%23dcdcdc&bgTextureContent=highlight_soft&bgImgOpacityContent=75&borderColorContent=%23aaaaaa&fcContent=%23222222&iconColorContent=%23222222&bgColorDefault=%23efefef&bgTextureDefault=highlight_soft&bgImgOpacityDefault=75&borderColorDefault=%23aaaaaa&fcDefault=%23222222&iconColorDefault=%238c291d&bgColorHover=%23dddddd&bgTextureHover=highlight_soft&bgImgOpacityHover=75&borderColorHover=%23999999&fcHover=%23222222&iconColorHover=%23222222&bgColorActive=%23dfdfdf&bgTextureActive=inset_soft&bgImgOpacityActive=75&borderColorActive=%23aaaaaa&fcActive=%23140f06&iconColorActive=%238c291d&bgColorHighlight=%23fbf9ee&bgTextureHighlight=glass&bgImgOpacityHighlight=55&borderColorHighlight=%23aaaaaa&fcHighlight=%23363636&iconColorHighlight=%232e83ff&bgColorError=%23fef1ec&bgTextureError=glass&bgImgOpacityError=95&borderColorError=%23aaaaaa&fcError=%238c291d&iconColorError=%23cd0a0a&bgColorOverlay=%23aaaaaa&bgTextureOverlay=flat&bgImgOpacityOverlay=0&opacityOverlay=35&bgColorShadow=%23000000&bgTextureShadow=flat&bgImgOpacityShadow=0&opacityShadow=35&thicknessShadow=8px&offsetTopShadow=-8px&offsetLeftShadow=-8px&cornerRadiusShadow=8px&ctl=themeroller
 * Copyright 2014 jQuery Foundation and other contributors; Licensed MIT */
 
@@ -48,7 +48,7 @@
 	left: 0;
 	position: absolute;
 	opacity: 0;
-	filter:Alpha(Opacity=0);
+	filter:Alpha(Opacity=0); /* support: IE8 */
 }
 
 .ui-front {
@@ -86,6 +86,10 @@
 	width: 100%;
 	height: 100%;
 }
+.ui-draggable-handle {
+	-ms-touch-action: none;
+	touch-action: none;
+}
 .ui-resizable {
 	position: relative;
 }
@@ -93,6 +97,8 @@
 	position: absolute;
 	font-size: 0.1px;
 	display: block;
+	-ms-touch-action: none;
+	touch-action: none;
 }
 .ui-resizable-disabled .ui-resizable-handle,
 .ui-resizable-autohide .ui-resizable-handle {
@@ -154,10 +160,18 @@
 	right: -5px;
 	top: -5px;
 }
+.ui-selectable {
+	-ms-touch-action: none;
+	touch-action: none;
+}
 .ui-selectable-helper {
 	position: absolute;
 	z-index: 100;
 	border: 1px dotted black;
+}
+.ui-sortable-handle {
+	-ms-touch-action: none;
+	touch-action: none;
 }
 .ui-autocomplete {
 	position: absolute;
@@ -331,72 +345,56 @@ button.ui-button::-moz-focus-inner {
 }
 .ui-menu {
 	list-style: none;
-	padding: 2px;
+	padding: 0;
 	margin: 0;
 	display: block;
 	outline: none;
 }
 .ui-menu .ui-menu {
-	margin-top: -3px;
 	position: absolute;
 }
 .ui-menu .ui-menu-item {
+	position: relative;
 	margin: 0;
-	padding: 0;
-	width: 100%;
+	padding: 3px 1em 3px .4em;
+	cursor: pointer;
+	min-height: 0; /* support: IE7 */
 	/* support: IE10, see #8844 */
-	list-style-image: url(data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7);
+	list-style-image: url("data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7");
 }
 .ui-menu .ui-menu-divider {
-	margin: 5px -2px 5px -2px;
+	margin: 5px 0;
 	height: 0;
 	font-size: 0;
 	line-height: 0;
 	border-width: 1px 0 0 0;
 }
-.ui-menu .ui-menu-item a {
-	text-decoration: none;
-	display: block;
-	padding: 2px .4em;
-	line-height: 1.5;
-	min-height: 0; /* support: IE7 */
-	font-weight: normal;
-}
-.ui-menu .ui-menu-item a.ui-state-focus,
-.ui-menu .ui-menu-item a.ui-state-active {
-	font-weight: normal;
+.ui-menu .ui-state-focus,
+.ui-menu .ui-state-active {
 	margin: -1px;
-}
-
-.ui-menu .ui-state-disabled {
-	font-weight: normal;
-	margin: .4em 0 .2em;
-	line-height: 1.5;
-}
-.ui-menu .ui-state-disabled a {
-	cursor: default;
 }
 
 /* icon support */
 .ui-menu-icons {
 	position: relative;
 }
-.ui-menu-icons .ui-menu-item a {
-	position: relative;
+.ui-menu-icons .ui-menu-item {
 	padding-left: 2em;
 }
 
 /* left-aligned */
 .ui-menu .ui-icon {
 	position: absolute;
-	top: .2em;
+	top: 0;
+	bottom: 0;
 	left: .2em;
+	margin: auto 0;
 }
 
 /* right-aligned */
 .ui-menu .ui-menu-icon {
-	position: static;
-	float: right;
+	left: auto;
+	right: 0;
 }
 .ui-progressbar {
 	height: 2em;
@@ -408,9 +406,9 @@ button.ui-button::-moz-focus-inner {
 	height: 100%;
 }
 .ui-progressbar .ui-progressbar-overlay {
-	/* background: url("images/animated-overlay.gif"); */
+	background: url("data:image/gif;base64,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");
 	height: 100%;
-	filter: alpha(opacity=25);
+	filter: alpha(opacity=25); /* support: IE8 */
 	opacity: 0.25;
 }
 .ui-progressbar-indeterminate .ui-progressbar-value {
@@ -476,7 +474,7 @@ button.ui-button::-moz-focus-inner {
 }
 .ui-widget-content {
 	border: 1px solid #aaaaaa;
-	/* background: #dcdcdc url(images/ui-bg_highlight-soft_75_dcdcdc_1x100.png) 50% top repeat-x; */
+	/* background: #dcdcdc url("images/ui-bg_highlight-soft_75_dcdcdc_1x100.png") 50% top repeat-x; */
 	color: #222222;
 }
 .ui-widget-content a {
@@ -484,7 +482,7 @@ button.ui-button::-moz-focus-inner {
 }
 .ui-widget-header {
 	border: 1px solid #aaaaaa;
-	/* background: #ffffff url(images/ui-bg_flat_0_ffffff_40x100.png) 50% 50% repeat-x; */
+	/* background: #ffffff url("images/ui-bg_flat_0_ffffff_40x100.png") 50% 50% repeat-x; */
 	color: #222222;
 	font-weight: bold;
 }
@@ -498,7 +496,7 @@ button.ui-button::-moz-focus-inner {
 .ui-widget-content .ui-state-default,
 .ui-widget-header .ui-state-default {
 	border: 1px solid #aaaaaa;
-	/* background: #efefef url(images/ui-bg_highlight-soft_75_efefef_1x100.png) 50% 50% repeat-x; */
+	/* background: #efefef url("images/ui-bg_highlight-soft_75_efefef_1x100.png") 50% 50% repeat-x; */
 	font-weight: bold;
 	color: #222222;
 }
@@ -515,7 +513,7 @@ button.ui-button::-moz-focus-inner {
 .ui-widget-content .ui-state-focus,
 .ui-widget-header .ui-state-focus {
 	border: 1px solid #999999;
-	/* background: #dddddd url(images/ui-bg_highlight-soft_75_dddddd_1x100.png) 50% 50% repeat-x; */
+	/* background: #dddddd url("images/ui-bg_highlight-soft_75_dddddd_1x100.png") 50% 50% repeat-x; */
 	font-weight: bold;
 	color: #222222;
 }
@@ -534,7 +532,7 @@ button.ui-button::-moz-focus-inner {
 .ui-widget-content .ui-state-active,
 .ui-widget-header .ui-state-active {
 	border: 1px solid #aaaaaa;
-	background: #dfdfdf url(images/ui-bg_inset-soft_75_dfdfdf_1x100.png) 50% 50% repeat-x;
+	/* background: #dfdfdf url("images/ui-bg_inset-soft_75_dfdfdf_1x100.png") 50% 50% repeat-x; */
 	font-weight: bold;
 	color: #140f06;
 }
@@ -551,7 +549,7 @@ button.ui-button::-moz-focus-inner {
 .ui-widget-content .ui-state-highlight,
 .ui-widget-header .ui-state-highlight {
 	border: 1px solid #aaaaaa;
-	/* background: #fbf9ee url(images/ui-bg_glass_55_fbf9ee_1x400.png) 50% 50% repeat-x; */
+	/* background: #fbf9ee url("images/ui-bg_glass_55_fbf9ee_1x400.png") 50% 50% repeat-x; */
 	color: #363636;
 }
 .ui-state-highlight a,
@@ -563,7 +561,7 @@ button.ui-button::-moz-focus-inner {
 .ui-widget-content .ui-state-error,
 .ui-widget-header .ui-state-error {
 	border: 1px solid #aaaaaa;
-	/* background: #fef1ec url(images/ui-bg_glass_95_fef1ec_1x400.png) 50% 50% repeat-x; */
+	/* background: #fef1ec url("images/ui-bg_glass_95_fef1ec_1x400.png") 50% 50% repeat-x; */
 	color: #8c291d;
 }
 .ui-state-error a,
@@ -585,18 +583,18 @@ button.ui-button::-moz-focus-inner {
 .ui-widget-content .ui-priority-secondary,
 .ui-widget-header .ui-priority-secondary {
 	opacity: .7;
-	filter:Alpha(Opacity=70);
+	filter:Alpha(Opacity=70); /* support: IE8 */
 	font-weight: normal;
 }
 .ui-state-disabled,
 .ui-widget-content .ui-state-disabled,
 .ui-widget-header .ui-state-disabled {
 	opacity: .35;
-	filter:Alpha(Opacity=35);
+	filter:Alpha(Opacity=35); /* support: IE8 */
 	background-image: none;
 }
 .ui-state-disabled .ui-icon {
-	filter:Alpha(Opacity=35); /* For IE8 - See #6059 */
+	filter:Alpha(Opacity=35); /* support: IE8 - See #6059 */
 }
 
 /* Icons
@@ -610,27 +608,27 @@ button.ui-button::-moz-focus-inner {
 /*
 .ui-icon,
 .ui-widget-content .ui-icon {
-	background-image: url(images/ui-icons_222222_256x240.png);
+	background-image: url("images/ui-icons_222222_256x240.png");
 }
 .ui-widget-header .ui-icon {
-	background-image: url(images/ui-icons_222222_256x240.png);
+	background-image: url("images/ui-icons_222222_256x240.png");
 }
 .ui-state-default .ui-icon {
-	background-image: url(images/ui-icons_8c291d_256x240.png);
+	background-image: url("images/ui-icons_8c291d_256x240.png");
 }
 .ui-state-hover .ui-icon,
 .ui-state-focus .ui-icon {
-	background-image: url(images/ui-icons_222222_256x240.png);
+	background-image: url("images/ui-icons_222222_256x240.png");
 }
 .ui-state-active .ui-icon {
-	background-image: url(images/ui-icons_8c291d_256x240.png);
+	background-image: url("images/ui-icons_8c291d_256x240.png");
 }
 .ui-state-highlight .ui-icon {
-	background-image: url(images/ui-icons_2e83ff_256x240.png);
+	background-image: url("images/ui-icons_2e83ff_256x240.png");
 }
 .ui-state-error .ui-icon,
 .ui-state-error-text .ui-icon {
-	background-image: url(images/ui-icons_cd0a0a_256x240.png);
+	background-image: url("images/ui-icons_cd0a0a_256x240.png");
 }
 */
 
@@ -844,15 +842,15 @@ button.ui-button::-moz-focus-inner {
 
 /* Overlays */
 .ui-widget-overlay {
-	/* background: #aaaaaa url(images/ui-bg_flat_0_aaaaaa_40x100.png) 50% 50% repeat-x; */
+	/* background: #aaaaaa url("images/ui-bg_flat_0_aaaaaa_40x100.png") 50% 50% repeat-x; */
 	opacity: .35;
-	filter: Alpha(Opacity=35);
+	filter: Alpha(Opacity=35); /* support: IE8 */
 }
 .ui-widget-shadow {
 	margin: -8px 0 0 -8px;
 	padding: 8px;
-	/* background: #000000 url(images/ui-bg_flat_0_000000_40x100.png) 50% 50% repeat-x; */
+	/* background: #000000 url("images/ui-bg_flat_0_000000_40x100.png") 50% 50% repeat-x; */
 	opacity: .35;
-	filter: Alpha(Opacity=35);
+	filter: Alpha(Opacity=35); /* support: IE8 */
 	border-radius: 8px;
 }

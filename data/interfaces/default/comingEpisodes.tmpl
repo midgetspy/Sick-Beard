@@ -32,8 +32,8 @@
     },
     format: function(s) {
         if (s.indexOf('Loading...') == 0)
-            return s.replace('Loading...','000');
-        return (s || '').replace(/^(The|A)\s/i,'');
+            return s.replace('Loading...', '000');
+        return /^(a to )/i.test(s || '') ? s : (s || '').replace(/^(The|A|An)\s/i,'');
     },
     type: 'text'
 });
@@ -61,17 +61,16 @@
         widgets: ['stickyHeaders'],
         sortList: sortList,
         textExtraction: {
-            5: function(node) { return \$(node).find("span").text().toLowerCase(); }
+            6: function(node) { return \$(node).find("span").text().toLowerCase(); }
         },
         headers: {
             0: { sorter: 'isoDate' },
             1: { sorter: 'loadingNames' },
-            2: { sorter: false },
-            3: { sorter: false },
-            4: { sorter: 'loadingNames' },
-            5: { sorter: 'quality' },
-            6: { sorter: false },
-            7: { sorter: false }
+            3: { sorter: 'loadingNames' },
+            4: { sorter: false },
+            6: { sorter: 'quality' },
+            7: { sorter: false },
+            8: { sorter: false }
         }
     });
 
@@ -87,7 +86,19 @@
 
 <br/>
     <table id="showListTable" class="tablesorter" cellspacing="1" border="0" cellpadding="0">
-    <thead><tr><th>Airdate</th><th>Show</th><th class="nowrap">Next Ep</th><th>Next Ep Name</th><th>Network</th><th>Quality</th><th>tvDB</th><th>Search</th></tr></thead>
+    <thead>
+        <tr>
+            <th>Airdate</th>
+            <th>Show</th>
+            <th class="nowrap">Next Ep</th>
+            <th>Next Ep Name</th>
+            <th class="col-plotinfo">&nbsp;</th>
+            <th>Network</th>
+            <th>Quality</th>
+            <th>tvDB</th>
+            <th>Search</th>
+        </tr>
+    </thead>
     <tbody>
 
     #for $cur_result in $sql_results:
@@ -118,11 +129,13 @@
             #end if
         </td>
         <td class="nowrap" align="center"><%="%02ix%02i" % (int(cur_result["season"]), int(cur_result["episode"])) %></td>
-        <td>
+        <td>$cur_result["name"]</td>
+        <td class="col-plotinfo">
         #if $cur_result["description"] != "" and $cur_result["description"] != None:
             <img alt="" src="$sbRoot/images/info32.png" height="16" width="16" class="plotInfo" id="plot_info_<%=str(cur_result["showid"])+"_"+str(cur_result["season"])+"_"+str(cur_result["episode"])%>" />
+        #else:
+            <img src="$sbRoot/images/info32.png" width="16" height="16" class="plotInfoNone" alt="" />
         #end if
-            $cur_result["name"]
         </td>
         <td align="center">$cur_result["network"]</td>
         <td align="center">

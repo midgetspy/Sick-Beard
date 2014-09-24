@@ -67,21 +67,6 @@ $(document).ready(function () {
             });
     });
 
-    $("#testBoxcar").click(function () {
-        var boxcar_username = $.trim($("#boxcar_username").val());
-        if (!boxcar_username) {
-            $("#testBoxcar-result").html("Please fill out the necessary fields above.");
-            return;
-        }
-        $(this).prop("disabled", true);
-        $("#testBoxcar-result").html(loading);
-        $.get(sbRoot + "/home/testBoxcar", {'username': boxcar_username})
-            .done(function (data) {
-                $("#testBoxcar-result").html(data);
-                $("#testBoxcar").prop("disabled", false);
-            });
-    });
-
     $("#testBoxcar2").click(function () {
         var boxcar2_access_token = $.trim($("#boxcar2_access_token").val());
         var boxcar2_sound = $("#boxcar2_sound").val() || "default";
@@ -271,6 +256,23 @@ $(document).ready(function () {
             .done(function (data) {
                 $("#testNMA-result").html(data);
                 $("#testNMA").prop("disabled", false);
+            });
+    });
+
+    $("#testPushalot").click(function () {
+        var pushalot_authorizationtoken = $.trim($("#pushalot_authorizationtoken").val());
+        var pushalot_silent = ($("#pushalot_silent").prop('checked') == true) ? 'True' : 'False';
+        var pushalot_important = ($("#pushalot_important").prop('checked') == true) ? 'True' : 'False';
+        if (!pushalot_authorizationtoken) {
+            $("#testPushalot-result").html("Please fill out the necessary fields above.");
+            return;
+        }
+        $(this).prop("disabled", true);
+        $("#testPushalot-result").html(loading);
+        $.get(sbRoot + "/home/testPushalot", {'authtoken': pushalot_authorizationtoken, 'silent': pushalot_silent, 'important': pushalot_important})
+            .done(function (data) {
+                $("#testPushalot-result").html(data);
+                $("#testPushalot").prop("disabled", false);
             });
     });
 

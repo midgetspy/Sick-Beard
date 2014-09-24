@@ -117,7 +117,7 @@ class LibnotifyNotifier:
             self._notify(common.notifyStrings[common.NOTIFY_DOWNLOAD], ep_name)
 
     def test_notify(self):
-        return self._notify("Test notification", "This is a test notification from Sick Beard", force=True)
+        return self._notify("Test", "This is a test notification from Sick Beard", force=True)
 
     def update_library(self, ep_obj=None):
         pass

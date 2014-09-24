@@ -28,7 +28,7 @@ from sickbeard import logger
 
 class ProwlNotifier:
 
-    def _notify(self, prowl_api=None, prowl_priority=None, event=None, message=None, force=False):
+    def _notify(self, event, message, prowl_api=None, prowl_priority=None, force=False):
 
         # suppress notifications if the notifier is disabled but the notify options are checked
         if not sickbeard.USE_PROWL and not force:
@@ -47,7 +47,7 @@ class ProwlNotifier:
             http_handler = HTTPSConnection("api.prowlapp.com")
 
             data = {'apikey': prowl_api,
-                    'application': "Sick Beard",
+                    'application': "SickBeard",
                     'event': event,
                     'description': message.encode('utf-8'),
                     'priority': prowl_priority
@@ -72,6 +72,9 @@ class ProwlNotifier:
         elif request_status == 401:
             logger.log(u"PROWL: Auth failed: %s" % response.reason, logger.ERROR)
             return False
+        elif request_status == 406:
+            logger.log(u"PROWL: Message throttle limit reached.", logger.WARNING)
+            return False
         else:
             logger.log(u"PROWL: Notification failed.", logger.ERROR)
             return False
@@ -82,14 +85,14 @@ class ProwlNotifier:
 
     def notify_snatch(self, ep_name):
         if sickbeard.PROWL_NOTIFY_ONSNATCH:
-            self._notify(prowl_api=None, prowl_priority=None, event=common.notifyStrings[common.NOTIFY_SNATCH], message=ep_name)
+            self._notify(common.notifyStrings[common.NOTIFY_SNATCH], ep_name)
 
     def notify_download(self, ep_name):
         if sickbeard.PROWL_NOTIFY_ONDOWNLOAD:
-            self._notify(prowl_api=None, prowl_priority=None, event=common.notifyStrings[common.NOTIFY_DOWNLOAD], message=ep_name)
+            self._notify(common.notifyStrings[common.NOTIFY_DOWNLOAD], ep_name)
 
     def test_notify(self, prowl_api, prowl_priority):
-        return self._notify(prowl_api, prowl_priority, event="Test", message="This is a test notification from Sick Beard", force=True)
+        return self._notify("Test", "This is a test notification from Sick Beard", prowl_api, prowl_priority, force=True)
 
     def update_library(self, ep_obj=None):
         pass

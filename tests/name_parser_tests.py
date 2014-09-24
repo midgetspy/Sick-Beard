@@ -136,11 +136,11 @@ combination_test_cases = [
                            parser.ParseResult(None, '30 Rock', 4, [22]),
                            ['fov']),
                            
-                          ('Season 2\\Show Name - 03-04 - Ep Name.ext',
+                          ('Season 2/Show Name - 03-04 - Ep Name.avi',
                            parser.ParseResult(None, 'Show Name', 2, [3,4], extra_info = 'Ep Name'),
                            ['no_season', 'season_only']),
                            
-                          ('Season 02\\03-04-05 - Ep Name.ext',
+                          ('Season 02/03-04-05 - Ep Name.avi',
                            parser.ParseResult(None, None, 2, [3,4,5], extra_info = 'Ep Name'),
                            ['no_season', 'season_only']),
                           ]
