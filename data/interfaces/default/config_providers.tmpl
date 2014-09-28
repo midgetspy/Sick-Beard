@@ -87,7 +87,7 @@
                                 <span class="component-title jumbo">Configure Provider:</span>
                                 <span class="component-desc">
                                     #set $provider_config_list = []
-                                    #for $cur_provider in ("btn", "hdbits", "omgwtfnzbs", "tvtorrents", "torrentleech", "thepiratebay", "torrentz", "torrentday", "sceneaccess", "iptorrents", "bithdtv", "torrentshack","speed","kickass"):
+                                    #for $cur_provider in ("btn", "hdbits", "omgwtfnzbs", "tvtorrents", "torrentleech", "thepiratebay", "torrentz", "torrentday", "sceneaccess", "iptorrents", "bithdtv", "torrentshack","speed","kickass","revolutiontt"):
                                         #set $cur_provider_obj = $sickbeard.providers.getProviderClass($cur_provider)
                                         #if $cur_provider_obj.providerType == $GenericProvider.NZB and not $sickbeard.USE_NZBS:
                                             #continue
@@ -412,6 +412,30 @@
                             </label>
                         </div>
                     </div><!-- /speedDiv //-->
+                    
+                    <div class="providerDiv" id="revolutionttDiv">
+                        <div class="field-pair">
+                            <label class="clearfix">
+                                <span class="component-title">Username:</span>
+                                <input class="component-desc" type="text" name="revolutiontt_username" value="$sickbeard.REVOLUTIONTT_USERNAME" size="40" />
+                            </label>
+                        </div>
+                        <div class="field-pair">
+                            <label class="clearfix">
+                                <span class="component-title">Password:</span>
+                                <input class="component-desc" type="password" name="revolutiontt_password" value="$sickbeard.REVOLUTIONTT_PASSWORD" size="40" />
+                            </label>
+                        </div>
+                        <div class="field-pair">
+                            <label class="clearfix">
+                                <span class="component-title">RSS PassKey (*):</span>
+                                <input class="component-desc" type="text" name="revolutiontt_rsshash" value="$sickbeard.REVOLUTIONTT_RSSHASH" size="40" /></b>
+                            </label>
+                        </div>
+                        <div class="field-pair">
+                            <span class="component-title"><i>Note: options with (*) are optional, these variables can be gathered from </i><a href="https://revolutiontt.me/getrss.php" target="_blank">https://revolutiontt.me/getrss.php</a>, it will construct a self made rss if you do not enter these details.</span>
+                        </div>
+                    </div><!-- /revolutionttDiv //-->
 <!-- end div for editing providers -->
             
                     </fieldset>

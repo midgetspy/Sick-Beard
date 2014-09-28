@@ -38,7 +38,7 @@ from providers import ezrss, tvtorrents, torrentleech, btn, newznab, womble, omg
 
 from providers import kickass, torrentz, thepiratebay, torrentday
 from providers import sceneaccess, iptorrents, bithdtv, btdigg, torrentshack
-from providers import speed
+from providers import speed, revolutiontt
 
 from sickbeard.config import CheckSection, check_setting_int, check_setting_str, ConfigMigrator
 
@@ -224,6 +224,11 @@ SPEED_USERNAME = None
 SPEED_PASSWORD = None
 SPEED_RSSHASH = None
 
+REVOLUTIONTT = False
+REVOLUTIONTT_USERNAME = None
+REVOLUTIONTT_PASSWORD = None
+REVOLUTIONTT_RSSHASH = None
+
 BTN = False
 BTN_API_KEY = None
 
@@ -394,6 +399,7 @@ def initialize(consoleLogging=True):
                 BITHDTV, BITHDTV_USERNAME, BITHDTV_PASSWORD, \
                 TORRENTSHACK, TORRENTSHACK_USERNAME, TORRENTSHACK_PASSWORD, TORRENTSHACK_UID, TORRENTSHACK_AUTH, TORRENTSHACK_PASS_KEY ,TORRENTSHACK_AUTH_KEY, \
                 SPEED, SPEED_USERNAME, SPEED_PASSWORD, SPEED_RSSHASH, \
+                REVOLUTIONTT, REVOLUTIONTT_USERNAME, REVOLUTIONTT_PASSWORD, REVOLUTIONTT_RSSHASH, \
                 BTDIGG, \
                 NZBS, NZBS_UID, NZBS_HASH, EZRSS, \
                 THEPIRATEBAY, THEPIRATEBAY_TRUSTED, THEPIRATEBAY_PROXY, THEPIRATEBAY_PROXY_URL, THEPIRATEBAY_URL_OVERRIDE, \
@@ -596,6 +602,11 @@ def initialize(consoleLogging=True):
         SPEED_USERNAME = check_setting_str(CFG, 'SPEED', 'speed_username', '')
         SPEED_PASSWORD = check_setting_str(CFG, 'SPEED', 'speed_password', '')
         SPEED_RSSHASH = check_setting_str(CFG, 'SPEED', 'speed_rsshash', '')
+        
+        REVOLUTIONTT = bool(check_setting_int(CFG, 'REVOLUTIONTT', 'revolutiontt', 0))
+        REVOLUTIONTT_USERNAME = check_setting_str(CFG, 'REVOLUTIONTT', 'revolutiontt_username', '')
+        REVOLUTIONTT_PASSWORD = check_setting_str(CFG, 'REVOLUTIONTT', 'revolutiontt_password', '')
+        REVOLUTIONTT_RSSHASH = check_setting_str(CFG, 'REVOLUTIONTT', 'revolutiontt_rsshash', '')
         
         BTDIGG = bool(check_setting_int(CFG, 'BTDIGG', 'btdigg', 0))
         
@@ -1203,6 +1214,12 @@ def save_config():
     new_config['SPEED']['speed_username'] = SPEED_USERNAME
     new_config['SPEED']['speed_password'] = SPEED_PASSWORD
     new_config['SPEED']['speed_rsshash'] = SPEED_RSSHASH
+    
+    new_config['REVOLUTIONTT'] = {}
+    new_config['REVOLUTIONTT']['revolutiontt'] = int(REVOLUTIONTT)
+    new_config['REVOLUTIONTT']['revolutiontt_username'] = REVOLUTIONTT_USERNAME
+    new_config['REVOLUTIONTT']['revolutiontt_password'] = REVOLUTIONTT_PASSWORD
+    new_config['REVOLUTIONTT']['revolutiontt_rsshash'] = REVOLUTIONTT_RSSHASH
     
     new_config['BTDIGG'] = {}
     new_config['BTDIGG']['btdigg'] = int(BTDIGG)
