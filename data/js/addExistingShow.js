@@ -1,24 +1,21 @@
-$(document).ready(function() { 
+$(document).ready(function() {
 
     $('#tableDiv').on('click', '#checkAll', function() {
 
         var seasCheck = this;
-
         $('.dirCheck').each(function() {
             this.checked = seasCheck.checked;
         });
+
     });
 
     $('#submitShowDirs').click(function() {
 
         var dirArr = new Array();
-
         $('.dirCheck').each(function() {
-
-        if (this.checked == true) {
-            dirArr.push(encodeURIComponent($(this).attr('id')));
-        }
-
+            if (this.checked == true) {
+                dirArr.push(encodeURIComponent($(this).attr('id')));
+            }
         });
 
         if (dirArr.length == 0) {
@@ -26,10 +23,10 @@ $(document).ready(function() {
         }
 
         url = sbRoot + '/home/addShows/addExistingShows?promptForSettings=' + ($('#promptForSettings').prop('checked') ? 'on' : 'off');
-
         url += '&shows_to_add=' + dirArr.join('&shows_to_add=');
 
         window.location.href = url;
+
     });
 
 
