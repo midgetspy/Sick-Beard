@@ -1007,6 +1007,8 @@ class ConfigProviders:
                       torrentshack_username = None, torrentshack_password = None, torrentshack_uid = None, torrentshack_auth = None, torrentshack_pass_key = None, torrentshack_auth_key = None,
                       torrentz_verified = None,
                       speed_username = None, speed_password = None, speed_rsshash = None,
+                      revolutiontt_username = None, revolutiontt_password = None, revolutiontt_rsshash = None,
+                      kickass_alt_url = None,
                       provider_order=None):
 
         results = []
@@ -1092,6 +1094,8 @@ class ConfigProviders:
                 sickbeard.TORRENTSHACK = curEnabled
             elif curProvider == 'speed':
                 sickbeard.SPEED = curEnabled
+            elif curProvider == 'revolutiontt':
+                sickbeard.REVOLUTIONTT = curEnabled
             elif curProvider == 'btn':
                 sickbeard.BTN = curEnabled
             elif curProvider in newznabProviderDict:
@@ -1131,6 +1135,8 @@ class ConfigProviders:
             thepiratebay_url_override_enable = 0
             sickbeard.THEPIRATEBAY_URL_OVERRIDE = ""
             
+        sickbeard.KICKASS_ALT_URL = kickass_alt_url.strip()
+ 
         sickbeard.TORRENTLEECH_USERNAME = torrentleech_username
         sickbeard.TORRENTLEECH_PASSWORD = torrentleech_password
         
@@ -1159,6 +1165,10 @@ class ConfigProviders:
         sickbeard.SPEED_USERNAME = speed_username.strip()
         sickbeard.SPEED_PASSWORD = speed_password.strip()
         sickbeard.SPEED_RSSHASH = speed_rsshash.strip()
+        
+        sickbeard.REVOLUTIONTT_USERNAME = revolutiontt_username.strip()
+        sickbeard.REVOLUTIONTT_PASSWORD = revolutiontt_password.strip()
+        sickbeard.REVOLUTIONTT_RSSHASH = revolutiontt_rsshash.strip()
         
         if torrentz_verified == "on":
             torrentz_verified = 1

@@ -38,7 +38,7 @@ from providers import ezrss, tvtorrents, torrentleech, btn, newznab, womble, omg
 
 from providers import kickass, torrentz, thepiratebay, torrentday
 from providers import sceneaccess, iptorrents, bithdtv, btdigg, torrentshack
-from providers import speed
+from providers import speed, revolutiontt
 
 from sickbeard.config import CheckSection, check_setting_int, check_setting_str, ConfigMigrator
 
@@ -185,6 +185,7 @@ TVTORRENTS_DIGEST = None
 TVTORRENTS_HASH = None
 
 KICKASS = False
+KICKASS_ALT_URL = None
 
 TORRENTZ = False
 TORRENTZ_VERIFIED = False
@@ -226,6 +227,11 @@ SPEED = False
 SPEED_USERNAME = None
 SPEED_PASSWORD = None
 SPEED_RSSHASH = None
+
+REVOLUTIONTT = False
+REVOLUTIONTT_USERNAME = None
+REVOLUTIONTT_PASSWORD = None
+REVOLUTIONTT_RSSHASH = None
 
 BTN = False
 BTN_API_KEY = None
@@ -388,7 +394,8 @@ def initialize(consoleLogging=True):
                 showUpdateScheduler, __INITIALIZED__, LAUNCH_BROWSER, showList, loadingShowList, \
                 NEWZNAB_DATA, NZBS, NZBS_UID, NZBS_HASH, EZRSS, HDBITS, HDBITS_USERNAME, HDBITS_PASSKEY, TVTORRENTS, TVTORRENTS_DIGEST, TVTORRENTS_HASH, BTN, BTN_API_KEY, \
                 TORRENT_DIR, USENET_RETENTION, SOCKET_TIMEOUT, \
-                KICKASS, TORRENTZ, TORRENTZ_VERIFIED, \
+                KICKASS, KICKASS_ALT_URL, \
+                TORRENTZ, TORRENTZ_VERIFIED, \
                 TORRENTLEECH, TORRENTLEECH_USERNAME, TORRENTLEECH_PASSWORD, \
                 TORRENTDAY, TORRENTDAY_USERNAME, TORRENTDAY_PASSWORD, \
                 SCENEACCESS, SCENEACCESS_USERNAME, SCENEACCESS_PASSWORD, SCENEACCESS_RSSHASH, \
@@ -396,6 +403,7 @@ def initialize(consoleLogging=True):
                 BITHDTV, BITHDTV_USERNAME, BITHDTV_PASSWORD, \
                 TORRENTSHACK, TORRENTSHACK_USERNAME, TORRENTSHACK_PASSWORD, TORRENTSHACK_UID, TORRENTSHACK_AUTH, TORRENTSHACK_PASS_KEY ,TORRENTSHACK_AUTH_KEY, \
                 SPEED, SPEED_USERNAME, SPEED_PASSWORD, SPEED_RSSHASH, \
+                REVOLUTIONTT, REVOLUTIONTT_USERNAME, REVOLUTIONTT_PASSWORD, REVOLUTIONTT_RSSHASH, \
                 BTDIGG, \
                 NZBS, NZBS_UID, NZBS_HASH, EZRSS, \
                 THEPIRATEBAY, THEPIRATEBAY_TRUSTED, THEPIRATEBAY_PROXY, THEPIRATEBAY_PROXY_URL, THEPIRATEBAY_URL_OVERRIDE, \
@@ -561,6 +569,7 @@ def initialize(consoleLogging=True):
         BTN_API_KEY = check_setting_str(CFG, 'BTN', 'btn_api_key', '')
 
         KICKASS = bool(check_setting_int(CFG, 'KICKASS', 'kickass', 0))
+        KICKASS_ALT_URL = check_setting_str(CFG, 'KICKASS', 'kickass_alt_url', '')
         
         TORRENTZ = bool(check_setting_int(CFG, 'TORRENTZ', 'torrentz', 0))    
         TORRENTZ_VERIFIED = bool(check_setting_int(CFG, 'TORRENTZ', 'torrentz_verified', 0))    
@@ -600,6 +609,11 @@ def initialize(consoleLogging=True):
         SPEED_USERNAME = check_setting_str(CFG, 'SPEED', 'speed_username', '')
         SPEED_PASSWORD = check_setting_str(CFG, 'SPEED', 'speed_password', '')
         SPEED_RSSHASH = check_setting_str(CFG, 'SPEED', 'speed_rsshash', '')
+        
+        REVOLUTIONTT = bool(check_setting_int(CFG, 'REVOLUTIONTT', 'revolutiontt', 0))
+        REVOLUTIONTT_USERNAME = check_setting_str(CFG, 'REVOLUTIONTT', 'revolutiontt_username', '')
+        REVOLUTIONTT_PASSWORD = check_setting_str(CFG, 'REVOLUTIONTT', 'revolutiontt_password', '')
+        REVOLUTIONTT_RSSHASH = check_setting_str(CFG, 'REVOLUTIONTT', 'revolutiontt_rsshash', '')
         
         BTDIGG = bool(check_setting_int(CFG, 'BTDIGG', 'btdigg', 0))
         
@@ -1176,6 +1190,7 @@ def save_config():
 
     new_config['KICKASS'] = {}
     new_config['KICKASS']['kickass'] = int(KICKASS)
+    new_config['KICKASS']['kickass_alt_url'] = KICKASS_ALT_URL
 
     new_config['TORRENTZ'] = {}
     new_config['TORRENTZ']['torrentz'] = int(TORRENTZ)
@@ -1223,6 +1238,12 @@ def save_config():
     new_config['SPEED']['speed_username'] = SPEED_USERNAME
     new_config['SPEED']['speed_password'] = SPEED_PASSWORD
     new_config['SPEED']['speed_rsshash'] = SPEED_RSSHASH
+    
+    new_config['REVOLUTIONTT'] = {}
+    new_config['REVOLUTIONTT']['revolutiontt'] = int(REVOLUTIONTT)
+    new_config['REVOLUTIONTT']['revolutiontt_username'] = REVOLUTIONTT_USERNAME
+    new_config['REVOLUTIONTT']['revolutiontt_password'] = REVOLUTIONTT_PASSWORD
+    new_config['REVOLUTIONTT']['revolutiontt_rsshash'] = REVOLUTIONTT_RSSHASH
     
     new_config['BTDIGG'] = {}
     new_config['BTDIGG']['btdigg'] = int(BTDIGG)
