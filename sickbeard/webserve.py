@@ -1142,8 +1142,8 @@ class ConfigNotifications:
                           use_pytivo=None, pytivo_notify_onsnatch=None, pytivo_notify_ondownload=None, pytivo_update_library=None,
                               pytivo_host=None, pytivo_share_name=None, pytivo_tivo_name=None,
                           use_nma=None, nma_notify_onsnatch=None, nma_notify_ondownload=None, nma_api=None, nma_priority=0,
-                          use_pushalot=None, pushalot_notify_onsnatch=None, pushalot_notify_ondownload=None, pushalot_authorizationtoken=None,
-                              pushalot_silent=None, pushalot_important=None
+                          use_pushalot=None, pushalot_notify_onsnatch=None, pushalot_notify_ondownload=None, pushalot_authorizationtoken=None, pushalot_silent=None, pushalot_important=None,
+                          use_pushbullet=None, pushbullet_notify_onsnatch=None, pushbullet_notify_ondownload=None, pushbullet_access_token=None, pushbullet_device_iden=None, pushbullet_device_list=None
                           ):
 
         results = []
@@ -1232,6 +1232,12 @@ class ConfigNotifications:
         sickbeard.PUSHALOT_AUTHORIZATIONTOKEN = pushalot_authorizationtoken
         sickbeard.PUSHALOT_SILENT = config.checkbox_to_value(pushalot_silent)
         sickbeard.PUSHALOT_IMPORTANT = config.checkbox_to_value(pushalot_important)
+
+        sickbeard.USE_PUSHBULLET = config.checkbox_to_value(use_pushbullet)
+        sickbeard.PUSHBULLET_NOTIFY_ONSNATCH = config.checkbox_to_value(pushbullet_notify_onsnatch)
+        sickbeard.PUSHBULLET_NOTIFY_ONDOWNLOAD = config.checkbox_to_value(pushbullet_notify_ondownload)
+        sickbeard.PUSHBULLET_ACCESS_TOKEN = pushbullet_access_token
+        sickbeard.PUSHBULLET_DEVICE_IDEN = pushbullet_device_iden
 
         # Online
         sickbeard.USE_TWITTER = config.checkbox_to_value(use_twitter)
@@ -2101,6 +2107,26 @@ class Home:
             return "Test Synology notice failed"
 
     @cherrypy.expose
+    def testPushbullet(self, accessToken=None, device_iden=None):
+        cherrypy.response.headers['Cache-Control'] = "max-age=0,no-cache,no-store"
+
+        result = notifiers.pushbullet_notifier.test_notify(accessToken, device_iden)
+        if result:
+            return "Pushbullet notification succeeded. Check your Pushbullet clients to make sure it worked"
+        else:
+            return "Error sending Pushbullet notification"
+
+    @cherrypy.expose
+    def getPushbulletDevices(self, accessToken=None):
+        cherrypy.response.headers['Cache-Control'] = "max-age=0,no-cache,no-store"
+
+        result = notifiers.pushbullet_notifier.get_devices(accessToken)
+        if result:
+            return result
+        else:
+            return "Error sending Pushbullet notification"
+
+    @cherrypy.expose
     def shutdown(self, pid=None):
 
         if str(pid) != str(sickbeard.PID):
@@ -2146,12 +2172,12 @@ class Home:
     @cherrypy.expose
     def displayShow(self, show=None):
 
-        if show == None:
+        if show is None:
             return _genericMessage("Error", "Invalid show ID")
         else:
             showObj = sickbeard.helpers.findCertainShow(sickbeard.showList, int(show))
 
-            if showObj == None:
+            if showObj is None:
                 return _genericMessage("Error", "Show not in show list")
 
         myDB = db.DBConnection()
