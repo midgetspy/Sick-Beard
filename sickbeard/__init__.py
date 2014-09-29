@@ -746,7 +746,7 @@ def initialize(consoleLogging=True):
 
         # processors
         autoPostProcesserScheduler = scheduler.Scheduler(autoPostProcesser.PostProcesser(),
-                                                         cycleTime=datetime.timedelta(minutes=10),
+                                                         cycleTime=datetime.timedelta(minutes=360),
                                                          threadName="POSTPROCESSER",
                                                          run_delay=datetime.timedelta(minutes=5)
                                                          )
