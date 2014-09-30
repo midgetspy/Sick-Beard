@@ -71,7 +71,7 @@ class NZBClubProvider(generic.NZBProvider):
 
     def _get_title_and_url(self, item):
         (title, url) = super(NZBClubProvider, self)._get_title_and_url(item)
-        url = url.replace("_"," ").replace("/nzb view/","/nzb_get/") + ".nzb"
+        url = url.replace("/nzb_view/","/nzb_get/") + ".nzb"
         logger.log( '_get_title_and_url(%s), returns (%s, %s)' %(item, title, url), logger.DEBUG)
         logger.log( 'self.searchString=%s' %(self.searchString), logger.DEBUG)
 
