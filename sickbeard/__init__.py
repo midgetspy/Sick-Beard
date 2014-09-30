@@ -712,7 +712,7 @@ def initialize(consoleLogging=True):
                                                  silent=True)
 
         showUpdateScheduler = scheduler.Scheduler(showUpdater.ShowUpdater(),
-                                                  cycleTime=datetime.timedelta(hours=1),
+                                                  cycleTime=datetime.timedelta(hours=6),
                                                   threadName="SHOWUPDATER",
                                                   start_time=datetime.time(hour=3)  # 3 AM
                                                   )
@@ -739,7 +739,7 @@ def initialize(consoleLogging=True):
         backlogSearchScheduler.action.cycleTime = BACKLOG_SEARCH_FREQUENCY
 
         properFinderScheduler = scheduler.Scheduler(properFinder.ProperFinder(),
-                                                    cycleTime=datetime.timedelta(hours=1),
+                                                    cycleTime=datetime.timedelta(hours=6),
                                                     threadName="FINDPROPERS",
                                                     start_time=datetime.time(hour=1)  # 1 AM
                                                     )
