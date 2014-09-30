@@ -286,4 +286,68 @@ $(document).ready(function () {
             });
     });
 
+    $("#testPushbullet").click(function () {
+        var pushbullet_access_token = $.trim($("#pushbullet_access_token").val());
+        var pushbullet_device_iden = $("#pushbullet_device_iden").val();
+        if (!pushbullet_access_token) {
+            $("#testPushbullet-result").html("Please fill out the necessary fields above.");
+            return;
+        }
+        $(this).prop("disabled", true);
+        $("#testPushbullet-result").html(loading);
+        $.get(sbRoot + "/home/testPushbullet", {'accessToken': pushbullet_access_token, 'device_iden': pushbullet_device_iden})
+            .done(function (data) {
+                $("#testPushbullet-result").html(data);
+                $("#testPushbullet").prop("disabled", false);
+            });
+    });
+
+    function get_pushbullet_devices (msg) {
+        var pushbullet_access_token = $.trim($("#pushbullet_access_token").val());
+        if (!pushbullet_access_token) {
+            $("#testPushbullet-result").html("Please fill out the necessary fields above.");
+            return;
+        }
+        $(this).prop("disabled", true);
+        if (msg) {
+            $("#testPushbullet-result").html(loading);
+        }
+        var current_pushbullet_device = $("#pushbullet_device_iden").val();
+        $.get(sbRoot + "/home/getPushbulletDevices", {'accessToken': pushbullet_access_token})
+            .done(function (data) {
+                var devices = jQuery.parseJSON(data).devices;
+                $("#pushbullet_device_list").html('');
+                // add default option to send to all devices
+                $("#pushbullet_device_list").append('<option value="" selected="selected">-- All Devices --</option>');
+                for (var i = 0; i < devices.length; i++) {
+                    // only list active device targets
+                    if (devices[i].active == true) {
+                        // if a device in the list matches our current iden, select it
+                        if (current_pushbullet_device == devices[i].iden) {
+                            $("#pushbullet_device_list").append('<option value="' + devices[i].iden + '" selected="selected">' + devices[i].manufacturer + ' ' + devices[i].nickname + '</option>');
+                        } else {
+                            $("#pushbullet_device_list").append('<option value="' + devices[i].iden + '">' + devices[i].manufacturer + ' ' + devices[i].nickname + '</option>');
+                        }
+                    }
+                }
+                $("#getPushbulletDevices").prop("disabled", false);
+                if (msg) {
+                    $('#testPushbullet-result').html(msg);
+                }
+            });
+
+        $("#pushbullet_device_list").change(function () {
+            $("#pushbullet_device_iden").val($("#pushbullet_device_list").val());
+            $('#testPushbullet-result').html("Don't forget to save your new pushbullet settings.");
+        });
+    }
+
+    $("#getPushbulletDevices").click(function () {
+        get_pushbullet_devices("Device list updated. Select device target to use.");
+    });
+
+    if ($("#use_pushbullet").prop('checked')) {
+        get_pushbullet_devices();
+    }
+
 });
