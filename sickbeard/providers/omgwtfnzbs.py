@@ -52,7 +52,7 @@ class OmgwtfnzbsProvider(generic.NZBProvider):
 
     def _checkAuth(self):
 
-        if not sickbeard.OMGWTFNZBS_USERNAME  or not sickbeard.OMGWTFNZBS_APIKEY:
+        if not sickbeard.OMGWTFNZBS_USERNAME or not sickbeard.OMGWTFNZBS_APIKEY:
             raise AuthException("Your authentication credentials for " + self.name + " are missing, check your config.")
 
         return True
@@ -165,6 +165,7 @@ class OmgwtfnzbsCache(tvcache.TVCache):
         params = {'user': sickbeard.OMGWTFNZBS_USERNAME,
                   'api': sickbeard.OMGWTFNZBS_APIKEY,
                   'eng': 1,
+                  'delay': 20,
                   'catid': '19,20'}  # SD,HD
 
         rss_url = 'https://rss.omgwtfnzbs.org/rss-download.php?' + urllib.urlencode(params)
