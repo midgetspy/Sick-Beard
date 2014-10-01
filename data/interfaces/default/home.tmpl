@@ -19,7 +19,7 @@
 
 #set $sql_statement = 'SELECT showid, '
 
-#set $sql_statement += '(SELECT COUNT(*) FROM tv_episodes WHERE showid=tv_eps.showid AND season > 0 AND episode > 0 AND status IN ' + $status_quality + ') AS ep_snatched, '
+#set $sql_statement += '(SELECT COUNT(*) FROM tv_episodes WHERE showid=tv_eps.showid AND season > 0 AND episode > 0 AND location != \'\' AND status IN ' + $status_quality + ') AS ep_snatched, '
 #set $sql_statement += '(SELECT COUNT(*) FROM tv_episodes WHERE showid=tv_eps.showid AND season > 0 AND episode > 0 AND status IN ' + $status_download + ') AS ep_downloaded, '
 
 #set $sql_statement += '(SELECT COUNT(*) FROM tv_episodes WHERE showid=tv_eps.showid AND season > 0 AND episode > 0 '
