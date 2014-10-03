@@ -531,6 +531,7 @@ displayShow.tmpl + manage_backlogOverview.tmpl
   padding-right: 10px;
   padding-bottom: 1px;
   font-weight: bold;
+  width:115px;
 }
 .checkbox.inline {
   padding: 0 5px;
