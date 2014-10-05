@@ -1272,11 +1272,12 @@ class ConfigHidden:
         return _munge(t)
 
     @cherrypy.expose
-    def saveHidden(self, anon_redirect=None, git_path=None, extra_scripts=None, create_missing_show_dirs=None, add_shows_wo_dir=None):
+    def saveHidden(self, anon_redirect=None, display_all_seasons=None, git_path=None, extra_scripts=None, create_missing_show_dirs=None, add_shows_wo_dir=None):
 
         results = []
 
         sickbeard.ANON_REDIRECT = anon_redirect
+        sickbeard.DISPLAY_ALL_SEASONS = config.checkbox_to_value(display_all_seasons)
         sickbeard.GIT_PATH = git_path
         sickbeard.EXTRA_SCRIPTS = [x.strip() for x in extra_scripts.split('|') if x.strip()]
         sickbeard.CREATE_MISSING_SHOW_DIRS = config.checkbox_to_value(create_missing_show_dirs)
