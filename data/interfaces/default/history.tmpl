@@ -68,8 +68,8 @@
 #set $curStatus, $curQuality = $Quality.splitCompositeStatus(int($hItem["action"]))
   <tr>
     <td class="col-src">
-    #if $len($hItem["source"]) > 0:
-        <img src="$sbRoot/images/${hItem["source"]}.png" width="16" height="16" alt="$hItem["source"]" title="$hItem["source"]"/>
+    #if $hItem["source"]:
+        <img src="$sbRoot/images/${hItem["source"]}.png" width="16" height="16" alt="$hItem["source"]" title="$hItem["source"]" />
     #else:
         $hItem["source"]
     #end if
@@ -92,8 +92,8 @@
         #end if
     #elif $curStatus == DOWNLOADED:
         $hItem["provider"]
-    #else
-      #if $len($hItem["provider"]) > 0:
+    #else:
+      #if $hItem["provider"] and $len($hItem["provider"]) > 0:
         #set provider_id = $generic.GenericProvider.makeID($hItem["provider"])
         #set $provider = $providers.getProviderClass($provider_id)
         #if $provider is not None:
