@@ -1,5 +1,6 @@
-# Author: Nic Wolfe <nic@wolfeden.ca>
-# URL: http://code.google.com/p/sickbeard/
+###################################################################################################
+# Author: Jodi Jones <venom@gen-x.co.nz>
+# URL: https://github.com/VeNoMouS/Sick-Beard
 #
 # This file is part of Sick Beard.
 #
@@ -11,206 +12,149 @@
 # Sick Beard is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
+#  GNU General Public License for more details.
 #
 # You should have received a copy of the GNU General Public License
 # along with Sick Beard.  If not, see <http://www.gnu.org/licenses/>.
+###################################################################################################
 
-
-
-import urllib, httplib
-import datetime
-
+import re
 import sickbeard
 
-from lib import MultipartPostHandler
-import urllib2, cookielib, base64
-try:
-    import json
-except ImportError:
-    from lib import simplejson as json
+from hashlib import sha1
 
-from sickbeard.common import USER_AGENT
+from lib import requests
+from lib.bencode import bencode, bdecode
+
 from sickbeard import logger
 from sickbeard.exceptions import ex
-from urllib import quote
-import cookielib
-import re
-import time
-import socket
-from sickbeard.name_parser.parser import NameParser, InvalidNameException
 
+###################################################################################################
 
-def _makeOpener(username, password):
-    auth_handler = urllib2.HTTPBasicAuthHandler()
-    auth_handler.add_password(realm='uTorrent',
-                              uri=sickbeard.TORRENT_HOST,
-                              user=username,
-                              passwd=password)
-    opener = urllib2.build_opener(auth_handler)
-    urllib2.install_opener(opener)
+def _authToken(session=None,host=None, username=None, password=None):
+    auth = None
 
-    cookie_jar = cookielib.CookieJar()
-    cookie_handler = urllib2.HTTPCookieProcessor(cookie_jar)
-
-    handlers = [auth_handler, cookie_handler]
-    return urllib2.build_opener(*handlers)
-
-def _utorrent_api(host):
-    try:
-        response=urllib2.urlopen(host,timeout=1)
-
-        return True
-    except urllib2.HTTPError, e:
-        if e.code == 400:
-            return True
-    except urllib2.URLError, e:
-        return False
-    return False
-
-def _utorrent_credentials(host, username, password):
-    try:
-        auth = urllib2.HTTPBasicAuthHandler()
-        auth.add_password(
-            realm='uTorrent',
-            uri=host,
-            user='%s'%username,
-            passwd=password
-        )
-        opener = urllib2.build_opener(auth)
-        urllib2.install_opener(opener)
-
-        urllib2.urlopen(host + 'gui/token.html')
-        return True
-    except urllib2.HTTPError, e:
-        return False
-
-def _get_token(opener):
-    url = sickbeard.TORRENT_HOST + 'gui/token.html'
-    try:
-        response = opener.open(url, timeout=5)
-
-        token_re = "<div id='token' style='display:none;'>([^<>]+)</div>"
-        match = re.search(token_re, response.read())
-        return True, match.group(1)
-    except urllib2.HTTPError, e:
-        if e.code == 401:
-            logger.log("uTorrent username & password are invalid.", logger.ERROR)
-            return False, "uTorrent username & password are invalid."
-        elif e.code == 404:
-            logger.log("uTorrent is not running or the uTorrent API is not enabled.", logger.ERROR)
-            return False, "uTorrent is not running or uTorrent API is not enabled."
-
-        logger.log("An error occured while connecting to uTorrent.", logger.ERROR)
-        return False, "An error occured while connecting to uTorrent."
-
-def _action(url, host, username, password):
-    if _utorrent_api(host):
-        opener = _makeOpener(username, password)
-        success, token = _get_token(opener)
-
-        if success:
-            url = host + 'gui/?token=' + token + url
-
-            try:
-                logger.log(u"Calling uTorrent with url: " + url, logger.DEBUG)
-                response = opener.open(url)
-
-                return True, json.loads(response.read())
-            except urllib2.HTTPError, e:
-                if e.code == 401:
-                    logger.log("uTorrent username & password are invalid.", logger.ERROR)
-                    return False, "uTorrent username & password are invalid."
-                elif e.code == 404:
-                    logger.log("uTorrent is not running or the uTorrent API is not enabled.", logger.ERROR)
-                    return False, "uTorrent is not running or uTorrent API is not enabled."
-
-                logger.log("An error occured while connecting to uTorrent.", logger.ERROR)
-                return False, "An error occured while connecting to uTorrent."
-            except Exception as e:
-                return False, e
-        else:
-            return False, token
-
-    logger.log("uTorrent is not running or the uTorrent API is not enabled.", logger.ERROR)
-    return False, "uTorrent is not running or the uTorrent API is not enabled."
-
-def _findTorrentHash(url):
-    for i in range(0, 15):
-        try:
-            if url.startswith('magnet'):
-                token_re = "&dn=([^<>&]+)"
-                match = re.search(token_re, url)
-                name = match.group(1).replace('_','.').replace('+','.')
-            else:
-                real_name = url[url.rfind('/') + 1:url.rfind('.torrent')]
-                real_name = real_name[real_name.rfind('=') + 1:url.rfind('.torrent')]
-                name = real_name.replace('_','.').replace('+','.')
-        except:
-            logger.log("Unable to retrieve episode name from " + url, logger.WARNING)
-            return False
-
-        parse_result = False
-        try:
-            myParser = NameParser()
-            parse_result = myParser.parse(name)
-        except:
-            logger.log(u"Unable to parse the filename " + name + " into a valid episode", logger.WARNING)
+    if not session:
+        session = requests.Session()
+    
+    response = session.get(host + "gui/token.html",auth=(username, password), verify=False,timeout=30)
+    if response.status_code == 200:
+        auth = re.search("<div.*?>(\S+)<\/div>", response.text).group(1)
+    else:
+        logger.log("[uTorrent] Authenication Failed.",logger.ERROR)
         
-        success, torrent_list = _action('&list=1', sickbeard.TORRENT_HOST, sickbeard.TORRENT_USERNAME, sickbeard.TORRENT_PASSWORD)
-        
-        if not success:
-            continue
-        
-        #Don't fail when a torrent name can't be parsed to a name
-        for torrent in torrent_list['torrents']:
-            try:
-                #Try to match URL first
-                if len(torrent) >= 20 and url == torrent[19]:
-                    return torrent[0]
-                if len(torrent) < 3: 
-                    continue
-                #If that fails try to parse the name of the torrent
-                torrent_result = myParser.parse(torrent[2])
-                if parse_result and torrent_result.series_name == parse_result.series_name and torrent_result.season_number == parse_result.season_number and torrent_result.episode_numbers == parse_result.episode_numbers:
-                    return torrent[0]                
-            except InvalidNameException:
-                pass
-        time.sleep(1)
-    logger.log(u"I will not be able to set label or paused to this torrent: " + url)
-    return False
+    return auth,session
+
+###################################################################################################
+
+def _TorrentHash(url=None,torrent=None):
+    hash=None
+    if url.startswith('magnet'):
+        hash = re.search('urn:btih:([\w]{32,40})', url).group(1)
+        if len(hash) == 32:
+            hash = b16encode(b32decode(hash)).upper()
+    else:
+        info = bdecode(torrent)["info"]
+        hash = sha1(bencode(info)).hexdigest().upper()
+    return hash
+
+###################################################################################################
 
 def testAuthentication(host=None, username=None, password=None):
+    auth,session = _authToken(None,host,username,password)
+    if auth:
+        return True,u"[uTorrent] Authenication Successful."
+    return False,u"[uTorrent] Authenication Failed."
+
+###################################################################################################
+
+def _sendRequest(session,params=None,files=None,fnct=None,):
     try:
-        success, result = _action('', host, username, password)
-        if result and result["build"]:
-            result = "[uTorrent] Build: " + str(result["build"])
-        return success, result
-    except Exception, e:
-        return False, u"[uTorrent] testAuthentication() Error: " + ex(e)
-
-
-    if not success:
-        return False, result
-
-    return True, "Success. API Build: " + str(result["build"])
-
-def sendTORRENT(result):
-    url = '&action=add-url&s=' + urllib.quote_plus(result.url) #+ '&t=' + str(int(time.time()))
-    if result.provider.token:
-        url = url + ":COOKIE:" + result.provider.token
-
-    success, new_result = _action(url, sickbeard.TORRENT_HOST, sickbeard.TORRENT_USERNAME, sickbeard.TORRENT_PASSWORD)
-
-    torrent_hash = _findTorrentHash(result.url)
-    torrent_label = sickbeard.TORRENT_PATH.replace("/", "_").replace("\\", "_")
-
-    if torrent_hash and torrent_label:
-        url = '&action=setprops&s=label&hash=' + torrent_hash +'&v=' + quote(torrent_label) + '&t=' + str(int(time.time()))
-        _action(url, sickbeard.TORRENT_HOST, sickbeard.TORRENT_USERNAME, sickbeard.TORRENT_PASSWORD)
+        response = session.post(sickbeard.TORRENT_HOST + "gui/",auth=(sickbeard.TORRENT_USERNAME, sickbeard.TORRENT_PASSWORD), params=params, files=files,timeout=30)
+    except (requests.exceptions.ConnectionError, requests.exceptions.HTTPError), e:
+        logger.log("[uTorrent] Problem sending command " + fnct +  " - " + ex(e), logger.ERROR)
+        return False
     
-    if torrent_hash and sickbeard.TORRENT_PAUSED:
-        url = '&action=pause&hash=' + torrent_hash + '&t=' + str(int(time.time()))
-        _action(url, sickbeard.TORRENT_HOST, sickbeard.TORRENT_USERNAME, sickbeard.TORRENT_PASSWORD)
+    if response.status_code == 200:
+        return True
+    
+    logger.log("[uTorrent] Problem sending command " + fnct + ", return code = " + str(response.status_code))
+    return False
 
-    return success, new_result
+###################################################################################################
+
+def sendTORRENT(torrent):
+    
+    ###################################################################################################
+    
+    session = None
+    torrent_hash = None
+    params = {}
+    files = {}
+    
+    ###################################################################################################
+        
+    session = torrent.provider.session if hasattr(torrent.provider, 'session') else requests.Session()
+    
+    ###################################################################################################
+    
+    if session:
+        
+        ###################################################################################################
+        
+        auth,session = _authToken(session,sickbeard.TORRENT_HOST,sickbeard.TORRENT_USERNAME, sickbeard.TORRENT_PASSWORD)
+        if not auth:
+            return False
+
+        ###################################################################################################
+        
+        if torrent.url.startswith("magnet:"):
+            params = {'token': auth, 'action': 'add-url', 's': torrent.url }
+            if not _sendRequest(session,params,None,"Add-URL"):
+                return False
+            torrent_hash = _TorrentHash(torrent.url)
+        else:
+            try:    
+                tsession = session.get(torrent.url, verify=False,timeout=30)
+                logger.log("[uTorrent] Succesfully downloaded torrent from provider...", logger.DEBUG)
+            except (requests.exceptions.ConnectionError, requests.exceptions.HTTPError), e:
+                logger.log("[uTorrent] Torrent download Error  - " + ex(e), logger.ERROR)
+                return False
+            
+            params = {'token': auth, 'action': 'add-file'}
+            files = {'torrent_file': ("", tsession.content)}
+            if not _sendRequest(session,params,files,"Add-File"):
+                return False
+            torrent_hash = _TorrentHash(torrent.url,tsession.content)
+        
+        ###################################################################################################
+        
+        if not torrent_hash:
+            logger.log("[uTorrent] Could not find torrent's hash to associate with, addtional functions now disabled.",logger.DEBUG)
+            return True
+        
+        ###################################################################################################
+        
+        if torrent_hash and sickbeard.TORRENT_PAUSED:
+            params = {'token': auth, 'action': 'pause', 'hash': torrent_hash}
+            _sendRequest(session,params,None,"Pause")
+            logger.log("[uTorrent] Paused torrent with hash " + torrent_hash,logger.DEBUG)
+        
+        ###################################################################################################
+        
+        if torrent_hash and sickbeard.TORRENT_PATH:
+            torrent_label = sickbeard.TORRENT_PATH.replace("/", "_").replace("\\", "_")
+            params = {'token': auth, 'action': 'setprops', 'hash': torrent_hash, 's': 'label', 'v': torrent_label}
+            _sendRequest(session,params,None,"Label")
+            logger.log("[uTorrent] Label set to " + torrent_label + " for torrent with hash " + torrent_hash,logger.DEBUG)
+        
+        ###################################################################################################
+        
+        if torrent_hash and sickbeard.TORRENT_RATIO:
+            params = {'token': auth, 'action': 'setprops', 'hash': torrent_hash, 's': 'seed_override', 'v': '1'}
+            _sendRequest(session,params,None,"SetRatio(seed_override)")
+            
+            params = {'token': auth, 'action': 'setprops', 'hash': torrent_hash, 's': 'seed_ratio', 'v': float(sickbeard.TORRENT_RATIO)*10}
+            _sendRequest(session,params,None,"SetRatio(ratio)")
+            logger.log("[uTorrent] Ratio set to " + sickbeard.TORRENT_RATIO + " for torrent with hash " + torrent_hash,logger.DEBUG)
+        return True

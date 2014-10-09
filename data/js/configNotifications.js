@@ -1,6 +1,63 @@
 $(document).ready(function () {
     var loading = '<img src="' + sbRoot + '/images/loading16.gif" height="16" width="16" />';
 
+    /*************************** Pushbullet ***************************/
+    
+    if (!$("#pushbullet_apikey").val()) {
+        $("#divbullet_devices").hide();
+    }
+    else {
+        PushBullet_Select();
+        $( "#divbullet_devices" ).show();
+    }
+    
+    function PushBullet_Select() {
+        var pushbullet_apikey = $("#pushbullet_apikey").val();
+        var pushbullet_device = $("#pushbullet_device").val();
+        var $select = $('#bullet_devices');
+        
+        $.getJSON(sbRoot + "/home/Pushbullet_retriveDevices",  {'apiKey': pushbullet_apikey}, function(data){    
+            //clear the current content of the select
+            $select.html('');
+            
+            //populate first value with blank value
+            if (data.devices.length) {
+                $select.append('<option value="">All Devices</option>');
+            }
+            
+            //iterate over the data and append a select option
+            $.each(data.devices, function(key, val){
+                $select.append('<option value="' + val.iden + '">' + val.nickname + '</option>');
+                if ($("#pushbullet_device").val()==val.iden) {
+                    $select.val(val.iden);
+                }
+            })
+        });
+    }
+
+    $('#savePushbullet').click(function () {
+        if (!$("#pushbullet_apikey").val()) {
+            $('#divbullet_devices').hide("slow");
+        }
+        else {
+            $("#pushbullet_device").val($("#bullet_devices option:selected").val());
+            PushBullet_Select();
+            $('#divbullet_devices').show("slow");
+        }
+    });
+        
+    $('#testPushbullet').click(function ()
+    {
+        $('#testPushbullet-result').html(loading);
+        var pushbullet_apikey = $("#pushbullet_apikey").val();
+        var pushbullet_device = $("#bullet_devices option:selected").val();
+        $.get(sbRoot + "/home/testPushbullet", {'apiKey': pushbullet_apikey, 'device': pushbullet_device },
+            function (data)
+            { $('#testPushbullet-result').html(data); });
+    });
+    
+    /*************************** EOF Pushbullet ***************************/
+    
     $('#testGrowl').click(function () {
         $('#testGrowl-result').html(loading);
         var growl_host = $("#growl_host").val();
