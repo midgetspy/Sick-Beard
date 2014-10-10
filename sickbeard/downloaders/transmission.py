@@ -65,7 +65,7 @@ def sendTORRENT(torrent):
 
     if torrent.url.startswith("magnet:"):
         magnet=1
-        
+
     ###################################################################################################
     
     if session:
@@ -76,7 +76,7 @@ def sendTORRENT(torrent):
             logger.log("[Transmission] Login With Transmission, Successful.", logger.DEBUG)
         except transmissionrpc.TransmissionError, e:
             logger.log("[Transmission] Login With Transmission, Failed.",logger.ERROR)
-            return False,u"[Transmission] Login With Transmission, Failed."
+            return False
             
         ###################################################################################################
         
@@ -86,7 +86,7 @@ def sendTORRENT(torrent):
                 logger.log("[Transmission] Succesfully Downloaded Torrent...", logger.DEBUG)
             except (requests.exceptions.ConnectionError, requests.exceptions.HTTPError), e:
                 logger.log("[Transmission] Download Error  - " + ex(e), logger.ERROR)
-                return False,u"[Transmission] Download Error - " + ex(e)
+                return False
         
         ###################################################################################################
         
@@ -98,7 +98,7 @@ def sendTORRENT(torrent):
             logger.log("[Transmission] Added Torrent To Transmission.",logger.DEBUG)
         except Exception, e:
             logger.log("[Transmission] Error Adding Torrent - " + ex(e), logger.ERROR)
-            return False,u"[Transmission] Error Adding Torrent."
+            return False
         
         ###################################################################################################
         
@@ -107,15 +107,15 @@ def sendTORRENT(torrent):
             logger.log("[Transmission] Successfully Set Transmission Session Params.",logger.DEBUG)
         except Exception, e:
             logger.log("[Transmission] Error Setting Torrent Session.",logger.ERROR)
-            return False,u"[Transmission] Error Setting Torrent Session."
+            return False
         
         ###################################################################################################
         
     else:
         logger.log("[Transmission] Error No Requests Session.",logger.ERROR)
-        return False, u"[Transmission] Error No Requests Session."
+        return False
     logger.log("[Transmission] Completed Transaction.",logger.DEBUG)
-    return True,u"[Transmission] Completed Transction."
+    return True
     
 ###################################################################################################
 
