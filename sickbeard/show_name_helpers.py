@@ -179,7 +179,10 @@ def makeSceneSearchString(episode):
 
     for curShow in showNames:
         for curEpString in epStrings:
-            toReturn.append(curShow + '.' + curEpString)
+            if curEpString != '':
+                toReturn.append(curShow + '.' + curEpString)
+            else:
+                toReturn.append(curShow)
 
     return toReturn
 
@@ -211,6 +214,23 @@ def isGoodResult(name, show, log=True):
     return False
 
 
+def uniqify(seq, idfun=None):
+    # http://www.peterbe.com/plog/uniqifiers-benchmark
+    if idfun is None:
+        def idfun(x):
+            return x
+    seen = {}
+    result = []
+    for item in seq:
+        marker = idfun(item)
+        if marker in seen:
+            continue
+        seen[marker] = 1
+        result.append(item)
+
+    return result
+
+
 def allPossibleShowNames(show):
     """
     Figures out every possible variation of the name for a particular show. Includes TVDB name, TVRage name,
@@ -225,7 +245,7 @@ def allPossibleShowNames(show):
     showNames += [name for name in get_scene_exceptions(show.tvdbid)]
 
     # if we have a tvrage name then use it
-    if show.tvrname != "" and show.tvrname != None:
+    if show.tvrname != "" and show.tvrname is not None:
         showNames.append(show.tvrname)
 
     newShowNames = []
@@ -234,8 +254,7 @@ def allPossibleShowNames(show):
     country_list.update(dict(zip(countryList.values(), countryList.keys())))
 
     # if we have "Show Name Australia" or "Show Name (Australia)" this will add "Show Name (AU)" for
-    # any countries defined in common.countryList
-    # (and vice versa)
+    # any countries defined in common.countryList (and vice versa)
     for curName in set(showNames):
         if not curName:
             continue
@@ -246,5 +265,5 @@ def allPossibleShowNames(show):
                 newShowNames.append(curName.replace(' (' + curCountry + ')', ' (' + country_list[curCountry] + ')'))
 
     showNames += newShowNames
-
-    return showNames
+    # at this point we could have duplicates due to case-ing, prune dupes
+    return uniqify(showNames, lambda x: x.lower())
