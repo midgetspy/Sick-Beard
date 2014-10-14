@@ -257,6 +257,9 @@ USE_PUSHOVER = False
 PUSHOVER_NOTIFY_ONSNATCH = False
 PUSHOVER_NOTIFY_ONDOWNLOAD = False
 PUSHOVER_USERKEY = None
+PUSHOVER_PRIORITY = 0
+PUSHOVER_DEVICE = None
+PUSHOVER_SOUND = None
 
 USE_LIBNOTIFY = False
 LIBNOTIFY_NOTIFY_ONSNATCH = False
@@ -359,7 +362,7 @@ def initialize(consoleLogging=True):
                 WOMBLE, OMGWTFNZBS, OMGWTFNZBS_USERNAME, OMGWTFNZBS_APIKEY, providerList, newznabProviderList, \
                 EXTRA_SCRIPTS, USE_TWITTER, TWITTER_USERNAME, TWITTER_PASSWORD, TWITTER_PREFIX, \
                 USE_BOXCAR2, BOXCAR2_ACCESS_TOKEN, BOXCAR2_NOTIFY_ONDOWNLOAD, BOXCAR2_NOTIFY_ONSNATCH, BOXCAR2_SOUND, \
-                USE_PUSHOVER, PUSHOVER_USERKEY, PUSHOVER_NOTIFY_ONDOWNLOAD, PUSHOVER_NOTIFY_ONSNATCH, \
+                USE_PUSHOVER, PUSHOVER_USERKEY, PUSHOVER_NOTIFY_ONDOWNLOAD, PUSHOVER_NOTIFY_ONSNATCH, PUSHOVER_PRIORITY, PUSHOVER_DEVICE, PUSHOVER_SOUND, \
                 USE_LIBNOTIFY, LIBNOTIFY_NOTIFY_ONSNATCH, LIBNOTIFY_NOTIFY_ONDOWNLOAD, USE_NMJ, NMJ_HOST, NMJ_DATABASE, NMJ_MOUNT, USE_NMJv2, NMJv2_HOST, NMJv2_DATABASE, NMJv2_DBLOC, \
                 USE_SYNOINDEX, SYNOINDEX_NOTIFY_ONSNATCH, SYNOINDEX_NOTIFY_ONDOWNLOAD, SYNOINDEX_UPDATE_LIBRARY, \
                 USE_LISTVIEW, METADATA_XBMC, METADATA_XBMC_12PLUS, METADATA_MEDIABROWSER, METADATA_MEDE8ER, METADATA_PS3, metadata_provider_dict, \
@@ -584,7 +587,7 @@ def initialize(consoleLogging=True):
         PROWL_NOTIFY_ONSNATCH = bool(check_setting_int(CFG, 'Prowl', 'prowl_notify_onsnatch', 0))
         PROWL_NOTIFY_ONDOWNLOAD = bool(check_setting_int(CFG, 'Prowl', 'prowl_notify_ondownload', 0))
         PROWL_API = check_setting_str(CFG, 'Prowl', 'prowl_api', '')
-        PROWL_PRIORITY = check_setting_str(CFG, 'Prowl', 'prowl_priority', "0")
+        PROWL_PRIORITY = check_setting_int(CFG, 'Prowl', 'prowl_priority', 0)
 
         CheckSection(CFG, 'Twitter')
         USE_TWITTER = bool(check_setting_int(CFG, 'Twitter', 'use_twitter', 0))
@@ -606,6 +609,9 @@ def initialize(consoleLogging=True):
         PUSHOVER_NOTIFY_ONSNATCH = bool(check_setting_int(CFG, 'Pushover', 'pushover_notify_onsnatch', 0))
         PUSHOVER_NOTIFY_ONDOWNLOAD = bool(check_setting_int(CFG, 'Pushover', 'pushover_notify_ondownload', 0))
         PUSHOVER_USERKEY = check_setting_str(CFG, 'Pushover', 'pushover_userkey', '')
+        PUSHOVER_PRIORITY = check_setting_int(CFG, 'Pushover', 'pushover_priority', 0)
+        PUSHOVER_DEVICE = check_setting_str(CFG, 'Pushover', 'pushover_device', 'all')
+        PUSHOVER_SOUND = check_setting_str(CFG, 'Pushover', 'pushover_sound', 'pushover')
 
         CheckSection(CFG, 'Libnotify')
         USE_LIBNOTIFY = bool(check_setting_int(CFG, 'Libnotify', 'use_libnotify', 0))
@@ -650,7 +656,7 @@ def initialize(consoleLogging=True):
         NMA_NOTIFY_ONSNATCH = bool(check_setting_int(CFG, 'NMA', 'nma_notify_onsnatch', 0))
         NMA_NOTIFY_ONDOWNLOAD = bool(check_setting_int(CFG, 'NMA', 'nma_notify_ondownload', 0))
         NMA_API = check_setting_str(CFG, 'NMA', 'nma_api', '')
-        NMA_PRIORITY = check_setting_str(CFG, 'NMA', 'nma_priority', "0")
+        NMA_PRIORITY = check_setting_int(CFG, 'NMA', 'nma_priority', 0)
 
         CheckSection(CFG, 'Pushalot')
         USE_PUSHALOT = bool(check_setting_int(CFG, 'Pushalot', 'use_pushalot', 0))
@@ -1130,7 +1136,7 @@ def save_config():
     new_config['Prowl']['prowl_notify_onsnatch'] = int(PROWL_NOTIFY_ONSNATCH)
     new_config['Prowl']['prowl_notify_ondownload'] = int(PROWL_NOTIFY_ONDOWNLOAD)
     new_config['Prowl']['prowl_api'] = PROWL_API
-    new_config['Prowl']['prowl_priority'] = PROWL_PRIORITY
+    new_config['Prowl']['prowl_priority'] = int(PROWL_PRIORITY)
 
     new_config['Twitter'] = {}
     new_config['Twitter']['use_twitter'] = int(USE_TWITTER)
@@ -1152,6 +1158,9 @@ def save_config():
     new_config['Pushover']['pushover_notify_onsnatch'] = int(PUSHOVER_NOTIFY_ONSNATCH)
     new_config['Pushover']['pushover_notify_ondownload'] = int(PUSHOVER_NOTIFY_ONDOWNLOAD)
     new_config['Pushover']['pushover_userkey'] = PUSHOVER_USERKEY
+    new_config['Pushover']['pushover_priority'] = int(PUSHOVER_PRIORITY)
+    new_config['Pushover']['pushover_device'] = PUSHOVER_DEVICE
+    new_config['Pushover']['pushover_sound'] = PUSHOVER_SOUND
 
     new_config['Libnotify'] = {}
     new_config['Libnotify']['use_libnotify'] = int(USE_LIBNOTIFY)
@@ -1186,7 +1195,7 @@ def save_config():
     new_config['pyTivo']['use_pytivo'] = int(USE_PYTIVO)
     new_config['pyTivo']['pytivo_notify_onsnatch'] = int(PYTIVO_NOTIFY_ONSNATCH)
     new_config['pyTivo']['pytivo_notify_ondownload'] = int(PYTIVO_NOTIFY_ONDOWNLOAD)
-    new_config['pyTivo']['pyTivo_update_library'] = int(PYTIVO_UPDATE_LIBRARY)
+    new_config['pyTivo']['pytivo_update_library'] = int(PYTIVO_UPDATE_LIBRARY)
     new_config['pyTivo']['pytivo_host'] = PYTIVO_HOST
     new_config['pyTivo']['pytivo_share_name'] = PYTIVO_SHARE_NAME
     new_config['pyTivo']['pytivo_tivo_name'] = PYTIVO_TIVO_NAME
@@ -1196,7 +1205,7 @@ def save_config():
     new_config['NMA']['nma_notify_onsnatch'] = int(NMA_NOTIFY_ONSNATCH)
     new_config['NMA']['nma_notify_ondownload'] = int(NMA_NOTIFY_ONDOWNLOAD)
     new_config['NMA']['nma_api'] = NMA_API
-    new_config['NMA']['nma_priority'] = NMA_PRIORITY
+    new_config['NMA']['nma_priority'] = int(NMA_PRIORITY)
 
     new_config['Pushalot'] = {}
     new_config['Pushalot']['use_pushalot'] = int(USE_PUSHALOT)
