@@ -1130,10 +1130,11 @@ class ConfigNotifications:
                           use_plex=None, plex_notify_onsnatch=None, plex_notify_ondownload=None, plex_update_library=None,
                               plex_server_host=None, plex_host=None, plex_username=None, plex_password=None,
                           use_growl=None, growl_notify_onsnatch=None, growl_notify_ondownload=None, growl_host=None, growl_password=None,
-                          use_prowl=None, prowl_notify_onsnatch=None, prowl_notify_ondownload=None, prowl_api=None, prowl_priority=0,
+                          use_prowl=None, prowl_notify_onsnatch=None, prowl_notify_ondownload=None, prowl_api=None, prowl_priority=None,
                           use_twitter=None, twitter_notify_onsnatch=None, twitter_notify_ondownload=None,
                           use_boxcar2=None, boxcar2_notify_onsnatch=None, boxcar2_notify_ondownload=None, boxcar2_access_token=None, boxcar2_sound=None,
-                          use_pushover=None, pushover_notify_onsnatch=None, pushover_notify_ondownload=None, pushover_userkey=None,
+                          use_pushover=None, pushover_notify_onsnatch=None, pushover_notify_ondownload=None, pushover_userkey=None, pushover_priority=None,
+                              pushover_device=None, pushover_sound=None, pushover_device_list=None,
                           use_libnotify=None, libnotify_notify_onsnatch=None, libnotify_notify_ondownload=None,
                           use_nmj=None, nmj_host=None, nmj_database=None, nmj_mount=None,
                           use_synoindex=None, synoindex_notify_onsnatch=None, synoindex_notify_ondownload=None, synoindex_update_library=None,
@@ -1141,7 +1142,7 @@ class ConfigNotifications:
                           use_trakt=None, trakt_username=None, trakt_password=None, trakt_api=None,
                           use_pytivo=None, pytivo_notify_onsnatch=None, pytivo_notify_ondownload=None, pytivo_update_library=None,
                               pytivo_host=None, pytivo_share_name=None, pytivo_tivo_name=None,
-                          use_nma=None, nma_notify_onsnatch=None, nma_notify_ondownload=None, nma_api=None, nma_priority=0,
+                          use_nma=None, nma_notify_onsnatch=None, nma_notify_ondownload=None, nma_api=None, nma_priority=None,
                           use_pushalot=None, pushalot_notify_onsnatch=None, pushalot_notify_ondownload=None, pushalot_authorizationtoken=None, pushalot_silent=None, pushalot_important=None,
                           use_pushbullet=None, pushbullet_notify_onsnatch=None, pushbullet_notify_ondownload=None, pushbullet_access_token=None, pushbullet_device_iden=None, pushbullet_device_list=None
                           ):
@@ -1213,6 +1214,9 @@ class ConfigNotifications:
         sickbeard.PUSHOVER_NOTIFY_ONSNATCH = config.checkbox_to_value(pushover_notify_onsnatch)
         sickbeard.PUSHOVER_NOTIFY_ONDOWNLOAD = config.checkbox_to_value(pushover_notify_ondownload)
         sickbeard.PUSHOVER_USERKEY = pushover_userkey
+        sickbeard.PUSHOVER_PRIORITY = pushover_priority
+        sickbeard.PUSHOVER_DEVICE = pushover_device
+        sickbeard.PUSHOVER_SOUND = pushover_sound
 
         sickbeard.USE_BOXCAR2 = config.checkbox_to_value(use_boxcar2)
         sickbeard.BOXCAR2_NOTIFY_ONSNATCH = config.checkbox_to_value(boxcar2_notify_onsnatch)
@@ -1924,7 +1928,7 @@ class Home:
             return "Registration and Testing of growl failed " + urllib.unquote_plus(host) + pw_append
 
     @cherrypy.expose
-    def testProwl(self, prowl_api=None, prowl_priority=0):
+    def testProwl(self, prowl_api=None, prowl_priority=None):
         cherrypy.response.headers['Cache-Control'] = "max-age=0,no-cache,no-store"
 
         result = notifiers.prowl_notifier.test_notify(prowl_api, prowl_priority)
@@ -1944,14 +1948,24 @@ class Home:
             return "Error sending Boxcar2 notification"
 
     @cherrypy.expose
-    def testPushover(self, userKey=None):
+    def testPushover(self, userKey=None, priority=None, device=None, sound=None):
         cherrypy.response.headers['Cache-Control'] = "max-age=0,no-cache,no-store"
 
-        result = notifiers.pushover_notifier.test_notify(userKey)
+        result = notifiers.pushover_notifier.test_notify(userKey, priority, device, sound)
         if result:
             return "Pushover notification succeeded. Check your Pushover clients to make sure it worked"
         else:
             return "Error sending Pushover notification"
+
+    @cherrypy.expose
+    def getPushoverDevices(self, userKey=None):
+        cherrypy.response.headers['Cache-Control'] = "max-age=0,no-cache,no-store"
+
+        result = notifiers.pushover_notifier.get_devices(userKey)
+        if result:
+            return result
+        else:
+            return "{}"
 
     @cherrypy.expose
     def twitterStep1(self):
@@ -2078,7 +2092,7 @@ class Home:
             return "Test notice failed to Trakt"
 
     @cherrypy.expose
-    def testNMA(self, nma_api=None, nma_priority=0):
+    def testNMA(self, nma_api=None, nma_priority=None):
         cherrypy.response.headers['Cache-Control'] = "max-age=0,no-cache,no-store"
 
         result = notifiers.nma_notifier.test_notify(nma_api, nma_priority)
@@ -2125,7 +2139,7 @@ class Home:
         if result:
             return result
         else:
-            return "Error sending Pushbullet notification"
+            return "{}"
 
     @cherrypy.expose
     def shutdown(self, pid=None):
