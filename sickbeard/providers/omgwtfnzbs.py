@@ -75,10 +75,11 @@ class OmgwtfnzbsProvider(generic.NZBProvider):
                 if 'information is incorrect' in parsedJSON.get('notice'):
                     logger.log(u"Incorrect authentication credentials for " + self.name + " : " + str(description_text), logger.DEBUG)
                     raise AuthException("Your authentication credentials for " + self.name + " are incorrect, check your config.")
-
+                elif 'please try again later' in parsedJSON.get('notice'):
+                    logger.log(self.name + u" down for maintenance, aborting", logger.DEBUG)
+                    return False
                 elif '0 results matched your terms' in parsedJSON.get('notice'):
                     return True
-
                 else:
                     logger.log(u"Unknown error given from " + self.name + " : " + str(description_text), logger.DEBUG)
                     return False
@@ -165,7 +166,7 @@ class OmgwtfnzbsCache(tvcache.TVCache):
         params = {'user': sickbeard.OMGWTFNZBS_USERNAME,
                   'api': sickbeard.OMGWTFNZBS_APIKEY,
                   'eng': 1,
-                  'delay': 20,
+                  'delay': 25,
                   'catid': '19,20'}  # SD,HD
 
         rss_url = 'https://rss.omgwtfnzbs.org/rss-download.php?' + urllib.urlencode(params)
