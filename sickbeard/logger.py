@@ -87,7 +87,7 @@ class SBRotatingLogHandler(object):
                 # define a Handler which writes INFO messages or higher to the sys.stderr
                 console = logging.StreamHandler()
 
-                console.setLevel(logging.INFO)
+                console.setLevel(logging.WARN)
 
                 # set a format which is simpler for console use
                 console.setFormatter(logging.Formatter('%(asctime)s %(levelname)s::%(message)s', '%H:%M:%S'))
@@ -109,7 +109,7 @@ class SBRotatingLogHandler(object):
         Configure a file handler to log at file_name and return it.
         """
         file_handler = logging.FileHandler(self.log_file_path, encoding='utf-8')
-        file_handler.setLevel(logging.DEBUG)
+        file_handler.setLevel(logging.WARN)
         file_handler.setFormatter(logging.Formatter('%(asctime)s %(levelname)-8s %(message)s', '%Y-%m-%d %H:%M:%S'))
         return file_handler
 
