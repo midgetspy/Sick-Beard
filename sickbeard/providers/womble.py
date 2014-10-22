@@ -72,6 +72,9 @@ class WombleCache(tvcache.TVCache):
 
         return RSS_data
 
+    def _translateTitle(self, title):
+        return title.replace(' ', '.').replace('_', '.')
+
     def _checkAuth(self, data):
         return data != 'Invalid Link'
 
