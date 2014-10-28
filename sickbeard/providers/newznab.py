@@ -21,6 +21,7 @@ import email.utils
 import datetime
 import re
 import os
+import time
 
 try:
     import xml.etree.cElementTree as etree
@@ -99,7 +100,7 @@ class NewznabProvider(generic.NZBProvider):
             else:
                 cur_params['q'] = helpers.sanitizeSceneName(cur_exception)
 
-            if season != None:
+            if season is not None:
                 # air-by-date means &season=2010&q=2010.03, no other way to do it atm
                 if show.air_by_date:
                     cur_params['season'] = season.split('-')[0]
@@ -183,6 +184,9 @@ class NewznabProvider(generic.NZBProvider):
                 raise AuthException("Your account on " + self.name + " has been suspended, contact the administrator.")
             elif code == '102':
                 raise AuthException("Your account isn't allowed to use the API on " + self.name + ", contact the administrator")
+            elif code == '910':
+                logger.log(u"" + self.name + " currently has their API disabled, probably maintenance?", logger.WARNING)
+                return False
             else:
                 logger.log(u"Unknown error given from " + self.name + ": " + parsedXML.attrib['description'], logger.ERROR)
                 return False
@@ -208,49 +212,77 @@ class NewznabProvider(generic.NZBProvider):
         if self.needs_auth and self.key:
             params['apikey'] = self.key
 
-        search_url = self.url + 'api?' + urllib.urlencode(params)
+        results = []
+        offset = total = hits = 0
 
-        logger.log(u"Search url: " + search_url, logger.DEBUG)
+        # hardcoded to stop after a max of 4 hits (400 items) per query
+        while (hits < 4) and (offset == 0 or offset < total):
+            if hits > 0:
+                # sleep for a few seconds to not hammer the site and let cpu rest
+                time.sleep(2)
 
-        data = self.getURL(search_url)
+            params['offset'] = offset
 
-        if not data:
-            logger.log(u"No data returned from " + search_url, logger.ERROR)
-            return []
+            search_url = self.url + 'api?' + urllib.urlencode(params)
 
-        # hack this in until it's fixed server side
-        if not data.startswith('<?xml'):
-            data = '<?xml version="1.0" encoding="ISO-8859-1" ?>' + data
+            logger.log(u"Search url: " + search_url, logger.DEBUG)
 
-        parsedXML = helpers.parse_xml(data)
+            data = self.getURL(search_url)
 
-        if parsedXML is None:
-            logger.log(u"Error trying to load " + self.name + " XML data", logger.ERROR)
-            return []
+            if not data:
+                logger.log(u"No data returned from " + search_url, logger.ERROR)
+                return results
 
-        if self._checkAuthFromData(parsedXML):
+            # hack this in until it's fixed server side
+            if not data.startswith('<?xml'):
+                data = '<?xml version="1.0" encoding="ISO-8859-1" ?>' + data
 
-            if parsedXML.tag == 'rss':
-                items = parsedXML.findall('.//item')
+            parsedXML = helpers.parse_xml(data)
 
-            else:
-                logger.log(u"Resulting XML from " + self.name + " isn't RSS, not parsing it", logger.ERROR)
-                return []
+            if parsedXML is None:
+                logger.log(u"Error trying to load " + self.name + " XML data", logger.ERROR)
+                return results
 
-            results = []
+            if self._checkAuthFromData(parsedXML):
 
-            for curItem in items:
-                (title, url) = self._get_title_and_url(curItem)
+                if parsedXML.tag == 'rss':
+                    items = parsedXML.findall('.//item')
+                    response = parsedXML.find('.//{http://www.newznab.com/DTD/2010/feeds/attributes/}response')
 
-                if title and url:
-                    logger.log(u"Adding item from RSS to results: " + title, logger.DEBUG)
-                    results.append(curItem)
                 else:
-                    logger.log(u"The XML returned from the " + self.name + " RSS feed is incomplete, this result is unusable", logger.DEBUG)
+                    logger.log(u"Resulting XML from " + self.name + " isn't RSS, not parsing it", logger.ERROR)
+                    return results
 
-            return results
+                # process the items that we have
+                for curItem in items:
+                    (title, url) = self._get_title_and_url(curItem)
 
-        return []
+                    if title and url:
+                        # commenting this out for performance reasons, we see the results when they are added to cache anyways
+                        # logger.log(u"Adding item from RSS to results: " + title, logger.DEBUG)
+                        results.append(curItem)
+                    else:
+                        logger.log(u"The XML returned from the " + self.name + " RSS feed is incomplete, this result is unusable", logger.DEBUG)
+
+                # check to see if our offset matches what was returned, otherwise dont trust their values and just use what we have
+                if offset != int(response.get('offset') or 0):
+                    logger.log(u"Newznab provider returned invalid api data, report this to your provider! Aborting fetching further results.", logger.DEBUG)
+                    return results
+
+                try:
+                    total = int(response.get('total') or 0)
+                except AttributeError:
+                    logger.log(u"Newznab provider provided invalid total.", logger.DEBUG)
+                    break
+
+            # if we have 0 results, just break out otherwise increment and continue
+            if total == 0:
+                break
+            else:
+                offset += 100
+                hits += 1
+
+        return results
 
     def findPropers(self, search_date=None):
 
