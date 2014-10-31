@@ -108,7 +108,7 @@ WEB_HOST = None
 WEB_IPV6 = None
 
 ANON_REDIRECT = None
-DISPLAY_ALL_SEASONS = False
+DISPLAY_ALL_SEASONS = None
 
 USE_API = False
 API_KEY = None
@@ -405,7 +405,7 @@ def initialize(consoleLogging=True):
         if not ANON_REDIRECT.endswith('?'):
             ANON_REDIRECT = ''
 
-        DISPLAY_ALL_SEASONS = bool(check_setting_int(CFG, 'General', 'display_all_seasons', 0))
+        DISPLAY_ALL_SEASONS = check_setting_int(CFG, 'General', 'display_all_seasons', 1)
 
         USE_API = bool(check_setting_int(CFG, 'General', 'use_api', 0))
         API_KEY = check_setting_str(CFG, 'General', 'api_key', '')
