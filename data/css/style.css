@@ -49,10 +49,14 @@ browser.css
 .ui-menu .ui-menu-item-alternate {
   background-color: #fff;
 }
-.ui-autocomplete .ui-menu-item .ui-state-focus {
+.ui-autocomplete .ui-menu-item.ui-state-focus,
+.ui-autocomplete .ui-menu-item.ui-state-active {
   color: #fff;
   background: none;
   background-color: #0a246a;
+  margin: 0;
+  border: none;
+  font-weight: normal;
 }
 /* restore 1.8.x resize handle on dialog button pane */
 .ui-dialog .ui-resizable-se {
@@ -752,6 +756,26 @@ span.pause {
 }
 
 /* =======================================================================
+history.tmpl
+========================================================================== */
+th.col-src,
+td.col-src {
+  width: 45px;
+  text-align: center;
+}
+th.col-time,
+td.col-time {
+  width: 155px;
+  white-space: nowrap;
+  text-align: center;
+}
+th.col-action,
+td.col-action {
+  width: 110px;
+  text-align: center;
+}
+
+/* =======================================================================
 config.tmpl
 ========================================================================== */
 .infoTable td {
@@ -1027,11 +1051,10 @@ h1 a:hover, h2 a:hover, span a:hover, div.h2footer a:hover, .notify-text a:hover
 }
 /* used on displayShow and comingEp list */
 .plotInfo {
-  position: relative;
-  float: right;
-  margin-left: 8px;
-  font-weight: bold;
   cursor: help;
+}
+.plotInfoNone {
+  opacity: 0.25;
 }
 div select option {
   padding: 2px 10px;
@@ -1299,3 +1322,87 @@ ul.nav .dropdown-menu .divider {
   filter: progid:dximagetransform.microsoft.gradient(startColorstr='#51a9c4', endColorstr='#2d88a1', GradientType=0);
 }
 */
+
+/* =======================================================================
+displayShow.tmpl (update)
+========================================================================== */
+.sickbeardTable2 {
+  table-layout: auto;
+  width: 100%;
+  border-collapse: collapse;
+  border-spacing: 0;
+  text-align: center;
+  border: none;
+  empty-cells: show;
+}
+.sickbeardTable2 th{
+  color: #fff;
+  text-align: center;
+  background-color: #333;
+  white-space: nowrap;
+}
+.sickbeardTable2 th, 
+.sickbeardTable2 td {
+  border-top: 1px solid #fff;
+  border-left: 1px solid #fff;
+  padding: 4px;
+}
+th.row-seasonheader {
+  border: none;
+  background-color: #fff;
+  color: #000;
+  line-height: 25px;
+  font-size: 22px;
+  letter-spacing: 1px;
+  padding-top: 15px;
+}
+
+th.col-checkbox,
+td.col-checkbox {
+  width: 17px;
+  border-left: none;
+}
+th.col-metadata,
+td.col-metadata {
+  width: 28px;
+}
+th.col-ep,
+td.col-ep {
+  width: 50px;
+  white-space: nowrap;
+}
+th.col-name,
+td.col-name {
+  min-width: 100px;
+  text-align: left;
+}
+th.col-plotinfo,
+td.col-plotinfo {
+  width: 18px;
+  border-left: none;
+}
+th.col-airdate,
+td.col-airdate {
+  width: 86px;
+  white-space: nowrap;
+}
+th.col-filename,
+td.col-filename {
+  text-align: left;
+}
+th.col-status,
+td.col-status {
+  text-align: left;
+}
+th.col-search,
+td.col-search {
+  width: 46px;
+}
+/* need to remove when we upgrade bootstrap */
+.btn-block {
+  box-sizing: border-box;
+  display: block;
+  padding-left: 0;
+  padding-right: 0;
+  width: 100%;
+}

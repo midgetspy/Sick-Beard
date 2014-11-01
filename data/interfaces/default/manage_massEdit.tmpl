@@ -93,6 +93,17 @@
 </div>
 
 <div class="optionWrapper clearfix">
+    <span class="selectTitle">Skip Notices</span>
+    <div class="selectChoices">
+        <select id="edit_skip_notices" name="skip_notices">
+            <option value="keep">&lt; keep &gt;</option>
+            <option value="enable" #if $skip_notices_value then "selected=\"selected\"" else ""#>enable</option>
+            <option value="disable" #if $skip_notices_value == False then "selected=\"selected\"" else ""#>disable</option>
+        </select>
+    </div><br />
+</div>
+
+<div class="optionWrapper clearfix">
     <br /><span class="separator" style="font-size: 1.2em; font-weight: 700;">*</span>
     Changing these settings will cause the selected shows to be refreshed.
 </div>

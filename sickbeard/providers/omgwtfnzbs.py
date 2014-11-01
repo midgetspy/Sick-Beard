@@ -52,7 +52,7 @@ class OmgwtfnzbsProvider(generic.NZBProvider):
 
     def _checkAuth(self):
 
-        if not sickbeard.OMGWTFNZBS_USERNAME  or not sickbeard.OMGWTFNZBS_APIKEY:
+        if not sickbeard.OMGWTFNZBS_USERNAME or not sickbeard.OMGWTFNZBS_APIKEY:
             raise AuthException("Your authentication credentials for " + self.name + " are missing, check your config.")
 
         return True
@@ -75,10 +75,11 @@ class OmgwtfnzbsProvider(generic.NZBProvider):
                 if 'information is incorrect' in parsedJSON.get('notice'):
                     logger.log(u"Incorrect authentication credentials for " + self.name + " : " + str(description_text), logger.DEBUG)
                     raise AuthException("Your authentication credentials for " + self.name + " are incorrect, check your config.")
-
+                elif 'please try again later' in parsedJSON.get('notice'):
+                    logger.log(self.name + u" down for maintenance, aborting", logger.DEBUG)
+                    return False
                 elif '0 results matched your terms' in parsedJSON.get('notice'):
                     return True
-
                 else:
                     logger.log(u"Unknown error given from " + self.name + " : " + str(description_text), logger.DEBUG)
                     return False
@@ -92,7 +93,7 @@ class OmgwtfnzbsProvider(generic.NZBProvider):
         return [x for x in show_name_helpers.makeSceneSearchString(ep_obj)]
 
     def _get_title_and_url(self, item):
-        return (item['release'], item['getnzb'])
+        return (item['release'].replace('_', '.'), item['getnzb'])
 
     def _doSearch(self, search, show=None, retention=0):
 
@@ -101,6 +102,7 @@ class OmgwtfnzbsProvider(generic.NZBProvider):
         params = {'user': sickbeard.OMGWTFNZBS_USERNAME,
                   'api': sickbeard.OMGWTFNZBS_APIKEY,
                   'eng': 1,
+                  'nukes': 1,  # show nuke info
                   'catid': '19,20',  # SD,HD
                   'retention': sickbeard.USENET_RETENTION,
                   'search': search}
@@ -128,6 +130,9 @@ class OmgwtfnzbsProvider(generic.NZBProvider):
             results = []
 
             for item in parsedJSON:
+                if 'nuked' in item and item['nuked'].startswith('1'):
+                    # logger.log(u"Skipping nuked release: " + item['release'], logger.DEBUG)
+                    continue
                 if 'release' in item and 'getnzb' in item:
                     results.append(item)
 
@@ -165,6 +170,7 @@ class OmgwtfnzbsCache(tvcache.TVCache):
         params = {'user': sickbeard.OMGWTFNZBS_USERNAME,
                   'api': sickbeard.OMGWTFNZBS_APIKEY,
                   'eng': 1,
+                  'delay': 30,
                   'catid': '19,20'}  # SD,HD
 
         rss_url = 'https://rss.omgwtfnzbs.org/rss-download.php?' + urllib.urlencode(params)

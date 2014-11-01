@@ -40,7 +40,7 @@ class ProwlNotifier:
         if not prowl_priority:
             prowl_priority = sickbeard.PROWL_PRIORITY
 
-        logger.log("PROWL: Sending notice with details: event=\"%s\", message=\"%s\", priority=%s, api=%s" % (event, message, prowl_priority, prowl_api), logger.DEBUG)
+        logger.log(u"PROWL: Sending notice with details: event=\"%s\", message=\"%s\", priority=%s, api=%s" % (event, message, prowl_priority, prowl_api), logger.DEBUG)
 
         try:
 

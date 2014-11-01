@@ -53,7 +53,7 @@ def _downloadResult(result):
 
     newResult = False
 
-    if resProvider == None:
+    if resProvider is None:
         logger.log(u"Invalid provider name - this is a coding error, report it please", logger.ERROR)
         return False
 
@@ -103,7 +103,7 @@ def snatchEpisode(result, endStatus=SNATCHED):
     endStatus: the episode status that should be used for the episode object once it's snatched.
     """
 
-    # NZBs can be sent straight to SAB or saved to disk
+    # NZBs can be sent straight to downloader or saved to disk
     if result.resultType in ("nzb", "nzbdata"):
         if sickbeard.NZB_METHOD == "blackhole":
             dlResult = _downloadResult(result)
@@ -135,7 +135,7 @@ def snatchEpisode(result, endStatus=SNATCHED):
             curEpObj.status = Quality.compositeStatus(endStatus, result.quality)
             curEpObj.saveToDB()
 
-        if curEpObj.status not in Quality.DOWNLOADED:
+        if not curEpObj.show.skip_notices and curEpObj.status not in Quality.DOWNLOADED:
             notifiers.notify_snatch(curEpObj.prettyName())
 
     return True

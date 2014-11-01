@@ -2,10 +2,17 @@ $(document).ready(function(){
 
     $('#sbRoot').ajaxEpSearch({'colorRow': true});
 
+    $("#showAllSeasons, a.seasonJump").click(function() {
+        showAllSeasons();
+    });
+
     $('#seasonJump').change(function() {
+        // show hidden seasons first so we can actually go there
+        showAllSeasons();
+
         var id = $(this).val();
         if (id && id != 'jump') {
-            $('html,body').animate({scrollTop: $(id).offset().top},'slow');
+            $('html,body').animate({scrollTop: $(id).offset().top}, 'slow');
             location.hash = id;
         }
         $(this).val('jump');
@@ -138,6 +145,14 @@ $(document).ready(function(){
             }
         });
     });
+
+    // hide toggle button and show all season data
+    function showAllSeasons() {
+        if ($('#showAllSeasons').is(":visible")) {
+            $('#showAllSeasons').hide();
+            $('#segment').show();
+        }
+    }
 
     $.fn.showHideRows = function(whichClass) {
 

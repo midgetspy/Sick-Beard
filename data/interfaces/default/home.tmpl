@@ -53,8 +53,8 @@
     },
     format: function(s) {
         if (s.indexOf('Loading...') == 0)
-          return s.replace('Loading...','000');
-        return (s || '').replace(/^(The|A)\s/i,'');
+          return s.replace('Loading...', '000');
+        return /^(a to )/i.test(s || '') ? s : (s || '').replace(/^(The|A|An)\s/i,'');
     },
     type: 'text'
 });
@@ -64,7 +64,7 @@
     is: function(s) {
         return false;
     },
-    format: function(s) { 
+    format: function(s) {
         return s.replace('hd1080p',5).replace('hd720p',4).replace('hd',3).replace('sd',2).replace('any',1).replace('custom',7);
     },
     type: 'numeric'
