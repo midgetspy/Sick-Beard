@@ -31,14 +31,15 @@ except ImportError:
 import sickbeard
 import generic
 
-from sickbeard import classes
-from sickbeard import helpers
+from sickbeard import helpers, classes, logger, db
 from sickbeard import scene_exceptions
-from sickbeard import encodingKludge as ek
 
-from sickbeard import logger
+from sickbeard.common import Quality, MULTI_EP_RESULT, SEASON_RESULT
 from sickbeard import tvcache
+from sickbeard import encodingKludge as ek
 from sickbeard.exceptions import ex, AuthException
+
+from sickbeard.name_parser.parser import NameParser, InvalidNameException
 
 
 class NewznabProvider(generic.NZBProvider):
@@ -80,7 +81,166 @@ class NewznabProvider(generic.NZBProvider):
     def isEnabled(self):
         return self.enabled
 
-    def _get_season_search_strings(self, show, season=None):
+    def findEpisode(self, episode, manualSearch=False):
+
+        logger.log(u"Searching " + self.name + " for " + episode.prettyName())
+
+        self.cache.updateCache()
+        results = self.cache.searchCache(episode, manualSearch)
+        logger.log(u"Cache results: " + str(results), logger.DEBUG)
+
+        # if we got some results then use them no matter what.
+        # OR
+        # return anyway unless we're doing a manual search
+        if results or not manualSearch:
+            return results
+
+        itemList = []
+
+        for cur_search_string in self._get_episode_search_strings(episode):
+            itemList += self._doSearch(cur_search_string, show=episode.show)
+
+        # check if shows that we have a tvrage id for returned 0 results
+        # if so, fall back to just searching by query
+        if itemList == [] and episode.show.tvrid != 0:
+            logger.log(u"Unable to find a result on " + self.name + " using tvrage id (" + str(episode.show.tvrid) + "), trying to search by string...", logger.WARNING)
+            for cur_search_string in self._get_episode_search_strings(episode, ignore_tvr=True):
+                itemList += self._doSearch(cur_search_string, show=episode.show)
+
+        for item in itemList:
+
+            (title, url) = self._get_title_and_url(item)
+
+            # parse the file name
+            try:
+                myParser = NameParser()
+                parse_result = myParser.parse(title)
+            except InvalidNameException:
+                logger.log(u"Unable to parse the filename " + title + " into a valid episode", logger.WARNING)
+                continue
+
+            if episode.show.air_by_date:
+                if parse_result.air_date != episode.airdate:
+
+                    logger.log(u"Episode " + title + " didn't air on " + str(episode.airdate) + ", skipping it", logger.DEBUG)
+                    continue
+
+            elif parse_result.season_number != episode.season or episode.episode not in parse_result.episode_numbers:
+                logger.log(u"Episode " + title + " isn't " + str(episode.season) + "x" + str(episode.episode) + ", skipping it", logger.DEBUG)
+                continue
+
+            quality = self.getQuality(item)
+
+            if not episode.show.wantEpisode(episode.season, episode.episode, quality, manualSearch):
+                logger.log(u"Ignoring result " + title + " because we don't want an episode that is " + Quality.qualityStrings[quality], logger.DEBUG)
+                continue
+
+            logger.log(u"Found result " + title + " at " + url, logger.DEBUG)
+
+            result = self.getResult([episode])
+            result.url = url
+            result.name = title
+            result.quality = quality
+
+            results.append(result)
+
+        return results
+
+    def findSeasonResults(self, show, season):
+
+        itemList = []
+        results = {}
+
+        for cur_string in self._get_season_search_strings(show, season):
+            itemList += self._doSearch(cur_string)
+
+        # check if shows that we have a tvrage id for returned 0 results
+        # if so, fall back to just searching by query
+        if itemList == [] and show.tvrid != 0:
+            logger.log(u"Unable to find a result on " + self.name + " using tvrage id (" + str(show.tvrid) + "), trying to search by string...", logger.WARNING)
+            for cur_string in self._get_season_search_strings(show, season, ignore_tvr=True):
+                itemList += self._doSearch(cur_string)
+
+        for item in itemList:
+
+            (title, url) = self._get_title_and_url(item)
+
+            quality = self.getQuality(item)
+
+            # parse the file name
+            try:
+                myParser = NameParser(False)
+                parse_result = myParser.parse(title)
+            except InvalidNameException:
+                logger.log(u"Unable to parse the filename " + title + " into a valid episode", logger.WARNING)
+                continue
+
+            if not show.air_by_date:
+                # this check is meaningless for non-season searches
+                if (parse_result.season_number != None and parse_result.season_number != season) or (parse_result.season_number == None and season != 1):
+                    logger.log(u"The result " + title + " doesn't seem to be a valid episode for season " + str(season) + ", ignoring")
+                    continue
+
+                # we just use the existing info for normal searches
+                actual_season = season
+                actual_episodes = parse_result.episode_numbers
+
+            else:
+                if not parse_result.air_by_date:
+                    logger.log(u"This is supposed to be an air-by-date search but the result " + title + " didn't parse as one, skipping it", logger.DEBUG)
+                    continue
+
+                myDB = db.DBConnection()
+                sql_results = myDB.select("SELECT season, episode FROM tv_episodes WHERE showid = ? AND airdate = ?", [show.tvdbid, parse_result.air_date.toordinal()])
+
+                if len(sql_results) != 1:
+                    logger.log(u"Tried to look up the date for the episode " + title + " but the database didn't give proper results, skipping it", logger.WARNING)
+                    continue
+
+                actual_season = int(sql_results[0]["season"])
+                actual_episodes = [int(sql_results[0]["episode"])]
+
+            # make sure we want the episode
+            wantEp = True
+            for epNo in actual_episodes:
+                if not show.wantEpisode(actual_season, epNo, quality):
+                    wantEp = False
+                    break
+
+            if not wantEp:
+                logger.log(u"Ignoring result " + title + " because we don't want an episode that is " + Quality.qualityStrings[quality], logger.DEBUG)
+                continue
+
+            logger.log(u"Found result " + title + " at " + url, logger.DEBUG)
+
+            # make a result object
+            epObj = []
+            for curEp in actual_episodes:
+                epObj.append(show.getEpisode(actual_season, curEp))
+
+            result = self.getResult(epObj)
+            result.url = url
+            result.name = title
+            result.quality = quality
+
+            if len(epObj) == 1:
+                epNum = epObj[0].episode
+            elif len(epObj) > 1:
+                epNum = MULTI_EP_RESULT
+                logger.log(u"Separating multi-episode result to check for later - result contains episodes: " + str(parse_result.episode_numbers), logger.DEBUG)
+            elif len(epObj) == 0:
+                epNum = SEASON_RESULT
+                result.extraInfo = [show]
+                logger.log(u"Separating full season result to check for later", logger.DEBUG)
+
+            if epNum in results:
+                results[epNum].append(result)
+            else:
+                results[epNum] = [result]
+
+        return results
+
+    def _get_season_search_strings(self, show, season=None, ignore_tvr=False):
 
         if not show:
             return [{}]
@@ -94,7 +254,7 @@ class NewznabProvider(generic.NZBProvider):
             cur_params = {}
 
             # search directly by tvrage id
-            if show.tvrid:
+            if not ignore_tvr and show.tvrid:
                 cur_params['rid'] = show.tvrid
             # if we can't then fall back on a very basic name search
             else:
@@ -117,7 +277,7 @@ class NewznabProvider(generic.NZBProvider):
 
         return to_return
 
-    def _get_episode_search_strings(self, ep_obj):
+    def _get_episode_search_strings(self, ep_obj, ignore_tvr=False):
 
         params = {}
 
@@ -125,7 +285,7 @@ class NewznabProvider(generic.NZBProvider):
             return [params]
 
         # search directly by tvrage id
-        if ep_obj.show.tvrid:
+        if not ignore_tvr and ep_obj.show.tvrid:
             params['rid'] = ep_obj.show.tvrid
         # if we can't then fall back on a very basic name search
         else:
