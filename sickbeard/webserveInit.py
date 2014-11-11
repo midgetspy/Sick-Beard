@@ -112,6 +112,7 @@ def initWebServer(options={}):
         'tools.gzip.mime_types': mime_gzip,
         'error_page.401': http_error_401_hander,
         'error_page.404': http_error_404_hander,
+        'tools.autoproxy.on': True,
     }
 
     if enable_https:
@@ -168,6 +169,36 @@ def initWebServer(options={}):
                 'tools.auth_basic.checkpassword': checkpassword
             }
         })
+
+    # Ensure that when behind a mod_rewrite Apache reverse proxy,
+    # both direct requests and proxied requests are handled properly.
+    def autoproxy(
+        base   = None,
+        local  = 'X-Forwarded-Host',
+        remote = 'X-Forwarded-For',
+        scheme = 'X-Forwarded-Proto',
+        debug  = False,
+    ):
+        """
+        Apply the CherryPy proxy tool only if the ``local`` header is set.
+
+        Notice that it maps the parameters to the original proxy tool.
+
+        Use it as per the usual proxy tool:
+            tools.autoproxy.on: True
+            tools.autoproxy.base: "http://www.mydomain.com"
+        """
+        # or to look for all of them
+        # h = cherrypy.serving.request.headers
+        # if local in h and remote in h and scheme in h:
+        if local in cherrypy.serving.request.headers:
+          cherrypy.lib.cptools.proxy(base, local, remote, scheme, debug)
+
+    cherrypy.tools.autoproxy = cherrypy.Tool(
+        'before_request_body',
+        autoproxy,
+        priority = 30,
+    )
 
     cherrypy.server.start()
     cherrypy.server.wait()
