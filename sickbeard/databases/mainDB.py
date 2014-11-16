@@ -446,7 +446,7 @@ class AddRequireAndIgnoreWords(AddLastUpdateTVDB):
         self.incDBVersion()
 
 
-# included in build 507 (2014-0#-##)
+# included in build 507 (2014-11-16)
 class CleanupHistoryAndSpecials(AddRequireAndIgnoreWords):
     """ Cleanup older history entries and set specials from wanted to skipped """
 
@@ -560,7 +560,7 @@ class CleanupHistoryAndSpecials(AddRequireAndIgnoreWords):
         self.connection.action("VACUUM")
 
 
-# included in build 507 (2014-0#-##)
+# included in build 507 (2014-11-16)
 class AddSkipNotifications(CleanupHistoryAndSpecials):
     """ Adding column skip_notices to tv_shows """
 
@@ -577,7 +577,7 @@ class AddSkipNotifications(CleanupHistoryAndSpecials):
         self.incDBVersion()
 
 
-# included in build 507 (2014-0#-##)
+# included in build 507 (2014-11-16)
 class AddHistorySource(AddSkipNotifications):
     """ Adding column source to history """
 
