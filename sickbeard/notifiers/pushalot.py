@@ -29,25 +29,31 @@ from sickbeard import logger
 
 class PushalotNotifier:
 
-    def _notify(self, title, message, pushalot_authorizationtoken=None, force=False):
+    def _notify(self, title, message, authtoken=None, silent=None, important=None, force=False):
 
         # suppress notifications if the notifier is disabled but the notify options are checked
         if not sickbeard.USE_PUSHALOT and not force:
             return False
 
         # fill in omitted parameters
-        if not pushalot_authorizationtoken:
-            pushalot_authorizationtoken = sickbeard.PUSHALOT_AUTHORIZATIONTOKEN
+        if not authtoken:
+            authtoken = sickbeard.PUSHALOT_AUTHORIZATIONTOKEN
+        if not important:
+            important = bool(sickbeard.PUSHALOT_IMPORTANT)
+        if not silent:
+            silent = bool(sickbeard.PUSHALOT_SILENT)
 
-        logger.log("PUSHALOT: Sending notice with details: title=\"%s\", message=\"%s\", authorizationtoken=%s" % (title, message, pushalot_authorizationtoken), logger.DEBUG)
+        logger.log(u"PUSHALOT: Sending notice with details: title=\"%s\", message=\"%s\", silent=%s, important=%s, authtoken=%s" % (title, message, silent, important, authtoken), logger.DEBUG)
 
         try:
 
             http_handler = HTTPSConnection("pushalot.com")
 
-            data = {'AuthorizationToken': pushalot_authorizationtoken,
+            data = {'AuthorizationToken': authtoken,
                     'Title': title.encode('utf-8'),
                     'Body': message.encode('utf-8'),
+                    'IsImportant': important,
+                    'IsSilent': silent,
                     'Source': 'SickBeard'
                     }
 
@@ -94,8 +100,8 @@ class PushalotNotifier:
         if sickbeard.PUSHALOT_NOTIFY_ONDOWNLOAD:
             self._notify(common.notifyStrings[common.NOTIFY_DOWNLOAD], ep_name)
 
-    def test_notify(self, pushalot_authorizationtoken):
-        return self._notify("Test", "This is a test notification from Sick Beard", pushalot_authorizationtoken, force=True)
+    def test_notify(self, authtoken, silent, important):
+        return self._notify("Test", "This is a test notification from Sick Beard", authtoken, silent, important, force=True)
 
     def update_library(self, ep_obj=None):
         pass

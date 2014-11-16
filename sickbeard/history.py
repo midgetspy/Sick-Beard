@@ -23,13 +23,14 @@ from sickbeard.common import SNATCHED, Quality
 
 dateFormat = "%Y%m%d%H%M%S"
 
-def _logHistoryItem(action, showid, season, episode, quality, resource, provider):
+
+def _logHistoryItem(action, showid, season, episode, quality, resource, provider, source):
 
     logDate = datetime.datetime.today().strftime(dateFormat)
 
     myDB = db.DBConnection()
-    myDB.action("INSERT INTO history (action, date, showid, season, episode, quality, resource, provider) VALUES (?,?,?,?,?,?,?,?)",
-                [action, logDate, showid, season, episode, quality, resource, provider])
+    myDB.action("INSERT INTO history (action, date, showid, season, episode, quality, resource, provider, source) VALUES (?,?,?,?,?,?,?,?,?)",
+                [action, logDate, showid, season, episode, quality, resource, provider, source])
 
 
 def logSnatch(searchResult):
@@ -39,28 +40,32 @@ def logSnatch(searchResult):
         showid = int(curEpObj.show.tvdbid)
         season = int(curEpObj.season)
         episode = int(curEpObj.episode)
+
         quality = searchResult.quality
 
         providerClass = searchResult.provider
-        if providerClass != None:
+        if providerClass is not None:
             provider = providerClass.name
+            source = searchResult.provider.providerType
         else:
             provider = "unknown"
+            source = "unknown"
 
         action = Quality.compositeStatus(SNATCHED, searchResult.quality)
 
         resource = searchResult.name
 
-        _logHistoryItem(action, showid, season, episode, quality, resource, provider)
+        _logHistoryItem(action, showid, season, episode, quality, resource, provider, source)
 
-def logDownload(episode, filename, new_ep_quality, release_group=None):
+
+def logDownload(episode, filename, new_ep_quality, release_group=None, source=""):
 
     showid = int(episode.show.tvdbid)
     season = int(episode.season)
     epNum = int(episode.episode)
 
     quality = new_ep_quality
-    
+
     # store the release group as the provider if possible
     if release_group:
         provider = release_group
@@ -69,5 +74,4 @@ def logDownload(episode, filename, new_ep_quality, release_group=None):
 
     action = episode.status
 
-    _logHistoryItem(action, showid, season, epNum, quality, filename, provider)
-
+    _logHistoryItem(action, showid, season, epNum, quality, filename, provider, source)

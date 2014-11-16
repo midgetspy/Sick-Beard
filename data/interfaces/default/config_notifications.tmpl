@@ -590,11 +590,11 @@
                                 <label class="nocheck clearfix">
                                     <span class="component-title">Prowl Priority:</span>
                                    <select id="prowl_priority" name="prowl_priority">
-                                        <option value="-2" #if $sickbeard.PROWL_PRIORITY == "-2" then 'selected="selected"' else ""#>Very Low</option>
-                                        <option value="-1" #if $sickbeard.PROWL_PRIORITY == "-1" then 'selected="selected"' else ""#>Moderate</option>
-                                        <option value="0" #if $sickbeard.PROWL_PRIORITY == "0" then 'selected="selected"' else ""#>Normal</option>
-                                        <option value="1" #if $sickbeard.PROWL_PRIORITY == "1" then 'selected="selected"' else ""#>High</option>
-                                        <option value="2" #if $sickbeard.PROWL_PRIORITY == "2" then 'selected="selected"' else ""#>Emergency</option>
+                                        <option value="-2" #if $sickbeard.PROWL_PRIORITY == -2 then 'selected="selected"' else ""#>Very Low</option>
+                                        <option value="-1" #if $sickbeard.PROWL_PRIORITY == -1 then 'selected="selected"' else ""#>Moderate</option>
+                                        <option value="0" #if $sickbeard.PROWL_PRIORITY == 0 then 'selected="selected"' else ""#>Normal</option>
+                                        <option value="1" #if $sickbeard.PROWL_PRIORITY == 1 then 'selected="selected"' else ""#>High</option>
+                                        <option value="2" #if $sickbeard.PROWL_PRIORITY == 2 then 'selected="selected"' else ""#>Emergency</option>
                                     </select>
                                 </label>
                                 <label class="nocheck clearfix">
@@ -687,7 +687,72 @@
                                 </label>
                                 <label class="nocheck clearfix">
                                     <span class="component-title">&nbsp;</span>
-                                    <span class="component-desc">User key of your Pushover account</span>
+                                    <span class="component-desc">User/Group key of your Pushover account</span>
+                                </label>
+                            </div>
+                            <div class="field-pair">
+                                <label class="nocheck clearfix">
+                                    <span class="component-title">Pushover Priority:</span>
+                                   <select id="pushover_priority" name="pushover_priority">
+                                        <option value="-2" #if $sickbeard.PUSHOVER_PRIORITY == -2 then 'selected="selected"' else ""#>Lowest</option>
+                                        <option value="-1" #if $sickbeard.PUSHOVER_PRIORITY == -1 then 'selected="selected"' else ""#>Low</option>
+                                        <option value="0" #if $sickbeard.PUSHOVER_PRIORITY == 0 then 'selected="selected"' else ""#>Normal</option>
+                                        <option value="1" #if $sickbeard.PUSHOVER_PRIORITY == 1 then 'selected="selected"' else ""#>High</option>
+                                    </select>
+                                </label>
+                                <label class="nocheck clearfix">
+                                    <span class="component-title">&nbsp;</span>
+                                    <span class="component-desc">Priority of Pushover messages from Sick-Beard.</span>
+                                </label>
+                                <label class="nocheck clearfix">
+                                    <span class="component-title">&nbsp;</span>
+                                    <span class="component-desc">Overview: <a href="https://pushover.net/api#priority" rel="noreferrer" onclick="window.open('${sickbeard.ANON_REDIRECT}' + this.href, '_blank'); return false;">https://pushover.net/api#priority</a></span>
+                                </label>
+                            </div>
+                            <div class="field-pair">
+                                <label class="nocheck clearfix">
+                                    <span class="component-title">Pushover Device</span>
+                                    <input type="hidden" name="pushover_device" id="pushover_device" value="$sickbeard.PUSHOVER_DEVICE" size="35" />
+                                    <select id="pushover_device_list" name="pushover_device_list" class="float-left" style="margin-right: 5px;">
+                                    </select>
+                                    <input type="button" class="btn" value="Refresh Devices" id="getPushoverDevices" />
+                                </label>
+                                <label class="nocheck clearfix">
+                                    <span class="component-title">&nbsp;</span>
+                                    <span class="component-desc">Which device do you want to push to?</span>
+                                </label>
+                            </div>
+                            <div class="field-pair">
+                                <label class="nocheck clearfix">
+                                    <span class="component-title">Pushover Sound</span>
+                                   <select id="pushover_sound" name="pushover_sound">
+                                        <option value="pushover" #if $sickbeard.PUSHOVER_SOUND == "pushover" then 'selected="selected"' else ""#>Pushover (default)</option>
+                                        <option value="bike" #if $sickbeard.PUSHOVER_SOUND == "bike" then 'selected="selected"' else ""#>Bike</option>
+                                        <option value="bugle" #if $sickbeard.PUSHOVER_SOUND == "bugle" then 'selected="selected"' else ""#>Bugle</option>
+                                        <option value="cashregister" #if $sickbeard.PUSHOVER_SOUND == "cashregister" then 'selected="selected"' else ""#>Cash Register</option>
+                                        <option value="classical" #if $sickbeard.PUSHOVER_SOUND == "classical" then 'selected="selected"' else ""#>Classical</option>
+                                        <option value="cosmic" #if $sickbeard.PUSHOVER_SOUND == "cosmic" then 'selected="selected"' else ""#>Cosmic</option>
+                                        <option value="falling" #if $sickbeard.PUSHOVER_SOUND == "falling" then 'selected="selected"' else ""#>Falling</option>
+                                        <option value="gamelan" #if $sickbeard.PUSHOVER_SOUND == "gamelan" then 'selected="selected"' else ""#>Gamelan</option>
+                                        <option value="incoming" #if $sickbeard.PUSHOVER_SOUND == "incoming" then 'selected="selected"' else ""#>Incoming</option>
+                                        <option value="intermission" #if $sickbeard.PUSHOVER_SOUND == "intermission" then 'selected="selected"' else ""#>Intermission</option>
+                                        <option value="magic" #if $sickbeard.PUSHOVER_SOUND == "magic" then 'selected="selected"' else ""#>Magic</option>
+                                        <option value="mechanical" #if $sickbeard.PUSHOVER_SOUND == "mechanical" then 'selected="selected"' else ""#>Mechanical</option>
+                                        <option value="pianobar" #if $sickbeard.PUSHOVER_SOUND == "pianobar" then 'selected="selected"' else ""#>Piano Bar</option>
+                                        <option value="siren" #if $sickbeard.PUSHOVER_SOUND == "siren" then 'selected="selected"' else ""#>Siren</option>
+                                        <option value="spacealarm" #if $sickbeard.PUSHOVER_SOUND == "spacealarm" then 'selected="selected"' else ""#>Space Alarm</option>
+                                        <option value="tugboat" #if $sickbeard.PUSHOVER_SOUND == "tugboat" then 'selected="selected"' else ""#>Tug Boat</option>
+                                        <option value="alien" #if $sickbeard.PUSHOVER_SOUND == "alien" then 'selected="selected"' else ""#>Alien Alarm (long)</option>
+                                        <option value="climb" #if $sickbeard.PUSHOVER_SOUND == "climb" then 'selected="selected"' else ""#>Climb (long)</option>
+                                        <option value="persistent" #if $sickbeard.PUSHOVER_SOUND == "persistent" then 'selected="selected"' else ""#>Persistent (long)</option>
+                                        <option value="echo" #if $sickbeard.PUSHOVER_SOUND == "echo" then 'selected="selected"' else ""#>Pushover Echo (long)</option>
+                                        <option value="updown" #if $sickbeard.PUSHOVER_SOUND == "updown" then 'selected="selected"' else ""#>Up Down (long)</option>
+                                        <option value="none" #if $sickbeard.PUSHOVER_SOUND == "none" then 'selected="selected"' else ""#>None (silent)</option>
+                                    </select>
+                                </label>
+                                <label class="nocheck clearfix">
+                                    <span class="component-title">&nbsp;</span>
+                                    <span class="component-desc">Select one of the predefined sounds for your notifications</span>
                                 </label>
                             </div>
                             <div class="testNotification" id="testPushover-result">Click below to test.</div>
@@ -824,18 +889,18 @@
                                 </label>
                                 <label class="nocheck clearfix">
                                     <span class="component-title">&nbsp;</span>
-                                    <span class="component-desc">Multiple keys (maxium of 5) must be seperated by commas</span>
+                                    <span class="component-desc">Multiple keys (maxium of 5) must be separated by commas</span>
                                 </label>
                             </div>
                             <div class="field-pair">
                                 <label class="nocheck clearfix">
                                     <span class="component-title">NMA priority:</span>
                                        <select id="nma_priority" name="nma_priority">
-                                        <option value="-2" #if $sickbeard.NMA_PRIORITY == "-2" then 'selected="selected"' else ""#>Very Low</option>
-                                        <option value="-1" #if $sickbeard.NMA_PRIORITY == "-1" then 'selected="selected"' else ""#>Moderate</option>
-                                        <option value="0" #if $sickbeard.NMA_PRIORITY == "0" then 'selected="selected"' else ""#>Normal</option>
-                                        <option value="1" #if $sickbeard.NMA_PRIORITY == "1" then 'selected="selected"' else ""#>High</option>
-                                        <option value="2" #if $sickbeard.NMA_PRIORITY == "2" then 'selected="selected"' else ""#>Emergency</option>
+                                        <option value="-2" #if $sickbeard.NMA_PRIORITY == -2 then 'selected="selected"' else ""#>Very Low</option>
+                                        <option value="-1" #if $sickbeard.NMA_PRIORITY == -1 then 'selected="selected"' else ""#>Moderate</option>
+                                        <option value="0" #if $sickbeard.NMA_PRIORITY == 0 then 'selected="selected"' else ""#>Normal</option>
+                                        <option value="1" #if $sickbeard.NMA_PRIORITY == 1 then 'selected="selected"' else ""#>High</option>
+                                        <option value="2" #if $sickbeard.NMA_PRIORITY == 2 then 'selected="selected"' else ""#>Emergency</option>
                                     </select>
                                 </label>
                                 <label class="nocheck clearfix">
@@ -883,12 +948,26 @@
                             </div>
                             <div class="field-pair">
                                 <label class="nocheck clearfix">
-                                    <span class="component-title">Pushalot Authorization Token</span>
+                                    <span class="component-title">Pushalot Auth Token</span>
                                     <input type="text" name="pushalot_authorizationtoken" id="pushalot_authorizationtoken" value="$sickbeard.PUSHALOT_AUTHORIZATIONTOKEN" size="35" />
                                 </label>
                                 <label class="nocheck clearfix">
                                     <span class="component-title">&nbsp;</span>
                                     <span class="component-desc">Authorization Token of your Pushalot account</span>
+                                </label>
+                            </div>
+                            <div class="field-pair">
+                                <input type="checkbox" name="pushalot_silent" id="pushalot_silent" #if $sickbeard.PUSHALOT_SILENT then "checked=\"checked\"" else ""# />
+                                <label class="clearfix" for="pushalot_silent">
+                                    <span class="component-title">Silent</span>
+                                    <span class="component-desc">Don't send Toast notifications and Only update Live Tile?</span>
+                                </label>
+                            </div>
+                            <div class="field-pair">
+                                <input type="checkbox" name="pushalot_important" id="pushalot_important" #if $sickbeard.PUSHALOT_IMPORTANT then "checked=\"checked\"" else ""# />
+                                <label class="clearfix" for="pushalot_important">
+                                    <span class="component-title">Important</span>
+                                    <span class="component-desc">Mark visually as important within the client?</span>
                                 </label>
                             </div>
                             <div class="testNotification" id="testPushalot-result">Click below to test.</div>
@@ -898,6 +977,68 @@
 
                     </fieldset>
                 </div><!-- /pushalot component-group //-->
+
+
+                <div class="component-group clearfix">
+                    <div class="component-group-desc">
+                        <img class="notifier-icon" src="$sbRoot/images/notifiers/pushbullet.png" alt="" title="Pushbullet" />
+                        <h3><a href="http://www.pushbullet.com/" rel="noreferrer" onclick="window.open('${sickbeard.ANON_REDIRECT}' + this.href, '_blank'); return false;">Pushbullet</a></h3>
+                        <p>Pushbullet allows you to send push notifications to Android, iOS and supported browsers.</p>
+                    </div>
+                    <fieldset class="component-group-list">
+                        <div class="field-pair">
+                            <input type="checkbox" class="enabler" name="use_pushbullet" id="use_pushbullet" #if $sickbeard.USE_PUSHBULLET then "checked=\"checked\"" else ""# />
+                            <label class="clearfix" for="use_pushbullet">
+                                <span class="component-title">Enable</span>
+                                <span class="component-desc">Should Sick Beard send Pushbullet notifications?</span>
+                            </label>
+                        </div>
+
+                        <div id="content_use_pushbullet">
+                            <div class="field-pair">
+                                <input type="checkbox" name="pushbullet_notify_onsnatch" id="pushbullet_notify_onsnatch" #if $sickbeard.PUSHBULLET_NOTIFY_ONSNATCH then "checked=\"checked\"" else ""# />
+                                <label class="clearfix" for="pushbullet_notify_onsnatch">
+                                    <span class="component-title">Notify on Snatch</span>
+                                    <span class="component-desc">Send notification when we start a download?</span>
+                                </label>
+                            </div>
+                            <div class="field-pair">
+                                <input type="checkbox" name="pushbullet_notify_ondownload" id="pushbullet_notify_ondownload" #if $sickbeard.PUSHBULLET_NOTIFY_ONDOWNLOAD then "checked=\"checked\"" else ""# />
+                                <label class="clearfix" for="pushbullet_notify_ondownload">
+                                    <span class="component-title">Notify on Download</span>
+                                    <span class="component-desc">Send notification when we finish a download?</span>
+                                </label>
+                            </div>
+                            <div class="field-pair">
+                                <label class="nocheck clearfix">
+                                    <span class="component-title">Pushbullet Access Token</span>
+                                    <input type="text" name="pushbullet_access_token" id="pushbullet_access_token" value="$sickbeard.PUSHBULLET_ACCESS_TOKEN" size="35" />
+                                </label>
+                                <label class="nocheck clearfix">
+                                    <span class="component-title">&nbsp;</span>
+                                    <span class="component-desc">Get your token at: <a href="https://www.pushbullet.com/account" rel="noreferrer" onclick="window.open('${sickbeard.ANON_REDIRECT}' + this.href, '_blank'); return false;">https://www.pushbullet.com/account</a></span>
+                                </label>
+                            </div>
+                            <div class="field-pair">
+                                <label class="nocheck clearfix">
+                                    <span class="component-title">Pushbullet Target</span>
+                                    <input type="hidden" name="pushbullet_device_iden" id="pushbullet_device_iden" value="$sickbeard.PUSHBULLET_DEVICE_IDEN" size="35" />
+                                    <select id="pushbullet_device_list" name="pushbullet_device_list" class="float-left" style="margin-right: 5px;">
+                                    </select>
+                                    <input type="button" class="btn" value="Refresh Devices" id="getPushbulletDevices" />
+                                </label>
+                                <label class="nocheck clearfix">
+                                    <span class="component-title">&nbsp;</span>
+                                    <span class="component-desc">Which device do you want to push to?</span>
+                                </label>
+                            </div>
+                            <div class="testNotification" id="testPushbullet-result">Click below to test.</div>
+                            <input type="button" class="btn" value="Test Pushbullet" id="testPushbullet" />
+                            <input type="submit" class="btn config_submitter" value="Save Changes" />
+                        </div><!-- /content_use_pushbullet //-->
+
+                    </fieldset>
+                </div><!-- /pushbullet component-group //-->
 
                 <div class="component-group-save">
                     <input type="submit" class="btn config_submitter" value="Save Changes" />

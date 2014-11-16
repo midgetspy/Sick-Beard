@@ -85,18 +85,68 @@ $(document).ready(function () {
 
     $("#testPushover").click(function () {
         var pushover_userkey = $.trim($("#pushover_userkey").val());
+        var pushover_priority = $("#pushover_priority").val();
+        var pushover_device = $("#pushover_device").val();
+        var pushover_sound = $("#pushover_sound").val();
         if (!pushover_userkey) {
             $("#testPushover-result").html("Please fill out the necessary fields above.");
             return;
         }
         $(this).prop("disabled", true);
         $("#testPushover-result").html(loading);
-        $.get(sbRoot + "/home/testPushover", {'userKey': pushover_userkey})
+        $.get(sbRoot + "/home/testPushover", {'userKey': pushover_userkey, 'priority': pushover_priority, 'device': pushover_device, 'sound': pushover_sound})
             .done(function (data) {
                 $("#testPushover-result").html(data);
                 $("#testPushover").prop("disabled", false);
             });
     });
+
+    function get_pushover_devices (msg) {
+        var pushover_userkey = $.trim($("#pushover_userkey").val());
+        if (!pushover_userkey) {
+            $("#testPushover-result").html("Please fill out the necessary fields above.");
+            return;
+        }
+        $(this).prop("disabled", true);
+        if (msg) {
+            $("#testPushover-result").html(loading);
+        }
+        var current_pushover_device = $("#pushover_device").val();
+        $.get(sbRoot + "/home/getPushoverDevices", {'userKey': pushover_userkey})
+            .done(function (data) {
+                var devices = jQuery.parseJSON(data || '{}').devices;
+                $("#pushover_device_list").html('');
+                // add default option to send to all devices
+                $("#pushover_device_list").append('<option value="all" selected="selected">-- All Devices --</option>');
+                if (devices) {
+                    for (var i = 0; i < devices.length; i++) {
+                        // if a device in the list matches our current iden, select it
+                        if (current_pushover_device == devices[i]) {
+                            $("#pushover_device_list").append('<option value="' + devices[i] + '" selected="selected">' + devices[i] + '</option>');
+                        } else {
+                            $("#pushover_device_list").append('<option value="' + devices[i] + '">' + devices[i] + '</option>');
+                        }
+                    }
+                }
+                $("#getPushoverDevices").prop("disabled", false);
+                if (msg) {
+                    $('#testPushover-result').html(msg);
+                }
+            });
+
+        $("#pushover_device_list").change(function () {
+            $("#pushover_device").val($("#pushover_device_list").val());
+            $('#testPushover-result').html("Don't forget to save your new Pushover settings.");
+        });
+    }
+
+    $("#getPushoverDevices").click(function () {
+        get_pushover_devices("Device list updated. Select specific device to use.");
+    });
+
+    if ($("#use_pushover").prop('checked')) {
+        get_pushover_devices();
+    }
 
     $("#testLibnotify").click(function () {
         $("#testLibnotify-result").html(loading);
@@ -261,13 +311,15 @@ $(document).ready(function () {
 
     $("#testPushalot").click(function () {
         var pushalot_authorizationtoken = $.trim($("#pushalot_authorizationtoken").val());
+        var pushalot_silent = ($("#pushalot_silent").prop('checked') == true) ? 'True' : 'False';
+        var pushalot_important = ($("#pushalot_important").prop('checked') == true) ? 'True' : 'False';
         if (!pushalot_authorizationtoken) {
             $("#testPushalot-result").html("Please fill out the necessary fields above.");
             return;
         }
         $(this).prop("disabled", true);
         $("#testPushalot-result").html(loading);
-        $.get(sbRoot + "/home/testPushalot", {'authorizationtoken': pushalot_authorizationtoken})
+        $.get(sbRoot + "/home/testPushalot", {'authtoken': pushalot_authorizationtoken, 'silent': pushalot_silent, 'important': pushalot_important})
             .done(function (data) {
                 $("#testPushalot-result").html(data);
                 $("#testPushalot").prop("disabled", false);
@@ -283,5 +335,71 @@ $(document).ready(function () {
                 $("#testSynoNotify").prop("disabled", false);
             });
     });
+
+    $("#testPushbullet").click(function () {
+        var pushbullet_access_token = $.trim($("#pushbullet_access_token").val());
+        var pushbullet_device_iden = $("#pushbullet_device_iden").val();
+        if (!pushbullet_access_token) {
+            $("#testPushbullet-result").html("Please fill out the necessary fields above.");
+            return;
+        }
+        $(this).prop("disabled", true);
+        $("#testPushbullet-result").html(loading);
+        $.get(sbRoot + "/home/testPushbullet", {'accessToken': pushbullet_access_token, 'device_iden': pushbullet_device_iden})
+            .done(function (data) {
+                $("#testPushbullet-result").html(data);
+                $("#testPushbullet").prop("disabled", false);
+            });
+    });
+
+    function get_pushbullet_devices (msg) {
+        var pushbullet_access_token = $.trim($("#pushbullet_access_token").val());
+        if (!pushbullet_access_token) {
+            $("#testPushbullet-result").html("Please fill out the necessary fields above.");
+            return;
+        }
+        $(this).prop("disabled", true);
+        if (msg) {
+            $("#testPushbullet-result").html(loading);
+        }
+        var current_pushbullet_device = $("#pushbullet_device_iden").val();
+        $.get(sbRoot + "/home/getPushbulletDevices", {'accessToken': pushbullet_access_token})
+            .done(function (data) {
+                var devices = jQuery.parseJSON(data || '{}').devices;
+                $("#pushbullet_device_list").html('');
+                // add default option to send to all devices
+                $("#pushbullet_device_list").append('<option value="" selected="selected">-- All Devices --</option>');
+                if (devices) {
+                    for (var i = 0; i < devices.length; i++) {
+                        // only list active device targets
+                        if (devices[i].active == true) {
+                            // if a device in the list matches our current iden, select it
+                            if (current_pushbullet_device == devices[i].iden) {
+                                $("#pushbullet_device_list").append('<option value="' + devices[i].iden + '" selected="selected">' + devices[i].manufacturer + ' ' + devices[i].nickname + '</option>');
+                            } else {
+                                $("#pushbullet_device_list").append('<option value="' + devices[i].iden + '">' + devices[i].manufacturer + ' ' + devices[i].nickname + '</option>');
+                            }
+                        }
+                    }
+                }
+                $("#getPushbulletDevices").prop("disabled", false);
+                if (msg) {
+                    $('#testPushbullet-result').html(msg);
+                }
+            });
+
+        $("#pushbullet_device_list").change(function () {
+            $("#pushbullet_device_iden").val($("#pushbullet_device_list").val());
+            $('#testPushbullet-result').html("Don't forget to save your new Pushbullet settings.");
+        });
+    }
+
+    $("#getPushbulletDevices").click(function () {
+        get_pushbullet_devices("Device list updated. Select specific device to use.");
+    });
+
+    if ($("#use_pushbullet").prop('checked')) {
+        get_pushbullet_devices();
+    }
 
 });

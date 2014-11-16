@@ -43,7 +43,7 @@
                 parent.append($("<img/>").attr({"src": sbRoot + "/images/" + img_name, "height": options.size, "alt": img_result, "title": img_result}));
             });
 
-            // fon't follow the link
+            // don't follow the link
             return false;
         });
     };

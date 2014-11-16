@@ -132,17 +132,17 @@ def _genericMessage(subject, message):
 
 def _getEpisode(show, season, episode):
 
-    if show == None or season == None or episode == None:
+    if show is None or season is None or episode is None:
         return "Invalid parameters"
 
     showObj = sickbeard.helpers.findCertainShow(sickbeard.showList, int(show))
 
-    if showObj == None:
+    if showObj is None:
         return "Show not in show list"
 
     epObj = showObj.getEpisode(int(season), int(episode))
 
-    if epObj == None:
+    if epObj is None:
         return "Episode couldn't be retrieved"
 
     return epObj
@@ -211,14 +211,20 @@ class Manage:
         return _munge(t)
 
     @cherrypy.expose
-    def showEpisodeStatuses(self, tvdb_id, whichStatus):
+    def showEpisodeStatuses(self, tvdb_id, whichStatus, includeSpecials, excludeNoAirdate):
         myDB = db.DBConnection()
 
         status_list = [int(whichStatus)]
         if status_list[0] == SNATCHED:
             status_list = Quality.SNATCHED + Quality.SNATCHED_PROPER
 
-        cur_show_results = myDB.select("SELECT season, episode, name FROM tv_episodes WHERE showid = ? AND season > 0 AND status IN (" + ','.join(['?'] * len(status_list)) + ")", [int(tvdb_id)] + status_list)
+        sqlStatement = "SELECT season, episode, name FROM tv_episodes WHERE showid = ?"
+        if includeSpecials == "False":
+            sqlStatement += " AND season > 0"
+        if excludeNoAirdate == "True":
+            sqlStatement += " AND airdate > 1"
+
+        cur_show_results = myDB.select(sqlStatement + " AND status IN (" + ','.join(['?'] * len(status_list)) + ")", [int(tvdb_id)] + status_list)
 
         result = {}
         for cur_result in cur_show_results:
@@ -233,7 +239,7 @@ class Manage:
         return json.dumps(result)
 
     @cherrypy.expose
-    def episodeStatuses(self, whichStatus=None):
+    def episodeStatuses(self, whichStatus=None, includeSpecials=False, excludeNoAirdate=False):
 
         if whichStatus:
             whichStatus = int(whichStatus)
@@ -246,13 +252,21 @@ class Manage:
         t = PageTemplate(file="manage_episodeStatuses.tmpl")
         t.submenu = ManageMenu
         t.whichStatus = whichStatus
+        t.includeSpecials = includeSpecials
+        t.excludeNoAirdate = excludeNoAirdate
 
         # if we have no status then this is as far as we need to go
         if not status_list:
             return _munge(t)
 
+        sqlStatement = ""
+        if not includeSpecials:
+            sqlStatement += " AND season > 0"
+        if excludeNoAirdate:
+            sqlStatement += " AND airdate > 1"
+
         myDB = db.DBConnection()
-        status_results = myDB.select("SELECT show_name, tv_shows.tvdb_id as tvdb_id FROM tv_episodes, tv_shows WHERE tv_episodes.status IN (" + ','.join(['?'] * len(status_list)) + ") AND season > 0 AND tv_episodes.showid = tv_shows.tvdb_id ORDER BY show_name", status_list)
+        status_results = myDB.select("SELECT show_name, tv_shows.tvdb_id as tvdb_id FROM tv_episodes, tv_shows WHERE tv_episodes.status IN (" + ','.join(['?'] * len(status_list)) + ")" + sqlStatement + " AND tv_episodes.showid = tv_shows.tvdb_id ORDER BY show_name", status_list)
 
         ep_counts = {}
         show_names = {}
@@ -274,7 +288,7 @@ class Manage:
         return _munge(t)
 
     @cherrypy.expose
-    def changeEpisodeStatuses(self, oldStatus, newStatus, *args, **kwargs):
+    def changeEpisodeStatuses(self, oldStatus, newStatus, opt_includeSpecials, opt_excludeNoAirdate, *args, **kwargs):
 
         status_list = [int(oldStatus)]
         if status_list[0] == SNATCHED:
@@ -295,13 +309,19 @@ class Manage:
 
             to_change[tvdb_id].append(what)
 
+        sqlStatement = ""
+        if opt_includeSpecials == "False":
+            sqlStatement += " AND season > 0"
+        if opt_excludeNoAirdate == "True":
+            sqlStatement += " AND airdate > 1"
+
         myDB = db.DBConnection()
 
         for cur_tvdb_id in to_change:
 
             # get a list of all the eps we want to change if they just said "all"
             if 'all' in to_change[cur_tvdb_id]:
-                all_eps_results = myDB.select("SELECT season, episode FROM tv_episodes WHERE status IN (" + ','.join(['?'] * len(status_list)) + ") AND season > 0 AND showid = ?", status_list + [cur_tvdb_id])
+                all_eps_results = myDB.select("SELECT season, episode FROM tv_episodes WHERE status IN (" + ','.join(['?'] * len(status_list)) + ")" + sqlStatement + " AND showid = ?", status_list + [cur_tvdb_id])
                 all_eps = [str(x["season"]) + 'x' + str(x["episode"]) for x in all_eps_results]
                 to_change[cur_tvdb_id] = all_eps
 
@@ -316,6 +336,7 @@ class Manage:
 
         if show_obj:
             sickbeard.backlogSearchScheduler.action.searchBacklog([show_obj])  # @UndefinedVariable
+            ui.notifications.message('Forced Backlog', 'Running limited backlog for ' + str(show_obj.name))
 
         redirect("/manage/backlogOverview/")
 
@@ -383,6 +404,9 @@ class Manage:
         paused_all_same = True
         last_paused = None
 
+        skip_notices_all_same = True
+        last_skip_notices = None
+
         quality_all_same = True
         last_quality = None
 
@@ -402,6 +426,13 @@ class Manage:
                 else:
                     last_paused = curShow.paused
 
+            if skip_notices_all_same:
+                # if we had a value already and this value is different then they're not all the same
+                if last_skip_notices not in (curShow.skip_notices, None):
+                    skip_notices_all_same = False
+                else:
+                    last_skip_notices = curShow.skip_notices
+
             if flatten_folders_all_same:
                 if last_flatten_folders not in (None, curShow.flatten_folders):
                     flatten_folders_all_same = False
@@ -416,6 +447,7 @@ class Manage:
 
         t.showList = toEdit
         t.paused_value = last_paused if paused_all_same else None
+        t.skip_notices_value = last_skip_notices if skip_notices_all_same else None
         t.flatten_folders_value = last_flatten_folders if flatten_folders_all_same else None
         t.quality_value = last_quality if quality_all_same else None
         t.root_dir_list = root_dir_list
@@ -423,7 +455,7 @@ class Manage:
         return _munge(t)
 
     @cherrypy.expose
-    def massEditSubmit(self, paused=None, flatten_folders=None, quality_preset=False,
+    def massEditSubmit(self, paused=None, skip_notices=None, flatten_folders=None, quality_preset=False,
                        anyQualities=[], bestQualities=[], toEdit=None, *args, **kwargs):
 
         dir_map = {}
@@ -456,6 +488,12 @@ class Manage:
                 new_paused = True if paused == 'enable' else False
             new_paused = 'on' if new_paused else 'off'
 
+            if skip_notices == 'keep':
+                new_skip_notices = showObj.skip_notices
+            else:
+                new_skip_notices = True if skip_notices == 'enable' else False
+            new_skip_notices = 'on' if new_skip_notices else 'off'
+
             if flatten_folders == 'keep':
                 new_flatten_folders = showObj.flatten_folders
             else:
@@ -465,7 +503,7 @@ class Manage:
             if quality_preset == 'keep':
                 anyQualities, bestQualities = Quality.splitQuality(showObj.quality)
 
-            curErrors += Home().editShow(curShow, new_show_dir, anyQualities, bestQualities, new_flatten_folders, new_paused, directCall=True)
+            curErrors += Home().editShow(curShow, new_show_dir, anyQualities, bestQualities, new_flatten_folders, new_paused, new_skip_notices, directCall=True)
 
             if curErrors:
                 logger.log(u"Errors: " + str(curErrors), logger.ERROR)
@@ -480,27 +518,27 @@ class Manage:
     @cherrypy.expose
     def massUpdate(self, toUpdate=None, toRefresh=None, toRename=None, toDelete=None, toMetadata=None):
 
-        if toUpdate != None:
+        if toUpdate is not None:
             toUpdate = toUpdate.split('|')
         else:
             toUpdate = []
 
-        if toRefresh != None:
+        if toRefresh is not None:
             toRefresh = toRefresh.split('|')
         else:
             toRefresh = []
 
-        if toRename != None:
+        if toRename is not None:
             toRename = toRename.split('|')
         else:
             toRename = []
 
-        if toDelete != None:
+        if toDelete is not None:
             toDelete = toDelete.split('|')
         else:
             toDelete = []
 
-        if toMetadata != None:
+        if toMetadata is not None:
             toMetadata = toMetadata.split('|')
         else:
             toMetadata = []
@@ -517,7 +555,7 @@ class Manage:
 
             showObj = sickbeard.helpers.findCertainShow(sickbeard.showList, int(curShowID))
 
-            if showObj == None:
+            if showObj is None:
                 continue
 
             if curShowID in toDelete:
@@ -599,6 +637,7 @@ class History:
 
         myDB = db.DBConnection()
         myDB.action("DELETE FROM history WHERE 1=1")
+        myDB.action("VACUUM")
         ui.notifications.message('History cleared')
         redirect("/history/")
 
@@ -607,6 +646,7 @@ class History:
 
         myDB = db.DBConnection()
         myDB.action("DELETE FROM history WHERE date < " + str((datetime.datetime.today() - datetime.timedelta(days=30)).strftime(history.dateFormat)))
+        myDB.action("VACUUM")
         ui.notifications.message('Removed history entries greater than 30 days old')
         redirect("/history/")
 
@@ -867,7 +907,7 @@ class ConfigPostProcessing:
     @cherrypy.expose
     def testNaming(self, pattern=None, multi=None, abd=False):
 
-        if multi != None:
+        if multi is not None:
             multi = int(multi)
 
         result = naming.test_name(pattern, multi, abd)
@@ -878,7 +918,7 @@ class ConfigPostProcessing:
 
     @cherrypy.expose
     def isNamingValid(self, pattern=None, multi=None, abd=False):
-        if pattern == None:
+        if pattern is None:
             return "invalid"
 
         # air by date shows just need one check, we don't need to worry about season folders
@@ -1091,10 +1131,11 @@ class ConfigNotifications:
                           use_plex=None, plex_notify_onsnatch=None, plex_notify_ondownload=None, plex_update_library=None,
                               plex_server_host=None, plex_host=None, plex_username=None, plex_password=None,
                           use_growl=None, growl_notify_onsnatch=None, growl_notify_ondownload=None, growl_host=None, growl_password=None,
-                          use_prowl=None, prowl_notify_onsnatch=None, prowl_notify_ondownload=None, prowl_api=None, prowl_priority=0,
+                          use_prowl=None, prowl_notify_onsnatch=None, prowl_notify_ondownload=None, prowl_api=None, prowl_priority=None,
                           use_twitter=None, twitter_notify_onsnatch=None, twitter_notify_ondownload=None,
                           use_boxcar2=None, boxcar2_notify_onsnatch=None, boxcar2_notify_ondownload=None, boxcar2_access_token=None, boxcar2_sound=None,
-                          use_pushover=None, pushover_notify_onsnatch=None, pushover_notify_ondownload=None, pushover_userkey=None,
+                          use_pushover=None, pushover_notify_onsnatch=None, pushover_notify_ondownload=None, pushover_userkey=None, pushover_priority=None,
+                              pushover_device=None, pushover_sound=None, pushover_device_list=None,
                           use_libnotify=None, libnotify_notify_onsnatch=None, libnotify_notify_ondownload=None,
                           use_nmj=None, nmj_host=None, nmj_database=None, nmj_mount=None,
                           use_synoindex=None, synoindex_notify_onsnatch=None, synoindex_notify_ondownload=None, synoindex_update_library=None,
@@ -1102,8 +1143,10 @@ class ConfigNotifications:
                           use_trakt=None, trakt_username=None, trakt_password=None, trakt_api=None,
                           use_pytivo=None, pytivo_notify_onsnatch=None, pytivo_notify_ondownload=None, pytivo_update_library=None,
                               pytivo_host=None, pytivo_share_name=None, pytivo_tivo_name=None,
-                          use_nma=None, nma_notify_onsnatch=None, nma_notify_ondownload=None, nma_api=None, nma_priority=0,
-                          use_pushalot=None, pushalot_notify_onsnatch=None, pushalot_notify_ondownload=None, pushalot_authorizationtoken=None):
+                          use_nma=None, nma_notify_onsnatch=None, nma_notify_ondownload=None, nma_api=None, nma_priority=None,
+                          use_pushalot=None, pushalot_notify_onsnatch=None, pushalot_notify_ondownload=None, pushalot_authorizationtoken=None, pushalot_silent=None, pushalot_important=None,
+                          use_pushbullet=None, pushbullet_notify_onsnatch=None, pushbullet_notify_ondownload=None, pushbullet_access_token=None, pushbullet_device_iden=None, pushbullet_device_list=None
+                          ):
 
         results = []
 
@@ -1172,6 +1215,9 @@ class ConfigNotifications:
         sickbeard.PUSHOVER_NOTIFY_ONSNATCH = config.checkbox_to_value(pushover_notify_onsnatch)
         sickbeard.PUSHOVER_NOTIFY_ONDOWNLOAD = config.checkbox_to_value(pushover_notify_ondownload)
         sickbeard.PUSHOVER_USERKEY = pushover_userkey
+        sickbeard.PUSHOVER_PRIORITY = pushover_priority
+        sickbeard.PUSHOVER_DEVICE = pushover_device
+        sickbeard.PUSHOVER_SOUND = pushover_sound
 
         sickbeard.USE_BOXCAR2 = config.checkbox_to_value(use_boxcar2)
         sickbeard.BOXCAR2_NOTIFY_ONSNATCH = config.checkbox_to_value(boxcar2_notify_onsnatch)
@@ -1189,6 +1235,14 @@ class ConfigNotifications:
         sickbeard.PUSHALOT_NOTIFY_ONSNATCH = config.checkbox_to_value(pushalot_notify_onsnatch)
         sickbeard.PUSHALOT_NOTIFY_ONDOWNLOAD = config.checkbox_to_value(pushalot_notify_ondownload)
         sickbeard.PUSHALOT_AUTHORIZATIONTOKEN = pushalot_authorizationtoken
+        sickbeard.PUSHALOT_SILENT = config.checkbox_to_value(pushalot_silent)
+        sickbeard.PUSHALOT_IMPORTANT = config.checkbox_to_value(pushalot_important)
+
+        sickbeard.USE_PUSHBULLET = config.checkbox_to_value(use_pushbullet)
+        sickbeard.PUSHBULLET_NOTIFY_ONSNATCH = config.checkbox_to_value(pushbullet_notify_onsnatch)
+        sickbeard.PUSHBULLET_NOTIFY_ONDOWNLOAD = config.checkbox_to_value(pushbullet_notify_ondownload)
+        sickbeard.PUSHBULLET_ACCESS_TOKEN = pushbullet_access_token
+        sickbeard.PUSHBULLET_DEVICE_IDEN = pushbullet_device_iden
 
         # Online
         sickbeard.USE_TWITTER = config.checkbox_to_value(use_twitter)
@@ -1223,11 +1277,12 @@ class ConfigHidden:
         return _munge(t)
 
     @cherrypy.expose
-    def saveHidden(self, anon_redirect=None, git_path=None, extra_scripts=None, create_missing_show_dirs=None, add_shows_wo_dir=None):
+    def saveHidden(self, anon_redirect=None, display_all_seasons=None, git_path=None, extra_scripts=None, create_missing_show_dirs=None, add_shows_wo_dir=None):
 
         results = []
 
         sickbeard.ANON_REDIRECT = anon_redirect
+        sickbeard.DISPLAY_ALL_SEASONS = config.checkbox_to_value(display_all_seasons)
         sickbeard.GIT_PATH = git_path
         sickbeard.EXTRA_SCRIPTS = [x.strip() for x in extra_scripts.split('|') if x.strip()]
         sickbeard.CREATE_MISSING_SHOW_DIRS = config.checkbox_to_value(create_missing_show_dirs)
@@ -1283,7 +1338,7 @@ class ConfigHidden:
 
             show_id = show['id']
             if int(tvdb_id) != int(show_id):
-                logger.log("Warning: Issue matching \"%s\" on tvdb. Got \"%s\" and \"%s\"" % (show_name, tvdb_id, show_id), logger.ERROR)
+                logger.log(u"Warning: Issue matching \"%s\" on tvdb. Got \"%s\" and \"%s\"" % (show_name, tvdb_id, show_id), logger.ERROR)
                 errMatch.append("<tr><td class='tvShow'><a target='_blank' href='%s/home/displayShow?show=%s'>%s</a></td><td>%s</td><td>%s</td>" % (sickbeard.WEB_ROOT, tvdb_id, show_name, tvdb_id, show_id))
             else:
                 show_status = show['status']
@@ -1372,7 +1427,7 @@ class HomePostProcess:
                 pp_options[key] = value
 
             result = processTV.processDir(dir, nzbName, method=method, pp_options=pp_options)
-            if quiet != None and int(quiet) == 1:
+            if quiet is not None and int(quiet) == 1:
                 return result
 
             result = result.replace("\n", "<br />\n")
@@ -1863,7 +1918,7 @@ class Home:
         host = config.clean_host(host, default_port=23053)
 
         result = notifiers.growl_notifier.test_notify(host, password)
-        if password == None or password == '':
+        if password is None or password == '':
             pw_append = ''
         else:
             pw_append = " with password: " + password
@@ -1874,7 +1929,7 @@ class Home:
             return "Registration and Testing of growl failed " + urllib.unquote_plus(host) + pw_append
 
     @cherrypy.expose
-    def testProwl(self, prowl_api=None, prowl_priority=0):
+    def testProwl(self, prowl_api=None, prowl_priority=None):
         cherrypy.response.headers['Cache-Control'] = "max-age=0,no-cache,no-store"
 
         result = notifiers.prowl_notifier.test_notify(prowl_api, prowl_priority)
@@ -1894,14 +1949,24 @@ class Home:
             return "Error sending Boxcar2 notification"
 
     @cherrypy.expose
-    def testPushover(self, userKey=None):
+    def testPushover(self, userKey=None, priority=None, device=None, sound=None):
         cherrypy.response.headers['Cache-Control'] = "max-age=0,no-cache,no-store"
 
-        result = notifiers.pushover_notifier.test_notify(userKey)
+        result = notifiers.pushover_notifier.test_notify(userKey, priority, device, sound)
         if result:
             return "Pushover notification succeeded. Check your Pushover clients to make sure it worked"
         else:
             return "Error sending Pushover notification"
+
+    @cherrypy.expose
+    def getPushoverDevices(self, userKey=None):
+        cherrypy.response.headers['Cache-Control'] = "max-age=0,no-cache,no-store"
+
+        result = notifiers.pushover_notifier.get_devices(userKey)
+        if result:
+            return result
+        else:
+            return "{}"
 
     @cherrypy.expose
     def twitterStep1(self):
@@ -2028,7 +2093,7 @@ class Home:
             return "Test notice failed to Trakt"
 
     @cherrypy.expose
-    def testNMA(self, nma_api=None, nma_priority=0):
+    def testNMA(self, nma_api=None, nma_priority=None):
         cherrypy.response.headers['Cache-Control'] = "max-age=0,no-cache,no-store"
 
         result = notifiers.nma_notifier.test_notify(nma_api, nma_priority)
@@ -2038,10 +2103,10 @@ class Home:
             return "Test NMA notice failed"
 
     @cherrypy.expose
-    def testPushalot(self, authorizationtoken=None):
+    def testPushalot(self, authtoken=None, silent=None, important=None):
         cherrypy.response.headers['Cache-Control'] = "max-age=0,no-cache,no-store"
 
-        result = notifiers.pushalot_notifier.test_notify(authorizationtoken)
+        result = notifiers.pushalot_notifier.test_notify(authtoken, silent, important)
         if result:
             return "Pushalot notification succeeded. Check your Pushalot clients to make sure it worked"
         else:
@@ -2056,6 +2121,26 @@ class Home:
             return "Test Synology notice sent successfully"
         else:
             return "Test Synology notice failed"
+
+    @cherrypy.expose
+    def testPushbullet(self, accessToken=None, device_iden=None):
+        cherrypy.response.headers['Cache-Control'] = "max-age=0,no-cache,no-store"
+
+        result = notifiers.pushbullet_notifier.test_notify(accessToken, device_iden)
+        if result:
+            return "Pushbullet notification succeeded. Check your Pushbullet clients to make sure it worked"
+        else:
+            return "Error sending Pushbullet notification"
+
+    @cherrypy.expose
+    def getPushbulletDevices(self, accessToken=None):
+        cherrypy.response.headers['Cache-Control'] = "max-age=0,no-cache,no-store"
+
+        result = notifiers.pushbullet_notifier.get_devices(accessToken)
+        if result:
+            return result
+        else:
+            return "{}"
 
     @cherrypy.expose
     def shutdown(self, pid=None):
@@ -2103,12 +2188,12 @@ class Home:
     @cherrypy.expose
     def displayShow(self, show=None):
 
-        if show == None:
+        if show is None:
             return _genericMessage("Error", "Invalid show ID")
         else:
             showObj = sickbeard.helpers.findCertainShow(sickbeard.showList, int(show))
 
-            if showObj == None:
+            if showObj is None:
                 return _genericMessage("Error", "Show not in show list")
 
         myDB = db.DBConnection()
@@ -2179,8 +2264,10 @@ class Home:
         def titler(x):
             if not x:
                 return x
-            if x.lower().startswith('a '):
+            if not x.lower().startswith('a to ') and x.lower().startswith('a '):
                     x = x[2:]
+            elif x.lower().startswith('an '):
+                    x = x[3:]
             elif x.lower().startswith('the '):
                     x = x[4:]
             return x
@@ -2197,9 +2284,9 @@ class Home:
         return result['description'] if result else 'Episode not found.'
 
     @cherrypy.expose
-    def editShow(self, show=None, location=None, anyQualities=[], bestQualities=[], flatten_folders=None, paused=None, directCall=False, air_by_date=None, tvdbLang=None, rls_ignore_words=None, rls_require_words=None):
+    def editShow(self, show=None, location=None, anyQualities=[], bestQualities=[], flatten_folders=None, paused=None, skip_notices=None, directCall=False, air_by_date=None, tvdbLang=None, rls_ignore_words=None, rls_require_words=None):
 
-        if show == None:
+        if show is None:
             errString = "Invalid show ID: " + str(show)
             if directCall:
                 return [errString]
@@ -2208,7 +2295,7 @@ class Home:
 
         showObj = sickbeard.helpers.findCertainShow(sickbeard.showList, int(show))
 
-        if showObj == None:
+        if showObj is None:
             errString = "Unable to find the specified show: " + str(show)
             if directCall:
                 return [errString]
@@ -2226,6 +2313,7 @@ class Home:
 
         flatten_folders = config.checkbox_to_value(flatten_folders)
         paused = config.checkbox_to_value(paused)
+        skip_notices = config.checkbox_to_value(skip_notices)
         air_by_date = config.checkbox_to_value(air_by_date)
 
         if tvdbLang and tvdbLang in tvdb_api.Tvdb().config['valid_languages']:
@@ -2259,6 +2347,8 @@ class Home:
                     errors.append("Unable to refresh this show: " + ex(e))
 
             showObj.paused = paused
+
+            showObj.skip_notices = skip_notices
 
             # if this routine was called via the mass edit, do not change the options that are not passed
             if not directCall:
@@ -2311,12 +2401,12 @@ class Home:
     @cherrypy.expose
     def deleteShow(self, show=None):
 
-        if show == None:
+        if show is None:
             return _genericMessage("Error", "Invalid show ID")
 
         showObj = sickbeard.helpers.findCertainShow(sickbeard.showList, int(show))
 
-        if showObj == None:
+        if showObj is None:
             return _genericMessage("Error", "Unable to find the specified show")
 
         if sickbeard.showQueueScheduler.action.isBeingAdded(showObj) or sickbeard.showQueueScheduler.action.isBeingUpdated(showObj):  # @UndefinedVariable
@@ -2330,12 +2420,12 @@ class Home:
     @cherrypy.expose
     def refreshShow(self, show=None):
 
-        if show == None:
+        if show is None:
             return _genericMessage("Error", "Invalid show ID")
 
         showObj = sickbeard.helpers.findCertainShow(sickbeard.showList, int(show))
 
-        if showObj == None:
+        if showObj is None:
             return _genericMessage("Error", "Unable to find the specified show")
 
         # force the update from the DB
@@ -2351,12 +2441,12 @@ class Home:
     @cherrypy.expose
     def updateShow(self, show=None, force=0):
 
-        if show == None:
+        if show is None:
             return _genericMessage("Error", "Invalid show ID")
 
         showObj = sickbeard.helpers.findCertainShow(sickbeard.showList, int(show))
 
-        if showObj == None:
+        if showObj is None:
             return _genericMessage("Error", "Unable to find the specified show")
 
         # force the update
@@ -2400,7 +2490,7 @@ class Home:
     @cherrypy.expose
     def setStatus(self, show=None, eps=None, status=None, direct=False):
 
-        if show == None or eps == None or status == None:
+        if show is None or eps is None or status is None:
             errMsg = "You must specify a show and at least one episode"
             if direct:
                 ui.notifications.error('Error', errMsg)
@@ -2418,7 +2508,7 @@ class Home:
 
         showObj = sickbeard.helpers.findCertainShow(sickbeard.showList, int(show))
 
-        if showObj == None:
+        if showObj is None:
             errMsg = "Error", "Show not in show list"
             if direct:
                 ui.notifications.error('Error', errMsg)
@@ -2428,7 +2518,7 @@ class Home:
 
         segment_list = []
 
-        if eps != None:
+        if eps is not None:
 
             for curEp in eps.split('|'):
 
@@ -2448,7 +2538,7 @@ class Home:
                     if ep_segment not in segment_list:
                         segment_list.append(ep_segment)
 
-                if epObj == None:
+                if epObj is None:
                     return _genericMessage("Error", "Episode couldn't be retrieved")
 
                 with epObj.lock:
@@ -2483,12 +2573,12 @@ class Home:
     @cherrypy.expose
     def testRename(self, show=None):
 
-        if show == None:
+        if show is None:
             return _genericMessage("Error", "You must specify a show")
 
         showObj = sickbeard.helpers.findCertainShow(sickbeard.showList, int(show))
 
-        if showObj == None:
+        if showObj is None:
             return _genericMessage("Error", "Show not in show list")
 
         try:
@@ -2530,13 +2620,13 @@ class Home:
     @cherrypy.expose
     def doRename(self, show=None, eps=None):
 
-        if show == None or eps == None:
+        if show is None or eps is None:
             errMsg = "You must specify a show and at least one episode"
             return _genericMessage("Error", errMsg)
 
         show_obj = sickbeard.helpers.findCertainShow(sickbeard.showList, int(show))
 
-        if show_obj == None:
+        if show_obj is None:
             errMsg = "Error", "Show not in show list"
             return _genericMessage("Error", errMsg)
 
@@ -2547,7 +2637,7 @@ class Home:
 
         myDB = db.DBConnection()
 
-        if eps == None:
+        if eps is None:
             redirect("/home/displayShow?show=" + show)
 
         for curEp in eps.split('|'):
@@ -2587,7 +2677,7 @@ class Home:
         sickbeard.searchQueueScheduler.action.add_item(ep_queue_item)  # @UndefinedVariable
 
         # wait until the queue item tells us whether it worked or not
-        while ep_queue_item.success == None:  # @UndefinedVariable
+        while ep_queue_item.success is None:  # @UndefinedVariable
             time.sleep(1)
 
         # return the correct json value

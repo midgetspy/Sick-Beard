@@ -14,17 +14,17 @@
 
 #set $myDB = $db.DBConnection()
 #set $today = str($datetime.date.today().toordinal())
-#set status_quality = '(' + ','.join([str(x) for x in $Quality.SNATCHED + $Quality.SNATCHED_PROPER]) + ')'
+#set status_snatched = '(' + ','.join([str(x) for x in $Quality.SNATCHED + $Quality.SNATCHED_PROPER]) + ')'
 #set status_download = '(' + ','.join([str(x) for x in $Quality.DOWNLOADED + [$ARCHIVED]]) + ')'
 
 #set $sql_statement = 'SELECT showid, '
 
-#set $sql_statement += '(SELECT COUNT(*) FROM tv_episodes WHERE showid=tv_eps.showid AND season > 0 AND episode > 0 AND status IN ' + $status_quality + ') AS ep_snatched, '
+#set $sql_statement += '(SELECT COUNT(*) FROM tv_episodes WHERE showid=tv_eps.showid AND season > 0 AND episode > 0 AND status IN ' + $status_snatched + ') AS ep_snatched, '
 #set $sql_statement += '(SELECT COUNT(*) FROM tv_episodes WHERE showid=tv_eps.showid AND season > 0 AND episode > 0 AND status IN ' + $status_download + ') AS ep_downloaded, '
 
 #set $sql_statement += '(SELECT COUNT(*) FROM tv_episodes WHERE showid=tv_eps.showid AND season > 0 AND episode > 0 '
 #set $sql_statement += ' AND ((airdate > 1 AND airdate <= ' + $today + ' AND (status = ' + str($SKIPPED) + ' OR status = ' + str($WANTED) + ')) '
-#set $sql_statement += ' OR (status IN ' + status_quality + ') OR (status IN ' + status_download + '))) AS ep_total, '
+#set $sql_statement += ' OR (status IN ' + status_snatched + ') OR (status IN ' + status_download + '))) AS ep_total, '
 
 #set $sql_statement += ' (SELECT airdate FROM tv_episodes WHERE showid=tv_eps.showid AND airdate >= ' + $today + ' AND status = ' + str($UNAIRED) + ' ORDER BY airdate ASC LIMIT 1) AS ep_airs_next '
 #set $sql_statement += ' FROM tv_episodes tv_eps GROUP BY showid'
@@ -53,8 +53,8 @@
     },
     format: function(s) {
         if (s.indexOf('Loading...') == 0)
-          return s.replace('Loading...','000');
-        return (s || '').replace(/^(The|A)\s/i,'');
+          return s.replace('Loading...', '000');
+        return /^(a to )/i.test(s || '') ? s : (s || '').replace(/^(The|A|An)\s/i,'');
     },
     type: 'text'
 });
@@ -64,7 +64,7 @@
     is: function(s) {
         return false;
     },
-    format: function(s) { 
+    format: function(s) {
         return s.replace('hd1080p',5).replace('hd720p',4).replace('hd',3).replace('sd',2).replace('any',1).replace('custom',7);
     },
     type: 'numeric'
@@ -189,7 +189,7 @@ $myShowList.sort(lambda x, y: cmp(x.name, y.name))
     #end if
 
     #if $cur_total != 0:
-        #set $download_stat = str($cur_downloaded + $cur_snatched)
+        #set $download_stat = str($cur_downloaded)
         #set $download_stat_tip = "Downloaded: " + str($cur_downloaded)
         #if $cur_snatched > 0:
             #set $download_stat_tip = download_stat_tip + "&#013;" + "Snatched: " + str($cur_snatched)

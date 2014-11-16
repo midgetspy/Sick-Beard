@@ -99,12 +99,12 @@ case "$1" in
 
     stop)
         echo "Stopping $DESC"
-        start-stop-daemon --stop --pidfile $PID_FILE --retry 15
+        start-stop-daemon --stop --pidfile $PID_FILE --retry 15 --oknodo
         ;;
 
     restart|force-reload)
         echo "Restarting $DESC"
-        start-stop-daemon --stop --pidfile $PID_FILE --retry 15
+        start-stop-daemon --stop --pidfile $PID_FILE --retry 15 --oknodo
         start-stop-daemon -d $APP_PATH -c $RUN_AS $EXTRA_SSD_OPTS --start --pidfile $PID_FILE --exec $DAEMON -- $DAEMON_OPTS
         ;;
 
