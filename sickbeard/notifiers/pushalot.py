@@ -43,7 +43,7 @@ class PushalotNotifier:
         if not silent:
             silent = bool(sickbeard.PUSHALOT_SILENT)
 
-        logger.log("PUSHALOT: Sending notice with details: title=\"%s\", message=\"%s\", silent=%s, important=%s, authtoken=%s" % (title, message, silent, important, authtoken), logger.DEBUG)
+        logger.log(u"PUSHALOT: Sending notice with details: title=\"%s\", message=\"%s\", silent=%s, important=%s, authtoken=%s" % (title, message, silent, important, authtoken), logger.DEBUG)
 
         try:
 

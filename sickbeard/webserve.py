@@ -336,6 +336,7 @@ class Manage:
 
         if show_obj:
             sickbeard.backlogSearchScheduler.action.searchBacklog([show_obj])  # @UndefinedVariable
+            ui.notifications.message('Forced Backlog', 'Running limited backlog for ' + str(show_obj.name))
 
         redirect("/manage/backlogOverview/")
 

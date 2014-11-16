@@ -2418,17 +2418,17 @@ class CMD_ShowsStats(ApiCall):
 
         myDB = db.DBConnection()
         today = str(datetime.date.today().toordinal())
-        status_quality = '(' + ','.join([str(quality) for quality in Quality.SNATCHED + Quality.SNATCHED_PROPER]) + ')'
+        status_snatched = '(' + ','.join([str(quality) for quality in Quality.SNATCHED + Quality.SNATCHED_PROPER]) + ')'
         status_download = '(' + ','.join([str(quality) for quality in Quality.DOWNLOADED + [ARCHIVED]]) + ')'
 
         sql_statement = 'SELECT '
 
-        sql_statement += '(SELECT COUNT(*) FROM tv_episodes WHERE season > 0 AND episode > 0 AND status IN ' + status_quality + ') AS ep_snatched, '
+        sql_statement += '(SELECT COUNT(*) FROM tv_episodes WHERE season > 0 AND episode > 0 AND status IN ' + status_snatched + ') AS ep_snatched, '
         sql_statement += '(SELECT COUNT(*) FROM tv_episodes WHERE season > 0 AND episode > 0 AND status IN ' + status_download + ') AS ep_downloaded, '
 
         sql_statement += '(SELECT COUNT(*) FROM tv_episodes WHERE season > 0 AND episode > 0 '
         sql_statement += ' AND ((airdate > 1 AND airdate <= ' + today + ' AND (status = ' + str(SKIPPED) + ' OR status = ' + str(WANTED) + ')) '
-        sql_statement += ' OR (status IN ' + status_quality + ') OR (status IN ' + status_download + '))) AS ep_total '
+        sql_statement += ' OR (status IN ' + status_snatched + ') OR (status IN ' + status_download + '))) AS ep_total '
 
         sql_statement += ' FROM tv_episodes tv_eps LIMIT 1'
 
