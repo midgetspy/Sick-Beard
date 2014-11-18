@@ -180,10 +180,15 @@ class Mede8erMetadata(mediabrowser.MediaBrowserMetadata):
         if myShow["contentrating"] is not None:
             mpaa.text = myShow["contentrating"]
 
-        IMDB_ID = etree.SubElement(tv_node, "id")
         if myShow['imdb_id'] is not None:
+            IMDB_ID = etree.SubElement(tv_node, "id")
             IMDB_ID.attrib["moviedb"] = "imdb"
             IMDB_ID.text = myShow['imdb_id']
+
+        if myShow['zap2it_id'] is not None:
+            zap2it_id = etree.SubElement(tv_node, "id")
+            zap2it_id.attrib["moviedb"] = "zap2it"
+            zap2it_id.text = myShow['zap2it_id']
 
         tvdbid = etree.SubElement(tv_node, "tvdbid")
         if myShow['id'] is not None:

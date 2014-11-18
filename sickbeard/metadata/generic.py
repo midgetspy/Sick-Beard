@@ -401,7 +401,8 @@ class GenericMetadata():
             logger.log(u"Writing show nfo file to " + nfo_file_path, logger.DEBUG)
 
             nfo_file = ek.ek(open, nfo_file_path, 'w')
-
+            if nfo_file_path.endswith('.xml'):
+                nfo_file.write('<?xml version="1.0" encoding="UTF-8"?>\n')
             data.write(nfo_file, encoding="utf-8")
             nfo_file.close()
             helpers.chmodAsParent(nfo_file_path)
@@ -445,7 +446,8 @@ class GenericMetadata():
             logger.log(u"Writing episode nfo file to " + nfo_file_path, logger.DEBUG)
 
             nfo_file = ek.ek(open, nfo_file_path, 'w')
-
+            if nfo_file_path.endswith('.xml'):
+                nfo_file.write('<?xml version="1.0" encoding="UTF-8"?>\n')
             data.write(nfo_file, encoding="utf-8")
             nfo_file.close()
             helpers.chmodAsParent(nfo_file_path)
