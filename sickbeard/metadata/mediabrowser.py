@@ -250,7 +250,7 @@ class MediaBrowserMetadata(generic.GenericMetadata):
 
         # check for title and id
         try:
-            if myShow['seriesname'] == None or myShow['seriesname'] == "" or myShow['id'] == None or myShow['id'] == "":
+            if myShow['seriesname'] is None or myShow['seriesname'] == "" or myShow['id'] is None or myShow['id'] == "":
                 logger.log(u"Incomplete info for show with id " + str(show_obj.tvdbid) + " on tvdb, skipping it", logger.ERROR)
                 return False
         except tvdb_exceptions.tvdb_attributenotfound:
@@ -258,37 +258,37 @@ class MediaBrowserMetadata(generic.GenericMetadata):
             return False
 
         tvdbid = etree.SubElement(tv_node, "id")
-        if myShow['id'] != None:
+        if myShow['id'] is not None:
             tvdbid.text = myShow['id']
 
         SeriesName = etree.SubElement(tv_node, "SeriesName")
-        if myShow['seriesname'] != None:
+        if myShow['seriesname'] is not None:
             SeriesName.text = myShow['seriesname']
 
         Status = etree.SubElement(tv_node, "Status")
-        if myShow['status'] != None:
+        if myShow['status'] is not None:
             Status.text = myShow['status']
 
         Network = etree.SubElement(tv_node, "Network")
-        if myShow['network'] != None:
+        if myShow['network'] is not None:
             Network.text = myShow['network']
 
         Airs_Time = etree.SubElement(tv_node, "Airs_Time")
-        if myShow['airs_time'] != None:
+        if myShow['airs_time'] is not None:
             Airs_Time.text = myShow['airs_time']
 
         Airs_DayOfWeek = etree.SubElement(tv_node, "Airs_DayOfWeek")
-        if myShow['airs_dayofweek'] != None:
+        if myShow['airs_dayofweek'] is not None:
             Airs_DayOfWeek.text = myShow['airs_dayofweek']
 
         FirstAired = etree.SubElement(tv_node, "FirstAired")
-        if myShow['firstaired'] != None:
+        if myShow['firstaired'] is not None:
             FirstAired.text = myShow['firstaired']
 
         ContentRating = etree.SubElement(tv_node, "ContentRating")
         MPAARating = etree.SubElement(tv_node, "MPAARating")
         certification = etree.SubElement(tv_node, "certification")
-        if myShow['contentrating'] != None:
+        if myShow['contentrating'] is not None:
             ContentRating.text = myShow['contentrating']
             MPAARating.text = myShow['contentrating']
             certification.text = myShow['contentrating']
@@ -297,19 +297,19 @@ class MediaBrowserMetadata(generic.GenericMetadata):
         MetadataType.text = "Series"
 
         Overview = etree.SubElement(tv_node, "Overview")
-        if myShow['overview'] != None:
+        if myShow['overview'] is not None:
             Overview.text = myShow['overview']
 
         PremiereDate = etree.SubElement(tv_node, "PremiereDate")
-        if myShow['firstaired'] != None:
+        if myShow['firstaired'] is not None:
             PremiereDate.text = myShow['firstaired']
 
         Rating = etree.SubElement(tv_node, "Rating")
-        if myShow['rating'] != None:
+        if myShow['rating'] is not None:
             Rating.text = myShow['rating']
 
         ProductionYear = etree.SubElement(tv_node, "ProductionYear")
-        if myShow['firstaired'] != None:
+        if myShow['firstaired'] is not None:
             try:
                 year_text = str(datetime.datetime.strptime(myShow['firstaired'], '%Y-%m-%d').year)
                 if year_text:
@@ -319,45 +319,45 @@ class MediaBrowserMetadata(generic.GenericMetadata):
 
         RunningTime = etree.SubElement(tv_node, "RunningTime")
         Runtime = etree.SubElement(tv_node, "Runtime")
-        if myShow['runtime'] != None:
+        if myShow['runtime'] is not None:
             RunningTime.text = myShow['runtime']
             Runtime.text = myShow['runtime']
 
         IMDB_ID = etree.SubElement(tv_node, "IMDB_ID")
         IMDB = etree.SubElement(tv_node, "IMDB")
         IMDbId = etree.SubElement(tv_node, "IMDbId")
-        if myShow['imdb_id'] != None:
+        if myShow['imdb_id'] is not None:
             IMDB_ID.text = myShow['imdb_id']
             IMDB.text = myShow['imdb_id']
             IMDbId.text = myShow['imdb_id']
 
         Zap2ItId = etree.SubElement(tv_node, "Zap2ItId")
-        if myShow['zap2it_id'] != None:
+        if myShow['zap2it_id'] is not None:
             Zap2ItId.text = myShow['zap2it_id']
 
         Genres = etree.SubElement(tv_node, "Genres")
-        if myShow["genre"] != None:
+        if myShow["genre"] is not None:
             for genre in myShow['genre'].split('|'):
                 if genre and genre.strip():
                     cur_genre = etree.SubElement(Genres, "Genre")
                     cur_genre.text = genre.strip()
 
         Genre = etree.SubElement(tv_node, "Genre")
-        if myShow["genre"] != None:
+        if myShow["genre"] is not None:
             Genre.text = "|".join([x.strip() for x in myShow["genre"].split('|') if x and x.strip()])
 
         Studios = etree.SubElement(tv_node, "Studios")
         Studio = etree.SubElement(Studios, "Studio")
-        if myShow["network"] != None:
+        if myShow["network"] is not None:
             Studio.text = myShow['network']
 
         Persons = etree.SubElement(tv_node, "Persons")
 
-        if myShow["_actors"] != None:
+        if myShow["_actors"] is not None:
             for actor in myShow["_actors"]:
                 cur_actor_name_text = actor['name']
 
-                if cur_actor_name_text != None and cur_actor_name_text.strip():
+                if cur_actor_name_text is not None and cur_actor_name_text.strip():
                     cur_actor = etree.SubElement(Persons, "Person")
                     cur_actor_name = etree.SubElement(cur_actor, "Name")
                     cur_actor_name.text = cur_actor_name_text.strip()
@@ -367,7 +367,7 @@ class MediaBrowserMetadata(generic.GenericMetadata):
 
                     cur_actor_role = etree.SubElement(cur_actor, "Role")
                     cur_actor_role_text = actor['role']
-                    if cur_actor_role_text != None:
+                    if cur_actor_role_text is not None:
                         cur_actor_role.text = cur_actor_role_text
 
         helpers.indentXML(tv_node)
@@ -424,16 +424,16 @@ class MediaBrowserMetadata(generic.GenericMetadata):
                 # root (or single) episode
 
                 # default to today's date for specials if firstaired is not set
-                if myEp['firstaired'] == None and ep_obj.season == 0:
+                if myEp['firstaired'] is None and ep_obj.season == 0:
                     myEp['firstaired'] = str(datetime.date.fromordinal(1))
 
-                if myEp['episodename'] == None or myEp['firstaired'] == None:
+                if myEp['episodename'] is None or myEp['firstaired'] is None:
                     return None
 
                 episode = rootNode
 
                 EpisodeName = etree.SubElement(episode, "EpisodeName")
-                if curEpToWrite.name != None:
+                if curEpToWrite.name is not None:
                     EpisodeName.text = curEpToWrite.name
                 else:
                     EpisodeName.text = ""
@@ -462,7 +462,7 @@ class MediaBrowserMetadata(generic.GenericMetadata):
                 MetadataType.text = "Episode"
 
                 Overview = etree.SubElement(episode, "Overview")
-                if curEpToWrite.description != None:
+                if curEpToWrite.description is not None:
                     Overview.text = curEpToWrite.description
                 else:
                     Overview.text = ""
@@ -470,13 +470,13 @@ class MediaBrowserMetadata(generic.GenericMetadata):
                 if not ep_obj.relatedEps:
                     Rating = etree.SubElement(episode, "Rating")
                     rating_text = myEp['rating']
-                    if rating_text != None:
+                    if rating_text is not None:
                         Rating.text = rating_text
 
                     IMDB_ID = etree.SubElement(episode, "IMDB_ID")
                     IMDB = etree.SubElement(episode, "IMDB")
                     IMDbId = etree.SubElement(episode, "IMDbId")
-                    if myShow['imdb_id'] != None:
+                    if myShow['imdb_id'] is not None:
                         IMDB_ID.text = myShow['imdb_id']
                         IMDB.text = myShow['imdb_id']
                         IMDbId.text = myShow['imdb_id']
