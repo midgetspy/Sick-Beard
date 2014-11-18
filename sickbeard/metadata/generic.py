@@ -142,21 +142,21 @@ class GenericMetadata():
 
     def _has_episode_thumb(self, ep_obj):
         location = self.get_episode_thumb_path(ep_obj)
-        result = location != None and ek.ek(os.path.isfile, location)
+        result = location is not None and ek.ek(os.path.isfile, location)
         if location:
             logger.log(u"Checking if " + location + " exists: " + str(result), logger.DEBUG)
         return result
 
     def _has_season_poster(self, show_obj, season):
         location = self.get_season_poster_path(show_obj, season)
-        result = location != None and ek.ek(os.path.isfile, location)
+        result = location is not None and ek.ek(os.path.isfile, location)
         if location:
             logger.log(u"Checking if " + location + " exists: " + str(result), logger.DEBUG)
         return result
 
     def _has_season_banner(self, show_obj, season):
         location = self.get_season_banner_path(show_obj, season)
-        result = location != None and ek.ek(os.path.isfile, location)
+        result = location is not None and ek.ek(os.path.isfile, location)
         if location:
             logger.log(u"Checking if " + location + " exists: " + str(result), logger.DEBUG)
         return result
@@ -401,7 +401,8 @@ class GenericMetadata():
             logger.log(u"Writing show nfo file to " + nfo_file_path, logger.DEBUG)
 
             nfo_file = ek.ek(open, nfo_file_path, 'w')
-
+            if nfo_file_path.endswith('.xml'):
+                nfo_file.write('<?xml version="1.0" encoding="UTF-8"?>\n')
             data.write(nfo_file, encoding="utf-8")
             nfo_file.close()
             helpers.chmodAsParent(nfo_file_path)
@@ -445,7 +446,8 @@ class GenericMetadata():
             logger.log(u"Writing episode nfo file to " + nfo_file_path, logger.DEBUG)
 
             nfo_file = ek.ek(open, nfo_file_path, 'w')
-
+            if nfo_file_path.endswith('.xml'):
+                nfo_file.write('<?xml version="1.0" encoding="UTF-8"?>\n')
             data.write(nfo_file, encoding="utf-8")
             nfo_file.close()
             helpers.chmodAsParent(nfo_file_path)
@@ -858,7 +860,7 @@ class GenericMetadata():
                 return empty_return
 
             name = showXML.findtext('title')
-            if showXML.findtext('tvdbid') != None:
+            if showXML.findtext('tvdbid') is not None:
                 tvdb_id = int(showXML.findtext('tvdbid'))
             elif showXML.findtext('id'):
                 tvdb_id = int(showXML.findtext('id'))
