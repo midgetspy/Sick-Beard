@@ -117,8 +117,8 @@ def validate_name(pattern, multi=None, file_only=False, abd=False):
 
     parser = NameParser(True)
 
-    new_name = ep.formatted_filename(pattern, multi) + '.ext'
-    new_path = ep.formatted_dir(pattern, multi)
+    new_name = ep.formatted_filename(pattern, multi, debug=True) + '.ext'
+    new_path = ep.formatted_dir(pattern, multi, debug=True)
     if not file_only:
         new_name = ek.ek(os.path.join, new_path, new_name)
 
@@ -183,4 +183,4 @@ def test_name(pattern, multi=None, abd=False):
 
     ep = _generate_sample_ep(multi, abd)
 
-    return {'name': ep.formatted_filename(pattern, multi), 'dir': ep.formatted_dir(pattern, multi)}
+    return {'name': ep.formatted_filename(pattern, multi, debug=True), 'dir': ep.formatted_dir(pattern, multi, debug=True)}
