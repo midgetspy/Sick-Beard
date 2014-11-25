@@ -1515,7 +1515,7 @@ class TVEpisode(object):
 
         return result_name
 
-    def _format_pattern(self, pattern=None, multi=None):
+    def _format_pattern(self, pattern=None, multi=None, debug=False):
         """
         Manipulates an episode naming pattern and then fills the template in
         """
@@ -1539,13 +1539,14 @@ class TVEpisode(object):
             else:
                 result_name = result_name.replace('%RN', '%S.N.S%0SE%0E.%E.N-SiCKBEARD')
                 result_name = result_name.replace('%rn', '%s.n.s%0se%0e.%e.n-sickbeard')
-
-            logger.log(u"Episode has no release name, replacing it with a generic one: " + result_name, logger.DEBUG)
+            if debug:
+                logger.log(u"Episode has no release name, replacing it with a generic one: " + result_name, logger.DEBUG)
 
         if not replace_map['%RG']:
             result_name = result_name.replace('%RG', 'SiCKBEARD')
             result_name = result_name.replace('%rg', 'sickbeard')
-            logger.log(u"Episode has no release group, replacing it with a generic one: " + result_name, logger.DEBUG)
+            if debug:
+                logger.log(u"Episode has no release group, replacing it with a generic one: " + result_name, logger.DEBUG)
 
         # split off ep name part only
         name_groups = re.split(r'[\\/]', result_name)
@@ -1635,8 +1636,8 @@ class TVEpisode(object):
             result_name = result_name.replace(cur_name_group, cur_name_group_result)
 
         result_name = self._format_string(result_name, replace_map)
-
-        logger.log(u"formatting pattern: " + pattern + " -> " + result_name, logger.DEBUG)
+        if debug:
+            logger.log(u"formatting pattern: " + pattern + " -> " + result_name, logger.DEBUG)
 
         return result_name
 
@@ -1657,7 +1658,7 @@ class TVEpisode(object):
 
         return result
 
-    def formatted_dir(self, pattern=None, multi=None):
+    def formatted_dir(self, pattern=None, multi=None, debug=False):
         """
         Just the folder name of the episode
         """
@@ -1675,9 +1676,9 @@ class TVEpisode(object):
         if len(name_groups) == 1:
             return ''
         else:
-            return self._format_pattern(os.sep.join(name_groups[:-1]), multi)
+            return self._format_pattern(os.sep.join(name_groups[:-1]), multi, debug)
 
-    def formatted_filename(self, pattern=None, multi=None):
+    def formatted_filename(self, pattern=None, multi=None, debug=False):
         """
         Just the filename of the episode, formatted based on the naming settings
         """
@@ -1692,7 +1693,7 @@ class TVEpisode(object):
         # split off the filename only, if they exist
         name_groups = re.split(r'[\\/]', pattern)
 
-        return self._format_pattern(name_groups[-1], multi)
+        return self._format_pattern(name_groups[-1], multi, debug)
 
     def rename(self):
         """
