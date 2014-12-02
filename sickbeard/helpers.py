@@ -31,6 +31,7 @@ import traceback
 import urllib
 import urllib2
 import zlib
+import filecmp
 
 from httplib import BadStatusLine
 
@@ -392,6 +393,9 @@ def listMediaFiles(path):
 
 def copyFile(srcFile, destFile):
     ek.ek(shutil.copyfile, srcFile, destFile)
+    while not filecmp.cmp(srcFile, destFile):
+        ek.ek(shutil.copyfile, srcFile, destFile)
+
     try:
         ek.ek(shutil.copymode, srcFile, destFile)
     except OSError:
