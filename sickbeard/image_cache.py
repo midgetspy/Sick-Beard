@@ -142,7 +142,7 @@ class ImageCache:
             ek.ek(os.makedirs, self._cache_dir())
 
         logger.log(u"Copying from "+image_path+" to "+dest_path)
-        helpers.copyFile(image_path, dest_path)
+        helpers.linkOrCopyFile(image_path, dest_path)
         
         return True
 
