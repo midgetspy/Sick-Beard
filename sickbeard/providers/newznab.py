@@ -408,6 +408,8 @@ class NewznabProvider(generic.NZBProvider):
                 if parsedXML.tag == 'rss':
                     items = parsedXML.findall('.//item')
                     response = parsedXML.find('.//{http://www.newznab.com/DTD/2010/feeds/attributes/}response')
+                    if not response and "nzbgeek" in self.url:
+                        response = parsedXML.find('.//{http://nzbgeek.info/feeds/attributes/}response')
 
                 else:
                     logger.log(u"Resulting XML from " + self.name + " isn't RSS, not parsing it", logger.ERROR)
