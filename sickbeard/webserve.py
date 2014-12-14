@@ -719,7 +719,7 @@ class ConfigGeneral:
     @cherrypy.expose
     def saveGeneral(self, log_dir=None, web_port=None, web_log=None, web_ipv6=None,
                     launch_browser=None, web_username=None, use_api=None, api_key=None,
-                    web_password=None, version_notify=None, enable_https=None, https_cert=None, https_key=None):
+                    web_password=None, version_notify=None, enable_https=None, https_cert=None, https_key=None, https_chain=None):
 
         results = []
 
@@ -747,6 +747,9 @@ class ConfigGeneral:
 
         if not config.change_HTTPS_KEY(https_key):
             results += ["Unable to create directory " + os.path.normpath(https_key) + ", https key directory not changed."]
+
+        if not config.change_HTTPS_CHAIN(https_chain):
+            results += ["Unable to create directory " + os.path.normpath(https_chain) + ", https chain directory not changed."]
 
         # API
         sickbeard.USE_API = config.checkbox_to_value(use_api)
