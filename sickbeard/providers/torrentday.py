@@ -50,7 +50,7 @@ class TorrentDayProvider(generic.TorrentProvider):
         self.rssuid = None
         self.session = None
         self.supportsBacklog = True
-        self.url = 'http://www.torrentday.com/'
+        self.url = 'https://www.torrentday.com/'
         logger.log('[' + self.name + '] initializing...')
     
     ###################################################################################################
