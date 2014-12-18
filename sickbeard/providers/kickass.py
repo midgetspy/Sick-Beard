@@ -137,18 +137,27 @@ class KickAssProvider(generic.TorrentProvider):
         logger.log("[" + self.name + "] Performing Search: {0}".format(search_params))
         for page in range(1,3):
             searchData = None
+            SearchParameters = {}
             
             if len(sickbeard.KICKASS_ALT_URL):
                 self.url = sickbeard.KICKASS_ALT_URL
-                
-            SearchURL = self.url + "json.php?q=" + search_params.replace(':','') + "%20category:tv&order=desc&page=" + str(page) + "&field="
             
             if len(search_params):
-                SearchURL +=  "seeders"
+                SearchParameters["q"] = search_params+" category:tv"
             else:
-                SearchURL +=  "time_add"
+                SearchParameters["q"] = "category:tv"
+                
+            SearchParameters["order"] = "desc"
+            SearchParameters["page"] = str(page)
             
-            searchData = self.getURL(SearchURL)
+            if len(search_params):
+                SearchParameters["field"] = "seeders"
+            else:
+                SearchParameters["field"] = "time_add"
+            
+            SearchQuery = urllib.urlencode(SearchParameters)
+            
+            searchData = self.getURL(self.url + "json.php?%s" % SearchQuery )
               
             if searchData:
                 try:
@@ -171,6 +180,7 @@ class KickAssProvider(generic.TorrentProvider):
     ###################################################################################################
     
     def getURL(self, url, headers=None):
+        logger.log("[" + self.name + "] getURL() retrieving URL: " + url, logger.DEBUG)
         response = None
         
         if not self.session:
@@ -185,8 +195,12 @@ class KickAssProvider(generic.TorrentProvider):
             logger.log("[" + self.name + "] getURL() Error loading " + self.name + " URL: " + ex(e), logger.ERROR)
             return None
         
-        if response.status_code not in [200,302,303]:
+        if response.status_code not in [200,302,303,404]:
+            # response did not return an acceptable result
             logger.log("[" + self.name + "] getURL() requested URL - " + url +" returned status code is " + str(response.status_code), logger.ERROR)
+            return None
+        if response.status_code in [404]:
+            # response returned an empty result
             return None
 
         return response.content
@@ -217,7 +231,7 @@ class KickAssCache(tvcache.TVCache):
         data = provider._doSearch("")
         if data:
             for title, url in data:
-                xml += "<item>" + "<title>" + escape(title) + "</title>" +  "<link>"+ urllib.quote(url,'/,:') + "</link>" + "</item>"
+                xml += "<item>" + "<title>" + escape(title) + "</title>" +  "<link>"+ url + "</link>" + "</item>"
         xml += "</channel></rss>"
         return xml
     
