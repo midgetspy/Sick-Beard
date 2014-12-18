@@ -56,7 +56,10 @@ def sendTORRENT(torrent):
         
     ###################################################################################################
     
-    host = urlparse(sickbeard.TORRENT_HOST)
+    host = sickbeard.TORRENT_HOST
+    if not host.startswith('http'):
+        host = 'http://' + sickbeard.TORRENT_HOST
+    host = urlparse(host)
     session = None
     if hasattr(torrent.provider, 'session'):
         session = torrent.provider.session
@@ -131,6 +134,8 @@ def sendTORRENT(torrent):
 def testAuthentication(host, username, password):
 
     try:
+        if not host.startswith('http'):
+            host = 'http://' + host
         host = urlparse(host)
     except Exception, e:
         return False, u"[Transmission] Host properties are not filled in correctly."
