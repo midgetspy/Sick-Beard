@@ -16,8 +16,6 @@
 #			as root.
 # sickbeard_dir:	Directory where Sick Beard lives.
 #			Default: /usr/local/sickbeard
-# pidfile:		The name of the pidfile to create.
-#     Default is sickbeard.pid in sickbeard_dir.
 
 . /etc/rc.subr
 
