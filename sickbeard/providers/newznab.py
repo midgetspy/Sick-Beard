@@ -407,7 +407,22 @@ class NewznabProvider(generic.NZBProvider):
 
                 if parsedXML.tag == 'rss':
                     items = parsedXML.findall('.//item')
-                    response = parsedXML.find('.//{http://www.newznab.com/DTD/2010/feeds/attributes/}response')
+                    # Find all nodes with offset and total attributes
+                    offset_nodes = parsedXML.findall('.//*[@offset]')
+                    total_nodes = parsedXML.findall('.//*[@total]')
+                    # Our set of candidates for the response tag is the union
+                    # of the nodes with offset and total attributes since we
+                    # expect both to be present
+                    response_candidates = set(offset_nodes) & set(total_nodes)
+                    # Filter out any nodes which are not namespaced 'response'
+                    # tags
+                    response_nodes = [node for node in response_candidates if node.tag.endswith('}response')]
+                    # Verify that one and only one node matches and use it,
+                    # return otherwise
+                    if len(response_nodes) != 1:
+                        logger.log("No valid response node was found in the API response!")
+                        return results
+                    response = response_nodes[0]
 
                 else:
                     logger.log(u"Resulting XML from " + self.name + " isn't RSS, not parsing it", logger.ERROR)
