@@ -406,21 +406,21 @@ class NewznabProvider(generic.NZBProvider):
             if self._checkAuthFromData(parsedXML):
 
                 if parsedXML.tag == 'rss':
-                    items = parsedXML.findall('.//item')
-                    # Find all nodes with offset and total attributes
-                    offset_nodes = parsedXML.findall('.//*[@offset]')
-                    total_nodes = parsedXML.findall('.//*[@total]')
-                    # Our set of candidates for the response tag is the union
-                    # of the nodes with offset and total attributes since we
-                    # expect both to be present
-                    response_candidates = set(offset_nodes) & set(total_nodes)
-                    # Filter out any nodes which are not namespaced 'response'
-                    # tags
-                    response_nodes = [node for node in response_candidates if node.tag.endswith('}response')]
+                    items = []
+                    response_nodes = []
+                    for node in parsedXML.getiterator():
+                        # Collect all items for result parsing
+                        if node.tag == "item":
+                            items.append(node)
+                        # Find response nodes but ignore XML namespacing to
+                        # accomodate providers with alternative definitions
+                        elif node.tag.split("}", 1)[-1] == "response":
+                            response_nodes.append(node)
                     # Verify that one and only one node matches and use it,
                     # return otherwise
                     if len(response_nodes) != 1:
-                        logger.log("No valid response node was found in the API response!")
+                        logger.log(u"No valid, unique response node was found in the API response",
+                            logger.ERROR)
                         return results
                     response = response_nodes[0]
 
@@ -441,13 +441,13 @@ class NewznabProvider(generic.NZBProvider):
 
                 # check to see if our offset matches what was returned, otherwise dont trust their values and just use what we have
                 if offset != int(response.get('offset') or 0):
-                    logger.log(u"Newznab provider returned invalid api data, report this to your provider! Aborting fetching further results.", logger.DEBUG)
+                    logger.log(u"Newznab provider returned invalid api data, report this to your provider! Aborting fetching further results.", logger.WARNING)
                     return results
 
                 try:
                     total = int(response.get('total') or 0)
                 except AttributeError:
-                    logger.log(u"Newznab provider provided invalid total.", logger.DEBUG)
+                    logger.log(u"Newznab provider provided invalid total.", logger.WARNING)
                     break
 
             # if we have 0 results, just break out otherwise increment and continue
