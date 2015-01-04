@@ -67,7 +67,7 @@ class DownloadStationAPI(object):
 			response = json.loads(open_request.read())
 			logger.log('response: ' + str(json.dumps(response).encode('utf-8')), logger.DEBUG)
 			if response['success'] == False:
-				logger.log(u"Request Error: " + response['error']['code'], logger.DEBUG)
+				logger.log(u"Request Error: " + str(response['error']['code']), logger.DEBUG)
 				return False
 			else:
 				return True if not 'data' in response else response['data']
@@ -79,7 +79,7 @@ class DownloadStationAPI(object):
 			logger.log(u"Unable to connect to DownloadStation " + str(e), logger.ERROR)
 		return False
 
-    def add_download(self, uri):
+    def add_download(self, uri, destination):
         logger.log(u"Adding Download:" + uri, logger.DEBUG)
         post_data = {
             'api' : 'SYNO.DownloadStation.Task',
@@ -87,6 +87,9 @@ class DownloadStationAPI(object):
             'uri' : uri,
             'version' : 1
         }
+        if destination and destination != '':
+            logger.log(u"Setting destination to: " + destination, logger.DEBUG)
+            post_data['destination'] = destination
         return self._request('task.cgi', post_data)
 
     def pause_download(self, uri):
@@ -120,7 +123,7 @@ def sendDownload(download):
 
     try:
         ds = DownloadStationAPI(host.hostname, host.port, sickbeard.TORRENT_USERNAME, sickbeard.TORRENT_PASSWORD)
-        torrent = ds.add_download(download.url)
+        torrent = ds.add_download(download.url, sickbeard.TORRENT_PATH)
         if sickbeard.TORRENT_PAUSED:
 			ds.pause_download(download.url)
         return True
