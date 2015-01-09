@@ -429,13 +429,13 @@ class ConfigMigrator():
         """
 
         sickbeard.NAMING_PATTERN = self._name_to_pattern()
-        logger.log("Based on your old settings I'm setting your new naming pattern to: " + sickbeard.NAMING_PATTERN)
+        logger.log(u"Based on your old settings I'm setting your new naming pattern to: " + sickbeard.NAMING_PATTERN)
 
         sickbeard.NAMING_CUSTOM_ABD = bool(check_setting_int(self.config_obj, 'General', 'naming_dates', 0))
 
         if sickbeard.NAMING_CUSTOM_ABD:
             sickbeard.NAMING_ABD_PATTERN = self._name_to_pattern(True)
-            logger.log("Adding a custom air-by-date naming pattern to your config: " + sickbeard.NAMING_ABD_PATTERN)
+            logger.log(u"Adding a custom air-by-date naming pattern to your config: " + sickbeard.NAMING_ABD_PATTERN)
         else:
             sickbeard.NAMING_ABD_PATTERN = naming.name_abd_presets[0]
 

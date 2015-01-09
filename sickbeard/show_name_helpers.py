@@ -158,8 +158,6 @@ def makeSceneSearchString(episode):
     myDB = db.DBConnection()
     numseasonsSQlResult = myDB.select("SELECT COUNT(DISTINCT season) as numseasons FROM tv_episodes WHERE showid = ? and season != 0", [episode.show.tvdbid])
     numseasons = int(numseasonsSQlResult[0][0])
-    numepisodesSQlResult = myDB.select("SELECT COUNT(episode) as numepisodes FROM tv_episodes WHERE showid = ? and season != 0", [episode.show.tvdbid])
-    numepisodes = int(numepisodesSQlResult[0][0])
 
     # see if we should use dates instead of episodes
     if episode.show.air_by_date and episode.airdate != datetime.date.fromordinal(1):
@@ -168,9 +166,8 @@ def makeSceneSearchString(episode):
         epStrings = ["S%02iE%02i" % (int(episode.season), int(episode.episode)),
                     "%ix%02i" % (int(episode.season), int(episode.episode))]
 
-    # for single-season shows just search for the show name -- if total ep count (exclude s0) is less than 11
-    # due to the amount of qualities and releases, it is easy to go over the 50 result limit on rss feeds otherwise
-    if numseasons == 1 and numepisodes < 11:
+    # for single-season shows just search for the show name
+    if numseasons == 1:
         epStrings = ['']
 
     showNames = set(makeSceneShowSearchStrings(episode.show))
@@ -179,7 +176,10 @@ def makeSceneSearchString(episode):
 
     for curShow in showNames:
         for curEpString in epStrings:
-            toReturn.append(curShow + '.' + curEpString)
+            if curEpString != '':
+                toReturn.append(curShow + '.' + curEpString)
+            else:
+                toReturn.append(curShow)
 
     return toReturn
 
@@ -211,6 +211,23 @@ def isGoodResult(name, show, log=True):
     return False
 
 
+def uniqify(seq, idfun=None):
+    # http://www.peterbe.com/plog/uniqifiers-benchmark
+    if idfun is None:
+        def idfun(x):
+            return x
+    seen = {}
+    result = []
+    for item in seq:
+        marker = idfun(item)
+        if marker in seen:
+            continue
+        seen[marker] = 1
+        result.append(item)
+
+    return result
+
+
 def allPossibleShowNames(show):
     """
     Figures out every possible variation of the name for a particular show. Includes TVDB name, TVRage name,
@@ -225,7 +242,7 @@ def allPossibleShowNames(show):
     showNames += [name for name in get_scene_exceptions(show.tvdbid)]
 
     # if we have a tvrage name then use it
-    if show.tvrname != "" and show.tvrname != None:
+    if show.tvrname != "" and show.tvrname is not None:
         showNames.append(show.tvrname)
 
     newShowNames = []
@@ -234,8 +251,7 @@ def allPossibleShowNames(show):
     country_list.update(dict(zip(countryList.values(), countryList.keys())))
 
     # if we have "Show Name Australia" or "Show Name (Australia)" this will add "Show Name (AU)" for
-    # any countries defined in common.countryList
-    # (and vice versa)
+    # any countries defined in common.countryList (and vice versa)
     for curName in set(showNames):
         if not curName:
             continue
@@ -246,5 +262,5 @@ def allPossibleShowNames(show):
                 newShowNames.append(curName.replace(' (' + curCountry + ')', ' (' + country_list[curCountry] + ')'))
 
     showNames += newShowNames
-
-    return showNames
+    # at this point we could have duplicates due to case-ing, prune dupes
+    return uniqify(showNames, lambda x: x.lower())

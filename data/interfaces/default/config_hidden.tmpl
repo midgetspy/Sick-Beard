@@ -38,6 +38,14 @@
                         </div>
 
                         <div class="field-pair">
+                            <input type="checkbox" name="display_all_seasons" id="display_all_seasons" #if $sickbeard.DISPLAY_ALL_SEASONS then "checked=\"checked\"" else ""#/>
+                            <label class="clearfix" for="display_all_seasons">
+                                <span class="component-title">Show All Seasons</span>
+                                <span class="component-desc">Should Sick Beard show all seasons on displayShow?</span>
+                            </label>
+                        </div>
+
+                        <div class="field-pair">
                             <label class="nocheck clearfix">
                                 <span class="component-title">Git Path</span>
                                 <input type="text" name="git_path" value="$sickbeard.GIT_PATH" size="55" />

@@ -205,10 +205,10 @@ class WDTVMetadata(generic.GenericMetadata):
                 logger.log(u"Unable to find episode " + str(curEpToWrite.season) + "x" + str(curEpToWrite.episode) + " on tvdb... has it been removed? Should I delete from db?")
                 return None
 
-            if myEp["firstaired"] == None and ep_obj.season == 0:
+            if myEp["firstaired"] is None and ep_obj.season == 0:
                 myEp["firstaired"] = str(datetime.date.fromordinal(1))
 
-            if myEp["episodename"] == None or myEp["firstaired"] == None:
+            if myEp["episodename"] is None or myEp["firstaired"] is None:
                 return None
 
             if len(eps_to_write) > 1:
@@ -224,11 +224,11 @@ class WDTVMetadata(generic.GenericMetadata):
             title.text = ep_obj.prettyName()
 
             seriesName = etree.SubElement(episode, "series_name")
-            if myShow["seriesname"] != None:
+            if myShow["seriesname"] is not None:
                 seriesName.text = myShow["seriesname"]
 
             episodeName = etree.SubElement(episode, "episode_name")
-            if curEpToWrite.name != None:
+            if curEpToWrite.name is not None:
                 episodeName.text = curEpToWrite.name
 
             seasonNumber = etree.SubElement(episode, "season_number")
@@ -243,7 +243,7 @@ class WDTVMetadata(generic.GenericMetadata):
                 firstAired.text = str(curEpToWrite.airdate)
 
             year = etree.SubElement(episode, "year")
-            if myShow["firstaired"] != None:
+            if myShow["firstaired"] is not None:
                 try:
                     year_text = str(datetime.datetime.strptime(myShow["firstaired"], '%Y-%m-%d').year)
                     if year_text:
@@ -253,34 +253,34 @@ class WDTVMetadata(generic.GenericMetadata):
 
             runtime = etree.SubElement(episode, "runtime")
             if curEpToWrite.season != 0:
-                if myShow["runtime"] != None:
+                if myShow["runtime"] is not None:
                     runtime.text = myShow["runtime"]
 
             genre = etree.SubElement(episode, "genre")
-            if myShow["genre"] != None:
+            if myShow["genre"] is not None:
                 genre.text = " / ".join([x.strip() for x in myShow["genre"].split('|') if x and x.strip()])
 
             director = etree.SubElement(episode, "director")
             director_text = myEp['director']
-            if director_text != None:
+            if director_text is not None:
                 director.text = director_text
 
-            if myShow["_actors"] != None:
+            if myShow["_actors"] is not None:
                 for actor in myShow["_actors"]:
                     cur_actor_name_text = actor['name']
 
-                    if cur_actor_name_text != None and cur_actor_name_text.strip():
+                    if cur_actor_name_text is not None and cur_actor_name_text.strip():
                         cur_actor = etree.SubElement(episode, "actor")
                         cur_actor_name = etree.SubElement(cur_actor, "name")
                         cur_actor_name.text = cur_actor_name_text.strip()
 
                         cur_actor_role = etree.SubElement(cur_actor, "role")
                         cur_actor_role_text = actor['role']
-                        if cur_actor_role_text != None:
+                        if cur_actor_role_text is not None:
                             cur_actor_role.text = cur_actor_role_text
 
             overview = etree.SubElement(episode, "overview")
-            if curEpToWrite.description != None:
+            if curEpToWrite.description is not None:
                 overview.text = curEpToWrite.description
 
             # Make it purdy

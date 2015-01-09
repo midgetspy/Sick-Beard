@@ -24,11 +24,11 @@ def getShowImage(url, imgNum=None):
 
     image_data = None  # @UnusedVariable
 
-    if url == None:
+    if url is None:
         return None
 
     # if they provided a fanart number try to use it instead
-    if imgNum != None:
+    if imgNum is not None:
         tempURL = url.split('-')[0] + "-" + str(imgNum) + ".jpg"
     else:
         tempURL = url

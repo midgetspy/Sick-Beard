@@ -159,8 +159,6 @@ class TVShow(object):
 
     def getEpisode(self, season, episode, file=None, noCreate=False):
 
-        #return TVEpisode(self, season, episode)
-
         if not season in self.episodes:
             self.episodes[season] = {}
 
@@ -395,7 +393,6 @@ class TVShow(object):
                 if episode == 0:
                     continue
                 try:
-                    #ep = TVEpisode(self, season, episode)
                     ep = self.getEpisode(season, episode)
                 except exceptions.EpisodeNotFoundException:
                     logger.log(str(self.tvdbid) + u": TVDB object for " + str(season) + "x" + str(episode) + " is incomplete, skipping this episode")
@@ -977,14 +974,13 @@ class TVEpisode(object):
     hastbn = property(lambda self: self._hastbn, dirty_setter("_hastbn"))
     status = property(lambda self: self._status, dirty_setter("_status"))
     tvdbid = property(lambda self: self._tvdbid, dirty_setter("_tvdbid"))
-    #location = property(lambda self: self._location, dirty_setter("_location"))
+    # location = property(lambda self: self._location, dirty_setter("_location"))
     file_size = property(lambda self: self._file_size, dirty_setter("_file_size"))
     release_name = property(lambda self: self._release_name, dirty_setter("_release_name"))
 
     def _set_location(self, new_location):
         logger.log(u"Setter sets location to " + new_location, logger.DEBUG)
 
-        #self._location = newLocation
         dirty_setter("_location")(self, new_location)
 
         if new_location and ek.ek(os.path.isfile, new_location):
@@ -1037,14 +1033,14 @@ class TVEpisode(object):
                     pass
 
                 # if we tried loading it from NFO and didn't find the NFO, use TVDB
-                if self.hasnfo == False:
+                if self.hasnfo is False:
                     try:
                         result = self.loadFromTVDB(season, episode)
                     except exceptions.EpisodeDeletedException:
                         result = False
 
                     # if we failed SQL *and* NFO, TVDB then fail
-                    if result == False:
+                    if result is False:
                         raise exceptions.EpisodeNotFoundException("Couldn't find episode " + str(season) + "x" + str(episode))
 
         # don't update if not needed
@@ -1064,8 +1060,7 @@ class TVEpisode(object):
             logger.log(str(self.show.tvdbid) + u": Episode " + str(self.season) + "x" + str(self.episode) + " not found in the database", logger.DEBUG)
             return False
         else:
-            #NAMEIT logger.log(u"AAAAA from" + str(self.season)+"x"+str(self.episode) + " -" + self.name + " to " + str(sqlResults[0]["name"]))
-            if sqlResults[0]["name"] != None:
+            if sqlResults[0]["name"] is not None:
                 self.name = sqlResults[0]["name"]
             self.season = season
             self.episode = episode
@@ -1073,7 +1068,7 @@ class TVEpisode(object):
             if self.description is None:
                 self.description = ""
             self.airdate = datetime.date.fromordinal(int(sqlResults[0]["airdate"]))
-            #logger.log(u"1 Status changes from " + str(self.status) + " to " + str(sqlResults[0]["status"]), logger.DEBUG)
+            # logger.log(u"1 Status changes from " + str(self.status) + " to " + str(sqlResults[0]["status"]), logger.DEBUG)
             self.status = int(sqlResults[0]["status"])
 
             # don't overwrite my location
@@ -1149,7 +1144,6 @@ class TVEpisode(object):
                 self.deleteEpisode()
             return False
 
-        #NAMEIT logger.log(u"BBBBBBBB from " + str(self.season)+"x"+str(self.episode) + " -" +self.name+" to "+myEp["episodename"])
         self.name = myEp["episodename"]
         self.season = season
         self.episode = episode
@@ -1168,7 +1162,7 @@ class TVEpisode(object):
                 self.deleteEpisode()
             return False
 
-        #early conversion to int so that episode doesn't get marked dirty
+        # early conversion to int so that episode doesn't get marked dirty
         self.tvdbid = int(myEp["id"])
 
         # don't update show status if show dir is missing, unless it's missing on purpose
@@ -1261,7 +1255,7 @@ class TVEpisode(object):
                         logger.log(str(self.show.tvdbid) + u": NFO has an <episodedetails> block for a different episode - wanted " + str(self.season) + "x" + str(self.episode) + " but got " + str(epDetails.findtext('season')) + "x" + str(epDetails.findtext('episode')), logger.DEBUG)
                         continue
 
-                    if epDetails.findtext('title') == None or epDetails.findtext('aired') == None:
+                    if epDetails.findtext('title') is None or epDetails.findtext('aired') is None:
                         raise exceptions.NoNFOException("Error in NFO format (missing episode title or airdate)")
 
                     self.name = epDetails.findtext('title')
@@ -1521,7 +1515,7 @@ class TVEpisode(object):
 
         return result_name
 
-    def _format_pattern(self, pattern=None, multi=None):
+    def _format_pattern(self, pattern=None, multi=None, debug=False):
         """
         Manipulates an episode naming pattern and then fills the template in
         """
@@ -1545,13 +1539,14 @@ class TVEpisode(object):
             else:
                 result_name = result_name.replace('%RN', '%S.N.S%0SE%0E.%E.N-SiCKBEARD')
                 result_name = result_name.replace('%rn', '%s.n.s%0se%0e.%e.n-sickbeard')
-
-            logger.log(u"Episode has no release name, replacing it with a generic one: " + result_name, logger.DEBUG)
+            if debug:
+                logger.log(u"Episode has no release name, replacing it with a generic one: " + result_name, logger.DEBUG)
 
         if not replace_map['%RG']:
             result_name = result_name.replace('%RG', 'SiCKBEARD')
             result_name = result_name.replace('%rg', 'sickbeard')
-            logger.log(u"Episode has no release group, replacing it with a generic one: " + result_name, logger.DEBUG)
+            if debug:
+                logger.log(u"Episode has no release group, replacing it with a generic one: " + result_name, logger.DEBUG)
 
         # split off ep name part only
         name_groups = re.split(r'[\\/]', result_name)
@@ -1636,13 +1631,13 @@ class TVEpisode(object):
 
             # fill out the template for this piece and then insert this piece into the actual pattern
             cur_name_group_result = re.sub('(?i)(?x)' + regex_used, regex_replacement, cur_name_group)
-            #cur_name_group_result = cur_name_group.replace(ep_format, ep_string)
-            #logger.log(u"found "+ep_format+" as the ep pattern using "+regex_used+" and replaced it with "+regex_replacement+" to result in "+cur_name_group_result+" from "+cur_name_group, logger.DEBUG)
+            # cur_name_group_result = cur_name_group.replace(ep_format, ep_string)
+            # logger.log(u"found "+ep_format+" as the ep pattern using "+regex_used+" and replaced it with "+regex_replacement+" to result in "+cur_name_group_result+" from "+cur_name_group, logger.DEBUG)
             result_name = result_name.replace(cur_name_group, cur_name_group_result)
 
         result_name = self._format_string(result_name, replace_map)
-
-        logger.log(u"formatting pattern: " + pattern + " -> " + result_name, logger.DEBUG)
+        if debug:
+            logger.log(u"formatting pattern: " + pattern + " -> " + result_name, logger.DEBUG)
 
         return result_name
 
@@ -1663,7 +1658,7 @@ class TVEpisode(object):
 
         return result
 
-    def formatted_dir(self, pattern=None, multi=None):
+    def formatted_dir(self, pattern=None, multi=None, debug=False):
         """
         Just the folder name of the episode
         """
@@ -1681,9 +1676,9 @@ class TVEpisode(object):
         if len(name_groups) == 1:
             return ''
         else:
-            return self._format_pattern(os.sep.join(name_groups[:-1]), multi)
+            return self._format_pattern(os.sep.join(name_groups[:-1]), multi, debug)
 
-    def formatted_filename(self, pattern=None, multi=None):
+    def formatted_filename(self, pattern=None, multi=None, debug=False):
         """
         Just the filename of the episode, formatted based on the naming settings
         """
@@ -1698,7 +1693,7 @@ class TVEpisode(object):
         # split off the filename only, if they exist
         name_groups = re.split(r'[\\/]', pattern)
 
-        return self._format_pattern(name_groups[-1], multi)
+        return self._format_pattern(name_groups[-1], multi, debug)
 
     def rename(self):
         """
@@ -1736,12 +1731,12 @@ class TVEpisode(object):
         # move related files
         for cur_related_file in related_files:
             cur_result = helpers.rename_ep_file(cur_related_file, absolute_proper_path, absolute_current_path_no_ext_length)
-            if cur_result == False:
+            if cur_result is False:
                 logger.log(str(self.tvdbid) + u": Unable to rename file " + cur_related_file, logger.ERROR)
 
         # save the ep
         with self.lock:
-            if result != False:
+            if result is not False:
                 self.location = absolute_proper_path + file_ext
                 for relEp in self.relatedEps:
                     relEp.location = absolute_proper_path + file_ext

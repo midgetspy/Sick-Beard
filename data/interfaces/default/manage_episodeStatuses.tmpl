@@ -54,7 +54,7 @@ Manage episodes with status <select name="whichStatus">
 <input type="hidden" id="oldStatus" name="oldStatus" value="$whichStatus" />
 <input type="hidden" id="opt_includeSpecials" name="opt_includeSpecials" value="$includeSpecials" />
 <input type="hidden" id="opt_excludeNoAirdate" name="opt_excludeNoAirdate" value="$excludeNoAirdate" />
-#if $whichStatus in ($common.SNATCHED, $common.ARCHIVED, $common.IGNORED):
+#if $whichStatus in ($common.UNKNOWN, $common.SNATCHED, $common.ARCHIVED, $common.IGNORED):
 #set $row_class = "good"
 #else
 #set $row_class = $common.Overview.overviewStrings[$whichStatus]

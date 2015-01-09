@@ -77,7 +77,7 @@ initially download: <b><%=", ".join([Quality.qualityStrings[x] for x in sorted(a
 #end if
 #if $bestQualities:
 replace with: <b><%=", ".join([Quality.qualityStrings[x] for x in sorted(bestQualities)])%></b>
-#end if 
+#end if
 #end if
     </td></tr>
     <tr><td class="showLegend">Language:</td><td><img src="$sbRoot/images/flags/${show.lang}.png" width="16" height="11" alt="" /> $show.lang</td></tr>
@@ -112,7 +112,7 @@ Change selected episodes to
         <label for="skipped" class="checkbox inline skipped"><input type="checkbox" id="skipped" checked="checked" /> Skipped: <b>$epCounts[$Overview.SKIPPED]</b></label>
     </div>
     <div class="pull-right" style="padding-bottom: 5px;">
-        <button class="btn btn-mini seriesCheck"><a href="#" onclick="return false;">Select Filtered Episodes</a></button> 
+        <button class="btn btn-mini seriesCheck"><a href="#" onclick="return false;">Select Filtered Episodes</a></button>
         <button class="btn btn-mini clearAll"><a href="#" onclick="return false;">Clear All</a></button>
     </div>
 </div>
@@ -129,7 +129,7 @@ Change selected episodes to
     #if $curSeason != -1:
 
       #set $seasonCount = $seasonCount + 1
-      #if $seasonCount == 2:
+      #if $sickbeard.DISPLAY_ALL_SEASONS == False and $seasonCount == 2:
       <tbody id="segment" class="hide">
       #end if
 
@@ -185,12 +185,12 @@ Change selected episodes to
   </tr>
 
 #end for
-#if $seasonCount > 1:
+#if $sickbeard.DISPLAY_ALL_SEASONS == False and $seasonCount > 1:
     </tbody>
 #end if
 </table><br />
 
-#if $seasonCount > 1:
+#if $sickbeard.DISPLAY_ALL_SEASONS == False and $seasonCount > 1:
     <button class="btn btn-large btn-block btn-inverse" id="showAllSeasons"><i class="icon-chevron-down icon-white"></i> Show All Seasons <i class="icon-chevron-down icon-white"></i></button>
 #end if
 

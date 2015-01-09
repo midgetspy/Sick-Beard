@@ -125,7 +125,7 @@ class XBMC_12PlusMetadata(generic.GenericMetadata):
 
         # check for title and id
         try:
-            if myShow["seriesname"] == None or myShow["seriesname"] == "" or myShow["id"] == None or myShow["id"] == "":
+            if myShow["seriesname"] is None or myShow["seriesname"] == "" or myShow["id"] is None or myShow["id"] == "":
                 logger.log(u"Incomplete info for show with id " + str(show_ID) + " on tvdb, skipping it", logger.ERROR)
 
                 return False
@@ -135,15 +135,15 @@ class XBMC_12PlusMetadata(generic.GenericMetadata):
             return False
 
         title = etree.SubElement(tv_node, "title")
-        if myShow["seriesname"] != None:
+        if myShow["seriesname"] is not None:
             title.text = myShow["seriesname"]
 
         rating = etree.SubElement(tv_node, "rating")
-        if myShow["rating"] != None:
+        if myShow["rating"] is not None:
             rating.text = myShow["rating"]
 
         year = etree.SubElement(tv_node, "year")
-        if myShow["firstaired"] != None:
+        if myShow["firstaired"] is not None:
             try:
                 year_text = str(datetime.datetime.strptime(myShow["firstaired"], '%Y-%m-%d').year)
                 if year_text:
@@ -152,54 +152,54 @@ class XBMC_12PlusMetadata(generic.GenericMetadata):
                 pass
 
         plot = etree.SubElement(tv_node, "plot")
-        if myShow["overview"] != None:
+        if myShow["overview"] is not None:
             plot.text = myShow["overview"]
 
         episodeguide = etree.SubElement(tv_node, "episodeguide")
         episodeguideurl = etree.SubElement(episodeguide, "url")
         episodeguideurl2 = etree.SubElement(tv_node, "episodeguideurl")
-        if myShow["id"] != None:
+        if myShow["id"] is not None:
             showurl = sickbeard.TVDB_BASE_URL + '/series/' + myShow["id"] + '/all/en.zip'
             episodeguideurl.text = showurl
             episodeguideurl2.text = showurl
 
         mpaa = etree.SubElement(tv_node, "mpaa")
-        if myShow["contentrating"] != None:
+        if myShow["contentrating"] is not None:
             mpaa.text = myShow["contentrating"]
 
         tvdbid = etree.SubElement(tv_node, "id")
-        if myShow["id"] != None:
+        if myShow["id"] is not None:
             tvdbid.text = myShow["id"]
 
         genre = etree.SubElement(tv_node, "genre")
-        if myShow["genre"] != None:
+        if myShow["genre"] is not None:
             genre.text = " / ".join([x.strip() for x in myShow["genre"].split('|') if x and x.strip()])
 
         premiered = etree.SubElement(tv_node, "premiered")
-        if myShow["firstaired"] != None:
+        if myShow["firstaired"] is not None:
             premiered.text = myShow["firstaired"]
 
         studio = etree.SubElement(tv_node, "studio")
-        if myShow["network"] != None:
+        if myShow["network"] is not None:
             studio.text = myShow["network"]
 
-        if myShow["_actors"] != None:
+        if myShow["_actors"] is not None:
             for actor in myShow["_actors"]:
                 cur_actor_name_text = actor['name']
 
-                if cur_actor_name_text != None and cur_actor_name_text.strip():
+                if cur_actor_name_text is not None and cur_actor_name_text.strip():
                     cur_actor = etree.SubElement(tv_node, "actor")
                     cur_actor_name = etree.SubElement(cur_actor, "name")
                     cur_actor_name.text = cur_actor_name_text.strip()
 
                     cur_actor_role = etree.SubElement(cur_actor, "role")
                     cur_actor_role_text = actor['role']
-                    if cur_actor_role_text != None:
+                    if cur_actor_role_text is not None:
                         cur_actor_role.text = cur_actor_role_text
 
                     cur_actor_thumb = etree.SubElement(cur_actor, "thumb")
                     cur_actor_thumb_text = actor['image']
-                    if cur_actor_thumb_text != None:
+                    if cur_actor_thumb_text is not None:
                         cur_actor_thumb.text = cur_actor_thumb_text
 
         # Make it purdy
@@ -264,11 +264,11 @@ class XBMC_12PlusMetadata(generic.GenericMetadata):
                 episode = rootNode
 
             title = etree.SubElement(episode, "title")
-            if curEpToWrite.name != None:
+            if curEpToWrite.name is not None:
                 title.text = curEpToWrite.name
 
             showtitle = etree.SubElement(episode, "showtitle")
-            if curEpToWrite.show.name != None:
+            if curEpToWrite.show.name is not None:
                 showtitle.text = curEpToWrite.show.name
 
             season = etree.SubElement(episode, "season")
@@ -287,29 +287,29 @@ class XBMC_12PlusMetadata(generic.GenericMetadata):
                 aired.text = ''
 
             plot = etree.SubElement(episode, "plot")
-            if curEpToWrite.description != None:
+            if curEpToWrite.description is not None:
                 plot.text = curEpToWrite.description
 
             runtime = etree.SubElement(episode, "runtime")
             if curEpToWrite.season != 0:
-                if myShow["runtime"] != None:
+                if myShow["runtime"] is not None:
                     runtime.text = myShow["runtime"]
 
             displayseason = etree.SubElement(episode, "displayseason")
             if 'airsbefore_season' in myEp:
                 displayseason_text = myEp['airsbefore_season']
-                if displayseason_text != None:
+                if displayseason_text is not None:
                     displayseason.text = displayseason_text
 
             displayepisode = etree.SubElement(episode, "displayepisode")
             if 'airsbefore_episode' in myEp:
                 displayepisode_text = myEp['airsbefore_episode']
-                if displayepisode_text != None:
+                if displayepisode_text is not None:
                     displayepisode.text = displayepisode_text
 
             thumb = etree.SubElement(episode, "thumb")
             thumb_text = myEp['filename']
-            if thumb_text != None:
+            if thumb_text is not None:
                 thumb.text = thumb_text
 
             watched = etree.SubElement(episode, "watched")
@@ -317,43 +317,43 @@ class XBMC_12PlusMetadata(generic.GenericMetadata):
 
             credits = etree.SubElement(episode, "credits")
             credits_text = myEp['writer']
-            if credits_text != None:
+            if credits_text is not None:
                 credits.text = credits_text
 
             director = etree.SubElement(episode, "director")
             director_text = myEp['director']
-            if director_text != None:
+            if director_text is not None:
                 director.text = director_text
 
             rating = etree.SubElement(episode, "rating")
             rating_text = myEp['rating']
-            if rating_text != None:
+            if rating_text is not None:
                 rating.text = rating_text
 
             gueststar_text = myEp['gueststars']
-            if gueststar_text != None:
+            if gueststar_text is not None:
                 for actor in (x.strip() for x in gueststar_text.split('|') if x and x.strip()):
                     cur_actor = etree.SubElement(episode, "actor")
                     cur_actor_name = etree.SubElement(cur_actor, "name")
                     cur_actor_name.text = actor
 
-            if myShow['_actors'] != None:
+            if myShow['_actors'] is not None:
                 for actor in myShow['_actors']:
                     cur_actor_name_text = actor['name']
 
-                    if cur_actor_name_text != None and cur_actor_name_text.strip():
+                    if cur_actor_name_text is not None and cur_actor_name_text.strip():
                         cur_actor = etree.SubElement(episode, "actor")
                         cur_actor_name = etree.SubElement(cur_actor, "name")
                         cur_actor_name.text = cur_actor_name_text.strip()
 
                         cur_actor_role = etree.SubElement(cur_actor, "role")
                         cur_actor_role_text = actor['role']
-                        if cur_actor_role_text != None:
+                        if cur_actor_role_text is not None:
                             cur_actor_role.text = cur_actor_role_text
 
                         cur_actor_thumb = etree.SubElement(cur_actor, "thumb")
                         cur_actor_thumb_text = actor['image']
-                        if cur_actor_thumb_text != None:
+                        if cur_actor_thumb_text is not None:
                             cur_actor_thumb.text = cur_actor_thumb_text
 
         # Make it purdy
