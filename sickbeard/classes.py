@@ -20,6 +20,7 @@
 
 import sickbeard
 
+import ssl
 import urllib
 import datetime
 
@@ -27,6 +28,10 @@ from common import USER_AGENT, Quality
 
 class SickBeardURLopener(urllib.FancyURLopener):
     version = USER_AGENT
+    
+    def __init__(self):
+        # call the base class
+        urllib.FancyURLopener.__init__(self, context=ssl._create_unverified_context())
 
 class AuthURLOpener(SickBeardURLopener):
     """
@@ -44,7 +49,7 @@ class AuthURLOpener(SickBeardURLopener):
         self.numTries = 0
         
         # call the base class
-        urllib.FancyURLopener.__init__(self)
+        urllib.SickBeardURLopener.__init__(self)
 
     def prompt_user_passwd(self, host, realm):
         """
