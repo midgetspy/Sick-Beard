@@ -20,8 +20,8 @@
 
 import sickbeard
 
-import ssl
 import urllib
+import ssl
 import datetime
 
 from common import USER_AGENT, Quality

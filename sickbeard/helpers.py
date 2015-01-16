@@ -30,6 +30,7 @@ import time
 import traceback
 import urllib
 import urllib2
+import ssl
 import zlib
 
 from httplib import BadStatusLine
@@ -172,7 +173,7 @@ def getURL(url, post_data=None, headers=[]):
     Returns a byte-string retrieved from the url provider.
     """
 
-    opener = urllib2.build_opener()
+    opener = urllib2.build_opener(urllib2.HTTPSHandler(context=sslModule._create_unverified_context())
     opener.addheaders = [('User-Agent', USER_AGENT), ('Accept-Encoding', 'gzip,deflate')]
     for cur_header in headers:
         opener.addheaders.append(cur_header)

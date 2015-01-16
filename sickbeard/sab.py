@@ -18,6 +18,7 @@
 
 
 import urllib
+import ssl
 import httplib
 import datetime
 
@@ -77,13 +78,14 @@ def sendNZB(nzb):
     try:
         # if we have the URL to an NZB then we've built up the SAB API URL already so just call it
         if nzb.resultType == "nzb":
-            f = urllib.urlopen(url)
+            f = urllib.urlopen(url, context=ssl._create_unverified_context())
 
         # if we are uploading the NZB data to SAB then we need to build a little POST form and send it
         elif nzb.resultType == "nzbdata":
             cookies = cookielib.CookieJar()
             opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(cookies),
-                                          MultipartPostHandler.MultipartPostHandler)
+                                          MultipartPostHandler.MultipartPostHandler,
+                                          urllib2.HTTPSHandler(context=sslModule._create_unverified_context()))
             req = urllib2.Request(url,
                                   multiPartParams,
                                   headers={'User-Agent': USER_AGENT})
@@ -162,7 +164,7 @@ def _checkSabResponse(f):
 
 def _sabURLOpenSimple(url):
     try:
-        f = urllib.urlopen(url)
+        f = urllib.urlopen(url, context=ssl._create_unverified_context())
     except (EOFError, IOError), e:
         logger.log(u"Unable to connect to SAB: " + ex(e), logger.ERROR)
         return False, "Unable to connect"

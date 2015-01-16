@@ -19,6 +19,7 @@ import time
 import errno
 import httplib
 import urllib2
+import ssl
 import StringIO
 from hashlib import md5
 from threading import RLock
@@ -202,7 +203,7 @@ class CachedResponse(StringIO.StringIO):
 
     @locked_function
     def recache(self):
-        new_request = urllib2.urlopen(self.url)
+        new_request = urllib2.urlopen(self.url, context=ssl._create_unverified_context())
         set_cache_header = store_in_cache(
             self.cache_location,
             new_request.url,

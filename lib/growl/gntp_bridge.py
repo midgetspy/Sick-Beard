@@ -1,5 +1,6 @@
 from gntp import *
 import urllib
+import ssl
 import Growl
 
 def register_send(self):
@@ -55,7 +56,7 @@ def get_resource(self,key):
 			return self.resources.get(resource[1])['Data']
 		elif resource.startswith('http'):
 			resource = resource.replace(' ', '%20')
-			icon = urllib.urlopen(resource)
+			icon = urllib.urlopen(resource, context=ssl._create_unverified_context())
 			return icon.read()
 		else:
 			return None

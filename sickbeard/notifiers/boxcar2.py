@@ -20,6 +20,7 @@
 
 import urllib
 import urllib2
+import ssl
 
 import sickbeard
 
@@ -57,7 +58,7 @@ class Boxcar2Notifier:
         # send the request to boxcar2
         try:
             req = urllib2.Request(API_URL)
-            handle = urllib2.urlopen(req, data)
+            handle = urllib2.urlopen(req, data, context=ssl._create_unverified_context())
             handle.close()
 
         except urllib2.URLError, e:

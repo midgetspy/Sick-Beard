@@ -20,6 +20,7 @@
 
 import urllib
 import urllib2
+import ssl
 import time
 import socket
 import base64
@@ -50,7 +51,7 @@ class PushoverNotifier:
         # get devices from pushover
         try:
             req = urllib2.Request(DEVICE_URL)
-            handle = urllib2.urlopen(req, data)
+            handle = urllib2.urlopen(req, data, context=ssl._create_unverified_context())
             if handle:
                 result = handle.read()
             handle.close()
@@ -79,7 +80,7 @@ class PushoverNotifier:
         # send the request to pushover
         try:
             req = urllib2.Request(API_URL)
-            handle = urllib2.urlopen(req, data)
+            handle = urllib2.urlopen(req, data, context=ssl._create_unverified_context())
             handle.close()
 
         except urllib2.URLError, e:

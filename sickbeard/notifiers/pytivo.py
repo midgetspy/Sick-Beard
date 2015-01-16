@@ -21,6 +21,7 @@ import sickbeard
 
 from urllib import urlencode
 from urllib2 import Request, urlopen
+import ssl
 
 from sickbeard import logger
 from sickbeard.exceptions import ex
@@ -80,7 +81,7 @@ class pyTivoNotifier:
         request = Request(requestUrl)
 
         try:
-            response = urlopen(request)  # @UnusedVariable
+            response = urlopen(request, context=ssl._create_unverified_context())  # @UnusedVariable
         except IOError, e:
             if hasattr(e, 'reason'):
                 logger.log(u"PYTIVO: Failed to reach server '%s' - %s" % (host, e.reason), logger.WARNING)
