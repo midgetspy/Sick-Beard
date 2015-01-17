@@ -18,7 +18,8 @@
 
 import urllib
 import urllib2
-import ssl
+if sys.version_info >= (2, 7, 9):
+    import ssl
 import socket
 import base64
 
@@ -44,7 +45,10 @@ class PushbulletNotifier:
             req = urllib2.Request(DEVICEAPI_ENDPOINT)
             base64string = base64.encodestring('%s:%s' % (accessToken, ''))[:-1]
             req.add_header("Authorization", "Basic %s" % base64string)
-            handle = urllib2.urlopen(req, context=ssl._create_unverified_context())
+            if sys.version_info >= (2, 7, 9):
+                handle = urllib2.urlopen(req, context=ssl._create_unverified_context())
+            else:
+                handle = urllib2.urlopen(req)
             if handle:
                 result = handle.read()
             handle.close()
@@ -71,7 +75,10 @@ class PushbulletNotifier:
             req = urllib2.Request(PUSHAPI_ENDPOINT)
             base64string = base64.encodestring('%s:%s' % (accessToken, ''))[:-1]
             req.add_header("Authorization", "Basic %s" % base64string)
-            handle = urllib2.urlopen(req, data, context=ssl._create_unverified_context())
+            if sys.version_info >= (2, 7, 9):
+                handle = urllib2.urlopen(req, data, context=ssl._create_unverified_context())
+            else:
+                handle = urllib2.urlopen(req, data)
             handle.close()
         except socket.timeout:
             return False

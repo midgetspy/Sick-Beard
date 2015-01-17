@@ -20,7 +20,8 @@
 
 import urllib
 import urllib2
-import ssl
+if sys.version_info >= (2, 7, 9):
+    import ssl
 
 import sickbeard
 
@@ -58,7 +59,10 @@ class Boxcar2Notifier:
         # send the request to boxcar2
         try:
             req = urllib2.Request(API_URL)
-            handle = urllib2.urlopen(req, data, context=ssl._create_unverified_context())
+            if sys.version_info >= (2, 7, 9):
+                handle = urllib2.urlopen(req, data, context=ssl._create_unverified_context())
+            else:
+                handle = urllib2.urlopen(req, data)
             handle.close()
 
         except urllib2.URLError, e:

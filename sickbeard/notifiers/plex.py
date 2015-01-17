@@ -18,7 +18,8 @@
 
 import urllib
 import urllib2
-import ssl
+if sys.version_info >= (2, 7, 9):
+    import ssl
 import base64
 
 import sickbeard
@@ -78,8 +79,11 @@ class PLEXNotifier:
                 logger.log(u"PLEX: Contacting (with auth header) via url: " + url, logger.DEBUG)
             else:
                 logger.log(u"PLEX: Contacting via url: " + url, logger.DEBUG)
-
-            response = urllib2.urlopen(req, context=ssl._create_unverified_context())
+            
+            if sys.version_info >= (2, 7, 9):
+                response = urllib2.urlopen(req, context=ssl._create_unverified_context())
+            else:
+                response = urllib2.urlopen(req)
 
             result = response.read().decode(sickbeard.SYS_ENCODING)
             response.close()
@@ -166,7 +170,10 @@ class PLEXNotifier:
 
             url = "http://%s/library/sections" % sickbeard.PLEX_SERVER_HOST
             try:
-                xml_tree = etree.parse(urllib.urlopen(url, context=ssl._create_unverified_context()))
+                if sys.version_info >= (2, 7, 9):
+                    xml_tree = etree.parse(urllib.urlopen(url, context=ssl._create_unverified_context()))
+                else:
+                    xml_tree = etree.parse(urllib.urlopen(url))
                 media_container = xml_tree.getroot()
             except IOError, e:
                 logger.log(u"PLEX: Error while trying to contact Plex Media Server: " + ex(e), logger.ERROR)
@@ -181,7 +188,10 @@ class PLEXNotifier:
                 if section.attrib['type'] == "show":
                     url = "http://%s/library/sections/%s/refresh" % (sickbeard.PLEX_SERVER_HOST, section.attrib['key'])
                     try:
-                        urllib.urlopen(url, context=ssl._create_unverified_context())
+                        if sys.version_info >= (2, 7, 9):
+                            urllib.urlopen(url, context=ssl._create_unverified_context())
+                        else:
+                            urllib.urlopen(url)
                     except Exception, e:
                         logger.log(u"PLEX: Error updating library section for Plex Media Server: " + ex(e), logger.ERROR)
                         return False

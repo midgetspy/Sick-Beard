@@ -21,7 +21,8 @@
 import sickbeard
 
 import urllib
-import ssl
+if sys.version_info >= (2, 7, 9):
+    import ssl
 import datetime
 
 from common import USER_AGENT, Quality
@@ -31,7 +32,10 @@ class SickBeardURLopener(urllib.FancyURLopener):
     
     def __init__(self):
         # call the base class
-        urllib.FancyURLopener.__init__(self, context=ssl._create_unverified_context())
+        if sys.version_info >= (2, 7, 9):
+            urllib.FancyURLopener.__init__(self, context=ssl._create_unverified_context())
+        else:
+            urllib.FancyURLopener.__init__(self)
 
 class AuthURLOpener(SickBeardURLopener):
     """

@@ -18,7 +18,8 @@
 
 
 import urllib
-import ssl
+if sys.version_info >= (2, 7, 9):
+    import ssl
 import httplib
 import datetime
 
@@ -78,7 +79,10 @@ def sendNZB(nzb):
     try:
         # if we have the URL to an NZB then we've built up the SAB API URL already so just call it
         if nzb.resultType == "nzb":
-            f = urllib.urlopen(url, context=ssl._create_unverified_context())
+            if sys.version_info >= (2, 7, 9):
+                f = urllib.urlopen(url, context=ssl._create_unverified_context())
+            else:
+                f = urllib.urlopen(url)
 
         # if we are uploading the NZB data to SAB then we need to build a little POST form and send it
         elif nzb.resultType == "nzbdata":

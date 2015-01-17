@@ -18,7 +18,8 @@
 
 import urllib
 import urllib2
-import ssl
+if sys.version_info >= (2, 7, 9):
+    import ssl
 import socket
 import base64
 import time
@@ -194,7 +195,10 @@ class XBMCNotifier:
                 authheader = "Basic %s" % base64string
                 req.add_header("Authorization", authheader)
 
-            response = urllib2.urlopen(req, context=ssl._create_unverified_context())
+            if sys.version_info >= (2, 7, 9):
+                response = urllib2.urlopen(req, context=ssl._create_unverified_context())
+            else:
+                response = urllib2.urlopen(req)
             result = response.read().decode(sickbeard.SYS_ENCODING)
             response.close()
 
@@ -330,7 +334,10 @@ class XBMCNotifier:
                 req.add_header("Authorization", authheader)
 
             try:
-                response = urllib2.urlopen(req, context=ssl._create_unverified_context())
+                if sys.version_info >= (2, 7, 9):
+                    response = urllib2.urlopen(req, context=ssl._create_unverified_context())
+                else:
+                    response = urllib2.urlopen(req)
             except urllib2.URLError, e:
                 logger.log(u"XBMC: Error while trying to retrieve XBMC API version for " + host + ": " + ex(e), logger.WARNING)
                 return False

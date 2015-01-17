@@ -17,7 +17,8 @@
 # along with Sick Beard.  If not, see <http://www.gnu.org/licenses/>.
 
 import urllib2
-import ssl
+if sys.version_info >= (2, 7, 9):
+    import ssl
 
 from hashlib import sha1
 
@@ -76,7 +77,10 @@ class TraktNotifier:
         # request the URL from trakt and parse the result as json
         try:
             logger.log(u"TRAKT: Calling method http://api.trakt.tv/" + method + ", with data" + encoded_data, logger.DEBUG)
-            stream = urllib2.urlopen("http://api.trakt.tv/" + method, encoded_data, context=ssl._create_unverified_context())
+            if sys.version_info >= (2, 7, 9):
+                stream = urllib2.urlopen("http://api.trakt.tv/" + method, encoded_data, context=ssl._create_unverified_context())
+            else:
+                stream = urllib2.urlopen("http://api.trakt.tv/" + method, encoded_data)
             resp = stream.read()
 
             resp = json.loads(resp)
