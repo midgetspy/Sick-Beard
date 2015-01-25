@@ -86,7 +86,7 @@
                                 <span class="component-title jumbo">Configure Provider:</span>
                                 <span class="component-desc">
                                     #set $provider_config_list = []
-                                    #for $cur_provider in ("btn", "hdbits", "omgwtfnzbs", "tvtorrents", "torrentleech"):
+                                    #for $cur_provider in ("btn", "hdbits", "omgwtfnzbs", "tvtorrents", "torrentleech", "bitmetv"):
                                         #set $cur_provider_obj = $sickbeard.providers.getProviderClass($cur_provider)
                                         #if $cur_provider_obj.providerType == $GenericProvider.NZB and not $sickbeard.USE_NZBS:
                                             #continue
@@ -179,6 +179,21 @@
                                 <input class="component-desc" type="text" name="torrentleech_key" value="$sickbeard.TORRENTLEECH_KEY" size="40" />
                             </label>
                         </div>
+                    </div><!-- /torrentleechDiv //-->
+
+                    <div class="providerDiv" id="bitmetvDiv">
+                      <div class="field-pair">
+                        <label class="clearfix">
+                          <span class="component-title">BitMeTV uid</span>
+                          <input class="component-desc" type="text" name="bitmetv_uid" value="$sickbeard.BITMETV_UID" size="40" />
+                        </label>
+                      </div>
+                      <div class="field-pair">
+                        <label class="clearfix">
+                          <span class="component-title">BitMeTV passkey</span>
+                          <input class="component-desc" type="text" name="bitmetv_key" value="$sickbeard.BITMETV_KEY" size="40" />
+                        </label>
+                      </div>
                     </div><!-- /torrentleechDiv //-->
 
                     <div class="providerDiv" id="btnDiv">
