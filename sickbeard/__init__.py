@@ -175,6 +175,7 @@ TORRENTLEECH_KEY = None
 BITMETV = False
 BITMETV_UID = None
 BITMETV_KEY = None
+BITMETV_PASS = None
 
 BTN = False
 BTN_API_KEY = None
@@ -348,7 +349,7 @@ def initialize(consoleLogging=True):
                 USE_PLEX, PLEX_NOTIFY_ONSNATCH, PLEX_NOTIFY_ONDOWNLOAD, PLEX_UPDATE_LIBRARY, \
                 PLEX_SERVER_HOST, PLEX_HOST, PLEX_USERNAME, PLEX_PASSWORD, \
                 showUpdateScheduler, __INITIALIZED__, LAUNCH_BROWSER, showList, loadingShowList, \
-                NEWZNAB_DATA, NZBS, NZBS_UID, NZBS_HASH, EZRSS, HDBITS, HDBITS_USERNAME, HDBITS_PASSKEY, TVTORRENTS, TVTORRENTS_DIGEST, TVTORRENTS_HASH, BTN, BTN_API_KEY, TORRENTLEECH, TORRENTLEECH_KEY, BITMETV, BITMETV_UID, BITMETV_KEY, \
+                NEWZNAB_DATA, NZBS, NZBS_UID, NZBS_HASH, EZRSS, HDBITS, HDBITS_USERNAME, HDBITS_PASSKEY, TVTORRENTS, TVTORRENTS_DIGEST, TVTORRENTS_HASH, BTN, BTN_API_KEY, TORRENTLEECH, TORRENTLEECH_KEY, BITMETV, BITMETV_UID, BITMETV_KEY, BITMETV_PASS, \
                 TORRENT_DIR, USENET_RETENTION, SOCKET_TIMEOUT, \
                 SEARCH_FREQUENCY, DEFAULT_SEARCH_FREQUENCY, BACKLOG_SEARCH_FREQUENCY, \
                 QUALITY_DEFAULT, FLATTEN_FOLDERS_DEFAULT, STATUS_DEFAULT, \
@@ -535,6 +536,7 @@ def initialize(consoleLogging=True):
         BITMETV = bool(check_setting_int(CFG, 'BitMeTV', 'bitmetv', 0))
         BITMETV_UID = check_setting_str(CFG, 'BitMeTV', 'bitmetv_uid', '')
         BITMETV_KEY = check_setting_str(CFG, 'BitMeTV', 'bitmetv_key', '')
+        BITMETV_PASS = check_setting_str(CFG, 'BitMeTV', 'bitmetv_pass', '')
 
         CheckSection(CFG, 'NZBs')
         NZBS = bool(check_setting_int(CFG, 'NZBs', 'nzbs', 0))
@@ -1089,6 +1091,7 @@ def save_config():
     new_config['BitMeTV']['bitmetv'] = int(BITMETV)
     new_config['BitMeTV']['bitmetv_uid'] = BITMETV_UID
     new_config['BitMeTV']['bitmetv_key'] = BITMETV_KEY
+    new_config['BitMeTV']['bitmetv_pass'] = BITMETV_PASS
 
     new_config['NZBs'] = {}
     new_config['NZBs']['nzbs'] = int(NZBS)

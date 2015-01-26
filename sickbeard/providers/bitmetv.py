@@ -47,7 +47,7 @@ class BitMeTVProvider(generic.TorrentProvider):
     def getURL(self, url, post_data=None, headers=None):
 
         if not headers:
-            headers = []
+            headers = [('Cookie', 'uid=' + sickbeard.BITMETV_UID + ';pass=' + sickbeard.BITMETV_PASS + ';')]
 
         data = helpers.getURL(url, post_data, headers)
 
@@ -64,6 +64,9 @@ class BitMeTVProvider(generic.TorrentProvider):
 
         if not sickbeard.BITMETV_KEY:
             raise AuthException("Your key for " + self.name + " is missing, check your config.")
+
+        if not sickbeard.BITMETV_PASS:
+            raise AuthException("Your pass for " + self.name + " is missing, check your config.")
 
         return True
 
