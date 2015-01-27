@@ -221,6 +221,9 @@ class TorrentDayProvider(generic.TorrentProvider):
 
         self.session = requests.Session()
         logger.log("[" + self.name + "] Attempting to Login")
+        
+        if sickbeard.TORRENTDAY_ALT_URL:
+            self.url = 'https://torrentday.eu/'
 
         try:
             response = self.session.post(self.url + "torrents/", data=login_params, timeout=30, verify=False)
