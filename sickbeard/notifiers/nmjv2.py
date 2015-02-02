@@ -18,6 +18,7 @@
 # along with Sick Beard.  If not, see <http://www.gnu.org/licenses/>.
 
 import urllib2
+import sys
 if sys.version_info >= (2, 7, 9):
     import ssl
 from xml.dom.minidom import parseString

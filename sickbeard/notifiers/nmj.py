@@ -18,6 +18,7 @@
 
 import urllib
 import urllib2
+import sys
 if sys.version_info >= (2, 7, 9):
     import ssl
 import sickbeard

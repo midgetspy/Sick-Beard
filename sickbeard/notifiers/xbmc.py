@@ -18,16 +18,13 @@
 
 import urllib
 import urllib2
-if sys.version_info >= (2, 7, 9):
-    import ssl
 import socket
-import base64
 import time
 
 import sickbeard
 
 from sickbeard import logger
-from sickbeard import common
+from sickbeard import common, helpers
 from sickbeard.exceptions import ex
 from sickbeard.encodingKludge import fixStupidEncodings
 
@@ -191,14 +188,12 @@ class XBMCNotifier:
             req = urllib2.Request(url)
             # if we have a password, use authentication
             if password:
-                base64string = base64.encodestring('%s:%s' % (username, password))[:-1]
-                authheader = "Basic %s" % base64string
-                req.add_header("Authorization", authheader)
-
-            if sys.version_info >= (2, 7, 9):
-                response = urllib2.urlopen(req, context=ssl._create_unverified_context())
+                pw_mgr = urllib2.HTTPPasswordMgrWithDefaultRealm()
+                pw_mgr.add_password(None, url, username, password)
             else:
-                response = urllib2.urlopen(req)
+                pw_mgr = None
+
+            response = helpers.getURLFileLike(req, password_mgr=pw_mgr)
             result = response.read().decode(sickbeard.SYS_ENCODING)
             response.close()
 
@@ -329,17 +324,14 @@ class XBMCNotifier:
             req.add_header("Content-type", "application/json")
             # if we have a password, use authentication
             if password:
-                base64string = base64.encodestring('%s:%s' % (username, password))[:-1]
-                authheader = "Basic %s" % base64string
-                req.add_header("Authorization", authheader)
+                pw_mgr = urllib2.HTTPPasswordMgrWithDefaultRealm()
+                pw_mgr.add_password(None, url, username, password)
+            else:
+                pw_mgr = None
 
-            try:
-                if sys.version_info >= (2, 7, 9):
-                    response = urllib2.urlopen(req, context=ssl._create_unverified_context())
-                else:
-                    response = urllib2.urlopen(req)
-            except urllib2.URLError, e:
-                logger.log(u"XBMC: Error while trying to retrieve XBMC API version for " + host + ": " + ex(e), logger.WARNING)
+            response = helpers.getURLFileLike(req, password_mgr=pw_mgr)
+            if response is None:
+                logger.log(u"XBMC: Error while trying to retrieve XBMC API version for " + host + ": ", logger.WARNING)
                 return False
 
             # parse the json result

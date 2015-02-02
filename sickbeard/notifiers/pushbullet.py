@@ -18,14 +18,10 @@
 
 import urllib
 import urllib2
-if sys.version_info >= (2, 7, 9):
-    import ssl
 import socket
-import base64
-
 import sickbeard
 
-from sickbeard import logger
+from sickbeard import logger, helpers
 from sickbeard.common import notifyStrings, NOTIFY_SNATCH, NOTIFY_DOWNLOAD
 from sickbeard.exceptions import ex
 
@@ -40,23 +36,11 @@ class PushbulletNotifier:
         if not accessToken:
             accessToken = sickbeard.PUSHBULLET_ACCESS_TOKEN
 
-        # get devices from pushbullet
-        try:
-            req = urllib2.Request(DEVICEAPI_ENDPOINT)
-            base64string = base64.encodestring('%s:%s' % (accessToken, ''))[:-1]
-            req.add_header("Authorization", "Basic %s" % base64string)
-            if sys.version_info >= (2, 7, 9):
-                handle = urllib2.urlopen(req, context=ssl._create_unverified_context())
-            else:
-                handle = urllib2.urlopen(req)
-            if handle:
-                result = handle.read()
-            handle.close()
-            return result
-        except urllib2.URLError:
-            return None
-        except socket.timeout:
-            return None
+        # get devices from pushbullet        
+        req = urllib2.Request(DEVICEAPI_ENDPOINT)
+        pw_mgr = urllib2.HTTPPasswordMgrWithDefaultRealm()
+        pw_mgr.add_password(None, DEVICEAPI_ENDPOINT, accessToken, '')
+        return helpers.getURL(req, password_mgr=pw_mgr)
 
     def _sendPushbullet(self, title, body, accessToken, device_iden):
 
@@ -72,13 +56,10 @@ class PushbulletNotifier:
 
         # send the request to pushbullet
         try:
-            req = urllib2.Request(PUSHAPI_ENDPOINT)
-            base64string = base64.encodestring('%s:%s' % (accessToken, ''))[:-1]
-            req.add_header("Authorization", "Basic %s" % base64string)
-            if sys.version_info >= (2, 7, 9):
-                handle = urllib2.urlopen(req, data, context=ssl._create_unverified_context())
-            else:
-                handle = urllib2.urlopen(req, data)
+            req = urllib2.Request(PUSHAPI_ENDPOINT, data)
+            pw_mgr = urllib2.HTTPPasswordMgrWithDefaultRealm()
+            pw_mgr.add_password(None, DEVICEAPI_ENDPOINT, accessToken, '')
+            handle = helpers.getURLFileLike(req, password_mgr=pw_mgr, throw_exc=True)
             handle.close()
         except socket.timeout:
             return False

@@ -20,15 +20,10 @@
 
 import urllib
 import urllib2
-if sys.version_info >= (2, 7, 9):
-    import ssl
 import time
-import socket
-import base64
-
 import sickbeard
 
-from sickbeard import logger
+from sickbeard import logger, helpers
 from sickbeard.common import notifyStrings, NOTIFY_SNATCH, NOTIFY_DOWNLOAD
 from sickbeard.exceptions import ex
 
@@ -50,20 +45,8 @@ class PushoverNotifier:
             })
 
         # get devices from pushover
-        try:
-            req = urllib2.Request(DEVICE_URL)
-            if sys.version_info >= (2, 7, 9):
-                handle = urllib2.urlopen(req, data, context=ssl._create_unverified_context())
-            else:
-                handle = urllib2.urlopen(req, data)
-            if handle:
-                result = handle.read()
-            handle.close()
-            return result
-        except urllib2.URLError:
-            return None
-        except socket.timeout:
-            return None
+        req = urllib2.Request(DEVICE_URL, data)
+        return helpers.getURL(req)
 
     def _sendPushover(self, title, msg, userKey, priority, device, sound):
 
@@ -83,11 +66,8 @@ class PushoverNotifier:
 
         # send the request to pushover
         try:
-            req = urllib2.Request(API_URL)
-            if sys.version_info >= (2, 7, 9):
-                handle = urllib2.urlopen(req, data, context=ssl._create_unverified_context())
-            else:
-                handle = urllib2.urlopen(req, data)
+            req = urllib2.Request(API_URL, data)
+            handle = helpers.getURLFileLike(req, throw_exc=True)
             handle.close()
 
         except urllib2.URLError, e:

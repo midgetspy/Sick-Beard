@@ -18,14 +18,10 @@
 
 import urllib
 import urllib2
-if sys.version_info >= (2, 7, 9):
-    import ssl
-import base64
-
 import sickbeard
 
 from sickbeard import logger
-from sickbeard import common
+from sickbeard import common, helpers
 from sickbeard.exceptions import ex
 from sickbeard.encodingKludge import fixStupidEncodings
 
@@ -73,17 +69,12 @@ class PLEXNotifier:
             req = urllib2.Request(url)
             # if we have a password, use authentication
             if password:
-                base64string = base64.encodestring('%s:%s' % (username, password))[:-1]
-                authheader = "Basic %s" % base64string
-                req.add_header("Authorization", authheader)
-                logger.log(u"PLEX: Contacting (with auth header) via url: " + url, logger.DEBUG)
+                pw_mgr = urllib2.HTTPPasswordMgrWithDefaultRealm()
+                pw_mgr.add_password(None, url, username, password)
             else:
-                logger.log(u"PLEX: Contacting via url: " + url, logger.DEBUG)
-            
-            if sys.version_info >= (2, 7, 9):
-                response = urllib2.urlopen(req, context=ssl._create_unverified_context())
-            else:
-                response = urllib2.urlopen(req)
+                pw_mgr = None
+
+            response = helpers.getURLFileLike(req, password_mgr=pw_mgr)
 
             result = response.read().decode(sickbeard.SYS_ENCODING)
             response.close()
@@ -170,10 +161,7 @@ class PLEXNotifier:
 
             url = "http://%s/library/sections" % sickbeard.PLEX_SERVER_HOST
             try:
-                if sys.version_info >= (2, 7, 9):
-                    xml_tree = etree.parse(urllib.urlopen(url, context=ssl._create_unverified_context()))
-                else:
-                    xml_tree = etree.parse(urllib.urlopen(url))
+                xml_tree = etree.parse(helpers.getURLFileLike(url))
                 media_container = xml_tree.getroot()
             except IOError, e:
                 logger.log(u"PLEX: Error while trying to contact Plex Media Server: " + ex(e), logger.ERROR)
@@ -187,15 +175,9 @@ class PLEXNotifier:
             for section in sections:
                 if section.attrib['type'] == "show":
                     url = "http://%s/library/sections/%s/refresh" % (sickbeard.PLEX_SERVER_HOST, section.attrib['key'])
-                    try:
-                        if sys.version_info >= (2, 7, 9):
-                            urllib.urlopen(url, context=ssl._create_unverified_context())
-                        else:
-                            urllib.urlopen(url)
-                    except Exception, e:
-                        logger.log(u"PLEX: Error updating library section for Plex Media Server: " + ex(e), logger.ERROR)
+                    if helpers.getURLFileLike(url) is None:
+                        logger.log(u"PLEX: Error updating library section for Plex Media Server", logger.ERROR)
                         return False
-
             return True
 
 notifier = PLEXNotifier

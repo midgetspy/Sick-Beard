@@ -20,12 +20,9 @@
 
 import urllib
 import urllib2
-if sys.version_info >= (2, 7, 9):
-    import ssl
-
 import sickbeard
 
-from sickbeard import logger
+from sickbeard import logger, helpers
 from sickbeard.common import notifyStrings, NOTIFY_SNATCH, NOTIFY_DOWNLOAD
 from sickbeard.exceptions import ex
 
@@ -58,11 +55,8 @@ class Boxcar2Notifier:
 
         # send the request to boxcar2
         try:
-            req = urllib2.Request(API_URL)
-            if sys.version_info >= (2, 7, 9):
-                handle = urllib2.urlopen(req, data, context=ssl._create_unverified_context())
-            else:
-                handle = urllib2.urlopen(req, data)
+            req = urllib2.Request(API_URL, data)
+            handle = helpers.getURLFileLike(req, throw_exc=True)
             handle.close()
 
         except urllib2.URLError, e:

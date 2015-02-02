@@ -20,12 +20,8 @@ import os
 import sickbeard
 
 from urllib import urlencode
-from urllib2 import Request, urlopen
-if sys.version_info >= (2, 7, 9):
-    import ssl
-
-from sickbeard import logger
-from sickbeard.exceptions import ex
+from urllib2 import Request
+from sickbeard import logger, helpers
 from sickbeard import encodingKludge as ek
 
 
@@ -81,19 +77,8 @@ class pyTivoNotifier:
 
         request = Request(requestUrl)
 
-        try:
-            if sys.version_info >= (2, 7, 9):
-                response = urlopen(request, context=ssl._create_unverified_context())  # @UnusedVariable
-            else:
-                response = urlopen(request)  # @UnusedVariable
-        except IOError, e:
-            if hasattr(e, 'reason'):
-                logger.log(u"PYTIVO: Failed to reach server '%s' - %s" % (host, e.reason), logger.WARNING)
-            elif hasattr(e, 'code'):
-                logger.log(u"PYTIVO: The server could not fulfill the request '%s' - %s" % (host, e.code), logger.WARNING)
-            return False
-        except Exception, e:
-            logger.log(u"PYTIVO: Unknown exception: " + ex(e), logger.ERROR)
+        if helpers.getURLFileLike(request) is None:
+            logger.log(u"PYTIVO: Could not successfully request transfer of file", logger.ERROR)
             return False
         else:
             logger.log(u"PYTIVO: Successfully requested transfer of file", logger.MESSAGE)
