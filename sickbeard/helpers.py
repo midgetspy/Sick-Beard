@@ -172,11 +172,11 @@ def sanitizeFileName(name):
 
     return name
 
-def getURL(url, validate=False, cookies = cookielib.CookieJar(), password_mgr=None):
+def getURL(url, validate=False, cookies = cookielib.CookieJar(), password_mgr=None, throw_exc=False):
     """
     Convenience method to directly retrieve the contents of a url
     """
-    obj = getURLFileLike(url, validate, cookies, password_mgr)
+    obj = getURLFileLike(url, validate, cookies, password_mgr, throw_exc)
     if obj:
         return readURLFileLike(obj)
     else:
