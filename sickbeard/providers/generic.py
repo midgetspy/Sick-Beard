@@ -21,6 +21,7 @@ from __future__ import with_statement
 import datetime
 import os
 import re
+import urllib2
 
 import sickbeard
 
@@ -104,7 +105,7 @@ class GenericProvider:
         if not headers:
             headers = []
 
-        data = helpers.getURL(url, post_data, headers)
+        data = helpers.getURL(urllib2.Request(url, post_data, headers))
 
         if not data:
             logger.log(u"Error loading " + self.name + " URL: " + url, logger.ERROR)
