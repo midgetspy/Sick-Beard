@@ -270,10 +270,8 @@ def clean_url(url):
 
         scheme, netloc, path, query, fragment = urlparse.urlsplit(url, 'http')
 
-        if not path.endswith('/'):
-            basename, ext = ek.ek(os.path.splitext, ek.ek(os.path.basename, path))  # @UnusedVariable
-            if not ext:
-                path = path + '/'
+        if not path:
+            path = path + '/'
 
         cleaned_url = urlparse.urlunsplit((scheme, netloc, path, query, fragment))
 
