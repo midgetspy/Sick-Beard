@@ -122,7 +122,8 @@ def processDir(dirName, nzbName=None, method=None, recurse=False, pp_options={})
     folders = filter(lambda x: ek.ek(os.path.isdir, ek.ek(os.path.join, dirName, x)), fileList)
 
     # videoFiles, sorted by size, process biggest file first. Leaves smaller same named file behind
-    videoFiles = sorted(filter(helpers.isMediaFile, fileList), key=lambda x: ek.ek(os.path.getsize, ek.ek(os.path.join, dirName, x)), reverse=True)
+    mediaFiles =  filter(lambda x: ek.ek(os.path.exists, ek.ek(os.path.join, dirName, x)), filter(helpers.isMediaFile, fileList))
+    videoFiles = sorted(mediaFiles, key=lambda x: ek.ek(os.path.getsize, ek.ek(os.path.join, dirName, x)), reverse=True)
     remaining_video_files = list(videoFiles)
 
     num_videoFiles = len(videoFiles)
