@@ -854,7 +854,10 @@ class CMD_Episode(ApiCall):
         status, quality = Quality.splitCompositeStatus(int(episode["status"]))
         episode["status"] = _get_status_Strings(status)
         episode["quality"] = _get_quality_string(quality)
-        episode["file_size_human"] = _sizeof_fmt(episode["file_size"])
+        if episode["file_size"]:
+            episode["file_size_human"] = _sizeof_fmt(episode["file_size"])
+        else:
+            episode["file_size_human"] = ""
 
         myDB.connection.close()
         return _responds(RESULT_SUCCESS, episode)
