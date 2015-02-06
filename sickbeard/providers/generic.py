@@ -101,11 +101,7 @@ class GenericProvider:
         By default this is just a simple urlopen call but this method should be overridden
         for providers with special URL requirements (like cookies)
         """
-
-        if not headers:
-            headers = []
-
-        data = helpers.getURL(urllib2.Request(url, post_data, headers))
+        data = helpers.getURL(urllib2.Request(url, data=post_data, headers=headers))
 
         if not data:
             logger.log(u"Error loading " + self.name + " URL: " + url, logger.ERROR)

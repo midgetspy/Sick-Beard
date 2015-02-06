@@ -26,7 +26,7 @@ except ImportError:
 
 import sickbeard
 
-from sickbeard import logger, helpers
+from sickbeard import logger
 
 
 class TraktNotifier:
@@ -74,7 +74,7 @@ class TraktNotifier:
         # request the URL from trakt and parse the result as json
         logger.log(u"TRAKT: Calling method http://api.trakt.tv/" + method + ", with data" + encoded_data, logger.DEBUG)
         req = urllib2.Request("http://api.trakt.tv/" + method, encoded_data)
-        urlResp = helpers.getURL(req)
+        urlResp = sickbeard.helpers.getURL(req)
         if urlResp:
             resp = json.loads(urlResp)
         else:

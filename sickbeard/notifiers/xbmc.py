@@ -24,7 +24,7 @@ import time
 import sickbeard
 
 from sickbeard import logger
-from sickbeard import common, helpers
+from sickbeard import common
 from sickbeard.exceptions import ex
 from sickbeard.encodingKludge import fixStupidEncodings
 
@@ -193,16 +193,19 @@ class XBMCNotifier:
             else:
                 pw_mgr = None
 
-            response = helpers.getURLFileLike(req, password_mgr=pw_mgr)
-            result = response.read().decode(sickbeard.SYS_ENCODING)
-            response.close()
+            response = sickbeard.helpers.getURLFileLike(req, password_mgr=pw_mgr, throw_exc=True)
+            if response:
+                result = response.read().decode(sickbeard.SYS_ENCODING)
+                response.close()
 
             logger.log(u"XBMC: HTTP response: " + result.replace('\n', ''), logger.DEBUG)
             return result
 
         except (urllib2.URLError, IOError), e:
             logger.log(u"XBMC: Could not contact XBMC HTTP at " + fixStupidEncodings(url) + " " + ex(e), logger.WARNING)
-            return False
+        except Exception, e:
+            logger.log(u"XBMC: Exception occurred while trying to access " + fixStupidEncodings(url) + " " + ex(e), logger.WARNING)
+        return False
 
     def _update_library(self, host=None, showName=None):
         """Handles updating XBMC host via HTTP API
@@ -329,24 +332,23 @@ class XBMCNotifier:
             else:
                 pw_mgr = None
 
-            response = helpers.getURLFileLike(req, password_mgr=pw_mgr)
-            if response is None:
-                logger.log(u"XBMC: Error while trying to retrieve XBMC API version for " + host + ": ", logger.WARNING)
-                return False
-
+            
+            response = sickbeard.helpers.getURLFileLike(req, password_mgr=pw_mgr, throw_exc=True)
             # parse the json result
-            try:
-                result = json.load(response)
-                response.close()
-                logger.log(u"XBMC: JSON response: " + str(result), logger.DEBUG)
-                return result  # need to return response for parsing
-            except ValueError, e:
-                logger.log(u"XBMC: Unable to decode JSON: " + response, logger.WARNING)
-                return False
+            result = json.load(response)
+            response.close()
+            logger.log(u"XBMC: JSON response: " + str(result), logger.DEBUG)
+            return result  # need to return response for parsing
 
+        except ValueError, e:
+            logger.log(u"XBMC: Unable to decode JSON: " + response, logger.WARNING)
+        except urllib2.URLError, e:
+            logger.log(u"XBMC: Error while trying to retrieve XBMC API version for " + host + ": " + ex(e), logger.WARNING)
         except IOError, e:
             logger.log(u"XBMC: Could not contact XBMC JSON API at " + fixStupidEncodings(url) + " " + ex(e), logger.WARNING)
-            return False
+        except Exception, e:
+            logger.log(u"XBMC: Exception occurred while trying to access " + fixStupidEncodings(url) + " " + ex(e), logger.WARNING)
+        return False
 
     def _update_library_json(self, host=None, showName=None):
         """Handles updating XBMC host via HTTP JSON-RPC

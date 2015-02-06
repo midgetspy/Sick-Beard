@@ -18,9 +18,6 @@
 
 import urllib
 import urllib2
-import sys
-if sys.version_info >= (2, 7, 9):
-    import ssl
 import sickbeard
 import telnetlib
 import re
@@ -104,10 +101,7 @@ class NMJNotifier:
             try:
                 req = urllib2.Request(mount)
                 logger.log(u"NMJ: Try to mount network drive via url: %s" % (mount), logger.DEBUG)
-                if sys.version_info >= (2, 7, 9):
-                    handle = urllib2.urlopen(req, context=ssl._create_unverified_context())
-                else:
-                    handle = urllib2.urlopen(req)
+                sickbeard.helpers.getURLFileLike(req)
             except IOError, e:
                 if hasattr(e, 'reason'):
                     logger.log(u"NMJ: Could not contact Popcorn Hour on host %s: %s" % (host, e.reason), logger.WARNING)
@@ -133,10 +127,7 @@ class NMJNotifier:
         try:
             req = urllib2.Request(updateUrl)
             logger.log(u"NMJ: Sending NMJ scan update command via url: %s" % (updateUrl), logger.DEBUG)
-            if sys.version_info >= (2, 7, 9):
-                handle = urllib2.urlopen(req, context=ssl._create_unverified_context())
-            else:
-                handle = urllib2.urlopen(req)
+            handle = sickbeard.helpers.getURLFileLike(req)
             response = handle.read()
         except IOError, e:
             if hasattr(e, 'reason'):

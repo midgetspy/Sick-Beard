@@ -55,7 +55,7 @@ from sickbeard.common import USER_AGENT, mediaExtensions
 
 from sickbeard import db
 from sickbeard import encodingKludge as ek
-from sickbeard import notifiers
+from sickbeard.notifiers import synoindex_notifier
 
 # workaround for broken urllib2 in python 2.6.5: wrong credentials lead to an infinite recursion
 if sys.version_info >= (2, 6, 5) and sys.version_info < (2, 6, 6):
@@ -377,7 +377,7 @@ def makeDir(path):
         try:
             ek.ek(os.makedirs, path)
             # do the library update for synoindex
-            notifiers.synoindex_notifier.addFolder(path)
+            synoindex_notifier.addFolder(path)
         except OSError:
             return False
     return True
@@ -510,7 +510,7 @@ def make_dirs(path):
                     # use normpath to remove end separator, otherwise checks permissions against itself
                     chmodAsParent(ek.ek(os.path.normpath, sofar))
                     # do the library update for synoindex
-                    notifiers.synoindex_notifier.addFolder(sofar)
+                    synoindex_notifier.addFolder(sofar)
                 except (OSError, IOError), e:
                     logger.log(u"Failed creating " + sofar + " : " + ex(e), logger.ERROR)
                     return False
@@ -580,7 +580,7 @@ def delete_empty_folders(check_empty_dir, keep_dir=None):
                 # need shutil.rmtree when ignore_items is really implemented
                 ek.ek(os.rmdir, check_empty_dir)
                 # do the library update for synoindex
-                notifiers.synoindex_notifier.deleteFolder(check_empty_dir)
+                synoindex_notifier.deleteFolder(check_empty_dir)
             except OSError, e:
                 logger.log(u"Unable to delete " + check_empty_dir + ": " + repr(e) + " / " + str(e), logger.WARNING)
                 break

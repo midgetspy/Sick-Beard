@@ -21,7 +21,7 @@ import urllib2
 import socket
 import sickbeard
 
-from sickbeard import logger, helpers
+from sickbeard import logger
 from sickbeard.common import notifyStrings, NOTIFY_SNATCH, NOTIFY_DOWNLOAD
 from sickbeard.exceptions import ex
 
@@ -40,7 +40,7 @@ class PushbulletNotifier:
         req = urllib2.Request(DEVICEAPI_ENDPOINT)
         pw_mgr = urllib2.HTTPPasswordMgrWithDefaultRealm()
         pw_mgr.add_password(None, DEVICEAPI_ENDPOINT, accessToken, '')
-        return helpers.getURL(req, password_mgr=pw_mgr)
+        return sickbeard.helpers.getURL(req, password_mgr=pw_mgr)
 
     def _sendPushbullet(self, title, body, accessToken, device_iden):
 
@@ -59,7 +59,7 @@ class PushbulletNotifier:
             req = urllib2.Request(PUSHAPI_ENDPOINT, data)
             pw_mgr = urllib2.HTTPPasswordMgrWithDefaultRealm()
             pw_mgr.add_password(None, DEVICEAPI_ENDPOINT, accessToken, '')
-            handle = helpers.getURLFileLike(req, password_mgr=pw_mgr, throw_exc=True)
+            handle = sickbeard.helpers.getURLFileLike(req, password_mgr=pw_mgr, throw_exc=True)
             handle.close()
         except socket.timeout:
             return False

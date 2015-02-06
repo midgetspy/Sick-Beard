@@ -21,7 +21,7 @@ import sickbeard
 
 from urllib import urlencode
 from urllib2 import Request
-from sickbeard import logger, helpers
+from sickbeard import logger
 from sickbeard import encodingKludge as ek
 
 
@@ -77,7 +77,7 @@ class pyTivoNotifier:
 
         request = Request(requestUrl)
 
-        if helpers.getURLFileLike(request) is None:
+        if sickbeard.helpers.getURLFileLike(request) is None:
             logger.log(u"PYTIVO: Could not successfully request transfer of file", logger.ERROR)
             return False
         else:

@@ -21,7 +21,7 @@ import urllib2
 import sickbeard
 
 from sickbeard import logger
-from sickbeard import common, helpers
+from sickbeard import common
 from sickbeard.exceptions import ex
 from sickbeard.encodingKludge import fixStupidEncodings
 
@@ -74,7 +74,7 @@ class PLEXNotifier:
             else:
                 pw_mgr = None
 
-            response = helpers.getURLFileLike(req, password_mgr=pw_mgr)
+            response = sickbeard.helpers.getURLFileLike(req, password_mgr=pw_mgr)
 
             result = response.read().decode(sickbeard.SYS_ENCODING)
             response.close()
@@ -181,7 +181,7 @@ class PLEXNotifier:
                 req.add_header("X-Plex-Version", "1.0")
                 
                 try:
-                    response = helpers.getURLFileLike(req, throw_exc=True)
+                    response = sickbeard.helpers.getURLFileLike(req, throw_exc=True)
                     auth_tree = etree.parse(response)
                     token = auth_tree.findall(".//authentication-token")[0].text
                     token_arg = "?X-Plex-Token=" + token
@@ -194,7 +194,7 @@ class PLEXNotifier:
 
             url = "http://%s/library/sections%s" % (sickbeard.PLEX_SERVER_HOST, token_arg)
             try:
-                xml_tree = etree.parse(helpers.getURLFileLike(url))
+                xml_tree = etree.parse(sickbeard.helpers.getURLFileLike(url))
                 media_container = xml_tree.getroot()
             except IOError, e:
                 logger.log(u"PLEX: Error while trying to contact Plex Media Server: " + ex(e), logger.ERROR)
@@ -208,7 +208,7 @@ class PLEXNotifier:
             for section in sections:
                 if section.attrib['type'] == "show":
                     url = "http://%s/library/sections/%s/refresh%s" % (sickbeard.PLEX_SERVER_HOST, section.attrib['key'], token_arg)
-                    if helpers.getURLFileLike(url) is None:
+                    if sickbeard.helpers.getURLFileLike(url) is None:
                         logger.log(u"PLEX: Error updating library section for Plex Media Server", logger.ERROR)
                         return False
             return True

@@ -22,7 +22,7 @@ import urllib
 import urllib2
 import sickbeard
 
-from sickbeard import logger, helpers
+from sickbeard import logger
 from sickbeard.common import notifyStrings, NOTIFY_SNATCH, NOTIFY_DOWNLOAD
 from sickbeard.exceptions import ex
 
@@ -56,7 +56,7 @@ class Boxcar2Notifier:
         # send the request to boxcar2
         try:
             req = urllib2.Request(API_URL, data)
-            handle = helpers.getURLFileLike(req, throw_exc=True)
+            handle = sickbeard.helpers.getURLFileLike(req, throw_exc=True)
             handle.close()
 
         except urllib2.URLError, e:

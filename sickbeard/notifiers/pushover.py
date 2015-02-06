@@ -23,7 +23,7 @@ import urllib2
 import time
 import sickbeard
 
-from sickbeard import logger, helpers
+from sickbeard import logger
 from sickbeard.common import notifyStrings, NOTIFY_SNATCH, NOTIFY_DOWNLOAD
 from sickbeard.exceptions import ex
 
@@ -46,7 +46,7 @@ class PushoverNotifier:
 
         # get devices from pushover
         req = urllib2.Request(DEVICE_URL, data)
-        return helpers.getURL(req)
+        return sickbeard.helpers.getURL(req)
 
     def _sendPushover(self, title, msg, userKey, priority, device, sound):
 
@@ -67,7 +67,7 @@ class PushoverNotifier:
         # send the request to pushover
         try:
             req = urllib2.Request(API_URL, data)
-            handle = helpers.getURLFileLike(req, throw_exc=True)
+            handle = sickbeard.helpers.getURLFileLike(req, throw_exc=True)
             handle.close()
 
         except urllib2.URLError, e:

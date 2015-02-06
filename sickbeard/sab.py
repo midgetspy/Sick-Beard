@@ -76,7 +76,7 @@ def sendNZB(nzb):
         elif nzb.resultType == "nzbdata":
             req = urllib2.Request(url,multiPartParams)
 
-        result = helpers.getURL(req)
+        result = helpers.getURL(req, throw_exc=True)
 
     except (EOFError, IOError), e:
         logger.log(u"Unable to connect to SAB: " + ex(e), logger.ERROR)
@@ -138,7 +138,7 @@ def _checkSabResponse(f):
 
 def _sabURLOpenSimple(url):
     try:
-        f = helpers.getURL(url)
+        f = helpers.getURLFileLike(url, throw_exc=True)
     except (EOFError, IOError), e:
         logger.log(u"Unable to connect to SAB: " + ex(e), logger.ERROR)
         return False, "Unable to connect"
