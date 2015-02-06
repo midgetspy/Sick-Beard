@@ -92,7 +92,7 @@ def sendNZB(nzb):
         return False
 
     # massage the result a little bit
-    sabText = result[0].strip()
+    sabText = result.strip()
 
     logger.log(u"Result text from SAB: " + sabText, logger.DEBUG)
 
