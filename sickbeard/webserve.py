@@ -1000,7 +1000,7 @@ class ConfigProviders:
                       btn_api_key=None, hdbits_username=None, hdbits_passkey=None,
                       thepiratebay_trusted = None, thepiratebay_proxy = None, thepiratebay_proxy_url = None,thepiratebay_url_override = None, thepiratebay_url_override_enable = None,
                       torrentleech_username = None, torrentleech_password = None,
-                      torrentday_username = None, torrentday_password = None,
+                      torrentday_alt_url = None, torrentday_username = None, torrentday_password = None,
                       sceneaccess_username = None, sceneaccess_password = None, sceneaccess_rsshash = None,
                       iptorrents_username = None, iptorrents_password = None,iptorrents_uid = None, iptorrents_rsshash = None,
                       bithdtv_username = None, bithdtv_password = None,
@@ -1140,6 +1140,10 @@ class ConfigProviders:
         sickbeard.TORRENTLEECH_USERNAME = torrentleech_username
         sickbeard.TORRENTLEECH_PASSWORD = torrentleech_password
         
+        if sickbeard.TORRENTDAY_ALT_URL == "on":
+            sickbeard.TORRENTDAY_ALT_URL = 1
+        else:
+            sickbeard.TORRENTDAY_ALT_URL = 0
         sickbeard.TORRENTDAY_USERNAME = torrentday_username.strip()
         sickbeard.TORRENTDAY_PASSWORD = torrentday_password.strip()
         

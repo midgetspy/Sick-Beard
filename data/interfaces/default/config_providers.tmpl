@@ -281,6 +281,14 @@
                                 <input class="component-desc" type="password" name="torrentday_password" value="$sickbeard.TORRENTDAY_PASSWORD" size="40" />
                             </label>
                         </div>
+                        
+                        <div class="field-pair">
+                            <input type="checkbox" name="torrentday_alt_url" id="torrentday_alt_url" #if $sickbeard.TORRENTDAY_ALT_URL then "checked=\"checked\"" else ""#/>
+                            <label class="clearfix" for="torrentday_alt_url">
+                                <span class="component-title">Use torrentday.eu</span>
+                                <span class="component-desc">Use torrentdays's alternative domain.</span>
+                            </label>
+                        </div>
                     </div><!-- /torrentdayDiv //-->
                 
                     <div class="providerDiv" id="torrentleechDiv">

@@ -51,6 +51,7 @@ class TorrentDayProvider(generic.TorrentProvider):
         self.session = None
         self.supportsBacklog = True
         self.url = 'https://www.torrentday.com/'
+        self.url_alt = 'https://torrentday.eu'
         logger.log('[' + self.name + '] initializing...')
     
     ###################################################################################################
@@ -221,6 +222,9 @@ class TorrentDayProvider(generic.TorrentProvider):
 
         self.session = requests.Session()
         logger.log("[" + self.name + "] Attempting to Login")
+        
+        if sickbeard.TORRENTDAY_ALT_URL:
+            self.url = self.url_alt
 
         try:
             response = self.session.post(self.url + "torrents/", data=login_params, timeout=30, verify=False)

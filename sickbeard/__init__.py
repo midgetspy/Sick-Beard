@@ -195,6 +195,7 @@ TORRENTLEECH_USERNAME = None
 TORRENTLEECH_PASSWORD = None
 
 TORRENTDAY = False
+TORRENTDAY_ALT_URL = False
 TORRENTDAY_USERNAME = None
 TORRENTDAY_PASSWORD = None
 
@@ -403,7 +404,7 @@ def initialize(consoleLogging=True):
                 KICKASS, KICKASS_ALT_URL, \
                 TORRENTZ, TORRENTZ_VERIFIED, \
                 TORRENTLEECH, TORRENTLEECH_USERNAME, TORRENTLEECH_PASSWORD, \
-                TORRENTDAY, TORRENTDAY_USERNAME, TORRENTDAY_PASSWORD, \
+                TORRENTDAY, TORRENTDAY_ALT_URL, TORRENTDAY_USERNAME, TORRENTDAY_PASSWORD, \
                 SCENEACCESS, SCENEACCESS_USERNAME, SCENEACCESS_PASSWORD, SCENEACCESS_RSSHASH, \
                 IPTORRENTS, IPTORRENTS_USERNAME, IPTORRENTS_PASSWORD, IPTORRENTS_UID, IPTORRENTS_RSSHASH, \
                 BITHDTV, BITHDTV_USERNAME, BITHDTV_PASSWORD, \
@@ -586,6 +587,7 @@ def initialize(consoleLogging=True):
         TORRENTLEECH_PASSWORD = check_setting_str(CFG, 'TORRENTLEECH', 'torrentleech_password', '')
         
         TORRENTDAY = bool(check_setting_int(CFG, 'TORRENTDAY', 'torrentday', 0))    
+        TORRENTDAY_ALT_URL = bool(check_setting_int(CFG, 'TORRENTDAY', 'torrentday_alt_url', 0))
         TORRENTDAY_USERNAME = check_setting_str(CFG, 'TORRENTDAY', 'torrentday_username', '')   
         TORRENTDAY_PASSWORD = check_setting_str(CFG, 'TORRENTDAY', 'torrentday_password', '')
         
@@ -1217,6 +1219,7 @@ def save_config():
 
     new_config['TORRENTDAY'] = {}
     new_config['TORRENTDAY']['torrentday'] = int(TORRENTDAY)
+    new_config['TORRENTDAY']['torrentday_alt_url'] = int(TORRENTDAY_ALT_URL)
     new_config['TORRENTDAY']['torrentday_username'] = TORRENTDAY_USERNAME
     new_config['TORRENTDAY']['torrentday_password'] = TORRENTDAY_PASSWORD
 
