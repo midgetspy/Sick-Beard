@@ -1800,7 +1800,7 @@ class TVEpisode(object):
                 try:
                     os.remove(cur_related_file)
                 except (IOError, OSError), e:
-                    logger.log(u"Unable to remove related file " + self.location + ": " + ex(e), logger.ERROR)
+                    logger.log(u"Unable to remove related file " + cur_related_file + ": " + ex(e), logger.ERROR)
                     pass       
         except (IOError, OSError), e:
             logger.log(u"Unable to remove episode file " + self.location + ": " + ex(e), logger.ERROR)
