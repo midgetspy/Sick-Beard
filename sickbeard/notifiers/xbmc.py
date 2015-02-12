@@ -348,7 +348,7 @@ class XBMCNotifier:
             logger.log(u"XBMC: Could not contact XBMC JSON API at " + fixStupidEncodings(url) + " " + ex(e), logger.WARNING)
             return False
 
-    def _update_library_json(self, host=None, showName=None):
+    def _update_library_json(self, host=None, showName=None, showPath=None):
         """Handles updating XBMC host via HTTP JSON-RPC
 
         Attempts to update the XBMC video library for a specific tv show if passed,
@@ -372,39 +372,44 @@ class XBMCNotifier:
             tvshowid = -1
             logger.log(u"XBMC: Updating library via JSON method for show " + showName, logger.MESSAGE)
 
-            # get tvshowid by showName
-            showsCommand = '{"jsonrpc":"2.0","method":"VideoLibrary.GetTVShows","id":1}'
-            showsResponse = self._send_to_xbmc_json(showsCommand, host)
-
-            if showsResponse and "result" in showsResponse and "tvshows" in showsResponse["result"]:
-                shows = showsResponse["result"]["tvshows"]
+            if showPath:
+                path = showPath
+                logger.log(u"XBMC: Received Show Path: " + path, logger.DEBUG)
             else:
-                logger.log(u"XBMC: No tvshows in XBMC TV show list", logger.DEBUG)
-                return False
+                # get tvshowid by showName
+                showsCommand = '{"jsonrpc":"2.0","method":"VideoLibrary.GetTVShows","id":1}'
+                showsResponse = self._send_to_xbmc_json(showsCommand, host)
 
-            for show in shows:
-                if (show["label"] == showName):
-                    tvshowid = show["tvshowid"]
-                    break  # exit out of loop otherwise the label and showname will not match up
+                if showsResponse and "result" in showsResponse and "tvshows" in showsResponse["result"]:
+                    shows = showsResponse["result"]["tvshows"]
+                else:
+                    logger.log(u"XBMC: No tvshows in XBMC TV show list", logger.DEBUG)
+                    return False
 
-            # this can be big, so free some memory
-            del shows
+                for show in shows:
+                    if (show["label"] == showName):
+                        tvshowid = show["tvshowid"]
+                        break  # exit out of loop otherwise the label and showname will not match up
 
-            # we didn't find the show (exact match), thus revert to just doing a full update if enabled
-            if (tvshowid == -1):
-                logger.log(u"XBMC: Exact show name not matched in XBMC TV show list", logger.DEBUG)
-                return False
+                # this can be big, so free some memory
+                del shows
 
-            # lookup tv-show path
-            pathCommand = '{"jsonrpc":"2.0","method":"VideoLibrary.GetTVShowDetails","params":{"tvshowid":%d, "properties": ["file"]},"id":1}' % (tvshowid)
-            pathResponse = self._send_to_xbmc_json(pathCommand, host)
+                # we didn't find the show (exact match), thus revert to just doing a full update if enabled
+                if (tvshowid == -1):
+                    logger.log(u"XBMC: Exact show name not matched in XBMC TV show list", logger.DEBUG)
+                    return False
 
-            path = pathResponse["result"]["tvshowdetails"]["file"]
-            logger.log(u"XBMC: Received Show: " + show["label"] + " with ID: " + str(tvshowid) + " Path: " + path, logger.DEBUG)
+                # lookup tv-show path
+                pathCommand = '{"jsonrpc":"2.0","method":"VideoLibrary.GetTVShowDetails","params":{"tvshowid":%d, "properties": ["file"]},"id":1}' % (tvshowid)
+                pathResponse = self._send_to_xbmc_json(pathCommand, host)
 
-            if (len(path) < 1):
-                logger.log(u"XBMC: No valid path found for " + showName + " with ID: " + str(tvshowid) + " on " + host, logger.WARNING)
-                return False
+                path = pathResponse["result"]["tvshowdetails"]["file"]
+
+                logger.log(u"XBMC: Received Show: " + show["label"] + " with ID: " + str(tvshowid) + " Path: " + path, logger.DEBUG)
+
+                if (len(path) < 1):
+                    logger.log(u"XBMC: No valid path found for " + showName + " with ID: " + str(tvshowid) + " on " + host, logger.WARNING)
+                    return False
 
             logger.log(u"XBMC: Updating " + showName + " on " + host + " at " + path, logger.MESSAGE)
             updateCommand = '{"jsonrpc":"2.0","method":"VideoLibrary.Scan","params":{"directory":%s},"id":1}' % (json.dumps(path))
@@ -462,8 +467,12 @@ class XBMCNotifier:
 
         """
 
+	showPath = None
+
         if ep_obj:
             showName = ep_obj.show.name
+	    if ep_obj.showPath:
+                showPath = ep_obj.showPath
         elif show_obj:
             showName = show_obj.name
         else:
@@ -493,7 +502,7 @@ class XBMCNotifier:
                                 self._update_library(curHost)
                     else:
                         # try to update for just the show, if it fails, do full update if enabled
-                        if not self._update_library_json(curHost, showName):
+                        if not self._update_library_json(curHost, showName, showPath = showPath):
                             if showName and sickbeard.XBMC_UPDATE_FULL:
                                 self._update_library_json(curHost)
                 else:
