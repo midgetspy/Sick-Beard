@@ -27,7 +27,7 @@ from sickbeard import encodingKludge as ek
 from sickbeard.name_parser.parser import NameParser, InvalidNameException
 
 MIN_DB_VERSION = 9  # oldest db version we support migrating from
-MAX_DB_VERSION = 18
+MAX_DB_VERSION = 19
 
 
 class MainSanityCheck(db.DBSanityCheck):
@@ -605,3 +605,21 @@ class AddHistorySource(AddSkipNotifications):
             self.connection.mass_action(set_torrent_source)
 
         self.incDBVersion()
+
+
+class AddRetainEpisodeCount(AddHistorySource):
+    """ Adding column retain_episode_count tv_shows """
+
+    def test(self):
+        return self.checkDBVersion() >= 19
+
+    def execute(self):
+        backupDatabase(19)
+
+        logger.log(u"Adding column retain_episode_count to tvshows")
+        if not self.hasColumn("tv_shows", "retain_episode_count"):
+            self.addColumn("tv_shows", "retain_episode_count", "INTEGER", default=0)
+
+        self.incDBVersion()
+
+
