@@ -936,7 +936,7 @@ class TVShow(object):
             "SELECT * FROM tv_episodes WHERE showid = ? AND (status % 10)=? ORDER BY airdate DESC",
             [self.tvdbid, DOWNLOADED]
         )
-        if self.retain_episode_count is not None and self.retain_episode_count > 0:
+        if self.retain_episode_count is not None and int(self.retain_episode_count) > 0:
             logger.log(u"Checking retained episodes.. :"+self.name, logger.DEBUG)
             remove=len(sqlResults) - int(self.retain_episode_count)
             if remove > 0:
