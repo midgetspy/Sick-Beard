@@ -18,8 +18,6 @@
 
 import urllib
 import urllib2
-import base64
-
 import sickbeard
 
 from sickbeard import logger
@@ -71,14 +69,12 @@ class PLEXNotifier:
             req = urllib2.Request(url)
             # if we have a password, use authentication
             if password:
-                base64string = base64.encodestring('%s:%s' % (username, password))[:-1]
-                authheader = "Basic %s" % base64string
-                req.add_header("Authorization", authheader)
-                logger.log(u"PLEX: Contacting (with auth header) via url: " + url, logger.DEBUG)
+                pw_mgr = urllib2.HTTPPasswordMgrWithDefaultRealm()
+                pw_mgr.add_password(None, url, username, password)
             else:
-                logger.log(u"PLEX: Contacting via url: " + url, logger.DEBUG)
+                pw_mgr = None
 
-            response = urllib2.urlopen(req)
+            response = sickbeard.helpers.getURLFileLike(req, password_mgr=pw_mgr)
 
             result = response.read().decode(sickbeard.SYS_ENCODING)
             response.close()
@@ -175,16 +171,17 @@ class PLEXNotifier:
             token_arg = ""
             if username and password:
 
-                logger.log(u"PLEX: fetching credentials for Plex user: " + username, logger.DEBUG)            
-                req = urllib2.Request("https://plex.tv/users/sign_in.xml", data="")
-                authheader = "Basic %s" % base64.encodestring('%s:%s' % (username, password))[:-1]
-                req.add_header("Authorization", authheader)
+                logger.log(u"PLEX: fetching credentials for Plex user: " + username, logger.DEBUG)
+                url = "https://plex.tv/users/sign_in.xml"            
+                req = urllib2.Request(url, data="")
+                pw_mgr = urllib2.HTTPPasswordMgrWithDefaultRealm()
+                pw_mgr.add_password(None, url, username, password)
                 req.add_header("X-Plex-Product", "Sick Beard Notifier")
                 req.add_header("X-Plex-Client-Identifier", "5f48c063eaf379a565ff56c9bb2b401e")
                 req.add_header("X-Plex-Version", "1.0")
                 
                 try:
-                    response = urllib2.urlopen(req)
+                    response = sickbeard.helpers.getURLFileLike(req, throw_exc=True)
                     auth_tree = etree.parse(response)
                     token = auth_tree.findall(".//authentication-token")[0].text
                     token_arg = "?X-Plex-Token=" + token
@@ -197,7 +194,7 @@ class PLEXNotifier:
 
             url = "http://%s/library/sections%s" % (sickbeard.PLEX_SERVER_HOST, token_arg)
             try:
-                xml_tree = etree.parse(urllib.urlopen(url))
+                xml_tree = etree.parse(sickbeard.helpers.getURLFileLike(url))
                 media_container = xml_tree.getroot()
             except IOError, e:
                 logger.log(u"PLEX: Error while trying to contact Plex Media Server: " + ex(e), logger.ERROR)
@@ -211,12 +208,9 @@ class PLEXNotifier:
             for section in sections:
                 if section.attrib['type'] == "show":
                     url = "http://%s/library/sections/%s/refresh%s" % (sickbeard.PLEX_SERVER_HOST, section.attrib['key'], token_arg)
-                    try:
-                        urllib.urlopen(url)
-                    except Exception, e:
-                        logger.log(u"PLEX: Error updating library section for Plex Media Server: " + ex(e), logger.ERROR)
+                    if sickbeard.helpers.getURLFileLike(url) is None:
+                        logger.log(u"PLEX: Error updating library section for Plex Media Server", logger.ERROR)
                         return False
-
             return True
 
 notifier = PLEXNotifier

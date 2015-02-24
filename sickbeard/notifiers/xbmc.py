@@ -19,7 +19,6 @@
 import urllib
 import urllib2
 import socket
-import base64
 import time
 
 import sickbeard
@@ -189,20 +188,24 @@ class XBMCNotifier:
             req = urllib2.Request(url)
             # if we have a password, use authentication
             if password:
-                base64string = base64.encodestring('%s:%s' % (username, password))[:-1]
-                authheader = "Basic %s" % base64string
-                req.add_header("Authorization", authheader)
+                pw_mgr = urllib2.HTTPPasswordMgrWithDefaultRealm()
+                pw_mgr.add_password(None, url, username, password)
+            else:
+                pw_mgr = None
 
-            response = urllib2.urlopen(req)
-            result = response.read().decode(sickbeard.SYS_ENCODING)
-            response.close()
+            response = sickbeard.helpers.getURLFileLike(req, password_mgr=pw_mgr, throw_exc=True)
+            if response:
+                result = response.read().decode(sickbeard.SYS_ENCODING)
+                response.close()
 
             logger.log(u"XBMC: HTTP response: " + result.replace('\n', ''), logger.DEBUG)
             return result
 
         except (urllib2.URLError, IOError), e:
             logger.log(u"XBMC: Could not contact XBMC HTTP at " + fixStupidEncodings(url) + " " + ex(e), logger.WARNING)
-            return False
+        except Exception, e:
+            logger.log(u"XBMC: Exception occurred while trying to access " + fixStupidEncodings(url) + " " + ex(e), logger.WARNING)
+        return False
 
     def _update_library(self, host=None, showName=None):
         """Handles updating XBMC host via HTTP API
@@ -324,29 +327,28 @@ class XBMCNotifier:
             req.add_header("Content-type", "application/json")
             # if we have a password, use authentication
             if password:
-                base64string = base64.encodestring('%s:%s' % (username, password))[:-1]
-                authheader = "Basic %s" % base64string
-                req.add_header("Authorization", authheader)
+                pw_mgr = urllib2.HTTPPasswordMgrWithDefaultRealm()
+                pw_mgr.add_password(None, url, username, password)
+            else:
+                pw_mgr = None
 
-            try:
-                response = urllib2.urlopen(req)
-            except urllib2.URLError, e:
-                logger.log(u"XBMC: Error while trying to retrieve XBMC API version for " + host + ": " + ex(e), logger.WARNING)
-                return False
-
+            
+            response = sickbeard.helpers.getURLFileLike(req, password_mgr=pw_mgr, throw_exc=True)
             # parse the json result
-            try:
-                result = json.load(response)
-                response.close()
-                logger.log(u"XBMC: JSON response: " + str(result), logger.DEBUG)
-                return result  # need to return response for parsing
-            except ValueError, e:
-                logger.log(u"XBMC: Unable to decode JSON: " + response, logger.WARNING)
-                return False
+            result = json.load(response)
+            response.close()
+            logger.log(u"XBMC: JSON response: " + str(result), logger.DEBUG)
+            return result  # need to return response for parsing
 
+        except ValueError, e:
+            logger.log(u"XBMC: Unable to decode JSON: " + response, logger.WARNING)
+        except urllib2.URLError, e:
+            logger.log(u"XBMC: Error while trying to retrieve XBMC API version for " + host + ": " + ex(e), logger.WARNING)
         except IOError, e:
             logger.log(u"XBMC: Could not contact XBMC JSON API at " + fixStupidEncodings(url) + " " + ex(e), logger.WARNING)
-            return False
+        except Exception, e:
+            logger.log(u"XBMC: Exception occurred while trying to access " + fixStupidEncodings(url) + " " + ex(e), logger.WARNING)
+        return False
 
     def _update_library_json(self, host=None, showName=None):
         """Handles updating XBMC host via HTTP JSON-RPC

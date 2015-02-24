@@ -21,9 +21,6 @@
 import urllib
 import urllib2
 import time
-import socket
-import base64
-
 import sickbeard
 
 from sickbeard import logger
@@ -48,17 +45,8 @@ class PushoverNotifier:
             })
 
         # get devices from pushover
-        try:
-            req = urllib2.Request(DEVICE_URL)
-            handle = urllib2.urlopen(req, data)
-            if handle:
-                result = handle.read()
-            handle.close()
-            return result
-        except urllib2.URLError:
-            return None
-        except socket.timeout:
-            return None
+        req = urllib2.Request(DEVICE_URL, data)
+        return sickbeard.helpers.getURL(req)
 
     def _sendPushover(self, title, msg, userKey, priority, device, sound):
 
@@ -78,8 +66,8 @@ class PushoverNotifier:
 
         # send the request to pushover
         try:
-            req = urllib2.Request(API_URL)
-            handle = urllib2.urlopen(req, data)
+            req = urllib2.Request(API_URL, data)
+            handle = sickbeard.helpers.getURLFileLike(req, throw_exc=True)
             handle.close()
 
         except urllib2.URLError, e:

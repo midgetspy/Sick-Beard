@@ -28,10 +28,13 @@ import stat
 import StringIO
 import time
 import traceback
-import urllib
 import urllib2
+import cookielib
+import sys
+if sys.version_info >= (2, 7, 9):
+    import ssl
 import zlib
-
+from lib import MultipartPostHandler
 from httplib import BadStatusLine
 
 try:
@@ -46,20 +49,23 @@ try:
 except ImportError:
     import elementtree.ElementTree as etree
 
-import sickbeard
-
 from sickbeard.exceptions import MultipleShowObjectsException, ex
-from sickbeard import logger, classes
-from sickbeard.common import USER_AGENT, mediaExtensions, XML_NSMAP
+from sickbeard import logger
+from sickbeard.common import USER_AGENT, mediaExtensions
 
 from sickbeard import db
 from sickbeard import encodingKludge as ek
-from sickbeard import notifiers
+from sickbeard.notifiers import synoindex_notifier
 
-from lib.tvdb_api import tvdb_api, tvdb_exceptions
+# workaround for broken urllib2 in python 2.6.5: wrong credentials lead to an infinite recursion
+if sys.version_info >= (2, 6, 5) and sys.version_info < (2, 6, 6):
+    class HTTPBasicAuthHandler(urllib2.HTTPBasicAuthHandler):
+        def retry_http_basic_auth(self, host, req, realm):
+            # don't retry if auth failed
+            if req.get_header(self.auth_header, None) is not None:
+                return None
 
-urllib._urlopener = classes.SickBeardURLopener()
-
+            return urllib2.HTTPBasicAuthHandler.retry_http_basic_auth(self, host, req, realm)
 
 def indentXML(elem, level=0):
     '''
@@ -166,61 +172,121 @@ def sanitizeFileName(name):
 
     return name
 
-
-def getURL(url, post_data=None, headers=[]):
+def getURL(url, validate=False, cookies = cookielib.CookieJar(), password_mgr=None, throw_exc=False):
     """
-    Returns a byte-string retrieved from the url provider.
+    Convenience method to directly retrieve the contents of a url
     """
+    obj = getURLFileLike(url, validate, cookies, password_mgr, throw_exc)
+    if obj:
+        return readURLFileLike(obj)
+    else:
+        return None
 
-    opener = urllib2.build_opener()
-    opener.addheaders = [('User-Agent', USER_AGENT), ('Accept-Encoding', 'gzip,deflate')]
-    for cur_header in headers:
-        opener.addheaders.append(cur_header)
 
+def getURLFileLike(url, validate=False, cookies = cookielib.CookieJar(), password_mgr=None, throw_exc=False):
+    """
+    Returns a file-like object same as returned by urllib2.urlopen but with Handlers configured for sickbeard.
+    
+    It allows for the use of cookies, multipart/form-data, https without certificate validation and both basic
+    and digest HTTP authentication. In addition, the user-agent is set to the sickbeard default and accepts
+    gzip and deflate encoding (which can be automatically handled when using readURL() to retrieve the contents)
+    
+    @param url: can be either a string or a Request object.
+    @param validate: defines if SSL certificates should be validated on HTTPS connections
+    @param cookies: is the cookielib.CookieJar in which cookies are stored.
+    @param password_mgr: if given, should be something that is compatible with HTTPPasswordMgr
+    @param throw_exc: throw the exception that was caught instead of None
+    @return: the file-like object retrieved from the URL or None (or the exception) if it could not be retrieved
+    """
+    # configure the OpenerDirector appropriately
+    if not validate and sys.version_info >= (2, 7, 9):
+            opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(cookies),
+                                          MultipartPostHandler.MultipartPostHandler,
+                                          urllib2.HTTPSHandler(context=ssl._create_unverified_context()),
+                                          urllib2.HTTPDigestAuthHandler(password_mgr),
+                                          urllib2.HTTPBasicAuthHandler(password_mgr))
+    else:
+        # Before python 2.7.9, there was no built-in way to validate SSL certificates
+        # Since our default is not to validate, it is of low priority to make it available here
+        if validate and sys.version_info < (2, 7, 9):
+            logger.log(u"The SSL certificate will not be validated for " + url + "(python 2.7.9+ required)", logger.MESSAGE)
+
+        opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(cookies),
+                                      MultipartPostHandler.MultipartPostHandler,
+                                      urllib2.HTTPDigestAuthHandler(password_mgr),
+                                      urllib2.HTTPBasicAuthHandler(password_mgr))
+
+    # set the default headers for every request
+    opener.addheaders = [('User-Agent', USER_AGENT), 
+                         ('Accept-Encoding', 'gzip,deflate')]
+        
     try:
-        usock = opener.open(url, post_data)
-        url = usock.geturl()
-        encoding = usock.info().get("Content-Encoding")
-
-        if encoding in ('gzip', 'x-gzip', 'deflate'):
-            content = usock.read()
-            if encoding == 'deflate':
-                data = StringIO.StringIO(zlib.decompress(content))
-            else:
-                data = gzip.GzipFile('', 'rb', 9, StringIO.StringIO(content))
-            result = data.read()
-
-        else:
-            result = usock.read()
-
-        usock.close()
+        return opener.open(url)
 
     except urllib2.HTTPError, e:
         logger.log(u"HTTP error " + str(e.code) + " while loading URL " + url, logger.WARNING)
-        return None
+        if throw_exc:
+            raise 
+        else:
+            return None
 
     except urllib2.URLError, e:
         logger.log(u"URL error " + str(e.reason) + " while loading URL " + url, logger.WARNING)
-        return None
+        if throw_exc:
+            raise 
+        else:
+            return None
 
     except BadStatusLine:
         logger.log(u"BadStatusLine error while loading URL " + url, logger.WARNING)
-        return None
+        if throw_exc:
+            raise 
+        else:
+            return None
 
     except socket.timeout:
         logger.log(u"Timed out while loading URL " + url, logger.WARNING)
-        return None
+        if throw_exc:
+            raise 
+        else:
+            return None
 
     except ValueError:
         logger.log(u"Unknown error while loading URL " + url, logger.WARNING)
-        return None
+        if throw_exc:
+            raise 
+        else:
+            return None
 
     except Exception:
         logger.log(u"Unknown exception while loading URL " + url + ": " + traceback.format_exc(), logger.WARNING)
-        return None
+        if throw_exc:
+            raise 
+        else:
+            return None
 
-    return result
+def readURLFileLike(urlFileLike):
+    """
+    Return the contents of the file like objects as string, performing decompression if necessary.
+    
+    @param urlFileLike: is a file like objects same as returned by urllib2.urlopen() and getURL()
+    """
+    encoding = urlFileLike.info().get("Content-Encoding")
 
+    if encoding in ('gzip', 'x-gzip', 'deflate'):
+        content = urlFileLike.read()
+        if encoding == 'deflate':
+            data = StringIO.StringIO(zlib.decompress(content))
+        else:
+            data = gzip.GzipFile('', 'rb', 9, StringIO.StringIO(content))
+        result = data.read()
+
+    else:
+        result = urlFileLike.read()
+
+    urlFileLike.close()
+    
+    return result;
 
 def is_hidden_folder(folder):
     """
@@ -311,7 +377,7 @@ def makeDir(path):
         try:
             ek.ek(os.makedirs, path)
             # do the library update for synoindex
-            notifiers.synoindex_notifier.addFolder(path)
+            synoindex_notifier.addFolder(path)
         except OSError:
             return False
     return True
@@ -444,7 +510,7 @@ def make_dirs(path):
                     # use normpath to remove end separator, otherwise checks permissions against itself
                     chmodAsParent(ek.ek(os.path.normpath, sofar))
                     # do the library update for synoindex
-                    notifiers.synoindex_notifier.addFolder(sofar)
+                    synoindex_notifier.addFolder(sofar)
                 except (OSError, IOError), e:
                     logger.log(u"Failed creating " + sofar + " : " + ex(e), logger.ERROR)
                     return False
@@ -514,7 +580,7 @@ def delete_empty_folders(check_empty_dir, keep_dir=None):
                 # need shutil.rmtree when ignore_items is really implemented
                 ek.ek(os.rmdir, check_empty_dir)
                 # do the library update for synoindex
-                notifiers.synoindex_notifier.deleteFolder(check_empty_dir)
+                synoindex_notifier.deleteFolder(check_empty_dir)
             except OSError, e:
                 logger.log(u"Unable to delete " + check_empty_dir + ": " + repr(e) + " / " + str(e), logger.WARNING)
                 break
