@@ -1039,6 +1039,86 @@
 
                     </fieldset>
                 </div><!-- /pushbullet component-group //-->
+                
+                
+                
+                
+                
+                
+                
+                <div class="component-group clearfix">
+		                    <div class="component-group-desc">
+		                        <img class="notifier-icon" src="$sbRoot/images/notifiers/pushbullet.png" alt="" title="MDLESK" />
+		                        <h3><a href="http://www.mdlesk.com/" rel="noreferrer" onclick="window.open('${sickbeard.ANON_REDIRECT}' + this.href, '_blank'); return false;">MDLESK</a></h3>
+		                        <p>MDLESK allows you to send push notifications to Windows 8 Systems, Windows Phone devices, and other supported devices</p>
+		                    </div>
+		                    <fieldset class="component-group-list">
+		                        <div class="field-pair">
+		                            <input type="checkbox" class="enabler" name="use_mdlesk" id="use_mdlesk" #if $sickbeard.USE_MDLESK then "checked=\"checked\"" else ""# />
+		                            <label class="clearfix" for="use_mdlesk">
+		                                <span class="component-title">Enable</span>
+		                                <span class="component-desc">Should Sick Beard send MDLESK notifications?</span>
+		                            </label>
+		                        </div>
+		
+		                        <div id="content_use_mdlesk">
+		                            <div class="field-pair">
+		                                <input type="checkbox" name="mdlesk_notify_onsnatch" id="mdlesk_notify_onsnatch" #if $sickbeard.MDLESK_NOTIFY_ONSNATCH then "checked=\"checked\"" else ""# />
+		                                <label class="clearfix" for="mdlesk_notify_onsnatch">
+		                                    <span class="component-title">Notify on Snatch</span>
+		                                    <span class="component-desc">Send notification when we start a download?</span>
+		                                </label>
+		                            </div>
+		                            <div class="field-pair">
+		                                <input type="checkbox" name="mdlesk_notify_ondownload" id="mdlesk_notify_ondownload" #if $sickbeard.MDLESK_NOTIFY_ONDOWNLOAD then "checked=\"checked\"" else ""# />
+		                                <label class="clearfix" for="mdlesk_notify_ondownload">
+		                                    <span class="component-title">Notify on Download</span>
+		                                    <span class="component-desc">Send notification when we finish a download?</span>
+		                                </label>
+		                            </div>
+		                            <div class="field-pair">
+		                                <label class="nocheck clearfix">
+		                                    <span class="component-title">Server</span>
+		                                    <input type="text" name="mdlesk_server" id="mdlesk_server" value="$sickbeard.MDLESK_SERVER" size="35" />
+		                                </label>
+		                                <label class="nocheck clearfix">
+		                                    <span class="component-title">&nbsp;</span>
+		                                    <span class="component-desc">The default hosted server is http://mdlesk.com/Api.aspx</span>
+		                                </label>
+		                            </div>
+		                            <div class="field-pair">
+						<label class="nocheck clearfix">
+						    <span class="component-title">Username</span>
+						    <input type="text" name="mdlesk_username" id="mdlesk_username" value="$sickbeard.MDLESK_USERNAME" size="35" />
+						</label>
+		                            </div>
+		                            <div class="field-pair">
+						<label class="nocheck clearfix">
+						    <span class="component-title">API Key</span>
+						    <input type="text" name="mdlesk_apikey" id="mdlesk_apikey" value="$sickbeard.MDLESK_APIKEY" size="35" />
+						</label>
+						<label class="nocheck clearfix">
+						    <span class="component-title">&nbsp;</span>
+						    <span class="component-desc">Get your API Key by visiting the hosted server and logging into your account.</span>
+						</label>
+		                            </div>
+		                            <div class="field-pair">
+						<label class="nocheck clearfix">
+						    <span class="component-title">Source System</span>
+						    <input type="text" name="mdlesk_source" id="mdlesk_source" value="$sickbeard.MDLESK_SOURCE" size="35" />
+						</label>
+						<label class="nocheck clearfix">
+						    <span class="component-title">&nbsp;</span>
+						    <span class="component-desc">Usually Sick Beard</span>
+						</label>
+		                            </div>
+		                            <div class="testNotification" id="testMdlesk-result">Click below to test.</div>
+		                            <input type="button" class="btn" value="Test MDLESK" id="testMdlesk" />
+		                            <input type="submit" class="btn config_submitter" value="Save Changes" />
+		                        </div><!-- /content_use_pushbullet //-->
+		
+		                    </fieldset>
+                </div><!-- /mdlesk component-group //-->
 
                 <div class="component-group-save">
                     <input type="submit" class="btn config_submitter" value="Save Changes" />

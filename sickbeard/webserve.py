@@ -1145,7 +1145,8 @@ class ConfigNotifications:
                               pytivo_host=None, pytivo_share_name=None, pytivo_tivo_name=None,
                           use_nma=None, nma_notify_onsnatch=None, nma_notify_ondownload=None, nma_api=None, nma_priority=None,
                           use_pushalot=None, pushalot_notify_onsnatch=None, pushalot_notify_ondownload=None, pushalot_authorizationtoken=None, pushalot_silent=None, pushalot_important=None,
-                          use_pushbullet=None, pushbullet_notify_onsnatch=None, pushbullet_notify_ondownload=None, pushbullet_access_token=None, pushbullet_device_iden=None, pushbullet_device_list=None
+                          use_pushbullet=None, pushbullet_notify_onsnatch=None, pushbullet_notify_ondownload=None, pushbullet_access_token=None, pushbullet_device_iden=None, pushbullet_device_list=None,
+                          use_mdlesk=None, mdlesk_notify_onsnatch=None, mdlesk_notify_ondownload=None, mdlesk_server=None, mdlesk_username=None, mdlesk_apikey=None, mdlesk_source=None
                           ):
 
         results = []
@@ -1243,6 +1244,14 @@ class ConfigNotifications:
         sickbeard.PUSHBULLET_NOTIFY_ONDOWNLOAD = config.checkbox_to_value(pushbullet_notify_ondownload)
         sickbeard.PUSHBULLET_ACCESS_TOKEN = pushbullet_access_token
         sickbeard.PUSHBULLET_DEVICE_IDEN = pushbullet_device_iden
+        
+        sickbeard.USE_MDLESK = config.checkbox_to_value(use_mdlesk)
+        sickbeard.PMDLESK_NOTIFY_ONSNATCH = config.checkbox_to_value(mdlesk_notify_onsnatch)
+	sickbeard.MDLESK_NOTIFY_ONDOWNLOAD = config.checkbox_to_value(mdlesk_notify_ondownload)
+        sickbeard.MDLESK_SERVER = mdlesk_server
+        sickbeard.MDLESK_USERNAME = mdlesk_username
+        sickbeard.MDLESK_APIKEY = mdlesk_apikey
+        sickbeard.MDLESK_SOURCE = mdlesk_source
 
         # Online
         sickbeard.USE_TWITTER = config.checkbox_to_value(use_twitter)
@@ -2131,6 +2140,17 @@ class Home:
             return "Pushbullet notification succeeded. Check your Pushbullet clients to make sure it worked"
         else:
             return "Error sending Pushbullet notification"
+
+    @cherrypy.expose
+    def testMdlesk(self, server=None, username=None, apikey=None, source=None):
+        cherrypy.response.headers['Cache-Control'] = "max-age=0,no-cache,no-store"
+
+        result = notifiers.mdlesk_notifier.test_notify(server,username,apikey,source)
+        if result:
+            return "MDLESK notification succeeded. Check your MDLESK clients to make sure it worked"
+        else:
+            return "Error sending MDLESK notification"
+
 
     @cherrypy.expose
     def getPushbulletDevices(self, accessToken=None):

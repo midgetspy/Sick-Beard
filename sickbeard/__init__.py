@@ -312,6 +312,14 @@ PUSHBULLET_NOTIFY_ONDOWNLOAD = False
 PUSHBULLET_ACCESS_TOKEN = None
 PUSHBULLET_DEVICE_IDEN = None
 
+USE_MDLESK = False
+MDLESK_NOTIFY_ONSNATCH = False
+MDLESK_NOTIFY_ONDOWNLOAD = False
+MDLESK_SERVER = None
+MDLESK_USERNAME = None
+MDLESK_APIKEY = None
+MDLESK_SOURCE = None
+
 COMING_EPS_LAYOUT = None
 COMING_EPS_DISPLAY_PAUSED = None
 COMING_EPS_SORT = None
@@ -368,7 +376,8 @@ def initialize(consoleLogging=True):
                 USE_LISTVIEW, METADATA_XBMC, METADATA_XBMC_12PLUS, METADATA_MEDIABROWSER, METADATA_MEDE8ER, METADATA_PS3, metadata_provider_dict, \
                 GIT_PATH, MOVE_ASSOCIATED_FILES, FILTER_ASSOCIATED_FILES, \
                 COMING_EPS_LAYOUT, COMING_EPS_SORT, COMING_EPS_DISPLAY_PAUSED, METADATA_WDTV, METADATA_TIVO, IGNORE_WORDS, CREATE_MISSING_SHOW_DIRS, \
-                ADD_SHOWS_WO_DIR, ANON_REDIRECT, DISPLAY_ALL_SEASONS
+                ADD_SHOWS_WO_DIR, ANON_REDIRECT, DISPLAY_ALL_SEASONS, \
+                USE_MDLESK, MDLESK_NOTIFY_ONSNATCH, MDLESK_NOTIFY_ONDOWNLOAD, MDLESK_SERVER, MDLESK_USERNAME, MDLESK_APIKEY, MDLESK_SOURCE
 
         if __INITIALIZED__:
             return False
@@ -672,6 +681,15 @@ def initialize(consoleLogging=True):
         PUSHBULLET_NOTIFY_ONDOWNLOAD = bool(check_setting_int(CFG, 'Pushbullet', 'pushbullet_notify_ondownload', 0))
         PUSHBULLET_ACCESS_TOKEN = check_setting_str(CFG, 'Pushbullet', 'pushbullet_access_token', '')
         PUSHBULLET_DEVICE_IDEN = check_setting_str(CFG, 'Pushbullet', 'pushbullet_device_iden', '')
+        
+        CheckSection(CFG, 'Mdlesk')
+        USE_MDLESK = bool(check_setting_int(CFG, 'Mdlesk', 'use_mdlesk', 0))
+        MDLESK_NOTIFY_ONSNATCH = bool(check_setting_int(CFG, 'Mdlesk', 'mdlesk_notify_onsnatch', 0))
+	MDLESK_NOTIFY_ONDOWNLOAD = bool(check_setting_int(CFG, 'Mdlesk', 'mdlesk_notify_ondownload', 0))
+        MDLESK_SERVER = check_setting_str(CFG, 'Mdlesk', 'mdlesk_server', '')
+        MDLESK_USERNAME = check_setting_str(CFG, 'Mdlesk', 'mdlesk_username', '')
+        MDLESK_APIKEY = check_setting_str(CFG, 'Mdlesk', 'mdlesk_apikey', '')
+        MDLESK_SOURCE = check_setting_str(CFG, 'Mdlesk', 'mdlesk_source', '')
 
         if not os.path.isfile(CONFIG_FILE):
             logger.log(u"Unable to find '" + CONFIG_FILE + "', all settings will be default!", logger.DEBUG)
@@ -1229,6 +1247,15 @@ def save_config():
     new_config['GUI']['coming_eps_layout'] = COMING_EPS_LAYOUT
     new_config['GUI']['coming_eps_display_paused'] = int(COMING_EPS_DISPLAY_PAUSED)
     new_config['GUI']['coming_eps_sort'] = COMING_EPS_SORT
+    
+    new_config['Mdlesk'] = {}
+    new_config['Mdlesk']['use_mdlesk'] = int(USE_MDLESK)
+    new_config['Mdlesk']['mdlesk_notify_onsnatch'] = int(MDLESK_NOTIFY_ONSNATCH)
+    new_config['Mdlesk']['mdlesk_notify_ondownload'] = int(MDLESK_NOTIFY_ONDOWNLOAD)
+    new_config['Mdlesk']['mdlesk_server'] = MDLESK_SERVER
+    new_config['Mdlesk']['mdlesk_username'] = MDLESK_USERNAME
+    new_config['Mdlesk']['mdlesk_apikey'] = MDLESK_APIKEY
+    new_config['Mdlesk']['mdlesk_source'] = MDLESK_SOURCE
 
     new_config.write()
 

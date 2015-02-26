@@ -336,6 +336,24 @@ $(document).ready(function () {
             });
     });
 
+    $("#testMdlesk").click(function () {
+	       var mdlesk_server = $.trim($("#mdlesk_server").val());
+		   	        var mdlesk_username = $("#mdlesk_username").val();
+		   	        var mdlesk_apikey = $("#mdlesk_apikey").val();
+		   	        var mdlesk_source = $("#mdlesk_source").val();
+		   	        if (!mdlesk_server || !mdlesk_username || !mdlesk_apikey) {
+		   	            $("#testMdlesk-result").html("Please fill out the necessary fields above.");
+		   	            return;
+		   	        }
+	        $(this).prop("disabled", true);
+	        $("#testMdlesk-result").html(loading);
+	        $.get(sbRoot + "/home/testMdlesk", {'server': mdlesk_server, 'username': mdlesk_username, 'apikey':mdlesk_apikey, 'source': mdlesk_source})
+	            .done(function (data) {
+	                $("#testMdlesk-result").html(data);
+	                $("#testMdlesk").prop("disabled", false);
+	            });
+    });
+
     $("#testPushbullet").click(function () {
         var pushbullet_access_token = $.trim($("#pushbullet_access_token").val());
         var pushbullet_device_iden = $("#pushbullet_device_iden").val();
