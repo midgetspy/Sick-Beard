@@ -47,7 +47,7 @@ class TorrentShackProvider(generic.TorrentProvider):
         self.name = "TorrentShack"
         self.session = None
         self.supportsBacklog = True
-        self.url = 'https://torrentshack.eu/'
+        self.url = 'https://theshack.us.to/'
         logger.log("[" + self.name + "] initializing...")
     
     ###################################################################################################
