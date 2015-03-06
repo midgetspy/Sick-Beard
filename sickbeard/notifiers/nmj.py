@@ -127,8 +127,7 @@ class NMJNotifier:
         try:
             req = urllib2.Request(updateUrl)
             logger.log(u"NMJ: Sending NMJ scan update command via url: %s" % (updateUrl), logger.DEBUG)
-            handle = sickbeard.helpers.getURLFileLike(req)
-            response = handle.read()
+            response = sickbeard.helpers.getURL(req)
         except IOError, e:
             if hasattr(e, 'reason'):
                 logger.log(u"NMJ: Could not contact Popcorn Hour on host %s: %s" % (host, e.reason), logger.WARNING)
