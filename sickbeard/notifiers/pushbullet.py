@@ -58,7 +58,7 @@ class PushbulletNotifier:
         try:
             req = urllib2.Request(PUSHAPI_ENDPOINT, data)
             pw_mgr = urllib2.HTTPPasswordMgrWithDefaultRealm()
-            pw_mgr.add_password(None, DEVICEAPI_ENDPOINT, accessToken, '')
+            pw_mgr.add_password(None, PUSHAPI_ENDPOINT, accessToken, '')
             handle = sickbeard.helpers.getURLFileLike(req, password_mgr=pw_mgr, throw_exc=True)
             handle.close()
         except socket.timeout:
