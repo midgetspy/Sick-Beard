@@ -21,4 +21,4 @@ EXPOSE 8081
 
 VOLUME ["/var/lib/sickbeard"]
 
-CMD ["/opt/sickbeard/SickBeard.py", "--nolaunch"]
+CMD ["/opt/sickbeard/SickBeard.py", "--nolaunch", "--datadir=/var/lib/sickbeard"]
