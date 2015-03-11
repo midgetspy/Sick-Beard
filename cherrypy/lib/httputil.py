@@ -1,33 +1,34 @@
-"""HTTP library functions."""
+"""HTTP library functions.
 
-# This module contains functions for building an HTTP application
-# framework: any one, not just one whose name starts with "Ch". ;) If you
-# reference any modules from some popular framework inside *this* module,
-# FuManChu will personally hang you up by your thumbs and submit you
-# to a public caning.
+This module contains functions for building an HTTP application
+framework: any one, not just one whose name starts with "Ch". ;) If you
+reference any modules from some popular framework inside *this* module,
+FuManChu will personally hang you up by your thumbs and submit you
+to a public caning.
+"""
 
 from binascii import b2a_base64
-from BaseHTTPServer import BaseHTTPRequestHandler
+from cherrypy._cpcompat import BaseHTTPRequestHandler, HTTPDate, ntob, ntou
+from cherrypy._cpcompat import basestring, bytestr, iteritems, nativestr
+from cherrypy._cpcompat import reversed, sorted, unicodestr, unquote_qs
 response_codes = BaseHTTPRequestHandler.responses.copy()
 
-# From http://www.cherrypy.org/ticket/361
+# From https://bitbucket.org/cherrypy/cherrypy/issue/361
 response_codes[500] = ('Internal Server Error',
-                      'The server encountered an unexpected condition '
-                      'which prevented it from fulfilling the request.')
+                       'The server encountered an unexpected condition '
+                       'which prevented it from fulfilling the request.')
 response_codes[503] = ('Service Unavailable',
-                      'The server is currently unable to handle the '
-                      'request due to a temporary overloading or '
-                      'maintenance of the server.')
+                       'The server is currently unable to handle the '
+                       'request due to a temporary overloading or '
+                       'maintenance of the server.')
 
 import re
 import urllib
 
-from rfc822 import formatdate as HTTPDate
-
 
 def urljoin(*atoms):
-    """Return the given path *atoms, joined into a single URL.
-    
+    """Return the given path \*atoms, joined into a single URL.
+
     This will correctly join a SCRIPT_NAME and PATH_INFO into the
     original URL, even if either atom is blank.
     """
@@ -37,24 +38,39 @@ def urljoin(*atoms):
     # Special-case the final url of "", and return "/" instead.
     return url or "/"
 
+
+def urljoin_bytes(*atoms):
+    """Return the given path *atoms, joined into a single URL.
+
+    This will correctly join a SCRIPT_NAME and PATH_INFO into the
+    original URL, even if either atom is blank.
+    """
+    url = ntob("/").join([x for x in atoms if x])
+    while ntob("//") in url:
+        url = url.replace(ntob("//"), ntob("/"))
+    # Special-case the final url of "", and return "/" instead.
+    return url or ntob("/")
+
+
 def protocol_from_http(protocol_str):
     """Return a protocol tuple from the given 'HTTP/x.y' string."""
     return int(protocol_str[5]), int(protocol_str[7])
 
+
 def get_ranges(headervalue, content_length):
     """Return a list of (start, stop) indices from a Range header, or None.
-    
+
     Each (start, stop) tuple will be composed of two ints, which are suitable
     for use in a slicing operation. That is, the header "Range: bytes=3-6",
     if applied against a Python string, is requesting resource[3:7]. This
     function will return the list [(3, 7)].
-    
+
     If this function returns an empty list, you should return HTTP 416.
     """
-    
+
     if not headervalue:
         return None
-    
+
     result = []
     bytesunit, byteranges = headervalue.split("=", 1)
     for brange in byteranges.split(","):
@@ -87,30 +103,44 @@ def get_ranges(headervalue, content_length):
                 # See rfc quote above.
                 return None
             # Negative subscript (last N bytes)
-            result.append((content_length - int(stop), content_length))
-    
+            #
+            # RFC 2616 Section 14.35.1:
+            #   If the entity is shorter than the specified suffix-length,
+            #   the entire entity-body is used.
+            if int(stop) > content_length:
+              result.append((0, content_length))
+            else:
+              result.append((content_length - int(stop), content_length))
+
     return result
 
 
 class HeaderElement(object):
+
     """An element (with parameters) from an HTTP header's element list."""
-    
+
     def __init__(self, value, params=None):
         self.value = value
         if params is None:
             params = {}
         self.params = params
-    
+
     def __cmp__(self, other):
         return cmp(self.value, other.value)
-    
-    def __unicode__(self):
-        p = [";%s=%s" % (k, v) for k, v in self.params.iteritems()]
-        return u"%s%s" % (self.value, "".join(p))
-    
+
+    def __lt__(self, other):
+        return self.value < other.value
+
     def __str__(self):
-        return str(self.__unicode__())
-    
+        p = [";%s=%s" % (k, v) for k, v in iteritems(self.params)]
+        return str("%s%s" % (self.value, "".join(p)))
+
+    def __bytes__(self):
+        return ntob(self.__str__())
+
+    def __unicode__(self):
+        return ntou(self.__str__())
+
     def parse(elementstr):
         """Transform 'token;key=val' to ('token', {'key': 'val'})."""
         # Split the element into a value and parameters. The 'value' may
@@ -131,7 +161,7 @@ class HeaderElement(object):
             params[key] = val
         return initial_value, params
     parse = staticmethod(parse)
-    
+
     def from_str(cls, elementstr):
         """Construct an instance from a string of the form 'token;key=val'."""
         ival, params = cls.parse(elementstr)
@@ -141,16 +171,18 @@ class HeaderElement(object):
 
 q_separator = re.compile(r'; *q *=')
 
+
 class AcceptElement(HeaderElement):
+
     """An element (with parameters) from an Accept* header's element list.
-    
+
     AcceptElement objects are comparable; the more-preferred object will be
     "less than" the less-preferred object. They are also therefore sortable;
     if you sort a list of AcceptElement objects, they will be listed in
     priority order; the most preferred value will be first. Yes, it should
     have been the other way around, but it's too late to fix now.
     """
-    
+
     def from_str(cls, elementstr):
         qvalue = None
         # The first "q" parameter (if any) separates the initial
@@ -161,46 +193,57 @@ class AcceptElement(HeaderElement):
             # The qvalue for an Accept header can have extensions. The other
             # headers cannot, but it's easier to parse them as if they did.
             qvalue = HeaderElement.from_str(atoms[0].strip())
-        
+
         media_type, params = cls.parse(media_range)
         if qvalue is not None:
             params["q"] = qvalue
         return cls(media_type, params)
     from_str = classmethod(from_str)
-    
+
     def qvalue(self):
         val = self.params.get("q", "1")
         if isinstance(val, HeaderElement):
             val = val.value
         return float(val)
     qvalue = property(qvalue, doc="The qvalue, or priority, of this value.")
-    
+
     def __cmp__(self, other):
         diff = cmp(self.qvalue, other.qvalue)
         if diff == 0:
             diff = cmp(str(self), str(other))
         return diff
 
+    def __lt__(self, other):
+        if self.qvalue == other.qvalue:
+            return str(self) < str(other)
+        else:
+            return self.qvalue < other.qvalue
 
+RE_HEADER_SPLIT = re.compile(',(?=(?:[^"]*"[^"]*")*[^"]*$)')
 def header_elements(fieldname, fieldvalue):
-    """Return a sorted HeaderElement list from a comma-separated header str."""
+    """Return a sorted HeaderElement list from a comma-separated header string.
+    """
     if not fieldvalue:
         return []
-    
+
     result = []
-    for element in fieldvalue.split(","):
+    for element in RE_HEADER_SPLIT.split(fieldvalue):
         if fieldname.startswith("Accept") or fieldname == 'TE':
             hv = AcceptElement.from_str(element)
         else:
             hv = HeaderElement.from_str(element)
         result.append(hv)
-    result.sort()
-    result.reverse()
-    return result
+
+    return list(reversed(sorted(result)))
+
 
 def decode_TEXT(value):
-    """Decode RFC-2047 TEXT (e.g. "=?utf-8?q?f=C3=BCr?=" -> u"f\xfcr")."""
-    from email.Header import decode_header
+    r"""Decode :rfc:`2047` TEXT (e.g. "=?utf-8?q?f=C3=BCr?=" -> "f\xfcr")."""
+    try:
+        # Python 3
+        from email.header import decode_header
+    except ImportError:
+        from email.Header import decode_header
     atoms = decode_header(value)
     decodedvalue = ""
     for atom, charset in atoms:
@@ -209,18 +252,19 @@ def decode_TEXT(value):
         decodedvalue += atom
     return decodedvalue
 
+
 def valid_status(status):
     """Return legal HTTP status Code, Reason-phrase and Message.
-    
+
     The status arg must be an int, or a str that begins with an int.
-    
+
     If status is an int, or a str and no reason-phrase is supplied,
     a default reason-phrase will be provided.
     """
-    
+
     if not status:
         status = 200
-    
+
     status = str(status)
     parts = status.split(" ", 1)
     if len(parts) == 1:
@@ -230,28 +274,32 @@ def valid_status(status):
     else:
         code, reason = parts
         reason = reason.strip()
-    
+
     try:
         code = int(code)
     except ValueError:
         raise ValueError("Illegal response status from server "
                          "(%s is non-numeric)." % repr(code))
-    
+
     if code < 100 or code > 599:
         raise ValueError("Illegal response status from server "
                          "(%s is out of range)." % repr(code))
-    
+
     if code not in response_codes:
         # code is unknown but not illegal
         default_reason, message = "", ""
     else:
         default_reason, message = response_codes[code]
-    
+
     if reason is None:
         reason = default_reason
-    
+
     return code, reason, message
 
+
+# NOTE: the parse_qs functions that follow are modified version of those
+# in the python3.0 source - we need to pass through an encoding to the unquote
+# method, but the default parse_qs function doesn't allow us to.  These do.
 
 def _parse_qs(qs, keep_blank_values=0, strict_parsing=0, encoding='utf-8'):
     """Parse a query given as a string argument.
@@ -287,10 +335,8 @@ def _parse_qs(qs, keep_blank_values=0, strict_parsing=0, encoding='utf-8'):
             else:
                 continue
         if len(nv[1]) or keep_blank_values:
-            name = urllib.unquote(nv[0].replace('+', ' '))
-            name = name.decode(encoding, 'strict')
-            value = urllib.unquote(nv[1].replace('+', ' '))
-            value = value.decode(encoding, 'strict')
+            name = unquote_qs(nv[0], encoding)
+            value = unquote_qs(nv[1], encoding)
             if name in d:
                 if not isinstance(d[name], list):
                     d[name] = [d[name]]
@@ -302,9 +348,10 @@ def _parse_qs(qs, keep_blank_values=0, strict_parsing=0, encoding='utf-8'):
 
 image_map_pattern = re.compile(r"[0-9]+,[0-9]+")
 
+
 def parse_query_string(query_string, keep_blank_values=True, encoding='utf-8'):
     """Build a params dictionary from a query_string.
-    
+
     Duplicate key/value pairs in the provided query_string will be
     returned as {'key': [val1, val2, ...]}. Single key/values will
     be returned as strings: {'key': 'value'}.
@@ -320,40 +367,42 @@ def parse_query_string(query_string, keep_blank_values=True, encoding='utf-8'):
 
 
 class CaseInsensitiveDict(dict):
+
     """A case-insensitive dict subclass.
-    
+
     Each key is changed on entry to str(key).title().
     """
-    
+
     def __getitem__(self, key):
         return dict.__getitem__(self, str(key).title())
-    
+
     def __setitem__(self, key, value):
         dict.__setitem__(self, str(key).title(), value)
-    
+
     def __delitem__(self, key):
         dict.__delitem__(self, str(key).title())
-    
+
     def __contains__(self, key):
         return dict.__contains__(self, str(key).title())
-    
+
     def get(self, key, default=None):
         return dict.get(self, str(key).title(), default)
-    
-    def has_key(self, key):
-        return dict.has_key(self, str(key).title())
-    
+
+    if hasattr({}, 'has_key'):
+        def has_key(self, key):
+            return str(key).title() in self
+
     def update(self, E):
         for k in E.keys():
             self[str(k).title()] = E[k]
-    
+
     def fromkeys(cls, seq, value=None):
         newdict = cls()
         for k in seq:
             newdict[str(k).title()] = value
         return newdict
     fromkeys = classmethod(fromkeys)
-    
+
     def setdefault(self, key, x=None):
         key = str(key).title()
         try:
@@ -361,86 +410,127 @@ class CaseInsensitiveDict(dict):
         except KeyError:
             self[key] = x
             return x
-    
+
     def pop(self, key, default):
         return dict.pop(self, str(key).title(), default)
 
 
+#   TEXT = <any OCTET except CTLs, but including LWS>
+#
+# A CRLF is allowed in the definition of TEXT only as part of a header
+# field continuation. It is expected that the folding LWS will be
+# replaced with a single SP before interpretation of the TEXT value."
+if nativestr == bytestr:
+    header_translate_table = ''.join([chr(i) for i in xrange(256)])
+    header_translate_deletechars = ''.join(
+        [chr(i) for i in xrange(32)]) + chr(127)
+else:
+    header_translate_table = None
+    header_translate_deletechars = bytes(range(32)) + bytes([127])
+
+
 class HeaderMap(CaseInsensitiveDict):
+
     """A dict subclass for HTTP request and response headers.
-    
+
     Each key is changed on entry to str(key).title(). This allows headers
     to be case-insensitive and avoid duplicates.
-    
-    Values are header values (decoded according to RFC 2047 if necessary).
+
+    Values are header values (decoded according to :rfc:`2047` if necessary).
     """
-    
+
     protocol = (1, 1)
-    
+    encodings = ["ISO-8859-1"]
+
+    # Someday, when http-bis is done, this will probably get dropped
+    # since few servers, clients, or intermediaries do it. But until then,
+    # we're going to obey the spec as is.
+    # "Words of *TEXT MAY contain characters from character sets other than
+    # ISO-8859-1 only when encoded according to the rules of RFC 2047."
+    use_rfc_2047 = True
+
     def elements(self, key):
         """Return a sorted list of HeaderElements for the given header."""
         key = str(key).title()
         value = self.get(key)
         return header_elements(key, value)
-    
+
     def values(self, key):
         """Return a sorted list of HeaderElement.value for the given header."""
         return [e.value for e in self.elements(key)]
-    
+
     def output(self):
         """Transform self into a list of (name, value) tuples."""
-        header_list = []
-        for k, v in self.items():
-            if isinstance(k, unicode):
-                k = k.encode("ISO-8859-1")
-            
+        return list(self.encode_header_items(self.items()))
+
+    def encode_header_items(cls, header_items):
+        """
+        Prepare the sequence of name, value tuples into a form suitable for
+        transmitting on the wire for HTTP.
+        """
+        for k, v in header_items:
+            if isinstance(k, unicodestr):
+                k = cls.encode(k)
+
             if not isinstance(v, basestring):
                 v = str(v)
-            
-            if isinstance(v, unicode):
-                v = self.encode(v)
-            header_list.append((k, v))
-        return header_list
-    
-    def encode(self, v):
-        """Return the given header value, encoded for HTTP output."""
-        # HTTP/1.0 says, "Words of *TEXT may contain octets 
-        # from character sets other than US-ASCII." and 
-        # "Recipients of header field TEXT containing octets 
-        # outside the US-ASCII character set may assume that 
-        # they represent ISO-8859-1 characters." 
-        try:
-            v = v.encode("ISO-8859-1")
-        except UnicodeEncodeError:
-            if self.protocol == (1, 1):
-                # Encode RFC-2047 TEXT 
-                # (e.g. u"\u8200" -> "=?utf-8?b?6IiA?="). 
-                # We do our own here instead of using the email module
-                # because we never want to fold lines--folding has
-                # been deprecated by the HTTP working group.
-                v = b2a_base64(v.encode('utf-8'))
-                v = ('=?utf-8?b?' + v.strip('\n') + '?=')
-            else:
-                raise
-        return v
+
+            if isinstance(v, unicodestr):
+                v = cls.encode(v)
+
+            # See header_translate_* constants above.
+            # Replace only if you really know what you're doing.
+            k = k.translate(header_translate_table,
+                            header_translate_deletechars)
+            v = v.translate(header_translate_table,
+                            header_translate_deletechars)
+
+            yield (k, v)
+    encode_header_items = classmethod(encode_header_items)
+
+    def encode(cls, v):
+        """Return the given header name or value, encoded for HTTP output."""
+        for enc in cls.encodings:
+            try:
+                return v.encode(enc)
+            except UnicodeEncodeError:
+                continue
+
+        if cls.protocol == (1, 1) and cls.use_rfc_2047:
+            # Encode RFC-2047 TEXT
+            # (e.g. u"\u8200" -> "=?utf-8?b?6IiA?=").
+            # We do our own here instead of using the email module
+            # because we never want to fold lines--folding has
+            # been deprecated by the HTTP working group.
+            v = b2a_base64(v.encode('utf-8'))
+            return (ntob('=?utf-8?b?') + v.strip(ntob('\n')) + ntob('?='))
+
+        raise ValueError("Could not encode header part %r using "
+                         "any of the encodings %r." %
+                         (v, cls.encodings))
+    encode = classmethod(encode)
+
 
 class Host(object):
+
     """An internet address.
-    
-    name should be the client's host name. If not available (because no DNS
+
+    name
+        Should be the client's host name. If not available (because no DNS
         lookup is performed), the IP address should be used instead.
+
     """
-    
+
     ip = "0.0.0.0"
     port = 80
     name = "unknown.tld"
-    
+
     def __init__(self, ip, port, name=None):
         self.ip = ip
         self.port = port
         if name is None:
             name = ip
         self.name = name
-    
+
     def __repr__(self):
         return "httputil.Host(%r, %r, %r)" % (self.ip, self.port, self.name)
