@@ -21,7 +21,10 @@
 from __future__ import with_statement
 
 import os.path
+
 import sys
+if sys.version_info >= (2, 7, 9):
+    import ssl as sslModule
 
 # Try importing Python 2 modules using new names
 try:
@@ -131,7 +134,10 @@ def processEpisode(dir_to_process, org_NZB_name=None):
         password_mgr = urllib2.HTTPPasswordMgrWithDefaultRealm()
         password_mgr.add_password(None, url, username, password)
         handler = HTTPBasicAuthHandler(password_mgr)
-        opener = urllib2.build_opener(handler)
+        if sys.version_info >= (2, 7, 9):
+            opener = urllib2.build_opener(handler, urllib2.HTTPSHandler(context=sslModule._create_unverified_context()))
+        else:
+            opener = urllib2.build_opener(handler)
         urllib2.install_opener(opener)
 
         result = opener.open(url).readlines()

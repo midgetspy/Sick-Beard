@@ -45,7 +45,7 @@ class NMJv2Notifier:
         try:
             url_loc = "http://" + host + ":8008/file_operation?arg0=list_user_storage_file&arg1=&arg2=" + instance + "&arg3=20&arg4=true&arg5=true&arg6=true&arg7=all&arg8=name_asc&arg9=false&arg10=false"
             req = urllib2.Request(url_loc)
-            handle1 = urllib2.urlopen(req)
+            handle1 = sickbeard.helpers.getURLFileLike(req)
             response1 = handle1.read()
             # TODO: convert to etree?
             xml = parseString(response1)
@@ -55,7 +55,7 @@ class NMJv2Notifier:
                 xmlData = xmlTag.replace('<path>', '').replace('</path>', '').replace('[=]', '')
                 url_db = "http://" + host + ":8008/metadata_database?arg0=check_database&arg1=" + xmlData
                 reqdb = urllib2.Request(url_db)
-                handledb = urllib2.urlopen(reqdb)
+                handledb = sickbeard.helpers.getURLFileLike(reqdb)
                 responsedb = handledb.read()
                 xmldb = parseString(responsedb)
                 returnvalue = xmldb.getElementsByTagName('returnValue')[0].toxml().replace('<returnValue>', '').replace('</returnValue>', '')
@@ -94,10 +94,10 @@ class NMJv2Notifier:
             logger.log(u"NMJv2: Try to mount network drive via url: %s" % (host), logger.DEBUG)
             prereq = urllib2.Request(url_scandir)
             req = urllib2.Request(url_updatedb)
-            handle1 = urllib2.urlopen(prereq)
+            handle1 = sickbeard.helpers.getURLFileLike(prereq)
             response1 = handle1.read()
             time.sleep(0.5)
-            handle2 = urllib2.urlopen(req)
+            handle2 = sickbeard.helpers.getURLFileLike(req)
             response2 = handle2.read()
         except IOError, e:
             logger.log(u"NMJv2: Could not contact Popcorn Hour on host %s: %s" % (host, e), logger.WARNING)

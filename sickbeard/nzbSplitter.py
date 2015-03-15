@@ -18,7 +18,6 @@
 
 from __future__ import with_statement
 
-import urllib2
 import xml.etree.cElementTree as etree
 import xml.etree
 import re
