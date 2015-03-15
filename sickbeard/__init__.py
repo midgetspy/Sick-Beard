@@ -266,6 +266,7 @@ NZBGET_HOST = None
 
 TORRENT_USERNAME = None
 TORRENT_PASSWORD = None
+TORRENT_LABEL = None
 TORRENT_HOST = ''
 TORRENT_PATH = ''
 TORRENT_RATIO = ''
@@ -387,7 +388,7 @@ def initialize(consoleLogging=True):
         global ACTUAL_LOG_DIR, LOG_DIR, WEB_PORT, WEB_LOG, WEB_ROOT, WEB_USERNAME, WEB_PASSWORD, WEB_HOST, WEB_IPV6, USE_API, API_KEY, ENABLE_HTTPS, HTTPS_CERT, HTTPS_KEY, \
                 USE_NZBS, USE_TORRENTS, NZB_METHOD, NZB_DIR,TORRENT_METHOD, DOWNLOAD_PROPERS, PREFER_EPISODE_RELEASES, \
                 SAB_USERNAME, SAB_PASSWORD, SAB_APIKEY, SAB_CATEGORY, SAB_HOST, \
-                TORRENT_USERNAME, TORRENT_PASSWORD, TORRENT_HOST, TORRENT_PATH, TORRENT_RATIO, TORRENT_PAUSED, \
+                TORRENT_USERNAME, TORRENT_PASSWORD, TORRENT_LABEL, TORRENT_HOST, TORRENT_PATH, TORRENT_RATIO, TORRENT_PAUSED, \
                 NZBGET_PASSWORD, NZBGET_CATEGORY, NZBGET_HOST, currentSearchScheduler, backlogSearchScheduler, \
                 USE_XBMC, XBMC_NOTIFY_ONSNATCH, XBMC_NOTIFY_ONDOWNLOAD, XBMC_UPDATE_FULL, XBMC_UPDATE_ONLYFIRST, \
                 XBMC_UPDATE_LIBRARY, XBMC_HOST, XBMC_USERNAME, XBMC_PASSWORD, \
@@ -685,6 +686,7 @@ def initialize(consoleLogging=True):
         
         TORRENT_USERNAME = check_setting_str(CFG, 'TORRENT', 'torrent_username', '')
         TORRENT_PASSWORD = check_setting_str(CFG, 'TORRENT', 'torrent_password', '')
+        TORRENT_LABEL = check_setting_str(CFG, 'TORRENT', 'torrent_label', '')
         TORRENT_HOST = check_setting_str(CFG, 'TORRENT', 'torrent_host', '')
         TORRENT_PATH = check_setting_str(CFG, 'TORRENT', 'torrent_path', '')
         TORRENT_RATIO = check_setting_str(CFG, 'TORRENT', 'torrent_ratio', '')
@@ -1280,6 +1282,7 @@ def save_config():
     new_config['TORRENT'] = {}
     new_config['TORRENT']['torrent_username'] = TORRENT_USERNAME
     new_config['TORRENT']['torrent_password'] = TORRENT_PASSWORD
+    new_config['TORRENT']['torrent_label'] = TORRENT_LABEL
     new_config['TORRENT']['torrent_host'] = TORRENT_HOST
     new_config['TORRENT']['torrent_path'] = TORRENT_PATH
     new_config['TORRENT']['torrent_ratio'] = TORRENT_RATIO
