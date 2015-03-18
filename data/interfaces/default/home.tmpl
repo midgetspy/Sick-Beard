@@ -43,7 +43,7 @@
 
 #set $max_download_count = $max_download_count * 100
 
-<script type="text/javascript" charset="utf-8">
+<script>
 <!--
 
 \$.tablesorter.addParser({
@@ -70,10 +70,10 @@
     type: 'numeric'
 });
 
-\$.tablesorter.addParser({ 
+\$.tablesorter.addParser({
     id: 'eps',
     is: function(s) {
-        return false; 
+        return false;
     },
     format: function(s) {
         match = s.match(/^(.*)/);
@@ -102,7 +102,7 @@
     type: 'numeric'
 });
 
-\$(document).ready(function(){ 
+\$(document).ready(function(){
 
     \$("#showListTable:has(tbody tr)").tablesorter({
         sortList: [[5,1],[1,0]],
@@ -219,7 +219,7 @@ $myShowList.sort(lambda x, y: cmp(x.name, y.name))
         <td align="center"><span class="quality Custom">Custom</span></td>
     #end if
         <td align="center"><span style="display: none;">$download_stat</span><div id="progressbar$curShow.tvdbid" style="position:relative;"></div>
-          <script type="text/javascript">
+          <script>
           <!--
                 \$(function() {
                  \$("\#progressbar$curShow.tvdbid").progressbar({

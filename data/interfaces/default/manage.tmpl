@@ -8,7 +8,7 @@
 #import os.path
 #include $os.path.join($sickbeard.PROG_DIR, "data/interfaces/default/inc_top.tmpl")
 
-<script type="text/javascript" charset="utf-8">
+<script>
 <!--
 \$.tablesorter.addParser({
     id: 'showNames',
@@ -31,8 +31,8 @@
     type: 'numeric'
 });
 
-\$(document).ready(function() 
-{ 
+\$(document).ready(function()
+{
     \$("#massUpdateTable:has(tbody tr)").tablesorter({
         sortList: [[3,0]],
         textExtraction: {
@@ -51,11 +51,11 @@
             9: { sorter: false},
             10: { sorter: false}
         }
-    }); 
+    });
 });
 //-->
 </script>
-<script type="text/javascript" src="$sbRoot/js/massUpdate.js?$sbPID"></script>
+<script src="$sbRoot/js/massUpdate.js?$sbPID"></script>
 
 <form name="massUpdateForm" method="post" action="massUpdate">
 
@@ -127,7 +127,7 @@ $myShowList.sort(lambda x, y: cmp(x.name, y.name))
     <td align="center"><span class="quality $qualityPresetStrings[$curShow.quality]">$qualityPresetStrings[$curShow.quality]</span></td>
 #else:
     <td align="center"><span class="quality Custom">Custom</span></td>
-#end if 
+#end if
     <td align="center"><img src="$sbRoot/images/#if int($curShow.flatten_folders) == 1 then "yes16.png\" alt=\"Y\"" else "no16.png\" alt=\"N\""# width="16" height="16" /></td>
     <td align="center">$curShow.status</td>
     <td align="center">$curUpdate</td>

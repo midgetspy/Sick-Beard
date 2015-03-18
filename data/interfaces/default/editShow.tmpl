@@ -10,8 +10,8 @@
 #import os.path
 #include $os.path.join($sickbeard.PROG_DIR, "data/interfaces/default/inc_top.tmpl")
 
-<script type="text/javascript" src="$sbRoot/js/qualityChooser.js?$sbPID"></script>
-<script type="text/javascript" charset="utf-8">
+<script src="$sbRoot/js/qualityChooser.js?$sbPID"></script>
+<script charset="utf-8">
 <!--
 \$(document).ready(function(){
 
@@ -94,7 +94,7 @@ Separate words with a comma, e.g. "word1,word2,word3"<br />
 <input class="btn" type="submit" value="Submit" />
 </form>
 
-<script type="text/javascript" charset="utf-8">
+<script>
 <!--
     jQuery('#location').fileBrowser({ title: 'Select Show Location' });
 //-->
