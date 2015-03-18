@@ -44,19 +44,6 @@ class IPTorrentsProvider(generic.TorrentProvider):
     def imageName(self):
         return 'iptorrents.png'
 
-    def getURL(self, url, post_data=None, headers=None):
-
-        if not headers:
-            headers = []
-
-        data = helpers.getURL(url, post_data, headers)
-
-        if not data:
-            logger.log(u"Error loading " + self.name + " URL: " + url + " Your User Number and/or Torrent Pass may be incorrect", logger.ERROR)
-            return None
-
-        return data
-
     def _checkAuth(self):
 
         if not sickbeard.IPTORRENTS_U:
