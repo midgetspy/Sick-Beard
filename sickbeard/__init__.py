@@ -18,7 +18,7 @@
 
 from __future__ import with_statement
 
-import cherrypy
+from lib import cherrypy
 import datetime
 import os
 import re
