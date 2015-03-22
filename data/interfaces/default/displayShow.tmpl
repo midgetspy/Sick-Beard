@@ -52,7 +52,9 @@
 <div class="navShow"><img id="nextShow" width="16" height="18" src="$sbRoot/images/next.gif" alt="&gt;&gt;" title="Next Show" /></div>
 </div>
 
-<div id="summary" class="align-left">
+<div id="summary" class="align-left" style="overflow: auto">
+<img src="$sbRoot/showPoster/?show=$show.tvdbid&which=poster" alt=""
+    style="float: right; height: 200px; width: auto; margin: 0 0 0 1em;">
 <table>
 #if $show.network and $show.airs:
     <tr><td class="showLegend">Airs: </td><td>$show.airs on $show.network</td></tr>
