@@ -1398,7 +1398,7 @@ def HomeMenu():
     return [
         { 'title': 'Add Shows',              'path': 'home/addShows/',                                          },
         { 'title': 'Manual Post-Processing', 'path': 'home/postprocess/'                                        },
-        { 'title': 'Update XBMC',            'path': 'home/updateXBMC/', 'requires': haveXBMC                   },
+        { 'title': 'Update Kodi',            'path': 'home/updateXBMC/', 'requires': haveXBMC                   },
         { 'title': 'Update Plex',            'path': 'home/updatePLEX/', 'requires': havePLEX                   },
         { 'title': 'Restart',                'path': 'home/restart/?pid=' + str(sickbeard.PID), 'confirm': True   },
         { 'title': 'Shutdown',               'path': 'home/shutdown/?pid=' + str(sickbeard.PID), 'confirm': True  },
@@ -2005,9 +2005,9 @@ class Home:
         for curHost in [x.strip() for x in host.split(",")]:
             curResult = notifiers.xbmc_notifier.test_notify(urllib.unquote_plus(curHost), username, password)
             if len(curResult.split(":")) > 2 and 'OK' in curResult.split(":")[2]:
-                finalResult += "Test XBMC notice sent successfully to " + urllib.unquote_plus(curHost)
+                finalResult += "Test Kodi notice sent successfully to " + urllib.unquote_plus(curHost)
             else:
-                finalResult += "Test XBMC notice failed to " + urllib.unquote_plus(curHost)
+                finalResult += "Test Kodi notice failed to " + urllib.unquote_plus(curHost)
             finalResult += "<br />\n"
 
         return finalResult
@@ -2238,7 +2238,7 @@ class Home:
                 t.submenu.append({ 'title': 'Delete',               'path': 'home/deleteShow?show=%d' % showObj.tvdbid, 'confirm': True })
                 t.submenu.append({ 'title': 'Re-scan files',        'path': 'home/refreshShow?show=%d' % showObj.tvdbid })
                 t.submenu.append({ 'title': 'Force Full Update',    'path': 'home/updateShow?show=%d&amp;force=1' % showObj.tvdbid })
-                t.submenu.append({ 'title': 'Update show in XBMC',  'path': 'home/updateXBMC?show=%d' % showObj.tvdbid, 'requires': haveXBMC })
+                t.submenu.append({ 'title': 'Update show in Kodi',  'path': 'home/updateXBMC?show=%d' % showObj.tvdbid, 'requires': haveXBMC })
                 t.submenu.append({ 'title': 'Preview Rename',       'path': 'home/testRename?show=%d' % showObj.tvdbid })
 
         t.show = showObj
@@ -2474,9 +2474,9 @@ class Home:
             show_obj = None
 
         if notifiers.xbmc_notifier.update_library(show_obj=show_obj):
-            ui.notifications.message("Library update command sent to XBMC host(s): " + host)
+            ui.notifications.message("Library update command sent to Kodi host(s): " + host)
         else:
-            ui.notifications.error("Unable to contact one or more XBMC host(s): " + host)
+            ui.notifications.error("Unable to contact one or more Kodi host(s): " + host)
         redirect("/home/")
 
     @cherrypy.expose

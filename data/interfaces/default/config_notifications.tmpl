@@ -23,17 +23,17 @@
 
                 <div class="component-group clearfix">
                     <div class="component-group-desc">
-                        <img class="notifier-icon" src="$sbRoot/images/notifiers/xbmc.png" alt="" title="XBMC" />
-                        <h3><a href="http://xbmc.org/" rel="noreferrer" onclick="window.open('${sickbeard.ANON_REDIRECT}' + this.href, '_blank'); return false;">XBMC</a></h3>
+                        <img class="notifier-icon" src="$sbRoot/images/notifiers/kodi.png" alt="" title="Kodi" />
+                        <h3><a href="http://kodi.tv/" rel="noreferrer" onclick="window.open('${sickbeard.ANON_REDIRECT}' + this.href, '_blank'); return false;">Kodi</a></h3>
                         <p>A free and open source cross-platform media center and home entertainment system software with a 10-foot user interface designed for the living-room TV.</p>
-                        <p>For SickBeard to communicate with XBMC you must turn on the <a href="http://wiki.xbmc.org/index.php?title=Webserver" rel="noreferrer" onclick="window.open('${sickbeard.ANON_REDIRECT}' + this.href, '_blank'); return false;">XBMC Webserver</a>.</p>
+                        <p>For SickBeard to communicate with Kodi you must turn on the <a href="http://kodi.wiki/view/Webserver" rel="noreferrer" onclick="window.open('${sickbeard.ANON_REDIRECT}' + this.href, '_blank'); return false;">Kodi Webserver</a>.</p>
                     </div>
                     <fieldset class="component-group-list">
                         <div class="field-pair">
                             <input type="checkbox" class="enabler" name="use_xbmc" id="use_xbmc" #if $sickbeard.USE_XBMC then "checked=\"checked\"" else ""# />
                             <label class="clearfix" for="use_xbmc">
                                 <span class="component-title">Enable</span>
-                                <span class="component-desc">Should Sick Beard send XBMC commands?</span>
+                                <span class="component-desc">Should Sick Beard send Kodi commands?</span>
                             </label>
                         </div>
 
@@ -82,12 +82,12 @@
                             </div>
                             <div class="field-pair">
                                 <label class="nocheck clearfix">
-                                    <span class="component-title">XBMC IP:Port</span>
+                                    <span class="component-title">Kodi IP:Port</span>
                                     <input type="text" name="xbmc_host" id="xbmc_host" value="$sickbeard.XBMC_HOST" size="35" />
                                 </label>
                                 <label class="nocheck clearfix">
                                     <span class="component-title">&nbsp;</span>
-                                    <span class="component-desc">Host running XBMC (eg. 192.168.1.100:8080)</span>
+                                    <span class="component-desc">Host running Kodi (eg. 192.168.1.100:8080)</span>
                                 </label>
                                 <label class="nocheck clearfix">
                                     <span class="component-title">&nbsp;</span>
@@ -96,26 +96,26 @@
                             </div>
                             <div class="field-pair">
                                 <label class="nocheck clearfix">
-                                    <span class="component-title">XBMC Username</span>
+                                    <span class="component-title">Kodi Username</span>
                                     <input type="text" name="xbmc_username" id="xbmc_username" value="$sickbeard.XBMC_USERNAME" size="35" />
                                 </label>
                                 <label class="nocheck clearfix">
                                     <span class="component-title">&nbsp;</span>
-                                    <span class="component-desc">Username of your XBMC server (blank for none)</span>
+                                    <span class="component-desc">Username of your Kodi server (blank for none)</span>
                                 </label>
                             </div>
                             <div class="field-pair">
                                 <label class="nocheck clearfix">
-                                    <span class="component-title">XBMC Password</span>
+                                    <span class="component-title">Kodi Password</span>
                                     <input type="password" name="xbmc_password" id="xbmc_password" value="$sickbeard.XBMC_PASSWORD" size="35" />
                                 </label>
                                 <label class="nocheck clearfix">
                                     <span class="component-title">&nbsp;</span>
-                                    <span class="component-desc">Password of your XBMC server (blank for none)</span>
+                                    <span class="component-desc">Password of your Kodi server (blank for none)</span>
                                 </label>
                             </div>
                             <div class="testNotification" id="testXBMC-result">Click below to test.</div>
-                            <input type="button" class="btn" value="Test XBMC" id="testXBMC" />
+                            <input type="button" class="btn" value="Test Kodi" id="testXBMC" />
                             <input type="submit" class="btn config_submitter" value="Save Changes" />
                         </div><!-- /content_use_xbmc //-->
 
@@ -128,7 +128,7 @@
                         <img class="notifier-icon" src="$sbRoot/images/notifiers/plex.png" alt="" title="Plex" />
                         <h3><a href="http://www.plexapp.com/" rel="noreferrer" onclick="window.open('${sickbeard.ANON_REDIRECT}' + this.href, '_blank'); return false;">Plex</a></h3>
                         <p>Plex organizes all of your personal media, wherever you keep it, so you can enjoy it on any device.</p>
-                        <p>For sending notifications to Plex Home Theater (PHT) clients, use the XBMC notifier with port <b>3005</b>.</p>
+                        <p>For sending notifications to Plex Home Theater (PHT) clients, use the Kodi notifier with port <b>3005</b>.</p>
                     </div>
                     <fieldset class="component-group-list">
                         <div class="field-pair">
