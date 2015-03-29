@@ -32,8 +32,6 @@ tests/cache.db
 *.sw?
 .idea
 
-B
-
 # OS generated files #
 ######################
 .Spotlight-V100
@@ -44,3 +42,4 @@ ehthumbs.db
 Thumbs.db
 .directory
 *~
+
