@@ -1015,7 +1015,8 @@ class ConfigProviders:
                       tvtorrents_digest=None, tvtorrents_hash=None,
                       torrentleech_key=None,
                       btn_api_key=None, hdbits_username=None, hdbits_passkey=None,
-                      pisexy_username=None, pisexy_passkey=None, provider_order=None):
+                      pisexy_username=None, pisexy_passkey=None,
+                      provider_order=None):
 
         results = []
 
