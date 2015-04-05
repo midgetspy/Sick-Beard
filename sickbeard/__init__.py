@@ -34,7 +34,7 @@ from threading import Lock
 # apparently py2exe won't build these unless they're imported somewhere
 from sickbeard import providers, metadata
 
-from providers import ezrss, tvtorrents, torrentleech, btn, newznab, womble, omgwtfnzbs, hdbits
+from providers import ezrss, tvtorrents, torrentleech, btn, newznab, womble, omgwtfnzbs, hdbits, pisexy
 from sickbeard.config import CheckSection, check_setting_int, check_setting_str, ConfigMigrator
 
 from sickbeard import searchCurrent, searchBacklog, showUpdater, versionChecker, properFinder, autoPostProcesser
@@ -164,6 +164,10 @@ EZRSS = False
 HDBITS = False
 HDBITS_USERNAME = None
 HDBITS_PASSKEY = None
+
+PISEXY = False
+PISEXY_USERNAME = None
+PISEXY_PASSKEY = None
 
 TVTORRENTS = False
 TVTORRENTS_DIGEST = None
@@ -344,7 +348,8 @@ def initialize(consoleLogging=True):
                 USE_PLEX, PLEX_NOTIFY_ONSNATCH, PLEX_NOTIFY_ONDOWNLOAD, PLEX_UPDATE_LIBRARY, \
                 PLEX_SERVER_HOST, PLEX_HOST, PLEX_USERNAME, PLEX_PASSWORD, \
                 showUpdateScheduler, __INITIALIZED__, LAUNCH_BROWSER, showList, loadingShowList, \
-                NEWZNAB_DATA, NZBS, NZBS_UID, NZBS_HASH, EZRSS, HDBITS, HDBITS_USERNAME, HDBITS_PASSKEY, TVTORRENTS, TVTORRENTS_DIGEST, TVTORRENTS_HASH, BTN, BTN_API_KEY, TORRENTLEECH, TORRENTLEECH_KEY, \
+                NEWZNAB_DATA, NZBS, NZBS_UID, NZBS_HASH, EZRSS, HDBITS, HDBITS_USERNAME, HDBITS_PASSKEY, PISEXY, PISEXY_USERNAME, PISEXY_PASSKEY,\
+                TVTORRENTS, TVTORRENTS_DIGEST, TVTORRENTS_HASH, BTN, BTN_API_KEY, TORRENTLEECH, TORRENTLEECH_KEY, \
                 TORRENT_DIR, USENET_RETENTION, SOCKET_TIMEOUT, \
                 SEARCH_FREQUENCY, DEFAULT_SEARCH_FREQUENCY, BACKLOG_SEARCH_FREQUENCY, \
                 QUALITY_DEFAULT, FLATTEN_FOLDERS_DEFAULT, STATUS_DEFAULT, \
@@ -513,6 +518,11 @@ def initialize(consoleLogging=True):
         HDBITS = bool(check_setting_int(CFG, 'HDBITS', 'hdbits', 0))
         HDBITS_USERNAME = check_setting_str(CFG, 'HDBITS', 'hdbits_username', '')
         HDBITS_PASSKEY = check_setting_str(CFG, 'HDBITS', 'hdbits_passkey', '')
+
+        CheckSection(CFG, 'PISEXY')
+        PISEXY = bool(check_setting_int(CFG, 'PISEXY', 'pisexy', 0))
+        PISEXY_USERNAME = check_setting_str(CFG, 'PISEXY', 'pisexy_username', '')
+        PISEXY_PASSKEY = check_setting_str(CFG, 'PISEXY', 'pisexy_passkey', '')
 
         CheckSection(CFG, 'TVTORRENTS')
         TVTORRENTS = bool(check_setting_int(CFG, 'TVTORRENTS', 'tvtorrents', 0))
@@ -1062,6 +1072,11 @@ def save_config():
     new_config['HDBITS']['hdbits'] = int(HDBITS)
     new_config['HDBITS']['hdbits_username'] = HDBITS_USERNAME
     new_config['HDBITS']['hdbits_passkey'] = HDBITS_PASSKEY
+
+    new_config['PISEXY'] = {}
+    new_config['PISEXY']['pisexy'] = int(PISEXY)
+    new_config['PISEXY']['pisexy_username'] = PISEXY_USERNAME
+    new_config['PISEXY']['pisexy_passkey'] = PISEXY_PASSKEY
 
     new_config['TVTORRENTS'] = {}
     new_config['TVTORRENTS']['tvtorrents'] = int(TVTORRENTS)
