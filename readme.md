@@ -43,7 +43,7 @@ If you find a bug please report it or it'll never get fixed. Verify that it hasn
 
 [cherrypy]: http://www.cherrypy.org
 [cheetah]: http://www.cheetahtemplate.org/
-[simplejson]: http://code.google.com/p/simplejson/ 
+[simplejson]: https://github.com/simplejson/simplejson 
 [tvdb_api]: http://github.com/dbr/tvdb_api
 [configobj]: http://www.voidspace.org.uk/python/configobj.html
 [sabnzbd]: http://www.sabnzbd.org/
