@@ -14,6 +14,7 @@ class QualityTests(unittest.TestCase):
         self.assertEqual(config.clean_url("google.com/xml.rpc"), "http://google.com/xml.rpc")
         self.assertEqual(config.clean_url("google.com"), "http://google.com/")
         self.assertEqual(config.clean_url("http://www.example.com/folder/"), "http://www.example.com/folder/")
+        self.assertEqual(config.clean_url("scgi:///home/user/.config/path/socket"), "scgi:///home/user/.config/path/socket")
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(QualityTests)
