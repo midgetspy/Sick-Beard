@@ -37,7 +37,7 @@ Manage episodes with status <select name="whichStatus">
 <hr>
 <h3>${len($sorted_show_ids)} Shows containing $common.statusStrings[$int($whichStatus)] episodes <small>(#if $includeSpecials then "+Specials" else "-Specials"# #if $excludeNoAirdate then "-NoAirdate" else "+NoAirdate"#)</small></h3>
 
-<script type="text/javascript" src="$sbRoot/js/manageEpisodeStatuses.js?$sbPID"></script>
+<script src="$sbRoot/js/manageEpisodeStatuses.js?$sbPID"></script>
 
 <form action="$sbRoot/manage/changeEpisodeStatuses" method="post">
 <input type="button" class="btn btn-mini btn-primary toggleAll" value="Toggle All Episodes" />

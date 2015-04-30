@@ -11,7 +11,7 @@
 
 <input type="hidden" id="showID" value="$show.tvdbid" />
 
-<script type="text/javascript" src="$sbRoot/js/testRename.js"></script>
+<script src="$sbRoot/js/testRename.js"></script>
 
 <h3>Preview of the proposed name changes</h3>
 <blockquote style="margin-bottom: 0; color: #3A87AD;">
@@ -55,7 +55,7 @@
 #if len($epList) > 1:
     #set $epList = [$min($epList), $max($epList)]
 #end if
-        <tr class="season-$curSeason 
+        <tr class="season-$curSeason
             #if $curLoc == $newLoc:
                 #if $odd then "odd" else "even"#
             #else

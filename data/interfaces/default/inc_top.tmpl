@@ -16,13 +16,13 @@
         <link rel="apple-touch-icon-precomposed" sizes="72x72" href="$sbRoot/images/ico/apple-touch-icon-72x72-precomposed.png">
         <link rel="apple-touch-icon-precomposed" href="$sbRoot/images/ico/apple-touch-icon-57x57-precomposed.png">
 
-        <link rel="stylesheet" type="text/css" href="$sbRoot/css/lib/bootstrap.css?$sbPID"/>
-        <link rel="stylesheet" type="text/css" href="$sbRoot/css/lib/jquery.pnotify.default.css?$sbPID" />
-        <link rel="stylesheet" type="text/css" href="$sbRoot/css/lib/jquery-ui-1.11.2.custom.css?$sbPID" />
-        <link rel="stylesheet" type="text/css" href="$sbRoot/css/lib/jquery.qtip.css?$sbPID"/>
-        <link rel="stylesheet" type="text/css" href="$sbRoot/css/style.css?$sbPID"/>
+        <link rel="stylesheet" href="$sbRoot/css/lib/bootstrap.css?$sbPID"/>
+        <link rel="stylesheet" href="$sbRoot/css/lib/jquery.pnotify.default.css?$sbPID" />
+        <link rel="stylesheet" href="$sbRoot/css/lib/jquery-ui-1.11.2.custom.css?$sbPID" />
+        <link rel="stylesheet" href="$sbRoot/css/lib/jquery.qtip.css?$sbPID"/>
+        <link rel="stylesheet" href="$sbRoot/css/style.css?$sbPID"/>
 
-<style type="text/css">
+<style>
 <!--
 #contentWrapper { background: url("$sbRoot/images/bg.png") repeat 0 0 transparent; }
 
@@ -60,31 +60,30 @@
 #if $sickbeard.NEWEST_VERSION_STRING:
 .ui-pnotify { top: 30px !important; }
 #end if
-//--> 
+//-->
 </style>
 
-    <script type="text/javascript" src="$sbRoot/js/lib/jquery-1.7.2.min.js?$sbPID"></script>
-    <script type="text/javascript" src="$sbRoot/js/lib/bootstrap.min.js?$sbPID"></script>
-    <script type="text/javascript" src="$sbRoot/js/lib/jquery-ui-1.11.2.custom.min.js?$sbPID"></script>
-    <script type="text/javascript" src="$sbRoot/js/lib/jquery.cookie.js?$sbPID"></script>
-    <script type="text/javascript" src="$sbRoot/js/lib/jquery.selectboxes.min.js?$sbPID"></script>
-    <script type="text/javascript" src="$sbRoot/js/lib/jquery.tablesorter-2.17.8.min.js?$sbPID"></script>
-    <script type="text/javascript" src="$sbRoot/js/lib/jquery.tablesorter.widgets-2.17.8.min.js?$sbPID"></script>
-    <script type="text/javascript" src="$sbRoot/js/lib/jquery.qtip-2012-04-26.min.js?$sbPID"></script>
-    <script type="text/javascript" src="$sbRoot/js/lib/jquery.pnotify-1.2.2.min.js?$sbPID"></script>
-    <script type="text/javascript" src="$sbRoot/js/lib/jquery.form-3.50.js?$sbPID"></script>
-
-    <script type="text/javascript" charset="utf-8">
+    <script src="$sbRoot/js/lib/jquery-1.7.2.min.js?$sbPID"></script>
+    <script src="$sbRoot/js/lib/bootstrap.min.js?$sbPID"></script>
+    <script src="$sbRoot/js/lib/jquery-ui-1.11.2.custom.min.js?$sbPID"></script>
+    <script src="$sbRoot/js/lib/jquery.cookie.js?$sbPID"></script>
+    <script src="$sbRoot/js/lib/jquery.selectboxes.min.js?$sbPID"></script>
+    <script src="$sbRoot/js/lib/jquery.tablesorter-2.17.8.min.js?$sbPID"></script>
+    <script src="$sbRoot/js/lib/jquery.tablesorter.widgets-2.17.8.min.js?$sbPID"></script>
+    <script src="$sbRoot/js/lib/jquery.qtip-2012-04-26.min.js?$sbPID"></script>
+    <script src="$sbRoot/js/lib/jquery.pnotify-1.2.2.min.js?$sbPID"></script>
+    <script src="$sbRoot/js/lib/jquery.form-3.50.js?$sbPID"></script>
+    <script>
     <!--
         sbRoot = "$sbRoot"; // needed for browser.js & ajaxNotifications.js
         //HTML for scrolltopcontrol, which is auto wrapped in DIV w/ ID="topcontrol"
-        top_image_html = '<img src="$sbRoot/images/top.gif" width="31" height="11" alt="Jump to top" />'; 
+        top_image_html = '<img src="$sbRoot/images/top.gif" width="31" height="11" alt="Jump to top" />';
     //-->
     </script>
-    <script type="text/javascript" src="$sbRoot/js/lib/jquery.scrolltopcontrol-1.1.js?$sbPID"></script>
-    <script type="text/javascript" src="$sbRoot/js/browser.js?$sbPID"></script>
-    <script type="text/javascript" src="$sbRoot/js/ajaxNotifications.js?$sbPID"></script>
-    <script type="text/javascript">
+    <script src="$sbRoot/js/lib/jquery.scrolltopcontrol-1.1.js?$sbPID"></script>
+    <script src="$sbRoot/js/browser.js?$sbPID"></script>
+    <script src="$sbRoot/js/ajaxNotifications.js?$sbPID"></script>
+    <script>
     <!--
         \$(document).ready(function() {
             \$("#NAV$topmenu").addClass("active");

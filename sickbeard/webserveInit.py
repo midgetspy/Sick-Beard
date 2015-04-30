@@ -60,7 +60,7 @@ def initWebServer(options={}):
 <html>
     <head>
         <title>404</title>
-        <script type="text/javascript" charset="utf-8">
+        <script>
           <!--
           location.href = "%s/home/"
           //-->

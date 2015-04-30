@@ -8,7 +8,7 @@
 #import os.path
 #include $os.path.join($sickbeard.PROG_DIR, "data/interfaces/default/inc_top.tmpl")
 
-<script type="text/javascript" src="$sbRoot/js/config.js?$sbPID"></script>
+<script src="$sbRoot/js/config.js?$sbPID"></script>
 
 <div id="config">
 <div id="config-content">
@@ -102,15 +102,15 @@
 </form>
 </div></div>
 
-<script type="text/javascript">
+<script>
 \$(document).ready(function () {
     var loading = '<img src="' + sbRoot + '/images/loading16.gif" height="16" width="16" />';
 
     \$('#sbEnded').click(function () {
         \$('#sbEnded-result').html(loading);
         \$.get(sbRoot + "/config/hidden/sbEnded",
-            function (data) { 
-                \$('#sbEnded-result').html(data); 
+            function (data) {
+                \$('#sbEnded-result').html(data);
                 \$("table").tablesorter({ theme : 'blue', widgets: ['zebra'], sortList: [[0,0]] });
                 var resort = true;
                 \$("table").trigger("update", [resort]);
