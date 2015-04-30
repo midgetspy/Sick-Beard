@@ -18,6 +18,7 @@
 
 import urllib
 import urllib2
+import StringIO
 import sickbeard
 
 from sickbeard import logger
@@ -194,7 +195,8 @@ class PLEXNotifier:
 
             url = "http://%s/library/sections%s" % (sickbeard.PLEX_SERVER_HOST, token_arg)
             try:
-                xml_tree = etree.parse(sickbeard.helpers.getURLFileLike(url))
+                response = sickbeard.helpers.getURL(url)
+                xml_tree = etree.parse(StringIO.StringIO(response))
                 media_container = xml_tree.getroot()
             except IOError, e:
                 logger.log(u"PLEX: Error while trying to contact Plex Media Server: " + ex(e), logger.ERROR)
