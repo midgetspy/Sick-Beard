@@ -193,10 +193,7 @@ class XBMCNotifier:
             else:
                 pw_mgr = None
 
-            response = sickbeard.helpers.getURLFileLike(req, password_mgr=pw_mgr, throw_exc=True)
-            if response:
-                result = response.read().decode(sickbeard.SYS_ENCODING)
-                response.close()
+            result = sickbeard.helpers.getURL(req, password_mgr=pw_mgr, throw_exc=True)
 
             logger.log(u"XBMC: HTTP response: " + result.replace('\n', ''), logger.DEBUG)
             return result
@@ -333,10 +330,9 @@ class XBMCNotifier:
                 pw_mgr = None
 
             
-            response = sickbeard.helpers.getURLFileLike(req, password_mgr=pw_mgr, throw_exc=True)
+            response = sickbeard.helpers.getURL(req, password_mgr=pw_mgr, throw_exc=True)
             # parse the json result
-            result = json.load(response)
-            response.close()
+            result = json.loads(response)
             logger.log(u"XBMC: JSON response: " + str(result), logger.DEBUG)
             return result  # need to return response for parsing
 

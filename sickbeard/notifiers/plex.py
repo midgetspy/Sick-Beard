@@ -74,10 +74,7 @@ class PLEXNotifier:
             else:
                 pw_mgr = None
 
-            response = sickbeard.helpers.getURLFileLike(req, password_mgr=pw_mgr)
-
-            result = response.read().decode(sickbeard.SYS_ENCODING)
-            response.close()
+            result = sickbeard.helpers.getURL(req, password_mgr=pw_mgr)
 
             logger.log(u"PLEX: HTTP response: " + result.replace('\n', ''), logger.DEBUG)
             # could return result response = re.compile('<html><li>(.+\w)</html>').findall(result)
@@ -181,8 +178,8 @@ class PLEXNotifier:
                 req.add_header("X-Plex-Version", "1.0")
                 
                 try:
-                    response = sickbeard.helpers.getURLFileLike(req, throw_exc=True)
-                    auth_tree = etree.parse(response)
+                    response = sickbeard.helpers.getURL(req, throw_exc=True)
+                    auth_tree = etree.fromstring(response)
                     token = auth_tree.findall(".//authentication-token")[0].text
                     token_arg = "?X-Plex-Token=" + token
                 
@@ -194,7 +191,7 @@ class PLEXNotifier:
 
             url = "http://%s/library/sections%s" % (sickbeard.PLEX_SERVER_HOST, token_arg)
             try:
-                xml_tree = etree.parse(sickbeard.helpers.getURLFileLike(url))
+                xml_tree = etree.fromstring(sickbeard.helpers.getURL(url))
                 media_container = xml_tree.getroot()
             except IOError, e:
                 logger.log(u"PLEX: Error while trying to contact Plex Media Server: " + ex(e), logger.ERROR)
