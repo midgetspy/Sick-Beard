@@ -33,7 +33,7 @@ import webserve
 from sickbeard import db, logger, exceptions, history, ui, helpers
 from sickbeard.exceptions import ex
 from sickbeard import encodingKludge as ek
-from sickbeard import search_queue
+from sickbeard import search_queue, processTV
 from sickbeard.common import SNATCHED, SNATCHED_PROPER, DOWNLOADED, SKIPPED, UNAIRED, IGNORED, ARCHIVED, WANTED, UNKNOWN
 from common import Quality, qualityPresetStrings, statusStrings
 from sickbeard import image_cache
@@ -1196,6 +1196,43 @@ class CMD_Logs(ApiCall):
                 break
 
         return _responds(RESULT_SUCCESS, finalData)
+
+class CMD_PostProcess(ApiCall):
+    _help = {"desc": "Manual postprocess TV Download Dir",
+             "optionalParameters": {"path": {"desc": "Post process this folder"},
+                                    "force_replace": {"desc": "Overwrite files"},
+                                    "return_data": {"desc": "Returns result for the process"}
+                                    }
+             }
+
+    def __init__(self, args, kwargs):
+        # required
+        # optional
+        self.path, args = self.check_params(args, kwargs, "path", None, False, "string", [])
+        self.force_replace, args = self.check_params(args, kwargs, "force_replace", 0, False, "bool", [])
+        self.return_data, args = self.check_params(args, kwargs, "return_data", 0, False, "bool", [])
+        # super, missing, help
+        ApiCall.__init__(self, args, kwargs)
+
+    def run(self):
+        """ Starts the postprocess """
+        pp_options = {}
+
+        if not self.path and not sickbeard.TV_DOWNLOAD_DIR:
+            return _responds(RESULT_FAILURE, msg="You need to provide a path or set TV Download Dir")
+
+        if not self.path:
+            self.path = sickbeard.TV_DOWNLOAD_DIR
+
+        if bool(self.force_replace):
+            pp_options["force_replace"] = True
+
+        data = processTV.processDir(self.path, method="Manual", pp_options=pp_options)
+
+        if not self.return_data:
+            data = ""
+
+        return _responds(RESULT_SUCCESS, data=data, msg="Started postprocess for %s" % self.path)
 
 
 class CMD_SickBeard(ApiCall):
@@ -2467,6 +2504,7 @@ _functionMaper = {"help": CMD_Help,
                   "history.clear": CMD_HistoryClear,
                   "history.trim": CMD_HistoryTrim,
                   "logs": CMD_Logs,
+                  "postprocess": CMD_PostProcess,
                   "sb": CMD_SickBeard,
                   "sb.addrootdir": CMD_SickBeardAddRootDir,
                   "sb.checkscheduler": CMD_SickBeardCheckScheduler,
