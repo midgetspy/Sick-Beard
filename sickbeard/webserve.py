@@ -1205,7 +1205,7 @@ class ConfigNotifications:
         sickbeard.PROWL_NOTIFY_ONSNATCH = config.checkbox_to_value(prowl_notify_onsnatch)
         sickbeard.PROWL_NOTIFY_ONDOWNLOAD = config.checkbox_to_value(prowl_notify_ondownload)
         sickbeard.PROWL_API = prowl_api
-        sickbeard.PROWL_PRIORITY = prowl_priority
+        sickbeard.PROWL_PRIORITY = config.to_int(prowl_priority)
 
         sickbeard.USE_LIBNOTIFY = config.checkbox_to_value(use_libnotify)
         sickbeard.LIBNOTIFY_NOTIFY_ONSNATCH = config.checkbox_to_value(libnotify_notify_onsnatch)
@@ -1215,7 +1215,7 @@ class ConfigNotifications:
         sickbeard.PUSHOVER_NOTIFY_ONSNATCH = config.checkbox_to_value(pushover_notify_onsnatch)
         sickbeard.PUSHOVER_NOTIFY_ONDOWNLOAD = config.checkbox_to_value(pushover_notify_ondownload)
         sickbeard.PUSHOVER_USERKEY = pushover_userkey
-        sickbeard.PUSHOVER_PRIORITY = pushover_priority
+        sickbeard.PUSHOVER_PRIORITY = config.to_int(pushover_priority)
         sickbeard.PUSHOVER_DEVICE = pushover_device
         sickbeard.PUSHOVER_SOUND = pushover_sound
 
@@ -1229,7 +1229,7 @@ class ConfigNotifications:
         sickbeard.NMA_NOTIFY_ONSNATCH = config.checkbox_to_value(nma_notify_onsnatch)
         sickbeard.NMA_NOTIFY_ONDOWNLOAD = config.checkbox_to_value(nma_notify_ondownload)
         sickbeard.NMA_API = nma_api
-        sickbeard.NMA_PRIORITY = nma_priority
+        sickbeard.NMA_PRIORITY = config.to_int(nma_priority)
 
         sickbeard.USE_PUSHALOT = config.checkbox_to_value(use_pushalot)
         sickbeard.PUSHALOT_NOTIFY_ONSNATCH = config.checkbox_to_value(pushalot_notify_onsnatch)
