@@ -21,6 +21,7 @@ import httplib
 import datetime
 import sickbeard
 import urllib2
+import StringIO
 try:
     import json
 except ImportError:
@@ -138,7 +139,8 @@ def _checkSabResponse(f):
 
 def _sabURLOpenSimple(url):
     try:
-        f = helpers.getURLFileLike(url, throw_exc=True)
+        result = helpers.getURL(url, throw_exc=True)
+        f = StringIO.StringIO(result)
     except (EOFError, IOError), e:
         logger.log(u"Unable to connect to SAB: " + ex(e), logger.ERROR)
         return False, "Unable to connect"
