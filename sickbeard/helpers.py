@@ -245,7 +245,7 @@ def getURLFileLike(url, validate=False, cookies = cookielib.CookieJar(), passwor
             return None
 
     except socket.timeout:
-        logger.log(u"Timed out while loading URL " +  req_to_str(url),, logger.WARNING)
+        logger.log(u"Timed out while loading URL " +  req_to_str(url), logger.WARNING)
         if throw_exc:
             raise 
         else:
