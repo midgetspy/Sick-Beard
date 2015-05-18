@@ -694,10 +694,10 @@
                                 <label class="nocheck clearfix">
                                     <span class="component-title">Pushover Priority:</span>
                                    <select id="pushover_priority" name="pushover_priority">
-                                        <option value="-2" #if $sickbeard.PUSHOVER_PRIORITY == -2 then 'selected="selected"' else ""#>Lowest</option>
-                                        <option value="-1" #if $sickbeard.PUSHOVER_PRIORITY == -1 then 'selected="selected"' else ""#>Low</option>
-                                        <option value="0" #if $sickbeard.PUSHOVER_PRIORITY == 0 then 'selected="selected"' else ""#>Normal</option>
-                                        <option value="1" #if $sickbeard.PUSHOVER_PRIORITY == 1 then 'selected="selected"' else ""#>High</option>
+                                        <option value="-2" #if $sickbeard.PUSHOVER_PRIORITY == '-2' then 'selected' else ''#>Lowest</option>
+                                        <option value="-1" #if $sickbeard.PUSHOVER_PRIORITY == '-1' then 'selected' else ''#>Low</option>
+                                        <option value="0"  #if $sickbeard.PUSHOVER_PRIORITY ==  '0' then 'selected' else ''#>Normal</option>
+                                        <option value="1"  #if $sickbeard.PUSHOVER_PRIORITY ==  '1' then 'selected' else ''#>High</option>
                                     </select>
                                 </label>
                                 <label class="nocheck clearfix">
