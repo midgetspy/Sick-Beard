@@ -1014,7 +1014,9 @@ class ConfigProviders:
                       omgwtfnzbs_username=None, omgwtfnzbs_apikey=None,
                       tvtorrents_digest=None, tvtorrents_hash=None,
                       torrentleech_key=None,
-                      btn_api_key=None, hdbits_username=None, hdbits_passkey=None,
+                      btn_api_key=None, 
+                      hdbits_username=None, hdbits_passkey=None,
+                      kickass_alt_url=None,
                       provider_order=None):
 
         results = []
@@ -1076,6 +1078,8 @@ class ConfigProviders:
                 sickbeard.EZRSS = curEnabled
             elif curProvider == 'hdbits':
                 sickbeard.HDBITS = curEnabled
+            elif curProvider == 'kickass':
+                sickbeard.KICKASS = curEnabled
             elif curProvider == 'tvtorrents':
                 sickbeard.TVTORRENTS = curEnabled
             elif curProvider == 'torrentleech':
@@ -1089,6 +1093,8 @@ class ConfigProviders:
 
         sickbeard.HDBITS_USERNAME = hdbits_username.strip()
         sickbeard.HDBITS_PASSKEY = hdbits_passkey.strip()
+        
+        sickbeard.KICKASS_ALT_URL = kickass_alt_url.strip()
 
         sickbeard.TVTORRENTS_DIGEST = tvtorrents_digest.strip()
         sickbeard.TVTORRENTS_HASH = tvtorrents_hash.strip()
