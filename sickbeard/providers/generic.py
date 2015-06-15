@@ -96,10 +96,9 @@ class GenericProvider:
 
         return result
 
-    def getURL(self, url, post_data=None, heads=None):
+    def getURL(self, url, post_data=None, heads=None, errorWhenNone=True):
         """
-        By default this is just a simple urlopen call but this method should be overridden
-        for providers with special URL requirements (like cookies)
+        This uses the default sickbeard getURL() method to retrieve the contents of a URL
         """
         if post_data:
             if heads:
@@ -113,7 +112,7 @@ class GenericProvider:
                 req = urllib2.Request(url);
         response = helpers.getURL(req)
 
-        if response is None:
+        if response is None and errorWhenNone:
             logger.log(u"Error loading " + self.name + " URL: " + url, logger.ERROR)
 
         return response

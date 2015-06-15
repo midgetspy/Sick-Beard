@@ -145,7 +145,7 @@ class KickAssProvider(generic.TorrentProvider):
             path = "json.php"
             query = urlencode(SearchParameters)
             searchURL = urlunsplit((scheme, netloc, path, query, fragment))
-            searchData = self.getURL(searchURL)
+            searchData = self.getURL(searchURL, errorWhenNone=False)
 
             if searchData:
                 try:
