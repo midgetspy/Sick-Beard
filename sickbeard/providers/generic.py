@@ -96,7 +96,7 @@ class GenericProvider:
 
         return result
 
-    def getURL(self, url, post_data=None, heads=None, errorWhenNone=True):
+    def getURL(self, url, post_data=None, heads=None, errorWhenNone=False):
         """
         This uses the default sickbeard getURL() method to retrieve the contents of a URL
         """
