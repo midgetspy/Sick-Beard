@@ -609,6 +609,8 @@ def parse_xml(data, del_xmlns=False):
         data = re.sub(' xmlns="[^"]+"', '', data)
 
     try:
+        #utf8_parser = etree.XMLParser(encoding='utf-8')
+        data = data.encode('utf-8')
         parsedXML = etree.fromstring(data)
     except Exception, e:
         logger.log(u"Error trying to parse xml data: " + data + " to Elementtree, Error: " + ex(e), logger.DEBUG)

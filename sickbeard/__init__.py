@@ -18,7 +18,7 @@
 
 from __future__ import with_statement
 
-import cherrypy
+from lib import cherrypy
 import datetime
 import os
 import re
@@ -270,6 +270,7 @@ NZBGET_HOST = None
 
 TORRENT_USERNAME = None
 TORRENT_PASSWORD = None
+TORRENT_LABEL = None
 TORRENT_HOST = ''
 TORRENT_PATH = ''
 TORRENT_RATIO = ''
@@ -391,7 +392,7 @@ def initialize(consoleLogging=True):
         global ACTUAL_LOG_DIR, LOG_DIR, WEB_PORT, WEB_LOG, WEB_ROOT, WEB_USERNAME, WEB_PASSWORD, WEB_HOST, WEB_IPV6, USE_API, API_KEY, ENABLE_HTTPS, HTTPS_CERT, HTTPS_KEY, \
                 USE_NZBS, USE_TORRENTS, NZB_METHOD, NZB_DIR,TORRENT_METHOD, DOWNLOAD_PROPERS, PREFER_EPISODE_RELEASES, \
                 SAB_USERNAME, SAB_PASSWORD, SAB_APIKEY, SAB_CATEGORY, SAB_HOST, \
-                TORRENT_USERNAME, TORRENT_PASSWORD, TORRENT_HOST, TORRENT_PATH, TORRENT_RATIO, TORRENT_PAUSED, \
+                TORRENT_USERNAME, TORRENT_PASSWORD, TORRENT_LABEL, TORRENT_HOST, TORRENT_PATH, TORRENT_RATIO, TORRENT_PAUSED, \
                 NZBGET_PASSWORD, NZBGET_CATEGORY, NZBGET_HOST, currentSearchScheduler, backlogSearchScheduler, \
                 USE_XBMC, XBMC_NOTIFY_ONSNATCH, XBMC_NOTIFY_ONDOWNLOAD, XBMC_UPDATE_FULL, XBMC_UPDATE_ONLYFIRST, \
                 XBMC_UPDATE_LIBRARY, XBMC_HOST, XBMC_USERNAME, XBMC_PASSWORD, \
@@ -535,7 +536,7 @@ def initialize(consoleLogging=True):
         NZB_METHOD = check_setting_str(CFG, 'General', 'nzb_method', 'blackhole')
         if NZB_METHOD not in ('blackhole', 'sabnzbd', 'nzbget'):
             NZB_METHOD = 'blackhole'
-
+        
         TORRENT_METHOD = check_setting_str(CFG, 'General', 'torrent_method', 'blackhole')
         if TORRENT_METHOD not in ('blackhole', 'utorrent', 'transmission', 'downloadstation', 'deluge'):
             TORRENT_METHOD = 'blackhole'
@@ -559,10 +560,10 @@ def initialize(consoleLogging=True):
         if not EZRSS:
             CheckSection(CFG, 'EZRSS')
             EZRSS = bool(check_setting_int(CFG, 'EZRSS', 'ezrss', 0))
-
+        
 
         SUBTITLE_LANGUAGES = check_setting_str(CFG, 'General', 'subtitle_languages', '')
-
+        
         TVTORRENTS = bool(check_setting_int(CFG, 'TVTORRENTS', 'tvtorrents', 0))    
         TVTORRENTS_DIGEST = check_setting_str(CFG, 'TVTORRENTS', 'tvtorrents_digest', '')
         TVTORRENTS_HASH = check_setting_str(CFG, 'TVTORRENTS', 'tvtorrents_hash', '')
@@ -689,9 +690,10 @@ def initialize(consoleLogging=True):
         NZBGET_PASSWORD = check_setting_str(CFG, 'NZBget', 'nzbget_password', 'tegbzn6789')
         NZBGET_CATEGORY = check_setting_str(CFG, 'NZBget', 'nzbget_category', 'tv')
         NZBGET_HOST = check_setting_str(CFG, 'NZBget', 'nzbget_host', '')
-
+        
         TORRENT_USERNAME = check_setting_str(CFG, 'TORRENT', 'torrent_username', '')
         TORRENT_PASSWORD = check_setting_str(CFG, 'TORRENT', 'torrent_password', '')
+        TORRENT_LABEL = check_setting_str(CFG, 'TORRENT', 'torrent_label', '')
         TORRENT_HOST = check_setting_str(CFG, 'TORRENT', 'torrent_host', '')
         TORRENT_PATH = check_setting_str(CFG, 'TORRENT', 'torrent_path', '')
         TORRENT_RATIO = check_setting_str(CFG, 'TORRENT', 'torrent_ratio', '')
@@ -769,13 +771,13 @@ def initialize(consoleLogging=True):
         NMJ_HOST = check_setting_str(CFG, 'NMJ', 'nmj_host', '')
         NMJ_DATABASE = check_setting_str(CFG, 'NMJ', 'nmj_database', '')
         NMJ_MOUNT = check_setting_str(CFG, 'NMJ', 'nmj_mount', '')
-
+        
         CheckSection(CFG, 'NMJv2')
         USE_NMJv2 = bool(check_setting_int(CFG, 'NMJv2', 'use_nmjv2', 0))
         NMJv2_HOST = check_setting_str(CFG, 'NMJv2', 'nmjv2_host', '')
         NMJv2_DATABASE = check_setting_str(CFG, 'NMJv2', 'nmjv2_database', '')
         NMJv2_DBLOC = check_setting_str(CFG, 'NMJv2', 'nmjv2_dbloc', '')
-
+        
         CheckSection(CFG, 'Synology')
         USE_SYNOINDEX = bool(check_setting_int(CFG, 'Synology', 'use_synoindex', 0))
 
@@ -888,7 +890,7 @@ def initialize(consoleLogging=True):
                                                                       threadName="BACKLOG",
                                                                       runImmediately=True)
         backlogSearchScheduler.action.cycleTime = BACKLOG_SEARCH_FREQUENCY
-        
+
         subtitleQueueScheduler = scheduler.Scheduler(subtitle_queue.SubtitleQueue(),
                                                cycleTime=datetime.timedelta(seconds=3),
                                                threadName="SUBTITLEQUEUE",
@@ -1012,7 +1014,7 @@ def halt():
                 properFinderScheduler.thread.join(10)
             except:
                 pass
-            
+
             subtitleQueueScheduler.abort = True
             logger.log(u"Waiting for the SUBTITLEQUEUE thread to exit")
             try:
@@ -1283,7 +1285,7 @@ def save_config():
 
     new_config['Womble'] = {}
     new_config['Womble']['womble'] = int(WOMBLE)
-
+    
     new_config['omgwtfnzbs'] = {}
     new_config['omgwtfnzbs']['omgwtfnzbs'] = int(OMGWTFNZBS)
     new_config['omgwtfnzbs']['omgwtfnzbs_username'] = OMGWTFNZBS_USERNAME
@@ -1300,10 +1302,11 @@ def save_config():
     new_config['NZBget']['nzbget_password'] = NZBGET_PASSWORD
     new_config['NZBget']['nzbget_category'] = NZBGET_CATEGORY
     new_config['NZBget']['nzbget_host'] = NZBGET_HOST
-
+    
     new_config['TORRENT'] = {}
     new_config['TORRENT']['torrent_username'] = TORRENT_USERNAME
     new_config['TORRENT']['torrent_password'] = TORRENT_PASSWORD
+    new_config['TORRENT']['torrent_label'] = TORRENT_LABEL
     new_config['TORRENT']['torrent_host'] = TORRENT_HOST
     new_config['TORRENT']['torrent_path'] = TORRENT_PATH
     new_config['TORRENT']['torrent_ratio'] = TORRENT_RATIO
@@ -1390,7 +1393,7 @@ def save_config():
     new_config['NMJv2']['nmjv2_host'] = NMJv2_HOST
     new_config['NMJv2']['nmjv2_database'] = NMJv2_DATABASE
     new_config['NMJv2']['nmjv2_dbloc'] = NMJv2_DBLOC
-
+    
     new_config['Trakt'] = {}
     new_config['Trakt']['use_trakt'] = int(USE_TRAKT)
     new_config['Trakt']['trakt_username'] = TRAKT_USERNAME
