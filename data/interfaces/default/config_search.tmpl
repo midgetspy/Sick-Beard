@@ -324,7 +324,7 @@
                                     <span class="component-desc">Username of your Torrent Client (blank for none)</span>
                                 </label>
                             </div>
-
+                            
                             <div class="field-pair">
                                 <label class="nocheck clearfix">
                                     <span class="component-title" id="password_desc">Torrent Password</span>
@@ -335,6 +335,18 @@
                                     <span class="component-desc">Password of your Torrent Client (blank for none)</span>
                                 </label>
                             </div>
+                            
+                            <div class="field-pair" id="torrent_label">
+                                <label class="nocheck clearfix">
+                                    <span class="component-title" id="label_desc">Torrent Label</span>
+                                    <input type="text" name="torrent_label" id="torrent_label" value="$sickbeard.TORRENT_LABEL" size="45" />
+                                </label>
+                                <label class="nocheck clearfix">
+                                    <span class="component-title">&nbsp;</span>
+                                    <span class="component-desc">What label should we assign? (blank for default)</span>
+                                </label>
+                            </div>
+                            
                             <div class="field-pair" id="torrent_directory">
                                 <label class="nocheck clearfix">
                                     <span class="component-title" id="directory_desc">Torrent Directory</span>
@@ -342,7 +354,7 @@
                                 </label>
                                 <label class="nocheck clearfix">
                                     <span class="component-title">&nbsp;</span>
-                                    <span class="component-desc">Where should it save the downloaded files?(blank for default)</span>
+                                    <span class="component-desc">Where should it download files too? (blank for default)</span>
                                 </label>
                             </div>
                             
@@ -356,7 +368,7 @@
                                     <span class="component-desc">Stop transfer when reaching ratio(blank for default)</span>
                                 </label>
                             </div>
-
+                            
                             <div class="field-pair">
                                 <label class="nocheck clearfix">
                                     <span class="component-title" id="torrent_paused_desc">Start Torrent Paused</span>
@@ -370,9 +382,7 @@
                             <div class="testNotification" id="testTorrent-result">Click below to test.</div>
                         	<input type="button" value="Test Connection" id="testTorrent" class="btn config_submitter"/>
                         	<input type="submit" class="btn config_submitter" value="Save Changes" /><br/>
-						</div>
-                        
-                        
+			    </div>
                     </fieldset>
                 </div><!-- /component-group3 //-->
 
