@@ -18,15 +18,12 @@
 # along with Sick Beard.  If not, see <http://www.gnu.org/licenses/>.
 ###################################################################################################
 
-import os
-import re
-import sys
 import json
 import urllib
+from urlparse import urlsplit, urlunsplit
 import generic
 import datetime
 import sickbeard
-import exceptions
 
 from lib import requests
 from xml.sax.saxutils import escape
@@ -48,7 +45,7 @@ class KickAssProvider(generic.TorrentProvider):
         self.name = "KickAss"
         self.session = None
         self.supportsBacklog = True
-        self.url = "http://kickass.to/"
+        self.url = "kat.cr"
         logger.log("[" + self.name + "] initializing...")
         
     ###################################################################################################
@@ -155,14 +152,21 @@ class KickAssProvider(generic.TorrentProvider):
             else:
                 SearchParameters["field"] = "time_add"
             
-            SearchQuery = urllib.urlencode(SearchParameters)
-            
-            searchData = self.getURL(self.url + "json.php?%s" % SearchQuery )
-              
+            # Make sure the URL is correctly formatted by parsing it (defaults to using https URLs)
+            scheme, netloc, path, query, fragment = urlsplit(self.url, scheme="https")
+            # Make sure netloc is available, without a scheme in the parsed string it is 
+            # recognized as path without a netloc
+            if not netloc:
+                netloc = path
+            path = "json.php"
+            query = urllib.urlencode(SearchParameters)
+            searchURL = urlunsplit((scheme, netloc, path, query, fragment))
+            searchData = self.getURL(searchURL)
+
             if searchData:
                 try:
                     jdata = json.loads(searchData)
-                except ValueError, e:
+                except ValueError:
                     logger.log("[" + self.name + "] _doSearch() invalid data on search page " + str(page))
                     continue
                 
