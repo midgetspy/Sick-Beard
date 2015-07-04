@@ -48,7 +48,7 @@ class BitHDTVProvider(generic.TorrentProvider):
         self.name = "BitHDTV"
         self.session = None
         self.supportsBacklog = True
-        self.url = 'http://www.bit-hdtv.com/'
+        self.url = 'https://www.bit-hdtv.com/'
         logger.log("[" + self.name + "] initializing...")
         
     ###################################################################################################
