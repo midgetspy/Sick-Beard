@@ -126,9 +126,9 @@ class SickbeardTestDBCase(unittest.TestCase):
 
 class TestDBConnection(db.DBConnection, object):
 
-    def __init__(self, dbFileName=TESTDBNAME):
+    def __init__(self, dbFileName=TESTDBNAME, row_type=None):
         dbFileName = os.path.join(TESTDIR, dbFileName)
-        super(TestDBConnection, self).__init__(dbFileName)
+        super(TestDBConnection, self).__init__(dbFileName, row_type)
 
 
 class TestCacheDBConnection(TestDBConnection, object):

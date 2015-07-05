@@ -35,7 +35,7 @@ $(document).ready(function() {
             is_default = true;
         }
 
-        $('#rootDirs').append('<option value="'+path+'">'+path+'</option>');
+        $('#rootDirs').append('<option value="' + path + '">' + path + '</option>');
 
         syncOptionIDs();
 
@@ -43,8 +43,8 @@ $(document).ready(function() {
             setDefault($('#rootDirs option').attr('id'));
         }
 
-        $.get(sbRoot + '/config/general/saveRootDirs', { rootDirString: $('#rootDirText').val() });
         refreshRootDirs();
+        $.get(sbRoot + '/config/general/saveRootDirs', { rootDirString: $('#rootDirText').val() });
 
     }
 

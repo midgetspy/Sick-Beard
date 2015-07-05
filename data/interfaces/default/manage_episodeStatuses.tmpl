@@ -11,39 +11,50 @@
 
 <form action="$sbRoot/manage/episodeStatuses" method="get">
 Manage episodes with status <select name="whichStatus">
-#for $curStatus in [$common.SKIPPED, $common.SNATCHED, $common.WANTED, $common.ARCHIVED, $common.IGNORED]:
+#for $curStatus in [$common.SKIPPED, $common.UNKNOWN, $common.SNATCHED, $common.WANTED, $common.ARCHIVED, $common.IGNORED]:
 <option value="$curStatus"#if $curStatus == $whichStatus then " selected=\"selected\"" else ""#>$common.statusStrings[$curStatus]</option>
 #end for
 </select>
-<input class="btn" type="submit" value="Manage" /> 
+<input class="btn" type="submit" value="Manage" /><br>
+
+<label class="checkbox">
+    <input type="checkbox" value="True" id="includeSpecials" name="includeSpecials" #if $includeSpecials then "checked=\"checked\"" else ""# />
+    Include episodes in Season 0 (Specials)?
+</label>
+
+<label class="checkbox">
+    <input type="checkbox" value="True" id="excludeNoAirdate" name="excludeNoAirdate" #if $excludeNoAirdate then "checked=\"checked\"" else ""# />
+    Exclude episodes with airdate of 'never' (No Airdate)?
+</label>
+
 </form>
 
 #if $whichStatus and not $ep_counts:
-<br />
+<hr>
+<h3>None of your episodes have status $common.statusStrings[$int($whichStatus)] <small>(#if $includeSpecials then "+Specials" else "-Specials"# #if $excludeNoAirdate then "-NoAirdate" else "+NoAirdate"#)</small></h3>
 
-<h3>None of your episodes have status $common.statusStrings[$int($whichStatus)]</h3>
 #elif $whichStatus and $ep_counts:
-<br />
-
-<h3>Shows containing $common.statusStrings[$int($whichStatus)] episodes</h3>
+<hr>
+<h3>${len($sorted_show_ids)} Shows containing $common.statusStrings[$int($whichStatus)] episodes <small>(#if $includeSpecials then "+Specials" else "-Specials"# #if $excludeNoAirdate then "-NoAirdate" else "+NoAirdate"#)</small></h3>
 
 <script type="text/javascript" src="$sbRoot/js/manageEpisodeStatuses.js?$sbPID"></script>
 
-<br />
-
 <form action="$sbRoot/manage/changeEpisodeStatuses" method="post">
-
+<input type="button" class="btn btn-mini btn-primary toggleAll" value="Toggle All Episodes" />
+<input type="button" class="btn btn-mini btn-danger expandAll" value="Expand All Shows" />
 <table class="sickbeardTable" cellspacing="1" border="0" cellpadding="0">
     #for $cur_tvdb_id in $sorted_show_ids:
 <tr id="$cur_tvdb_id">
 <th><input type="checkbox" class="allCheck" id="allCheck-$cur_tvdb_id" name="$cur_tvdb_id-all" checked="checked" /></th>
-<th colspan="2" style="width: 100%; text-align: left;"><a class="whitelink" href="$sbRoot/home/displayShow?show=$cur_tvdb_id">$show_names[$cur_tvdb_id]</a> ($ep_counts[$cur_tvdb_id]) <input type="button" class="btn get_more_eps" id="$cur_tvdb_id" value="Expand" /></th>
+<th colspan="2" style="width: 100%; text-align: left;"><a class="whitelink" href="$sbRoot/home/displayShow?show=$cur_tvdb_id">$show_names[$cur_tvdb_id]</a> ($ep_counts[$cur_tvdb_id]) <input type="button" class="btn btn-mini get_more_eps" id="$cur_tvdb_id" value="Expand" /></th>
 </tr>
     #end for
 </table>
 
 <input type="hidden" id="oldStatus" name="oldStatus" value="$whichStatus" />
-#if $whichStatus in ($common.ARCHIVED, $common.IGNORED, $common.SNATCHED):
+<input type="hidden" id="opt_includeSpecials" name="opt_includeSpecials" value="$includeSpecials" />
+<input type="hidden" id="opt_excludeNoAirdate" name="opt_excludeNoAirdate" value="$excludeNoAirdate" />
+#if $whichStatus in ($common.UNKNOWN, $common.SNATCHED, $common.ARCHIVED, $common.IGNORED):
 #set $row_class = "good"
 #else
 #set $row_class = $common.Overview.overviewStrings[$whichStatus]
@@ -51,7 +62,7 @@ Manage episodes with status <select name="whichStatus">
 <input type="hidden" id="row_class" value="$row_class" />
 <br />
 Set checked shows/episodes to <select name="newStatus">
-#set $statusList = [$common.SKIPPED, $common.WANTED, $common.ARCHIVED, $common.IGNORED]
+#set $statusList = [$common.WANTED, $common.SKIPPED, $common.ARCHIVED, $common.IGNORED]
 #if $int($whichStatus) in $statusList
 $statusList.remove($int($whichStatus))
 #end if

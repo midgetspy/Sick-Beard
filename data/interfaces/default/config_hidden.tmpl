@@ -38,6 +38,14 @@
                         </div>
 
                         <div class="field-pair">
+                            <input type="checkbox" name="display_all_seasons" id="display_all_seasons" #if $sickbeard.DISPLAY_ALL_SEASONS then "checked=\"checked\"" else ""#/>
+                            <label class="clearfix" for="display_all_seasons">
+                                <span class="component-title">Show All Seasons</span>
+                                <span class="component-desc">Should Sick Beard show all seasons on displayShow?</span>
+                            </label>
+                        </div>
+
+                        <div class="field-pair">
                             <label class="nocheck clearfix">
                                 <span class="component-title">Git Path</span>
                                 <input type="text" name="git_path" value="$sickbeard.GIT_PATH" size="55" />
@@ -72,17 +80,6 @@
                             <label class="clearfix" for="add_shows_wo_dir">
                                 <span class="component-title">Add Shows Without Dir</span>
                                 <span class="component-desc">Should Sick Beard skip creating a show directory when adding?</span>
-                            </label>
-                        </div>
-
-                        <div class="field-pair">
-                            <label class="nocheck clearfix">
-                                <span class="component-title">Ignore Words</span>
-                                <input type="text" name="ignore_words" value="$sickbeard.IGNORE_WORDS" size="55" />
-                            </label>
-                            <label class="nocheck clearfix">
-                                <span class="component-title">&nbsp;</span>
-                                <span class="component-desc">Case insensitive words separated by <b>,</b> that you wish to ignore in releases.</span>
                             </label>
                         </div>
 

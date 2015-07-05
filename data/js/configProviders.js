@@ -14,6 +14,7 @@ $(document).ready(function(){
         });
     };
 
+    // create a new newznab provider from the given data and add it to our newznab string
     $.fn.addProvider = function (id, name, url, key, isDefault) {
 
         url = $.trim(url);
@@ -29,14 +30,17 @@ $(document).ready(function(){
             url = url + '/';
         }
 
+        // add the data to the provider dict
         var newData = [isDefault, [name, url, key]];
         newznabProviders[id] = newData;
 
+        // default providers will get edited in the built-in section
         if (!isDefault) {
             $('#editANewznabProvider').addOption(id, name);
             $(this).populateNewznabSection();
         }
 
+        // add the provider to the provider list so it can be enabled/sorted
         if ($('#providerOrderList > #' + id).length == 0) {
             var toAdd = '<li class="ui-state-default" id="' + id + '"> <input type="checkbox" id="enable_' + id + '" class="provider_enabler" CHECKED> <a href="' + url + '" class="imgLink" target="_new"><img src="' + sbRoot + '/images/providers/newznab.png" alt="' + name + '" width="16" height="16"></a> ' + name + '<span class="ui-icon ui-icon-arrowthick-2-n-s pull-right"></span></li>';
 
@@ -44,10 +48,12 @@ $(document).ready(function(){
             $('#providerOrderList').sortable("refresh");
         }
 
+        // build up the hidden form element that contains the config string
         $(this).makeNewznabProviderString();
 
     };
 
+    // updates the newznab provider dict with the new config info for a provider
     $.fn.updateProvider = function (id, url, key) {
 
         newznabProviders[id][1][1] = url;
@@ -59,6 +65,7 @@ $(document).ready(function(){
 
     };
 
+    // removes a provider from the lists
     $.fn.deleteProvider = function (id) {
 
         $('#editANewznabProvider').removeOption(id);
@@ -71,6 +78,7 @@ $(document).ready(function(){
 
     };
 
+    // populates the custom newznab section with the relevant info for whatever is selected in the dropbox
     $.fn.populateNewznabSection = function() {
 
         var selectedProvider = $('#editANewznabProvider :selected').val();
@@ -92,23 +100,24 @@ $(document).ready(function(){
         $('#newznab_key').val(data[2]);
 
         if (selectedProvider == 'addNewznab') {
-            $('#newznab_name').removeAttr("disabled");
-            $('#newznab_url').removeAttr("disabled");
+            $('#newznab_name').prop("disabled", false);
+            $('#newznab_url').prop("disabled", false);
         } else {
 
-            $('#newznab_name').attr("disabled", "disabled");
+            $('#newznab_name').prop("disabled", true);
 
             if (isDefault) {
-                $('#newznab_url').attr("disabled", "disabled");
-                $('#newznab_delete').attr("disabled", "disabled");
+                $('#newznab_url').prop("disabled", true);
+                $('#newznab_delete').prop("disabled", true);
             } else {
-                $('#newznab_url').removeAttr("disabled");
-                $('#newznab_delete').removeAttr("disabled");
+                $('#newznab_url').prop("disabled", false);
+                $('#newznab_delete').prop("disabled", false);
             }
         }
 
     };
 
+    // build up the config string that goes in the hidden form field 
     $.fn.makeNewznabProviderString = function() {
 
         var provStrings = new Array();
@@ -161,19 +170,19 @@ $(document).ready(function(){
 
     });
 
-    $('#editAProvider').change(function(){
+    $('#editAProvider').change(function() {
         $(this).showHideProviders();
     });
 
-    $('#editANewznabProvider').change(function(){
+    $('#editANewznabProvider').change(function() {
         $(this).populateNewznabSection();
     });
 
-    $('.provider_enabler').live('click', function(){
+    $('#providerOrderList').on('click', '.provider_enabler', function() {
         $(this).refreshProviderList();
     });
 
-
+    // checks with the server that we can add a new provider and then does the required actions
     $('#newznab_add').click(function(){
 
         var selectedProvider = $('#editANewznabProvider :selected').val();
@@ -202,6 +211,7 @@ $(document).ready(function(){
 
     });
 
+    // deletes a provider from our local backend
     $('.newznab_delete').click(function(){
 
         var selectedProvider = $('#editANewznabProvider :selected').val();
@@ -210,8 +220,8 @@ $(document).ready(function(){
 
     });
 
-    // initialization stuff
 
+    // initialization stuff
     $(this).showHideProviders();
 
     $("#providerOrderList").sortable({

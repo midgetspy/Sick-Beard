@@ -51,27 +51,46 @@
 
 <form action="editShow" method="post">
 <input type="hidden" name="show" value="$show.tvdbid" />
-Location: <input type="text" name="location" id="location" value="$show._location" size="50" /><br />
+<span class="showLegend">Location:</span><input type="text" name="location" id="location" value="$show._location" size="50" /><br />
 <br />
-Quality:
+<span class="showLegend">Quality:</span>
 #set $qualities = $common.Quality.splitQuality(int($show.quality))
 #set global $anyQualities = $qualities[0]
 #set global $bestQualities = $qualities[1]
 #include $os.path.join($sickbeard.PROG_DIR, "data/interfaces/default/inc_qualityChooser.tmpl")
 <br />
-<br />
-Language: <select name="tvdbLang" id="tvdbLangSelect"></select><br />
+<span class="showLegend">Language:</span><select name="tvdbLang" id="tvdbLangSelect"></select><br />
 Note: This will only affect the language of the retrieved metadata file contents and episode filenames.<br />
 This <b>DOES NOT</b> allow Sick Beard to download non-english TV episodes!<br />
 <br />
-<br />
-Flatten files (no folders): <input type="checkbox" name="flatten_folders" #if $show.flatten_folders == 1 and not $sickbeard.NAMING_FORCE_FOLDERS then "checked=\"checked\"" else ""# #if $sickbeard.NAMING_FORCE_FOLDERS then "disabled=\"disabled\"" else ""#/><br /><br />
-Paused: <input type="checkbox" name="paused" #if $show.paused == 1 then "checked=\"checked\"" else ""# /><br /><br />
 
-Air by date: 
-<input type="checkbox" name="air_by_date" #if $show.air_by_date == 1 then "checked=\"checked\"" else ""# /><br />
-(check this if the show is released as Show.03.02.2010 rather than Show.S02E03) 
-<br /><br />
+<span class="showLegend">Flatten files (no folders):</span><input type="checkbox" name="flatten_folders" #if $show.flatten_folders == 1 and not $sickbeard.NAMING_FORCE_FOLDERS then "checked=\"checked\"" else ""# #if $sickbeard.NAMING_FORCE_FOLDERS then "disabled=\"disabled\"" else ""#/><br />
+<br />
+
+<span class="showLegend">Paused:</span><input type="checkbox" name="paused" #if $show.paused == 1 then "checked=\"checked\"" else ""# /><br />
+<br />
+
+<span class="showLegend">Air by date:</span><input type="checkbox" name="air_by_date" #if $show.air_by_date == 1 then "checked=\"checked\"" else ""# /><br />
+(check this if the show is released as Show.03.02.2010 rather than Show.S02E03)<br />
+<br />
+
+<span class="showLegend">Skip Notifications:</span><input type="checkbox" name="skip_notices" #if $show.skip_notices == 1 then "checked=\"checked\"" else ""# /><br />
+Skip sending Snatched/Downloaded notifications for this show?<br />
+<br />
+
+<span class="showLegend">Ignored Words (all shows):</span>$sickbeard.IGNORE_WORDS<br />
+<br />
+
+<span class="showLegend">Ignored Words (this show):</span><input type="text" name="rls_ignore_words" id="rls_ignore_words" value="$show.rls_ignore_words" size="50" /><br />
+Results <b>with any</b> of these words in the title will be filtered out<br />
+Separate words with a comma, e.g. "word1,word2,word3"<br />
+<br />
+
+<span class="showLegend">Required Words (this show):</span><input type="text" name="rls_require_words" id="rls_require_words" value="$show.rls_require_words" size="50" /><br />
+Results <b>without one</b> of these words in the title will be filtered out<br />
+Separate words with a comma, e.g. "word1,word2,word3"<br />
+<br />
+
 <input class="btn" type="submit" value="Submit" />
 </form>
 

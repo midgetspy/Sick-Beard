@@ -65,16 +65,12 @@ class ShowContainer(dict):
 
         #keep only the 100th latest results
         if time.time() - self._lastgc > 20:
-            tbd = self._stack[:-100]
-            i = 0
-            for o in tbd:
+            for o in self._stack[:-100]:
                 del self[o]
-                del self._stack[i]
-                i += 1
+            self._stack = self._stack[-100:]
 
-            _lastgc = time.time()
-            del tbd
-                    
+            self._lastgc = time.time()
+
         super(ShowContainer, self).__setitem__(key, value)
 
 
@@ -821,11 +817,22 @@ class Tvdb:
                 use_dvd = False
 
             if use_dvd:
-                seas_no = int(cur_ep.find('DVD_season').text)
-                ep_no   = int(float(cur_ep.find('DVD_episodenumber').text))
+                elem_seasnum, elem_epno = cur_ep.find('DVD_season'), cur_ep.find('DVD_episodenumber')
             else:
-                seas_no = int(cur_ep.find('SeasonNumber').text)
-                ep_no = int(cur_ep.find('EpisodeNumber').text)
+                elem_seasnum, elem_epno = cur_ep.find('SeasonNumber'), cur_ep.find('EpisodeNumber')
+
+            if elem_seasnum is None or elem_epno is None:
+                log().warning("An episode has incomplete season/episode number (season: %r, episode: %r)" % (
+                    elem_seasnum, elem_epno))
+                log().debug(
+                    " ".join(
+                        "%r is %r" % (child.tag, child.text) for child in cur_ep.getchildren()))
+                # TODO: Should this happen?
+                continue # Skip to next episode
+
+            # float() is because https://github.com/dbr/tvnamer/issues/95 - should probably be fixed in TVDB data
+            seas_no = int(float(elem_seasnum.text))
+            ep_no = int(float(elem_epno.text))
 
             for cur_item in cur_ep.getchildren():
                 tag = cur_item.tag.lower()

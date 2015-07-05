@@ -38,26 +38,12 @@ from name_parser.parser import NameParser, InvalidNameException
 
 class ProperFinder():
 
-    def __init__(self):
-        self.updateInterval = datetime.timedelta(hours=1)
-
     def run(self):
 
         if not sickbeard.DOWNLOAD_PROPERS:
             return
 
-        # look for propers every night at 1 AM
-        updateTime = datetime.time(hour=1)
-
-        logger.log(u"Checking proper time", logger.DEBUG)
-
-        hourDiff = datetime.datetime.today().time().hour - updateTime.hour
-
-        # if it's less than an interval after the update time then do an update
-        if hourDiff >= 0 and hourDiff < self.updateInterval.seconds / 3600:
-            logger.log(u"Beginning the search for new propers")
-        else:
-            return
+        logger.log(u"Beginning the search for new propers")
 
         propers = self._getProperList()
 
@@ -150,17 +136,26 @@ class ProperFinder():
                 continue
 
             if not show_name_helpers.filterBadReleases(curProper.name):
-                logger.log(u"Proper " + curProper.name + " isn't a valid scene release that we want, igoring it", logger.DEBUG)
+                logger.log(u"Proper " + curProper.name + " isn't a valid scene release that we want, ignoring it", logger.DEBUG)
+                continue
+
+            show = helpers.findCertainShow(sickbeard.showList, curProper.tvdbid)
+            if not show:
+                logger.log(u"Unable to find the show with tvdbid " + str(curProper.tvdbid), logger.ERROR)
+                continue
+
+            if show.rls_ignore_words and search.filter_release_name(curProper.name, show.rls_ignore_words):
+                logger.log(u"Ignoring " + curProper.name + " based on ignored words filter: " + show.rls_ignore_words, logger.MESSAGE)
+                continue
+
+            if show.rls_require_words and not search.filter_release_name(curProper.name, show.rls_require_words):
+                logger.log(u"Ignoring " + curProper.name + " based on required words filter: " + show.rls_require_words, logger.MESSAGE)
                 continue
 
             # if we have an air-by-date show then get the real season/episode numbers
             if curProper.season == -1 and curProper.tvdbid:
-                showObj = helpers.findCertainShow(sickbeard.showList, curProper.tvdbid)
-                if not showObj:
-                    logger.log(u"This should never have happened, post a bug about this!", logger.ERROR)
-                    raise Exception("BAD STUFF HAPPENED")
 
-                tvdb_lang = showObj.lang
+                tvdb_lang = show.lang
                 # There's gotta be a better way of doing this but we don't wanna
                 # change the language value elsewhere
                 ltvdb_api_parms = sickbeard.TVDB_API_PARMS.copy()
@@ -216,10 +211,12 @@ class ProperFinder():
             else:
 
                 # make sure that none of the existing history downloads are the same proper we're trying to download
+                clean_proper_name = self._genericName(helpers.remove_non_release_groups(curProper.name))
                 isSame = False
+
                 for curResult in historyResults:
                     # if the result exists in history already we need to skip it
-                    if self._genericName(curResult["resource"]) == self._genericName(curProper.name):
+                    if self._genericName(helpers.remove_non_release_groups(curResult["resource"])) == clean_proper_name:
                         isSame = True
                         break
                 if isSame:
@@ -240,9 +237,7 @@ class ProperFinder():
                 result.quality = curProper.quality
 
                 # snatch it
-                downloadResult = search.snatchEpisode(result, SNATCHED_PROPER)
-
-                return downloadResult
+                search.snatchEpisode(result, SNATCHED_PROPER)
 
     def _genericName(self, name):
         return name.replace(".", " ").replace("-", " ").replace("_", " ").lower()
