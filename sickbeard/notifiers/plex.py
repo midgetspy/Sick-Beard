@@ -18,8 +18,6 @@
 
 import urllib
 import urllib2
-import base64
-
 import sickbeard
 
 from sickbeard import logger
@@ -71,17 +69,12 @@ class PLEXNotifier:
             req = urllib2.Request(url)
             # if we have a password, use authentication
             if password:
-                base64string = base64.encodestring('%s:%s' % (username, password))[:-1]
-                authheader = "Basic %s" % base64string
-                req.add_header("Authorization", authheader)
-                logger.log(u"PLEX: Contacting (with auth header) via url: " + url, logger.DEBUG)
+                pw_mgr = urllib2.HTTPPasswordMgrWithDefaultRealm()
+                pw_mgr.add_password(None, url, username, password)
             else:
-                logger.log(u"PLEX: Contacting via url: " + url, logger.DEBUG)
+                pw_mgr = None
 
-            response = urllib2.urlopen(req)
-
-            result = response.read().decode(sickbeard.SYS_ENCODING)
-            response.close()
+            result = sickbeard.helpers.getURL(req, password_mgr=pw_mgr)
 
             logger.log(u"PLEX: HTTP response: " + result.replace('\n', ''), logger.DEBUG)
             # could return result response = re.compile('<html><li>(.+\w)</html>').findall(result)
@@ -146,7 +139,7 @@ class PLEXNotifier:
     def test_notify(self, host, username, password):
         return self._notify("This is a test notification from Sick Beard", "Test", host, username, password, force=True)
 
-    def update_library(self, ep_obj=None):
+    def update_library(self, ep_obj=None, host=None, username=None, password=None):
         """Handles updating the Plex Media Server host via HTTP API
 
         Plex Media Server currently only supports updating the whole video library and not a specific path.
@@ -156,16 +149,49 @@ class PLEXNotifier:
 
         """
 
+        # fill in omitted parameters
+        if not host:
+            host = sickbeard.PLEX_SERVER_HOST
+        if not username:
+            username = sickbeard.PLEX_USERNAME
+        if not password:
+            password = sickbeard.PLEX_PASSWORD
+
         if sickbeard.USE_PLEX and sickbeard.PLEX_UPDATE_LIBRARY:
             if not sickbeard.PLEX_SERVER_HOST:
                 logger.log(u"PLEX: No Plex Media Server host specified, check your settings", logger.DEBUG)
                 return False
 
-            logger.log(u"PLEX: Updating library for the Plex Media Server host: " + sickbeard.PLEX_SERVER_HOST, logger.MESSAGE)
+            logger.log(u"PLEX: Updating library for the Plex Media Server host: " + host, logger.MESSAGE)
 
-            url = "http://%s/library/sections" % sickbeard.PLEX_SERVER_HOST
+            # if username and password were provided, fetch the auth token from plex.tv
+            token_arg = ""
+            if username and password:
+
+                logger.log(u"PLEX: fetching credentials for Plex user: " + username, logger.DEBUG)
+                url = "https://plex.tv/users/sign_in.xml"            
+                req = urllib2.Request(url, data="")
+                pw_mgr = urllib2.HTTPPasswordMgrWithDefaultRealm()
+                pw_mgr.add_password(None, url, username, password)
+                req.add_header("X-Plex-Product", "Sick Beard Notifier")
+                req.add_header("X-Plex-Client-Identifier", "5f48c063eaf379a565ff56c9bb2b401e")
+                req.add_header("X-Plex-Version", "1.0")
+                
+                try:
+                    response = sickbeard.helpers.getURL(req, throw_exc=True)
+                    auth_tree = etree.fromstring(response)
+                    token = auth_tree.findall(".//authentication-token")[0].text
+                    token_arg = "?X-Plex-Token=" + token
+                
+                except urllib2.URLError as e:
+                    logger.log(u"PLEX: Error fetching credentials from from plex.tv for user %s: %s" % (username, ex(e)), logger.MESSAGE)
+                
+                except (ValueError, IndexError) as e:
+                    logger.log(u"PLEX: Error parsing plex.tv response: " + ex(e), logger.MESSAGE)
+
+            url = "http://%s/library/sections%s" % (sickbeard.PLEX_SERVER_HOST, token_arg)
             try:
-                xml_tree = etree.parse(urllib.urlopen(url))
+                xml_tree = etree.fromstring(sickbeard.helpers.getURL(url))
                 media_container = xml_tree.getroot()
             except IOError, e:
                 logger.log(u"PLEX: Error while trying to contact Plex Media Server: " + ex(e), logger.ERROR)
@@ -178,13 +204,10 @@ class PLEXNotifier:
 
             for section in sections:
                 if section.attrib['type'] == "show":
-                    url = "http://%s/library/sections/%s/refresh" % (sickbeard.PLEX_SERVER_HOST, section.attrib['key'])
-                    try:
-                        urllib.urlopen(url)
-                    except Exception, e:
-                        logger.log(u"PLEX: Error updating library section for Plex Media Server: " + ex(e), logger.ERROR)
+                    url = "http://%s/library/sections/%s/refresh%s" % (sickbeard.PLEX_SERVER_HOST, section.attrib['key'], token_arg)
+                    if sickbeard.helpers.getURLFileLike(url) is None:
+                        logger.log(u"PLEX: Error updating library section for Plex Media Server", logger.ERROR)
                         return False
-
             return True
 
 notifier = PLEXNotifier

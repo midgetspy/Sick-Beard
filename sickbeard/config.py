@@ -30,6 +30,11 @@ from sickbeard import db
 
 import sickbeard
 
+# Address poor support for scgi over unix domain sockets
+# this is not nicely handled by python currently
+# http://bugs.python.org/issue23636
+urlparse.uses_netloc.append('scgi')
+
 naming_ep_type = ("%(seasonnumber)dx%(episodenumber)02d",
                   "s%(seasonnumber)02de%(episodenumber)02d",
                    "S%(seasonnumber)02dE%(episodenumber)02d",
@@ -270,10 +275,8 @@ def clean_url(url):
 
         scheme, netloc, path, query, fragment = urlparse.urlsplit(url, 'http')
 
-        if not path.endswith('/'):
-            basename, ext = ek.ek(os.path.splitext, ek.ek(os.path.basename, path))  # @UnusedVariable
-            if not ext:
-                path = path + '/'
+        if not path:
+            path = path + '/'
 
         cleaned_url = urlparse.urlunsplit((scheme, netloc, path, query, fragment))
 

@@ -9,10 +9,10 @@
 #import os.path
 #include $os.path.join($sickbeard.PROG_DIR, "data/interfaces/default/inc_top.tmpl")
 #set $sort = $sickbeard.COMING_EPS_SORT
-<script type="text/javascript" src="$sbRoot/js/ajaxEpSearch.js?$sbPID"></script>
+<script src="$sbRoot/js/ajaxEpSearch.js?$sbPID"></script>
 
 <div class="h2footer align-right">
-    <b>Key:</b> 
+    <b>Key:</b>
     <span class="listing-overdue">Past</span>
     <span class="listing-current">Current</span>
     <span class="listing-default">Future</span>
@@ -22,8 +22,8 @@
 
 #if $layout == 'list':
 <!-- start list view //-->
-<script type="text/javascript" src="$sbRoot/js/plotTooltip.js?$sbPID"></script>
-<script type="text/javascript" charset="utf-8">
+<script src="$sbRoot/js/plotTooltip.js?$sbPID"></script>
+<script charset="utf-8">
 <!--
 \$.tablesorter.addParser({
     id: 'loadingNames',
@@ -157,9 +157,9 @@
 <!-- end list view //-->
 #else:
 <!-- start non list view //-->
-<script type="text/javascript" charset="utf-8">
+<script charset="utf-8">
 <!--
-\$(document).ready(function(){ 
+\$(document).ready(function(){
   \$('#sbRoot').ajaxEpSearch({'size': 16, 'loadingImage': 'loading16_333333.gif'});
   \$(".epSummary").hide();
   \$(".epSummaryTrigger").click(function() {
@@ -178,13 +178,13 @@
     #set $missed_header = False
     #set $show_div = "epListing listing-default"
 
-    #if $sort == "show": 
+    #if $sort == "show":
         <br/><br/>
     #end if
-    
+
     #for $cur_result in $sql_results:
     <!-- start $cur_result["show_name"] //-->
-        
+
         #if int($cur_result["paused"]) and not $sickbeard.COMING_EPS_DISPLAY_PAUSED:
             #continue
         #end if
@@ -238,7 +238,7 @@
             <span class="tvshowTitle"><a href="$sbRoot/home/displayShow?show=${cur_result["showid"]}">$cur_result["show_name"]
             #if int($cur_result["paused"]):
             <span class="pause">[paused]</span>
-            #end if            
+            #end if
             </a></span>
             <span class="tvshowTitleIcons">
                 <a href="http://thetvdb.com/?tab=series&amp;id=${cur_result["showid"]}" rel="noreferrer" onclick="window.open('${sickbeard.ANON_REDIRECT}' + this.href, '_blank'); return false;" title="http://thetvdb.com/?tab=series&amp;id=${cur_result["showid"]}"><img alt="[tvdb]" height="16" width="16" src="$sbRoot/images/thetvdb16.png" /></a>
@@ -253,7 +253,7 @@
 #if $layout == 'banner':
         </tr>
         <tr>
-#end if          
+#end if
           <td class="nextEp">
             <span class="title">Next Episode:</span> <span><%=str(cur_result["season"])+"x"+"%02i" % int(cur_result["episode"]) %> - $cur_result["name"] ($datetime.date.fromordinal(int($cur_result["airdate"])))</span>
           </td>
@@ -277,7 +277,7 @@
       </table>
       </div>
     </div>
-    
+
     <!-- end $cur_result["show_name"] //-->
     #end for
 
@@ -286,7 +286,7 @@
 <!-- end non list view //-->
 #end if
 
-<script type="text/javascript" charset="utf-8">
+<script>
 <!--
 window.setInterval( "location.reload(true)", 600000); // Refresh every 10 minutes
 //-->

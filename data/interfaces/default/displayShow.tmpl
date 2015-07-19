@@ -89,7 +89,7 @@ replace with: <b><%=", ".join([Quality.qualityStrings[x] for x in sorted(bestQua
 </div>
 
 <div class="float-left">
-Change selected episodes to 
+Change selected episodes to
 <select id="statusSelect">
 #for $curStatus in [$WANTED, $SKIPPED, $ARCHIVED, $IGNORED] + sorted($Quality.DOWNLOADED):
 #if $curStatus == $DOWNLOADED:
@@ -196,7 +196,7 @@ Change selected episodes to
 
 #include $os.path.join($sickbeard.PROG_DIR, "data/interfaces/default/inc_bottom.tmpl")
 
-<script type="text/javascript" src="$sbRoot/js/lib/jquery.bookmarkscroll.js?$sbPID"></script>
-<script type="text/javascript" src="$sbRoot/js/displayShow.js?$sbPID"></script>
-<script type="text/javascript" src="$sbRoot/js/plotTooltip.js?$sbPID"></script>
-<script type="text/javascript" src="$sbRoot/js/ajaxEpSearch.js?$sbPID"></script>
+<script src="$sbRoot/js/lib/jquery.bookmarkscroll.js?$sbPID"></script>
+<script src="$sbRoot/js/displayShow.js?$sbPID"></script>
+<script src="$sbRoot/js/plotTooltip.js?$sbPID"></script>
+<script src="$sbRoot/js/ajaxEpSearch.js?$sbPID"></script>

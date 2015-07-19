@@ -1,4 +1,5 @@
 #!/bin/sh
+# $FreeBSD:$
 #
 # PROVIDE: sickbeard
 # REQUIRE: LOGIN
@@ -15,78 +16,21 @@
 #			as root.
 # sickbeard_dir:	Directory where Sick Beard lives.
 #			Default: /usr/local/sickbeard
-# sickbeard_chdir:  Change to this directory before running Sick Beard.
-#     Default is same as sickbeard_dir.
-# sickbeard_pid:  The name of the pidfile to create.
-#     Default is sickbeard.pid in sickbeard_dir.
-# sickbeard_host: The hostname or IP Sick Beard is listening on
-#     Default is 127.0.0.1
-# sickbeard_port: The port Sick Beard is listening on
-#     Default is 8081
-# sickbeard_web_user: Username to authenticate to the Sick Beard web interface
-#     Default is an empty string (no username)
-# sickbeard_web_password: Password to authenticate to the Sick Beard web interface
-#     Default is an empty string (no password)
-PATH="/sbin:/bin:/usr/sbin:/usr/bin:/usr/local/sbin:/usr/local/bin"
 
 . /etc/rc.subr
 
-name="sickbeard"
-rcvar=${name}_enable
+name=sickbeard
+rcvar=sickbeard_enable
 
 load_rc_config ${name}
 
-: ${sickbeard_enable:="NO"}
-: ${sickbeard_user:="_sabnzbd"}
-: ${sickbeard_dir:="/usr/local/sickbeard"}
-: ${sickbeard_chdir:="${sickbeard_dir}"}
-: ${sickbeard_pid:="${sickbeard_dir}/sickbeard.pid"}
-: ${sickbeard_host:="127.0.0.1"}
-: ${sickbeard_port:="8081"}
-: ${sickbeard_web_user:=""}
-: ${sickbeard_web_password:=""}
+: ${sickbeard_enable:=NO}
+: ${sickbeard_user:=_sabnzbd}
+: ${sickbeard_dir=/usr/local/sickbeard}
 
-WGET="/usr/local/bin/wget" # You need wget for this script to safely shutdown Sick Beard.
-
-status_cmd="${name}_status"
-stop_cmd="${name}_stop"
-
-command="/usr/sbin/daemon"
-command_args="-f -p ${sickbeard_pid} python ${sickbeard_dir}/SickBeard.py --quiet --nolaunch"
-
-# Check for wget and refuse to start without it.
-if [ ! -x "${WGET}" ]; then
-  warn "Sickbeard not started: You need wget to safely shut down Sick Beard."
-  exit 1
-fi
-
-# Ensure user is root when running this script.
-if [ `id -u` != "0" ]; then
-  echo "Oops, you should be root before running this!"
-  exit 1
-fi
-
-verify_sickbeard_pid() {
-    # Make sure the pid corresponds to the Sick Beard process.
-    pid=`cat ${sickbeard_pid} 2>/dev/null`
-    ps -p ${pid} 2>/dev/null | grep -q "python ${sickbeard_dir}/SickBeard.py"
-    return $?
-}
-
-# Try to stop Sick Beard cleanly by calling shutdown over http.
-sickbeard_stop() {
-    echo "Stopping $name"
-    verify_sickbeard_pid
-    ${WGET} -O - -q --user=${sickbeard_web_user} --password=${sickbeard_web_password} "http://${sickbeard_host}:${sickbeard_port}/home/shutdown/" >/dev/null
-    if [ -n "${pid}" ]; then
-      wait_for_pids ${pid}
-      echo "Stopped"
-    fi
-}
-
-sickbeard_status() {
-    verify_sickbeard_pid && echo "$name is running as ${pid}" || echo "$name is not running"
-}
+pidfile=${sickbeard_dir}/sickbeard.pid
+procname="*python"
+command=${sickbeard_dir}/SickBeard.py
+command_args="--datadir=${sickbeard_dir} --daemon --pidfile=${pidfile}"
 
 run_rc_command "$1"
-

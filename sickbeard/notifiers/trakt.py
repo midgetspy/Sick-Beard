@@ -17,7 +17,6 @@
 # along with Sick Beard.  If not, see <http://www.gnu.org/licenses/>.
 
 import urllib2
-
 from hashlib import sha1
 
 try:
@@ -73,19 +72,16 @@ class TraktNotifier:
         encoded_data = json.dumps(data)
 
         # request the URL from trakt and parse the result as json
-        try:
-            logger.log(u"TRAKT: Calling method http://api.trakt.tv/" + method + ", with data" + encoded_data, logger.DEBUG)
-            stream = urllib2.urlopen("http://api.trakt.tv/" + method, encoded_data)
-            resp = stream.read()
-
-            resp = json.loads(resp)
-
-            if ("error" in resp):
-                raise Exception(resp["error"])
-
-        except (IOError):
-            logger.log(u"TRAKT: Failed calling method", logger.ERROR)
+        logger.log(u"TRAKT: Calling method http://api.trakt.tv/" + method + ", with data" + encoded_data, logger.DEBUG)
+        req = urllib2.Request("http://api.trakt.tv/" + method, encoded_data)
+        urlResp = sickbeard.helpers.getURL(req)
+        if urlResp:
+            resp = json.loads(urlResp)
+        else:
             return False
+
+        if ("error" in resp):
+            raise Exception(resp["error"])
 
         if (resp["status"] == "success"):
             logger.log(u"TRAKT: Succeeded calling method. Result: " + resp["message"], logger.MESSAGE)

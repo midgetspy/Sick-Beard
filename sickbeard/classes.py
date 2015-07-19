@@ -16,55 +16,10 @@
 # You should have received a copy of the GNU General Public License
 # along with Sick Beard.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
 import sickbeard
-
-import urllib
 import datetime
 
-from common import USER_AGENT, Quality
-
-class SickBeardURLopener(urllib.FancyURLopener):
-    version = USER_AGENT
-
-class AuthURLOpener(SickBeardURLopener):
-    """
-    URLOpener class that supports http auth without needing interactive password entry.
-    If the provided username/password don't work it simply fails.
-    
-    user: username to use for HTTP auth
-    pw: password to use for HTTP auth
-    """
-    def __init__(self, user, pw):
-        self.username = user
-        self.password = pw
-
-        # remember if we've tried the username/password before
-        self.numTries = 0
-        
-        # call the base class
-        urllib.FancyURLopener.__init__(self)
-
-    def prompt_user_passwd(self, host, realm):
-        """
-        Override this function and instead of prompting just give the
-        username/password that were provided when the class was instantiated.
-        """
-
-        # if this is the first try then provide a username/password
-        if self.numTries == 0:
-            self.numTries = 1
-            return (self.username, self.password)
-        
-        # if we've tried before then return blank which cancels the request
-        else:
-            return ('', '')
-
-    # this is pretty much just a hack for convenience
-    def openit(self, url):
-        self.numTries = 0
-        return SickBeardURLopener.open(self, url)
+from common import Quality
 
 class SearchResult:
     """
