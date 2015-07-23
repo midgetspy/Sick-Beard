@@ -41,6 +41,9 @@ import threading
 import time
 import signal
 import traceback
+# We fix the https connection here by removing ssl verificaton
+import ssl
+ssl._create_default_https_context = ssl._create_unverified_context
 import getopt
 
 import sickbeard
