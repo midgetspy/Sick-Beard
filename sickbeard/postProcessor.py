@@ -32,11 +32,14 @@ from sickbeard import helpers
 from sickbeard import history
 from sickbeard import logger
 from sickbeard import notifiers
+from sickbeard import providers
 from sickbeard import show_name_helpers
 from sickbeard import scene_exceptions
 
 from sickbeard import encodingKludge as ek
 from sickbeard.exceptions import ex
+
+from sickbeard.providers.generic import GenericProvider
 
 from sickbeard.name_parser.parser import NameParser, InvalidNameException
 
@@ -734,7 +737,7 @@ class PostProcessor(object):
 
         # retrieve/create the corresponding TVEpisode objects
         ep_obj = self._get_ep_obj(tvdb_id, season, episodes)
-
+        
         # get the quality of the episode we're processing
         if quality:
             self._log(u"Snatch history had a quality in it, using that: " + common.Quality.qualityStrings[quality], logger.DEBUG)
@@ -845,7 +848,22 @@ class PostProcessor(object):
 
         # send notifiers library update
         notifiers.update_library(ep_obj)
-
+        
+        # optionally cleanup pvr if we've successfully downloaded the same ep
+        if sickbeard.USE_PVRS and sickbeard.PVR_POST_DOWNLOAD_ACTION > common.PVR_DO_NOTHING:
+            self._run_pvr_post_download_cleanup(ep_obj)
+            
         self._run_extra_scripts(ep_obj)
 
         return True
+    
+    def _run_pvr_post_download_cleanup(self, ep_obj):
+        for curProvider in providers.sortedProviderList():
+
+            if not curProvider.isActive() or curProvider.providerType != GenericProvider.PVR:
+                continue
+            
+            resultMessage = curProvider.postDownloadCleanup(ep_obj)
+            
+            if resultMessage:
+                self._log(resultMessage)

@@ -102,6 +102,32 @@
                                 <span class="component-desc">Do not use if you use a post-process script like sabToSickbeard on the same <i>TV Download Dir</i>.</span>
                             </label>
                         </div>
+                        
+                        <div class="field-pair" #if $sickbeard.USE_PVRS == False then "style=\"display:none\"" else ""#>
+                            <label class="nocheck clearfix" for="pvr_post_download_actionr">
+                                <span class="component-title">PVR Cleanup</span>
+                                <select name="pvr_post_download_action" id="pvr_post_download_action" class="input-large" >
+                                    #set $pvr_post_download_action_text = {PVR_DO_NOTHING: "Do Nothing ", PVR_CANCEL_RECORDING: "Cancel Pending Recording ", PVR_DELETE_RECORDING: "Delete Existing Recording "}
+                                    #for $curAction in (PVR_DO_NOTHING, PVR_CANCEL_RECORDING, PVR_DELETE_RECORDING):
+                                      #if $sickbeard.PVR_POST_DOWNLOAD_ACTION == $curAction:
+                                        #set $pvr_post_download_action = "selected=\"selected\""
+                                      #else
+                                        #set $pvr_post_download_action = ""
+                                      #end if
+                                    <option value="$curAction" $pvr_post_download_action>$pvr_post_download_action_text[$curAction]</option>
+                                    #end for
+                                    </select>
+                            </label>
+                            <label class="nocheck clearfix">
+                                <span class="component-title">&nbsp;</span>
+                                <span class="component-desc">What function should be performed on PVRs after a file is downloaded?</span>
+                            </label>
+                            <label class="nocheck clearfix">
+                                <span class="component-title">&nbsp;</span>
+                                <span class="component-desc"><b>NOTE:</b> This will allow you to unschedule and/or delete recordings from your pvr if the same episode has been downloaded via nzb/torrent.</span>
+                            </label>
+
+                        </div>
 
                         <div class="clearfix"></div>
                         <input type="submit" class="btn config_submitter" value="Save Changes" /><br/>

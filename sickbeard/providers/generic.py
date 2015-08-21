@@ -27,7 +27,7 @@ import sickbeard
 
 from sickbeard import helpers, classes, logger, db
 
-from sickbeard.common import Quality, MULTI_EP_RESULT, SEASON_RESULT
+from sickbeard.common import Quality, MULTI_EP_RESULT, SEASON_RESULT, PVR_HD_CHANNEL_GREATER_THAN, PVR_HD_CHANNEL_LESS_THAN, PVR_HD_CHANNEL_FIXED_LIST
 from sickbeard import tvcache
 from sickbeard import encodingKludge as ek
 from sickbeard.exceptions import ex
@@ -41,6 +41,7 @@ class GenericProvider:
 
     NZB = "nzb"
     TORRENT = "torrent"
+    PVR = "pvr"
 
     def __init__(self, name):
 
@@ -71,6 +72,8 @@ class GenericProvider:
             return self.isEnabled()
         elif self.providerType == GenericProvider.TORRENT and sickbeard.USE_TORRENTS:
             return self.isEnabled()
+        elif self.providerType == GenericProvider.PVR and sickbeard.USE_PVRS:
+            return self.isEnabled()
         else:
             return False
 
@@ -89,6 +92,8 @@ class GenericProvider:
             result = classes.NZBSearchResult(episodes)
         elif self.providerType == GenericProvider.TORRENT:
             result = classes.TorrentSearchResult(episodes)
+        elif self.providerType == GenericProvider.PVR:
+            result = classes.PVRSearchResult(episodes)
         else:
             result = classes.SearchResult(episodes)
 
@@ -331,7 +336,7 @@ class GenericProvider:
             # make sure we want the episode
             wantEp = True
             for epNo in actual_episodes:
-                if not show.wantEpisode(actual_season, epNo, quality):
+                if not show.wantEpisode(actual_season, epNo, quality, False, self.providerType == 'pvr'):
                     wantEp = False
                     break
 
@@ -350,6 +355,10 @@ class GenericProvider:
             result.url = url
             result.name = title
             result.quality = quality
+            
+            # store pvr result in extrainfo for later use
+            if result.resultType == 'pvr':
+                result.extraInfo = item
 
             if len(epObj) == 1:
                 epNum = epObj[0].episode
@@ -365,6 +374,14 @@ class GenericProvider:
                 results[epNum].append(result)
             else:
                 results[epNum] = [result]
+                
+        # if this is a pvr provider let's resort our results and put any items 
+        # that have the same recording date as the air date at the end, because 
+        # we want to prefer to download as opposed to recording via pvr  
+        if self.providerType == 'pvr':
+            for ep in results:
+                results[ep].sort(key=lambda item: 1 if self.isRecordingDateSameAsAirDate(item) else 0)
+                
 
         return results
 
@@ -391,3 +408,82 @@ class TorrentProvider(GenericProvider):
         GenericProvider.__init__(self, name)
 
         self.providerType = GenericProvider.TORRENT
+
+class PVRProvider(GenericProvider):
+    
+    def __init__(self, name):
+        
+        GenericProvider.__init__(self, name)
+        
+        self.providerType = GenericProvider.PVR
+        
+    def determineQualityByChannel(self, channelNum):
+        
+        quality = Quality.SDTV
+        
+        if sickbeard.PVR_HD_CHANNEL_METHOD == PVR_HD_CHANNEL_GREATER_THAN and int(channelNum) > sickbeard.PVR_HD_CHANNEL_CUTOFF:
+            quality = Quality.HDTV
+        elif sickbeard.PVR_HD_CHANNEL_METHOD == PVR_HD_CHANNEL_LESS_THAN and int(channelNum) < sickbeard.PVR_HD_CHANNEL_CUTOFF:
+            quality = Quality.HDTV 
+        elif sickbeard.PVR_HD_CHANNEL_METHOD == PVR_HD_CHANNEL_FIXED_LIST:
+            hd_channels = sickbeard.PVR_HD_CHANNEL_LIST.split(',')
+            if(str(channelNum) in hd_channels):
+                quality = Quality.HDTV
+                   
+        return quality  
+    
+    def isRecordingDateSameAsAirDate(self, result): 
+        try:
+            recording_date = self.getRecordingDateTime(result.extraInfo).date()
+            if result.episodes[0].airdate == recording_date:
+                return True
+        except:
+            pass
+        
+        return False
+    
+    def isRecordingDateWithinLimit(self, result):
+        try :
+            limit = datetime.date.today() + datetime.timedelta(days=sickbeard.PVR_MAX_SCHEDULING_DAYS)
+            recording_date = self.getRecordingDateTime(result.extraInfo).date()
+            if recording_date > limit:
+                return False
+        except:
+            pass
+        
+        return True
+    
+    def getAirDates(self, show, season):
+        
+        airDates = {}
+        
+        # get all episodes in season from db
+        myDB = db.DBConnection()
+        sql_result = myDB.select("SELECT episode, airdate FROM tv_episodes WHERE showid = ? AND season = ? ORDER BY episode DESC;", [show.tvdbid, season])
+
+        if sql_result:
+            for row in sql_result:
+                airDates[row['episode']] = datetime.date.fromordinal(row['airdate'])
+            
+        return airDates
+    
+    def getRecordingDateTime(self, extraInfo):
+        """
+        Return the date that an item would get recorded by the pvr 
+        """
+        return None
+            
+    def snatchEpisode(self, result):
+        """
+        Since each pvr provider will snatch/schedule episodes differently,
+        this should be overridden and should return the success status of scheduling episode
+        """
+        return False
+    
+    def postDownloadCleanup(self, ep_obj):
+        '''
+        optionally cleanup pvr if we've successfully downloaded the same ep
+        options include unscheduling a recording that's pending and
+        deleting a recording that's already complete
+        this should be overridden in provider specific manner
+        '''

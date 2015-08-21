@@ -55,5 +55,23 @@ $(document).ready(function(){
     });
 
     toggle_torrent_title();
+    
+    
+        $.fn.pvr_hd_channel_method_handler = function() {
+
+        var selectedHdChannelMethod = $('#pvr_hd_channel_method :selected').val();
+
+        if (selectedHdChannelMethod == 2) {
+            $('#channel_list_settings').show();
+            $('#channel_cutoff_settings').hide();
+        } else {
+            $('#channel_list_settings').hide();
+            $('#channel_cutoff_settings').show();
+        }
+
+    };
+    
+    $('#pvr_hd_channel_method').change($(this).pvr_hd_channel_method_handler);
+    $(this).pvr_hd_channel_method_handler();
 
 });

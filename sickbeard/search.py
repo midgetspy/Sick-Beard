@@ -118,6 +118,9 @@ def snatchEpisode(result, endStatus=SNATCHED):
     # torrents are always saved to disk
     elif result.resultType == "torrent":
         dlResult = _downloadResult(result)
+    # allow pvr provider to implement own snatch method    
+    elif result.resultType == "pvr":
+        dlResult = result.provider.snatchEpisode(result)
     else:
         logger.log(u"Unknown result type, unable to download it", logger.ERROR)
         dlResult = False
@@ -348,7 +351,7 @@ def findEpisode(episode, manualSearch=False):
     return bestResult
 
 
-def findSeason(show, season):
+def findSeason(show, season, pvrOnly=False):
 
     logger.log(u"Searching for stuff we need from " + show.name + " season " + str(season))
 
@@ -359,6 +362,10 @@ def findSeason(show, season):
     for curProvider in providers.sortedProviderList():
 
         if not curProvider.isActive():
+            continue
+        
+        # we only want pvr to run when called with pvrOnly and then only on pvr providers
+        if (pvrOnly and curProvider.providerType != GenericProvider.PVR) or (not pvrOnly and curProvider.providerType == GenericProvider.PVR) :
             continue
 
         try:
@@ -390,7 +397,10 @@ def findSeason(show, season):
 
     finalResults = []
 
-    anyQualities, bestQualities = Quality.splitQuality(show.quality)
+    if pvrOnly:
+        anyQualities, bestQualities = Quality.splitQuality(show.pvr_quality)
+    else:
+        anyQualities, bestQualities = Quality.splitQuality(show.quality)
 
     # pick the best season NZB
     BestSeasonResult = None

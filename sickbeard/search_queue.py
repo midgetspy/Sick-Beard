@@ -30,6 +30,7 @@ from sickbeard import ui
 BACKLOG_SEARCH = 10
 RSS_SEARCH = 20
 MANUAL_SEARCH = 30
+PVR_SEARCH = 40
 
 
 class SearchQueue(generic_queue.GenericQueue):
@@ -218,7 +219,7 @@ class BacklogQueueItem(generic_queue.QueueItem):
         logger.log(u"Finished searching for episodes from " + self.show.name + " season " + str(self.segment))
         self.finish()
 
-    def _need_any_episodes(self, statusResults, bestQualities):
+    def _need_any_episodes(self, statusResults, bestQualities, allowUnaired=False):
 
         wantSeason = False
 
@@ -236,5 +237,39 @@ class BacklogQueueItem(generic_queue.QueueItem):
             if (curStatus in (common.DOWNLOADED, common.SNATCHED, common.SNATCHED_PROPER) and curQuality < highestBestQuality) or curStatus == common.WANTED:
                 wantSeason = True
                 break
+            
+            # for pvr searches we want to allow unaired so we can check the epg
+            if allowUnaired and curStatus == common.UNAIRED:
+                wantSeason = True
+                break
 
         return wantSeason
+    
+class PVRQueueItem(BacklogQueueItem):
+    def __init__(self, show, segment):
+        BacklogQueueItem.__init__(self, show, segment)
+        self.thread_name = 'PVR-' + str(show.tvdbid)
+        self.action_id = PVR_SEARCH
+     
+    def _need_any_episodes(self, statusResults, bestQualities):
+        allowUnaired = True
+        return BacklogQueueItem._need_any_episodes(self, statusResults, bestQualities, allowUnaired) 
+                    
+    def execute(self):
+
+        generic_queue.QueueItem.execute(self)
+
+        results = search.findSeason(self.show, self.segment, True)
+
+        # schedule whatever we find
+        for curResult in results:
+            if curResult:
+                # don't schedule things more than our limit
+                if curResult.provider.isRecordingDateWithinLimit(curResult):
+                    search.snatchEpisode(curResult)
+                    time.sleep(2)
+                else:
+                    logger.log(u"Not scheduling " + curResult.name + " because its recording date is too far out.")  
+
+        logger.log(u"Finished searching for episodes from " + self.show.name + " season " + str(self.segment))
+        self.finish()
