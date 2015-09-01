@@ -1,4 +1,5 @@
 #import sickbeard
+#from sickbeard.common import PVR_HD_CHANNEL_GREATER_THAN, PVR_HD_CHANNEL_LESS_THAN, PVR_HD_CHANNEL_FIXED_LIST
 #set global $title="Config - Search Settings"
 #set global $header="Search Settings"
 
@@ -289,6 +290,86 @@
 
                     </fieldset>
                 </div><!-- /component-group3 //-->
+                
+                <div id="core-component-group4" class="component-group clearfix">
+
+                    <div class="component-group-desc">
+                        <h3>PVR Search</h3>
+                        <p>Settings that dictate how Sick Beard handles PVR search results.</p>
+                    </div>
+
+                    <fieldset class="component-group-list">
+
+                        <div class="field-pair">
+                            <input type="checkbox" name="use_pvrs" class="enabler" id="use_pvrs" #if $sickbeard.USE_PVRS == True then "checked=\"checked\"" else ""# />
+                            <label class="clearfix" for="use_pvrs">
+                                <span class="component-title">Search PVRs</span>
+                                <span class="component-desc">Should Sick Beard search via PVR providers?</span>
+                            </label>
+                        </div>
+                        
+                        <div id="content_use_pvrs">
+                             <div class="field-pair">
+                                <label class="nocheck clearfix" for="pvr_hd_channel_method">
+                                    <span class="component-title">HD Channel Method</span>
+                                    <span class="component-desc">
+                                        <select name="pvr_hd_channel_method" id="pvr_hd_channel_method" class="input-medium" >
+                                        #set $pvr_hd_channel_method_text = {PVR_HD_CHANNEL_GREATER_THAN: "Greater Than", PVR_HD_CHANNEL_LESS_THAN: "Less Than", PVR_HD_CHANNEL_FIXED_LIST: "List"}
+                                        #for $curAction in (PVR_HD_CHANNEL_GREATER_THAN, PVR_HD_CHANNEL_LESS_THAN, PVR_HD_CHANNEL_FIXED_LIST):
+                                          #if $sickbeard.PVR_HD_CHANNEL_METHOD == $curAction:
+                                            #set $pvr_hd_channel_method = "selected=\"selected\""
+                                          #else
+                                            #set $pvr_hd_channel_method = ""
+                                          #end if
+                                        <option value="$curAction" $pvr_hd_channel_method>$pvr_hd_channel_method_text[$curAction]</option>
+                                        #end for
+                                        </select>
+                                    </span>
+                                </label>
+                                <label class="nocheck clearfix">
+                                    <span class="component-title">&nbsp;</span>
+                                    <span class="component-desc">How should sickbeard determine HD channels?</span>
+                                </label>
+                            </label>
+                            </div>
+                            
+                            <div class="field-pair" name="channel_cutoff_settings" id="channel_cutoff_settings">
+                                <label class="nocheck clearfix">
+                                    <span class="component-title">Channel</span>
+                                    <input type="text" name="pvr_hd_channel_cutoff" id="pvr_hd_channel_cutoff" value="$sickbeard.PVR_HD_CHANNEL_CUTOFF" size="6" />
+                                </label>
+                                <label class="nocheck clearfix">
+                                    <span class="component-title">&nbsp;</span>
+                                    <span class="component-desc">The channel number where HD channels start/stop</span>
+                                </label>
+                            </div>
+                            
+                            <div class="field-pair" name="channel_list_settings" id="channel_list_settings">
+                                <label class="nocheck clearfix">
+                                    <span class="component-title">HD Channel List</span>
+                                    <input type="text" name="pvr_hd_channel_list" id="pvr_hd_channel_list" value="$sickbeard.PVR_HD_CHANNEL_LIST" size="35" />
+                                </label>
+                                <label class="nocheck clearfix">
+                                    <span class="component-title">&nbsp;</span>
+                                    <span class="component-desc">A comma separated list of HD channels</span>
+                                </label>
+                            </div>
+                            
+                            <div class="field-pair" name="pvr_max_scheduling_days" id="pvr_max_scheduling_days">
+                                <label class="nocheck clearfix">
+                                    <span class="component-title">Scheduling Limit</span>
+                                    <input type="text" name="pvr_max_scheduling_days" id="pvr_max_scheduling_days" value="$sickbeard.PVR_MAX_SCHEDULING_DAYS" size="6" />
+                                </label>
+                                <label class="nocheck clearfix">
+                                    <span class="component-title">&nbsp;</span>
+                                    <span class="component-desc">Maximum days in advance that a recording should be scheduled</span>
+                                </label>
+                            </div>
+                            
+                        </div><!-- /content_use_pvrs //-->
+
+                    </fieldset>
+                </div><!-- /component-group4 //-->
 
                 <div class="component-group-save">
                     <input type="submit" class="btn config_submitter" value="Save Changes" />

@@ -1,58 +1,25 @@
-Sick Beard
+Sick Beard PVR
 =====
 
-*Sick Beard is currently an alpha release. There may be severe bugs in it and at any given time it may not work at all.*
+This fork of the Sick Beard project adds in support for pvr recording software. Currently the only software supported is [NextPVR][nextPVR], although in theory others could be added.
 
-Sick Beard is a PVR for newsgroup users (with limited torrent support). It watches for new episodes of your favorite shows and when they are posted it downloads them, sorts and renames them, and optionally generates metadata for them. It currently supports several torrent and usenet sites and retrieves show information from theTVDB.com and TVRage.com.
+I find it useful for recording shows that might not be available via NZB or Torrent files or if you'd prefer not to use those methods but still want Sick Beard to manage all of your TV shows.
 
-Features include:
-
-* automatically retrieves new episode torrent or nzb files
-* can scan your existing library and then download any old seasons or episodes you're missing
-* can watch for better versions and upgrade your existing episodes (to from TV DVD/BluRay for example)
-* XBMC library updates, poster/fanart downloads, and NFO/TBN generation
-* configurable episode renaming
-* sends NZBs directly to SABnzbd, prioritizes and categorizes them properly
-* available for any platform, uses simple HTTP interface
-* can notify XBMC, Growl, or Twitter when new episodes are downloaded
-* specials and double episode support
+Please see the original [Sick Beard][sickbeard] documentation for initial setup.  If you already have a configured and running Sick Beard instance, you should be able to grab this source, copy your config.ini and sickbeard.db files into this project and start it up.
 
 
-Sick Beard makes use of the following projects:
+## Configuration
 
-* [cherrypy][cherrypy]
-* [Cheetah][cheetah]
-* [simplejson][simplejson]
-* [tvdb_api][tvdb_api]
-* [ConfigObj][configobj]
-* [SABnzbd+][sabnzbd]
-* [jQuery][jquery]
-* [Python GNTP][pythongntp]
-* [SocksiPy][socks]
-* [python-dateutil][dateutil]
-* [jsonrpclib][jsonrpclib]
+In order to configure the new functionality, you need to set options in 3 places in the Config menu -
 
-## Dependencies
+* **Search Settings** - Check the **Search PVRs** box and choose how HD channels will be determined along with how many days in advance recordings will be scheduled. Recommended setting is about 2 or 3 days.  Save your choices.
 
-To run Sick Beard from source you will need Python 2.5+ and Cheetah 2.1.0+.
-The [binary releases][githubdownloads] are standalone. Build 503 and older can be found on the now defunct [legacy releases][googledownloads].
+* **Search Providers** - Ensure that the PVR you want to use is checked in the **Priorities** section. You also need to configure any options listed in **Configure Built-In Providers** for the selected pvr. For NextPVR it is just the url where it is running.
 
-## Bugs
+* **Post Processing** - Choose what you would like to happen if a show is both recorded and downloaded. Your options are to do nothing and leave the recording, unschedule the recording if it has not yet recorded, or delete the recording if it already has recorded.
 
-If you find a bug please report it or it'll never get fixed. Verify that it hasn't [already been submitted][googleissues] and then [log a new bug][googlenewissue]. Be sure to provide as much information as possible.
+Any post processing such as commercial removal, video compression, renaming etc is currently left up to the PVR software.  Although, once that is complete, you can use the autoProcessTV script to import into Sick Beard.
 
-[cherrypy]: http://www.cherrypy.org
-[cheetah]: http://www.cheetahtemplate.org/
-[simplejson]: http://code.google.com/p/simplejson/ 
-[tvdb_api]: http://github.com/dbr/tvdb_api
-[configobj]: http://www.voidspace.org.uk/python/configobj.html
-[sabnzbd]: http://www.sabnzbd.org/
-[jquery]: http://jquery.com
-[pythongntp]: http://github.com/kfdm/gntp
-[socks]: http://code.google.com/p/socksipy-branch/
-[dateutil]: http://labix.org/python-dateutil
-[googledownloads]: http://code.google.com/p/sickbeard/downloads/list
-[googleissues]: http://code.google.com/p/sickbeard/issues/list
-[googlenewissue]: http://code.google.com/p/sickbeard/issues/entry
-[jsonrpclib]: https://github.com/joshmarshall/jsonrpclib
-[githubdownloads]: https://github.com/midgetspy/Sick-Beard/releases
+
+[nextPVR]: http://nextpvr.com/
+[sickbeard]: http://sickbeard.com/

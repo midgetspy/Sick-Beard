@@ -76,6 +76,11 @@ class TorrentSearchResult(SearchResult):
     """
     resultType = "torrent"
 
+class PVRSearchResult(SearchResult):
+    """
+    PVR result with pvr provider specific data stored in extraInfo
+    """
+    resultType = "pvr"
 
 class ShowListUI:
     """

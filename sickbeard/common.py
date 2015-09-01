@@ -69,6 +69,15 @@ multiEpStrings[NAMING_EXTEND] = "Extend"
 multiEpStrings[NAMING_LIMITED_EXTEND] = "Extend (Limited)"
 multiEpStrings[NAMING_LIMITED_EXTEND_E_PREFIXED] = "Extend (Limited, E-prefixed)"
 
+# pvr methods for determining hd
+PVR_HD_CHANNEL_GREATER_THAN = 0
+PVR_HD_CHANNEL_LESS_THAN = 1
+PVR_HD_CHANNEL_FIXED_LIST = 2
+
+# pvr post processing actions
+PVR_DO_NOTHING = 0
+PVR_CANCEL_RECORDING = 1
+PVR_DELETE_RECORDING = 2
 
 class Quality:
     NONE = 0               # 0

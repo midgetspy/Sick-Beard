@@ -59,6 +59,7 @@ class TVShow(object):
         self.genre = ""
         self.runtime = 0
         self.quality = int(sickbeard.QUALITY_DEFAULT)
+        self.pvr_quality = int(sickbeard.PVR_QUALITY_DEFAULT) # TODO: might eventually store separate pvr wanted show quality, but for now just get one global value
         self.flatten_folders = int(sickbeard.FLATTEN_FOLDERS_DEFAULT)
 
         self.status = ""
@@ -842,12 +843,16 @@ class TVShow(object):
         toReturn += "quality: " + str(self.quality) + "\n"
         return toReturn
 
-    def wantEpisode(self, season, episode, quality, manualSearch=False):
+    def wantEpisode(self, season, episode, quality, manualSearch=False, pvrSearch=False):
 
         logger.log(u"Checking if found episode " + str(season) + "x" + str(episode) + " is wanted at quality " + Quality.qualityStrings[quality], logger.DEBUG)
 
         # if the quality isn't one we want under any circumstances then just say no
-        anyQualities, bestQualities = Quality.splitQuality(self.quality)
+        if pvrSearch:
+            anyQualities, bestQualities = Quality.splitQuality(self.pvr_quality)
+        else:
+            anyQualities, bestQualities = Quality.splitQuality(self.quality)
+            
         logger.log(u"any,best = " + str(anyQualities) + " " + str(bestQualities) + " and found " + str(quality), logger.DEBUG)
 
         if quality not in anyQualities + bestQualities:

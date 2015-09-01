@@ -777,7 +777,8 @@ class ConfigSearch:
     @cherrypy.expose
     def saveSearch(self, use_nzbs=None, use_torrents=None, nzb_dir=None, sab_username=None, sab_password=None,
                        sab_apikey=None, sab_category=None, sab_host=None, nzbget_username=None, nzbget_password=None, nzbget_category=None, nzbget_host=None,
-                       torrent_dir=None, nzb_method=None, usenet_retention=None, search_frequency=None, download_propers=None, ignore_words=None):
+                       torrent_dir=None, nzb_method=None, usenet_retention=None, search_frequency=None, download_propers=None, ignore_words=None,
+                       use_pvrs=None, pvr_hd_channel_method=None, pvr_hd_channel_cutoff=None, pvr_hd_channel_list=None, pvr_max_scheduling_days=None):
 
         results = []
 
@@ -813,6 +814,13 @@ class ConfigSearch:
         if not config.change_TORRENT_DIR(torrent_dir):
             results += ["Unable to create directory " + os.path.normpath(torrent_dir) + ", directory not changed."]
 
+        # PVR Search
+        sickbeard.USE_PVRS = config.checkbox_to_value(use_pvrs)
+        sickbeard.PVR_HD_CHANNEL_METHOD = pvr_hd_channel_method
+        sickbeard.PVR_HD_CHANNEL_CUTOFF = pvr_hd_channel_cutoff
+        sickbeard.PVR_HD_CHANNEL_LIST = pvr_hd_channel_list.replace(" ", "")
+        sickbeard.PVR_MAX_SCHEDULING_DAYS = pvr_max_scheduling_days
+        
         sickbeard.save_config()
 
         if len(results) > 0:
@@ -839,7 +847,7 @@ class ConfigPostProcessing:
     def savePostProcessing(self, naming_pattern=None, naming_multi_ep=None,
                     xbmc_data=None, xbmc_12plus_data=None, mediabrowser_data=None, sony_ps3_data=None, wdtv_data=None, tivo_data=None, mede8er_data=None,
                     keep_processed_dir=None, process_automatically=None, rename_episodes=None,
-                    move_associated_files=None, filter_associated_files=None, tv_download_dir=None, naming_custom_abd=None, naming_abd_pattern=None):
+                    move_associated_files=None, filter_associated_files=None, tv_download_dir=None, naming_custom_abd=None, naming_abd_pattern=None, pvr_post_download_action=None):
 
         results = []
 
@@ -890,6 +898,10 @@ class ConfigPostProcessing:
         sickbeard.metadata_provider_dict['WDTV'].set_config(sickbeard.METADATA_WDTV)
         sickbeard.metadata_provider_dict['TIVO'].set_config(sickbeard.METADATA_TIVO)
         sickbeard.metadata_provider_dict['Mede8er'].set_config(sickbeard.METADATA_MEDE8ER)
+
+
+        # PVR post processing
+        sickbeard.PVR_POST_DOWNLOAD_ACTION = config.to_int(pvr_post_download_action, default=0)
 
         # Save changes
         sickbeard.save_config()
@@ -1015,7 +1027,7 @@ class ConfigProviders:
                       tvtorrents_digest=None, tvtorrents_hash=None,
                       torrentleech_key=None,
                       btn_api_key=None, hdbits_username=None, hdbits_passkey=None,
-                      provider_order=None):
+                      provider_order=None, nextpvr_url=None):
 
         results = []
 
@@ -1082,6 +1094,8 @@ class ConfigProviders:
                 sickbeard.TORRENTLEECH = curEnabled
             elif curProvider == 'btn':
                 sickbeard.BTN = curEnabled
+            elif curProvider == 'nextpvr':
+                sickbeard.USE_NEXTPVR = curEnabled
             elif curProvider in newznabProviderDict:
                 newznabProviderDict[curProvider].enabled = bool(curEnabled)
             else:
@@ -1099,6 +1113,8 @@ class ConfigProviders:
 
         sickbeard.OMGWTFNZBS_USERNAME = omgwtfnzbs_username.strip()
         sickbeard.OMGWTFNZBS_APIKEY = omgwtfnzbs_apikey.strip()
+        
+        sickbeard.NEXTPVR_URL = nextpvr_url.strip().rstrip('/')
 
         sickbeard.NEWZNAB_DATA = '!!!'.join([x.configStr() for x in sickbeard.newznabProviderList])
         sickbeard.PROVIDER_ORDER = provider_list

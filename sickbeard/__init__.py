@@ -34,10 +34,10 @@ from threading import Lock
 # apparently py2exe won't build these unless they're imported somewhere
 from sickbeard import providers, metadata
 
-from providers import ezrss, tvtorrents, torrentleech, btn, newznab, womble, omgwtfnzbs, hdbits
+from providers import ezrss, tvtorrents, torrentleech, btn, newznab, womble, omgwtfnzbs, hdbits, nextpvr
 from sickbeard.config import CheckSection, check_setting_int, check_setting_str, ConfigMigrator
 
-from sickbeard import searchCurrent, searchBacklog, showUpdater, versionChecker, properFinder, autoPostProcesser
+from sickbeard import searchCurrent, searchBacklog, showUpdater, versionChecker, properFinder, autoPostProcesser, searchPvr
 from sickbeard import helpers, db, exceptions, show_queue, search_queue, scheduler
 from sickbeard import logger
 from sickbeard import naming
@@ -80,6 +80,7 @@ showQueueScheduler = None
 searchQueueScheduler = None
 properFinderScheduler = None
 autoPostProcesserScheduler = None
+pvrSearchScheduler = None
 
 showList = None
 loadingShowList = None
@@ -132,6 +133,7 @@ METADATA_TIVO = None
 METADATA_MEDE8ER = None
 
 QUALITY_DEFAULT = None
+PVR_QUALITY_DEFAULT = None
 STATUS_DEFAULT = None
 FLATTEN_FOLDERS_DEFAULT = None
 PROVIDER_ORDER = []
@@ -148,6 +150,7 @@ TVDB_API_PARMS = {}
 
 USE_NZBS = None
 USE_TORRENTS = None
+USE_PVRS = None
 
 NZB_METHOD = None
 NZB_DIR = None
@@ -158,6 +161,7 @@ SEARCH_FREQUENCY = None
 BACKLOG_SEARCH_FREQUENCY = 21
 MIN_SEARCH_FREQUENCY = 10
 DEFAULT_SEARCH_FREQUENCY = 40
+PVR_SEARCH_FREQUENCY = 24
 
 EZRSS = False
 
@@ -312,6 +316,15 @@ PUSHBULLET_NOTIFY_ONDOWNLOAD = False
 PUSHBULLET_ACCESS_TOKEN = None
 PUSHBULLET_DEVICE_IDEN = None
 
+PVR_MAX_SCHEDULING_DAYS = 0
+PVR_HD_CHANNEL_METHOD = 0
+PVR_HD_CHANNEL_CUTOFF = 0
+PVR_HD_CHANNEL_LIST = None
+PVR_POST_DOWNLOAD_ACTION=0
+
+USE_NEXTPVR = False
+NEXTPVR_URL = ''
+
 COMING_EPS_LAYOUT = None
 COMING_EPS_DISPLAY_PAUSED = None
 COMING_EPS_SORT = None
@@ -368,7 +381,8 @@ def initialize(consoleLogging=True):
                 USE_LISTVIEW, METADATA_XBMC, METADATA_XBMC_12PLUS, METADATA_MEDIABROWSER, METADATA_MEDE8ER, METADATA_PS3, metadata_provider_dict, \
                 GIT_PATH, MOVE_ASSOCIATED_FILES, FILTER_ASSOCIATED_FILES, \
                 COMING_EPS_LAYOUT, COMING_EPS_SORT, COMING_EPS_DISPLAY_PAUSED, METADATA_WDTV, METADATA_TIVO, IGNORE_WORDS, CREATE_MISSING_SHOW_DIRS, \
-                ADD_SHOWS_WO_DIR, ANON_REDIRECT, DISPLAY_ALL_SEASONS
+                ADD_SHOWS_WO_DIR, ANON_REDIRECT, DISPLAY_ALL_SEASONS, \
+                USE_PVRS, USE_NEXTPVR, NEXTPVR_URL, pvrSearchScheduler, PVR_POST_DOWNLOAD_ACTION, PVR_HD_CHANNEL_METHOD, PVR_HD_CHANNEL_CUTOFF, PVR_HD_CHANNEL_LIST, PVR_MAX_SCHEDULING_DAYS, PVR_QUALITY_DEFAULT
 
         if __INITIALIZED__:
             return False
@@ -458,6 +472,15 @@ def initialize(consoleLogging=True):
 
         USE_NZBS = bool(check_setting_int(CFG, 'General', 'use_nzbs', 1))
         USE_TORRENTS = bool(check_setting_int(CFG, 'General', 'use_torrents', 0))
+        USE_PVRS = bool(check_setting_int(CFG, 'General', 'use_pvrs', 0))
+        
+        PVR_MAX_SCHEDULING_DAYS=check_setting_int(CFG, 'General', 'pvr_max_scheduling_days', 3)
+        PVR_HD_CHANNEL_METHOD=check_setting_int(CFG, 'General', 'pvr_hd_channel_method', 0)
+        PVR_HD_CHANNEL_CUTOFF=check_setting_int(CFG, 'General', 'pvr_hd_channel_cutoff', 200)
+        PVR_HD_CHANNEL_LIST=check_setting_str(CFG, 'General', 'pvr_hd_channel_list', '')
+        PVR_QUALITY_DEFAULT=check_setting_int(CFG, 'General', 'pvr_quality_default', 5)
+        
+        PVR_POST_DOWNLOAD_ACTION = int(check_setting_int(CFG, 'General', 'pvr_post_download_action', 0))
 
         NZB_METHOD = check_setting_str(CFG, 'General', 'nzb_method', 'blackhole')
         if NZB_METHOD not in ('blackhole', 'sabnzbd', 'nzbget'):
@@ -672,6 +695,10 @@ def initialize(consoleLogging=True):
         PUSHBULLET_NOTIFY_ONDOWNLOAD = bool(check_setting_int(CFG, 'Pushbullet', 'pushbullet_notify_ondownload', 0))
         PUSHBULLET_ACCESS_TOKEN = check_setting_str(CFG, 'Pushbullet', 'pushbullet_access_token', '')
         PUSHBULLET_DEVICE_IDEN = check_setting_str(CFG, 'Pushbullet', 'pushbullet_device_iden', '')
+        
+        CheckSection(CFG, 'NextPVR')
+        USE_NEXTPVR = bool(check_setting_int(CFG, 'NextPVR', 'use_nextpvr', 0))
+        NEXTPVR_URL = check_setting_str(CFG, 'NextPVR', 'nextpvr_url', 'http://localhost:8866')
 
         if not os.path.isfile(CONFIG_FILE):
             logger.log(u"Unable to find '" + CONFIG_FILE + "', all settings will be default!", logger.DEBUG)
@@ -752,6 +779,13 @@ def initialize(consoleLogging=True):
                                                                       )
 
         backlogSearchScheduler.action.cycleTime = BACKLOG_SEARCH_FREQUENCY
+        
+        
+        pvrSearchScheduler = scheduler.Scheduler(searchPvr.PVRSearcher(),
+                                                      cycleTime=datetime.timedelta(hours=PVR_SEARCH_FREQUENCY),
+                                                      threadName="PVR",
+                                                      run_delay=datetime.timedelta(minutes=3)
+                                                      )
 
         properFinderScheduler = scheduler.Scheduler(properFinder.ProperFinder(),
                                                     cycleTime=datetime.timedelta(hours=1),
@@ -781,7 +815,7 @@ def start():
     global __INITIALIZED__, currentSearchScheduler, backlogSearchScheduler, \
             showUpdateScheduler, versionCheckScheduler, showQueueScheduler, \
             properFinderScheduler, autoPostProcesserScheduler, searchQueueScheduler, \
-            started
+            pvrScheduler, started
 
     with INIT_LOCK:
 
@@ -810,6 +844,9 @@ def start():
 
             # start the proper finder
             autoPostProcesserScheduler.thread.start()
+            
+            # start the pvr search scheduler
+            pvrSearchScheduler.thread.start()
 
             started = True
 
@@ -818,7 +855,7 @@ def halt():
 
     global __INITIALIZED__, currentSearchScheduler, backlogSearchScheduler, showUpdateScheduler, \
             showQueueScheduler, properFinderScheduler, autoPostProcesserScheduler, searchQueueScheduler, \
-            started
+            pvrScheduler, started
 
     with INIT_LOCK:
 
@@ -883,6 +920,14 @@ def halt():
                 properFinderScheduler.thread.join(10)
             except:
                 pass
+            
+            pvrSearchScheduler.abort = True
+            logger.log(u"Waiting for the PVR thread to exit")
+            try:
+                pvrSearchScheduler.thread.join(10)
+            except:
+                pass
+            
 
             __INITIALIZED__ = False
 
@@ -1012,6 +1057,13 @@ def save_config():
 
     new_config['General']['use_nzbs'] = int(USE_NZBS)
     new_config['General']['use_torrents'] = int(USE_TORRENTS)
+    new_config['General']['use_pvrs'] = int(USE_PVRS)
+    new_config['General']['pvr_max_scheduling_days'] =int(PVR_MAX_SCHEDULING_DAYS)
+    new_config['General']['pvr_hd_channel_method'] = int(PVR_HD_CHANNEL_METHOD)
+    new_config['General']['pvr_hd_channel_cutoff'] = int(PVR_HD_CHANNEL_CUTOFF)
+    new_config['General']['pvr_hd_channel_list'] = PVR_HD_CHANNEL_LIST
+    new_config['General']['pvr_post_download_action'] = int(PVR_POST_DOWNLOAD_ACTION)
+    new_config['General']['pvr_quality_default'] = int(PVR_QUALITY_DEFAULT)
     new_config['General']['nzb_method'] = NZB_METHOD
     new_config['General']['usenet_retention'] = int(USENET_RETENTION)
     new_config['General']['search_frequency'] = int(SEARCH_FREQUENCY)
@@ -1229,6 +1281,10 @@ def save_config():
     new_config['GUI']['coming_eps_layout'] = COMING_EPS_LAYOUT
     new_config['GUI']['coming_eps_display_paused'] = int(COMING_EPS_DISPLAY_PAUSED)
     new_config['GUI']['coming_eps_sort'] = COMING_EPS_SORT
+    
+    new_config['NextPVR'] = {}
+    new_config['NextPVR']['use_nextpvr'] = int(USE_NEXTPVR)
+    new_config['NextPVR']['nextpvr_url'] = NEXTPVR_URL
 
     new_config.write()
 
