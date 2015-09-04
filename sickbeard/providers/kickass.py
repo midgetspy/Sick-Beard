@@ -192,9 +192,11 @@ class KickAssProvider(generic.TorrentProvider):
             
         if not headers:
             headers = []
-            
+        
+        headers['User-Agent']="SickBeard Torrent Edition."
+        
         try:
-            response = self.session.get(url, verify=False)
+            response = self.session.get(url, verify=False,headers=headers)
         except (requests.exceptions.ConnectionError, requests.exceptions.HTTPError), e:
             logger.log("[" + self.name + "] getURL() Error loading " + self.name + " URL: " + ex(e), logger.ERROR)
             return None
