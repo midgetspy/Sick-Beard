@@ -25,7 +25,6 @@ from lib import requests
 from sickbeard import logger
 from urlparse import urlparse
 from lib import transmissionrpc
-from sickbeard.exceptions import ex
 
 ###################################################################################################
 
@@ -97,7 +96,7 @@ def sendTORRENT(torrent):
                 r = session.get(torrent.url, verify=False)
                 logger.log("[Transmission] Succesfully Downloaded Torrent...", logger.DEBUG)
             except (requests.exceptions.ConnectionError, requests.exceptions.HTTPError), e:
-                logger.log("[Transmission] Download Error  - " + ex(e), logger.ERROR)
+                logger.log("[Transmission] Download Error  - " + str(e), logger.ERROR)
                 return False
         
         ###################################################################################################
@@ -109,7 +108,7 @@ def sendTORRENT(torrent):
                 tc.add_torrent(base64.b64encode(r.content),**params)    
             logger.log("[Transmission] Added Torrent To Transmission.",logger.DEBUG)
         except Exception, e:
-            logger.log("[Transmission] Error Adding Torrent - " + ex(e), logger.ERROR)
+            logger.log("[Transmission] Error Adding Torrent - " + str(e), logger.ERROR)
             return False
         
         ###################################################################################################
@@ -153,6 +152,6 @@ def testAuthentication(host, username, password):
         tc = transmissionrpc.Client(address, host.port, sickbeard.TORRENT_USERNAME, sickbeard.TORRENT_PASSWORD)
         return True, u"[Transmission] Success: Connected and Authenticated. RPC version: " + str(tc.rpc_version)
     except Exception, e:
-       return False, u"[Transmission] testAuthentication() Error: " + ex(e)
+       return False, u"[Transmission] testAuthentication() Error: " + str(e)
 
 ###################################################################################################
