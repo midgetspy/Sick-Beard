@@ -17,7 +17,6 @@
 # along with Sick Beard.  If not, see <http://www.gnu.org/licenses/>.
 
 
-
 import traceback
 import urllib
 import urllib2
@@ -28,6 +27,8 @@ import xml.etree.cElementTree as etree
 import sickbeard
 import generic
 
+from lib import requests
+
 from sickbeard import encodingKludge as ek
 from sickbeard.common import *
 from sickbeard import logger, helpers
@@ -37,13 +38,9 @@ from sickbeard.helpers import sanitizeSceneName
 class TORRENTZProvider(generic.TorrentProvider):
 
     def __init__(self):
-
         generic.TorrentProvider.__init__(self, "Torrentz")
-        
         self.supportsBacklog = True
-
         self.cache = TORRENTZCache(self)
-
         self.url = 'http://torrentz.eu/'
 
     def isEnabled(self):
@@ -93,7 +90,6 @@ class TORRENTZProvider(generic.TorrentProvider):
         
             if search_params:
                 params.update(search_params)
-
             
             if sickbeard.TORRENTZ_VERIFIED:
                 params.update({"baseurl" : "feed_verifiedP"})
@@ -143,21 +139,37 @@ class TORRENTZProvider(generic.TorrentProvider):
             raise 
     
     def _getTorrentzCache(self, torrentz_url):
-        url = ''
+        url = None
         torrentHash = torrentz_url.replace(self.url,'').upper()
-        #get all possible urls together to improve performance. 
-        url = url + "http://torrage.com/torrent/" + torrentHash + '.' + self.providerType + ";"
-        url = url + "http://zoink.it/torrent/" + torrentHash + '.' + self.providerType + ";"
-        url = url + "http://torcache.net/torrent/" + torrentHash + '.' + self.providerType + ";"
-
-        return url
+        #get all possible urls together to improve performance.
+        
+        trackers = []
+        try:
+            response = requests.get(self.url + torrentHash)
+        except (requests.exceptions.ConnectionError, requests.exceptions.HTTPError), e:
+            logger.log("[torrentz] _getTorrentzCache() Error gathering tracker info: " + str(e), logger.ERROR)
+            return None
+        
+        tracker_html = response.content.split('<div class="download">', 1)[-1].split('<div class="trackers">', 1)[1]
+        if tracker_html:
+            for z in re.finditer('.*?href=\"/tracker_\d+\">(?P<tracker>.*?)<\/a>.*?<span class=\"u\">(?P<seeders>.*?)<\/span>',tracker_html,re.MULTILINE|re.DOTALL):
+                if z.group('seeders').strip(',').isdigit() and int(z.group('seeders').strip(',')) > 1:
+                    if z.group('tracker') not in trackers:
+                        trackers.append(z.group('tracker').strip('/announce'))
+        
+        if trackers:
+            url = "magnet:?xt=urn:btih:" + torrentHash
+            for tracker in trackers:
+                url += "&tr=" + urllib.quote_plus(tracker)
+            return url
+        
+        return None
         
     def _get_title_and_url(self, item):
         title = item.findtext('title')
         torrentz_url = item.findtext('guid')
         url = self._getTorrentzCache(torrentz_url)
 
-        
         return (title, url)
 
     def _extract_name_from_filename(self, filename):
@@ -167,15 +179,11 @@ class TORRENTZProvider(generic.TorrentProvider):
         if match:
             return match.group(1)
         return None
-    
-
         
 class TORRENTZCache(tvcache.TVCache):
 
     def __init__(self, provider):
-
         tvcache.TVCache.__init__(self, provider)
-
         # only poll every 15 minutes max
         self.minTime = 15
 
