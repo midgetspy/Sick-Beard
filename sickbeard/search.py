@@ -421,7 +421,10 @@ def findSeason(show, season):
     # pick the best season NZB
     BestSeasonResult = None
     if SEASON_RESULT in foundResults:
-        BestSeasonResult = pickBestResult(foundResults[SEASON_RESULT], anyQualities+bestQualities)
+        try:
+            BestSeasonResult = pickBestResult(foundResults[SEASON_RESULT], anyQualities+bestQualities)
+        except Exception, e:
+            logger.log(u"Error getting best result for %s season %s" % (show.name, str(season)))
         
     if BestSeasonResult and BestSeasonResult.provider.providerType == GenericProvider.TORRENT and sickbeard.PREFER_EPISODE_RELEASES:
         BestSeasonResult = None
