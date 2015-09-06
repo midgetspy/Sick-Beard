@@ -1,5 +1,6 @@
-# Author: Marcos Almeida Jr. <junalmeida@gmail.com>
-# URL: https://github.com/junalmeida/Sick-Beard
+###################################################################################################
+# Author: Jodi Jones <venom@gen-x.co.nz>
+# URL: https://github.com/VeNoMouS/Sick-Beard
 #
 # This file is part of Sick Beard.
 #
@@ -15,208 +16,280 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with Sick Beard.  If not, see <http://www.gnu.org/licenses/>.
+###################################################################################################
 
-
-import traceback
-import urllib
-import urllib2
+import os
 import re
+import sys
+import urllib
+import generic
+import datetime
+import sickbeard
+import exceptions
+
+import time
+
+from lib import requests
+from xml.sax.saxutils import escape
 
 import xml.etree.cElementTree as etree
 
-import sickbeard
-import generic
-
-from lib import requests
-
-from sickbeard import encodingKludge as ek
-from sickbeard.common import *
-from sickbeard import logger, helpers
+from sickbeard import db
+from sickbeard import logger
 from sickbeard import tvcache
-from sickbeard.helpers import sanitizeSceneName
+from sickbeard.exceptions import ex
+from sickbeard.common import Quality
+from sickbeard.common import Overview
+from sickbeard import show_name_helpers
 
 class TORRENTZProvider(generic.TorrentProvider):
+    ###################################################################################################
 
     def __init__(self):
         generic.TorrentProvider.__init__(self, "Torrentz")
-        self.supportsBacklog = True
         self.cache = TORRENTZCache(self)
-        self.url = 'http://torrentz.eu/'
-
+        self.url = 'https://torrentz.eu/'
+        self.name = "Torrentz"
+        self.supportsBacklog = True
+        self.rss = False
+        self.session = None
+        
+        logger.log("[" + self.name + "] initializing...")
+        
+        if not self.session:
+            self.session = requests.Session()
+                
+    ###################################################################################################
+    
     def isEnabled(self):
         return sickbeard.TORRENTZ
         
+    ###################################################################################################
+    
     def imageName(self):
         return 'torrentz.png'
-                      
-    def _get_season_search_strings(self, show, season=None):
     
-        params = {}
+    ###################################################################################################
+    
+    def getQuality(self, item):
+        quality = Quality.nameQuality(item[0])
+        return quality
+
+    ###################################################################################################
+
+    def _get_title_and_url(self, item):
+        return item
+      
+    ###################################################################################################
+
+    def _get_airbydate_season_range(self, season):        
+        if season == None:
+            return ()        
+        year, month = map(int, season.split('-'))
+        min_date = datetime.date(year, month, 1)
+        if month == 12:
+            max_date = datetime.date(year, month, 31)
+        else:    
+            max_date = datetime.date(year, month+1, 1) -  datetime.timedelta(days=1)
+        
+        return (min_date, max_date)    
+
+    ###################################################################################################
+
+    def _get_season_search_strings(self, show, season=None):
+        search_string = []
     
         if not show:
-            return params
-
-        params['show_name'] = self._sanitizeNameToSearch(show.name)
-          
-        if season != None:
-            params['season'] = season
-    
-        return [params]    
-    
-    def _get_episode_search_strings(self, ep_obj):
-    
-        params = {}
+            return []
+      
+        myDB = db.DBConnection()
         
-        if not ep_obj:
-            return params
-                   
-        params['show_name'] = self._sanitizeNameToSearch(ep_obj.show.name)
-        
-        if ep_obj.show.air_by_date:
-            params['date'] = str(ep_obj.airdate)
+        if show.air_by_date:
+            (min_date, max_date) = self._get_airbydate_season_range(season)
+            sqlResults = myDB.select("SELECT * FROM tv_episodes WHERE showid = ? AND airdate >= ? AND airdate <= ?", [show.tvdbid,  min_date.toordinal(), max_date.toordinal()])
         else:
-            params['season'] = ep_obj.season
-            params['episode'] = ep_obj.episode
-    
-        return [params]
+            sqlResults = myDB.select("SELECT * FROM tv_episodes WHERE showid = ? AND season = ?", [show.tvdbid, season])
+            
+        for sqlEp in sqlResults:
+            if show.getOverview(int(sqlEp["status"])) in (Overview.WANTED, Overview.QUAL):
+                if show.air_by_date:
+                    for show_name in set(show_name_helpers.allPossibleShowNames(show)):
+                        ep_string = show_name_helpers.sanitizeSceneName(show_name) +' '+ str(datetime.date.fromordinal(sqlEp["airdate"])).replace('-', '.')
+                        search_string.append(ep_string)
+                else:
+                    for show_name in set(show_name_helpers.allPossibleShowNames(show)):
+                        ep_string = show_name_helpers.sanitizeSceneName(show_name) +' '+ sickbeard.config.naming_ep_type[2] % {'seasonnumber': season, 'episodenumber': int(sqlEp["episode"])}
+                        search_string.append(ep_string)                       
+        return search_string
 
-    def _sanitizeNameToSearch(self, text):
-        #text = re.sub(r'\([^)]*\)', '', text)
-        return sanitizeSceneName(text, ezrss=True).replace('.',' ').replace('-',' ').encode('utf-8')
+    ###################################################################################################
+
+    def _get_episode_search_strings(self, ep_obj):    
+        search_string = []
+       
+        if not ep_obj:
+            return []
+        if ep_obj.show.air_by_date:
+            for show_name in set(show_name_helpers.allPossibleShowNames(ep_obj.show)):
+                ep_string = show_name_helpers.sanitizeSceneName(show_name) +' '+ str(ep_obj.airdate).replace('-', '.')
+                search_string.append(ep_string)
+        else:
+            for show_name in set(show_name_helpers.allPossibleShowNames(ep_obj.show)):
+                ep_string = show_name_helpers.sanitizeSceneName(show_name) +' '+ sickbeard.config.naming_ep_type[2] % {'seasonnumber': ep_obj.season, 'episodenumber': ep_obj.episode}
+                search_string.append(ep_string)
+        return search_string    
+ 
+    ###################################################################################################
+    
+    def switchSearchType(self):
+        # sigh... we do this just to keep _doSearch() params standard, stupid rss...
+        if sickbeard.TORRENTZ_VERIFIED:
+            if self.rss is True:
+                search_type = "feed_verifiedA"
+            else:
+                search_type = "feed_verifiedP"
+        else:
+            if self.rss is True:
+                search_type = "feedA"
+            else:
+                search_type = "feedP"
         
+        # race condition between rss and back log searching if both were to run at same time, best to disable.
+        if self.rss is True:
+            self.rss = False
+            
+        return search_type
+    
+    ###################################################################################################
+    
     def _doSearch(self, search_params, show=None):
-        try:
-            params = { }
+        results = []
+        logger.log("[" + self.name + "] _doSearch() Performing Search: {0}".format(search_params,show))
         
-            if search_params:
-                params.update(search_params)
+        search_type = self.switchSearchType()
+        
+        for page in range(0,2):
+            searchData = None
             
-            if sickbeard.TORRENTZ_VERIFIED:
-                params.update({"baseurl" : "feed_verifiedP"})
-            else:
-                params.update({"baseurl" : "feed"})
-
-            if not 'episode' in params:
-                searchURL = self.url + "%(baseurl)s?q=%(show_name)s S%(season)02d" % params
-            else:
-                searchURL = self.url + "%(baseurl)s?q=%(show_name)s S%(season)02dE%(episode)02d" % params
-                
-            searchURL = searchURL.replace(" ", "+")
+            logger.log("[" + self.name + "] _doSearch() - " + self.url + search_type + "?q=" + urllib.quote(search_params) + "&p=" + str(page),logger.DEBUG)
+            searchData = self.getURL(self.url + search_type + "?q=" + urllib.quote(search_params) + "&p=" + str(page))
             
-            logger.log(u"Search string: " + searchURL)
-
-            items = []
-            for index in [0,1,2,3,4]:
+            if searchData and searchData.startswith("<?xml"):    
                 try:
-                    data = self.getURL(searchURL + "&p=%(page)d" % {'page': index })
+                    responseSoup = etree.ElementTree(etree.XML(searchData))
+                except Exception, e:
+                    logger.log("[" + self.name + "] _doSearch() XML error: " + str(e), logger.ERROR)
+                    continue
 
-                    if data and data.startswith("<?xml"):
-                        responseSoup = etree.ElementTree(etree.XML(data))
-                        newItems = responseSoup.getiterator('item')
-                        oldCount = len(items)
-                        items.extend(newItems)
-                        if len(items) - oldCount < 50:
-                            break
-                except Exception, e:
-                    logger.log((u"Error trying to load " + self.name + " RSS feed for %(show_name)s page %(page)d: " % {'page': index, 'show_name': params['show_name']})+str(e).decode('utf-8'), logger.ERROR)
-           
-            results = []
-            for curItem in items:
-                try:
-                    (title, url) = self._get_title_and_url(curItem)
-                    if not title or not url:
-                        #logger.log(u"The XML returned from the " + self.name + " RSS feed is incomplete: %(title)s %(url)s" % {'title': title, 'url': url}, logger.ERROR)
-                        continue
-                    results.append(curItem)
-                except Exception, e:
-                    logger.log(u"Error trying to load " + self.name + " RSS feed item: "+str(e).decode('utf-8'), logger.ERROR)
-               
-            logger.log(self.name + " total torrents: %(count)d" % { 'count' : len(results) })
-            return results
-        except Exception, e:
-            logger.log(u"Error trying to load " + self.name + ": "+str(e).decode('utf-8'), logger.ERROR)
-            traceback.print_exc()
-            raise 
+                torrents = responseSoup.getiterator('item')
+                if type(torrents) is list:
+                    for torrent in torrents:
+                        magnet = self._getTrackers(torrent.findtext('guid').strip(self.url))
+                        if magnet:
+                            item = (self._sanitizeName(torrent.findtext('title')),magnet)
+                            results.append(item)
+
+        return results
     
-    def _getTorrentzCache(self, torrentz_url):
-        url = None
-        torrentHash = torrentz_url.replace(self.url,'').upper()
-        #get all possible urls together to improve performance.
-        
-        trackers = []
-        try:
-            response = requests.get(self.url + torrentHash)
-        except (requests.exceptions.ConnectionError, requests.exceptions.HTTPError), e:
-            logger.log("[torrentz] _getTorrentzCache() Error gathering tracker info: " + str(e), logger.ERROR)
+    ################################################################################################### 
+    
+    def _getTrackers(self, torrentHash=None):
+        if not torrentHash:
             return None
         
-        tracker_html = response.content.split('<div class="download">', 1)[-1].split('<div class="trackers">', 1)[1]
-        if tracker_html:
-            for z in re.finditer('.*?href=\"/tracker_\d+\">(?P<tracker>.*?)<\/a>.*?<span class=\"u\">(?P<seeders>.*?)<\/span>',tracker_html,re.MULTILINE|re.DOTALL):
-                if z.group('seeders').strip(',').isdigit() and int(z.group('seeders').strip(',')) > 1:
-                    if z.group('tracker') not in trackers:
-                        trackers.append(z.group('tracker').strip('/announce'))
+        trackers = []
         
-        if trackers:
-            url = "magnet:?xt=urn:btih:" + torrentHash
-            for tracker in trackers:
-                url += "&tr=" + urllib.quote_plus(tracker)
-            return url
+        # Due to website aborting connection if querying too quickly/too much... have to sleep 1 second....
+        time.sleep(1)
+        
+        logger.log("[torrentz] _getTrackers() hash " + torrentHash, logger.DEBUG)
+        
+        response = self.getURL(self.url + torrentHash)
+
+        if response and "<title>404 Not Found</title>" not in response:
+            try:
+                tracker_html = response.split('<div class="download">', 1)[-1].split('<div class="trackers">', 1)[1]
+            except Exception, e:
+                logger.log("[" + self.name + "] _getTrackers() Error splitting tracker html: " + str(e), logger.ERROR)
+                return None
+            
+            if tracker_html:
+                for z in re.finditer('.*?href=\"/tracker_\d+\">(?P<tracker>.*?)<\/a>.*?<span class=\"u\">(?P<seeders>.*?)<\/span>',tracker_html,re.MULTILINE|re.DOTALL):
+                    if z.group('seeders').strip(',').isdigit() and int(z.group('seeders').strip(',')) > 1:
+                        if z.group('tracker') not in trackers:
+                            trackers.append(z.group('tracker').strip('/announce'))
+            if trackers:
+                url = "magnet:?xt=urn:btih:" + torrentHash
+                for tracker in trackers:
+                    url += "&tr=" + urllib.quote_plus(tracker)
+                return url
         
         return None
         
-    def _get_title_and_url(self, item):
-        title = item.findtext('title')
-        torrentz_url = item.findtext('guid')
-        url = self._getTorrentzCache(torrentz_url)
+    ###################################################################################################
+    
+    def _sanitizeName(self, text):
+        return show_name_helpers.sanitizeSceneName(text, ezrss=True).replace('.',' ').replace('-',' ').encode('utf-8')
 
-        return (title, url)
-
-    def _extract_name_from_filename(self, filename):
-        name_regex = '(.*?)\.?(\[.*]|\d+\.TPB)\.torrent$'
-        logger.log(u"Comparing "+name_regex+" against "+filename, logger.DEBUG)
-        match = re.match(name_regex, filename, re.I)
-        if match:
-            return match.group(1)
-        return None
+    ###################################################################################################
+    
+    def getURL(self, url, headers=None):
+        logger.log("[" + self.name + "] getURL() retrieving URL: " + url, logger.DEBUG)
+        response = None
+            
+        if not headers:
+            headers = {}
+         
+        headers['User-Agent']="SickBeard Torrent Edition."
         
+        try:
+            response = self.session.get(url, verify=False,headers=headers)
+        except (requests.exceptions.ConnectionError, requests.exceptions.HTTPError), e:
+            logger.log("[" + self.name + "] getURL() Error loading " + self.name + " URL: " + ex(e), logger.ERROR)
+            return None
+        
+        if response.status_code not in [200,302,303,404]:
+            # response did not return an acceptable result
+            logger.log("[" + self.name + "] getURL() requested URL - " + url +" returned status code is " + str(response.status_code), logger.ERROR)
+            return None
+        if response.status_code in [404]:
+            # response returned an empty result
+            return None
+
+        return response.content
+    
+    ###################################################################################################
+    
 class TORRENTZCache(tvcache.TVCache):
-
+    
+    ###################################################################################################
+    
     def __init__(self, provider):
         tvcache.TVCache.__init__(self, provider)
-        # only poll every 15 minutes max
+        # only poll Torrentz every 15 minutes max
         self.minTime = 15
-
-    def _getRSSData(self):
-        params = { }
-        
-        if sickbeard.TORRENTZ_VERIFIED:
-            params.update({"baseurl" : "feed_verified"})
-        else:
-            params.update({"baseurl" : "feedA"})
-        url = self.provider.url + '%(baseurl)s?q=' % params
-               
-        logger.log(self.provider.name + u" cache update URL: " + url)
-
-        data = self.provider.getURL(url)
-        return data
     
-    def _parseItem(self, item):
-        try:      
-            title = helpers.get_xml_text(item.findall('title')[0])
-            torrentz_url = helpers.get_xml_text(item.findall('guid')[0])
-            url = self.provider._getTorrentzCache(torrentz_url)
+    ###################################################################################################
+    
+    def _getRSSData(self):
+        logger.log("[" + provider.name + "] Retriving RSS")
 
-            if not title or not url:
-                #logger.log(u"The XML returned from the " + self.provider.name + " RSS feed is incomplete, this result is unusable: " + torrentz_url, logger.ERROR)
-                return
-
-            logger.log(u"Adding item from " + self.provider.name + " RSS to cache: "+title, logger.DEBUG)
-            
-            self._addCacheEntry(title, url)
+        self.provider.rss = True
+        searchData = self.provider._doSearch("")
         
-        except Exception, e:
-            logger.log(u"Error trying to parse " + self.provider.name + " cache: "+str(e).decode('utf-8'), logger.ERROR)
-            raise 
+        xml = "<rss xmlns:atom=\"http://www.w3.org/2005/Atom\" version=\"2.0\">" + \
+        "<channel>" + \
+        "<title>" + provider.name + "</title>" + \
+        "<link>" + provider.url + "</link>" + \
+        "<description>torrent search</description>" + \
+        "<language>en-us</language>" + \
+        "<atom:link href=\"" + provider.url + "\" rel=\"self\" type=\"application/rss+xml\"/>"
+        
+        for title, url in searchData:
+            xml += "<item>" + "<title>" + escape(title.decode('utf8','ignore')) + "</title>" +  "<link>"+ urllib.quote(url,'/,:') + "</link>" + "</item>"
+        xml += "</channel></rss>"
+        return xml
 
+    ###################################################################################################
+    
 provider = TORRENTZProvider()
