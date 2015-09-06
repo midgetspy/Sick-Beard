@@ -163,7 +163,7 @@ class KickAssProvider(generic.TorrentProvider):
             searchURL = urlunsplit((scheme, netloc, path, query, fragment))
             searchData = self.getURL(searchURL)
 
-            if searchData:
+            if searchData and "</html>" not in searchData.lower():
                 try:
                     jdata = json.loads(searchData)
                 except ValueError:
