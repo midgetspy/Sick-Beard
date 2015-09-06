@@ -191,7 +191,7 @@ class KickAssProvider(generic.TorrentProvider):
             self.session = requests.Session()
             
         if not headers:
-            headers = []
+            headers = {}
         
         headers['User-Agent']="SickBeard Torrent Edition."
         
