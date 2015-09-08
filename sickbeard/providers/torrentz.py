@@ -184,47 +184,12 @@ class TORRENTZProvider(generic.TorrentProvider):
                 torrents = responseSoup.getiterator('item')
                 if type(torrents) is list:
                     for torrent in torrents:
-                        magnet = self._getTrackers(torrent.findtext('guid').strip(self.url))
-                        if magnet:
+                        if torrent.findtext('guid') and torrent.findtext('title'):
+                            magnet = "magnet:?xt=urn:btih:" + torrent.findtext('guid').strip(self.url) + "&dn=" + self._sanitizeName(torrent.findtext('title')) + ".torrent"
                             item = (self._sanitizeName(torrent.findtext('title')),magnet)
                             results.append(item)
-
+            time.sleep(1)
         return results
-    
-    ################################################################################################### 
-    
-    def _getTrackers(self, torrentHash=None):
-        if not torrentHash:
-            return None
-        
-        trackers = []
-        
-        # Due to website aborting connection if querying too quickly/too much... have to sleep 1 second....
-        time.sleep(1)
-        
-        logger.log("[torrentz] _getTrackers() hash " + torrentHash, logger.DEBUG)
-        
-        response = self.getURL(self.url + torrentHash)
-
-        if response and "<title>404 Not Found</title>" not in response:
-            try:
-                tracker_html = response.split('<div class="download">', 1)[-1].split('<div class="trackers">', 1)[1]
-            except Exception, e:
-                logger.log("[" + self.name + "] _getTrackers() Error splitting tracker html: " + str(e), logger.ERROR)
-                return None
-            
-            if tracker_html:
-                for z in re.finditer('.*?href=\"/tracker_\d+\">(?P<tracker>.*?)<\/a>.*?<span class=\"u\">(?P<seeders>.*?)<\/span>',tracker_html,re.MULTILINE|re.DOTALL):
-                    if z.group('seeders').strip(',').isdigit() and int(z.group('seeders').strip(',')) > 1:
-                        if z.group('tracker') not in trackers:
-                            trackers.append(z.group('tracker').strip('/announce'))
-            if trackers:
-                url = "magnet:?xt=urn:btih:" + torrentHash
-                for tracker in trackers:
-                    url += "&tr=" + urllib.quote_plus(tracker)
-                return url
-        
-        return None
         
     ###################################################################################################
     
