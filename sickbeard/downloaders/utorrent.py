@@ -114,8 +114,13 @@ def sendTORRENT(torrent):
                 return False
             torrent_hash = _TorrentHash(torrent.url)
         else:
-            try:    
-                tsession = session.get(torrent.url, verify=False,timeout=30)
+            try:
+                headers = {
+                    'User-Agent': sickbeard.common.USER_AGENT,
+                    'Referer': torrent.url
+                }
+                
+                tsession = session.get(torrent.url, verify=False, headers=headers, timeout=60)
                 logger.log("[uTorrent] Succesfully downloaded torrent from provider...", logger.DEBUG)
             except (requests.exceptions.ConnectionError, requests.exceptions.HTTPError), e:
                 logger.log("[uTorrent] Torrent download Error  - " + ex(e), logger.ERROR)
