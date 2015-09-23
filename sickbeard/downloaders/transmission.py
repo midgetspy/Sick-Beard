@@ -25,7 +25,6 @@ from lib import requests
 from sickbeard import logger
 from urlparse import urlparse
 from lib import transmissionrpc
-from sickbeard.exceptions import ex
 
 ###################################################################################################
 
@@ -33,7 +32,6 @@ def sendTORRENT(torrent):
     
     ###################################################################################################
     
-    magnet = 0    
     params = {}
     change_params = {}
 
@@ -66,9 +64,6 @@ def sendTORRENT(torrent):
     else:
         session = requests.Session()
 
-    if torrent.url.startswith("magnet:"):
-        magnet=1
-
     ###################################################################################################
     
     if session:
@@ -92,24 +87,29 @@ def sendTORRENT(torrent):
             
         ###################################################################################################
         
-        if not magnet:
-            try:    
-                r = session.get(torrent.url, verify=False)
+        if not torrent.url.startswith("magnet:"):
+            try:
+                headers = {
+                    'User-Agent': sickbeard.common.USER_AGENT,
+                    'Referer': torrent.url
+                }
+                
+                r = session.get(torrent.url, verify=False, headers=headers, timeout=60)
                 logger.log("[Transmission] Succesfully Downloaded Torrent...", logger.DEBUG)
             except (requests.exceptions.ConnectionError, requests.exceptions.HTTPError), e:
-                logger.log("[Transmission] Download Error  - " + ex(e), logger.ERROR)
+                logger.log("[Transmission] Download Error  - " + str(e), logger.ERROR)
                 return False
         
         ###################################################################################################
         
         try:
-            if magnet:
+            if torrent.url.startswith("magnet:"):
                 tc.add_torrent(torrent.url,**params)
             else:
                 tc.add_torrent(base64.b64encode(r.content),**params)    
             logger.log("[Transmission] Added Torrent To Transmission.",logger.DEBUG)
         except Exception, e:
-            logger.log("[Transmission] Error Adding Torrent - " + ex(e), logger.ERROR)
+            logger.log("[Transmission] Error Adding Torrent - " + str(e), logger.ERROR)
             return False
         
         ###################################################################################################
@@ -153,6 +153,6 @@ def testAuthentication(host, username, password):
         tc = transmissionrpc.Client(address, host.port, sickbeard.TORRENT_USERNAME, sickbeard.TORRENT_PASSWORD)
         return True, u"[Transmission] Success: Connected and Authenticated. RPC version: " + str(tc.rpc_version)
     except Exception, e:
-       return False, u"[Transmission] testAuthentication() Error: " + ex(e)
+       return False, u"[Transmission] testAuthentication() Error: " + str(e)
 
 ###################################################################################################

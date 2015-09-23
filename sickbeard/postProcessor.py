@@ -18,10 +18,8 @@
 
 from __future__ import with_statement
 
-import glob
 import os
 import re
-import shlex
 import subprocess
 
 import sickbeard
@@ -55,13 +53,11 @@ class PostProcessor(object):
     EXISTS_SMALLER = 3
     DOESNT_EXIST = 4
 
-    IGNORED_FILESTRINGS = [ "/.AppleDouble/", ".DS_Store" ]
-
     NZB_NAME = 1
     FOLDER_NAME = 2
     FILE_NAME = 3
 
-    def __init__(self, file_path, nzb_name=None):
+    def __init__(self, file_path, nzb_name=None, pp_options={}):
         """
         Creates a new post processor with the given file path and optionally an NZB name.
 
@@ -83,13 +79,15 @@ class PostProcessor(object):
         # name of the NZB that resulted in this folder
         self.nzb_name = nzb_name
 
-        self.in_history = False
-        self.release_group = None
-        self.is_proper = False
+        self.force_replace = pp_options.get('force_replace', False)
 
-        self.good_results = {self.NZB_NAME: False,
-                             self.FOLDER_NAME: False,
-                             self.FILE_NAME: False}
+        self.in_history = False
+
+        self.release_group = None
+
+        self.release_name = None
+
+        self.is_proper = False
 
         self.log = ''
 
@@ -118,7 +116,7 @@ class PostProcessor(object):
         """
 
         if not existing_file:
-            self._log(u"There is no existing file so there's no worries about replacing it", logger.DEBUG)
+            self._log(u"There is no existing file", logger.DEBUG)
             return PostProcessor.DOESNT_EXIST
 
         # if the new file exists, return the appropriate code depending on the size
@@ -138,43 +136,8 @@ class PostProcessor(object):
                 return PostProcessor.EXISTS_SMALLER
 
         else:
-            self._log(u"File " + existing_file + " doesn't exist so there's no worries about replacing it", logger.DEBUG)
+            self._log(u"File " + existing_file + " doesn't exist", logger.DEBUG)
             return PostProcessor.DOESNT_EXIST
-
-    def list_associated_files(self, file_path, base_name_only=False):
-        """
-        For a given file path searches for files with the same name but different extension and returns their absolute paths
-
-        file_path: The file to check for associated files
-        base_name_only: False add extra '.' (conservative search) to file_path minus extension
-        Returns: A list containing all files which are associated to the given file
-        """
-
-        if not file_path:
-            return []
-
-        file_path_list = []
-        base_name = file_path.rpartition('.')[0]
-
-        if not base_name_only:
-            base_name = base_name + '.'
-
-        # don't strip it all and use cwd by accident
-        if not base_name:
-            return []
-
-        # don't confuse glob with chars we didn't mean to use
-        base_name = re.sub(r'[\[\]\*\?]', r'[\g<0>]', base_name)
-
-        for associated_file_path in ek.ek(glob.glob, base_name + '*'):
-            # only add associated to list
-            if associated_file_path == file_path:
-                continue
-
-            if ek.ek(os.path.isfile, associated_file_path):
-                file_path_list.append(associated_file_path)
-
-        return file_path_list
 
     def _delete(self, file_path, associated_files=False):
         """
@@ -190,7 +153,7 @@ class PostProcessor(object):
         # figure out which files we want to delete
         file_list = [file_path]
         if associated_files:
-            file_list = file_list + self.list_associated_files(file_path)
+            file_list = file_list + helpers.list_associated_files(file_path, base_name_only=True)
 
         if not file_list:
             self._log(u"There were no files associated with " + file_path + ", not deleting anything", logger.DEBUG)
@@ -198,8 +161,8 @@ class PostProcessor(object):
 
         # delete the file and any other files which we want to delete
         for cur_file in file_list:
-            self._log(u"Deleting file " + cur_file, logger.DEBUG)
             if ek.ek(os.path.isfile, cur_file):
+                self._log(u"Deleting file " + cur_file, logger.DEBUG)
                 ek.ek(os.remove, cur_file)
                 # do the library update for synoindex
                 notifiers.synoindex_notifier.deleteFile(cur_file)
@@ -222,7 +185,7 @@ class PostProcessor(object):
 
         file_list = [file_path]
         if associated_files:
-            file_list = file_list + self.list_associated_files(file_path)
+            file_list = file_list + helpers.list_associated_files(file_path, filter_ext=sickbeard.FILTER_ASSOCIATED_FILES)
 
         if not file_list:
             self._log(u"There were no files associated with " + file_path + ", not moving anything", logger.DEBUG)
@@ -273,7 +236,7 @@ class PostProcessor(object):
                 helpers.moveFile(cur_file_path, new_file_path)
                 helpers.chmodAsParent(new_file_path)
             except (IOError, OSError), e:
-                self._log("Unable to move file " + cur_file_path + " to " + new_file_path + ": " + ex(e), logger.ERROR)
+                self._log(u"Unable to move file " + cur_file_path + " to " + new_file_path + ": " + ex(e), logger.ERROR)
                 raise e
 
         self._combined_file_operation(file_path, new_path, new_base_name, associated_files, action=_int_move)
@@ -302,10 +265,10 @@ class PostProcessor(object):
         """
         Look up the NZB name in the history and see if it contains a record for self.nzb_name
 
-        Returns a (tvdb_id, season, []) tuple. The first two may be None if none were found.
+        Returns a (tvdb_id, season, [], quality) tuple. tvdb_id, season, quality may be None and episodes may be [].
         """
 
-        to_return = (None, None, [])
+        to_return = (None, None, [], None)
 
         # if we don't have either of these then there's nothing to use to search the history for anyway
         if not self.nzb_name and not self.folder_name:
@@ -325,51 +288,52 @@ class PostProcessor(object):
 
         # search the database for a possible match and return immediately if we find one
         for curName in names:
-            sql_results = myDB.select("SELECT * FROM history WHERE resource LIKE ?", [re.sub("[\.\-\ ]", "_", curName)])
+            # The underscore character ( _ ) represents a single character to match a pattern from a word or string
+            search_name = re.sub("[\.\-\ ]", "_", curName)
+            sql_results = myDB.select("SELECT * FROM history WHERE resource LIKE ?", [search_name])
 
             if len(sql_results) == 0:
                 continue
 
             tvdb_id = int(sql_results[0]["showid"])
             season = int(sql_results[0]["season"])
+            quality = int(sql_results[0]["quality"])
+
+            if quality == common.Quality.UNKNOWN:
+                quality = None
 
             self.in_history = True
-            to_return = (tvdb_id, season, [])
-            self._log("Found result in history: " + str(to_return), logger.DEBUG)
-
-            if curName == self.nzb_name:
-                self.good_results[self.NZB_NAME] = True
-            elif curName == self.folder_name:
-                self.good_results[self.FOLDER_NAME] = True
-            elif curName == self.file_name:
-                self.good_results[self.FILE_NAME] = True
+            to_return = (tvdb_id, season, [], quality)
+            self._log(u"Found result in history: " + str(to_return), logger.DEBUG)
 
             return to_return
 
         self.in_history = False
         return to_return
 
-    def _analyze_name(self, name, file=True):
+    def _analyze_name(self, name, file_name=True):
         """
         Takes a name and tries to figure out a show, season, and episode from it.
 
         name: A string which we want to analyze to determine show info from (unicode)
 
-        Returns a (tvdb_id, season, [episodes]) tuple. The first two may be None and episodes may be []
+        Returns a (tvdb_id, season, [episodes], quality) tuple. tvdb_id, season, quality may be None and episodes may be [].
         if none were found.
         """
 
         logger.log(u"Analyzing name " + repr(name))
 
-        to_return = (None, None, [])
+        to_return = (None, None, [], None)
 
         if not name:
             return to_return
 
+        name = helpers.remove_non_release_groups(helpers.remove_extension(name))
+
         # parse the name to break it into show name, season, and episode
-        np = NameParser(file)
+        np = NameParser(False)
         parse_result = np.parse(name)
-        self._log("Parsed " + name + " into " + str(parse_result).decode('utf-8'), logger.DEBUG)
+        self._log(u"Parsed " + name + " into " + str(parse_result).decode('utf-8', 'xmlcharrefreplace'), logger.DEBUG)
 
         if parse_result.air_by_date:
             season = -1
@@ -378,58 +342,33 @@ class PostProcessor(object):
             season = parse_result.season_number
             episodes = parse_result.episode_numbers
 
-        to_return = (None, season, episodes)
+        to_return = (None, season, episodes, None)
 
         # do a scene reverse-lookup to get a list of all possible names
         name_list = show_name_helpers.sceneToNormalShowNames(parse_result.series_name)
 
         if not name_list:
-            return (None, season, episodes)
+            return (None, season, episodes, None)
 
-        def _finalize(parse_result):
-            self.release_group = parse_result.release_group
-
-            # remember whether it's a proper
-            if parse_result.extra_info:
-                self.is_proper = re.search('(^|[\. _-])(proper|repack)([\. _-]|$)', parse_result.extra_info, re.I) != None
-
-            # if the result is complete then remember that for later
-            if parse_result.series_name and parse_result.season_number != None and parse_result.episode_numbers and parse_result.release_group:
-                test_name = os.path.basename(name)
-                if test_name == self.nzb_name:
-                    self.good_results[self.NZB_NAME] = True
-                elif test_name == self.folder_name:
-                    self.good_results[self.FOLDER_NAME] = True
-                elif test_name == self.file_name:
-                    self.good_results[self.FILE_NAME] = True
-                else:
-                    logger.log(u"Nothing was good, found " + repr(test_name) + " and wanted either " + repr(self.nzb_name) + ", " + repr(self.folder_name) + ", or " + repr(self.file_name))
-            else:
-                logger.log(u"Parse result not sufficient(all following have to be set). Will not save release name", logger.DEBUG)
-                logger.log(u"Parse result(series_name): " + str(parse_result.series_name), logger.DEBUG)
-                logger.log(u"Parse result(season_number): " + str(parse_result.season_number), logger.DEBUG)
-                logger.log(u"Parse result(episode_numbers): " + str(parse_result.episode_numbers), logger.DEBUG)
-                logger.log(u"Parse result(release_group): " + str(parse_result.release_group), logger.DEBUG)
-
-        # for each possible interpretation of that scene name
-        for cur_name in name_list:
-            self._log(u"Checking scene exceptions for a match on " + cur_name, logger.DEBUG)
-            scene_id = scene_exceptions.get_scene_exception_by_name(cur_name)
-            if scene_id:
-                self._log(u"Scene exception lookup got tvdb id " + str(scene_id) + u", using that", logger.DEBUG)
-                _finalize(parse_result)
-                return (scene_id, season, episodes)
-
-        # see if we can find the name directly in the DB, if so use it
+        # try finding name in DB
         for cur_name in name_list:
             self._log(u"Looking up " + cur_name + u" in the DB", logger.DEBUG)
             db_result = helpers.searchDBForShow(cur_name)
             if db_result:
                 self._log(u"Lookup successful, using tvdb id " + str(db_result[0]), logger.DEBUG)
-                _finalize(parse_result)
-                return (int(db_result[0]), season, episodes)
+                self._finalize(parse_result)
+                return (int(db_result[0]), season, episodes, None)
 
-        # see if we can find the name with a TVDB lookup
+        # try finding name in scene exceptions
+        for cur_name in name_list:
+            self._log(u"Checking scene exceptions for a match on " + cur_name, logger.DEBUG)
+            scene_id = scene_exceptions.get_scene_exception_by_name(cur_name)
+            if scene_id:
+                self._log(u"Scene exception lookup got tvdb id " + str(scene_id) + u", using that", logger.DEBUG)
+                self._finalize(parse_result)
+                return (scene_id, season, episodes, None)
+
+        # try finding name on TVDB
         for cur_name in name_list:
             try:
                 t = tvdb_api.Tvdb(custom_ui=classes.ShowListUI, **sickbeard.TVDB_API_PARMS)
@@ -456,18 +395,41 @@ class PostProcessor(object):
                 continue
 
             self._log(u"Lookup successful, using tvdb id " + str(showObj["id"]), logger.DEBUG)
-            _finalize(parse_result)
-            return (int(showObj["id"]), season, episodes)
+            self._finalize(parse_result)
+            return (int(showObj["id"]), season, episodes, None)
 
-        _finalize(parse_result)
+        self._finalize(parse_result)
         return to_return
+
+    def _finalize(self, parse_result):
+
+        self.release_group = parse_result.release_group
+
+        # remember whether it's a proper
+        self.is_proper = parse_result.is_proper
+
+        # if the result is complete then set release name
+        if parse_result.series_name and ((parse_result.season_number is not None and parse_result.episode_numbers)
+                                          or parse_result.air_date
+                                        ) and parse_result.release_group:
+
+            if not self.release_name:
+                self.release_name = helpers.remove_extension(ek.ek(os.path.basename, parse_result.original_name))
+
+        else:
+            logger.log(u"Parse result not sufficient (all following have to be set). will not save release name", logger.DEBUG)
+            logger.log(u"Parse result(series_name): " + str(parse_result.series_name), logger.DEBUG)
+            logger.log(u"Parse result(season_number): " + str(parse_result.season_number), logger.DEBUG)
+            logger.log(u"Parse result(episode_numbers): " + str(parse_result.episode_numbers), logger.DEBUG)
+            logger.log(u" or Parse result(air_date): " + str(parse_result.air_date), logger.DEBUG)
+            logger.log(u"Parse result(release_group): " + str(parse_result.release_group), logger.DEBUG)
 
     def _find_info(self):
         """
         For a given file try to find the showid, season, and episode.
         """
 
-        tvdb_id = season = None
+        tvdb_id = season = quality = None
         episodes = []
 
                         # try to look up the nzb in history
@@ -482,7 +444,7 @@ class PostProcessor(object):
                         # try to analyze the dir name
                         lambda: self._analyze_name(self.folder_name),
 
-                        # try to analyze the file+dir names together
+                        # try to analyze the file + dir names together
                         lambda: self._analyze_name(self.file_path),
 
                         # try to analyze the dir + file name together as one name
@@ -494,7 +456,7 @@ class PostProcessor(object):
         for cur_attempt in attempt_list:
 
             try:
-                (cur_tvdb_id, cur_season, cur_episodes) = cur_attempt()
+                (cur_tvdb_id, cur_season, cur_episodes, cur_quality) = cur_attempt()
             except InvalidNameException, e:
                 logger.log(u"Unable to parse, skipping: " + ex(e), logger.DEBUG)
                 continue
@@ -502,59 +464,44 @@ class PostProcessor(object):
             # if we already did a successful history lookup then keep that tvdb_id value
             if cur_tvdb_id and not (self.in_history and tvdb_id):
                 tvdb_id = cur_tvdb_id
-            if cur_season != None:
+
+            if cur_quality and not (self.in_history and quality):
+                quality = cur_quality
+
+            if cur_season is not None:
                 season = cur_season
+
             if cur_episodes:
                 episodes = cur_episodes
 
-            # for air-by-date shows we need to look up the season/episode from tvdb
+            # for air-by-date shows we need to look up the season/episode from database
             if season == -1 and tvdb_id and episodes:
                 self._log(u"Looks like this is an air-by-date show, attempting to convert the date to season/episode", logger.DEBUG)
+                airdate = episodes[0].toordinal()
+                myDB = db.DBConnection()
+                sql_result = myDB.select("SELECT season, episode FROM tv_episodes WHERE showid = ? and airdate = ?", [tvdb_id, airdate])
 
-                # try to get language set for this show
-                tvdb_lang = None
-                try:
-                    showObj = helpers.findCertainShow(sickbeard.showList, tvdb_id)
-                    if(showObj != None):
-                        tvdb_lang = showObj.lang
-                except exceptions.MultipleShowObjectsException:
-                    raise #TODO: later I'll just log this, for now I want to know about it ASAP
-
-                try:
-                    # There's gotta be a better way of doing this but we don't wanna
-                    # change the language value elsewhere
-                    ltvdb_api_parms = sickbeard.TVDB_API_PARMS.copy()
-
-                    if tvdb_lang and not tvdb_lang == 'en':
-                        ltvdb_api_parms['language'] = tvdb_lang
-
-                    t = tvdb_api.Tvdb(**ltvdb_api_parms)
-                    epObj = t[tvdb_id].airedOn(episodes[0])[0]
-                    season = int(epObj["seasonnumber"])
-                    episodes = [int(epObj["episodenumber"])]
-                    self._log(u"Got season " + str(season) + " episodes " + str(episodes), logger.DEBUG)
-                except tvdb_exceptions.tvdb_episodenotfound, e:
+                if sql_result:
+                    season = int(sql_result[0][0])
+                    episodes = [int(sql_result[0][1])]
+                else:
                     self._log(u"Unable to find episode with date " + str(episodes[0]) + u" for show " + str(tvdb_id) + u", skipping", logger.DEBUG)
                     # we don't want to leave dates in the episode list if we couldn't convert them to real episode numbers
                     episodes = []
                     continue
-                except tvdb_exceptions.tvdb_error, e:
-                    logger.log(u"Unable to contact TVDB: " + ex(e), logger.WARNING)
-                    episodes = []
-                    continue
 
             # if there's no season then we can hopefully just use 1 automatically
-            elif season == None and tvdb_id:
+            elif season is None and tvdb_id:
                 myDB = db.DBConnection()
                 numseasonsSQlResult = myDB.select("SELECT COUNT(DISTINCT season) as numseasons FROM tv_episodes WHERE showid = ? and season != 0", [tvdb_id])
-                if int(numseasonsSQlResult[0][0]) == 1 and season == None:
+                if int(numseasonsSQlResult[0][0]) == 1 and season is None:
                     self._log(u"Don't have a season number, but this show appears to only have 1 season, setting seasonnumber to 1...", logger.DEBUG)
                     season = 1
 
-            if tvdb_id and season != None and episodes:
-                return (tvdb_id, season, episodes)
+            if tvdb_id and season is not None and episodes:
+                return (tvdb_id, season, episodes, quality)
 
-        return (tvdb_id, season, episodes)
+        return (tvdb_id, season, episodes, quality)
 
     def _get_ep_obj(self, tvdb_id, season, episodes):
         """
@@ -575,12 +522,13 @@ class PostProcessor(object):
         try:
             show_obj = helpers.findCertainShow(sickbeard.showList, tvdb_id)
         except exceptions.MultipleShowObjectsException:
-            raise #TODO: later I'll just log this, for now I want to know about it ASAP
+            raise  # TODO: later I'll just log this, for now I want to know about it ASAP
 
         # if we can't find the show then there's nothing we can really do
         if not show_obj:
-            self._log(u"This show isn't in your list, you need to add it to SB before post-processing an episode", logger.ERROR)
-            raise exceptions.PostProcessingFailed()
+            error_msg = u"This show isn't in your list, you need to add it to SB before post-processing an episode"
+            self._log(error_msg, logger.ERROR)
+            raise exceptions.PostProcessingFailed(error_msg)
 
         root_ep = None
         for cur_episode in episodes:
@@ -592,11 +540,12 @@ class PostProcessor(object):
             try:
                 curEp = show_obj.getEpisode(season, episode)
             except exceptions.EpisodeNotFoundException, e:
-                self._log(u"Unable to create episode: " + ex(e), logger.DEBUG)
-                raise exceptions.PostProcessingFailed()
+                error_msg = u"Unable to create episode: " + ex(e)
+                self._log(error_msg, logger.DEBUG)
+                raise exceptions.PostProcessingFailed(error_msg)
 
             # associate all the episodes together under a single root episode
-            if root_ep == None:
+            if root_ep is None:
                 root_ep = curEp
                 root_ep.relatedEps = []
             elif curEp not in root_ep.relatedEps:
@@ -606,8 +555,7 @@ class PostProcessor(object):
 
     def _get_quality(self, ep_obj):
         """
-        Determines the quality of the file that is being post processed, first by checking if it is directly
-        available in the TVEpisode's status or otherwise by parsing through the data available.
+        Determines the quality of the file that is being post processed by parsing through the data available.
 
         ep_obj: The TVEpisode object related to the file we are post processing
 
@@ -615,13 +563,6 @@ class PostProcessor(object):
         """
 
         ep_quality = common.Quality.UNKNOWN
-
-        # if there is a quality available in the status then we don't need to bother guessing from the filename
-        if ep_obj.status in common.Quality.SNATCHED + common.Quality.SNATCHED_PROPER:
-            oldStatus, ep_quality = common.Quality.splitCompositeStatus(ep_obj.status) #@UnusedVariable
-            if ep_quality != common.Quality.UNKNOWN:
-                self._log(u"The old status had a quality in it, using that: " + common.Quality.qualityStrings[ep_quality], logger.DEBUG)
-                return ep_quality
 
         # nzb name is the most reliable if it exists, followed by folder name and lastly file name
         name_list = [self.nzb_name, self.folder_name, self.file_name]
@@ -641,7 +582,14 @@ class PostProcessor(object):
                 logger.log(cur_name + u" looks like it has quality " + common.Quality.qualityStrings[ep_quality] + ", using that", logger.DEBUG)
                 return ep_quality
 
-        # if we didn't get a quality from one of the names above, try assuming from each of the names
+        # Try getting quality from the episode (snatched) status
+        if ep_obj.status in common.Quality.SNATCHED + common.Quality.SNATCHED_PROPER:
+            oldStatus, ep_quality = common.Quality.splitCompositeStatus(ep_obj.status)  # @UnusedVariable
+            if ep_quality != common.Quality.UNKNOWN:
+                self._log(u"The old status had a quality in it, using that: " + common.Quality.qualityStrings[ep_quality], logger.DEBUG)
+                return ep_quality
+
+        # Try guessing quality from the file name
         ep_quality = common.Quality.assumeQuality(self.file_name)
         self._log(u"Guessing quality for name " + self.file_name + u", got " + common.Quality.qualityStrings[ep_quality], logger.DEBUG)
         if ep_quality != common.Quality.UNKNOWN:
@@ -659,51 +607,109 @@ class PostProcessor(object):
         for curScriptName in sickbeard.EXTRA_SCRIPTS:
 
             # generate a safe command line string to execute the script and provide all the parameters
-            script_cmd = [piece for piece in re.split("( |\\\".*?\\\"|'.*?')", curScriptName) if piece.strip()]
-            script_cmd[0] = ek.ek(os.path.abspath, script_cmd[0])
-            self._log(u"Absolute path to script: " + script_cmd[0], logger.DEBUG)
-
-            script_cmd = script_cmd + [ep_obj.location, self.file_path, str(ep_obj.show.tvdbid), str(ep_obj.season), str(ep_obj.episode), str(ep_obj.airdate)]
-
-            # use subprocess to run the command and capture output
-            self._log(u"Executing command " + str(script_cmd))
             try:
+                script_cmd = [piece for piece in re.split("( |\\\".*?\\\"|'.*?')", curScriptName) if piece.strip()]
+
+                script_cmd = script_cmd + [ep_obj.location.encode(sickbeard.SYS_ENCODING),
+                                               self.file_path.encode(sickbeard.SYS_ENCODING),
+                                               str(ep_obj.show.tvdbid),
+                                               str(ep_obj.season),
+                                               str(ep_obj.episode),
+                                               str(ep_obj.airdate)
+                                               ]
+
+                # use subprocess to run the command and capture output
+                self._log(u"Executing command " + str(script_cmd))
+
                 p = subprocess.Popen(script_cmd, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, cwd=sickbeard.PROG_DIR)
                 out, err = p.communicate() #@UnusedVariable
                 self._log(u"Script result: " + str(out), logger.DEBUG)
 
-            except OSError, e:
-                self._log(u"Unable to run extra_script: " + ex(e))
-
             except Exception, e:
                 self._log(u"Unable to run extra_script: " + ex(e))
 
-    def _is_priority(self, ep_obj, new_ep_quality):
+    def _safe_replace(self, ep_obj, new_ep_quality):
         """
-        Determines if the episode is a priority download or not (if it is expected). Episodes which are expected
-        (snatched) or larger than the existing episode are priority, others are not.
+        Determines if the new episode can safely replace old episode.
+        Episodes which are expected (snatched) or larger than the existing episode are priority, others are not.
 
         ep_obj: The TVEpisode object in question
         new_ep_quality: The quality of the episode that is being processed
 
-        Returns: True if the episode is priority, False otherwise.
+        Returns: True if the episode can safely replace old episode, False otherwise.
         """
 
-        # if SB downloaded this on purpose then this is a priority download
-        if self.in_history or ep_obj.status in common.Quality.SNATCHED + common.Quality.SNATCHED_PROPER:
-            self._log(u"SB snatched this episode so I'm marking it as priority", logger.DEBUG)
+        # if SB snatched this then assume it's safe
+        if ep_obj.status in common.Quality.SNATCHED + common.Quality.SNATCHED_PROPER:
+            self._log(u"Sick Beard snatched this episode, marking it safe to replace", logger.DEBUG)
             return True
 
-        # if the user downloaded it manually and it's higher quality than the existing episode then it's priority
-        if new_ep_quality > ep_obj and new_ep_quality != common.Quality.UNKNOWN:
-            self._log(u"This was manually downloaded but it appears to be better quality than what we have so I'm marking it as priority", logger.DEBUG)
+        old_ep_status, old_ep_quality = common.Quality.splitCompositeStatus(ep_obj.status)
+
+        # if old episode is not downloaded/archived then it's safe
+        if old_ep_status != common.DOWNLOADED and old_ep_status != common.ARCHIVED:
+            self._log(u"Existing episode status is not downloaded/archived, marking it safe to replace", logger.DEBUG)
             return True
 
-        # if the user downloaded it manually and it appears to be a PROPER/REPACK then it's priority
-        old_ep_status, old_ep_quality = common.Quality.splitCompositeStatus(ep_obj.status) #@UnusedVariable
-        if self.is_proper and new_ep_quality >= old_ep_quality:
-            self._log(u"This was manually downloaded but it appears to be a proper so I'm marking it as priority", logger.DEBUG)
+        if old_ep_status == common.ARCHIVED:
+            self._log(u"Existing episode status is archived, marking it unsafe to replace", logger.DEBUG)
+            return False
+
+        # Status downloaded. Quality/ size checks
+
+        # if manual post process option is set to force_replace then it's safe
+        if self.force_replace:
+            self._log(u"Processed episode is set to force replace existing episode, marking it safe to replace", logger.DEBUG)
             return True
+
+        # if the file processed is higher quality than the existing episode then it's safe
+        if new_ep_quality > old_ep_quality:
+            if new_ep_quality != common.Quality.UNKNOWN:
+                self._log(u"Existing episode status is not snatched but processed episode appears to be better quality than existing episode, marking it safe to replace", logger.DEBUG)
+                return True
+            else:
+                self._log(u"Episode already exists in database and processed episode has unknown quality, marking it unsafe to replace", logger.DEBUG)
+                return False
+
+        # if there's an existing downloaded file with same quality, check filesize to decide
+        if new_ep_quality == old_ep_quality:
+            self._log(u"Episode already exists in database and has same quality as processed episode", logger.DEBUG)
+
+            # check for an existing file
+            self._log(u"Checking size of existing file: " + ep_obj.location, logger.DEBUG)
+            existing_file_status = self._checkForExistingFile(ep_obj.location)
+
+            if existing_file_status == PostProcessor.EXISTS_LARGER:
+                self._log(u"File exists and new file is smaller, marking it unsafe to replace", logger.DEBUG)
+                return False
+
+            elif existing_file_status == PostProcessor.EXISTS_SAME:
+                self._log(u"File exists and new file is same size, marking it unsafe to replace", logger.DEBUG)
+                return False
+
+            elif existing_file_status == PostProcessor.EXISTS_SMALLER:
+                self._log(u"File exists and new file is larger, marking it safe to replace", logger.DEBUG)
+                return True
+
+            elif existing_file_status == PostProcessor.DOESNT_EXIST:
+                if not ek.ek(os.path.isdir, ep_obj.show._location) and not sickbeard.CREATE_MISSING_SHOW_DIRS:
+                    self._log(u"File and Show location doesn't exist, marking it unsafe to replace", logger.DEBUG)
+                    return False
+
+                else:
+                    self._log(u"File doesn't exist, marking it safe to replace", logger.DEBUG)
+                    return True
+
+            else:
+                self._log(u"Unknown file status for: " + ep_obj.location + "This should never happen, please log this as a bug.", logger.ERROR)
+                return False
+
+        # if there's an existing file with better quality
+        if new_ep_quality < old_ep_quality and old_ep_quality != common.Quality.UNKNOWN:
+            self._log(u"Episode already exists in database and processed episode has lower quality, marking it unsafe to replace", logger.DEBUG)
+            return False
+
+        self._log(u"None of the conditions were met, marking it unsafe to replace", logger.DEBUG)
 
         return False
 
@@ -717,54 +723,42 @@ class PostProcessor(object):
         if ek.ek(os.path.isdir, self.file_path):
             self._log(u"File " + self.file_path + " seems to be a directory")
             return False
-        for ignore_file in self.IGNORED_FILESTRINGS:
-            if ignore_file in self.file_path:
-                self._log(u"File " + self.file_path + " is ignored type, skipping")
-                return False
+
         # reset per-file stuff
         self.in_history = False
 
         # try to find the file info
-        (tvdb_id, season, episodes) = self._find_info()
+        (tvdb_id, season, episodes, quality) = self._find_info()
 
         # if we don't have it then give up
-        if not tvdb_id or season == None or not episodes:
+        if not tvdb_id or season is None or not episodes:
+            self._log(u"Not enough information to determine what episode this is", logger.DEBUG)
+            self._log(u"Quitting post-processing", logger.DEBUG)
             return False
 
         # retrieve/create the corresponding TVEpisode objects
         ep_obj = self._get_ep_obj(tvdb_id, season, episodes)
 
         # get the quality of the episode we're processing
-        new_ep_quality = self._get_quality(ep_obj)
-        logger.log(u"Quality of the episode we're processing: " + str(new_ep_quality), logger.DEBUG)
-
-        # see if this is a priority download (is it snatched, in history, or PROPER)
-        priority_download = self._is_priority(ep_obj, new_ep_quality)
-        self._log(u"Is ep a priority download: " + str(priority_download), logger.DEBUG)
-
-        # set the status of the episodes
-        for curEp in [ep_obj] + ep_obj.relatedEps:
-            curEp.status = common.Quality.compositeStatus(common.SNATCHED, new_ep_quality)
-
-        # check for an existing file
-        existing_file_status = self._checkForExistingFile(ep_obj.location)
-
-        # if it's not priority then we don't want to replace smaller files in case it was a mistake
-        if not priority_download:
-
-            # if there's an existing file that we don't want to replace stop here
-            if existing_file_status in (PostProcessor.EXISTS_LARGER, PostProcessor.EXISTS_SAME):
-                self._log(u"File exists and we are not going to replace it because it's not smaller, quitting post-processing", logger.DEBUG)
-                return False
-            elif existing_file_status == PostProcessor.EXISTS_SMALLER:
-                self._log(u"File exists and is smaller than the new file so I'm going to replace it", logger.DEBUG)
-            elif existing_file_status != PostProcessor.DOESNT_EXIST:
-                self._log(u"Unknown existing file status. This should never happen, please log this as a bug.", logger.ERROR)
-                return False
-
-        # if the file is priority then we're going to replace it even if it exists
+        if quality:
+            self._log(u"Snatch history had a quality in it, using that: " + common.Quality.qualityStrings[quality], logger.DEBUG)
+            new_ep_quality = quality
         else:
-            self._log(u"This download is marked a priority download so I'm going to replace an existing file if I find one", logger.DEBUG)
+            new_ep_quality = self._get_quality(ep_obj)
+
+        logger.log(u"Quality of the processing episode: " + str(new_ep_quality), logger.DEBUG)
+
+        # see if it's safe to replace existing episode (is download snatched, PROPER, better quality)
+        safe_replace = self._safe_replace(ep_obj, new_ep_quality)
+
+        # if it's not safe to replace, stop here
+        if not safe_replace:
+            self._log(u"Quitting post-processing", logger.DEBUG)
+            return False
+
+        # if the file is safe to replace then we're going to replace it even if it exists
+        else:
+            self._log(u"This download is marked as safe to replace existing file", logger.DEBUG)
 
         # delete the existing file (and company)
         for cur_ep in [ep_obj] + ep_obj.relatedEps:
@@ -774,7 +768,7 @@ class PostProcessor(object):
                 if cur_ep.location:
                     helpers.delete_empty_folders(ek.ek(os.path.dirname, cur_ep.location), keep_dir=ep_obj.show._location)
             except (OSError, IOError):
-                raise exceptions.PostProcessingFailed("Unable to delete the existing files")
+                raise exceptions.PostProcessingFailed(u"Unable to delete the existing files")
 
         # if the show directory doesn't exist then make it if allowed
         if not ek.ek(os.path.isdir, ep_obj.show._location) and sickbeard.CREATE_MISSING_SHOW_DIRS:
@@ -785,52 +779,36 @@ class PostProcessor(object):
                 notifiers.synoindex_notifier.addFolder(ep_obj.show._location)
 
             except (OSError, IOError):
-                raise exceptions.PostProcessingFailed("Unable to create the show directory: " + ep_obj.show._location)
+                raise exceptions.PostProcessingFailed(u"Unable to create the show directory: " + ep_obj.show._location)
 
             # get metadata for the show (but not episode because it hasn't been fully processed)
             ep_obj.show.writeMetadata(True)
 
         # update the ep info before we rename so the quality & release name go into the name properly
         for cur_ep in [ep_obj] + ep_obj.relatedEps:
-            with cur_ep.lock:
-                cur_release_name = None
 
-                # use the best possible representation of the release name
-                if self.good_results[self.NZB_NAME]:
-                    cur_release_name = self.nzb_name
-                    if cur_release_name.lower().endswith('.nzb'):
-                        cur_release_name = cur_release_name.rpartition('.')[0]
-                elif self.good_results[self.FOLDER_NAME]:
-                    cur_release_name = self.folder_name
-                elif self.good_results[self.FILE_NAME]:
-                    cur_release_name = self.file_name
-                    # take the extension off the filename, it's not needed
-                    if '.' in self.file_name:
-                        cur_release_name = self.file_name.rpartition('.')[0]
+            if self.release_name:
+                self._log(u"Found release name " + self.release_name, logger.DEBUG)
+                cur_ep.release_name = self.release_name
+            else:
+                cur_ep.release_name = ""
 
-                if cur_release_name:
-                    self._log("Found release name " + cur_release_name, logger.DEBUG)
-                    cur_ep.release_name = cur_release_name
-                else:
-                    logger.log(u"good results: " + repr(self.good_results), logger.DEBUG)
-
-                cur_ep.status = common.Quality.compositeStatus(common.DOWNLOADED, new_ep_quality)
-
-                cur_ep.saveToDB()
+            cur_ep.status = common.Quality.compositeStatus(common.DOWNLOADED, new_ep_quality)
 
         # find the destination folder
         try:
             proper_path = ep_obj.proper_path()
             proper_absolute_path = ek.ek(os.path.join, ep_obj.show.location, proper_path)
-
             dest_path = ek.ek(os.path.dirname, proper_absolute_path)
+
         except exceptions.ShowDirNotFoundException:
             raise exceptions.PostProcessingFailed(u"Unable to post-process an episode if the show dir doesn't exist, quitting")
 
         self._log(u"Destination folder for this episode: " + dest_path, logger.DEBUG)
 
         # create any folders we need
-        helpers.make_dirs(dest_path)
+        if not helpers.make_dirs(dest_path):
+            raise exceptions.PostProcessingFailed(u"Unable to create destination folder: " + dest_path)
 
         # figure out the base name of the resulting episode file
         if sickbeard.RENAME_EPISODES:
@@ -850,7 +828,7 @@ class PostProcessor(object):
             else:
                 self._move(self.file_path, dest_path, new_base_name, sickbeard.MOVE_ASSOCIATED_FILES)
         except (OSError, IOError):
-            raise exceptions.PostProcessingFailed("Unable to move the files to their new home")
+            raise exceptions.PostProcessingFailed(u"Unable to move the files to destination folder: " + dest_path)
 
         # put the new location in the database
         for cur_ep in [ep_obj] + ep_obj.relatedEps:
@@ -861,30 +839,16 @@ class PostProcessor(object):
         # log it to history
         history.logDownload(ep_obj, self.file_path, new_ep_quality, self.release_group)
 
-        # send notifications
-        notifiers.notify_download(ep_obj.prettyName())
+        # send notifiers download notification
+        if not ep_obj.show.skip_notices:
+            notifiers.notify_download(ep_obj.prettyName())
 
         # generate nfo/tbn
         ep_obj.createMetaFiles()
         ep_obj.saveToDB()
 
-        # do the library update for XBMC
-        notifiers.xbmc_notifier.update_library(ep_obj.show.name)
-
-        # do the library update for Plex
-        notifiers.plex_notifier.update_library()
-
-        # do the library update for NMJ
-        # nmj_notifier kicks off its library update when the notify_download is issued (inside notifiers)
-
-        # do the library update for Synology Indexer
-        notifiers.synoindex_notifier.addFile(ep_obj.location)
-
-        # do the library update for pyTivo
-        notifiers.pytivo_notifier.update_library(ep_obj)
-
-        # do the library update for Trakt
-        notifiers.trakt_notifier.update_library(ep_obj)
+        # send notifiers library update
+        notifiers.update_library(ep_obj)
 
         self._run_extra_scripts(ep_obj)
 

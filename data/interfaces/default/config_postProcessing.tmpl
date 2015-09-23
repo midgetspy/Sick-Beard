@@ -21,7 +21,7 @@
 <div id="config-content">
 <h5>All non-absolute folder locations are relative to <span class="path">$sickbeard.DATA_DIR</span></h5>
 
-<form id="configForms" action="savePostProcessing" method="post">
+<form id="configForm" action="savePostProcessing" method="post">
 
             <div id="config-components">
 
@@ -44,11 +44,7 @@
                             </label>
                             <label class="nocheck clearfix">
                                 <span class="component-title">&nbsp;</span>
-                                <span class="component-desc"><b>NOTE:</b> Use only if not using SABnzbd+ post processing.</span>
-                            </label>
-                            <label class="nocheck clearfix">
-                                <span class="component-title">&nbsp;</span>
-                                <span class="component-desc">Or if SABnzbd+ and Sick Beard are on different PCs.</span>
+                                <span class="component-desc"><b>NOTE:</b> Used with option Scan and Process or Manual Post-Processing.</span>
                             </label>
                         </div>
 
@@ -73,6 +69,17 @@
                         </div>
 
                         <div class="field-pair">
+                            <label class="nocheck clearfix" for="filter_associated_files">
+                                <span class="component-title">Filter Associated Files</span>
+                                <input type="text" name="filter_associated_files" id="filter_associated_files" value="$sickbeard.FILTER_ASSOCIATED_FILES" size="35" />
+                            </label>
+                            <label class="nocheck clearfix">
+                                <span class="component-title">&nbsp;</span>
+                                <span class="component-desc">Filter associated files by specific non-media file extensions (separated with coma). (eg. .idx, .sub, .en.srt)</span>
+                            </label>
+                        </div>
+
+                        <div class="field-pair">
                             <input type="checkbox" name="rename_episodes" id="rename_episodes" #if $sickbeard.RENAME_EPISODES == True then "checked=\"checked\"" else ""# />
                             <label class="clearfix" for="rename_episodes">
                                 <span class="component-title">Rename Episodes</span>
@@ -88,7 +95,11 @@
                             </label>
                             <label class="nocheck clearfix" for="process_automatically">
                                 <span class="component-title">&nbsp;</span>
-                                <span class="component-desc"><b>NOTE:</b> Do not use if you use sabToSickbeard w/ SABnzbd+!</span>
+                                <span class="component-desc"><b>NOTE:</b> Use if it's not possible to use a post-process script (like SABnzbd and Sick Beard are on different PCs).</span>
+                            </label>
+                            <label class="nocheck clearfix">
+                                <span class="component-title">&nbsp;</span>
+                                <span class="component-desc">Do not use if you use a post-process script like sabToSickbeard on the same <i>TV Download Dir</i>.</span>
                             </label>
                         </div>
 
@@ -464,7 +475,7 @@
                             <span>Toggle the metadata options that you wish to be created. <b>Multiple targets may be used.</b></span>
                         </div>
 
-#for ($cur_name, $cur_generator) in $m_dict.items(): 
+#for ($cur_name, $cur_generator) in $m_dict.items():
 #set $cur_metadata_inst = $sickbeard.metadata_provider_dict[$cur_generator.name]
 #set $cur_id = $cur_generator.get_id()
 <div class="metadataDiv clearfix" id="$cur_id">

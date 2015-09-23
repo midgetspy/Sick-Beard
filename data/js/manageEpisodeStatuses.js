@@ -27,13 +27,16 @@ $(document).ready(function() {
         var ischecked = $('#allCheck-' + cur_tvdb_id).prop('checked');
         var last_row = $('tr#' + cur_tvdb_id);
 
+        $(this).prop("disabled", true);
         $.getJSON(sbRoot + '/manage/showEpisodeStatuses',
                   {
                    tvdb_id: cur_tvdb_id,
-                   whichStatus: $('#oldStatus').val()
+                   whichStatus: $('#oldStatus').val(),
+                   includeSpecials: $('#opt_includeSpecials').val(),
+                   excludeNoAirdate: $('#opt_excludeNoAirdate').val()
                   },
                   function (data) {
-                      $.each(data, function(season,eps){
+                      $.each(data, function(season, eps) {
                           $.each(eps, function(episode, name) {
                               //alert(season+'x'+episode+': '+name);
                               last_row.after(make_row(cur_tvdb_id, season, episode, name, ischecked));
@@ -41,6 +44,39 @@ $(document).ready(function() {
                       });
                   });
         $(this).hide();
+    });
+
+    $('.expandAll').click(function() {
+        $(this).prop("disabled", true);
+        $('.get_more_eps').each(function() {
+            var cur_tvdb_id = $(this).attr('id');
+            var ischecked = $('#allCheck-' + cur_tvdb_id).prop('checked');
+            var last_row = $('tr#' + cur_tvdb_id);
+
+            $(this).prop("disabled", true);
+            $.getJSON(sbRoot + '/manage/showEpisodeStatuses',
+                      {
+                       tvdb_id: cur_tvdb_id,
+                       whichStatus: $('#oldStatus').val(),
+                       includeSpecials: $('#opt_includeSpecials').val(),
+                       excludeNoAirdate: $('#opt_excludeNoAirdate').val()
+                      },
+                      function (data) {
+                          $.each(data, function(season, eps) {
+                              $.each(eps, function(episode, name) {
+                                  last_row.after(make_row(cur_tvdb_id, season, episode, name, ischecked));
+                              });
+                          });
+                      });
+            $(this).hide();
+        });
+        $(this).hide();
+    });
+
+    $('.toggleAll').click(function() {
+        $('.sickbeardTable input').each(function() {
+            this.checked = !this.checked;
+        });
     });
 
 });

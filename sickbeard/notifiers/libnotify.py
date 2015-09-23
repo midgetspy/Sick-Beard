@@ -22,13 +22,14 @@ import sickbeard
 
 from sickbeard import logger, common
 
+
 def diagnose():
     '''
     Check the environment for reasons libnotify isn't working.  Return a
     user-readable message indicating possible issues.
     '''
     try:
-        import pynotify  #@UnusedImport
+        import pynotify  # @UnusedImport
     except ImportError:
         return (u"<p>Error: pynotify isn't installed.  On Ubuntu/Debian, install the "
                 u"<a href=\"apt:python-notify\">python-notify</a> package.")
@@ -66,19 +67,46 @@ class LibnotifyNotifier:
         try:
             import pynotify
         except ImportError:
-            logger.log(u"Unable to import pynotify. libnotify notifications won't work.")
+            logger.log(u"LIBNOTIFY: Unable to import pynotify. libnotify notifications won't work.", logger.ERROR)
             return False
         try:
             import gobject
         except ImportError:
-            logger.log(u"Unable to import gobject. We can't catch a GError in display.")
+            logger.log(u"LIBNOTIFY: Unable to import gobject. We can't catch a GError in display.", logger.ERROR)
             return False
         if not pynotify.init('Sick Beard'):
-            logger.log(u"Initialization of pynotify failed. libnotify notifications won't work.")
+            logger.log(u"LIBNOTIFY: Initialization of pynotify failed. libnotify notifications won't work.", logger.ERROR)
             return False
         self.pynotify = pynotify
         self.gobject = gobject
         return True
+
+    def _notify(self, title, message, force=False):
+        # suppress notifications if the notifier is disabled but the notify options are checked
+        if not sickbeard.USE_LIBNOTIFY and not force:
+            return False
+
+        # detect if we can use pynotify
+        if not self.init_pynotify():
+            return False
+
+        # Can't make this a global constant because PROG_DIR isn't available
+        # when the module is imported.
+        icon_path = os.path.join(sickbeard.PROG_DIR, "data/images/sickbeard_touch_icon.png")
+        icon_uri = "file://" + os.path.abspath(icon_path)
+
+        # If the session bus can't be acquired here a bunch of warning messages
+        # will be printed but the call to show() will still return True.
+        # pynotify doesn't seem too keen on error handling.
+        n = self.pynotify.Notification(title, message, icon_uri)
+        try:
+            return n.show()
+        except self.gobject.GError:
+            return False
+
+##############################################################################
+# Public functions
+##############################################################################
 
     def notify_snatch(self, ep_name):
         if sickbeard.LIBNOTIFY_NOTIFY_ONSNATCH:
@@ -89,26 +117,9 @@ class LibnotifyNotifier:
             self._notify(common.notifyStrings[common.NOTIFY_DOWNLOAD], ep_name)
 
     def test_notify(self):
-        return self._notify('Test notification', "This is a test notification from Sick Beard", force=True)
+        return self._notify("Test", "This is a test notification from Sick Beard", force=True)
 
-    def _notify(self, title, message, force=False):
-        if not sickbeard.USE_LIBNOTIFY and not force:
-            return False
-        if not self.init_pynotify():
-            return False
-
-        # Can't make this a global constant because PROG_DIR isn't available
-        # when the module is imported.
-        icon_path = os.path.join(sickbeard.PROG_DIR, "data/images/sickbeard_touch_icon.png")
-        icon_uri = 'file://' + os.path.abspath(icon_path)
-
-        # If the session bus can't be acquired here a bunch of warning messages
-        # will be printed but the call to show() will still return True.
-        # pynotify doesn't seem too keen on error handling.
-        n = self.pynotify.Notification(title, message, icon_uri)
-        try:
-            return n.show()
-        except self.gobject.GError:
-            return False
+    def update_library(self, ep_obj=None):
+        pass
 
 notifier = LibnotifyNotifier

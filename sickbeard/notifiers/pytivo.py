@@ -20,12 +20,18 @@ import os
 import sickbeard
 
 from urllib import urlencode
-from urllib2 import Request, urlopen, URLError
+from urllib2 import Request, urlopen
 
 from sickbeard import logger
+from sickbeard.exceptions import ex
 from sickbeard import encodingKludge as ek
 
+
 class pyTivoNotifier:
+
+##############################################################################
+# Public functions
+##############################################################################
 
     def notify_snatch(self, ep_name):
         pass
@@ -33,67 +39,59 @@ class pyTivoNotifier:
     def notify_download(self, ep_name):
         pass
 
-    def update_library(self, ep_obj):
+    def update_library(self, ep_obj=None):
 
-        # Values from config
-        
         if not sickbeard.USE_PYTIVO:
             return False
-        
+
         host = sickbeard.PYTIVO_HOST
         shareName = sickbeard.PYTIVO_SHARE_NAME
         tsn = sickbeard.PYTIVO_TIVO_NAME
-        
+
         # There are two more values required, the container and file.
-        # 
+        #
         # container: The share name, show name and season
         #
         # file: The file name
-        # 
+        #
         # Some slicing and dicing of variables is required to get at these values.
-        #
-        # There might be better ways to arrive at the values, but this is the best I have been able to 
-        # come up with.
-        #
-        
-        
+
         # Calculated values
-        
         showPath = ep_obj.show.location
         showName = ep_obj.show.name
-        rootShowAndSeason = ek.ek(os.path.dirname, ep_obj.location)      
+        rootShowAndSeason = ek.ek(os.path.dirname, ep_obj.location)
         absPath = ep_obj.location
-        
+
         # Some show names have colons in them which are illegal in a path location, so strip them out.
         # (Are there other characters?)
-        showName = showName.replace(":","")
-        
+        showName = showName.replace(":", "")
+
         root = showPath.replace(showName, "")
         showAndSeason = rootShowAndSeason.replace(root, "")
-        
+
         container = shareName + "/" + showAndSeason
-        file = "/" + absPath.replace(root, "")
-        
+        mediaFile = "/" + absPath.replace(root, "")
+
         # Finally create the url and make request
-        requestUrl = "http://" + host + "/TiVoConnect?" + urlencode( {'Command':'Push', 'Container':container, 'File':file, 'tsn':tsn} )
-               
-        logger.log(u"pyTivo notification: Requesting " + requestUrl)
-        
-        request = Request( requestUrl )
+        requestUrl = "http://" + host + "/TiVoConnect?" + urlencode( {'Command': 'Push', 'Container': container, 'File': mediaFile, 'tsn': tsn})
+
+        logger.log(u"PYTIVO: Requesting " + requestUrl, logger.DEBUG)
+
+        request = Request(requestUrl)
 
         try:
-            response = urlopen(request) #@UnusedVariable   
-        except URLError, e:
+            response = urlopen(request)  # @UnusedVariable
+        except IOError, e:
             if hasattr(e, 'reason'):
-                logger.log(u"pyTivo notification: Error, failed to reach a server")
-                logger.log(u"'Error reason: " + e.reason)
-                return False
+                logger.log(u"PYTIVO: Failed to reach server '%s' - %s" % (host, e.reason), logger.WARNING)
             elif hasattr(e, 'code'):
-                logger.log(u"pyTivo notification: Error, the server couldn't fulfill the request")
-                logger.log(u"Error code: " + e.code)
-                return False
+                logger.log(u"PYTIVO: The server could not fulfill the request '%s' - %s" % (host, e.code), logger.WARNING)
+            return False
+        except Exception, e:
+            logger.log(u"PYTIVO: Unknown exception: " + ex(e), logger.ERROR)
+            return False
         else:
-            logger.log(u"pyTivo notification: Successfully requested transfer of file")
+            logger.log(u"PYTIVO: Successfully requested transfer of file", logger.MESSAGE)
             return True
 
 notifier = pyTivoNotifier

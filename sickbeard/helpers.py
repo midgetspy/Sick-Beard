@@ -18,6 +18,7 @@
 
 from __future__ import with_statement
 
+import glob
 import gzip
 import os
 import re
@@ -80,6 +81,32 @@ def indentXML(elem, level=0):
             elem.text = elem.text.replace('\n', ' ')
         if level and (not elem.tail or not elem.tail.strip()):
             elem.tail = i
+
+
+def remove_extension(name):
+    """
+    Remove download or media extension from name (if any)
+    """
+
+    if name and "." in name:
+        base_name, sep, extension = name.rpartition('.')  # @UnusedVariable
+        if base_name and extension.lower() in ['nzb', 'torrent'] + mediaExtensions:
+            name = base_name
+
+    return name
+
+
+def remove_non_release_groups(name):
+    """
+    Remove non release groups from name
+    """
+
+    if name and "-" in name:
+        name_group = name.rsplit('-', 1)
+        if name_group[-1].upper() in ["RP", "NZBGEEK"]:
+            name = name_group[0]
+
+    return name
 
 
 def replaceExtension(filename, newExt):
@@ -195,6 +222,19 @@ def getURL(url, post_data=None, headers=[]):
     return result
 
 
+def is_hidden_folder(folder):
+    """
+    Returns True if folder is hidden.
+    On Linux based systems hidden folders start with . (dot)
+    folder: Full path of folder to check
+    """
+    if ek.ek(os.path.isdir, folder):
+        if ek.ek(os.path.basename, folder).startswith('.'):
+            return True
+
+    return False
+
+
 def findCertainShow(showList, tvdbid):
     results = filter(lambda x: x.tvdbid == tvdbid, showList)
     if len(results) == 0:
@@ -218,6 +258,52 @@ def findCertainTVRageShow(showList, tvrid):
         raise MultipleShowObjectsException()
     else:
         return results[0]
+
+
+def list_associated_files(file_path, base_name_only=False, filter_ext=""):
+    """
+    For a given file path searches for files with the same name but different extension and returns their absolute paths
+
+    file_path: The file to check for associated files
+    base_name_only: False add extra '.' (conservative search) to file_path minus extension
+    filter_ext: A comma separated string with extensions to include or empty string to include all matches
+    Returns: A list containing all files which are associated to the given file
+    """
+
+    if not file_path:
+        return []
+
+    file_path_list = []
+    base_name = file_path.rpartition('.')[0]
+
+    if not base_name_only:
+        base_name = base_name + '.'
+
+    # don't strip it all and use cwd by accident
+    if not base_name:
+        return []
+
+    # don't confuse glob with chars we didn't mean to use
+    base_name = re.sub(r'[\[\]\*\?]', r'[\g<0>]', base_name)
+
+    if filter_ext:
+        # convert to tuple of extensions to restrict to
+        filter_ext = tuple(x.lower().strip() for x in filter_ext.split(','))
+
+    for associated_file_path in ek.ek(glob.glob, base_name + '*'):
+        # only add associated to list
+        if associated_file_path == file_path:
+            continue
+
+        if ek.ek(os.path.isfile, associated_file_path):
+            if filter_ext:
+                if associated_file_path.lower().endswith(filter_ext):
+                    file_path_list.append(associated_file_path)
+
+            else:
+                file_path_list.append(associated_file_path)
+
+    return file_path_list
 
 
 def makeDir(path):
@@ -447,7 +533,8 @@ def chmodAsParent(childPath):
         logger.log(u"No parent path provided in " + childPath + ", unable to get permissions from it", logger.DEBUG)
         return
 
-    parentMode = stat.S_IMODE(os.stat(parentPath)[stat.ST_MODE])
+    parentPathStat = ek.ek(os.stat, parentPath)
+    parentMode = stat.S_IMODE(parentPathStat[stat.ST_MODE])
 
     childPathStat = ek.ek(os.stat, childPath)
     childPath_mode = stat.S_IMODE(childPathStat[stat.ST_MODE])
@@ -510,6 +597,13 @@ def fixSetGroupID(childPath):
             logger.log(u"Respecting the set-group-ID bit on the parent directory for %s" % (childPath), logger.DEBUG)
         except OSError:
             logger.log(u"Failed to respect the set-group-ID bit on the parent directory for %s (setting group ID %i)" % (childPath, parentGID), logger.ERROR)
+
+
+def real_path(path):
+    """
+    Returns: the canonicalized absolute pathname. The resulting path will have no symbolic link, '/./' or '/../' components.
+    """
+    return ek.ek(os.path.normpath, ek.ek(os.path.normcase, ek.ek(os.path.realpath, path)))
 
 
 def sanitizeSceneName(name, ezrss=False):
@@ -588,8 +682,8 @@ def parse_json(data):
 
     try:
         parsedJSON = json.loads(data)
-    except ValueError:
-        logger.log(u"Error trying to decode json data:" + data, logger.ERROR)
+    except ValueError, e:
+        logger.log(u"Error trying to decode json data. Error: " + ex(e), logger.DEBUG)
         return None
 
     return parsedJSON
@@ -613,7 +707,7 @@ def parse_xml(data, del_xmlns=False):
         data = data.encode('utf-8')
         parsedXML = etree.fromstring(data)
     except Exception, e:
-        logger.log(u"Error trying to parse xml data: " + data + " to Elementtree, Error: " + ex(e), logger.DEBUG)
+        logger.log(u"Error trying to parse xml data. Error: " + ex(e), logger.DEBUG)
         parsedXML = None
 
     return parsedXML

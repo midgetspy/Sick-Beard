@@ -64,7 +64,7 @@ CFG = None
 CONFIG_FILE = None
 
 # this is the version of the config we EXPECT to find
-CONFIG_VERSION = 5
+CONFIG_VERSION = 6
 
 PROG_DIR = '.'
 MY_FULLNAME = None
@@ -115,6 +115,7 @@ WEB_HOST = None
 WEB_IPV6 = None
 
 ANON_REDIRECT = None
+DISPLAY_ALL_SEASONS = None
 
 USE_API = False
 API_KEY = None
@@ -135,6 +136,7 @@ METADATA_MEDIABROWSER = None
 METADATA_PS3 = None
 METADATA_WDTV = None
 METADATA_TIVO = None
+METADATA_MEDE8ER = None
 
 SUBTITLE_LANGUAGES = None
 
@@ -166,7 +168,7 @@ PREFER_EPISODE_RELEASES = None
 SEARCH_FREQUENCY = None
 BACKLOG_SEARCH_FREQUENCY = 21
 MIN_SEARCH_FREQUENCY = 10
-DEFAULT_SEARCH_FREQUENCY = 60
+DEFAULT_SEARCH_FREQUENCY = 40
 
 EZRSS = False
 
@@ -195,7 +197,6 @@ TORRENTLEECH_USERNAME = None
 TORRENTLEECH_PASSWORD = None
 
 TORRENTDAY = False
-TORRENTDAY_ALT_URL = False
 TORRENTDAY_USERNAME = None
 TORRENTDAY_PASSWORD = None
 
@@ -246,6 +247,7 @@ RENAME_EPISODES = False
 PROCESS_AUTOMATICALLY = False
 KEEP_PROCESSED_DIR = False
 MOVE_ASSOCIATED_FILES = False
+FILTER_ASSOCIATED_FILES = None
 TV_DOWNLOAD_DIR = None
 
 NZBS = False
@@ -264,6 +266,7 @@ SAB_APIKEY = None
 SAB_CATEGORY = None
 SAB_HOST = ''
 
+NZBGET_USERNAME = None
 NZBGET_PASSWORD = None
 NZBGET_CATEGORY = None
 NZBGET_HOST = None
@@ -277,6 +280,7 @@ TORRENT_RATIO = ''
 TORRENT_PAUSED = False
 
 USE_XBMC = False
+XBMC_ALWAYS_ON = True
 XBMC_NOTIFY_ONSNATCH = False
 XBMC_NOTIFY_ONDOWNLOAD = False
 XBMC_UPDATE_LIBRARY = False
@@ -314,17 +318,19 @@ TWITTER_USERNAME = None
 TWITTER_PASSWORD = None
 TWITTER_PREFIX = None
 
-USE_BOXCAR = False
-BOXCAR_NOTIFY_ONSNATCH = False
-BOXCAR_NOTIFY_ONDOWNLOAD = False
-BOXCAR_USERNAME = None
-BOXCAR_PASSWORD = None
-BOXCAR_PREFIX = None
+USE_BOXCAR2 = False
+BOXCAR2_NOTIFY_ONSNATCH = False
+BOXCAR2_NOTIFY_ONDOWNLOAD = False
+BOXCAR2_ACCESS_TOKEN = None
+BOXCAR2_SOUND = None
 
 USE_PUSHOVER = False
 PUSHOVER_NOTIFY_ONSNATCH = False
 PUSHOVER_NOTIFY_ONDOWNLOAD = False
 PUSHOVER_USERKEY = None
+PUSHOVER_PRIORITY = 0
+PUSHOVER_DEVICE = None
+PUSHOVER_SOUND = None
 
 USE_PUSHBULLET = False
 PUSHBULLET_NOTIFY_ONSNATCH = False
@@ -342,6 +348,9 @@ NMJ_DATABASE = None
 NMJ_MOUNT = None
 
 USE_SYNOINDEX = False
+SYNOINDEX_NOTIFY_ONSNATCH = False
+SYNOINDEX_NOTIFY_ONDOWNLOAD = False
+SYNOINDEX_UPDATE_LIBRARY = False
 
 USE_NMJv2 = False
 NMJv2_HOST = None
@@ -366,6 +375,19 @@ NMA_NOTIFY_ONSNATCH = False
 NMA_NOTIFY_ONDOWNLOAD = False
 NMA_API = None
 NMA_PRIORITY = 0
+
+USE_PUSHALOT = False
+PUSHALOT_NOTIFY_ONSNATCH = False
+PUSHALOT_NOTIFY_ONDOWNLOAD = False
+PUSHALOT_AUTHORIZATIONTOKEN = None
+PUSHALOT_SILENT = False
+PUSHALOT_IMPORTANT = False
+
+USE_PUSHBULLET = False
+PUSHBULLET_NOTIFY_ONSNATCH = False
+PUSHBULLET_NOTIFY_ONDOWNLOAD = False
+PUSHBULLET_ACCESS_TOKEN = None
+PUSHBULLET_DEVICE_IDEN = None
 
 COMING_EPS_LAYOUT = None
 COMING_EPS_DISPLAY_PAUSED = None
@@ -405,7 +427,7 @@ def initialize(consoleLogging=True):
                 KICKASS, KICKASS_ALT_URL, \
                 TORRENTZ, TORRENTZ_VERIFIED, \
                 TORRENTLEECH, TORRENTLEECH_USERNAME, TORRENTLEECH_PASSWORD, \
-                TORRENTDAY, TORRENTDAY_ALT_URL, TORRENTDAY_USERNAME, TORRENTDAY_PASSWORD, \
+                TORRENTDAY, TORRENTDAY_USERNAME, TORRENTDAY_PASSWORD, \
                 SCENEACCESS, SCENEACCESS_USERNAME, SCENEACCESS_PASSWORD, SCENEACCESS_RSSHASH, \
                 IPTORRENTS, IPTORRENTS_USERNAME, IPTORRENTS_PASSWORD, IPTORRENTS_UID, IPTORRENTS_RSSHASH, \
                 BITHDTV, BITHDTV_USERNAME, BITHDTV_PASSWORD, \
@@ -422,6 +444,8 @@ def initialize(consoleLogging=True):
                 USE_GROWL, GROWL_HOST, GROWL_PASSWORD, USE_PROWL, PROWL_NOTIFY_ONSNATCH, PROWL_NOTIFY_ONDOWNLOAD, PROWL_API, PROWL_PRIORITY, PROG_DIR, \
                 USE_PYTIVO, PYTIVO_NOTIFY_ONSNATCH, PYTIVO_NOTIFY_ONDOWNLOAD, PYTIVO_UPDATE_LIBRARY, PYTIVO_HOST, PYTIVO_SHARE_NAME, PYTIVO_TIVO_NAME, \
                 USE_NMA, NMA_NOTIFY_ONSNATCH, NMA_NOTIFY_ONDOWNLOAD, NMA_API, NMA_PRIORITY, \
+                USE_PUSHALOT, PUSHALOT_NOTIFY_ONSNATCH, PUSHALOT_NOTIFY_ONDOWNLOAD, PUSHALOT_AUTHORIZATIONTOKEN, PUSHALOT_SILENT, PUSHALOT_IMPORTANT, \
+                USE_PUSHBULLET, PUSHBULLET_NOTIFY_ONSNATCH, PUSHBULLET_NOTIFY_ONDOWNLOAD, PUSHBULLET_ACCESS_TOKEN, PUSHBULLET_DEVICE_IDEN, \
                 versionCheckScheduler, VERSION_NOTIFY, PROCESS_AUTOMATICALLY, \
                 KEEP_PROCESSED_DIR, TV_DOWNLOAD_DIR, TVDB_BASE_URL, MIN_SEARCH_FREQUENCY, \
                 showQueueScheduler, searchQueueScheduler, ROOT_DIRS, CACHE_DIR, ACTUAL_CACHE_DIR, TVDB_API_PARMS, \
@@ -429,15 +453,15 @@ def initialize(consoleLogging=True):
                 RENAME_EPISODES, properFinderScheduler, PROVIDER_ORDER, autoPostProcesserScheduler, \
                 WOMBLE, OMGWTFNZBS, OMGWTFNZBS_USERNAME, OMGWTFNZBS_APIKEY, providerList, newznabProviderList, \
                 EXTRA_SCRIPTS, USE_TWITTER, TWITTER_USERNAME, TWITTER_PASSWORD, TWITTER_PREFIX, \
-                USE_BOXCAR, BOXCAR_USERNAME, BOXCAR_PASSWORD, BOXCAR_NOTIFY_ONDOWNLOAD, BOXCAR_NOTIFY_ONSNATCH, \
-                USE_PUSHOVER, PUSHOVER_USERKEY, PUSHOVER_NOTIFY_ONDOWNLOAD, PUSHOVER_NOTIFY_ONSNATCH, \
-                USE_PUSHBULLET, PUSHBULLET_APIKEY, PUSHBULLET_DEVICE, PUSHBULLET_NOTIFY_ONDOWNLOAD, PUSHBULLET_NOTIFY_ONSNATCH, \
-                USE_LIBNOTIFY, LIBNOTIFY_NOTIFY_ONSNATCH, LIBNOTIFY_NOTIFY_ONDOWNLOAD, USE_NMJ, NMJ_HOST, NMJ_DATABASE, NMJ_MOUNT, USE_NMJv2, NMJv2_HOST, NMJv2_DATABASE, NMJv2_DBLOC, USE_SYNOINDEX, \
-                USE_LISTVIEW, METADATA_XBMC, METADATA_XBMC_12PLUS, METADATA_MEDIABROWSER, METADATA_PS3, metadata_provider_dict, \
+                USE_BOXCAR2, BOXCAR2_ACCESS_TOKEN, BOXCAR2_NOTIFY_ONDOWNLOAD, BOXCAR2_NOTIFY_ONSNATCH, BOXCAR2_SOUND, \
+                USE_PUSHOVER, PUSHOVER_USERKEY, PUSHOVER_NOTIFY_ONDOWNLOAD, PUSHOVER_NOTIFY_ONSNATCH, PUSHOVER_PRIORITY, PUSHOVER_DEVICE, PUSHOVER_SOUND, \
+                USE_LIBNOTIFY, LIBNOTIFY_NOTIFY_ONSNATCH, LIBNOTIFY_NOTIFY_ONDOWNLOAD, USE_NMJ, NMJ_HOST, NMJ_DATABASE, NMJ_MOUNT, USE_NMJv2, NMJv2_HOST, NMJv2_DATABASE, NMJv2_DBLOC, \
+                USE_SYNOINDEX, SYNOINDEX_NOTIFY_ONSNATCH, SYNOINDEX_NOTIFY_ONDOWNLOAD, SYNOINDEX_UPDATE_LIBRARY, \
+                USE_LISTVIEW, METADATA_XBMC, METADATA_XBMC_12PLUS, METADATA_MEDIABROWSER, METADATA_MEDE8ER, METADATA_PS3, metadata_provider_dict, \
                 SUBTITLE_LANGUAGES, subtitleQueueScheduler, \
-                GIT_PATH, MOVE_ASSOCIATED_FILES, \
+                GIT_PATH, MOVE_ASSOCIATED_FILES, FILTER_ASSOCIATED_FILES, \
                 COMING_EPS_LAYOUT, COMING_EPS_SORT, COMING_EPS_DISPLAY_PAUSED, METADATA_WDTV, METADATA_TIVO, IGNORE_WORDS, CREATE_MISSING_SHOW_DIRS, \
-                ADD_SHOWS_WO_DIR, ANON_REDIRECT
+                ADD_SHOWS_WO_DIR, ANON_REDIRECT, DISPLAY_ALL_SEASONS
 
         if __INITIALIZED__:
             return False
@@ -473,6 +497,8 @@ def initialize(consoleLogging=True):
         # attempt to help prevent users from breaking links by using a bad url
         if not ANON_REDIRECT.endswith('?'):
             ANON_REDIRECT = ''
+
+        DISPLAY_ALL_SEASONS = check_setting_int(CFG, 'General', 'display_all_seasons', 1)
 
         USE_API = bool(check_setting_int(CFG, 'General', 'use_api', 0))
         API_KEY = check_setting_str(CFG, 'General', 'api_key', '')
@@ -515,7 +541,7 @@ def initialize(consoleLogging=True):
         if CACHE_DIR:
             TVDB_API_PARMS['cache'] = os.path.join(CACHE_DIR, 'tvdb')
 
-        TVDB_BASE_URL = 'http://www.thetvdb.com/api/' + TVDB_API_KEY
+        TVDB_BASE_URL = 'http://thetvdb.com/api/' + TVDB_API_KEY
 
         QUALITY_DEFAULT = check_setting_int(CFG, 'General', 'quality_default', SD)
         STATUS_DEFAULT = check_setting_int(CFG, 'General', 'status_default', SKIPPED)
@@ -524,8 +550,8 @@ def initialize(consoleLogging=True):
 
         PROVIDER_ORDER = check_setting_str(CFG, 'General', 'provider_order', '').split()
 
-        NAMING_PATTERN = check_setting_str(CFG, 'General', 'naming_pattern', '')
-        NAMING_ABD_PATTERN = check_setting_str(CFG, 'General', 'naming_abd_pattern', '')
+        NAMING_PATTERN = check_setting_str(CFG, 'General', 'naming_pattern', '%SN - %Sx%0E - %EN')
+        NAMING_ABD_PATTERN = check_setting_str(CFG, 'General', 'naming_abd_pattern', '%SN - %A-D - %EN')
         NAMING_CUSTOM_ABD = check_setting_int(CFG, 'General', 'naming_custom_abd', 0)
         NAMING_MULTI_EP = check_setting_int(CFG, 'General', 'naming_multi_ep', 1)
         NAMING_FORCE_FOLDERS = naming.check_force_season_folders()
@@ -553,6 +579,7 @@ def initialize(consoleLogging=True):
         RENAME_EPISODES = check_setting_int(CFG, 'General', 'rename_episodes', 1)
         KEEP_PROCESSED_DIR = check_setting_int(CFG, 'General', 'keep_processed_dir', 1)
         MOVE_ASSOCIATED_FILES = check_setting_int(CFG, 'General', 'move_associated_files', 0)
+        FILTER_ASSOCIATED_FILES = check_setting_str(CFG, 'General', 'filter_associated_files', '')
         CREATE_MISSING_SHOW_DIRS = check_setting_int(CFG, 'General', 'create_missing_show_dirs', 0)
         ADD_SHOWS_WO_DIR = check_setting_int(CFG, 'General', 'add_shows_wo_dir', 0)
 
@@ -588,7 +615,6 @@ def initialize(consoleLogging=True):
         TORRENTLEECH_PASSWORD = check_setting_str(CFG, 'TORRENTLEECH', 'torrentleech_password', '')
         
         TORRENTDAY = bool(check_setting_int(CFG, 'TORRENTDAY', 'torrentday', 0))    
-        TORRENTDAY_ALT_URL = bool(check_setting_int(CFG, 'TORRENTDAY', 'torrentday_alt_url', 0))
         TORRENTDAY_USERNAME = check_setting_str(CFG, 'TORRENTDAY', 'torrentday_username', '')   
         TORRENTDAY_PASSWORD = check_setting_str(CFG, 'TORRENTDAY', 'torrentday_password', '')
         
@@ -639,6 +665,7 @@ def initialize(consoleLogging=True):
         METADATA_PS3 = check_setting_str(CFG, 'General', 'metadata_ps3', '0|0|0|0|0|0|0|0|0|0')
         METADATA_WDTV = check_setting_str(CFG, 'General', 'metadata_wdtv', '0|0|0|0|0|0|0|0|0|0')
         METADATA_TIVO = check_setting_str(CFG, 'General', 'metadata_tivo', '0|0|0|0|0|0|0|0|0|0')
+        METADATA_MEDE8ER = check_setting_str(CFG, 'General', 'metadata_mede8er', '0|0|0|0|0|0|0|0|0|0')
 
         CheckSection(CFG, 'GUI')
         COMING_EPS_LAYOUT = check_setting_str(CFG, 'GUI', 'coming_eps_layout', 'banner')
@@ -687,6 +714,7 @@ def initialize(consoleLogging=True):
         SAB_HOST = check_setting_str(CFG, 'SABnzbd', 'sab_host', '')
 
         CheckSection(CFG, 'NZBget')
+        NZBGET_USERNAME = check_setting_str(CFG, 'NZBget', 'nzbget_username', 'nzbget')
         NZBGET_PASSWORD = check_setting_str(CFG, 'NZBget', 'nzbget_password', 'tegbzn6789')
         NZBGET_CATEGORY = check_setting_str(CFG, 'NZBget', 'nzbget_category', 'tv')
         NZBGET_HOST = check_setting_str(CFG, 'NZBget', 'nzbget_host', '')
@@ -701,6 +729,7 @@ def initialize(consoleLogging=True):
 
         CheckSection(CFG, 'XBMC')
         USE_XBMC = bool(check_setting_int(CFG, 'XBMC', 'use_xbmc', 0))
+        XBMC_ALWAYS_ON = bool(check_setting_int(CFG, 'XBMC', 'xbmc_always_on', 1))
         XBMC_NOTIFY_ONSNATCH = bool(check_setting_int(CFG, 'XBMC', 'xbmc_notify_onsnatch', 0))
         XBMC_NOTIFY_ONDOWNLOAD = bool(check_setting_int(CFG, 'XBMC', 'xbmc_notify_ondownload', 0))
         XBMC_UPDATE_LIBRARY = bool(check_setting_int(CFG, 'XBMC', 'xbmc_update_library', 0))
@@ -732,7 +761,7 @@ def initialize(consoleLogging=True):
         PROWL_NOTIFY_ONSNATCH = bool(check_setting_int(CFG, 'Prowl', 'prowl_notify_onsnatch', 0))
         PROWL_NOTIFY_ONDOWNLOAD = bool(check_setting_int(CFG, 'Prowl', 'prowl_notify_ondownload', 0))
         PROWL_API = check_setting_str(CFG, 'Prowl', 'prowl_api', '')
-        PROWL_PRIORITY = check_setting_str(CFG, 'Prowl', 'prowl_priority', "0")
+        PROWL_PRIORITY = check_setting_int(CFG, 'Prowl', 'prowl_priority', 0)
 
         CheckSection(CFG, 'Twitter')
         USE_TWITTER = bool(check_setting_int(CFG, 'Twitter', 'use_twitter', 0))
@@ -742,17 +771,21 @@ def initialize(consoleLogging=True):
         TWITTER_PASSWORD = check_setting_str(CFG, 'Twitter', 'twitter_password', '')
         TWITTER_PREFIX = check_setting_str(CFG, 'Twitter', 'twitter_prefix', 'Sick Beard')
 
-        CheckSection(CFG, 'Boxcar')
-        USE_BOXCAR = bool(check_setting_int(CFG, 'Boxcar', 'use_boxcar', 0))
-        BOXCAR_NOTIFY_ONSNATCH = bool(check_setting_int(CFG, 'Boxcar', 'boxcar_notify_onsnatch', 0))
-        BOXCAR_NOTIFY_ONDOWNLOAD = bool(check_setting_int(CFG, 'Boxcar', 'boxcar_notify_ondownload', 0))
-        BOXCAR_USERNAME = check_setting_str(CFG, 'Boxcar', 'boxcar_username', '')
+        CheckSection(CFG, 'Boxcar2')
+        USE_BOXCAR2 = bool(check_setting_int(CFG, 'Boxcar2', 'use_boxcar2', 0))
+        BOXCAR2_NOTIFY_ONSNATCH = bool(check_setting_int(CFG, 'Boxcar2', 'boxcar2_notify_onsnatch', 0))
+        BOXCAR2_NOTIFY_ONDOWNLOAD = bool(check_setting_int(CFG, 'Boxcar2', 'boxcar2_notify_ondownload', 0))
+        BOXCAR2_ACCESS_TOKEN = check_setting_str(CFG, 'Boxcar2', 'boxcar2_access_token', '')
+        BOXCAR2_SOUND = check_setting_str(CFG, 'Boxcar2', 'boxcar2_sound', 'default')
 
         CheckSection(CFG, 'Pushover')
         USE_PUSHOVER = bool(check_setting_int(CFG, 'Pushover', 'use_pushover', 0))
         PUSHOVER_NOTIFY_ONSNATCH = bool(check_setting_int(CFG, 'Pushover', 'pushover_notify_onsnatch', 0))
         PUSHOVER_NOTIFY_ONDOWNLOAD = bool(check_setting_int(CFG, 'Pushover', 'pushover_notify_ondownload', 0))
         PUSHOVER_USERKEY = check_setting_str(CFG, 'Pushover', 'pushover_userkey', '')
+        PUSHOVER_PRIORITY = check_setting_int(CFG, 'Pushover', 'pushover_priority', 0)
+        PUSHOVER_DEVICE = check_setting_str(CFG, 'Pushover', 'pushover_device', 'all')
+        PUSHOVER_SOUND = check_setting_str(CFG, 'Pushover', 'pushover_sound', 'pushover')
 
         CheckSection(CFG, 'Pushbullet')
         USE_PUSHBULLET = bool(check_setting_int(CFG, 'Pushbullet', 'use_pushbullet', 0))
@@ -780,6 +813,9 @@ def initialize(consoleLogging=True):
         
         CheckSection(CFG, 'Synology')
         USE_SYNOINDEX = bool(check_setting_int(CFG, 'Synology', 'use_synoindex', 0))
+        SYNOINDEX_NOTIFY_ONSNATCH = bool(check_setting_int(CFG, 'Synology', 'synoindex_notify_onsnatch', 0))
+        SYNOINDEX_NOTIFY_ONDOWNLOAD = bool(check_setting_int(CFG, 'Synology', 'synoindex_notify_ondownload', 0))
+        SYNOINDEX_UPDATE_LIBRARY = bool(check_setting_int(CFG, 'Synology', 'synoindex_update_library', 0))
 
         CheckSection(CFG, 'Trakt')
         USE_TRAKT = bool(check_setting_int(CFG, 'Trakt', 'use_trakt', 0))
@@ -801,7 +837,22 @@ def initialize(consoleLogging=True):
         NMA_NOTIFY_ONSNATCH = bool(check_setting_int(CFG, 'NMA', 'nma_notify_onsnatch', 0))
         NMA_NOTIFY_ONDOWNLOAD = bool(check_setting_int(CFG, 'NMA', 'nma_notify_ondownload', 0))
         NMA_API = check_setting_str(CFG, 'NMA', 'nma_api', '')
-        NMA_PRIORITY = check_setting_str(CFG, 'NMA', 'nma_priority', "0")
+        NMA_PRIORITY = check_setting_int(CFG, 'NMA', 'nma_priority', 0)
+
+        CheckSection(CFG, 'Pushalot')
+        USE_PUSHALOT = bool(check_setting_int(CFG, 'Pushalot', 'use_pushalot', 0))
+        PUSHALOT_NOTIFY_ONSNATCH = bool(check_setting_int(CFG, 'Pushalot', 'pushalot_notify_onsnatch', 0))
+        PUSHALOT_NOTIFY_ONDOWNLOAD = bool(check_setting_int(CFG, 'Pushalot', 'pushalot_notify_ondownload', 0))
+        PUSHALOT_AUTHORIZATIONTOKEN = check_setting_str(CFG, 'Pushalot', 'pushalot_authorizationtoken', '')
+        PUSHALOT_SILENT = bool(check_setting_int(CFG, 'Pushalot', 'pushalot_silent', 0))
+        PUSHALOT_IMPORTANT = bool(check_setting_int(CFG, 'Pushalot', 'pushalot_important', 0))
+
+        CheckSection(CFG, 'Pushbullet')
+        USE_PUSHBULLET = bool(check_setting_int(CFG, 'Pushbullet', 'use_pushbullet', 0))
+        PUSHBULLET_NOTIFY_ONSNATCH = bool(check_setting_int(CFG, 'Pushbullet', 'pushbullet_notify_onsnatch', 0))
+        PUSHBULLET_NOTIFY_ONDOWNLOAD = bool(check_setting_int(CFG, 'Pushbullet', 'pushbullet_notify_ondownload', 0))
+        PUSHBULLET_ACCESS_TOKEN = check_setting_str(CFG, 'Pushbullet', 'pushbullet_access_token', '')
+        PUSHBULLET_DEVICE_IDEN = check_setting_str(CFG, 'Pushbullet', 'pushbullet_device_iden', '')
 
         if not os.path.isfile(CONFIG_FILE):
             logger.log(u"Unable to find '" + CONFIG_FILE + "', all settings will be default!", logger.DEBUG)
@@ -831,6 +882,7 @@ def initialize(consoleLogging=True):
                                    (METADATA_PS3, metadata.ps3),
                                    (METADATA_WDTV, metadata.wdtv),
                                    (METADATA_TIVO, metadata.tivo),
+                                   (METADATA_MEDE8ER, metadata.mede8er)
                                    ]:
 
             (cur_metadata_config, cur_metadata_class) = cur_metadata_tuple
@@ -842,54 +894,61 @@ def initialize(consoleLogging=True):
         newznabProviderList = providers.getNewznabProviderList(NEWZNAB_DATA)
         providerList = providers.makeProviderList()
 
-        # initialize schedulars
-        currentSearchScheduler = scheduler.Scheduler(searchCurrent.CurrentSearcher(),
-                                                     cycleTime=datetime.timedelta(minutes=SEARCH_FREQUENCY),
-                                                     threadName="SEARCH",
-                                                     runImmediately=True)
+        # initialize schedulers
 
-        # the interval for this is stored inside the ShowUpdater class
-        showUpdaterInstance = showUpdater.ShowUpdater()
-        showUpdateScheduler = scheduler.Scheduler(showUpdaterInstance,
-                                               cycleTime=showUpdaterInstance.updateInterval,
-                                               threadName="SHOWUPDATER",
-                                               runImmediately=False)
-
+        # updaters
         versionCheckScheduler = scheduler.Scheduler(versionChecker.CheckVersion(),
                                                      cycleTime=datetime.timedelta(hours=12),
-                                                     threadName="CHECKVERSION",
-                                                     runImmediately=True)
+                                                    threadName="CHECKVERSION"
+                                                    )
 
         showQueueScheduler = scheduler.Scheduler(show_queue.ShowQueue(),
                                                cycleTime=datetime.timedelta(seconds=3),
                                                threadName="SHOWQUEUE",
                                                silent=True)
 
+        showUpdateScheduler = scheduler.Scheduler(showUpdater.ShowUpdater(),
+                                                  cycleTime=datetime.timedelta(hours=1),
+                                                  threadName="SHOWUPDATER",
+                                                  start_time=datetime.time(hour=3)  # 3 AM
+                                                  )
+
+        # searchers
         searchQueueScheduler = scheduler.Scheduler(search_queue.SearchQueue(),
                                                cycleTime=datetime.timedelta(seconds=3),
                                                threadName="SEARCHQUEUE",
-                                               silent=True)
+                                                   silent=True
+                                                   )
 
-        properFinderInstance = properFinder.ProperFinder()
-        properFinderScheduler = scheduler.Scheduler(properFinderInstance,
-                                                     cycleTime=properFinderInstance.updateInterval,
-                                                     threadName="FINDPROPERS",
-                                                     runImmediately=False)
-        if not DOWNLOAD_PROPERS:
-            properFinderScheduler.silent = True
-
-        autoPostProcesserScheduler = scheduler.Scheduler(autoPostProcesser.PostProcesser(),
-                                                     cycleTime=datetime.timedelta(minutes=10),
-                                                     threadName="POSTPROCESSER",
-                                                     runImmediately=True)
-        if not PROCESS_AUTOMATICALLY:
-            autoPostProcesserScheduler.silent = True
+        currentSearchScheduler = scheduler.Scheduler(searchCurrent.CurrentSearcher(),
+                                                     cycleTime=datetime.timedelta(minutes=SEARCH_FREQUENCY),
+                                                     threadName="SEARCH",
+                                                     run_delay=datetime.timedelta(minutes=1)
+                                                     )
 
         backlogSearchScheduler = searchBacklog.BacklogSearchScheduler(searchBacklog.BacklogSearcher(),
                                                                       cycleTime=datetime.timedelta(minutes=get_backlog_cycle_time()),
                                                                       threadName="BACKLOG",
-                                                                      runImmediately=True)
+                                                                      run_delay=datetime.timedelta(minutes=7)
+                                                                      )
+
         backlogSearchScheduler.action.cycleTime = BACKLOG_SEARCH_FREQUENCY
+
+        properFinderScheduler = scheduler.Scheduler(properFinder.ProperFinder(),
+                                                    cycleTime=datetime.timedelta(hours=1),
+                                                     threadName="FINDPROPERS",
+                                                    start_time=datetime.time(hour=1)  # 1 AM
+                                                    )
+
+        # processors
+        autoPostProcesserScheduler = scheduler.Scheduler(autoPostProcesser.PostProcesser(),
+                                                     cycleTime=datetime.timedelta(minutes=10),
+                                                     threadName="POSTPROCESSER",
+                                                         run_delay=datetime.timedelta(minutes=5)
+                                                         )
+
+        if not PROCESS_AUTOMATICALLY:
+            autoPostProcesserScheduler.silent = True
 
         subtitleQueueScheduler = scheduler.Scheduler(subtitle_queue.SubtitleQueue(),
                                                cycleTime=datetime.timedelta(seconds=3),
@@ -1141,6 +1200,7 @@ def save_config():
     new_config['General']['web_username'] = WEB_USERNAME
     new_config['General']['web_password'] = WEB_PASSWORD
     new_config['General']['anon_redirect'] = ANON_REDIRECT
+    new_config['General']['display_all_seasons'] = DISPLAY_ALL_SEASONS
     new_config['General']['use_api'] = int(USE_API)
     new_config['General']['api_key'] = API_KEY
     new_config['General']['enable_https'] = int(ENABLE_HTTPS)
@@ -1173,6 +1233,7 @@ def save_config():
     new_config['General']['metadata_ps3'] = METADATA_PS3
     new_config['General']['metadata_wdtv'] = METADATA_WDTV
     new_config['General']['metadata_tivo'] = METADATA_TIVO
+    new_config['General']['metadata_mede8er'] = METADATA_MEDE8ER
     new_config['General']['subtitle_languages'] = SUBTITLE_LANGUAGES
 
     new_config['General']['cache_dir'] = ACTUAL_CACHE_DIR if ACTUAL_CACHE_DIR else 'cache'
@@ -1180,6 +1241,7 @@ def save_config():
     new_config['General']['tv_download_dir'] = TV_DOWNLOAD_DIR
     new_config['General']['keep_processed_dir'] = int(KEEP_PROCESSED_DIR)
     new_config['General']['move_associated_files'] = int(MOVE_ASSOCIATED_FILES)
+    new_config['General']['filter_associated_files'] = FILTER_ASSOCIATED_FILES
     new_config['General']['process_automatically'] = int(PROCESS_AUTOMATICALLY)
     new_config['General']['rename_episodes'] = int(RENAME_EPISODES)
     new_config['General']['create_missing_show_dirs'] = int(CREATE_MISSING_SHOW_DIRS)
@@ -1221,7 +1283,6 @@ def save_config():
 
     new_config['TORRENTDAY'] = {}
     new_config['TORRENTDAY']['torrentday'] = int(TORRENTDAY)
-    new_config['TORRENTDAY']['torrentday_alt_url'] = int(TORRENTDAY_ALT_URL)
     new_config['TORRENTDAY']['torrentday_username'] = TORRENTDAY_USERNAME
     new_config['TORRENTDAY']['torrentday_password'] = TORRENTDAY_PASSWORD
 
@@ -1299,6 +1360,7 @@ def save_config():
     new_config['SABnzbd']['sab_host'] = SAB_HOST
 
     new_config['NZBget'] = {}
+    new_config['NZBget']['nzbget_username'] = NZBGET_USERNAME
     new_config['NZBget']['nzbget_password'] = NZBGET_PASSWORD
     new_config['NZBget']['nzbget_category'] = NZBGET_CATEGORY
     new_config['NZBget']['nzbget_host'] = NZBGET_HOST
@@ -1314,6 +1376,7 @@ def save_config():
 
     new_config['XBMC'] = {}
     new_config['XBMC']['use_xbmc'] = int(USE_XBMC)
+    new_config['XBMC']['xbmc_always_on'] = int(XBMC_ALWAYS_ON)
     new_config['XBMC']['xbmc_notify_onsnatch'] = int(XBMC_NOTIFY_ONSNATCH)
     new_config['XBMC']['xbmc_notify_ondownload'] = int(XBMC_NOTIFY_ONDOWNLOAD)
     new_config['XBMC']['xbmc_update_library'] = int(XBMC_UPDATE_LIBRARY)
@@ -1345,7 +1408,7 @@ def save_config():
     new_config['Prowl']['prowl_notify_onsnatch'] = int(PROWL_NOTIFY_ONSNATCH)
     new_config['Prowl']['prowl_notify_ondownload'] = int(PROWL_NOTIFY_ONDOWNLOAD)
     new_config['Prowl']['prowl_api'] = PROWL_API
-    new_config['Prowl']['prowl_priority'] = PROWL_PRIORITY
+    new_config['Prowl']['prowl_priority'] = int(PROWL_PRIORITY)
 
     new_config['Twitter'] = {}
     new_config['Twitter']['use_twitter'] = int(USE_TWITTER)
@@ -1355,24 +1418,21 @@ def save_config():
     new_config['Twitter']['twitter_password'] = TWITTER_PASSWORD
     new_config['Twitter']['twitter_prefix'] = TWITTER_PREFIX
 
-    new_config['Boxcar'] = {}
-    new_config['Boxcar']['use_boxcar'] = int(USE_BOXCAR)
-    new_config['Boxcar']['boxcar_notify_onsnatch'] = int(BOXCAR_NOTIFY_ONSNATCH)
-    new_config['Boxcar']['boxcar_notify_ondownload'] = int(BOXCAR_NOTIFY_ONDOWNLOAD)
-    new_config['Boxcar']['boxcar_username'] = BOXCAR_USERNAME
+    new_config['Boxcar2'] = {}
+    new_config['Boxcar2']['use_boxcar2'] = int(USE_BOXCAR2)
+    new_config['Boxcar2']['boxcar2_notify_onsnatch'] = int(BOXCAR2_NOTIFY_ONSNATCH)
+    new_config['Boxcar2']['boxcar2_notify_ondownload'] = int(BOXCAR2_NOTIFY_ONDOWNLOAD)
+    new_config['Boxcar2']['boxcar2_access_token'] = BOXCAR2_ACCESS_TOKEN
+    new_config['Boxcar2']['boxcar2_sound'] = BOXCAR2_SOUND
 
     new_config['Pushover'] = {}
     new_config['Pushover']['use_pushover'] = int(USE_PUSHOVER)
     new_config['Pushover']['pushover_notify_onsnatch'] = int(PUSHOVER_NOTIFY_ONSNATCH)
     new_config['Pushover']['pushover_notify_ondownload'] = int(PUSHOVER_NOTIFY_ONDOWNLOAD)
     new_config['Pushover']['pushover_userkey'] = PUSHOVER_USERKEY
-
-    new_config['Pushbullet'] = {}
-    new_config['Pushbullet']['use_pushbullet'] = int(USE_PUSHBULLET)
-    new_config['Pushbullet']['pushbullet_notify_onsnatch'] = int(PUSHBULLET_NOTIFY_ONSNATCH)
-    new_config['Pushbullet']['pushbullet_notify_ondownload'] = int(PUSHBULLET_NOTIFY_ONDOWNLOAD)
-    new_config['Pushbullet']['pushbullet_apikey'] = PUSHBULLET_APIKEY
-    new_config['Pushbullet']['pushbullet_device'] = PUSHBULLET_DEVICE
+    new_config['Pushover']['pushover_priority'] = int(PUSHOVER_PRIORITY)
+    new_config['Pushover']['pushover_device'] = PUSHOVER_DEVICE
+    new_config['Pushover']['pushover_sound'] = PUSHOVER_SOUND
     
     new_config['Libnotify'] = {}
     new_config['Libnotify']['use_libnotify'] = int(USE_LIBNOTIFY)
@@ -1387,6 +1447,9 @@ def save_config():
 
     new_config['Synology'] = {}
     new_config['Synology']['use_synoindex'] = int(USE_SYNOINDEX)
+    new_config['Synology']['synoindex_notify_onsnatch'] = int(SYNOINDEX_NOTIFY_ONSNATCH)
+    new_config['Synology']['synoindex_notify_ondownload'] = int(SYNOINDEX_NOTIFY_ONDOWNLOAD)
+    new_config['Synology']['synoindex_update_library'] = int(SYNOINDEX_UPDATE_LIBRARY)
 
     new_config['NMJv2'] = {}
     new_config['NMJv2']['use_nmjv2'] = int(USE_NMJv2)
@@ -1404,7 +1467,7 @@ def save_config():
     new_config['pyTivo']['use_pytivo'] = int(USE_PYTIVO)
     new_config['pyTivo']['pytivo_notify_onsnatch'] = int(PYTIVO_NOTIFY_ONSNATCH)
     new_config['pyTivo']['pytivo_notify_ondownload'] = int(PYTIVO_NOTIFY_ONDOWNLOAD)
-    new_config['pyTivo']['pyTivo_update_library'] = int(PYTIVO_UPDATE_LIBRARY)
+    new_config['pyTivo']['pytivo_update_library'] = int(PYTIVO_UPDATE_LIBRARY)
     new_config['pyTivo']['pytivo_host'] = PYTIVO_HOST
     new_config['pyTivo']['pytivo_share_name'] = PYTIVO_SHARE_NAME
     new_config['pyTivo']['pytivo_tivo_name'] = PYTIVO_TIVO_NAME
@@ -1414,7 +1477,22 @@ def save_config():
     new_config['NMA']['nma_notify_onsnatch'] = int(NMA_NOTIFY_ONSNATCH)
     new_config['NMA']['nma_notify_ondownload'] = int(NMA_NOTIFY_ONDOWNLOAD)
     new_config['NMA']['nma_api'] = NMA_API
-    new_config['NMA']['nma_priority'] = NMA_PRIORITY
+    new_config['NMA']['nma_priority'] = int(NMA_PRIORITY)
+
+    new_config['Pushalot'] = {}
+    new_config['Pushalot']['use_pushalot'] = int(USE_PUSHALOT)
+    new_config['Pushalot']['pushalot_notify_onsnatch'] = int(PUSHALOT_NOTIFY_ONSNATCH)
+    new_config['Pushalot']['pushalot_notify_ondownload'] = int(PUSHALOT_NOTIFY_ONDOWNLOAD)
+    new_config['Pushalot']['pushalot_authorizationtoken'] = PUSHALOT_AUTHORIZATIONTOKEN
+    new_config['Pushalot']['pushalot_silent'] = int(PUSHALOT_SILENT)
+    new_config['Pushalot']['pushalot_important'] = int(PUSHALOT_IMPORTANT)
+
+    new_config['Pushbullet'] = {}
+    new_config['Pushbullet']['use_pushbullet'] = int(USE_PUSHBULLET)
+    new_config['Pushbullet']['pushbullet_notify_onsnatch'] = int(PUSHBULLET_NOTIFY_ONSNATCH)
+    new_config['Pushbullet']['pushbullet_notify_ondownload'] = int(PUSHBULLET_NOTIFY_ONDOWNLOAD)
+    new_config['Pushbullet']['pushbullet_access_token'] = PUSHBULLET_ACCESS_TOKEN
+    new_config['Pushbullet']['pushbullet_device_iden'] = PUSHBULLET_DEVICE_IDEN
 
     new_config['Newznab'] = {}
     new_config['Newznab']['newznab_data'] = NEWZNAB_DATA
@@ -1444,13 +1522,13 @@ def launchBrowser(startPort=None):
 
 
 def getEpList(epIDs, showid=None):
-    if epIDs == None or len(epIDs) == 0:
+    if epIDs is None or len(epIDs) == 0:
         return []
 
     query = "SELECT * FROM tv_episodes WHERE tvdbid in (%s)" % (",".join(['?'] * len(epIDs)),)
     params = epIDs
 
-    if showid != None:
+    if showid is not None:
         query += " AND showid = ?"
         params.append(showid)
 

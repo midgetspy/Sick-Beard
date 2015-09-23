@@ -107,14 +107,14 @@ class ManualSearchQueueItem(generic_queue.QueueItem):
             providerModule = foundEpisode.provider
             if not result:
                 ui.notifications.error('Error while attempting to snatch ' + foundEpisode.name + ', check your logs')
-            elif providerModule == None:
+            elif providerModule is None:
                 ui.notifications.error('Provider is configured incorrectly, unable to download')
 
         self.success = result
 
     def finish(self):
         # don't let this linger if something goes wrong
-        if self.success == None:
+        if self.success is None:
             self.success = False
         generic_queue.QueueItem.finish(self)
 
@@ -143,12 +143,12 @@ class RSSSearchQueueItem(generic_queue.QueueItem):
 
     def _changeMissingEpisodes(self):
 
-        logger.log(u"Changing all old missing episodes to status WANTED")
+        logger.log(u"Changing all old missing episodes (UNAIRED) to status WANTED")
 
         curDate = datetime.date.today().toordinal()
 
         myDB = db.DBConnection()
-        sqlResults = myDB.select("SELECT * FROM tv_episodes WHERE status = ? AND airdate < ?", [common.UNAIRED, curDate])
+        sqlResults = myDB.select("SELECT * FROM tv_episodes WHERE status = ? AND season > 0 AND airdate < ?", [common.UNAIRED, curDate])
 
         for sqlEp in sqlResults:
 
@@ -158,7 +158,7 @@ class RSSSearchQueueItem(generic_queue.QueueItem):
                 logger.log(u"ERROR: expected to find a single show matching " + sqlEp["showid"])
                 return None
 
-            if show == None:
+            if show is None:
                 logger.log(u"Unable to find the show with ID " + str(sqlEp["showid"]) + " in your show list! DB value was " + str(sqlEp), logger.ERROR)
                 return None
 
@@ -200,7 +200,7 @@ class BacklogQueueItem(generic_queue.QueueItem):
             statusResults = myDB.select("SELECT status FROM tv_episodes WHERE showid = ? AND airdate >= ? AND airdate <= ?",
                                         [self.show.tvdbid, min_date.toordinal(), max_date.toordinal()])
 
-        anyQualities, bestQualities = common.Quality.splitQuality(self.show.quality)  #@UnusedVariable
+        anyQualities, bestQualities = common.Quality.splitQuality(self.show.quality)  # @UnusedVariable
         self.wantSeason = self._need_any_episodes(statusResults, bestQualities)
 
     def execute(self):
@@ -211,9 +211,11 @@ class BacklogQueueItem(generic_queue.QueueItem):
 
         # download whatever we find
         for curResult in results:
-            search.snatchEpisode(curResult)
-            time.sleep(5)
+            if curResult:
+                search.snatchEpisode(curResult)
+                time.sleep(5)
 
+        logger.log(u"Finished searching for episodes from " + self.show.name + " season " + str(self.segment))
         self.finish()
 
     def _need_any_episodes(self, statusResults, bestQualities):

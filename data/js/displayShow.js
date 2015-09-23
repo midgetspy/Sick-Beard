@@ -2,10 +2,17 @@ $(document).ready(function(){
 
     $('#sbRoot').ajaxEpSearch({'colorRow': true});
 
+    $("#showAllSeasons, a.seasonJump").click(function() {
+        showAllSeasons();
+    });
+
     $('#seasonJump').change(function() {
+        // show hidden seasons first so we can actually go there
+        showAllSeasons();
+
         var id = $(this).val();
         if (id && id != 'jump') {
-            $('html,body').animate({scrollTop: $(id).offset().top},'slow');
+            $('html,body').animate({scrollTop: $(id).offset().top}, 'slow');
             location.hash = id;
         }
         $(this).val('jump');
@@ -14,9 +21,9 @@ $(document).ready(function(){
     $("#prevShow").click(function() {
         var show = $('#pickShow option:selected');
         if (show.prev('option').length < 1){
-            show.parent().children('option:last').attr('selected', 'selected');
+            show.parent().children('option:last').prop('selected', true);
         } else{
-            show.prev('option').attr('selected', 'selected');
+            show.prev('option').prop('selected', true);
         }
         $("#pickShow").change();
     });
@@ -24,9 +31,9 @@ $(document).ready(function(){
     $("#nextShow").click(function() {
         var show = $('#pickShow option:selected');
         if (show.next('option').length < 1) {
-            show.parent().children('option:first').attr('selected', 'selected');
+            show.parent().children('option:first').prop('selected', true);
         } else{
-            show.next('option').attr('selected', 'selected');
+            show.next('option').prop('selected', true);
         }
         $("#pickShow").change();
     });
@@ -113,7 +120,7 @@ $(document).ready(function(){
     // handle the show selection dropbox
     $('#pickShow').change(function() {
         var sbRoot = $('#sbRoot').val();
-        var val = $(this).attr('value');
+        var val = $(this).val();
         if (val == 0) {
             return;
         }
@@ -138,6 +145,14 @@ $(document).ready(function(){
             }
         });
     });
+
+    // hide toggle button and show all season data
+    function showAllSeasons() {
+        if ($('#showAllSeasons').is(":visible")) {
+            $('#showAllSeasons').hide();
+            $('#segment').show();
+        }
+    }
 
     $.fn.showHideRows = function(whichClass) {
 

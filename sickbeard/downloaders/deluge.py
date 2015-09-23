@@ -17,6 +17,7 @@
 # along with Sick Beard.  If not, see <http://www.gnu.org/licenses/>.
 
 import sickbeard
+
 from lib import requests
 from base64 import b64encode
 from sickbeard import logger
@@ -103,7 +104,12 @@ class Deluge:
             ###################################################################################################
             # Attempt to download torrent file.
             try:
-                r =  self.session.get(torrent.url, verify=False)
+                headers = {
+                    'User-Agent': sickbeard.common.USER_AGENT,
+                    'Referer': torrent.url
+                }
+                
+                r =  self.session.get(torrent.url, verify=False, headers=headers, timeout=60)
             except (requests.exceptions.ConnectionError, requests.exceptions.HTTPError), e:
                logger.log("[" + self.name + "] _sendTORRENT() Error grabbing torrent " + torrent.url + " - " + ex(e), logger.ERROR)
                return False

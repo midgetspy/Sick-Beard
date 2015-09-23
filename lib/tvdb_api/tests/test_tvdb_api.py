@@ -99,6 +99,10 @@ class test_tvdb_basic(unittest.TestCase):
             show
         )
 
+    def test_no_season(self):
+        show = self.t['Katekyo Hitman Reborn']
+        print tvdb_api
+        print show[1][1]
 
 class test_tvdb_errors(unittest.TestCase):
     # Used to store the cached instance of Tvdb()

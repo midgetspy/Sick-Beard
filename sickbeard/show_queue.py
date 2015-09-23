@@ -43,7 +43,7 @@ class ShowQueue(generic_queue.GenericQueue):
         return show in [x.show for x in self.queue if x.action_id in actions]
 
     def _isBeingSomethinged(self, show, actions):
-        return self.currentItem != None and show == self.currentItem.show and \
+        return self.currentItem is not None and show == self.currentItem.show and \
                 self.currentItem.action_id in actions
 
     def isInUpdateQueue(self, show):
@@ -68,7 +68,7 @@ class ShowQueue(generic_queue.GenericQueue):
         return self._isBeingSomethinged(show, (ShowQueueActions.RENAME,))
 
     def _getLoadingShowList(self):
-        return [x for x in self.queue + [self.currentItem] if x != None and x.isLoading]
+        return [x for x in self.queue + [self.currentItem] if x is not None and x.isLoading]
 
     loadingShowList = property(_getLoadingShowList)
 
@@ -98,7 +98,7 @@ class ShowQueue(generic_queue.GenericQueue):
             raise exceptions.CantRefreshException("This show is already being refreshed, not refreshing again.")
 
         if (self.isBeingUpdated(show) or self.isInUpdateQueue(show)) and not force:
-            logger.log(u"A refresh was attempted but there is already an update queued or in progress. Since updates do a refres at the end anyway I'm skipping this request.", logger.DEBUG)
+            logger.log(u"A refresh was attempted but there is already an update queued or in progress. Since updates do a refresh at the end anyway I'm skipping this request.", logger.DEBUG)
             return
 
         queueItemObj = QueueItemRefresh(show)
@@ -116,6 +116,7 @@ class ShowQueue(generic_queue.GenericQueue):
         return queueItemObj
 
     def addShow(self, tvdb_id, showDir, default_status=None, quality=None, flatten_folders=None, lang="en"):
+
         queueItemObj = QueueItemAdd(tvdb_id, showDir, default_status, quality, flatten_folders, lang)
 
         self.add_item(queueItemObj)
@@ -131,11 +132,11 @@ class ShowQueueActions:
     RENAME = 5
 
     names = {REFRESH: 'Refresh',
-                    ADD: 'Add',
-                    UPDATE: 'Update',
-                    FORCEUPDATE: 'Force Update',
-                    RENAME: 'Rename',
-                    }
+             ADD: 'Add',
+             UPDATE: 'Update',
+             FORCEUPDATE: 'Force Update',
+             RENAME: 'Rename',
+             }
 
 
 class ShowQueueItem(generic_queue.QueueItem):
@@ -153,7 +154,7 @@ class ShowQueueItem(generic_queue.QueueItem):
         self.show = show
 
     def isInQueue(self):
-        return self in sickbeard.showQueueScheduler.action.queue + [sickbeard.showQueueScheduler.action.currentItem] #@UndefinedVariable
+        return self in sickbeard.showQueueScheduler.action.queue + [sickbeard.showQueueScheduler.action.currentItem]  # @UndefinedVariable
 
     def _getName(self):
         return str(self.show.tvdbid)
@@ -186,7 +187,7 @@ class QueueItemAdd(ShowQueueItem):
         Returns the show name if there is a show object created, if not returns
         the dir that the show is being added to.
         """
-        if self.show == None:
+        if self.show is None:
             return self.showDir
         return self.show.name
 
@@ -197,7 +198,7 @@ class QueueItemAdd(ShowQueueItem):
         Returns True if we've gotten far enough to have a show object, or False
         if we still only know the folder name.
         """
-        if self.show == None:
+        if self.show is None:
             return True
         return False
 
@@ -250,12 +251,15 @@ class QueueItemAdd(ShowQueueItem):
             # set up initial values
             self.show.location = self.showDir
             self.show.quality = self.quality if self.quality else sickbeard.QUALITY_DEFAULT
-            self.show.flatten_folders = self.flatten_folders if self.flatten_folders != None else sickbeard.FLATTEN_FOLDERS_DEFAULT
+            self.show.flatten_folders = self.flatten_folders if self.flatten_folders is not None else sickbeard.FLATTEN_FOLDERS_DEFAULT
             self.show.paused = 0
+            self.show.skip_notices = 0
 
             # be smartish about this
             if self.show.genre and "talk show" in self.show.genre.lower():
                 self.show.air_by_date = 1
+            if self.show.genre and "documentary" in self.show.genre.lower():
+                self.show.air_by_date = 0
 
         except tvdb_exceptions.tvdb_exception, e:
             logger.log(u"Unable to add show due to an error with TVDB: " + ex(e), logger.ERROR)
@@ -314,12 +318,12 @@ class QueueItemAdd(ShowQueueItem):
         if self.default_status != SKIPPED:
             logger.log(u"Setting all episodes to the specified default status: " + str(self.default_status))
             myDB = db.DBConnection()
-            myDB.action("UPDATE tv_episodes SET status = ? WHERE status = ? AND showid = ? AND season != 0", [self.default_status, SKIPPED, self.show.tvdbid])
+            myDB.action("UPDATE tv_episodes SET status = ? WHERE status = ? AND showid = ? AND season > 0", [self.default_status, SKIPPED, self.show.tvdbid])
 
         # if they started with WANTED eps then run the backlog
         if self.default_status == WANTED:
             logger.log(u"Launching backlog for this show since its episodes are WANTED")
-            sickbeard.backlogSearchScheduler.action.searchBacklog([self.show]) #@UndefinedVariable
+            sickbeard.backlogSearchScheduler.action.searchBacklog([self.show])  # @UndefinedVariable
 
         self.show.writeMetadata()
         self.show.populateCache()
@@ -329,7 +333,7 @@ class QueueItemAdd(ShowQueueItem):
         self.finish()
 
     def _finishEarly(self):
-        if self.show != None:
+        if self.show is not None:
             self.show.deleteShow()
 
         self.finish()
@@ -366,7 +370,7 @@ class QueueItemRename(ShowQueueItem):
         logger.log(u"Performing rename on " + self.show.name)
 
         try:
-            show_loc = self.show.location
+            show_loc = self.show.location  # @UnusedVariable
         except exceptions.ShowDirNotFoundException:
             logger.log(u"Can't perform rename on " + self.show.name + " when the show dir is missing.", logger.WARNING)
             return
@@ -432,7 +436,7 @@ class QueueItemUpdate(ShowQueueItem):
             logger.log(u"Unable to get info from TVDB, the show info will not be refreshed: " + ex(e), logger.ERROR)
             TVDBEpList = None
 
-        if TVDBEpList == None:
+        if TVDBEpList is None:
             logger.log(u"No data returned from TVDB, unable to update this show", logger.ERROR)
 
         else:
@@ -461,7 +465,7 @@ class QueueItemUpdate(ShowQueueItem):
             if self.show.tvrid == 0:
                 self.show.setTVRID()
 
-        sickbeard.showQueueScheduler.action.refreshShow(self.show, True) #@UndefinedVariable
+        sickbeard.showQueueScheduler.action.refreshShow(self.show, True)  # @UndefinedVariable
 
 
 class QueueItemForceUpdate(QueueItemUpdate):

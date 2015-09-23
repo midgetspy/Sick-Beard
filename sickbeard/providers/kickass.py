@@ -28,6 +28,8 @@ import sickbeard
 from lib import requests
 from xml.sax.saxutils import escape
 
+import xml.etree.cElementTree as etree
+
 from sickbeard import db
 from sickbeard import logger
 from sickbeard import tvcache
@@ -46,6 +48,7 @@ class KickAssProvider(generic.TorrentProvider):
         self.session = None
         self.supportsBacklog = True
         self.url = "kat.cr"
+        self.namespace = "{http://xmlns.ezrss.it/0.1/}"
         logger.log("[" + self.name + "] initializing...")
         
     ###################################################################################################
@@ -134,51 +137,47 @@ class KickAssProvider(generic.TorrentProvider):
         logger.log("[" + self.name + "] Performing Search: {0}".format(search_params))
         for page in range(1,3):
             searchData = None
-            SearchParameters = {}
+            SearchParameters = { "order":"desc", "page":str(page), "rss":"1" }
             
             if len(sickbeard.KICKASS_ALT_URL):
                 self.url = sickbeard.KICKASS_ALT_URL
-            
-            if len(search_params):
-                SearchParameters["q"] = search_params+" category:tv"
-            else:
-                SearchParameters["q"] = "category:tv"
-                
-            SearchParameters["order"] = "desc"
-            SearchParameters["page"] = str(page)
-            
-            if len(search_params):
-                SearchParameters["field"] = "seeders"
-            else:
-                SearchParameters["field"] = "time_add"
-            
+
             # Make sure the URL is correctly formatted by parsing it (defaults to using https URLs)
             scheme, netloc, path, query, fragment = urlsplit(self.url, scheme="https")
             # Make sure netloc is available, without a scheme in the parsed string it is 
             # recognized as path without a netloc
             if not netloc:
                 netloc = path
-            path = "json.php"
-            query = urllib.urlencode(SearchParameters)
-            searchURL = urlunsplit((scheme, netloc, path, query, fragment))
+                
+            if len(search_params):
+                SearchParameters["field"] = "seeders"
+                path = "usearch/" + urllib.quote(search_params + " category:tv") + "/"
+            else:
+                SearchParameters["field"] = "time_add"
+                path = "usearch/" + urllib.quote("category:tv") + " /"
+            
+            searchURL = urlunsplit((scheme, netloc, path, urllib.urlencode(SearchParameters), fragment))
             searchData = self.getURL(searchURL)
 
-            if searchData:
+            if searchData and searchData.startswith("<?xml"):
                 try:
-                    jdata = json.loads(searchData)
-                except ValueError:
-                    logger.log("[" + self.name + "] _doSearch() invalid data on search page " + str(page))
+                    responseSoup = etree.ElementTree(etree.XML(searchData))
+                except Exception, e:
+                    logger.log("[" + self.name + "] _doSearch() XML error: " + str(e), logger.ERROR)
+                    continue
+
+                try:
+                    torrents = responseSoup.getiterator('item')
+                except Exception, e:
+                    logger.log("[" + self.name + "] _doSearch() XML split error " + str(e), logger.ERROR)
                     continue
                 
-                torrents = jdata.get('list', [0])
-                
-                for torrent in torrents:
-                    item = (torrent['title'].replace('.',' '), torrent['torrentLink'])
-                    logger.log("[" + self.name + "] _doSearch() Title: " + torrent['title'], logger.DEBUG)
-                    results.append(item)
-                    
-        if not len(results):
-            logger.log("[" + self.name + "] _doSearch() No results found.", logger.DEBUG)
+                if type(torrents) is list:
+                    for torrent in torrents:
+                        if torrent.findtext('title') and torrent.findtext('{0}magnetURI'.format(self.namespace)) and torrent.findtext('{0}seeds'.format(self.namespace)):
+                            if int(torrent.findtext('{0}seeds'.format(self.namespace))) >= 1:
+                                item = (show_name_helpers.sanitizeSceneName(torrent.findtext('title')),torrent.findtext('{0}magnetURI'.format(self.namespace)))
+                                results.append(item)
         return results
     
     ###################################################################################################
@@ -191,10 +190,12 @@ class KickAssProvider(generic.TorrentProvider):
             self.session = requests.Session()
             
         if not headers:
-            headers = []
-            
+            headers = {}
+        
+        headers['User-Agent']="SickBeard Torrent Edition."
+        
         try:
-            response = self.session.get(url, verify=False)
+            response = self.session.get(url, verify=False,headers=headers)
         except (requests.exceptions.ConnectionError, requests.exceptions.HTTPError), e:
             logger.log("[" + self.name + "] getURL() Error loading " + self.name + " URL: " + ex(e), logger.ERROR)
             return None
@@ -223,19 +224,19 @@ class KickAssCache(tvcache.TVCache):
     ###################################################################################################
     
     def _getRSSData(self):
-        logger.log("[" + provider.name + "] Retriving RSS")
+        logger.log("[" + self.provider.name + "] Retriving RSS")
         
         xml = "<rss xmlns:atom=\"http://www.w3.org/2005/Atom\" version=\"2.0\">" + \
             "<channel>" + \
-            "<title>" + provider.name + "</title>" + \
-            "<link>" + provider.url + "</link>" + \
+            "<title>" + self.provider.name + "</title>" + \
+            "<link>" + self.provider.url + "</link>" + \
             "<description>torrent search</description>" + \
             "<language>en-us</language>" + \
-            "<atom:link href=\"" + provider.url + "\" rel=\"self\" type=\"application/rss+xml\"/>"
-        data = provider._doSearch("")
+            "<atom:link href=\"" + self.provider.url + "\" rel=\"self\" type=\"application/rss+xml\"/>"
+        data = self.provider._doSearch("")
         if data:
             for title, url in data:
-                xml += "<item>" + "<title>" + escape(title) + "</title>" +  "<link>"+ url + "</link>" + "</item>"
+                xml += "<item>" + "<title>" + escape(title.decode('utf8','ignore')) + "</title>" +  "<link>"+ urllib.quote(url,'/,:') + "</link>" + "</item>"
         xml += "</channel></rss>"
         return xml
     
