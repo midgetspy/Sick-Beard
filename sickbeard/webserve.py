@@ -2503,8 +2503,8 @@ class Home:
 
             # if this routine was called via the mass edit, do not change the options that are not passed
             if not directCall:
-            showObj.air_by_date = air_by_date
-            showObj.lang = tvdb_lang
+                showObj.air_by_date = air_by_date
+                showObj.lang = tvdb_lang
                 showObj.rls_ignore_words = rls_ignore_words.strip()
                 showObj.rls_require_words = rls_require_words.strip()
 

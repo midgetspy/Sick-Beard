@@ -24,7 +24,6 @@ import time
 import sickbeard
 from sickbeard import db, logger, common, exceptions, helpers
 from sickbeard import generic_queue
-from sickbeard import search
 import os.path
 from sickbeard import encodingKludge as ek
 from lib import subliminal
