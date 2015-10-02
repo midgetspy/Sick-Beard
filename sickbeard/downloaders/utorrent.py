@@ -161,5 +161,5 @@ def sendTORRENT(torrent):
             
             params = {'token': auth, 'action': 'setprops', 'hash': torrent_hash, 's': 'seed_ratio', 'v': float(sickbeard.TORRENT_RATIO)*10}
             _sendRequest(session,params,None,"SetRatio(ratio)")
-            logger.log("[uTorrent] Ratio set to " + sickbeard.TORRENT_RATIO + " for torrent with hash " + torrent_hash,logger.DEBUG)
+            logger.log("[uTorrent] Ratio set to " + str(sickbeard.TORRENT_RATIO) + " for torrent with hash " + torrent_hash,logger.DEBUG)
         return True
