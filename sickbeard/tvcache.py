@@ -140,7 +140,7 @@ class TVCache():
         return title.replace(' ', '.')
 
     def _translateLinkURL(self, url):
-        return url.replace('&amp;', '&')
+        return unescape(urllib.unquote(url))
 
     def _parseItem(self, item):
 

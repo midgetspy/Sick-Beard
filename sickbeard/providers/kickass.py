@@ -176,7 +176,7 @@ class KickAssProvider(generic.TorrentProvider):
                     for torrent in torrents:
                         if torrent.findtext('title') and torrent.findtext('{0}magnetURI'.format(self.namespace)) and torrent.findtext('{0}seeds'.format(self.namespace)):
                             if int(torrent.findtext('{0}seeds'.format(self.namespace))) >= 1:
-                                item = (show_name_helpers.sanitizeSceneName(torrent.findtext('title')),torrent.findtext('{0}magnetURI'.format(self.namespace)))
+                                item = (torrent.findtext('title').encode('ascii',errors='ignore'),torrent.findtext('{0}magnetURI'.format(self.namespace)).encode('ascii',errors='ignore'))
                                 results.append(item)
         return results
     
@@ -236,7 +236,7 @@ class KickAssCache(tvcache.TVCache):
         data = self.provider._doSearch("")
         if data:
             for title, url in data:
-                xml += "<item>" + "<title>" + escape(title.decode('utf8','ignore')) + "</title>" +  "<link>"+ urllib.quote(url,'/,:') + "</link>" + "</item>"
+                xml += "<item>" + "<title>" + escape(title) + "</title>" +  "<link>"+ urllib.quote(url,'/,:') + "</link>" + "</item>"
         xml += "</channel></rss>"
         return xml
     
