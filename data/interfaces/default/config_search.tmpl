@@ -184,6 +184,13 @@
                                 </label>
                             </div>
                         </div>
+                        <div class="field-pair">
+                            <input type="checkbox" name="sab_duplicates" class="enabler" id="sab_duplicates" #if $sickbeard.SAB_DUPLICATES then "checked=\"checked\"" else ""# />
+                            <label class="clearfix" for="sab_duplicates">
+                                <span class="component-title">Ignore Duplicate NZBs</span>
+                                <span class="component-desc">Don't download search results already in SABnzbd History</span>
+                            </label>
+                        </div>                        
 
                         <div id="nzbget_settings">
                             <div class="field-pair">
