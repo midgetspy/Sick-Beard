@@ -584,7 +584,7 @@ class TVShow(object):
                     newStatus = DOWNLOADED
 
                 # if it was snatched proper and we found a higher quality one then allow the status change
-                elif oldStatus == SNATCHED_PROPER and oldQuality < newQuality:
+                elif oldStatus == SNATCHED_PROPER and oldQuality <= newQuality:
                     logger.log(u"STATUS: this ep used to be snatched proper with quality " + Quality.qualityStrings[oldQuality] + " but a file exists with quality " + Quality.qualityStrings[newQuality] + " so I'm setting the status to DOWNLOADED", logger.DEBUG)
                     newStatus = DOWNLOADED
 
