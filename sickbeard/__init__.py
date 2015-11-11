@@ -261,6 +261,13 @@ PUSHOVER_PRIORITY = 0
 PUSHOVER_DEVICE = None
 PUSHOVER_SOUND = None
 
+USE_ANDROIDPN = False
+ANDROIDPN_NOTIFY_ONSNATCH = False
+ANDROIDPN_NOTIFY_ONDOWNLOAD = False
+ANDROIDPN_URL = ''
+ANDROIDPN_BROADCAST = 'Y'
+ANDROIDPN_USERNAME = None
+
 USE_LIBNOTIFY = False
 LIBNOTIFY_NOTIFY_ONSNATCH = False
 LIBNOTIFY_NOTIFY_ONDOWNLOAD = False
@@ -363,6 +370,7 @@ def initialize(consoleLogging=True):
                 EXTRA_SCRIPTS, USE_TWITTER, TWITTER_USERNAME, TWITTER_PASSWORD, TWITTER_PREFIX, \
                 USE_BOXCAR2, BOXCAR2_ACCESS_TOKEN, BOXCAR2_NOTIFY_ONDOWNLOAD, BOXCAR2_NOTIFY_ONSNATCH, BOXCAR2_SOUND, \
                 USE_PUSHOVER, PUSHOVER_USERKEY, PUSHOVER_NOTIFY_ONDOWNLOAD, PUSHOVER_NOTIFY_ONSNATCH, PUSHOVER_PRIORITY, PUSHOVER_DEVICE, PUSHOVER_SOUND, \
+                USE_ANDROIDPN, ANDROIDPN_NOTIFY_ONSNATCH, ANDROIDPN_NOTIFY_ONDOWNLOAD, ANDROIDPN_URL, ANDROIDPN_USERNAME, ANDROIDPN_BROADCAST, \
                 USE_LIBNOTIFY, LIBNOTIFY_NOTIFY_ONSNATCH, LIBNOTIFY_NOTIFY_ONDOWNLOAD, USE_NMJ, NMJ_HOST, NMJ_DATABASE, NMJ_MOUNT, USE_NMJv2, NMJv2_HOST, NMJv2_DATABASE, NMJv2_DBLOC, \
                 USE_SYNOINDEX, SYNOINDEX_NOTIFY_ONSNATCH, SYNOINDEX_NOTIFY_ONDOWNLOAD, SYNOINDEX_UPDATE_LIBRARY, \
                 USE_LISTVIEW, METADATA_XBMC, METADATA_XBMC_12PLUS, METADATA_MEDIABROWSER, METADATA_MEDE8ER, METADATA_PS3, metadata_provider_dict, \
@@ -612,6 +620,14 @@ def initialize(consoleLogging=True):
         PUSHOVER_PRIORITY = check_setting_int(CFG, 'Pushover', 'pushover_priority', 0)
         PUSHOVER_DEVICE = check_setting_str(CFG, 'Pushover', 'pushover_device', 'all')
         PUSHOVER_SOUND = check_setting_str(CFG, 'Pushover', 'pushover_sound', 'pushover')
+
+        CheckSection(CFG, 'AndroidPN')
+        USE_ANDROIDPN = bool(check_setting_int(CFG, 'AndroidPN', 'use_androidpn', 0))
+        ANDROIDPN_NOTIFY_ONSNATCH = bool(check_setting_int(CFG, 'AndroidPN', 'androidpn_notify_onsnatch', 0))
+        ANDROIDPN_NOTIFY_ONDOWNLOAD = bool(check_setting_int(CFG, 'AndroidPN', 'androidpn_notify_ondownload', 0))
+        ANDROIDPN_URL = check_setting_str(CFG, 'AndroidPN', 'androidpn_url', '')
+        ANDROIDPN_USERNAME = check_setting_str(CFG, 'AndroidPN', 'androidpn_username', '')
+        ANDROIDPN_BROADCAST = check_setting_str(CFG, 'AndroidPN', 'androidpn_broadcast', 'Y')
 
         CheckSection(CFG, 'Libnotify')
         USE_LIBNOTIFY = bool(check_setting_int(CFG, 'Libnotify', 'use_libnotify', 0))
@@ -1161,6 +1177,14 @@ def save_config():
     new_config['Pushover']['pushover_priority'] = int(PUSHOVER_PRIORITY)
     new_config['Pushover']['pushover_device'] = PUSHOVER_DEVICE
     new_config['Pushover']['pushover_sound'] = PUSHOVER_SOUND
+
+    new_config['AndroidPN'] = {}
+    new_config['AndroidPN']['use_androidpn'] = int(USE_ANDROIDPN)
+    new_config['AndroidPN']['androidpn_notify_onsnatch'] = int(ANDROIDPN_NOTIFY_ONSNATCH)
+    new_config['AndroidPN']['androidpn_notify_ondownload'] = int(ANDROIDPN_NOTIFY_ONDOWNLOAD)
+    new_config['AndroidPN']['androidpn_url'] = ANDROIDPN_URL
+    new_config['AndroidPN']['androidpn_username'] = ANDROIDPN_USERNAME
+    new_config['AndroidPN']['androidpn_broadcast'] = ANDROIDPN_BROADCAST
 
     new_config['Libnotify'] = {}
     new_config['Libnotify']['use_libnotify'] = int(USE_LIBNOTIFY)

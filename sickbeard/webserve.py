@@ -1219,6 +1219,13 @@ class ConfigNotifications:
         sickbeard.PUSHOVER_DEVICE = pushover_device
         sickbeard.PUSHOVER_SOUND = pushover_sound
 
+        sickbeard.USE_ANDROIDPN = config.checkbox_to_value(use_androidpn)
+        sickbeard.ANDROIDPN_NOTIFY_ONSNATCH = config.checkbox_to_value(androidpn_notify_onsnatch)
+        sickbeard.ANDROIDPN_NOTIFY_ONDOWNLOAD = config.checkbox_to_value(androidpn_notify_ondownload)
+        sickbeard.ANDROIDPN_URL = androidpn_url
+        sickbeard.ANDROIDPN_USERNAME = androidpn_username
+        sickbeard.ANDROIDPN_BROADCAST = androidpn_broadcast
+
         sickbeard.USE_BOXCAR2 = config.checkbox_to_value(use_boxcar2)
         sickbeard.BOXCAR2_NOTIFY_ONSNATCH = config.checkbox_to_value(boxcar2_notify_onsnatch)
         sickbeard.BOXCAR2_NOTIFY_ONDOWNLOAD = config.checkbox_to_value(boxcar2_notify_ondownload)
