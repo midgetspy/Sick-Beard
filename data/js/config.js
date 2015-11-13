@@ -8,6 +8,13 @@ $(document).ready(function () {
         }
     });
 
+    $(".disabler").each(function () {
+    	if ($(this).prop('checked')) {
+	    $('#content_' + $(this).attr('id')).hide();
+	}
+    });
+
+
     $(".enabler").click(function () {
         if ($(this).prop('checked')) {
             $('#content_' + $(this).attr('id')).fadeIn("fast", "linear");
