@@ -16,6 +16,14 @@ $(document).ready(function () {
         }
     });
 
+    $(".disabler").click(function () {
+        if ($(this).prop('checked')) {
+            $('#content_' + $(this).attr('id')).fadeOut("fast", "linear");
+        } else {
+            $('#content_' + $(this).attr('id')).fadeIn("fast", "linear");
+        }
+    });
+
     // bind 'myForm' and provide a simple callback function 
     $('#configForm').ajaxForm({
         beforeSubmit: function () {

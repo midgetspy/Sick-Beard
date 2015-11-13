@@ -1145,6 +1145,7 @@ class ConfigNotifications:
                               pytivo_host=None, pytivo_share_name=None, pytivo_tivo_name=None,
                           use_nma=None, nma_notify_onsnatch=None, nma_notify_ondownload=None, nma_api=None, nma_priority=None,
                           use_pushalot=None, pushalot_notify_onsnatch=None, pushalot_notify_ondownload=None, pushalot_authorizationtoken=None, pushalot_silent=None, pushalot_important=None,
+                          use_androidpn=None, androidpn_notify_onsnatch=None, androidpn_notify_ondownload=None, androidpn_url=None, androidpn_username=None, androidpn_broadcast=None,
                           use_pushbullet=None, pushbullet_notify_onsnatch=None, pushbullet_notify_ondownload=None, pushbullet_access_token=None, pushbullet_device_iden=None, pushbullet_device_list=None
                           ):
 
@@ -2108,6 +2109,16 @@ class Home:
             return "Test NMA notice sent successfully"
         else:
             return "Test NMA notice failed"
+
+    @cherrypy.expose
+    def testAndroidPN(self, url=None, username=None, broadcast=None):
+        cherrypy.response.headers['Cache-Control'] = "max-age=0,no-cache,no-store"
+
+        result = notifiers.androidpn_notifier.test_notify(url, username, broadcast)
+        if result:
+            return "Test AndroidPN notice sent successfully"
+        else:
+            return "Test AndroidPN notice failed"
 
     @cherrypy.expose
     def testPushalot(self, authtoken=None, silent=None, important=None):

@@ -309,6 +309,23 @@ $(document).ready(function () {
             });
     });
 
+    $("#testAndroidPN").click(function () {
+    	var androidpn_url = $.trim($("#androidpn_url").val());
+	var androidpn_username = $.trim($("#androidpn_username").val());
+	var androidpn_broadcast = ($("#androidpn_broadcast").prop('checked') == true) ? 'Y' : 'N';
+	if (!androidpn_url) {
+		$("#testAndroidPN-result").html("Please fill out the necessary fields above.");
+		return;
+	}
+	$(this).prop("disabled", true);
+        $("#testAndroidPN-result").html(loading);
+        $.get(sbRoot + "/home/testAndroidPN", {'url': androidpn_url, 'username': androidpn_username, 'broadcast': androidpn_broadcast})
+            .done(function (data) {
+                $("#testAndroidPN-result").html(data);
+                $("#testAndroidPN").prop("disabled", false);
+            });
+    });
+
     $("#testPushalot").click(function () {
         var pushalot_authorizationtoken = $.trim($("#pushalot_authorizationtoken").val());
         var pushalot_silent = ($("#pushalot_silent").prop('checked') == true) ? 'True' : 'False';

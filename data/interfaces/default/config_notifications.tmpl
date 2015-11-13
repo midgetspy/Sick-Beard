@@ -1075,12 +1075,21 @@
                                     <input type="text" name="androidpn_url" id="androidpn_url" value="$sickbeard.ANDROIDPN_URL" size="35" />
                                 </label>
                             </div>
-                            <div class="field-pair">
-                                <label class="nocheck clearfix">
-                                    <span class="component-title">AndroidPN Target</span>
-                                    <input type="hidden" name="androidpn_username" id="androidpn_username" value="$sickbeard.ANDROIDPN_USERNAME" size="35" />
-                                </label>
-                            </div>
+			    <div class="field-pair">
+			    	<input type="checkbox" class="disabler" name="androidpn_broadcast" id="androidpn_broadcast" #if $sickbeard.ANDROIDPN_BROADCAST then "checked=\"checked\"" else ""# />
+				<label class="clearfix" for="androidpn_broadcast">
+				    <span class="component-title">AndroidPN Broadcast</span>
+				    <span class="component-desc">Broadcast to all users</span>
+				</label>
+			    </div>
+			    <div id="content_androidpn_broadcast">
+				    <div class="field-pair">
+					<label class="nocheck clearfix">
+					    <span class="component-title">AndroidPN Username</span>
+					    <input type="text" name="androidpn_username" id="androidpn_username" value="$sickbeard.ANDROIDPN_USERNAME" size="35" />
+					</label>
+				    </div>
+			    </div><!-- /content_androidpn_broadcast //-->
                             <div class="testNotification" id="testAndroidPN-result">Click below to test.</div>
                             <input type="button" class="btn" value="Test AndroidPN" id="testAndroidPN" />
                             <input type="submit" class="btn config_submitter" value="Save Changes" />
