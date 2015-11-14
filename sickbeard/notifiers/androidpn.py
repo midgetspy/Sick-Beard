@@ -120,7 +120,7 @@ class AndroidPNNotifier:
         if sickbeard.ANDROIDPN_NOTIFY_ONDOWNLOAD:
             self._notify(notifyStrings[NOTIFY_DOWNLOAD], ep_name)
 
-    def test_notify(self, userKey, priority, device, sound):
+    def test_notify(self, url, username, broadcast):
         return self._notify("Test", "This is a test notification from Sick Beard", url, username, broadcast, force=True)
 
     def update_library(self, ep_obj=None):
