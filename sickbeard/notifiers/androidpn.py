@@ -103,6 +103,10 @@ class AndroidPNNotifier:
             url = sickbeard.ANDROIDPN_URL
         if not broadcast:
             broadcast = sickbeard.ANDROIDPN_BROADCAST
+            if broadcast:
+                broadcast = 'Y'
+            else:
+                broadcast = 'N'
 
         logger.log(u"ANDROIDPN: Sending notice with details: title=\"%s\", message=\"%s\", username=%s, url=%s, broadcast=%s" % (title, message, username, url, broadcast), logger.DEBUG)
 
