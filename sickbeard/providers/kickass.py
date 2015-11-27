@@ -48,7 +48,7 @@ class KickAssProvider(generic.TorrentProvider):
         self.session = None
         self.supportsBacklog = True
         self.url = "kat.cr"
-        self.namespace = "{http://xmlns.ezrss.it/0.1/}"
+        self.namespace = "{//kastatic.com/xmlns/0.1/}"
         logger.log("[" + self.name + "] initializing...")
         
     ###################################################################################################
