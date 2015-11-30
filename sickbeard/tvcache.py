@@ -20,6 +20,9 @@ import time
 import datetime
 import sqlite3
 
+import urllib
+from xml.sax.saxutils import unescape
+
 import sickbeard
 
 from sickbeard import db
