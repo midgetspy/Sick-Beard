@@ -18,7 +18,6 @@
 # along with Sick Beard.  If not, see <http://www.gnu.org/licenses/>.
 ###################################################################################################
 
-import json
 import urllib
 from urlparse import urlsplit, urlunsplit
 import generic

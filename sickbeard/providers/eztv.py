@@ -25,7 +25,6 @@ import datetime
 import sickbeard
 
 from lib import requests
-from xml.sax.saxutils import escape
 
 from sickbeard import db
 from sickbeard import logger
@@ -131,7 +130,6 @@ class EZTVProvider(generic.TorrentProvider):
     ###################################################################################################
 
     def _doSearch(self, search_params, show=None):
-        results = []
         logger.log("[" + self.name + "] Performing Search: {0}".format(search_params.replace('.', ' ')))
         searchUrl = self.url + "search/" + urllib.quote(search_params.replace('.', ' '))
         return self.parseResults(searchUrl)
