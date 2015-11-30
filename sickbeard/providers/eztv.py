@@ -20,12 +20,9 @@
 
 import re
 import urllib
-from urlparse import urlsplit, urlunsplit
 import generic
 import datetime
 import sickbeard
-
-import xml.etree.cElementTree as etree
 
 from lib import requests
 from xml.sax.saxutils import escape
@@ -39,7 +36,8 @@ from sickbeard.common import Overview
 from sickbeard import show_name_helpers
 
 class EZTVProvider(generic.TorrentProvider):
-  ###################################################################################################
+
+    ###################################################################################################
     def __init__(self):
         generic.TorrentProvider.__init__(self, "EZTV")
         self.cache = EZTVCache(self)
@@ -49,7 +47,7 @@ class EZTVProvider(generic.TorrentProvider):
         self.url = "https://eztv.ag/"
         self.namespace = None
         logger.log("[" + self.name + "] initializing...")
-        
+
     ###################################################################################################
 
     def isEnabled(self):
@@ -134,19 +132,19 @@ class EZTVProvider(generic.TorrentProvider):
 
     def _doSearch(self, search_params, show=None):
         results = []
-        logger.log("[" + self.name + "] Performing Search: {0}".format(search_params.replace('.',' ')))
-        searchUrl = self.url + "search/" + urllib.quote(search_params.replace('.',' '))
+        logger.log("[" + self.name + "] Performing Search: {0}".format(search_params.replace('.', ' ')))
+        searchUrl = self.url + "search/" + urllib.quote(search_params.replace('.', ' '))
         return self.parseResults(searchUrl)
 
     ###################################################################################################
-    
+
     def parseResults(self, searchUrl):
         data = self.getURL(searchUrl)
         results = []
         if data:
-            srgx = re.compile('class="epinfo">(?P<title>.*?)</a>.*?<a href="magnet:(?P<url>.*?)"' , re.MULTILINE|re.DOTALL)
+            srgx = re.compile('class="epinfo">(?P<title>.*?)</a>.*?<a href="magnet:(?P<url>.*?)"', re.MULTILINE | re.DOTALL)
             for torrent in srgx.finditer(data):
-                item = (torrent.group('title').replace('.',' '), "magnet:" + torrent.group('url'))
+                item = (torrent.group('title').replace('.', ' '), "magnet:" + torrent.group('url'))
                 results.append(item)
             if len(results):
                 logger.log("[" + self.name + "] parseResults() Some results found.")
@@ -155,26 +153,26 @@ class EZTVProvider(generic.TorrentProvider):
         else:
             logger.log("[" + self.name + "] parseResults() Error no data returned!!")
         return results
-   
-   ###################################################################################################
-   
+
+    ###################################################################################################
+
     def getURL(self, url, headers=None):
         response = None
-            
+
         try:
             response = self.session.get(url, verify=False)
         except (requests.exceptions.ConnectionError, requests.exceptions.HTTPError), e:
             logger.log("[" + self.name + "] getURL() Error loading " + self.name + " URL: " + ex(e), logger.ERROR)
             return None
-        
-        if response.status_code not in [200,302,303]:
-            logger.log("[" + self.name + "] getURL() requested URL - " + url +" returned status code is " + str(response.status_code), logger.ERROR)
+
+        if response.status_code not in [200, 302, 303]:
+            logger.log("[" + self.name + "] getURL() requested URL - " + url + " returned status code is " + str(response.status_code), logger.ERROR)
             return None
-    
+
         return response.content
-    
+
     ###################################################################################################
-    
+
 class EZTVCache(tvcache.TVCache):
 
     ###################################################################################################
