@@ -25,10 +25,11 @@ import generic
 import datetime
 import sickbeard
 
-from lib import requests
-from xml.sax.saxutils import escape
-
 import xml.etree.cElementTree as etree
+
+from lib import requests
+from StringIO import StringIO
+from xml.sax.saxutils import escape
 
 from sickbeard import db
 from sickbeard import logger
@@ -48,7 +49,7 @@ class KickAssProvider(generic.TorrentProvider):
         self.session = None
         self.supportsBacklog = True
         self.url = "kat.cr"
-        self.namespace = "{//kastatic.com/xmlns/0.1/}"
+        self.namespace = None
         logger.log("[" + self.name + "] initializing...")
         
     ###################################################################################################
@@ -160,6 +161,12 @@ class KickAssProvider(generic.TorrentProvider):
             searchData = self.getURL(searchURL)
 
             if searchData and searchData.startswith("<?xml"):
+                
+                try:
+                    self.namespace = '{' + str(tuple(elem[1] for (event, elem) in etree.iterparse(StringIO(searchData),("start-ns",)))[0]) + '}'
+                except Exception,e:
+                    logger.log("[" + self.name + "] _doSearch() XML error: Unable to extract Name Space, search may fail.. " + str(e), logger.WARNING)
+                    
                 try:
                     responseSoup = etree.ElementTree(etree.XML(searchData))
                 except Exception, e:
