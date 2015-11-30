@@ -1117,6 +1117,8 @@ class ConfigProviders:
                 sickbeard.OMGWTFNZBS = curEnabled
             elif curProvider == 'ezrss':
                 sickbeard.EZRSS = curEnabled
+            elif curProvider == 'eztv':
+                sickbeard.EZTV = curEnabled
             elif curProvider == 'hdbits':
                 sickbeard.HDBITS = curEnabled
             elif curProvider == 'kickass':
