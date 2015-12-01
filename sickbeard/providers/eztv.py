@@ -25,6 +25,7 @@ import datetime
 import sickbeard
 
 from lib import requests
+from xml.sax.saxutils import escape
 
 from sickbeard import db
 from sickbeard import logger
@@ -44,7 +45,6 @@ class EZTVProvider(generic.TorrentProvider):
         self.session = requests.Session()
         self.supportsBacklog = True
         self.url = "https://eztv.ag/"
-        self.namespace = None
         logger.log("[" + self.name + "] initializing...")
 
     ###################################################################################################
@@ -182,10 +182,20 @@ class EZTVCache(tvcache.TVCache):
     ###################################################################################################
 
     def _getRSSData(self):
-        xml = None
-        self.rss_url = provider.url + "ezrss.xml"
-        logger.log("[" + provider.name + "] RSS URL - {0}".format(self.rss_url))
-        xml = provider.getURL(self.rss_url)
+        logger.log("[" + self.provider.name + "] Retriving RSS")
+
+        xml = "<rss xmlns:atom=\"http://www.w3.org/2005/Atom\" version=\"2.0\">" + \
+            "<channel>" + \
+            "<title>" + self.provider.name + "</title>" + \
+            "<link>" + self.provider.url + "</link>" + \
+            "<description>torrent search</description>" + \
+            "<language>en-us</language>" + \
+            "<atom:link href=\"" + self.provider.url + "\" rel=\"self\" type=\"application/rss+xml\"/>"
+        data = self.provider._doSearch("")
+        if data:
+            for title, url in data:
+                xml += "<item>" + "<title>" + escape(title) + "</title>" + "<link>" + urllib.quote(url, '/,:') + "</link>" + "</item>"
+        xml += "</channel></rss>"
         return xml
 
     ###################################################################################################
