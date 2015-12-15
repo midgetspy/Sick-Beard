@@ -88,6 +88,14 @@
                         </div>
 
                         <div class="field-pair">
+                            <input type="checkbox" name="use_ascii_filenames" id="use_ascii_filenames" #if $sickbeard.USE_ASCII_FILENAMES == True then "checked=\"checked\"" else ""# />
+                            <label class="clearfix" for="use_ascii_filenames">
+                                <span class="component-title">Use simple filenames</span>
+                                <span class="component-desc">Replace unicode characters with their ASCII equivalent from episodes filename.</span>
+                            </label>
+                        </div>
+
+                        <div class="field-pair">
                             <input type="checkbox" name="process_automatically" id="process_automatically" #if $sickbeard.PROCESS_AUTOMATICALLY == True then "checked=\"checked\"" else ""# />
                             <label class="clearfix" for="process_automatically">
                                 <span class="component-title">Scan and Process</span>

@@ -185,6 +185,7 @@ TORRENT_DIR = None
 ADD_SHOWS_WO_DIR = None
 CREATE_MISSING_SHOW_DIRS = None
 RENAME_EPISODES = False
+USE_ASCII_FILENAMES = False
 PROCESS_AUTOMATICALLY = False
 KEEP_PROCESSED_DIR = False
 MOVE_ASSOCIATED_FILES = False
@@ -372,7 +373,7 @@ def initialize(consoleLogging=True):
                 KEEP_PROCESSED_DIR, TV_DOWNLOAD_DIR, TVDB_BASE_URL, MIN_SEARCH_FREQUENCY, \
                 showQueueScheduler, searchQueueScheduler, ROOT_DIRS, CACHE_DIR, ACTUAL_CACHE_DIR, TVDB_API_PARMS, \
                 NAMING_PATTERN, NAMING_MULTI_EP, NAMING_FORCE_FOLDERS, NAMING_ABD_PATTERN, NAMING_CUSTOM_ABD, \
-                RENAME_EPISODES, properFinderScheduler, PROVIDER_ORDER, autoPostProcesserScheduler, \
+                RENAME_EPISODES, USE_ASCII_FILENAMES, properFinderScheduler, PROVIDER_ORDER, autoPostProcesserScheduler, \
                 WOMBLE, OMGWTFNZBS, OMGWTFNZBS_USERNAME, OMGWTFNZBS_APIKEY, providerList, newznabProviderList, \
                 EXTRA_SCRIPTS, USE_TWITTER, TWITTER_USERNAME, TWITTER_PASSWORD, TWITTER_PREFIX, \
                 USE_BOXCAR2, BOXCAR2_ACCESS_TOKEN, BOXCAR2_NOTIFY_ONDOWNLOAD, BOXCAR2_NOTIFY_ONSNATCH, BOXCAR2_SOUND, \
@@ -490,6 +491,7 @@ def initialize(consoleLogging=True):
         TV_DOWNLOAD_DIR = check_setting_str(CFG, 'General', 'tv_download_dir', '')
         PROCESS_AUTOMATICALLY = check_setting_int(CFG, 'General', 'process_automatically', 0)
         RENAME_EPISODES = check_setting_int(CFG, 'General', 'rename_episodes', 1)
+        USE_ASCII_FILENAMES = check_setting_int(CFG, 'General', 'use_ascii_filenames', 0)
         KEEP_PROCESSED_DIR = check_setting_int(CFG, 'General', 'keep_processed_dir', 1)
         MOVE_ASSOCIATED_FILES = check_setting_int(CFG, 'General', 'move_associated_files', 0)
         FILTER_ASSOCIATED_FILES = check_setting_str(CFG, 'General', 'filter_associated_files', '')
@@ -1072,6 +1074,7 @@ def save_config():
     new_config['General']['filter_associated_files'] = FILTER_ASSOCIATED_FILES
     new_config['General']['process_automatically'] = int(PROCESS_AUTOMATICALLY)
     new_config['General']['rename_episodes'] = int(RENAME_EPISODES)
+    new_config['General']['use_ascii_filenames'] = int(USE_ASCII_FILENAMES)
     new_config['General']['create_missing_show_dirs'] = int(CREATE_MISSING_SHOW_DIRS)
     new_config['General']['add_shows_wo_dir'] = int(ADD_SHOWS_WO_DIR)
 
