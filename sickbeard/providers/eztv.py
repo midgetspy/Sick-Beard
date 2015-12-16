@@ -1,6 +1,6 @@
-###################################################################################################
+##################################################################################################
 # Author: Jodi Jones <venom@gen-x.co.nz>
-# URL: http://code.google.com/p/sickbeard/
+# URL: https://github.com/VeNoMouS/Sick-Beard
 #
 # This file is part of Sick Beard.
 #
@@ -18,51 +18,55 @@
 # along with Sick Beard.  If not, see <http://www.gnu.org/licenses/>.
 ###################################################################################################
 
-import datetime
+import re
+import urllib
 import generic
-import json
+import datetime
 import sickbeard
 
 from lib import requests
+from xml.sax.saxutils import escape
 
-from operator import itemgetter
-from sickbeard.common import Quality
-from sickbeard import logger
-from sickbeard import show_name_helpers
 from sickbeard import db
-from sickbeard.common import Overview
+from sickbeard import logger
+from sickbeard import tvcache
 from sickbeard.exceptions import ex
+from sickbeard.common import Quality
+from sickbeard.common import Overview
+from sickbeard import show_name_helpers
 
-class BTDIGGProvider(generic.TorrentProvider):
+class EZTVProvider(generic.TorrentProvider):
 
     ###################################################################################################
-
     def __init__(self):
-        generic.TorrentProvider.__init__(self, "BTDigg")
-        self.name = "BTDigg"
-        self.session = None
+        generic.TorrentProvider.__init__(self, "EZTV")
+        self.cache = EZTVCache(self)
+        self.name = "EZTV"
+        self.session = requests.Session()
         self.supportsBacklog = True
-        self.url = 'https://api.btdigg.org/'
+        self.url = "https://eztv.ag/"
         logger.log("[" + self.name + "] initializing...")
-
-        if not self.session:
-            self.session = requests.Session()
 
     ###################################################################################################
 
     def isEnabled(self):
-        return sickbeard.BTDIGG
+        return sickbeard.EZTV
 
     ###################################################################################################
 
     def imageName(self):
-        return 'btdigg.png'
+        return 'eztv.png'
 
     ###################################################################################################
 
     def getQuality(self, item):
         quality = Quality.nameQuality(item[0])
         return quality
+
+    ###################################################################################################
+
+    def _get_title_and_url(self, item):
+        return item
 
     ###################################################################################################
 
@@ -112,6 +116,7 @@ class BTDIGGProvider(generic.TorrentProvider):
 
         if not ep_obj:
             return []
+
         if ep_obj.show.air_by_date:
             for show_name in set(show_name_helpers.allPossibleShowNames(ep_obj.show)):
                 ep_string = show_name_helpers.sanitizeSceneName(show_name) + ' ' + str(ep_obj.airdate).replace('-', '.')
@@ -125,47 +130,24 @@ class BTDIGGProvider(generic.TorrentProvider):
     ###################################################################################################
 
     def _doSearch(self, search_params, show=None):
-        search_params = search_params.replace('+', ' ')
-        logger.log("[" + self.name + "] Performing Search: {0}".format(search_params))
-        searchUrl = self.url + "api/private-341ada3245790954/s02?q=" + search_params + "&p=0&order=0"
+        logger.log("[" + self.name + "] Performing Search: {0}".format(search_params.replace('.', ' ')))
+        searchUrl = self.url + "search/" + urllib.quote(search_params.replace('.', ' '))
         return self.parseResults(searchUrl)
-
-    ###################################################################################################
-
-    def _get_title_and_url(self, item):
-        return item
 
     ###################################################################################################
 
     def parseResults(self, searchUrl):
         data = self.getURL(searchUrl)
         results = []
-        tmp_results = []
         if data:
-            logger.log("[" + self.name + "] parseResults() URL: " + searchUrl, logger.DEBUG)
-            jdata = json.load(data)
-            for torrent in sorted(jdata, key=itemgetter('reqs'), reverse=True):
-                found = 0
-
-                if torrent['ff'] > 0.0:
-                    continue
-
-                torrent['name'] = torrent['name'].replace('|', '').replace('.', ' ')
-
-                item = (torrent['name'], torrent['magnet'], torrent['reqs'])
-                for r in tmp_results:
-                    if r[0].lower() == torrent['name'].lower():
-                        found = 1
-                        if r[2] < torrent['reqs']:
-                            tmp_results[tmp_results.index(r)] = item
-
-                if not found:
-                    tmp_results.append(item)
-                logger.log("[" + self.name + "] parseResults() Title: " + torrent['name'], logger.DEBUG)
-
-            for r in tmp_results:
-                item = (r[0], r[1])
+            srgx = re.compile('class="epinfo">(?P<title>.*?)</a>.*?<a href="magnet:(?P<url>.*?)"', re.MULTILINE | re.DOTALL)
+            for torrent in srgx.finditer(data):
+                item = (torrent.group('title').replace('.', ' '), "magnet:" + torrent.group('url'))
                 results.append(item)
+            if len(results):
+                logger.log("[" + self.name + "] parseResults() Some results found.")
+            else:
+                logger.log("[" + self.name + "] parseResults() No results found.")
         else:
             logger.log("[" + self.name + "] parseResults() Error no data returned!!")
         return results
@@ -173,30 +155,49 @@ class BTDIGGProvider(generic.TorrentProvider):
     ###################################################################################################
 
     def getURL(self, url, headers=None):
-        logger.log("[" + self.name + "] getURL() retrieving URL: " + url, logger.DEBUG)
         response = None
 
-        if not headers:
-            headers = {}
-
-        headers['User-Agent'] = sickbeard.common.USER_AGENT
-
         try:
-            response = self.session.get(url, verify=False, headers=headers)
+            response = self.session.get(url, verify=False)
         except (requests.exceptions.ConnectionError, requests.exceptions.HTTPError), e:
             logger.log("[" + self.name + "] getURL() Error loading " + self.name + " URL: " + ex(e), logger.ERROR)
             return None
 
-        if response.status_code not in [200, 302, 303, 404]:
-            # response did not return an acceptable result
+        if response.status_code not in [200, 302, 303]:
             logger.log("[" + self.name + "] getURL() requested URL - " + url + " returned status code is " + str(response.status_code), logger.ERROR)
-            return None
-        if response.status_code in [404]:
-            # response returned an empty result
             return None
 
         return response.content
 
     ###################################################################################################
 
-provider = BTDIGGProvider()
+class EZTVCache(tvcache.TVCache):
+
+    ###################################################################################################
+
+    def __init__(self, provider):
+        tvcache.TVCache.__init__(self, provider)
+        self.minTime = 15
+
+    ###################################################################################################
+
+    def _getRSSData(self):
+        logger.log("[" + self.provider.name + "] Retriving RSS")
+
+        xml = "<rss xmlns:atom=\"http://www.w3.org/2005/Atom\" version=\"2.0\">" + \
+            "<channel>" + \
+            "<title>" + self.provider.name + "</title>" + \
+            "<link>" + self.provider.url + "</link>" + \
+            "<description>torrent search</description>" + \
+            "<language>en-us</language>" + \
+            "<atom:link href=\"" + self.provider.url + "\" rel=\"self\" type=\"application/rss+xml\"/>"
+        data = self.provider._doSearch("")
+        if data:
+            for title, url in data:
+                xml += "<item>" + "<title>" + escape(title) + "</title>" + "<link>" + urllib.quote(url, '/,:') + "</link>" + "</item>"
+        xml += "</channel></rss>"
+        return xml
+
+    ###################################################################################################
+
+provider = EZTVProvider()

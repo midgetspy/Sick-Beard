@@ -185,9 +185,9 @@ class TORRENTZProvider(generic.TorrentProvider):
                 if type(torrents) is list:
                     for torrent in torrents:
                         if torrent.findtext('guid') and torrent.findtext('title'):
-                            magnet = "magnet:?xt=urn:btih:" + torrent.findtext('guid').strip(self.url) + "&dn=" + self._sanitizeName(torrent.findtext('title')) + ".torrent"
-                            item = (self._sanitizeName(torrent.findtext('title')),magnet)
-                            results.append(item)
+                            title = torrent.findtext('title').encode('ascii',errors='ignore')
+                            magnet = "magnet:?xt=urn:btih:" + re.sub(self.url + '|' + self.url.replace('s:',':'),'',torrent.findtext('guid')) + "&dn=" + title + ".torrent"
+                            results.append((title,magnet))
             time.sleep(1)
         return results
         
@@ -251,7 +251,7 @@ class TORRENTZCache(tvcache.TVCache):
         "<atom:link href=\"" + provider.url + "\" rel=\"self\" type=\"application/rss+xml\"/>"
         
         for title, url in searchData:
-            xml += "<item>" + "<title>" + escape(title.decode('utf8','ignore')) + "</title>" +  "<link>"+ urllib.quote(url,'/,:') + "</link>" + "</item>"
+            xml += "<item>" + "<title>" + escape(title) + "</title>" +  "<link>"+ urllib.quote(url,'/,:') + "</link>" + "</item>"
         xml += "</channel></rss>"
         return xml
 

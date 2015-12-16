@@ -34,7 +34,7 @@ from threading import Lock
 # apparently py2exe won't build these unless they're imported somewhere
 from sickbeard import providers, metadata
 
-from providers import ezrss, tvtorrents, torrentleech, btn, newznab, womble, omgwtfnzbs, hdbits
+from providers import ezrss, eztv, tvtorrents, torrentleech, btn, newznab, womble, omgwtfnzbs, hdbits
 
 from providers import kickass, torrentz, thepiratebay, torrentday
 from providers import sceneaccess, iptorrents, bithdtv, btdigg, torrentshack
@@ -171,6 +171,8 @@ MIN_SEARCH_FREQUENCY = 10
 DEFAULT_SEARCH_FREQUENCY = 40
 
 EZRSS = False
+
+EZTV = False
 
 HDBITS = False
 HDBITS_USERNAME = None
@@ -422,7 +424,12 @@ def initialize(consoleLogging=True):
                 USE_PLEX, PLEX_NOTIFY_ONSNATCH, PLEX_NOTIFY_ONDOWNLOAD, PLEX_UPDATE_LIBRARY, \
                 PLEX_SERVER_HOST, PLEX_HOST, PLEX_USERNAME, PLEX_PASSWORD, \
                 showUpdateScheduler, __INITIALIZED__, LAUNCH_BROWSER, showList, loadingShowList, \
-                NEWZNAB_DATA, NZBS, NZBS_UID, NZBS_HASH, EZRSS, HDBITS, HDBITS_USERNAME, HDBITS_PASSKEY, TVTORRENTS, TVTORRENTS_DIGEST, TVTORRENTS_HASH, BTN, BTN_API_KEY, \
+                NEWZNAB_DATA, NZBS, NZBS_UID, NZBS_HASH, \
+                EZRSS, \
+                EZTV, \
+                HDBITS, HDBITS_USERNAME, HDBITS_PASSKEY, \
+                TVTORRENTS, TVTORRENTS_DIGEST, TVTORRENTS_HASH, \
+                BTN, BTN_API_KEY, \
                 TORRENT_DIR, USENET_RETENTION, SOCKET_TIMEOUT, \
                 KICKASS, KICKASS_ALT_URL, \
                 TORRENTZ, TORRENTZ_VERIFIED, \
@@ -679,6 +686,9 @@ def initialize(consoleLogging=True):
         NZB_DIR = check_setting_str(CFG, 'Blackhole', 'nzb_dir', '')
         TORRENT_DIR = check_setting_str(CFG, 'Blackhole', 'torrent_dir', '')
 
+        CheckSection(CFG, 'EZTV')
+        EZTV = bool(check_setting_int(CFG, 'EZTV', 'eztv', 0))
+        
         CheckSection(CFG, 'HDBITS')
         HDBITS = bool(check_setting_int(CFG, 'HDBITS', 'hdbits', 0))
         HDBITS_USERNAME = check_setting_str(CFG, 'HDBITS', 'hdbits_username', '')
@@ -1257,6 +1267,9 @@ def save_config():
 
     new_config['EZRSS'] = {}
     new_config['EZRSS']['ezrss'] = int(EZRSS)
+    
+    new_config['EZTV'] = {}
+    new_config['EZTV']['eztv'] = int(EZTV)
 
     new_config['HDBITS'] = {}
     new_config['HDBITS']['hdbits'] = int(HDBITS)

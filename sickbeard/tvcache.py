@@ -20,6 +20,9 @@ import time
 import datetime
 import sqlite3
 
+import urllib
+from xml.sax.saxutils import unescape
+
 import sickbeard
 
 from sickbeard import db
@@ -140,7 +143,7 @@ class TVCache():
         return title.replace(' ', '.')
 
     def _translateLinkURL(self, url):
-        return url.replace('&amp;', '&')
+        return unescape(urllib.unquote(url))
 
     def _parseItem(self, item):
 

@@ -47,7 +47,7 @@ class TorrentLeechProvider(generic.TorrentProvider):
 	self.name = "TorrentLeech"
 	self.session = None
 	self.supportsBacklog = True
-	self.url = 'http://www.torrentleech.org/'
+	self.url = 'https://www.torrentleech.org/'
 	logger.log("[" + self.name + "] initializing...")
         
     ###################################################################################################
