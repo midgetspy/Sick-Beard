@@ -49,10 +49,14 @@ browser.css
 .ui-menu .ui-menu-item-alternate {
   background-color: #fff;
 }
-.ui-autocomplete .ui-menu-item .ui-state-focus {
+.ui-autocomplete .ui-menu-item.ui-state-focus,
+.ui-autocomplete .ui-menu-item.ui-state-active {
   color: #fff;
   background: none;
   background-color: #0a246a;
+  margin: 0;
+  border: none;
+  font-weight: normal;
 }
 /* restore 1.8.x resize handle on dialog button pane */
 .ui-dialog .ui-resizable-se {
@@ -749,6 +753,26 @@ span.pause {
 .epSummary {
   padding-top: 5px;
   margin-left: 25px;
+}
+
+/* =======================================================================
+history.tmpl
+========================================================================== */
+th.col-src,
+td.col-src {
+  width: 45px;
+  text-align: center;
+}
+th.col-time,
+td.col-time {
+  width: 155px;
+  white-space: nowrap;
+  text-align: center;
+}
+th.col-action,
+td.col-action {
+  width: 110px;
+  text-align: center;
 }
 
 /* =======================================================================

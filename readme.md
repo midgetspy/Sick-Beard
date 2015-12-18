@@ -3,7 +3,7 @@ Sick Beard
 
 *Sick Beard is currently an alpha release. There may be severe bugs in it and at any given time it may not work at all.*
 
-Sick Beard is a PVR for newsgroup users (with limited torrent support). It watches for new episodes of your favorite shows and when they are posted it downloads them, sorts and renames them, and optionally generates metadata for them. It currently supports NZBs.org, NZBMatrix, Bin-Req, NZBs'R'Us, EZTV.it, and any Newznab installation and retrieves show information from theTVDB.com and TVRage.com.
+Sick Beard is a PVR for newsgroup users (with limited torrent support). It watches for new episodes of your favorite shows and when they are posted it downloads them, sorts and renames them, and optionally generates metadata for them. It currently supports several torrent and usenet sites and retrieves show information from theTVDB.com and TVRage.com.
 
 Features include:
 
@@ -34,7 +34,8 @@ Sick Beard makes use of the following projects:
 
 ## Dependencies
 
-To run Sick Beard from source you will need Python 2.5+ and Cheetah 2.1.0+. The [binary releases][googledownloads] are standalone.
+To run Sick Beard from source you will need Python 2.5+ and Cheetah 2.1.0+.
+The [binary releases][githubdownloads] are standalone. Build 503 and older can be found on the now defunct [legacy releases][googledownloads].
 
 ## Bugs
 
@@ -54,3 +55,4 @@ If you find a bug please report it or it'll never get fixed. Verify that it hasn
 [googleissues]: http://code.google.com/p/sickbeard/issues/list
 [googlenewissue]: http://code.google.com/p/sickbeard/issues/entry
 [jsonrpclib]: https://github.com/joshmarshall/jsonrpclib
+[githubdownloads]: https://github.com/midgetspy/Sick-Beard/releases

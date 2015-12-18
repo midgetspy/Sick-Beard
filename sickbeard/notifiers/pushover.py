@@ -21,7 +21,6 @@
 import urllib
 import urllib2
 import time
-
 import sickbeard
 
 from sickbeard import logger
@@ -30,23 +29,26 @@ from sickbeard.exceptions import ex
 
 API_URL = "https://api.pushover.net/1/messages.json"
 API_KEY = "OKCXmkvHN1syU2e8xvpefTnyvVWGv5"
+DEVICE_URL = "https://api.pushover.net/1/users/validate.json"
 
 
 class PushoverNotifier:
 
-    def _sendPushover(self, title, msg, userKey=None):
-        """
-        Sends a pushover notification to the address provided
-
-        msg: The message to send (unicode)
-        title: The title of the message
-        userKey: The pushover user id to send the message to (or to subscribe with)
-
-        returns: True if the message succeeded, False otherwise
-        """
-
+    def get_devices(self, userKey=None):
+        # fill in omitted parameters
         if not userKey:
             userKey = sickbeard.PUSHOVER_USERKEY
+
+        data = urllib.urlencode({
+            'token': API_KEY,
+            'user': userKey
+            })
+
+        # get devices from pushover
+        req = urllib2.Request(DEVICE_URL, data)
+        return sickbeard.helpers.getURL(req)
+
+    def _sendPushover(self, title, msg, userKey, priority, device, sound):
 
         # build up the URL and parameters
         msg = msg.strip()
@@ -56,13 +58,16 @@ class PushoverNotifier:
             'title': title,
             'user': userKey,
             'message': msg.encode('utf-8'),
+            'priority': priority,
+            'device': device,
+            'sound': sound,
             'timestamp': int(time.time())
             })
 
         # send the request to pushover
         try:
-            req = urllib2.Request(API_URL)
-            handle = urllib2.urlopen(req, data)
+            req = urllib2.Request(API_URL, data)
+            handle = sickbeard.helpers.getURLFileLike(req, throw_exc=True)
             handle.close()
 
         except urllib2.URLError, e:
@@ -103,13 +108,9 @@ class PushoverNotifier:
         logger.log(u"PUSHOVER: Notification successful.", logger.MESSAGE)
         return True
 
-    def _notify(self, title, message, userKey=None, force=False):
+    def _notify(self, title, message, userKey=None, priority=None, device=None, sound=None, force=False):
         """
         Sends a pushover notification based on the provided info or SB config
-
-        title: The title of the notification to send
-        message: The message string to send
-        userKey: The userKey to send the notification to
         """
 
         # suppress notifications if the notifier is disabled but the notify options are checked
@@ -119,10 +120,16 @@ class PushoverNotifier:
         # fill in omitted parameters
         if not userKey:
             userKey = sickbeard.PUSHOVER_USERKEY
+        if not priority:
+            priority = sickbeard.PUSHOVER_PRIORITY
+        if not device:
+            device = sickbeard.PUSHOVER_DEVICE
+        if not sound:
+            sound = sickbeard.PUSHOVER_SOUND
 
-        logger.log(u"PUSHOVER: Sending notification for " + message, logger.DEBUG)
+        logger.log(u"PUSHOVER: Sending notice with details: title=\"%s\", message=\"%s\", userkey=%s, priority=%s, device=%s, sound=%s" % (title, message, userKey, priority, device, sound), logger.DEBUG)
 
-        return self._sendPushover(title, message, userKey)
+        return self._sendPushover(title, message, userKey, priority, device, sound)
 
 ##############################################################################
 # Public functions
@@ -136,8 +143,8 @@ class PushoverNotifier:
         if sickbeard.PUSHOVER_NOTIFY_ONDOWNLOAD:
             self._notify(notifyStrings[NOTIFY_DOWNLOAD], ep_name)
 
-    def test_notify(self, userKey):
-        return self._notify("Test", "This is a test notification from Sick Beard", userKey, force=True)
+    def test_notify(self, userKey, priority, device, sound):
+        return self._notify("Test", "This is a test notification from Sick Beard", userKey, priority, device, sound, force=True)
 
     def update_library(self, ep_obj=None):
         pass

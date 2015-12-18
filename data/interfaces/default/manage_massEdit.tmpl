@@ -15,8 +15,8 @@
 #set $initial_quality = $common.SD
 #end if
 #set $anyQualities, $bestQualities = $common.Quality.splitQuality($initial_quality)
-<script type="text/javascript" src="$sbRoot/js/qualityChooser.js?$sbPID"></script>
-<script type="text/javascript" src="$sbRoot/js/massEdit.js?$sbPID"></script>
+<script src="$sbRoot/js/qualityChooser.js?$sbPID"></script>
+<script src="$sbRoot/js/massEdit.js?$sbPID"></script>
 
 <form action="massEditSubmit" method="post">
 <input type="hidden" name="toEdit" value="$showList" />
@@ -88,6 +88,17 @@
             <option value="keep">&lt; keep &gt;</option>
             <option value="enable" #if $paused_value then "selected=\"selected\"" else ""#>enable</option>
             <option value="disable" #if $paused_value == False then "selected=\"selected\"" else ""#>disable</option>
+        </select>
+    </div><br />
+</div>
+
+<div class="optionWrapper clearfix">
+    <span class="selectTitle">Skip Notices</span>
+    <div class="selectChoices">
+        <select id="edit_skip_notices" name="skip_notices">
+            <option value="keep">&lt; keep &gt;</option>
+            <option value="enable" #if $skip_notices_value then "selected=\"selected\"" else ""#>enable</option>
+            <option value="disable" #if $skip_notices_value == False then "selected=\"selected\"" else ""#>disable</option>
         </select>
     </div><br />
 </div>

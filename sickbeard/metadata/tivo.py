@@ -191,13 +191,13 @@ class TIVOMetadata(generic.GenericMetadata):
                 logger.log(u"Unable to find episode " + str(curEpToWrite.season) + "x" + str(curEpToWrite.episode) + " on tvdb... has it been removed? Should I delete from db?")
                 return None
 
-            if myEp["firstaired"] == None and ep_obj.season == 0:
+            if myEp["firstaired"] is None and ep_obj.season == 0:
                 myEp["firstaired"] = str(datetime.date.fromordinal(1))
 
-            if myEp["episodename"] == None or myEp["firstaired"] == None:
+            if myEp["episodename"] is None or myEp["firstaired"] is None:
                 return None
 
-            if myShow["seriesname"] != None:
+            if myShow["seriesname"] is not None:
                 data += ("title : " + myShow["seriesname"] + "\n")
                 data += ("seriesTitle : " + myShow["seriesname"] + "\n")
 
@@ -231,12 +231,12 @@ class TIVOMetadata(generic.GenericMetadata):
             data += ("description : " + sanitizedDescription + "\n")
 
             # Usually starts with "SH" and followed by 6-8 digits.
-            # Tivo uses zap2it for thier data, so the series id is the zap2it_id.
-            if myShow["zap2it_id"] != None:
+            # Tivo uses zap2it for their data, so the series id is the zap2it_id.
+            if myShow["zap2it_id"] is not None:
                 data += ("seriesId : " + myShow["zap2it_id"] + "\n")
 
             # This is the call sign of the channel the episode was recorded from.
-            if myShow["network"] != None:
+            if myShow["network"] is not None:
                 data += ("callsign : " + myShow["network"] + "\n")
 
             # This must be entered as yyyy-mm-ddThh:mm:ssZ (the t is capitalized and never changes, the Z is also
@@ -248,11 +248,11 @@ class TIVOMetadata(generic.GenericMetadata):
             # This shows up at the beginning of the description on the Program screen and on the Details screen.
             if myShow["actors"]:
                 for actor in myShow["actors"].split('|'):
-                    if actor != None and actor.strip():
+                    if actor is not None and actor.strip():
                         data += ("vActor : " + actor.strip() + "\n")
 
             # This is shown on both the Program screen and the Details screen.
-            if myEp["rating"] != None:
+            if myEp["rating"] is not None:
                 try:
                     rating = float(myEp['rating'])
                 except ValueError:

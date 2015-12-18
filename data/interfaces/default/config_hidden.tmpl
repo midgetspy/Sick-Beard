@@ -8,7 +8,7 @@
 #import os.path
 #include $os.path.join($sickbeard.PROG_DIR, "data/interfaces/default/inc_top.tmpl")
 
-<script type="text/javascript" src="$sbRoot/js/config.js?$sbPID"></script>
+<script src="$sbRoot/js/config.js?$sbPID"></script>
 
 <div id="config">
 <div id="config-content">
@@ -34,6 +34,14 @@
                             <label class="nocheck clearfix">
                                 <span class="component-title">&nbsp;</span>
                                 <span class="component-desc">Backlink protection via anonymizer service, must end in <b>?</b> (blank for none).</span>
+                            </label>
+                        </div>
+
+                        <div class="field-pair">
+                            <input type="checkbox" name="display_all_seasons" id="display_all_seasons" #if $sickbeard.DISPLAY_ALL_SEASONS then "checked=\"checked\"" else ""#/>
+                            <label class="clearfix" for="display_all_seasons">
+                                <span class="component-title">Show All Seasons</span>
+                                <span class="component-desc">Should Sick Beard show all seasons on displayShow?</span>
                             </label>
                         </div>
 
@@ -94,15 +102,15 @@
 </form>
 </div></div>
 
-<script type="text/javascript">
+<script>
 \$(document).ready(function () {
     var loading = '<img src="' + sbRoot + '/images/loading16.gif" height="16" width="16" />';
 
     \$('#sbEnded').click(function () {
         \$('#sbEnded-result').html(loading);
         \$.get(sbRoot + "/config/hidden/sbEnded",
-            function (data) { 
-                \$('#sbEnded-result').html(data); 
+            function (data) {
+                \$('#sbEnded-result').html(data);
                 \$("table").tablesorter({ theme : 'blue', widgets: ['zebra'], sortList: [[0,0]] });
                 var resort = true;
                 \$("table").trigger("update", [resort]);

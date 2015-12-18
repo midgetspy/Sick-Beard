@@ -7,15 +7,15 @@
         <meta name="viewport" content="width=device-width">
         <meta name="robots" content="noindex">
 
-        <script type="text/javascript" charset="utf-8">
+        <script>
         <!--
             sbRoot = "$sbRoot";
         //-->
         </script>
-        <script type="text/javascript" src="$sbRoot/js/lib/jquery-1.7.2.min.js?$sbPID"></script>
-        <script type="text/javascript" src="$sbRoot/js/apibuilder.js?$sbPID"></script>
+        <script src="$sbRoot/js/lib/jquery-1.7.2.min.js?$sbPID"></script>
+        <script src="$sbRoot/js/apibuilder.js?$sbPID"></script>
 
-        <style type="text/css">
+        <style>
         <!--
             #apibuilder select { padding: 2px 2px 2px 6px; display: block; float: left; margin: auto 8px 4px auto; }
             #apibuilder select option { padding: 1px 6px; line-height: 1.2em; }
@@ -24,8 +24,8 @@
         -->
         </style>
 
-<script type="text/javascript">
-var hide_empty_list=true; 
+<script>
+var hide_empty_list=true;
 var disable_empty_list=true;
 
 addListGroup("api", "Command");
@@ -53,6 +53,7 @@ addList("Command", "History", "?cmd=history", "history");
 addOption("Command", "History.Clear", "?cmd=history.clear", "", "", "action");
 addOption("Command", "History.Trim", "?cmd=history.trim", "", "", "action");
 addList("Command", "Logs", "?cmd=logs", "logs");
+addList("Command", "PostProcess", "?cmd=postprocess", "postprocess", "", "","action");
 addList("Command", "Show", "?cmd=show", "tvdbid");
 addList("Command", "Show.AddExisting", "?cmd=show.addexisting", "show.addexisting", "", "", "action");
 addList("Command", "Show.AddNew", "?cmd=show.addnew", "show.addnew", "", "", "action");
@@ -81,6 +82,11 @@ addOption("logs", "Debug", "&min_level=debug");
 addOption("logs", "Info", "&min_level=info");
 addOption("logs", "Warning", "&min_level=warning");
 addOption("logs", "Error", "&min_level=error");
+
+addOption("postprocess", "Optional Param", "", 1);
+addOption("postprocess", "C:\\PATH\\TO\\DIR", "&path=C:\\Temp");
+addOption("postprocess", "return_data", "&return_data=1");
+addOption("postprocess", "force_replace", "&force_replace=1");
 
 addOption("sb.setdefaults", "Optional Param", "", 1);
 addList("sb.setdefaults", "Exclude Paused Shows on ComingEps", "&future_show_paused=0", "sb.setdefaults-status");

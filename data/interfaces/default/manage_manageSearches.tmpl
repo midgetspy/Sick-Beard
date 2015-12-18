@@ -9,11 +9,11 @@
 #import os.path
 #include $os.path.join($sickbeard.PROG_DIR, "data/interfaces/default/inc_top.tmpl")
 
-<script type="text/javascript" src="$sbRoot/js/plotTooltip.js?$sbPID"></script>
+<script src="$sbRoot/js/plotTooltip.js?$sbPID"></script>
 
 
 <h3>Backlog Search:</h3>
-<a class="btn" href="$sbRoot/manage/manageSearches/pauseBacklog?paused=#if $backlogPaused then "0" else "1"#"><i class="#if $backlogPaused then "icon-play" else "icon-pause"#"></i> #if $backlogPaused then "Unpause" else "Pause"#</a> 
+<a class="btn" href="$sbRoot/manage/manageSearches/pauseBacklog?paused=#if $backlogPaused then "0" else "1"#"><i class="#if $backlogPaused then "icon-play" else "icon-pause"#"></i> #if $backlogPaused then "Unpause" else "Pause"#</a>
 #if not $backlogRunning:
 Not in progress<br />
 #else:
@@ -23,7 +23,7 @@ Currently running<br />
 
 <br />
 <h3>Daily Episode Search:</h3>
-<a class="btn" href="$sbRoot/manage/manageSearches/forceSearch"><i class="icon-exclamation-sign"></i> Force</a> 
+<a class="btn" href="$sbRoot/manage/manageSearches/forceSearch"><i class="icon-exclamation-sign"></i> Force</a>
 #if not $searchStatus:
 Not in progress<br />
 #else:

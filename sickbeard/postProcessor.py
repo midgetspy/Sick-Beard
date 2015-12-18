@@ -231,7 +231,7 @@ class PostProcessor(object):
                 helpers.moveFile(cur_file_path, new_file_path)
                 helpers.chmodAsParent(new_file_path)
             except (IOError, OSError), e:
-                self._log("Unable to move file " + cur_file_path + " to " + new_file_path + ": " + ex(e), logger.ERROR)
+                self._log(u"Unable to move file " + cur_file_path + " to " + new_file_path + ": " + ex(e), logger.ERROR)
                 raise e
 
         self._combined_file_operation(file_path, new_path, new_base_name, associated_files, action=_int_move)
@@ -299,7 +299,7 @@ class PostProcessor(object):
 
             self.in_history = True
             to_return = (tvdb_id, season, [], quality)
-            self._log("Found result in history: " + str(to_return), logger.DEBUG)
+            self._log(u"Found result in history: " + str(to_return), logger.DEBUG)
 
             return to_return
 
@@ -486,10 +486,10 @@ class PostProcessor(object):
                     continue
 
             # if there's no season then we can hopefully just use 1 automatically
-            elif season == None and tvdb_id:
+            elif season is None and tvdb_id:
                 myDB = db.DBConnection()
                 numseasonsSQlResult = myDB.select("SELECT COUNT(DISTINCT season) as numseasons FROM tv_episodes WHERE showid = ? and season != 0", [tvdb_id])
-                if int(numseasonsSQlResult[0][0]) == 1 and season == None:
+                if int(numseasonsSQlResult[0][0]) == 1 and season is None:
                     self._log(u"Don't have a season number, but this show appears to only have 1 season, setting seasonnumber to 1...", logger.DEBUG)
                     season = 1
 
@@ -540,7 +540,7 @@ class PostProcessor(object):
                 raise exceptions.PostProcessingFailed(error_msg)
 
             # associate all the episodes together under a single root episode
-            if root_ep == None:
+            if root_ep is None:
                 root_ep = curEp
                 root_ep.relatedEps = []
             elif curEp not in root_ep.relatedEps:
@@ -784,7 +784,7 @@ class PostProcessor(object):
         for cur_ep in [ep_obj] + ep_obj.relatedEps:
 
             if self.release_name:
-                self._log("Found release name " + self.release_name, logger.DEBUG)
+                self._log(u"Found release name " + self.release_name, logger.DEBUG)
                 cur_ep.release_name = self.release_name
             else:
                 cur_ep.release_name = ""
@@ -836,7 +836,8 @@ class PostProcessor(object):
         history.logDownload(ep_obj, self.file_path, new_ep_quality, self.release_group)
 
         # send notifiers download notification
-        notifiers.notify_download(ep_obj.prettyName())
+        if not ep_obj.show.skip_notices:
+            notifiers.notify_download(ep_obj.prettyName())
 
         # generate nfo/tbn
         ep_obj.createMetaFiles()

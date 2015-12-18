@@ -12,7 +12,7 @@
 #set global $topmenu="config"#
 #include $os.path.join($sickbeard.PROG_DIR, "data/interfaces/default/inc_top.tmpl")
 
-<script type="text/javascript" src="$sbRoot/js/config.js?$sbPID"></script>
+<script src="$sbRoot/js/config.js?$sbPID"></script>
 
 <div id="config">
 <div id="config-content">
@@ -38,7 +38,7 @@
                                 <span class="component-desc">Should Sick Beard open its home page when started?</span>
                             </label>
                         </div>
-                        
+
                         <div class="field-pair">
                             <input type="checkbox" name="version_notify" id="version_notify" #if $sickbeard.VERSION_NOTIFY then "checked=\"checked\"" else ""#/>
                             <label class="clearfix" for="version_notify">
@@ -72,7 +72,7 @@
                     </div>
 
                     <fieldset class="component-group-list">
-                        
+
                         <div class="field-pair">
                             <input type="checkbox" name="web_ipv6" id="web_ipv6" #if $sickbeard.WEB_IPV6 then "checked=\"checked\"" else ""#/>
                             <label class="clearfix" for="web_ipv6">
@@ -80,7 +80,7 @@
                                 <span class="component-desc">Allow Sick Beard to bind to any available IPv6 address?</span>
                             </label>
                         </div>
-                        
+
                         <div class="field-pair">
                             <input type="checkbox" name="web_log" id="web_log" #if $sickbeard.WEB_LOG then "checked=\"checked\"" else ""#/>
                             <label class="clearfix" for="web_log">
@@ -88,7 +88,7 @@
                                 <span class="component-desc">Have Sick Beard's web server (cherrypy) generate logs?</span>
                             </label>
                         </div>
-                        
+
                         <div class="field-pair">
                             <label class="nocheck clearfix">
                                 <span class="component-title">HTTP Port</span>
@@ -129,7 +129,7 @@
                                 <span class="component-desc">Enable accessing the interface from a HTTPS address.</span>
                             </label>
                         </div>
-                        
+
                         <div id="content_enable_https">
                             <div class="field-pair">
                                 <label class="nocheck clearfix">
@@ -141,7 +141,7 @@
                                     <span class="component-desc">File name or path to HTTPS Certificate.</span>
                                 </label>
                             </div>
-    
+
                             <div class="field-pair">
                                 <label class="nocheck clearfix">
                                     <span class="component-title">HTTPS Key</span>
@@ -201,7 +201,7 @@
 </form>
 </div></div>
 
-<script type="text/javascript" charset="utf-8">
+<script>
 <!--
     jQuery('#log_dir').fileBrowser({ title: 'Select Log Directory' });
 //-->

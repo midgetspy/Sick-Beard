@@ -21,6 +21,7 @@ import email.utils
 import datetime
 import re
 import os
+import time
 
 try:
     import xml.etree.cElementTree as etree
@@ -30,14 +31,15 @@ except ImportError:
 import sickbeard
 import generic
 
-from sickbeard import classes
-from sickbeard import helpers
+from sickbeard import helpers, classes, logger, db
 from sickbeard import scene_exceptions
-from sickbeard import encodingKludge as ek
 
-from sickbeard import logger
+from sickbeard.common import Quality, MULTI_EP_RESULT, SEASON_RESULT
 from sickbeard import tvcache
+from sickbeard import encodingKludge as ek
 from sickbeard.exceptions import ex, AuthException
+
+from sickbeard.name_parser.parser import NameParser, InvalidNameException
 
 
 class NewznabProvider(generic.NZBProvider):
@@ -79,7 +81,166 @@ class NewznabProvider(generic.NZBProvider):
     def isEnabled(self):
         return self.enabled
 
-    def _get_season_search_strings(self, show, season=None):
+    def findEpisode(self, episode, manualSearch=False):
+
+        logger.log(u"Searching " + self.name + " for " + episode.prettyName())
+
+        self.cache.updateCache()
+        results = self.cache.searchCache(episode, manualSearch)
+        logger.log(u"Cache results: " + str(results), logger.DEBUG)
+
+        # if we got some results then use them no matter what.
+        # OR
+        # return anyway unless we're doing a manual search
+        if results or not manualSearch:
+            return results
+
+        itemList = []
+
+        for cur_search_string in self._get_episode_search_strings(episode):
+            itemList += self._doSearch(cur_search_string, show=episode.show)
+
+        # check if shows that we have a tvrage id for returned 0 results
+        # if so, fall back to just searching by query
+        if itemList == [] and episode.show.tvrid != 0:
+            logger.log(u"Unable to find a result on " + self.name + " using tvrage id (" + str(episode.show.tvrid) + "), trying to search by string...", logger.WARNING)
+            for cur_search_string in self._get_episode_search_strings(episode, ignore_tvr=True):
+                itemList += self._doSearch(cur_search_string, show=episode.show)
+
+        for item in itemList:
+
+            (title, url) = self._get_title_and_url(item)
+
+            # parse the file name
+            try:
+                myParser = NameParser()
+                parse_result = myParser.parse(title)
+            except InvalidNameException:
+                logger.log(u"Unable to parse the filename " + title + " into a valid episode", logger.WARNING)
+                continue
+
+            if episode.show.air_by_date:
+                if parse_result.air_date != episode.airdate:
+
+                    logger.log(u"Episode " + title + " didn't air on " + str(episode.airdate) + ", skipping it", logger.DEBUG)
+                    continue
+
+            elif parse_result.season_number != episode.season or episode.episode not in parse_result.episode_numbers:
+                logger.log(u"Episode " + title + " isn't " + str(episode.season) + "x" + str(episode.episode) + ", skipping it", logger.DEBUG)
+                continue
+
+            quality = self.getQuality(item)
+
+            if not episode.show.wantEpisode(episode.season, episode.episode, quality, manualSearch):
+                logger.log(u"Ignoring result " + title + " because we don't want an episode that is " + Quality.qualityStrings[quality], logger.DEBUG)
+                continue
+
+            logger.log(u"Found result " + title + " at " + url, logger.DEBUG)
+
+            result = self.getResult([episode])
+            result.url = url
+            result.name = title
+            result.quality = quality
+
+            results.append(result)
+
+        return results
+
+    def findSeasonResults(self, show, season):
+
+        itemList = []
+        results = {}
+
+        for cur_string in self._get_season_search_strings(show, season):
+            itemList += self._doSearch(cur_string)
+
+        # check if shows that we have a tvrage id for returned 0 results
+        # if so, fall back to just searching by query
+        if itemList == [] and show.tvrid != 0:
+            logger.log(u"Unable to find a result on " + self.name + " using tvrage id (" + str(show.tvrid) + "), trying to search by string...", logger.WARNING)
+            for cur_string in self._get_season_search_strings(show, season, ignore_tvr=True):
+                itemList += self._doSearch(cur_string)
+
+        for item in itemList:
+
+            (title, url) = self._get_title_and_url(item)
+
+            quality = self.getQuality(item)
+
+            # parse the file name
+            try:
+                myParser = NameParser(False)
+                parse_result = myParser.parse(title)
+            except InvalidNameException:
+                logger.log(u"Unable to parse the filename " + title + " into a valid episode", logger.WARNING)
+                continue
+
+            if not show.air_by_date:
+                # this check is meaningless for non-season searches
+                if (parse_result.season_number != None and parse_result.season_number != season) or (parse_result.season_number == None and season != 1):
+                    logger.log(u"The result " + title + " doesn't seem to be a valid episode for season " + str(season) + ", ignoring")
+                    continue
+
+                # we just use the existing info for normal searches
+                actual_season = season
+                actual_episodes = parse_result.episode_numbers
+
+            else:
+                if not parse_result.air_by_date:
+                    logger.log(u"This is supposed to be an air-by-date search but the result " + title + " didn't parse as one, skipping it", logger.DEBUG)
+                    continue
+
+                myDB = db.DBConnection()
+                sql_results = myDB.select("SELECT season, episode FROM tv_episodes WHERE showid = ? AND airdate = ?", [show.tvdbid, parse_result.air_date.toordinal()])
+
+                if len(sql_results) != 1:
+                    logger.log(u"Tried to look up the date for the episode " + title + " but the database didn't give proper results, skipping it", logger.WARNING)
+                    continue
+
+                actual_season = int(sql_results[0]["season"])
+                actual_episodes = [int(sql_results[0]["episode"])]
+
+            # make sure we want the episode
+            wantEp = True
+            for epNo in actual_episodes:
+                if not show.wantEpisode(actual_season, epNo, quality):
+                    wantEp = False
+                    break
+
+            if not wantEp:
+                logger.log(u"Ignoring result " + title + " because we don't want an episode that is " + Quality.qualityStrings[quality], logger.DEBUG)
+                continue
+
+            logger.log(u"Found result " + title + " at " + url, logger.DEBUG)
+
+            # make a result object
+            epObj = []
+            for curEp in actual_episodes:
+                epObj.append(show.getEpisode(actual_season, curEp))
+
+            result = self.getResult(epObj)
+            result.url = url
+            result.name = title
+            result.quality = quality
+
+            if len(epObj) == 1:
+                epNum = epObj[0].episode
+            elif len(epObj) > 1:
+                epNum = MULTI_EP_RESULT
+                logger.log(u"Separating multi-episode result to check for later - result contains episodes: " + str(parse_result.episode_numbers), logger.DEBUG)
+            elif len(epObj) == 0:
+                epNum = SEASON_RESULT
+                result.extraInfo = [show]
+                logger.log(u"Separating full season result to check for later", logger.DEBUG)
+
+            if epNum in results:
+                results[epNum].append(result)
+            else:
+                results[epNum] = [result]
+
+        return results
+
+    def _get_season_search_strings(self, show, season=None, ignore_tvr=False):
 
         if not show:
             return [{}]
@@ -93,13 +254,13 @@ class NewznabProvider(generic.NZBProvider):
             cur_params = {}
 
             # search directly by tvrage id
-            if show.tvrid:
+            if not ignore_tvr and show.tvrid:
                 cur_params['rid'] = show.tvrid
             # if we can't then fall back on a very basic name search
             else:
                 cur_params['q'] = helpers.sanitizeSceneName(cur_exception)
 
-            if season != None:
+            if season is not None:
                 # air-by-date means &season=2010&q=2010.03, no other way to do it atm
                 if show.air_by_date:
                     cur_params['season'] = season.split('-')[0]
@@ -116,7 +277,7 @@ class NewznabProvider(generic.NZBProvider):
 
         return to_return
 
-    def _get_episode_search_strings(self, ep_obj):
+    def _get_episode_search_strings(self, ep_obj, ignore_tvr=False):
 
         params = {}
 
@@ -124,7 +285,7 @@ class NewznabProvider(generic.NZBProvider):
             return [params]
 
         # search directly by tvrage id
-        if ep_obj.show.tvrid:
+        if not ignore_tvr and ep_obj.show.tvrid:
             params['rid'] = ep_obj.show.tvrid
         # if we can't then fall back on a very basic name search
         else:
@@ -183,6 +344,9 @@ class NewznabProvider(generic.NZBProvider):
                 raise AuthException("Your account on " + self.name + " has been suspended, contact the administrator.")
             elif code == '102':
                 raise AuthException("Your account isn't allowed to use the API on " + self.name + ", contact the administrator")
+            elif code == '910':
+                logger.log(u"" + self.name + " currently has their API disabled, probably maintenance?", logger.WARNING)
+                return False
             else:
                 logger.log(u"Unknown error given from " + self.name + ": " + parsedXML.attrib['description'], logger.ERROR)
                 return False
@@ -208,49 +372,92 @@ class NewznabProvider(generic.NZBProvider):
         if self.needs_auth and self.key:
             params['apikey'] = self.key
 
-        search_url = self.url + 'api?' + urllib.urlencode(params)
+        results = []
+        offset = total = hits = 0
 
-        logger.log(u"Search url: " + search_url, logger.DEBUG)
+        # hardcoded to stop after a max of 4 hits (400 items) per query
+        while (hits < 4) and (offset == 0 or offset < total):
+            if hits > 0:
+                # sleep for a few seconds to not hammer the site and let cpu rest
+                time.sleep(2)
 
-        data = self.getURL(search_url)
+            params['offset'] = offset
 
-        if not data:
-            logger.log(u"No data returned from " + search_url, logger.ERROR)
-            return []
+            search_url = self.url + 'api?' + urllib.urlencode(params)
 
-        # hack this in until it's fixed server side
-        if not data.startswith('<?xml'):
-            data = '<?xml version="1.0" encoding="ISO-8859-1" ?>' + data
+            logger.log(u"Search url: " + search_url, logger.DEBUG)
 
-        parsedXML = helpers.parse_xml(data)
+            data = self.getURL(search_url)
 
-        if parsedXML is None:
-            logger.log(u"Error trying to load " + self.name + " XML data", logger.ERROR)
-            return []
+            if not data:
+                logger.log(u"No data returned from " + search_url, logger.ERROR)
+                return results
 
-        if self._checkAuthFromData(parsedXML):
+            # hack this in until it's fixed server side
+            if not data.startswith('<?xml'):
+                data = '<?xml version="1.0" encoding="ISO-8859-1" ?>' + data
 
-            if parsedXML.tag == 'rss':
-                items = parsedXML.findall('.//item')
+            parsedXML = helpers.parse_xml(data)
 
-            else:
-                logger.log(u"Resulting XML from " + self.name + " isn't RSS, not parsing it", logger.ERROR)
-                return []
+            if parsedXML is None:
+                logger.log(u"Error trying to load " + self.name + " XML data", logger.ERROR)
+                return results
 
-            results = []
+            if self._checkAuthFromData(parsedXML):
 
-            for curItem in items:
-                (title, url) = self._get_title_and_url(curItem)
+                if parsedXML.tag == 'rss':
+                    items = []
+                    response_nodes = []
+                    for node in parsedXML.getiterator():
+                        # Collect all items for result parsing
+                        if node.tag == "item":
+                            items.append(node)
+                        # Find response nodes but ignore XML namespacing to
+                        # accomodate providers with alternative definitions
+                        elif node.tag.split("}", 1)[-1] == "response":
+                            response_nodes.append(node)
+                    # Verify that one and only one node matches and use it,
+                    # return otherwise
+                    if len(response_nodes) != 1:
+                        logger.log(u"No valid, unique response node was found in the API response",
+                            logger.ERROR)
+                        return results
+                    response = response_nodes[0]
 
-                if title and url:
-                    logger.log(u"Adding item from RSS to results: " + title, logger.DEBUG)
-                    results.append(curItem)
                 else:
-                    logger.log(u"The XML returned from the " + self.name + " RSS feed is incomplete, this result is unusable", logger.DEBUG)
+                    logger.log(u"Resulting XML from " + self.name + " isn't RSS, not parsing it", logger.ERROR)
+                    return results
 
-            return results
+                # process the items that we have
+                for curItem in items:
+                    (title, url) = self._get_title_and_url(curItem)
 
-        return []
+                    if title and url:
+                        # commenting this out for performance reasons, we see the results when they are added to cache anyways
+                        # logger.log(u"Adding item from RSS to results: " + title, logger.DEBUG)
+                        results.append(curItem)
+                    else:
+                        logger.log(u"The XML returned from the " + self.name + " RSS feed is incomplete, this result is unusable", logger.DEBUG)
+
+                # check to see if our offset matches what was returned, otherwise dont trust their values and just use what we have
+                if offset != int(response.get('offset') or 0):
+                    logger.log(u"Newznab provider returned invalid api data, report this to your provider! Aborting fetching further results.", logger.WARNING)
+                    return results
+
+                try:
+                    total = int(response.get('total') or 0)
+                except AttributeError:
+                    logger.log(u"Newznab provider provided invalid total.", logger.WARNING)
+                    break
+
+            # if we have 0 results, just break out otherwise increment and continue
+            if total == 0:
+                break
+            else:
+                offset += 100
+                hits += 1
+
+        return results
 
     def findPropers(self, search_date=None):
 

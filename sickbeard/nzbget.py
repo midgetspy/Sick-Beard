@@ -52,7 +52,7 @@ def sendNZB(nzb):
 
         url = urlparse.urlunsplit((scheme, netloc, u"/xmlrpc", "", ""))
 
-        logger.log(u"Sending NZB to NZBGet")
+        logger.log(u"Sending NZB to NZBGet: %s" % nzb.name)
         logger.log(u"NZBGet URL: " + url, logger.DEBUG)
 
         nzbGetRPC = xmlrpclib.ServerProxy(url.encode("utf-8", 'ignore'))

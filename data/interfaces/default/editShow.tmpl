@@ -10,8 +10,8 @@
 #import os.path
 #include $os.path.join($sickbeard.PROG_DIR, "data/interfaces/default/inc_top.tmpl")
 
-<script type="text/javascript" src="$sbRoot/js/qualityChooser.js?$sbPID"></script>
-<script type="text/javascript" charset="utf-8">
+<script src="$sbRoot/js/qualityChooser.js?$sbPID"></script>
+<script charset="utf-8">
 <!--
 \$(document).ready(function(){
 
@@ -74,6 +74,10 @@ This <b>DOES NOT</b> allow Sick Beard to download non-english TV episodes!<br />
 (check this if the show is released as Show.03.02.2010 rather than Show.S02E03)<br />
 <br />
 
+<span class="showLegend">Skip Notifications:</span><input type="checkbox" name="skip_notices" #if $show.skip_notices == 1 then "checked=\"checked\"" else ""# /><br />
+Skip sending Snatched/Downloaded notifications for this show?<br />
+<br />
+
 <span class="showLegend">Ignored Words (all shows):</span>$sickbeard.IGNORE_WORDS<br />
 <br />
 
@@ -90,7 +94,7 @@ Separate words with a comma, e.g. "word1,word2,word3"<br />
 <input class="btn" type="submit" value="Submit" />
 </form>
 
-<script type="text/javascript" charset="utf-8">
+<script>
 <!--
     jQuery('#location').fileBrowser({ title: 'Select Show Location' });
 //-->
