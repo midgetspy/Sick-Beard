@@ -21,6 +21,7 @@ from __future__ import with_statement
 import datetime
 import os
 import re
+import urllib2
 
 import sickbeard
 
@@ -95,22 +96,27 @@ class GenericProvider:
 
         return result
 
-    def getURL(self, url, post_data=None, headers=None):
+    def getURL(self, url, post_data=None, heads=None):
         """
         By default this is just a simple urlopen call but this method should be overridden
         for providers with special URL requirements (like cookies)
         """
+        if post_data:
+            if heads:
+                req = urllib2.Request(url, post_data, heads)
+            else:
+                req = urllib2.Request(url, post_data);
+        else:
+            if heads:
+                req = urllib2.Request(url, headers=heads);
+            else:
+                req = urllib2.Request(url);
+        response = helpers.getURL(req)
 
-        if not headers:
-            headers = []
-
-        data = helpers.getURL(url, post_data, headers)
-
-        if not data:
+        if response is None:
             logger.log(u"Error loading " + self.name + " URL: " + url, logger.ERROR)
-            return None
 
-        return data
+        return response
 
     def downloadResult(self, result):
         """

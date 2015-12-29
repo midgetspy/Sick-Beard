@@ -14,8 +14,8 @@
 #set global $topmenu="config"#
 #include $os.path.join($sickbeard.PROG_DIR, "data/interfaces/default/inc_top.tmpl")
 
-<script type="text/javascript" src="$sbRoot/js/configPostProcessing.js?$sbPID"></script>
-<script type="text/javascript" src="$sbRoot/js/config.js?$sbPID"></script>
+<script src="$sbRoot/js/configPostProcessing.js?$sbPID"></script>
+<script src="$sbRoot/js/config.js?$sbPID"></script>
 
 <div id="config">
 <div id="config-content">
@@ -526,7 +526,7 @@
 </form>
 </div></div>
 
-<script type="text/javascript" charset="utf-8">
+<script>
 <!--
     jQuery('#tv_download_dir').fileBrowser({ title: 'Select TV Download Directory' });
 //-->

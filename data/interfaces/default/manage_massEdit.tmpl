@@ -15,8 +15,8 @@
 #set $initial_quality = $common.SD
 #end if
 #set $anyQualities, $bestQualities = $common.Quality.splitQuality($initial_quality)
-<script type="text/javascript" src="$sbRoot/js/qualityChooser.js?$sbPID"></script>
-<script type="text/javascript" src="$sbRoot/js/massEdit.js?$sbPID"></script>
+<script src="$sbRoot/js/qualityChooser.js?$sbPID"></script>
+<script src="$sbRoot/js/massEdit.js?$sbPID"></script>
 
 <form action="massEditSubmit" method="post">
 <input type="hidden" name="toEdit" value="$showList" />

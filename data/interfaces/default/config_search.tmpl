@@ -8,8 +8,8 @@
 #import os.path
 #include $os.path.join($sickbeard.PROG_DIR, "data/interfaces/default/inc_top.tmpl")
 
-<script type="text/javascript" src="$sbRoot/js/configSearch.js?$sbPID"></script>
-<script type="text/javascript" src="$sbRoot/js/config.js?$sbPID"></script>
+<script src="$sbRoot/js/configSearch.js?$sbPID"></script>
+<script src="$sbRoot/js/config.js?$sbPID"></script>
 
 <div id="config">
 <div id="config-content">
@@ -18,7 +18,7 @@
 <form id="configForm" action="saveSearch" method="post">
 
             <div id="config-components">
-                
+
                 <div id="core-component-group1" class="component-group clearfix">
 
                     <div class="component-group-desc">
@@ -34,7 +34,7 @@
                                 <span class="component-desc">Replace original download with "Proper/Repack" if nuked?</span>
                             </label>
                         </div>
-                        
+
                         <div class="field-pair">
                             <label class="nocheck clearfix">
                                 <span class="component-title">Search Frequency</span>
@@ -70,7 +70,7 @@
 
                         <div class="clearfix"></div>
                         <input type="submit" class="btn config_submitter" value="Save Changes" /><br/>
-                        
+
                     </fieldset>
                 </div><!-- /component-group1 //-->
 
@@ -139,7 +139,7 @@
                                     <span class="component-desc">(eg. http://localhost:8000/)</span>
                                 </label>
                             </div>
-                            
+
                             <div class="field-pair">
                                 <label class="nocheck clearfix">
                                     <span class="component-title">SABnzbd Username</span>
@@ -172,7 +172,7 @@
                                     <span class="component-desc">SABnzbd+ Config -> General -> API Key.</span>
                                 </label>
                             </div>
-                            
+
                             <div class="field-pair">
                                 <label class="nocheck clearfix">
                                     <span class="component-title">SABnzbd Category</span>
@@ -238,15 +238,15 @@
                                 </label>
                             </div>
                         </div>
-                        
+
                         <div class="clearfix"></div>
-                        
+
                         <div class="testNotification" id="testSABnzbd-result">Click below to test.</div>
                         <input type="button" value="Test SABnzbd" id="testSABnzbd" class="btn test-button"/>
                         <input type="submit" class="btn config_submitter" value="Save Changes" /><br/>
-                        
+
                         </div><!-- /content_use_nzbs //-->
-                        
+
                     </fieldset>
                 </div><!-- /component-group2 //-->
 
@@ -282,11 +282,11 @@
                                 <span class="component-desc">The directory where Sick Beard should store your <i>Torrent</i> files.</span>
                             </label>
                         </div>
-                        
+
                         <div class="clearfix"></div>
                         <input type="submit" class="btn config_submitter" value="Save Changes" /><br/>
                         </div><!-- /content_use_torrents //-->
-                        
+
                     </fieldset>
                 </div><!-- /component-group3 //-->
 
@@ -299,7 +299,7 @@
 </form>
 </div></div>
 
-<script type="text/javascript" charset="utf-8">
+<script charset="utf-8">
 <!--
     jQuery('#nzb_dir').fileBrowser({ title: 'Select NZB Black Hole/Watch Directory' });
     jQuery('#torrent_dir').fileBrowser({ title: 'Select Torrent Black Hole/Watch Directory' });
