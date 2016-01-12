@@ -352,6 +352,24 @@ $(document).ready(function () {
             });
     });
 
+    $("#testSlack").click(function () {
+        var slack_access_token = $("#slack_access_token").val();
+        var slack_channel = $("#slack_channel").val();
+        var slack_bot_name = $("#slack_bot_name").val();
+        var slack_icon_url = $("#slack_icon_url").val();
+        if (!slack_access_token || !slack_channel || !slack_bot_name) {
+            $("#testSlack-result").html("Please fill out the necessary fields above.");
+            return;
+        }
+        $(this).prop("disabled", true);
+        $("#testSlack-result").html(loading);
+        $.get(sbRoot + "/home/testSlack", {'accessToken': slack_access_token, 'channel': slack_channel, 'bot_name': slack_bot_name, 'icon_url': slack_icon_url})
+            .done(function (data) {
+                $("#testSlack-result").html(data);
+                $("#testSlack").prop("disabled", false);
+            });
+    });
+
     function get_pushbullet_devices (msg) {
         var pushbullet_access_token = $.trim($("#pushbullet_access_token").val());
         if (!pushbullet_access_token) {
