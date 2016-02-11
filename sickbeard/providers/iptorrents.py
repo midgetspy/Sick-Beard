@@ -218,7 +218,7 @@ class IPTorrentsCache(tvcache.TVCache):
     def _getRSSData(self):
         xml = ''
         if sickbeard.IPTORRENTS_UID and sickbeard.IPTORRENTS_RSSHASH:
-            self.rss_url = provider.url + "torrents/rss?u={0};tp={1}78;23;25;65;79;22;5;download".format(sickbeard.IPTORRENTS_UID,sickbeard.IPTORRENTS_RSSHASH)
+            self.rss_url = provider.url + "torrents/rss?u={0};tp={1};78;23;25;65;79;22;5;download".format(sickbeard.IPTORRENTS_UID,sickbeard.IPTORRENTS_RSSHASH)
             logger.log("[" + provider.name + "] RSS URL - {0}".format(self.rss_url))
             xml = provider.getURL(self.rss_url)
         else:
