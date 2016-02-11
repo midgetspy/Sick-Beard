@@ -130,7 +130,7 @@ class IPTorrentsProvider(generic.TorrentProvider):
 
     def _doSearch(self, search_params, show=None):
         logger.log("[IPTorrents] Performing Search: {0}".format(search_params))
-        searchUrl = self.url + "torrents/?l78=&l79=&l5=&q=" + urllib.quote(search_params)
+        searchUrl = self.url + "t?78=&23=&25=&65=&79=&22=&5=&q=" + urllib.quote(search_params) + "&qf=#torrents"
         return self.parseResults(searchUrl)
     
     ################################################################################################### 
@@ -218,12 +218,12 @@ class IPTorrentsCache(tvcache.TVCache):
     def _getRSSData(self):
         xml = ''
         if sickbeard.IPTORRENTS_UID and sickbeard.IPTORRENTS_RSSHASH:
-            self.rss_url = provider.url + "torrents/rss?download;l78;l79;l5;u={0};tp={1}".format(sickbeard.IPTORRENTS_UID,sickbeard.IPTORRENTS_RSSHASH)
+            self.rss_url = provider.url + "torrents/rss?u={0};tp={1};78;23;25;65;79;22;5;download".format(sickbeard.IPTORRENTS_UID,sickbeard.IPTORRENTS_RSSHASH)
             logger.log("[" + provider.name + "] RSS URL - {0}".format(self.rss_url))
             xml = provider.getURL(self.rss_url)
         else:
             logger.log("[" + provider.name + "] WARNING: RSS construction via browse since no hash provided.")
-            url = provider.url + "torrents/?l78=&l79=&l5=&q=&qf="
+            url = provider.url + "t?78=&23=&25=&65=&79=&22=&5=&q=&qf=#torrents"
             data = provider.parseResults(url)
             xml = "<rss xmlns:atom=\"http://www.w3.org/2005/Atom\" version=\"2.0\">" + \
             "<channel>" + \
