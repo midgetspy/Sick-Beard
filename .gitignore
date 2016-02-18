@@ -42,6 +42,6 @@ ehthumbs.db
 Thumbs.db
 .directory
 *~
-._.DS_Store
-
+*.pyproj
+*.sln
 ._.DS_Store
