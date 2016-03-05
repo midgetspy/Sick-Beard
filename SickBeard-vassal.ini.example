@@ -27,5 +27,6 @@ env = SICKBEARD_CONF=config.ini
 ;env = SICKBEARD_LOGDIR=""
 
 module = SickBeard_wsgi:app
+threads = 1
 
 socket = /tmp/sickbeard.sock
