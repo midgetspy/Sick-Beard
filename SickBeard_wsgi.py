@@ -41,7 +41,12 @@ import sickbeard
 from sickbeard import logger
 from sickbeard.version import SICKBEARD_VERSION
 
-from sickbeard.webserveInit import app, initWebServer
+from sickbeard.webserveInit import (
+    app as CHERRYPY_APP,
+    initWebServer
+)
+
+app = CHERRYPY_APP
 
 from lib.configobj import ConfigObj
 
