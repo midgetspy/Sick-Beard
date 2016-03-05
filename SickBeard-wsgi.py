@@ -3,6 +3,7 @@
 # Additions by:
 __author__ = 'Rob MacKinnon <rob.mackinnon@gmail.com>'
 __name__ = 'SickBeard_wsgi'
+__package__ = 'SickBeard_wsgi'
 # URL: http://code.google.com/p/sickbeard/
 #
 # Sick Beard is distributed in the hope that it will be useful,
