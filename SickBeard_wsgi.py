@@ -2,8 +2,7 @@
 # Author: Nic Wolfe <nic@wolfeden.ca>
 # Additions by:
 __author__ = 'Rob MacKinnon <rob.mackinnon@gmail.com>'
-__name__ = 'SickBeard_wsgi'
-__package__ = 'SickBeard_wsgi'
+#__name__ = 'SickBeard_wsgi'
 # URL: http://code.google.com/p/sickbeard/
 #
 # Sick Beard is distributed in the hope that it will be useful,
@@ -53,18 +52,22 @@ signal.signal(signal.SIGTERM, sickbeard.sig_handler)
 
 
 def getEnvironmentFlag(flag, default):
-    if os.environ[flag] is not None:
-        if os.environ[flag] == 1:
-            return True
-        else:
-            return False
-    return default
+    try:
+        if os.environ[flag] is not None:
+            if os.environ[flag] == 1:
+                return True
+            else:
+                return False
+    except:
+        return default
 
 
 def getEnvironmentStr(flag):
-    if os.environ[flag] is not None:
-        return os.environ[flag]
-    return None
+    try:
+        if os.environ[flag] is not None:
+            return os.environ[flag]
+    except:
+        return None
 
 
 def main():
@@ -161,7 +164,7 @@ def main():
 
     if forcedPort:
         logger.log(u"Forcing web server to port " + str(forcedPort))
-        startPort = forcedPort
+        startPort = int(forcedPort)
     else:
         startPort = sickbeard.WEB_PORT
 
@@ -220,6 +223,7 @@ def main():
             sickbeard.invoked_command = None
         time.sleep(1)
     return
+
 
 if __name__ == "__main__":
     if sys.hexversion >= 0x020600F0:
