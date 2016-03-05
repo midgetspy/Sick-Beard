@@ -46,7 +46,6 @@ from sickbeard.webserveInit import (
     initWebServer
 )
 
-app = CHERRYPY_APP
 
 from lib.configobj import ConfigObj
 
@@ -59,7 +58,7 @@ signal.signal(signal.SIGTERM, sickbeard.sig_handler)
 def getEnvironmentFlag(flag, default):
     try:
         if os.environ[flag] is not None:
-            if os.environ[flag] == 1:
+            if os.environ[flag] == "1":
                 return True
             else:
                 return False
@@ -156,6 +155,8 @@ def main():
     # Load the config and publish it to the sickbeard package
     sickbeard.CFG = ConfigObj(sickbeard.CONFIG_FILE)
 
+    sickbeard.VERSION_NOTIFY = getEnvironmentFlag('SICKBEARD_VERSION_UPDATE', False)
+
     # Initialize the config and our threads
     sickbeard.initialize(consoleLogging=consoleLogging)
 
@@ -220,17 +221,11 @@ def main():
     if forceUpdate:
         sickbeard.showUpdateScheduler.action.run(force=True)  # @UndefinedVariable
 
-    # Stay alive while my threads do the work
-    while (True):
-
-        if sickbeard.invoked_command:
-            sickbeard.invoked_command()
-            sickbeard.invoked_command = None
-        time.sleep(1)
-    return
+    return CHERRYPY_APP
 
 
 if __name__ == "__main__":
     if sys.hexversion >= 0x020600F0:
         freeze_support()
-    main()
+    print "Starting WSGI application"
+    app = main()

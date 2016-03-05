@@ -204,4 +204,4 @@ def initWebServer(options={}):
     )
 
     cherrypy.server.start()
-    cherrypy.server.wait()
+    #cherrypy.server.wait()
