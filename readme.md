@@ -37,6 +37,12 @@ Sick Beard makes use of the following projects:
 To run Sick Beard from source you will need Python 2.5+ and Cheetah 2.1.0+.
 The [binary releases][githubdownloads] are standalone. Build 503 and older can be found on the now defunct [legacy releases][googledownloads].
 
+## Additional Features
+
+### Run As Managed WSGI Application
+As of this fork, the cherrypy.server.wait() and invoked command loops have been removed for efficiency.  Service starts and is minded by uWSGI Emperor if you have it.
+To setup, update SickBeard-vassal.ini.example with your working directory and save to the vassal INI to your uWSGI Emperor directory.
+
 ## Bugs
 
 If you find a bug please report it or it'll never get fixed. Verify that it hasn't [already been submitted][googleissues] and then [log a new bug][googlenewissue]. Be sure to provide as much information as possible.

@@ -953,8 +953,8 @@ def saveAndShutdown(restart=False):
             logger.log(u"Restarting Sick Beard with " + str(popen_list))
             logger.close()
             subprocess.Popen(popen_list, cwd=os.getcwd())
-
-    os._exit(0)
+    sys.exit(0)
+    # os._exit(0)
 
 
 def invoke_command(to_call, *args, **kwargs):

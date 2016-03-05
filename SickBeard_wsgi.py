@@ -51,9 +51,6 @@ from lib.configobj import ConfigObj
 
 from SickBeard import daemonize, loadShowsFromDB
 
-signal.signal(signal.SIGINT, sickbeard.sig_handler)
-signal.signal(signal.SIGTERM, sickbeard.sig_handler)
-
 
 def getEnvironmentFlag(flag, default):
     try:
@@ -122,10 +119,9 @@ def main():
     forcedIP = getEnvironmentStr('SICKBEARD_LISTEN')
     noLaunch = True  # The WSGI version should never try to load a browser
 
-    sickbeard.DAEMON = getEnvironmentFlag('SICKBEARD_FORK', False)
+    sickbeard.DAEMON = False  # Don't ever fork
     consoleLogging = getEnvironmentFlag('SICKBEARD_CONSOLELOG', True)
-    sickbeard.CREATEPID = getEnvironmentFlag('SICKBEARD_CREATEPID', False)
-    sickbeard.PIDFILE = getEnvironmentStr('SICKBEARD_PIDFILE')
+    sickbeard.CREATEPID = False
     sickbeard.NO_RESIZE = getEnvironmentFlag('SICKBEARD_NO_RESIZE', False)
 
     if getEnvironmentStr('SICKBEARD_DATA_DIR') is not None:
@@ -223,6 +219,10 @@ def main():
 
     return CHERRYPY_APP
 
+signal.signal(signal.SIGINT, sickbeard.sig_handler)
+signal.signal(signal.SIGHUP, sickbeard.sig_handler)
+signal.signal(signal.SIGQUIT, sickbeard.sig_handler)
+signal.signal(signal.SIGTERM, sickbeard.sig_handler)
 
 print "Starting WSGI application"
 app = main()
