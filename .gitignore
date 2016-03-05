@@ -33,6 +33,7 @@ tests/cache.db
 
 # OS generated files #
 ######################
+.idea
 .Spotlight-V100
 .Trashes
 .DS_Store

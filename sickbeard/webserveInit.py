@@ -26,6 +26,8 @@ from sickbeard.webserve import WebInterface
 
 from sickbeard.helpers import create_https_certificates
 
+app = None
+
 
 def initWebServer(options={}):
     options.setdefault('port', 8081)
@@ -149,6 +151,7 @@ def initWebServer(options={}):
             'tools.staticdir.dir': 'css'
         },
     }
+    global app
     app = cherrypy.tree.mount(WebInterface(), options['web_root'], conf)
 
     # auth
