@@ -107,7 +107,7 @@ class EZRSSProvider(generic.TorrentProvider):
         if search_params:
             params.update(search_params)
 
-        search_url = self.url + 'search/index.php?' + urllib.urlencode(params)
+        search_url = self.url + 'search/?' + urllib.urlencode(params)
 
         logger.log(u"Search string: " + search_url, logger.DEBUG)
 
