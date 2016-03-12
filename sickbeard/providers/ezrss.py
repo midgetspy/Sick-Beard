@@ -172,7 +172,7 @@ class EZRSSCache(tvcache.TVCache):
 
     def _getRSSData(self):
 
-        rss_url = self.provider.url + 'feed/'
+        rss_url = self.provider.url + 'ezrss.xml'
         logger.log(self.provider.name + " cache update URL: " + rss_url, logger.DEBUG)
 
         data = self.provider.getURL(rss_url)
