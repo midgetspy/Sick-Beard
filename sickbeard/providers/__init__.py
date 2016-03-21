@@ -18,6 +18,7 @@
 
 __all__ = ['ezrss',
            'hdbits',
+           'kickass',
            'tvtorrents',
            'torrentleech',
            'womble',

@@ -34,7 +34,7 @@ from threading import Lock
 # apparently py2exe won't build these unless they're imported somewhere
 from sickbeard import providers, metadata
 
-from providers import ezrss, tvtorrents, torrentleech, btn, newznab, womble, omgwtfnzbs, hdbits
+from providers import ezrss, tvtorrents, torrentleech, btn, newznab, womble, omgwtfnzbs, hdbits, kickass
 from sickbeard.config import CheckSection, check_setting_int, check_setting_str, ConfigMigrator
 
 from sickbeard import searchCurrent, searchBacklog, showUpdater, versionChecker, properFinder, autoPostProcesser
@@ -47,6 +47,7 @@ from common import SD, SKIPPED, NAMING_REPEAT
 from sickbeard.databases import mainDB, cache_db
 
 from lib.configobj import ConfigObj
+from __builtin__ import False
 
 invoked_command = None
 
@@ -168,6 +169,9 @@ EZRSS = False
 HDBITS = False
 HDBITS_USERNAME = None
 HDBITS_PASSKEY = None
+
+KICKASS = False
+KICKASS_ALT_URL = None
 
 TVTORRENTS = False
 TVTORRENTS_DIGEST = None
@@ -356,7 +360,7 @@ def initialize(consoleLogging=True):
                 USE_PLEX, PLEX_NOTIFY_ONSNATCH, PLEX_NOTIFY_ONDOWNLOAD, PLEX_UPDATE_LIBRARY, \
                 PLEX_SERVER_HOST, PLEX_HOST, PLEX_USERNAME, PLEX_PASSWORD, \
                 showUpdateScheduler, __INITIALIZED__, LAUNCH_BROWSER, showList, loadingShowList, \
-                NEWZNAB_DATA, NZBS, NZBS_UID, NZBS_HASH, EZRSS, HDBITS, HDBITS_USERNAME, HDBITS_PASSKEY, TVTORRENTS, TVTORRENTS_DIGEST, TVTORRENTS_HASH, BTN, BTN_API_KEY, TORRENTLEECH, TORRENTLEECH_KEY, \
+                NEWZNAB_DATA, NZBS, NZBS_UID, NZBS_HASH, EZRSS, HDBITS, HDBITS_USERNAME, HDBITS_PASSKEY, KICKASS, KICKASS_ALT_URL, TVTORRENTS, TVTORRENTS_DIGEST, TVTORRENTS_HASH, BTN, BTN_API_KEY, TORRENTLEECH, TORRENTLEECH_KEY, \
                 TORRENT_DIR, USENET_RETENTION, SOCKET_TIMEOUT, \
                 SEARCH_FREQUENCY, DEFAULT_SEARCH_FREQUENCY, BACKLOG_SEARCH_FREQUENCY, \
                 POSTPROCESS_FREQUENCY, DEFAULT_POSTPROCESS_FREQUENCY, MIN_POSTPROCESS_FREQUENCY, \
@@ -531,6 +535,10 @@ def initialize(consoleLogging=True):
         HDBITS = bool(check_setting_int(CFG, 'HDBITS', 'hdbits', 0))
         HDBITS_USERNAME = check_setting_str(CFG, 'HDBITS', 'hdbits_username', '')
         HDBITS_PASSKEY = check_setting_str(CFG, 'HDBITS', 'hdbits_passkey', '')
+        
+        CheckSection(CFG, 'KICKASS')
+        KICKASS = bool(check_setting_int(CFG, 'KICKASS', 'kickass', 0))
+        KICKASS_ALT_URL = check_setting_str(CFG, 'KICKASS', 'kickass_alt_url', '')
 
         CheckSection(CFG, 'TVTORRENTS')
         TVTORRENTS = bool(check_setting_int(CFG, 'TVTORRENTS', 'tvtorrents', 0))
@@ -1090,6 +1098,10 @@ def save_config():
     new_config['HDBITS']['hdbits'] = int(HDBITS)
     new_config['HDBITS']['hdbits_username'] = HDBITS_USERNAME
     new_config['HDBITS']['hdbits_passkey'] = HDBITS_PASSKEY
+    
+    new_config['KICKASS'] = {}
+    new_config['KICKASS']['kickass'] = int(KICKASS)
+    new_config['KICKASS']['kickass_alt_url'] = KICKASS_ALT_URL
 
     new_config['TVTORRENTS'] = {}
     new_config['TVTORRENTS']['tvtorrents'] = int(TVTORRENTS)
