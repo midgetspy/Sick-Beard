@@ -159,6 +159,10 @@ BACKLOG_SEARCH_FREQUENCY = 21
 MIN_SEARCH_FREQUENCY = 10
 DEFAULT_SEARCH_FREQUENCY = 40
 
+POSTPROCESS_FREQUENCY = None
+MIN_POSTPROCESS_FREQUENCY = 5
+DEFAULT_POSTPROCESS_FREQUENCY = 10
+
 EZRSS = False
 
 HDBITS = False
@@ -355,6 +359,7 @@ def initialize(consoleLogging=True):
                 NEWZNAB_DATA, NZBS, NZBS_UID, NZBS_HASH, EZRSS, HDBITS, HDBITS_USERNAME, HDBITS_PASSKEY, TVTORRENTS, TVTORRENTS_DIGEST, TVTORRENTS_HASH, BTN, BTN_API_KEY, TORRENTLEECH, TORRENTLEECH_KEY, \
                 TORRENT_DIR, USENET_RETENTION, SOCKET_TIMEOUT, \
                 SEARCH_FREQUENCY, DEFAULT_SEARCH_FREQUENCY, BACKLOG_SEARCH_FREQUENCY, \
+                POSTPROCESS_FREQUENCY, DEFAULT_POSTPROCESS_FREQUENCY, MIN_POSTPROCESS_FREQUENCY, \
                 QUALITY_DEFAULT, FLATTEN_FOLDERS_DEFAULT, STATUS_DEFAULT, \
                 GROWL_NOTIFY_ONSNATCH, GROWL_NOTIFY_ONDOWNLOAD, TWITTER_NOTIFY_ONSNATCH, TWITTER_NOTIFY_ONDOWNLOAD, \
                 USE_GROWL, GROWL_HOST, GROWL_PASSWORD, USE_PROWL, PROWL_NOTIFY_ONSNATCH, PROWL_NOTIFY_ONDOWNLOAD, PROWL_API, PROWL_PRIORITY, PROG_DIR, \
@@ -477,7 +482,11 @@ def initialize(consoleLogging=True):
         SEARCH_FREQUENCY = check_setting_int(CFG, 'General', 'search_frequency', DEFAULT_SEARCH_FREQUENCY)
         if SEARCH_FREQUENCY < MIN_SEARCH_FREQUENCY:
             SEARCH_FREQUENCY = MIN_SEARCH_FREQUENCY
-
+        
+        POSTPROCESS_FREQUENCY = check_setting_int(CFG, 'General', 'postprocess_frequency', DEFAULT_POSTPROCESS_FREQUENCY)
+        if POSTPROCESS_FREQUENCY < MIN_POSTPROCESS_FREQUENCY:
+            POSTPROCESS_FREQUENCY = MIN_POSTPROCESS_FREQUENCY
+        
         TV_DOWNLOAD_DIR = check_setting_str(CFG, 'General', 'tv_download_dir', '')
         PROCESS_AUTOMATICALLY = check_setting_int(CFG, 'General', 'process_automatically', 0)
         RENAME_EPISODES = check_setting_int(CFG, 'General', 'rename_episodes', 1)
@@ -779,7 +788,7 @@ def initialize(consoleLogging=True):
 
         # processors
         autoPostProcesserScheduler = scheduler.Scheduler(autoPostProcesser.PostProcesser(),
-                                                         cycleTime=datetime.timedelta(minutes=10),
+                                                         cycleTime=datetime.timedelta(minutes=POSTPROCESS_FREQUENCY),
                                                          threadName="POSTPROCESSER",
                                                          run_delay=datetime.timedelta(minutes=5)
                                                          )
@@ -1033,6 +1042,7 @@ def save_config():
     new_config['General']['nzb_method'] = NZB_METHOD
     new_config['General']['usenet_retention'] = int(USENET_RETENTION)
     new_config['General']['search_frequency'] = int(SEARCH_FREQUENCY)
+    new_config['General']['postprocess_frequency'] = int(POSTPROCESS_FREQUENCY)
     new_config['General']['download_propers'] = int(DOWNLOAD_PROPERS)
     new_config['General']['quality_default'] = int(QUALITY_DEFAULT)
     new_config['General']['status_default'] = int(STATUS_DEFAULT)
