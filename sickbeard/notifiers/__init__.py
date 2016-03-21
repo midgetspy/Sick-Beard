@@ -34,6 +34,7 @@ import nma
 import pushalot
 import pushbullet
 
+import slack
 import tweet
 import trakt
 
@@ -58,6 +59,7 @@ nma_notifier = nma.NMA_Notifier()
 pushalot_notifier = pushalot.PushalotNotifier()
 pushbullet_notifier = pushbullet.PushbulletNotifier()
 # social
+slack_notifier = slack.SlackNotifier()
 twitter_notifier = tweet.TwitterNotifier()
 trakt_notifier = trakt.TraktNotifier()
 
@@ -76,6 +78,7 @@ notifiers = [
     nma_notifier,
     pushalot_notifier,
     pushbullet_notifier,
+    slack_notifier,
     twitter_notifier,
     trakt_notifier,
 ]
