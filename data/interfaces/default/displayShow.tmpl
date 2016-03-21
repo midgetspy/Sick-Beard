@@ -53,13 +53,13 @@
 </div>
 
 <div id="summary" class="align-left">
-<table>
+<table style="width:100%">
 #if $show.network and $show.airs:
-    <tr><td class="showLegend">Airs: </td><td>$show.airs on $show.network</td></tr>
+    <tr><td class="showLegend">Airs: </td><td>$show.airs on $show.network</td><td rowspan="8" align="right"><img height="160" src="$sbRoot/showPoster/?show=$show.tvdbid&amp;which=poster" /></td></tr>
 #else if $show.network:
-    <tr><td class="showLegend">Airs: </td><td>$show.network</td></tr>
+    <tr><td class="showLegend">Airs: </td><td>$show.network</td><td rowspan="8" align="right"><img height="160" src="$sbRoot/showPoster/?show=$show.tvdbid&amp;which=poster" /></td></tr>
 #else if $show.airs:
-    <tr><td class="showLegend">Airs: </td><td>$show.airs</td></tr>
+    <tr><td class="showLegend">Airs: </td><td>$show.airs</td><td rowspan="8" align="right"><img height="160" src="$sbRoot/showPoster/?show=$show.tvdbid&amp;which=poster" /></td></tr>
 #end if
     <tr><td class="showLegend">Status: </td><td>$show.status</td></tr>
 #if $showLoc[1]:
