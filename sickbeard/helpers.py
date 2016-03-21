@@ -198,6 +198,12 @@ def getURLFileLike(url, validate=False, cookies = cookielib.CookieJar(), passwor
     @param throw_exc: throw the exception that was caught instead of None
     @return: the file-like object retrieved from the URL or None (or the exception) if it could not be retrieved
     """
+    # get the name string for logging purposes
+    if isinstance(url, urllib2.Request):
+        name = url.get_full_url()
+    else:
+        name = url
+    
     # configure the OpenerDirector appropriately
     if not validate and sys.version_info >= (2, 7, 9):
             opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(cookies),
@@ -209,7 +215,7 @@ def getURLFileLike(url, validate=False, cookies = cookielib.CookieJar(), passwor
         # Before python 2.7.9, there was no built-in way to validate SSL certificates
         # Since our default is not to validate, it is of low priority to make it available here
         if validate and sys.version_info < (2, 7, 9):
-            logger.log(u"The SSL certificate will not be validated for " + url + "(python 2.7.9+ required)", logger.MESSAGE)
+            logger.log(u"The SSL certificate will not be validated for " + name + u"(python 2.7.9+ required)", logger.MESSAGE)
 
         opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(cookies),
                                       MultipartPostHandler.MultipartPostHandler,
@@ -224,42 +230,42 @@ def getURLFileLike(url, validate=False, cookies = cookielib.CookieJar(), passwor
         return opener.open(url)
 
     except urllib2.HTTPError, e:
-        logger.log(u"HTTP error " + str(e.code) + " while loading URL " + url, logger.WARNING)
+        logger.log(u"HTTP error " + str(e.code) + u" while loading URL " + name, logger.WARNING)
         if throw_exc:
             raise 
         else:
             return None
 
     except urllib2.URLError, e:
-        logger.log(u"URL error " + str(e.reason) + " while loading URL " + url, logger.WARNING)
+        logger.log(u"URL error " + str(e.reason) + u" while loading URL " + name, logger.WARNING)
         if throw_exc:
             raise 
         else:
             return None
 
     except BadStatusLine:
-        logger.log(u"BadStatusLine error while loading URL " + url, logger.WARNING)
+        logger.log(u"BadStatusLine error while loading URL " + name, logger.WARNING)
         if throw_exc:
             raise 
         else:
             return None
 
     except socket.timeout:
-        logger.log(u"Timed out while loading URL " + url, logger.WARNING)
+        logger.log(u"Timed out while loading URL " + name, logger.WARNING)
         if throw_exc:
             raise 
         else:
             return None
 
     except ValueError:
-        logger.log(u"Unknown error while loading URL " + url, logger.WARNING)
+        logger.log(u"Unknown error while loading URL " + name, logger.WARNING)
         if throw_exc:
             raise 
         else:
             return None
 
     except Exception:
-        logger.log(u"Unknown exception while loading URL " + url + ": " + traceback.format_exc(), logger.WARNING)
+        logger.log(u"Unknown exception while loading URL " + name + u": " + traceback.format_exc(), logger.WARNING)
         if throw_exc:
             raise 
         else:
