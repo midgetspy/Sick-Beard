@@ -231,6 +231,12 @@ def pickBestResult(results, show, quality_list=None):
     for cur_result in results:
         logger.log(u"Quality of " + cur_result.name + " is " + Quality.qualityStrings[cur_result.quality])
 
+        #if using sabnzbd, check to see if we've already got the same url in our history. If we do, then ignore this result. 
+        if sickbeard.SAB_DUPLICATES:
+            if sab.checkSabHistory(cur_result.url):
+        	   logger.log(u"Ignoring " + cur_result.name + " as it has already been downloaded by sabnzbd", logger.MESSAGE)
+        	   continue
+                
         if quality_list and cur_result.quality not in quality_list:
             logger.log(cur_result.name + " is a quality we know we don't want, rejecting it", logger.DEBUG)
             continue

@@ -201,3 +201,47 @@ def testAuthentication(host=None, username=None, password=None, apikey=None):
         return False, sabText
 
     return True, "Success"
+
+def checkSabHistory(sbUrl=None):
+    """
+    Sends an API request to SAB to get the history, checks for matches to sbUrl
+    
+    sbUrl - the URL to scan the SAB history for
+
+    Returns: True if url match is found
+    """
+    if sickbeard.SAB_APIKEY is not None:
+        apikey = sickbeard.SAB_APIKEY
+        
+    if sickbeard.SAB_HOST is not None:
+        host = sickbeard.SAB_HOST
+    
+    if sickbeard.SAB_USERNAME is not None:
+        username = sickbeard.SAB_USERNAME
+        
+    if sickbeard.SAB_PASSWORD is not None:
+        password = sickbeard.SAB_PASSWORD
+
+    # build up the URL parameters
+    params = {}
+    params['mode'] = 'history'
+    params['output'] = 'json'
+    params['limit'] = '100'
+    params['ma_username'] = username
+    params['ma_password'] = password
+    params['apikey'] = apikey
+    url = host + "api?" + urllib.urlencode(params)
+
+    # send the request
+    logger.log(u"SABnzbd history request URL: " + url, logger.DEBUG)
+    result, f = _sabURLOpenSimple(url)
+    if not result:
+        return False
+
+    # check the sab history json result for a match to our url
+    sabText = f.getvalue()
+    sabHistory = json.loads(sabText)
+    for slot in sabHistory['history']['slots']:
+        if slot['url'] == sbUrl:
+            return True            
+    return False
