@@ -8,6 +8,7 @@ sickbeard.db*
 autoProcessTV/autoProcessTV.cfg
 server.crt
 server.key
+SickBeard-vassal.ini
 
 #  SB Test Related   #
 ######################
@@ -33,6 +34,7 @@ tests/cache.db
 
 # OS generated files #
 ######################
+.idea
 .Spotlight-V100
 .Trashes
 .DS_Store
