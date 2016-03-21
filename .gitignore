@@ -8,6 +8,7 @@ sickbeard.db*
 autoProcessTV/autoProcessTV.cfg
 server.crt
 server.key
+sickbeard.pid*
 
 #  SB Test Related   #
 ######################

@@ -16,6 +16,7 @@
 # You should have received a copy of the GNU General Public License
 # along with Sick Beard.  If not, see <http://www.gnu.org/licenses/>.
 
+import base64
 import urllib
 import urllib2
 import sickbeard
@@ -169,35 +170,34 @@ class PLEXNotifier:
             if username and password:
 
                 logger.log(u"PLEX: fetching credentials for Plex user: " + username, logger.DEBUG)
-                url = "https://plex.tv/users/sign_in.xml"            
-                req = urllib2.Request(url, data="")
-                pw_mgr = urllib2.HTTPPasswordMgrWithDefaultRealm()
-                pw_mgr.add_password(None, url, username, password)
+                req = urllib2.Request("https://plex.tv/users/sign_in.xml", data="")
+                authheader = "Basic %s" % base64.encodestring('%s:%s' % (username, password))[:-1]
+                req.add_header("Authorization", authheader)
                 req.add_header("X-Plex-Product", "Sick Beard Notifier")
                 req.add_header("X-Plex-Client-Identifier", "5f48c063eaf379a565ff56c9bb2b401e")
                 req.add_header("X-Plex-Version", "1.0")
-                
+
                 try:
-                    response = sickbeard.helpers.getURL(req, throw_exc=True)
-                    auth_tree = etree.fromstring(response)
+                    response = urllib2.urlopen(req)
+                except urllib2.URLError, e:
+                    logger.log(u"PLEX: Error fetching credentials from from plex.tv for user %s: %s" % (username, ex(e)), logger.ERROR)
+
+                try:
+                    auth_tree = etree.parse(response)
                     token = auth_tree.findall(".//authentication-token")[0].text
                     token_arg = "?X-Plex-Token=" + token
-                
-                except urllib2.URLError as e:
-                    logger.log(u"PLEX: Error fetching credentials from from plex.tv for user %s: %s" % (username, ex(e)), logger.MESSAGE)
-                
                 except (ValueError, IndexError) as e:
-                    logger.log(u"PLEX: Error parsing plex.tv response: " + ex(e), logger.MESSAGE)
+                    logger.log(u"PLEX: Error parsing token from plex.tv response: " + ex(e), logger.ERROR)
 
             url = "http://%s/library/sections%s" % (sickbeard.PLEX_SERVER_HOST, token_arg)
             try:
-                xml_tree = etree.fromstring(sickbeard.helpers.getURL(url))
-                media_container = xml_tree.getroot()
+                data = sickbeard.helpers.getURL(url)
+                xml_tree = etree.fromstring(data)
             except IOError, e:
                 logger.log(u"PLEX: Error while trying to contact Plex Media Server: " + ex(e), logger.ERROR)
                 return False
 
-            sections = media_container.findall('.//Directory')
+            sections = xml_tree.findall('Directory')
             if not sections:
                 logger.log(u"PLEX: Plex Media Server not running on: " + sickbeard.PLEX_SERVER_HOST, logger.MESSAGE)
                 return False
