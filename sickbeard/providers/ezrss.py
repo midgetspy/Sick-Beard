@@ -42,7 +42,7 @@ class EZRSSProvider(generic.TorrentProvider):
 
         self.cache = EZRSSCache(self)
 
-        self.url = 'https://www.ezrss.it/'
+        self.url = 'https://eztv.ag/'
 
     def isEnabled(self):
         return sickbeard.EZRSS
@@ -107,7 +107,7 @@ class EZRSSProvider(generic.TorrentProvider):
         if search_params:
             params.update(search_params)
 
-        search_url = self.url + 'search/index.php?' + urllib.urlencode(params)
+        search_url = self.url + 'search/?' + urllib.urlencode(params)
 
         logger.log(u"Search string: " + search_url, logger.DEBUG)
 
@@ -172,7 +172,7 @@ class EZRSSCache(tvcache.TVCache):
 
     def _getRSSData(self):
 
-        rss_url = self.provider.url + 'feed/'
+        rss_url = self.provider.url + 'ezrss.xml'
         logger.log(self.provider.name + " cache update URL: " + rss_url, logger.DEBUG)
 
         data = self.provider.getURL(rss_url)
