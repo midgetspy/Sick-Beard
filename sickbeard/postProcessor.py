@@ -842,6 +842,9 @@ class PostProcessor(object):
         # generate nfo/tbn
         ep_obj.createMetaFiles()
         ep_obj.saveToDB()
+        
+        #clean episode retention as required by show
+        ep_obj.show.cleanEpisodeRetention()
 
         # send notifiers library update
         notifiers.update_library(ep_obj)

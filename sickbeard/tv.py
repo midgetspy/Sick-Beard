@@ -73,6 +73,8 @@ class TVShow(object):
         self.rls_ignore_words = ""
         self.rls_require_words = ""
 
+        self.retain_episode_count = 0
+
         self.lock = threading.Lock()
         self._isDirGood = False
 
@@ -656,6 +658,8 @@ class TVShow(object):
 
             self.rls_ignore_words = sqlResults[0]["rls_ignore_words"]
             self.rls_require_words = sqlResults[0]["rls_require_words"]
+            
+            self.retain_episode_count = int(sqlResults[0]["retain_episode_count"])
 
     def loadFromTVDB(self, cache=True, tvapi=None, cachedSeason=None):
 
@@ -820,6 +824,7 @@ class TVShow(object):
                         "last_update_tvdb": self.last_update_tvdb,
                         "rls_ignore_words": self.rls_ignore_words,
                         "rls_require_words": self.rls_require_words,
+                        "retain_episode_count": self.retain_episode_count,
                         "skip_notices": self.skip_notices
                         }
 
@@ -925,6 +930,27 @@ class TVShow(object):
             # if it's >= maxBestQuality then it's good
             else:
                 return Overview.GOOD
+    def cleanEpisodeRetention(self):
+        myDB = db.DBConnection()
+        sqlResults = myDB.select(
+            "SELECT * FROM tv_episodes WHERE showid = ? AND (status % 10)=? ORDER BY airdate DESC",
+            [self.tvdbid, DOWNLOADED]
+        )
+        if self.retain_episode_count is not None and int(self.retain_episode_count) > 0:
+            logger.log(u"Checking retained episodes.. :"+self.name, logger.DEBUG)
+            remove=len(sqlResults) - int(self.retain_episode_count)
+            if remove > 0:
+                logger.log(u"Removing the last "+str(remove)+" episodes", logger.DEBUG)
+                for ep in sqlResults[-1 * remove:]:
+                    epObj=TVEpisode(self, ep['season'], ep['episode'])
+                    #delete files, and mark as SKIPPED
+                    epObj.deleteFiles()
+                    del epObj
+            else:
+                logger.log(u"Retaining all " +str(len(sqlResults)) + " Episodes", logger.DEBUG)
+
+
+
 
 
 def dirty_setter(attr_name):
@@ -1750,3 +1776,35 @@ class TVEpisode(object):
             self.saveToDB()
             for relEp in self.relatedEps:
                 relEp.saveToDB()
+
+    # delete the files associated with this episode, and mark it skipped
+    # log and ignore failed attempts
+    def deleteFiles(self):
+        related_files = helpers.list_associated_files(self.location, base_name_only=True)
+        logger.log(u"Delete episode files: " + self.location , logger.MESSAGE)
+        # overwrites composite field, as we're
+        #about to delete the file - quality is irrelevant
+        
+        try:
+            if len(self.location) > 0:
+              os.remove(self.location)
+            #if there are no exceptions, then mark it cleared
+            self.hasnfo=0
+            self.hastbn=0
+            self.location=u''
+            self.file_size=0
+            self.status=SKIPPED
+            self.saveToDB()
+            #if related files could not all be deleted, we don't have the episode at this point anyway
+            for cur_related_file in related_files:
+                try:
+                    os.remove(cur_related_file)
+                except (IOError, OSError), e:
+                    logger.log(u"Unable to remove related file " + cur_related_file + ": " + ex(e), logger.ERROR)
+                    pass       
+        except (IOError, OSError), e:
+            logger.log(u"Unable to remove episode file " + self.location + ": " + ex(e), logger.ERROR)
+            pass
+
+     
+
