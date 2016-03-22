@@ -86,7 +86,7 @@
                                 <span class="component-title jumbo">Configure Provider:</span>
                                 <span class="component-desc">
                                     #set $provider_config_list = []
-                                    #for $cur_provider in ("btn", "hdbits", "omgwtfnzbs", "tvtorrents", "torrentleech"):
+                                    #for $cur_provider in ("btn", "hdbits", "omgwtfnzbs", "tvtorrents", "torrentleech", "iptorrents"):
                                         #set $cur_provider_obj = $sickbeard.providers.getProviderClass($cur_provider)
                                         #if $cur_provider_obj.providerType == $GenericProvider.NZB and not $sickbeard.USE_NZBS:
                                             #continue
@@ -170,7 +170,7 @@
                                 <input class="component-desc" type="text" name="tvtorrents_hash" value="$sickbeard.TVTORRENTS_HASH" size="40" />
                             </label>
                         </div>
-                    </div><!-- /torrentleechDiv //-->
+                    </div><!-- /tvtorrentsDiv //-->
 
                     <div class="providerDiv" id="torrentleechDiv">
                         <div class="field-pair">
@@ -180,6 +180,21 @@
                             </label>
                         </div>
                     </div><!-- /torrentleechDiv //-->
+
+                    <div class="providerDiv" id="iptorrentsDiv">
+                        <div class="field-pair">
+                            <label class="clearfix">
+                                <span class="component-title">IPTorrents User Number</span>
+                                <input class="component-desc" type="text" name="iptorrents_u" value="$sickbeard.IPTORRENTS_U" size="40" />
+                            </label>
+                        </div>
+                        <div class="field-pair">
+                            <label class="clearfix">
+                                <span class="component-title">IPTorrents Torrent Pass</span>
+                                <input class="component-desc" type="text" name="iptorrents_tp" value="$sickbeard.IPTORRENTS_TP" size="40" />
+                            </label>
+                        </div>
+                    </div><!-- /iptorrentsDiv //-->
 
                     <div class="providerDiv" id="btnDiv">
                         <div class="field-pair">
