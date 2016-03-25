@@ -158,7 +158,7 @@ class PLEXNotifier:
             password = sickbeard.PLEX_PASSWORD
 
         if sickbeard.USE_PLEX and sickbeard.PLEX_UPDATE_LIBRARY:
-            if not sickbeard.PLEX_SERVER_HOST:
+            if not host:
                 logger.log(u"PLEX: No Plex Media Server host specified, check your settings", logger.DEBUG)
                 return False
 
@@ -189,22 +189,22 @@ class PLEXNotifier:
                 except (ValueError, IndexError) as e:
                     logger.log(u"PLEX: Error parsing plex.tv response: " + ex(e), logger.MESSAGE)
 
-            url = "http://%s/library/sections%s" % (sickbeard.PLEX_SERVER_HOST, token_arg)
+            url = "http://%s/library/sections%s" % (host, token_arg)
             try:
                 xml_tree = etree.fromstring(sickbeard.helpers.getURL(url))
-                media_container = xml_tree.getroot()
+                media_container = xml_tree
             except IOError, e:
                 logger.log(u"PLEX: Error while trying to contact Plex Media Server: " + ex(e), logger.ERROR)
                 return False
 
             sections = media_container.findall('.//Directory')
             if not sections:
-                logger.log(u"PLEX: Plex Media Server not running on: " + sickbeard.PLEX_SERVER_HOST, logger.MESSAGE)
+                logger.log(u"PLEX: Plex Media Server not running on: " + host, logger.MESSAGE)
                 return False
 
             for section in sections:
                 if section.attrib['type'] == "show":
-                    url = "http://%s/library/sections/%s/refresh%s" % (sickbeard.PLEX_SERVER_HOST, section.attrib['key'], token_arg)
+                    url = "http://%s/library/sections/%s/refresh%s" % (host, section.attrib['key'], token_arg)
                     if sickbeard.helpers.getURLFileLike(url) is None:
                         logger.log(u"PLEX: Error updating library section for Plex Media Server", logger.ERROR)
                         return False
