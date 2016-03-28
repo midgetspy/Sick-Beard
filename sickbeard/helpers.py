@@ -165,7 +165,7 @@ def sanitizeFileName(name):
 
     # remove bad chars from the filename
     name = re.sub(r'[\\/\*]', '-', name)
-    name = re.sub(r'[:"<>|?]', '', name)
+    name = re.sub(r'[:"<>|?;,]', '', name)
 
     # remove leading/trailing periods and spaces
     name = name.strip(' .')
