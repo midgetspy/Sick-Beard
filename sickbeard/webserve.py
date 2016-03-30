@@ -1486,6 +1486,15 @@ class NewHomeAddShows:
         if len(keywords) > 1:
             keywords.insert(0, nameUTF8)
 
+        myDB = db.DBConnection()
+        show_results = myDB.select("SELECT tvdb_id FROM tv_shows")
+
+        show_ids = []
+        for cur_show_result in show_results:
+            cur_tvdb_id = int(cur_show_result["tvdb_id"])
+            if cur_tvdb_id not in show_ids:
+                show_ids.append(cur_tvdb_id)
+
         # Query the TVDB for each search term and build the list of results
         results = []
 
@@ -1518,6 +1527,10 @@ class NewHomeAddShows:
 
                     # don't add duplicates
                     if tvdb_id in [x[0] for x in results]:
+                        continue
+
+                    # don't add existing
+                    if tvdb_id in show_ids:
                         continue
 
                     results.append((tvdb_id, curSeries.findtext('SeriesName'), curSeries.findtext('FirstAired')))
