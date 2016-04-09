@@ -76,6 +76,7 @@ def initWebServer(options={}):
     enable_https = options['enable_https']
     https_cert = options['https_cert']
     https_key = options['https_key']
+    https_chain = options['https_chain']
 
     if enable_https:
         # If either the HTTPS certificate or key do not exist, make some self-signed ones.
@@ -118,6 +119,7 @@ def initWebServer(options={}):
     if enable_https:
         options_dict['server.ssl_certificate'] = https_cert
         options_dict['server.ssl_private_key'] = https_key
+        options_dict['server.ssl_certificate_chain'] = https_chain
         protocol = "https"
     else:
         protocol = "http"

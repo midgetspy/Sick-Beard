@@ -81,6 +81,20 @@ def change_HTTPS_KEY(https_key):
 
     return True
 
+def change_HTTPS_CHAIN(https_chain):
+
+    if https_chain == '':
+        sickbeard.HTTPS_CHAIN = ''
+        return True
+
+    if os.path.normpath(sickbeard.HTTPS_CHAIN) != os.path.normpath(https_chain):
+        if helpers.makeDir(os.path.dirname(os.path.abspath(https_chain))):
+            sickbeard.HTTPS_CHAIN = os.path.normpath(https_chain)
+            logger.log(u"Changed https chain path to " + https_chain)
+        else:
+            return False
+
+    return True
 
 def change_LOG_DIR(log_dir, web_log):
 
