@@ -144,7 +144,7 @@ class IPTorrentsProvider(generic.TorrentProvider):
         data = self.getURL(searchUrl)
         results = []
         if data:
-            for torrent in re.compile('<a class="t_title" href="/details\.php\?id=\d+">(?P<title>.*?)</a>.*?<a href="/download\.php/(?P<url>.*?)"><',re.MULTILINE|re.DOTALL).finditer(data):
+            for torrent in re.compile('<a class="t_title b" href="/details\.php\?id=\d+">(?P<title>.*?)</a>.*?<a href="/download\.php/(?P<url>.*?)"><',re.MULTILINE|re.DOTALL).finditer(data):
                 item = (torrent.group('title').replace('.',' '), self.url + "download.php/" + torrent.group('url'))
                 results.append(item)
             if len(results):
