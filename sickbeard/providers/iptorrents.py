@@ -46,7 +46,7 @@ class IPTorrentsProvider(generic.TorrentProvider):
         generic.TorrentProvider.__init__(self, "IPTorrents")
         self.supportsBacklog = True
         self.cache = IPTorrentsCache(self)     
-        self.url = 'https://www.iptorrents.com/' if getattr(sickbeard,'IPTORRENTS_EU',False) else 'https://iptorrents.eu/'
+        self.url = 'https://www.iptorrents.com/' if not getattr(sickbeard,'IPTORRENTS_EU',False) else 'https://iptorrents.eu/'
         self.name = "IPTorrents"
         self.session = None
         logger.log("[" + self.name + "] initializing...")
