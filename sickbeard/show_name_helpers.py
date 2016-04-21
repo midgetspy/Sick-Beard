@@ -188,7 +188,9 @@ def isGoodResult(name, show, log=True):
     """
     Use an automatically-created regex to make sure the result actually is the show it claims to be
     """
-
+    #
+    # Change _ to . to fix releases being rejected whetre the naming convention is to use _ (e.g. FoV)
+    name = re.sub('_', '.', name)
     all_show_names = allPossibleShowNames(show)
     showNames = map(sanitizeSceneName, all_show_names) + all_show_names
 
