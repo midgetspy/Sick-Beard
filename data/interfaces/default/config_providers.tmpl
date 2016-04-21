@@ -322,6 +322,14 @@
                     
                     <div class="providerDiv" id="iptorrentsDiv">
                         <div class="field-pair">
+                            <input type="checkbox" name="iptorrents_eu" id="iptorrents_eu" #if $sickbeard.IPTORRENTS_EU then "checked=\"checked\"" else ""#/>
+                            <label class="clearfix" for="iptorrents_eu">
+                                <span class="component-title">Use iptorrents.eu</span>
+                                <span class="component-desc">Use iptorrents.eu instead of iptorrents.com?</span>
+                            </label>
+                        </div>
+                        
+                        <div class="field-pair">
                             <label class="clearfix">
                                 <span class="component-title">Username:</span>
                                 <input class="component-desc" type="text" name="iptorrents_username" value="$sickbeard.IPTORRENTS_USERNAME" size="40" />
