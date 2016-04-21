@@ -198,6 +198,7 @@ class IPTorrentsProvider(generic.TorrentProvider):
         logger.log("[" + self.name + "] Attempting to Login")
         
         try:
+            self.switchURL()
             response = self.session.post(self.url + "/t", data=login_params, timeout=30, verify=False)
         except (requests.exceptions.ConnectionError, requests.exceptions.HTTPError), e:
             raise Exception("[" + self.name + "] _doLogin() Error: " + ex(e))
