@@ -215,7 +215,7 @@ class SpeedCache(tvcache.TVCache):
     def _getRSSData(self):
         xml = ''
         if sickbeard.SPEED_RSSHASH:
-            self.rss_url = "http://speed.cd/get_rss.php?feed=dl&user={0}&cat=2,41,49,55&passkey={1}".format(sickbeard.SPEED_USERNAME,sickbeard.SPEED_RSSHASH)
+            self.rss_url = provider.url + "get_rss.php?feed=dl&user={0}&cat=2,41,49,55&passkey={1}".format(sickbeard.SPEED_USERNAME,sickbeard.SPEED_RSSHASH)
             logger.log("[" + provider.name + "] RSS URL - {0}".format(self.rss_url))
             xml = provider.getURL(self.rss_url)
         else:
