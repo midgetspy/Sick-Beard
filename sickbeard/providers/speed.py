@@ -46,7 +46,7 @@ class SpeedProvider(generic.TorrentProvider):
         self.name = "Speed"
         self.session = None
         self.supportsBacklog = True
-        self.url = 'http://speed.cd/'
+        self.url = 'https://speed.cd/'
         logger.log("[" + self.name + "] initializing...")
     
     ###################################################################################################
@@ -133,7 +133,7 @@ class SpeedProvider(generic.TorrentProvider):
 
     def _doSearch(self, search_params, show=None):
         logger.log("[" + self.name + "] Performing Search: {0}".format(search_params))
-        searchUrl = self.url + "browse.php?c49=1&c2=1&c41=1&search=" + urllib.quote(search_params)
+        searchUrl = self.url + "browse.php?c49=1&c41=1&c55=1&c2=1&search=" + urllib.quote(search_params)
         return self.parseResults(searchUrl)
     
     ################################################################################################### 
@@ -142,8 +142,8 @@ class SpeedProvider(generic.TorrentProvider):
         data = self.getURL(searchUrl)
         results = []
         if data:
-            for torrent in re.compile("<td class='name'><div><a href='\/t\/.*?' class='torrent' id='(?P<id>.*?)'><b>(?P<title>.*?)</b></a>", re.MULTILINE|re.DOTALL).finditer(data):
-                item = (torrent.group('title').replace('.',' ').replace('<span class=\'hRed\'>','').replace('</span><span class=\'hGrn\'>','').replace('</span>',''), self.url + "download.php?torrent=" + torrent.group('id'))
+            for torrent in re.compile("<td class=\"lft\"><div><a href=\"\/t\/.*?\" class=\"torrent\" id=\"(?P<id>.*?)\"><b>(?P<title>.*?)</b></a>", re.MULTILINE|re.DOTALL).finditer(data):
+                item = (torrent.group('title').replace("<span class='hO'>","").replace("<span class='hG'>","").replace("</span>","").replace('.',' '), self.url + "download.php?torrent=" + torrent.group('id'))
                 results.append(item)
             if len(results):
                 logger.log("[" + self.name + "] parseResults() Some results found.")
@@ -182,15 +182,14 @@ class SpeedProvider(generic.TorrentProvider):
     def _doLogin(self):
         login_params  = {
             'username': sickbeard.SPEED_USERNAME,
-            'password': sickbeard.SPEED_PASSWORD,
-            'login': 'submit'
+            'password': sickbeard.SPEED_PASSWORD
         }
         
         self.session = requests.Session()
         logger.log("[" + self.name + "] Attempting to Login")
         
         try:
-            response = self.session.post(self.url + "takelogin.php", data=login_params, timeout=30, verify=False)
+            response = self.session.post(self.url + "take.login.php", data=login_params, timeout=30, verify=False)
         except (requests.exceptions.ConnectionError, requests.exceptions.HTTPError), e:
             raise Exception("[" + self.name + "] _doLogin() Error: " + ex(e))
             return False
@@ -216,12 +215,12 @@ class SpeedCache(tvcache.TVCache):
     def _getRSSData(self):
         xml = ''
         if sickbeard.SPEED_RSSHASH:
-            self.rss_url = "http://speed.cd/get_rss.php?feed=dl&user={0}&cat=2,49,41&passkey={1}".format(sickbeard.SPEED_USERNAME,sickbeard.SPEED_RSSHASH)
+            self.rss_url = "http://speed.cd/get_rss.php?feed=dl&user={0}&cat=2,41,49,55&passkey={1}".format(sickbeard.SPEED_USERNAME,sickbeard.SPEED_RSSHASH)
             logger.log("[" + provider.name + "] RSS URL - {0}".format(self.rss_url))
             xml = provider.getURL(self.rss_url)
         else:
             logger.log("[" + provider.name + "] WARNING: RSS construction via browse since no hash provided.")
-            url = provider.url + "browse.php?c49=1&c2=1&c41=1&search="
+            url = provider.url + "browse.php?c49=1&c41=1&c55=1&c2=1&search="
             data = provider.parseResults(url)
             xml = "<rss xmlns:atom=\"http://www.w3.org/2005/Atom\" version=\"2.0\">" + \
             "<channel>" + \
