@@ -124,12 +124,18 @@ class IPTorrentsProvider(generic.TorrentProvider):
             for show_name in set(show_name_helpers.allPossibleShowNames(ep_obj.show)):
                 ep_string = show_name_helpers.sanitizeSceneName(show_name) +' '+ sickbeard.config.naming_ep_type[2] % {'seasonnumber': ep_obj.season, 'episodenumber': ep_obj.episode}
                 search_string.append(ep_string)
-        return search_string    
+        return search_string
+    
+    ###################################################################################################
  
+    def switchURL(self):
+        self.url = 'https://www.iptorrents.com/' if not getattr(sickbeard,'IPTORRENTS_EU',False) else 'https://iptorrents.eu/'
+        
     ###################################################################################################
 
     def _doSearch(self, search_params, show=None):
         logger.log("[IPTorrents] Performing Search: {0}".format(search_params))
+        provider.switchURL()
         searchUrl = self.url + "t?78=&23=&25=&65=&79=&22=&5=&q=" + urllib.quote(search_params) + "&qf=#torrents"
         return self.parseResults(searchUrl)
     
@@ -192,6 +198,7 @@ class IPTorrentsProvider(generic.TorrentProvider):
         logger.log("[" + self.name + "] Attempting to Login")
         
         try:
+            self.switchURL()
             response = self.session.post(self.url + "/t", data=login_params, timeout=30, verify=False)
         except (requests.exceptions.ConnectionError, requests.exceptions.HTTPError), e:
             raise Exception("[" + self.name + "] _doLogin() Error: " + ex(e))
@@ -217,6 +224,7 @@ class IPTorrentsCache(tvcache.TVCache):
         
     def _getRSSData(self):
         xml = ''
+        provider.switchURL()
         if sickbeard.IPTORRENTS_UID and sickbeard.IPTORRENTS_RSSHASH:
             self.rss_url = provider.url + "torrents/rss?u={0};tp={1};78;23;25;65;79;22;5;download".format(sickbeard.IPTORRENTS_UID,sickbeard.IPTORRENTS_RSSHASH)
             logger.log("[" + provider.name + "] RSS URL - {0}".format(self.rss_url))
