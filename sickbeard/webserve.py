@@ -1054,7 +1054,7 @@ class ConfigProviders:
                       torrentleech_username = None, torrentleech_password = None,
                       torrentday_username = None, torrentday_password = None,
                       sceneaccess_username = None, sceneaccess_password = None, sceneaccess_rsshash = None,
-                      iptorrents_username = None, iptorrents_password = None,iptorrents_uid = None, iptorrents_rsshash = None,
+                      iptorrents_username = None, iptorrents_password = None, iptorrents_uid = None, iptorrents_rsshash = None, iptorrents_eu = None, 
                       bithdtv_username = None, bithdtv_password = None,
                       torrentshack_username = None, torrentshack_password = None, torrentshack_uid = None, torrentshack_auth = None, torrentshack_pass_key = None, torrentshack_auth_key = None,
                       torrentz_verified = None,
@@ -1205,6 +1205,7 @@ class ConfigProviders:
         sickbeard.IPTORRENTS_PASSWORD = iptorrents_password.strip()
         sickbeard.IPTORRENTS_UID = iptorrents_uid.strip()
         sickbeard.IPTORRENTS_RSSHASH = iptorrents_rsshash.strip()
+        sickbeard.IPTORRENTS_EU = 1 if iptorrents_eu == 'on' else 0
         
         sickbeard.BITHDTV_USERNAME = bithdtv_username.strip()
         sickbeard.BITHDTV_PASSWORD = bithdtv_password.strip()
