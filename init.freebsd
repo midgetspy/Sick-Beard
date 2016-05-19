@@ -31,7 +31,7 @@ load_rc_config ${name}
 pidfile=${sickbeard_dir}/sickbeard.pid
 procname="*python"
 command=${sickbeard_dir}/SickBeard.py
-command_args="--datadir=${sickbeard_dir} --daemon --pidfile=${pidfile}"
+sickbeard_flags="--datadir=${sickbeard_dir} --daemon --pidfile=${pidfile} ${sickbeard_flags}"
 faststop_cmd="${name}_stop"
 
 run_rc_command "$1"
