@@ -29,8 +29,8 @@ load_rc_config ${name}
 : ${sickbeard_dir=/usr/local/sickbeard}
 
 pidfile=${sickbeard_dir}/sickbeard.pid
-procname="*python"
 command=${sickbeard_dir}/SickBeard.py
+command_interpreter="/usr/local/bin/python2.7"
 sickbeard_flags="--datadir=${sickbeard_dir} --daemon --pidfile=${pidfile} ${sickbeard_flags}"
 faststop_cmd="${name}_stop"
 
