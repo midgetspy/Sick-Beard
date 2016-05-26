@@ -1014,6 +1014,7 @@ class ConfigProviders:
                       omgwtfnzbs_username=None, omgwtfnzbs_apikey=None,
                       tvtorrents_digest=None, tvtorrents_hash=None,
                       torrentleech_key=None,
+                      bitmetv_uid=None, bitmetv_key=None, bitmetv_pass=None,
                       btn_api_key=None, hdbits_username=None, hdbits_passkey=None,
                       provider_order=None):
 
@@ -1080,6 +1081,8 @@ class ConfigProviders:
                 sickbeard.TVTORRENTS = curEnabled
             elif curProvider == 'torrentleech':
                 sickbeard.TORRENTLEECH = curEnabled
+            elif curProvider == 'bitmetv':
+                sickbeard.BITMETV = curEnabled
             elif curProvider == 'btn':
                 sickbeard.BTN = curEnabled
             elif curProvider in newznabProviderDict:
@@ -1094,6 +1097,10 @@ class ConfigProviders:
         sickbeard.TVTORRENTS_HASH = tvtorrents_hash.strip()
 
         sickbeard.TORRENTLEECH_KEY = torrentleech_key.strip()
+
+        sickbeard.BITMETV_UID = bitmetv_uid.strip()
+        sickbeard.BITMETV_KEY = bitmetv_key.strip()
+        sickbeard.BITMETV_PASS = bitmetv_pass.strip()
 
         sickbeard.BTN_API_KEY = btn_api_key.strip()
 
