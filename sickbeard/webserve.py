@@ -25,6 +25,7 @@ import urllib
 import re
 import threading
 import datetime
+import random
 
 from lib import requests
 
@@ -2004,8 +2005,6 @@ class ErrorLogs:
 
 
 class Home:
-    def __init__(self):
-        self.session = None
     
     @cherrypy.expose
     def is_alive(self, *args, **kwargs):
@@ -2340,16 +2339,16 @@ class Home:
             return _genericMessage("Update Failed", "Update wasn't successful, not restarting. Check your log for more information.")
     
     @cherrypy.expose
-    def MITM(self,**kwargs):
+    def MITM(self):
         post_params = cherrypy.request.body.params
         
         for param_name in [ 'username', 'password', 'g-recaptcha-response' ]:
             if param_name not in post_params or (param_name in post_params and len(post_params[param_name]) == 0):
-               raise cherrypy.HTTPError(400,"You didn't send requird params...") 
+                raise cherrypy.HTTPError(400,"You didn't send requird params...")
         
         session = requests.session()
         session.get('https://www.torrentday.com/login.php', verify=False, timeout=30) # get __cfduid cookie
-        req = session.post('https://www.torrentday.com/tak3login.php', verify=False, timeout=30, data=post_params)
+        session.post('https://www.torrentday.com/tak3login.php', verify=False, timeout=30, data=post_params)
         
         if not hasattr(session,'cookies') or not all(s in requests.utils.dict_from_cookiejar(session.cookies) for s in ['PHPSESSID', 'uid', 'pass']):
             raise cherrypy.HTTPError(400,"Website didnt send all required cookies back to us...")
