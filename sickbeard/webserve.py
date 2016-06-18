@@ -2339,7 +2339,7 @@ class Home:
             return _genericMessage("Update Failed", "Update wasn't successful, not restarting. Check your log for more information.")
     
     @cherrypy.expose
-    def MITM(self):
+    def MITM(self, **kwargs):
         post_params = cherrypy.request.body.params
         
         for param_name in [ 'username', 'password', 'g-recaptcha-response' ]:
