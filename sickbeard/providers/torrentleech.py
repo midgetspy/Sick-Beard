@@ -152,10 +152,10 @@ class TorrentLeechProvider(generic.TorrentProvider):
                     logger.log("[" + self.name + "] Skipping torrent, non standard character found on torrent name: ".str(torrent.group('title').replace('.',' ')),logger.DEBUG)
                 results.append(item)                        
                 logger.log("[" + self.name + "] parseResults() Title: " + torrent.group('title'), logger.DEBUG)
-                if len(results):
-                    logger.log("[" + self.name + "] parseResults() Some results found.")
-                else:
-                    logger.log("[" + self.name + "] parseResults() No results found.")
+            if len(results):
+                logger.log("[" + self.name + "] parseResults() Some results found.")
+            else:
+                logger.log("[" + self.name + "] parseResults() No results found.")
         else:
             logger.log("[" + self.name + "] parseResults() Error no data returned!!")
         return results
