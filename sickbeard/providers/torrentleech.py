@@ -148,10 +148,10 @@ class TorrentLeechProvider(generic.TorrentProvider):
             for torrent in re.compile('<span class="title"><a href="/torrent/\d+">(?P<title>.*?)</a>.*?<td class="quickdownload">\s+<a href="/(?P<url>.*?)">',re.MULTILINE|re.DOTALL).finditer(data):
                 try:
                     item = (torrent.group('title').replace('.',' ').decode('ascii'), self.url + torrent.group('url'))
+                    logger.log("[" + self.name + "] parseResults() Title: " + torrent.group('title'), logger.DEBUG)
                 except:
                     logger.log("[" + self.name + "] Skipping torrent, non standard character found on torrent name: ".str(torrent.group('title').replace('.',' ')),logger.DEBUG)
                 results.append(item)                        
-                logger.log("[" + self.name + "] parseResults() Title: " + torrent.group('title'), logger.DEBUG)
             if len(results):
                 logger.log("[" + self.name + "] parseResults() Some results found.")
             else:
