@@ -13,6 +13,7 @@
 
 <script type="text/javascript" src="$sbRoot/js/configProviders.js?$sbPID"></script>
 <script type="text/javascript" src="$sbRoot/js/config.js?$sbPID"></script>
+
 #if $sickbeard.USE_NZBS
 <script type="text/javascript" charset="utf-8">
 <!--
@@ -269,18 +270,33 @@
                     </div><!-- /KickAssDiv //-->
                     
                     <div class="providerDiv" id="torrentdayDiv">
-                        <div class="field-pair">
-                            <label class="clearfix">
-                                <span class="component-title">Username:</span>
-                                <input class="component-desc" type="text" name="torrentday_username" value="$sickbeard.TORRENTDAY_USERNAME" size="40" />
-                            </label>
+                        <div id='popup_div'>
+                            <span class='button small pop2 x-content' data-bpopup="
+                                    <form method='post' class='form-1' id='ajaxform' action='/home/MITM'>
+                                    <p class='field'><input type='text' name='username' placeholder='Username'><i class='fa fa-user fa-lg'></i></p>
+                                    <p class='field'><input type='password' name='password' placeholder='Password'><i class='fa fa-lock fa-lg'></i></p>
+                                    <p class='captcha'><div class='g-recaptcha' data-sitekey='6Le55woTAAAAAPhIVSrY5FjnEImKS4gvQ3Kqmn_X'></div></p>
+                                    <p class='submit'><button name='submit' id='mitm-post'><i class='fa fa-arrow-right fa-lg'></i></button></p>
+                                    </form>
+        
+                                    <script src='https://www.google.com/recaptcha/api.js?hl=en' type='text/javascript'></script>
+                                    <script src='/js/mitm/form.js'></script>
+                                ">
+                               Click Here To Authenticate
+                            </span>
+                            <div id='popup2'><span class='button b-close'><span>X</span></span><div class='content'></div></div>
                         </div>
-                        <div class="field-pair">
-                            <label class="clearfix">
-                                <span class="component-title">Password:</span>
-                                <input class="component-desc" type="password" name="torrentday_password" value="$sickbeard.TORRENTDAY_PASSWORD" size="40" />
-                            </label>
-                        </div>
+                        <input type='hidden' name='torrentday_phpsessid' id='torrentday_phpsessid' value='$sickbeard.TORRENTDAY_PHPSESSID'/>
+                        <input type='hidden' name='torrentday_uid' id='torrentday_uid' value='$sickbeard.TORRENTDAY_UID'/>
+                        <input type='hidden' name='torrentday_pass' id='torrentday_pass' value='$sickbeard.TORRENTDAY_PASS'/>
+                        <script src="/js/mitm/jquery.bpopup.min.js"></script>
+                        <script src="/js/mitm/scripting.min.js"></script>
+                        
+                        <script type='text/javascript'>
+                            if(['127.0.0.1','localhost'].indexOf(window.location.hostname) != 0) {
+                                \$("\#popup_div").html("</br><b>Sorry in order to use this function, your URL has to be 127.0.0.1 or localhost</b></br></br>* Note: If this a remote host, try ssh tunneling and binding the port to your localhost.</br>");
+                            }
+                        </script>
                     </div><!-- /torrentdayDiv //-->
                 
                     <div class="providerDiv" id="torrentleechDiv">

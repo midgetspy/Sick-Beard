@@ -199,8 +199,9 @@ TORRENTLEECH_USERNAME = None
 TORRENTLEECH_PASSWORD = None
 
 TORRENTDAY = False
-TORRENTDAY_USERNAME = None
-TORRENTDAY_PASSWORD = None
+TORRENTDAY_PHPSESSID = None
+TORRENTDAY_UID = None
+TORRENTDAY_PASS = None
 
 SCENEACCESS = False
 SCENEACCESS_USERNAME = None
@@ -435,7 +436,7 @@ def initialize(consoleLogging=True):
                 KICKASS, KICKASS_ALT_URL, \
                 TORRENTZ, TORRENTZ_VERIFIED, \
                 TORRENTLEECH, TORRENTLEECH_USERNAME, TORRENTLEECH_PASSWORD, \
-                TORRENTDAY, TORRENTDAY_USERNAME, TORRENTDAY_PASSWORD, \
+                TORRENTDAY, TORRENTDAY_PHPSESSID, TORRENTDAY_UID, TORRENTDAY_PASS, \
                 SCENEACCESS, SCENEACCESS_USERNAME, SCENEACCESS_PASSWORD, SCENEACCESS_RSSHASH, \
                 IPTORRENTS, IPTORRENTS_USERNAME, IPTORRENTS_PASSWORD, IPTORRENTS_UID, IPTORRENTS_RSSHASH, IPTORRENTS_EU, \
                 BITHDTV, BITHDTV_USERNAME, BITHDTV_PASSWORD, \
@@ -623,8 +624,10 @@ def initialize(consoleLogging=True):
         TORRENTLEECH_PASSWORD = check_setting_str(CFG, 'TORRENTLEECH', 'torrentleech_password', '')
         
         TORRENTDAY = bool(check_setting_int(CFG, 'TORRENTDAY', 'torrentday', 0))    
-        TORRENTDAY_USERNAME = check_setting_str(CFG, 'TORRENTDAY', 'torrentday_username', '')   
-        TORRENTDAY_PASSWORD = check_setting_str(CFG, 'TORRENTDAY', 'torrentday_password', '')
+        TORRENTDAY_PHPSESSID = check_setting_str(CFG, 'TORRENTDAY', 'torrentday_phpsessid', '')   
+        TORRENTDAY_UID = check_setting_str(CFG, 'TORRENTDAY', 'torrentday_uid', '')
+        TORRENTDAY_PASS = check_setting_str(CFG, 'TORRENTDAY', 'torrentday_pass', '')
+        
         
         SCENEACCESS = bool(check_setting_int(CFG, 'SCENEACCESS', 'sceneaccess', 0))
         SCENEACCESS_USERNAME = check_setting_str(CFG, 'SCENEACCESS', 'sceneaccess_username', '')
@@ -1298,8 +1301,9 @@ def save_config():
 
     new_config['TORRENTDAY'] = {}
     new_config['TORRENTDAY']['torrentday'] = int(TORRENTDAY)
-    new_config['TORRENTDAY']['torrentday_username'] = TORRENTDAY_USERNAME
-    new_config['TORRENTDAY']['torrentday_password'] = TORRENTDAY_PASSWORD
+    new_config['TORRENTDAY']['torrentday_phpsessid'] = TORRENTDAY_PHPSESSID
+    new_config['TORRENTDAY']['torrentday_uid'] = TORRENTDAY_UID
+    new_config['TORRENTDAY']['torrentday_pass'] = TORRENTDAY_PASS
 
     new_config['SCENEACCESS'] = {}
     new_config['SCENEACCESS']['sceneaccess'] = int(SCENEACCESS)

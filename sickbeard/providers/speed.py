@@ -189,7 +189,7 @@ class SpeedProvider(generic.TorrentProvider):
         logger.log("[" + self.name + "] Attempting to Login")
         
         try:
-            response = self.session.post(self.url + "take.login.php", data=login_params, timeout=30, verify=False)
+            response = self.session.post(self.url + "takelogin.php", data=login_params, timeout=30, verify=False)
         except (requests.exceptions.ConnectionError, requests.exceptions.HTTPError), e:
             raise Exception("[" + self.name + "] _doLogin() Error: " + ex(e))
             return False
