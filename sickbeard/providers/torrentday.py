@@ -39,6 +39,8 @@ from sickbeard.common import Quality
 from sickbeard.common import Overview
 from sickbeard import show_name_helpers
 
+
+
 class TorrentDayProvider(generic.TorrentProvider):
 
     ###################################################################################################
@@ -51,7 +53,9 @@ class TorrentDayProvider(generic.TorrentProvider):
         self.session = None
         self.supportsBacklog = True
         self.url = 'https://www.torrentday.com/'
+        self.funcName = lambda n=0: sys._getframe(n + 1).f_code.co_name + "()"
         logger.log('[' + self.name + '] initializing...')
+        
 
     ###################################################################################################
 
@@ -144,11 +148,11 @@ class TorrentDayProvider(generic.TorrentProvider):
             data = self.getURL(searchUrl, data=PostData)
             jdata = json.loads(data)
             if jdata.get('Fs', [])[0].get('Fn', {}) == "Oarrive":
-                logger.log("[" + self.name + "] _doSearch() search data sent 0 results.")
+                logger.log("[" + self.name + "] " + self.funcName() + " search data sent 0 results.")
                 return []
             torrents = jdata.get('Fs', [])[0].get('Cn', {}).get('torrents', [])
         except ValueError, e:
-            logger.log("[" + self.name + "] _doSearch() invalid json returned.")
+            logger.log("[" + self.name + "] " + self.funcName() + " invalid json returned.")
             return []
 
         return self.parseResults(torrents)
@@ -161,24 +165,47 @@ class TorrentDayProvider(generic.TorrentProvider):
         for torrent in torrents:
             item = (torrent['name'].replace('.', ' '), self.url + "download.php/" + str(torrent['id']) + "/" + torrent['fname'] + "?torrent_pass=" + self.rsshash)
             results.append(item)
-            logger.log("[" + self.name + "] parseResults() Title: " + torrent['name'], logger.DEBUG)
+            logger.log("[" + self.name + "] " + self.funcName() + " Title: " + torrent['name'], logger.DEBUG)
 
         if len(results):
-            logger.log("[" + self.name + "] parseResults() Some results found.")
+            logger.log("[" + self.name + "] " + self.funcName() + " Some results found.")
         else:
-            logger.log("[" + self.name + "] parseResults() No results found.")
+            logger.log("[" + self.name + "] " + self.funcName() + " No results found.")
 
         return results
 
     ###################################################################################################
-
+    
+    def checkAuth(self,response):
+        if "www.torrentday.com/login.php" in response.url:
+            logger.log("[" + self.name + "] " + self.funcName() + " Error: We no longer appear to be authenticated. Aborting..",logger.ERROR)
+            sys.tracebacklimit=0 # raise exception to sickbeard but hide the stack trace.
+            raise Exception("[" + self.name + "] " + self.funcName() + " Error: We no longer appear to be authenticated. Aborting..")
+    
+    ###################################################################################################
+    
+    def checkAuthCookies(self):
+        cookies = { 'PHPSESSID': sickbeard.TORRENTDAY_PHPSESSID, 'uid': sickbeard.TORRENTDAY_UID, 'pass': sickbeard.TORRENTDAY_PASS }
+        for cookie_name in cookies:
+            if cookie_name in requests.utils.dict_from_cookiejar(self.session.cookies):
+                if requests.utils.dict_from_cookiejar(self.session.cookies)[cookie_name] != cookies[cookie_name]:
+                    logger.log("[" + self.name + "] " + self.funcName() + " Updating Cookie " + cookie_name + " from " + requests.utils.dict_from_cookiejar(self.session.cookies)[cookie_name] + " to " + cookies[cookie_name], logger.DEBUG)
+                    self.session.cookies.set(cookie_name,cookies[cookie_name])
+            else:
+                logger.log("[" + self.name + "] " + self.funcName() + " Adding Cookie " + cookie_name + " with value of " + cookies[cookie_name], logger.DEBUG)
+                self.session.cookies.set(cookie_name,cookies[cookie_name])
+        
+    ###################################################################################################
+    
     def getURL(self, url, headers=None, data=None):
         response = None
 
         if not self.session:
             if not self._doLogin():
                 return response
-
+        else:
+            self.checkAuthCookies()
+        
         if not headers:
             headers = []
         try:
@@ -187,11 +214,13 @@ class TorrentDayProvider(generic.TorrentProvider):
             else:
                 response = self.session.post(url, verify=False, data=data)
         except (requests.exceptions.ConnectionError, requests.exceptions.HTTPError), e:
-            logger.log("[" + self.name + "] getURL() Error loading " + self.name + " URL: " + ex(e), logger.ERROR)
+            logger.log("[" + self.name + "] " + self.funcName() + " Error loading " + self.name + " URL: " + ex(e), logger.ERROR)
             return None
 
+        self.checkAuth(response)
+        
         if response.status_code not in [200, 302, 303]:
-            logger.log("[" + self.name + "] getURL() requested URL - " + url + " returned status code is " + str(response.status_code), logger.ERROR)
+            logger.log("[" + self.name + "] " + self.funcName() + " requested URL - " + url + " returned status code is " + str(response.status_code), logger.ERROR)
             return None
 
         return response.content
@@ -204,33 +233,19 @@ class TorrentDayProvider(generic.TorrentProvider):
         if rssData:
             self.rssuid = rssData[0][0]
             self.rsshash = rssData[0][1]
+            logger.log("[" + self.name + "] " + self.funcName() + " rssuid = " + self.rssuid + ", rsshash = " + self.rsshash,logger.DEBUG)
             return True
         return False
 
     ###################################################################################################
 
     def _doLogin(self):
-        login_params = {
-            'username': sickbeard.TORRENTDAY_USERNAME,
-            'password': sickbeard.TORRENTDAY_PASSWORD,
-            'submit.x': '0',
-            'submit.y': '0',
-        }
-
-        self.session = requests.Session()
-        logger.log("[" + self.name + "] Attempting to Login")
-
-        try:
-            response = self.session.post(self.url + "t", data=login_params, timeout=30, verify=False)
-        except (requests.exceptions.ConnectionError, requests.exceptions.HTTPError), e:
-            raise Exception("[" + self.name + "] _doLogin() Error: " + ex(e))
-
-        if re.search("Password not correct|<title>Torrentday :: Login|User not found</title>", response.text) or response.status_code in [401, 403]:
-            raise Exception("[" + self.name + "] Login Failed, Invalid username or password for " + self.name + ". Check your settings.")
+        self.session = requests.Session()        
+        self.checkAuthCookies()
 
         if not self._getPassKey() or not self.rssuid or not self.rsshash:
-            raise Exception("[" + self.name + "] _doLogin() Could not extract rssHash info... aborting")
-
+            raise Exception("[" + self.name + "] " + self.funcName() + " Could not extract rssHash info... aborting")
+        
         return True
 
     ###################################################################################################
