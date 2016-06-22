@@ -233,6 +233,14 @@ class TorrentDayProvider(generic.TorrentProvider):
         if rssData:
             self.rssuid = rssData[0][0]
             self.rsshash = rssData[0][1]
+            
+            if self.rssuid == None:
+                logger.log("[" + self.name + "] " + self.funcName() + " Can't extract uid from rss.",logger.ERROR)
+                return False
+            if self.rsshash == None:
+                logger.log("[" + self.name + "] " + self.funcName() + " Can't extract hash from rss.",logger.ERROR)
+                return False
+            
             logger.log("[" + self.name + "] " + self.funcName() + " rssuid = " + self.rssuid + ", rsshash = " + self.rsshash,logger.DEBUG)
             return True
         return False
