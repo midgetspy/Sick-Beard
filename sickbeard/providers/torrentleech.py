@@ -150,7 +150,7 @@ class TorrentLeechProvider(generic.TorrentProvider):
                     item = (torrent.group('title').replace('.',' ').decode('ascii'), self.url + torrent.group('url'))
                     logger.log("[" + self.name + "] parseResults() Title: " + torrent.group('title'), logger.DEBUG)
                 except:
-                    logger.log("[" + self.name + "] Skipping torrent, non standard character found on torrent name: ".str(torrent.group('title').replace('.',' ')),logger.DEBUG)
+                    logger.log("[" + self.name + "] Skipping torrent, non standard character found and/or unable to extract torrent download information.",logger.DEBUG)
                 results.append(item)                        
             if len(results):
                 logger.log("[" + self.name + "] parseResults() Some results found.")
