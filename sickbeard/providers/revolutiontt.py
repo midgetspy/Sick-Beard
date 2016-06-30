@@ -150,7 +150,7 @@ class RevolutionTTProvider(generic.TorrentProvider):
         data = self.getURL(searchUrl)
         results = []
         if data:
-            for torrent in re.compile('<a href="details.php\?id=\d+&amp;hit=1"><b>(?P<title>.*?)</b>.*?<td align="center" class=\'br_left\'><a href="(?P<url>.*?)">', re.MULTILINE|re.DOTALL).finditer(data):
+            for torrent in re.compile('<a href="details\.php\?id=\w{11,}&amp;hit=1"><b>(?P<title>.*?)</b>.*?<td align="center" class=\'br_left\'><a href="(?P<url>.*?)">', re.MULTILINE|re.DOTALL).finditer(data):
                 item = (torrent.group('title').replace('.',' '), self.url + torrent.group('url'))
                 results.append(item)
         else:
