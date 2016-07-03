@@ -232,7 +232,7 @@ class RevolutionTTCache(tvcache.TVCache):
             if xml is not None:
                 xml = xml.decode('utf8','ignore')
             else:
-                logger.log("[" + provider.name + "] " + provider.funcName() + ", empty RSS data.")
+                logger.log("[" + provider.name + "] " + provider.funcName() + " WARNING: empty RSS data.")
                 xml = xml_header
                 xml += "</channel></rss>"
         else:
