@@ -48,6 +48,7 @@ class RevolutionTTProvider(generic.TorrentProvider):
         self.session = None
         self.supportsBacklog = True
         self.url = 'https://revolutiontt.me/'
+        self.funcName = lambda n=0: sys._getframe(n + 1).f_code.co_name + "()"
         logger.log("[" + self.name + "] initializing...")
     
     ###################################################################################################
@@ -139,9 +140,9 @@ class RevolutionTTProvider(generic.TorrentProvider):
             searchUrl = self.url + "browse.php?search=" + urllib.quote(search_params) + "&cat=" + str(section) + "&titleonly=1"
             results.extend(self.parseResults(searchUrl))
         if len(results):
-            logger.log("[" + self.name + "] parseResults() Some results found.")
+            logger.log("[" + self.name + "] " + self.funcName() + " Some results found.")
         else:
-            logger.log("[" + self.name + "] parseResults() No results found.")
+            logger.log("[" + self.name + "] " + self.funcName() + " No results found.")
         return results
     
     ################################################################################################### 
@@ -154,7 +155,7 @@ class RevolutionTTProvider(generic.TorrentProvider):
                 item = (torrent.group('title').replace('.',' '), self.url + torrent.group('url'))
                 results.append(item)
         else:
-            logger.log("[" + self.name + "] parseResults() Error no data returned!!")
+            logger.log("[" + self.name + "] " + self.funcName() + " Error no data returned!!")
         return results
     
     ###################################################################################################
@@ -169,11 +170,11 @@ class RevolutionTTProvider(generic.TorrentProvider):
         try:
             response = self.session.get(url, headers=self.header, verify=False)
         except (requests.exceptions.ConnectionError, requests.exceptions.HTTPError), e:
-            logger.log("[" + self.name + "] getURL() Error loading " + self.name + " URL: " + ex(e), logger.ERROR)
+            logger.log("[" + self.name + "] " + self.funcName() + " Error loading " + self.name + " URL: " + ex(e), logger.ERROR)
             return None
         
         if response.status_code not in [200,302,303]:
-            logger.log("[" + self.name + "] getURL() requested URL - " + url +" returned status code is " + str(response.status_code), logger.ERROR)
+            logger.log("[" + self.name + "] " + self.funcName() + " requested URL - " + url +" returned status code is " + str(response.status_code), logger.ERROR)
             return None
 
         return response.content
@@ -194,12 +195,12 @@ class RevolutionTTProvider(generic.TorrentProvider):
             self.session.get(self.url + "login.php",headers=self.header, timeout=30, verify=False)
             response = self.session.post(self.url + "takelogin.php", data=login_params,headers=self.header, timeout=30, verify=False)
         except (requests.exceptions.ConnectionError, requests.exceptions.HTTPError), e:
-            raise Exception("[" + self.name + "] _doLogin() Error: " + ex(e))
+            raise Exception("[" + self.name + "] " + self.funcName() + " Error: " + ex(e))
             return False
         
         if re.search("Login failed! Username or password incorrect.|<title>Revolution :: Login</title>|The page you tried to view can only be used when you're logged in",response.text) \
         or response.status_code in [401,403]:
-            raise Exception("[" + self.name + "] Login Failed, Invalid username or password for " + self.name + ". Check your settings.")
+            raise Exception("[" + self.name + "] " + self.funcName() + " Login Failed, Invalid username or password for " + self.name + ". Check your settings.")
             return False
         return True
     
@@ -226,15 +227,16 @@ class RevolutionTTCache(tvcache.TVCache):
         
         if sickbeard.REVOLUTIONTT_RSSHASH:
             self.rss_url = "https://revolutiontt.me/rss.php?feed=dl&cat=41,42,45&passkey={0}".format(sickbeard.REVOLUTIONTT_RSSHASH)
-            logger.log("[" + provider.name + "] RSS URL - {0}".format(self.rss_url))
+            logger.log("[" + provider.name + "] " + provider.funcName() + " RSS URL - {0}".format(self.rss_url))
             xml = provider.getURL(self.rss_url)
             if xml is not None:
                 xml = xml.decode('utf8','ignore')
             else:
+                logger.log("[" + provider.name + "] " + provider.funcName() + ", empty RSS data.")
                 xml = xml_header
                 xml += "</channel></rss>"
         else:
-            logger.log("[" + provider.name + "] WARNING: RSS construction via browse since no hash provided.")
+            logger.log("[" + provider.name + "] " + provider.funcName() + " WARNING: RSS construction via browse since no hash provided.")
             data = provider._doSearch("")
             
             xml = xml_header
