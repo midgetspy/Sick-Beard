@@ -183,8 +183,7 @@ class RevolutionTTProvider(generic.TorrentProvider):
     def _doLogin(self):
         login_params  = {
             'username': sickbeard.REVOLUTIONTT_USERNAME,
-            'password': sickbeard.REVOLUTIONTT_PASSWORD,
-            'submit': 'login'
+            'password': sickbeard.REVOLUTIONTT_PASSWORD
         }
         
         self.session = requests.Session()
@@ -217,22 +216,28 @@ class RevolutionTTCache(tvcache.TVCache):
     ###################################################################################################
         
     def _getRSSData(self):
-        xml = ''
-        if sickbeard.REVOLUTIONTT_RSSHASH:
-            self.rss_url = "https://revolutiontt.me/rss.php?feed=dl&cat=41,42,45&passkey={0}".format(sickbeard.REVOLUTIONTT_RSSHASH)
-            logger.log("[" + provider.name + "] RSS URL - {0}".format(self.rss_url))
-            xml = provider.getURL(self.rss_url).decode('utf8','ignore')
-        else:
-            logger.log("[" + provider.name + "] WARNING: RSS construction via browse since no hash provided.")
-            data = provider._doSearch("")
-            xml = "<rss xmlns:atom=\"http://www.w3.org/2005/Atom\" version=\"2.0\">" + \
+        xml_header = "<rss xmlns:atom=\"http://www.w3.org/2005/Atom\" version=\"2.0\">" + \
             "<channel>" + \
             "<title>" + provider.name + "</title>" + \
             "<link>" + provider.url + "</link>" + \
             "<description>torrent search</description>" + \
             "<language>en-us</language>" + \
             "<atom:link href=\"" + provider.url + "\" rel=\"self\" type=\"application/rss+xml\"/>"
+        
+        if sickbeard.REVOLUTIONTT_RSSHASH:
+            self.rss_url = "https://revolutiontt.me/rss.php?feed=dl&cat=41,42,45&passkey={0}".format(sickbeard.REVOLUTIONTT_RSSHASH)
+            logger.log("[" + provider.name + "] RSS URL - {0}".format(self.rss_url))
+            xml = provider.getURL(self.rss_url)
+            if xml is not None:
+                xml = xml.decode('utf8','ignore')
+            else:
+                xml = xml_header
+                xml += "</channel></rss>"
+        else:
+            logger.log("[" + provider.name + "] WARNING: RSS construction via browse since no hash provided.")
+            data = provider._doSearch("")
             
+            xml = xml_header
             for title, url in data:
                 xml += "<item>" + "<title>" + escape(title.decode('utf8','ignore')) + "</title>" +  "<link>"+ urllib.quote(url,'/,:') + "</link>" + "</item>"
             xml += "</channel></rss>"
