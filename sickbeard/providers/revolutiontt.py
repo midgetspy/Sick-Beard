@@ -45,6 +45,7 @@ class RevolutionTTProvider(generic.TorrentProvider):
         self.cache = RevolutionTTCache(self)
         self.header = {'user-agent': 'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/32.0.1700.107 Safari/537.36'}
         self.name = "RevolutionTT"
+        self.rss_passkey = None
         self.session = None
         self.supportsBacklog = True
         self.url = 'https://revolutiontt.me/'
@@ -181,6 +182,23 @@ class RevolutionTTProvider(generic.TorrentProvider):
     
     ###################################################################################################
     
+    def _getPassKey(self):
+        logger.log("[" + self.name + "] " + self.funcName() + " Attempting to acquire RSS.")
+        try:
+            self.rss_passkey = re.findall(r'passkey=([0-9A-Fa-f]{32})', self.getURL(self.url + "bookmarks.php"))[0]
+        except:
+            logger.log("[" + self.name + "] " + self.funcName() + " Failed to scrape authentication parameters for rss.",logger.ERROR)
+            return False
+        
+        if self.rss_passkey == None:
+            logger.log("[" + self.name + "] " + self.funcName() + " Can't extract password hash from rss authentication scrape.",logger.ERROR)
+            return False
+            
+        logger.log("[" + self.name + "] " + self.funcName() + " Scraped RSS passkey " + self.rss_passkey,logger.DEBUG)
+        return True
+    
+    ###################################################################################################
+    
     def _doLogin(self):
         login_params  = {
             'username': sickbeard.REVOLUTIONTT_USERNAME,
@@ -202,6 +220,10 @@ class RevolutionTTProvider(generic.TorrentProvider):
         or response.status_code in [401,403]:
             raise Exception("[" + self.name + "] " + self.funcName() + " Login Failed, Invalid username or password for " + self.name + ". Check your settings.")
             return False
+        
+        if not self._getPassKey() or not self.rss_passkey:
+            raise Exception("[" + self.name + "] " + self.funcName() + " Could not extract rssHash info... aborting.")
+
         return True
     
     ###################################################################################################
@@ -217,32 +239,24 @@ class RevolutionTTCache(tvcache.TVCache):
     ###################################################################################################
         
     def _getRSSData(self):
-        xml_header = "<rss xmlns:atom=\"http://www.w3.org/2005/Atom\" version=\"2.0\">" + \
-            "<channel>" + \
-            "<title>" + provider.name + "</title>" + \
-            "<link>" + provider.url + "</link>" + \
-            "<description>torrent search</description>" + \
-            "<language>en-us</language>" + \
-            "<atom:link href=\"" + provider.url + "\" rel=\"self\" type=\"application/rss+xml\"/>"
-        
-        if sickbeard.REVOLUTIONTT_RSSHASH:
-            self.rss_url = "https://revolutiontt.me/rss.php?feed=dl&cat=41,42,45&passkey={0}".format(sickbeard.REVOLUTIONTT_RSSHASH)
-            logger.log("[" + provider.name + "] " + provider.funcName() + " RSS URL - {0}".format(self.rss_url))
-            xml = provider.getURL(self.rss_url)
-            if xml is not None:
-                xml = xml.decode('utf8','ignore')
-            else:
-                logger.log("[" + provider.name + "] " + provider.funcName() + " WARNING: empty RSS data.")
-                xml = xml_header
-                xml += "</channel></rss>"
-        else:
-            logger.log("[" + provider.name + "] " + provider.funcName() + " WARNING: RSS construction via browse since no hash provided.")
-            data = provider._doSearch("")
+        if not provider.session:
+            provider._doLogin()
             
-            xml = xml_header
-            for title, url in data:
-                xml += "<item>" + "<title>" + escape(title.decode('utf8','ignore')) + "</title>" +  "<link>"+ urllib.quote(url,'/,:') + "</link>" + "</item>"
-            xml += "</channel></rss>"
+        self.rss_url = provider.url + "rss.php?feed=dl&cat=41,42,45&passkey={0}".format(provider.rss_passkey)
+        logger.log("[" + provider.name + "] " + provider.funcName() + " RSS URL - {0}".format(self.rss_url))
+        xml = provider.getURL(self.rss_url)
+        if xml is not None:
+            xml = xml.decode('utf8','ignore')
+        else:
+            logger.log("[" + provider.name + "] " + provider.funcName() + " WARNING: empty RSS data.")
+            xml = "<rss xmlns:atom=\"http://www.w3.org/2005/Atom\" version=\"2.0\">" + \
+                "<channel>" + \
+                "<title>" + provider.name + "</title>" + \
+                "<link>" + provider.url + "</link>" + \
+                "<description>torrent search</description>" + \
+                "<language>en-us</language>" + \
+                "<atom:link href=\"" + provider.url + "\" rel=\"self\" type=\"application/rss+xml\"/>" + \
+                "</channel></rss>"
         return xml
         
     ###################################################################################################    
