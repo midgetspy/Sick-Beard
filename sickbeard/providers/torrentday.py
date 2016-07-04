@@ -229,13 +229,24 @@ class TorrentDayProvider(generic.TorrentProvider):
 
     def _getPassKey(self):
         logger.log("[" + self.name + "] _getPassKey() Attempting to acquire RSS info")
-        rssData = re.findall(r'u=(.*);tp=([0-9A-Fa-f]{32})', self.getURL(self.url + "rss.php", data={'cat[]': '26', 'feed': 'direct', 'login': 'passkey'}))
-        if rssData:
-            self.rssuid = rssData[0][0]
-            self.rsshash = rssData[0][1]
-            logger.log("[" + self.name + "] " + self.funcName() + " rssuid = " + self.rssuid + ", rsshash = " + self.rsshash,logger.DEBUG)
-            return True
-        return False
+        try:
+            rssData = re.findall(r'u=(.*);tp=([0-9A-Fa-f]{32})', self.getURL(self.url + "rss.php", data={'cat[]': '26', 'feed': 'direct', 'login': 'passkey'}))[0]
+            self.rssuid = rssData[0]
+            self.rsshash = rssData[1]
+        except:
+            logger.log("[" + self.name + "] " + self.funcName() + " Failed to scrape authentication parameters for rss.",logger.ERROR)
+            return False
+                    
+        if self.rssuid == None:
+            logger.log("[" + self.name + "] " + self.funcName() + " Can't extract uid from rss authentication scrape.",logger.ERROR)
+            return False
+        
+        if self.rsshash == None:
+            logger.log("[" + self.name + "] " + self.funcName() + " Can't extract password hash from rss authentication scrape.",logger.ERROR)
+            return False
+            
+        logger.log("[" + self.name + "] " + self.funcName() + " rssuid = " + self.rssuid + ", rsshash = " + self.rsshash,logger.DEBUG)
+        return True
 
     ###################################################################################################
 
