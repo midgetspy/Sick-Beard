@@ -216,8 +216,14 @@ class RevolutionTTProvider(generic.TorrentProvider):
             raise Exception("[" + self.name + "] " + self.funcName() + " Error: " + ex(e))
             return False
         
+        if response.url.endswith('403.html') and 'You have been banned.' in response.content:
+            sys.tracebacklimit=0 # raise exception to sickbeard but hide the stack trace.
+            raise Exception("[" + self.name + "] " + self.funcName() + " Login Failed, you hae been banned.")
+            return False
+        
         if re.search("Login failed! Username or password incorrect.|<title>Revolution :: Login</title>|The page you tried to view can only be used when you're logged in",response.text) \
         or response.status_code in [401,403]:
+            sys.tracebacklimit=0 # raise exception to sickbeard but hide the stack trace.
             raise Exception("[" + self.name + "] " + self.funcName() + " Login Failed, Invalid username or password for " + self.name + ". Check your settings.")
             return False
         
