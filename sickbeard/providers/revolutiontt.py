@@ -218,7 +218,7 @@ class RevolutionTTProvider(generic.TorrentProvider):
         
         if response.url.endswith('403.html') and 'You have been banned.' in response.content:
             sys.tracebacklimit=0 # raise exception to sickbeard but hide the stack trace.
-            raise Exception("[" + self.name + "] " + self.funcName() + " Login Failed, you hae been banned.")
+            raise Exception("[" + self.name + "] " + self.funcName() + " Login Failed, you have been BANNED.")
             return False
         
         if re.search("Login failed! Username or password incorrect.|<title>Revolution :: Login</title>|The page you tried to view can only be used when you're logged in",response.text) \
