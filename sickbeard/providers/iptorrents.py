@@ -257,7 +257,7 @@ class IPTorrentsCache(tvcache.TVCache):
     ###################################################################################################
 
     def _getRSSData(self):
-        self.switchURL()
+        provider.switchURL()
  
         if not provider.session:
             provider._doLogin()
