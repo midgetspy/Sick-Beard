@@ -124,7 +124,7 @@ def sendTORRENT(torrent):
         ###################################################################################################
         
     else:
-        logger.log("[Transmission] Error No Requests Session.",logger.ERROR)
+        logger.log("[Transmission] Error No Requests Session. For the url of " + torrent.url,logger.ERROR)
         return False
     logger.log("[Transmission] Completed Transaction.",logger.DEBUG)
     return True
