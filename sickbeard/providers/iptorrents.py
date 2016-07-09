@@ -137,7 +137,7 @@ class IPTorrentsProvider(generic.TorrentProvider):
     ###################################################################################################
 
     def _doSearch(self, search_params, show=None):
-        logger.log("[" + self.name + "] " + self.funcName() + " Performing Search: {0}".format(search_params))
+        logger.log("[" + self.name + "] " + self.funcName() + " Performing Search: " + search_params)
         self.switchURL()
         searchUrl = self.url + "t?&99=78=&23=&25=&65=&79=&22=&5=&q=" + urllib.quote(search_params) + "&qf=#torrents"
         return self.parseResults(searchUrl)
@@ -258,7 +258,7 @@ class IPTorrentsCache(tvcache.TVCache):
 
     def _getRSSData(self):
         self.switchURL()
-        
+ 
         if not provider.session:
             provider._doLogin()
 
