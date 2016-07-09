@@ -68,6 +68,11 @@ class IPTorrentsProvider(generic.TorrentProvider):
 
     ###################################################################################################
 
+    def _get_title_and_url(self, item):
+        return item
+
+    ###################################################################################################
+
     def _get_airbydate_season_range(self, season):
         if season == None:
             return ()
