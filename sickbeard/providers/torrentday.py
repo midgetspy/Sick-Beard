@@ -163,7 +163,7 @@ class TorrentDayProvider(generic.TorrentProvider):
         results = []
 
         for torrent in torrents:
-            item = (torrent['name'].replace('.', ' '), self.url + "download.php/" + str(torrent['id']) + "/" + torrent['fname'] + "?torrent_pass=" + self.rss_paskey)
+            item = (torrent['name'].replace('.', ' '), self.url + "download.php/" + str(torrent['id']) + "/" + torrent['fname'] + "?torrent_pass=" + self.rss_passkey)
             results.append(item)
             logger.log("[" + self.name + "] " + self.funcName() + " Title: " + torrent['name'], logger.DEBUG)
 
