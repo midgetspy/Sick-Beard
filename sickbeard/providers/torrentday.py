@@ -290,10 +290,6 @@ class TorrentDayCache(tvcache.TVCache):
                 "</channel></rss>"
         return xml
 
-        self.rss_url = "{0}t.rss?download;7;14;24;26;33;u={1};tp={2}".format(provider.url, provider.rssuid, provider.rsshash)
-        logger.log("[" + provider.name + "] RSS URL - {0}".format(self.rss_url))
-        return provider.getURL(self.rss_url)
-
     ###################################################################################################
 
 provider = TorrentDayProvider()
