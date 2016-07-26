@@ -1,1 +1,2 @@
 Cheetah>=2.1.0
+Unidecode>=0.04.18

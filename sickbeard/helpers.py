@@ -36,6 +36,7 @@ if sys.version_info >= (2, 7, 9):
 import zlib
 from lib import MultipartPostHandler
 from httplib import BadStatusLine
+from unidecode import unidecode
 
 try:
     import json
@@ -49,6 +50,7 @@ try:
 except ImportError:
     import elementtree.ElementTree as etree
 
+import sickbeard
 from sickbeard.exceptions import MultipleShowObjectsException, ex
 from sickbeard import logger
 from sickbeard.common import USER_AGENT, mediaExtensions
@@ -170,7 +172,7 @@ def sanitizeFileName(name):
     # remove leading/trailing periods and spaces
     name = name.strip(' .')
 
-    return name
+    return name if not sickbeard.USE_ASCII_FILENAMES else unidecode(name)
 
 def getURL(url, validate=False, cookies = cookielib.CookieJar(), password_mgr=None, throw_exc=False):
     """
