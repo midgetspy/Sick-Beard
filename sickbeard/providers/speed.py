@@ -248,9 +248,12 @@ class SpeedCache(tvcache.TVCache):
         if not provider.session:
             provider._doLogin()
 
-        self.rss_url = provider.url + "get_rss.php?cat=2,30,41,49,52,55&feed=dl&user=" + provider.rss_uid + "&passkey=" + provider.rss_passkey
-        logger.log("[" + provider.name + "] " + provider.funcName() + " RSS URL - " + self.rss_url)
-        xml = provider.getURL(self.rss_url)
+        xml = None
+        if provider.rss_uid and provider.rss_passkey:
+            self.rss_url = provider.url + "get_rss.php?cat=2,30,41,49,52,55&feed=dl&user=" + provider.rss_uid + "&passkey=" + provider.rss_passkey
+            logger.log("[" + provider.name + "] " + provider.funcName() + " RSS URL - " + self.rss_url)
+            xml = provider.getURL(self.rss_url)
+
         if xml is not None:
             xml = xml.decode('utf8', 'ignore')
         else:
