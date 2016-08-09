@@ -195,6 +195,10 @@ class SpeedProvider(generic.TorrentProvider):
             sys.tracebacklimit = 0    # raise exception to sickbeard but hide the stack trace.
             raise Exception("[" + self.name + "] " + self.funcName() + " Error: " + ex(e))
         
+        if "We could not recognize your account properly. Mind if we double check that? It's for your own security." in response.content:
+            sys.tracebacklimit = 0    # raise exception to sickbeard but hide the stack trace.
+            raise Exception("[" + self.name + "] Login attempt blocked, You have not logged into website via a browser from this ip address before, please do so to have this ip whitelisted.")
+        
         if re.search("Incorrect username or Password|<title>SPEED\.CD \:\: You're home now",response.text) \
         or response.status_code in [401,403]:
             sys.tracebacklimit = 0    # raise exception to sickbeard but hide the stack trace.
