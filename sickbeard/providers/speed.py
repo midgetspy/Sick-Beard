@@ -147,7 +147,7 @@ class SpeedProvider(generic.TorrentProvider):
         results = []
         if data:
             for torrent in re.compile("<td class=\"lft\"><div><a href=\"\/t\/.*?\" class=\"torrent\" id=\"(?P<id>.*?)\"><b>(?P<title>.*?)</b></a>", re.MULTILINE|re.DOTALL).finditer(data):
-                item = (self.remove_tags(torrent.group('title')), self.url + "download.php?torrent=" + torrent.group('id'))
+                item = (self.remove_tags('', torrent.group('title')), self.url + "download.php?torrent=" + torrent.group('id'))
                 results.append(item)
             if len(results):
                 logger.log("[" + self.name + "] " + self.funcName() + " Some results found.")
