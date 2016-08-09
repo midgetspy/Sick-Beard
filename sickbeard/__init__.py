@@ -225,7 +225,6 @@ TORRENTSHACK_AUTH_KEY = None
 SPEED = False
 SPEED_USERNAME = None
 SPEED_PASSWORD = None
-SPEED_RSSHASH = None
 
 REVOLUTIONTT = False
 REVOLUTIONTT_USERNAME = None
@@ -433,7 +432,7 @@ def initialize(consoleLogging=True):
                 IPTORRENTS, IPTORRENTS_USERNAME, IPTORRENTS_PASSWORD, IPTORRENTS_EU, \
                 BITHDTV, BITHDTV_USERNAME, BITHDTV_PASSWORD, \
                 TORRENTSHACK, TORRENTSHACK_USERNAME, TORRENTSHACK_PASSWORD, TORRENTSHACK_UID, TORRENTSHACK_AUTH, TORRENTSHACK_PASS_KEY ,TORRENTSHACK_AUTH_KEY, \
-                SPEED, SPEED_USERNAME, SPEED_PASSWORD, SPEED_RSSHASH, \
+                SPEED, SPEED_USERNAME, SPEED_PASSWORD, \
                 REVOLUTIONTT, REVOLUTIONTT_USERNAME, REVOLUTIONTT_PASSWORD, \
                 BTDIGG, \
                 NZBS, NZBS_UID, NZBS_HASH, EZRSS, \
@@ -642,8 +641,7 @@ def initialize(consoleLogging=True):
         SPEED = bool(check_setting_int(CFG, 'SPEED', 'speed', 0))
         SPEED_USERNAME = check_setting_str(CFG, 'SPEED', 'speed_username', '')
         SPEED_PASSWORD = check_setting_str(CFG, 'SPEED', 'speed_password', '')
-        SPEED_RSSHASH = check_setting_str(CFG, 'SPEED', 'speed_rsshash', '')
-        
+                
         REVOLUTIONTT = bool(check_setting_int(CFG, 'REVOLUTIONTT', 'revolutiontt', 0))
         REVOLUTIONTT_USERNAME = check_setting_str(CFG, 'REVOLUTIONTT', 'revolutiontt_username', '')
         REVOLUTIONTT_PASSWORD = check_setting_str(CFG, 'REVOLUTIONTT', 'revolutiontt_password', '')
@@ -1302,7 +1300,6 @@ def save_config():
     new_config['SPEED']['speed'] = int(SPEED)
     new_config['SPEED']['speed_username'] = SPEED_USERNAME
     new_config['SPEED']['speed_password'] = SPEED_PASSWORD
-    new_config['SPEED']['speed_rsshash'] = SPEED_RSSHASH
     
     new_config['REVOLUTIONTT'] = {}
     new_config['REVOLUTIONTT']['revolutiontt'] = int(REVOLUTIONTT)

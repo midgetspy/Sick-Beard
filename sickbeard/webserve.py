@@ -1215,7 +1215,6 @@ class ConfigProviders:
         
         sickbeard.SPEED_USERNAME = speed_username.strip()
         sickbeard.SPEED_PASSWORD = speed_password.strip()
-        sickbeard.SPEED_RSSHASH = speed_rsshash.strip()
         
         sickbeard.REVOLUTIONTT_USERNAME = revolutiontt_username.strip()
         sickbeard.REVOLUTIONTT_PASSWORD = revolutiontt_password.strip()
