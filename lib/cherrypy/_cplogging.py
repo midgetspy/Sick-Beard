@@ -115,9 +115,11 @@ logfmt = logging.Formatter("%(message)s")
 import os
 import sys
 
+import six
+
 import cherrypy
 from cherrypy import _cperror
-from cherrypy._cpcompat import ntob, py3k
+from cherrypy._cpcompat import ntob
 
 
 class NullHandler(logging.Handler):
@@ -151,12 +153,11 @@ class LogManager(object):
     access_log = None
     """The actual :class:`logging.Logger` instance for access messages."""
 
-    if py3k:
-        access_log_format = \
-            '{h} {l} {u} {t} "{r}" {s} {b} "{f}" "{a}"'
-    else:
-        access_log_format = \
-            '%(h)s %(l)s %(u)s %(t)s "%(r)s" %(s)s %(b)s "%(f)s" "%(a)s"'
+    access_log_format = (
+        '{h} {l} {u} {t} "{r}" {s} {b} "{f}" "{a}"'
+        if six.PY3 else
+        '%(h)s %(l)s %(u)s %(t)s "%(r)s" %(s)s %(b)s "%(f)s" "%(a)s"'
+    )
 
     logger_root = None
     """The "top-level" logger name.
@@ -209,9 +210,11 @@ class LogManager(object):
         If ``traceback`` is True, the traceback of the current exception
         (if any) will be appended to ``msg``.
         """
+        exc_info = None
         if traceback:
-            msg += _cperror.format_exc()
-        self.error_log.log(severity, ' '.join((self.time(), context, msg)))
+            exc_info = _cperror._exc_info()
+
+        self.error_log.log(severity, ' '.join((self.time(), context, msg)), exc_info=exc_info)
 
     def __call__(self, *args, **kwargs):
         """An alias for ``error``."""
@@ -244,7 +247,7 @@ class LogManager(object):
             status = "-"
         else:
             status = response.output_status.split(ntob(" "), 1)[0]
-            if py3k:
+            if six.PY3:
                 status = status.decode('ISO-8859-1')
 
         atoms = {'h': remote.name or remote.ip,
@@ -258,7 +261,7 @@ class LogManager(object):
                  'a': dict.get(inheaders, 'User-Agent', ''),
                  'o': dict.get(inheaders, 'Host', '-'),
                  }
-        if py3k:
+        if six.PY3:
             for k, v in atoms.items():
                 if not isinstance(v, str):
                     v = str(v)
@@ -282,7 +285,7 @@ class LogManager(object):
                 self(traceback=True)
         else:
             for k, v in atoms.items():
-                if isinstance(v, unicode):
+                if isinstance(v, six.text_type):
                     v = v.encode('utf8')
                 elif not isinstance(v, str):
                     v = str(v)

@@ -202,13 +202,10 @@ TORRENTDAY_PASS = None
 SCENEACCESS = False
 SCENEACCESS_USERNAME = None
 SCENEACCESS_PASSWORD = None
-SCENEACCESS_RSSHASH = None
 
 IPTORRENTS = False
 IPTORRENTS_USERNAME = None
 IPTORRENTS_PASSWORD = None
-IPTORRENTS_UID = None
-IPTORRENTS_RSSHASH = None
 IPTORRENTS_EU = None
 
 BITHDTV = False
@@ -228,7 +225,6 @@ TORRENTSHACK_AUTH_KEY = None
 SPEED = False
 SPEED_USERNAME = None
 SPEED_PASSWORD = None
-SPEED_RSSHASH = None
 
 REVOLUTIONTT = False
 REVOLUTIONTT_USERNAME = None
@@ -432,11 +428,11 @@ def initialize(consoleLogging=True):
                 TORRENTZ, TORRENTZ_VERIFIED, \
                 TORRENTLEECH, TORRENTLEECH_USERNAME, TORRENTLEECH_PASSWORD, \
                 TORRENTDAY, TORRENTDAY_PHPSESSID, TORRENTDAY_UID, TORRENTDAY_PASS, \
-                SCENEACCESS, SCENEACCESS_USERNAME, SCENEACCESS_PASSWORD, SCENEACCESS_RSSHASH, \
-                IPTORRENTS, IPTORRENTS_USERNAME, IPTORRENTS_PASSWORD, IPTORRENTS_UID, IPTORRENTS_RSSHASH, IPTORRENTS_EU, \
+                SCENEACCESS, SCENEACCESS_USERNAME, SCENEACCESS_PASSWORD, \
+                IPTORRENTS, IPTORRENTS_USERNAME, IPTORRENTS_PASSWORD, IPTORRENTS_EU, \
                 BITHDTV, BITHDTV_USERNAME, BITHDTV_PASSWORD, \
                 TORRENTSHACK, TORRENTSHACK_USERNAME, TORRENTSHACK_PASSWORD, TORRENTSHACK_UID, TORRENTSHACK_AUTH, TORRENTSHACK_PASS_KEY ,TORRENTSHACK_AUTH_KEY, \
-                SPEED, SPEED_USERNAME, SPEED_PASSWORD, SPEED_RSSHASH, \
+                SPEED, SPEED_USERNAME, SPEED_PASSWORD, \
                 REVOLUTIONTT, REVOLUTIONTT_USERNAME, REVOLUTIONTT_PASSWORD, \
                 BTDIGG, \
                 NZBS, NZBS_UID, NZBS_HASH, EZRSS, \
@@ -624,13 +620,10 @@ def initialize(consoleLogging=True):
         SCENEACCESS = bool(check_setting_int(CFG, 'SCENEACCESS', 'sceneaccess', 0))
         SCENEACCESS_USERNAME = check_setting_str(CFG, 'SCENEACCESS', 'sceneaccess_username', '')
         SCENEACCESS_PASSWORD = check_setting_str(CFG, 'SCENEACCESS', 'sceneaccess_password', '')
-        SCENEACCESS_RSSHASH = check_setting_str(CFG, 'SCENEACCESS', 'sceneaccess_rsshash', '')
         
         IPTORRENTS = bool(check_setting_int(CFG, 'IPTORRENTS', 'iptorrents', 0))
         IPTORRENTS_USERNAME = check_setting_str(CFG, 'IPTORRENTS', 'iptorrents_username', '')
         IPTORRENTS_PASSWORD = check_setting_str(CFG, 'IPTORRENTS', 'iptorrents_password', '')
-        IPTORRENTS_UID = check_setting_str(CFG, 'IPTORRENTS', 'iptorrents_uid', '')
-        IPTORRENTS_RSSHASH = check_setting_str(CFG, 'IPTORRENTS', 'iptorrents_rsshash', '')
         IPTORRENTS_EU = bool(check_setting_int(CFG, 'IPTORRENTS', 'iptorrents_eu', 0))
         
         BITHDTV = bool(check_setting_int(CFG, 'BITHDTV', 'bithdtv', 0))
@@ -648,8 +641,7 @@ def initialize(consoleLogging=True):
         SPEED = bool(check_setting_int(CFG, 'SPEED', 'speed', 0))
         SPEED_USERNAME = check_setting_str(CFG, 'SPEED', 'speed_username', '')
         SPEED_PASSWORD = check_setting_str(CFG, 'SPEED', 'speed_password', '')
-        SPEED_RSSHASH = check_setting_str(CFG, 'SPEED', 'speed_rsshash', '')
-        
+                
         REVOLUTIONTT = bool(check_setting_int(CFG, 'REVOLUTIONTT', 'revolutiontt', 0))
         REVOLUTIONTT_USERNAME = check_setting_str(CFG, 'REVOLUTIONTT', 'revolutiontt_username', '')
         REVOLUTIONTT_PASSWORD = check_setting_str(CFG, 'REVOLUTIONTT', 'revolutiontt_password', '')
@@ -1283,14 +1275,11 @@ def save_config():
     new_config['SCENEACCESS']['sceneaccess'] = int(SCENEACCESS)
     new_config['SCENEACCESS']['sceneaccess_username'] = SCENEACCESS_USERNAME
     new_config['SCENEACCESS']['sceneaccess_password'] = SCENEACCESS_PASSWORD
-    new_config['SCENEACCESS']['sceneaccess_rsshash'] = SCENEACCESS_RSSHASH
 
     new_config['IPTORRENTS'] = {}
     new_config['IPTORRENTS']['iptorrents'] = int(IPTORRENTS)
     new_config['IPTORRENTS']['iptorrents_username'] = IPTORRENTS_USERNAME
     new_config['IPTORRENTS']['iptorrents_password'] = IPTORRENTS_PASSWORD
-    new_config['IPTORRENTS']['iptorrents_uid'] = IPTORRENTS_UID
-    new_config['IPTORRENTS']['iptorrents_rsshash'] = IPTORRENTS_RSSHASH
     new_config['IPTORRENTS']['iptorrents_eu'] = IPTORRENTS_EU
     
     new_config['BITHDTV'] = {}
@@ -1311,7 +1300,6 @@ def save_config():
     new_config['SPEED']['speed'] = int(SPEED)
     new_config['SPEED']['speed_username'] = SPEED_USERNAME
     new_config['SPEED']['speed_password'] = SPEED_PASSWORD
-    new_config['SPEED']['speed_rsshash'] = SPEED_RSSHASH
     
     new_config['REVOLUTIONTT'] = {}
     new_config['REVOLUTIONTT']['revolutiontt'] = int(REVOLUTIONTT)

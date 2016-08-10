@@ -59,9 +59,9 @@ hello.py::
 
     class HelloWorld:
         \"""Sample request handler class.\"""
+        @cherrypy.expose
         def index(self):
             return "Hello world!"
-        index.exposed = True
 
     cherrypy.tree.mount(HelloWorld())
     # CherryPy autoreload must be disabled for the flup server to work
@@ -124,7 +124,7 @@ class ServerAdapter(object):
 
     If you need to start more than one HTTP server (to serve on multiple
     ports, or protocols, etc.), you can manually register each one and then
-    start them all with bus.start:
+    start them all with bus.start::
 
         s1 = ServerAdapter(bus, MyWSGIServer(host='0.0.0.0', port=80))
         s2 = ServerAdapter(bus, another.HTTPServer(host='127.0.0.1', SSL=True))
@@ -183,7 +183,7 @@ class ServerAdapter(object):
         if not self.httpserver:
             return ''
         host, port = self.bind_addr
-        if getattr(self.httpserver, 'ssl_certificate', None):
+        if getattr(self.httpserver, 'ssl_adapter', None):
             scheme = "https"
             if port != 443:
                 host += ":%s" % port
