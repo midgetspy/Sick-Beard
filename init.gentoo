@@ -1,0 +1,77 @@
+#!/sbin/runscript
+# Copyright 1999-2013 Gentoo Foundation
+# Distributed under the terms of the GNU General Public License v2
+
+# History
+# -------
+# 1/29 Created          Richard Powell          richard@powell.ws
+
+# You will need to create a configuration file in order for this script
+# to work properly. Please create /etc/conf.d/sickbeard with the following:
+#
+# SICKBEARD_USER=<user you want sickbeard to run under>
+# SICKBEARD_GROUP=<group you want sickbeard to run under>
+# SICKBEARD_DIR=<path to Sickbeard.py>
+# PATH_TO_PYTHON_2=/usr/bin/python2
+# SICKBEARD_DATADIR=<directory that contains sickbeard.db file>
+# SICKBEARD_CONFDIR=<directory that contains Sickbeard's config.ini file>
+#
+
+RUNDIR=/var/run/sickbeard
+
+depend() {
+    need net
+}
+
+get_pidfile() {
+    # Parse the config.ini file for the value of web_port in the General section
+    eval `sed -e 's/[[:space:]]*\=[[:space:]]*/=/g' \
+        -e 's/;.*$//' \
+        -e 's/[[:space:]]*$//' \
+        -e 's/^[[:space:]]*//' \
+        -e "s/^\(.*\)=\([^\"']*\)$/\1=\"\2\"/" \
+       <  ${SICKBEARD_CONFDIR}/config.ini \
+        | sed -n -e "/^\[General\]/,/^\s*\[/{/^[^;].*\=.*/p;}"`
+
+    echo "${RUNDIR}/sickbeard-${web_port}.pid"
+}
+
+start() {
+    ebegin "Starting Sickbeard"
+
+    checkpath -q -d -o ${SICKBEARD_USER}:${SICKBEARD_GROUP} -m 0770 "${RUNDIR}"
+
+    start-stop-daemon \
+        --quiet \
+        --start \
+        --user ${SICKBEARD_USER} \
+        --group ${SICKBEARD_GROUP} \
+        --name sickbeard \
+        --background \
+        --pidfile $(get_pidfile) \
+        --exec ${PATH_TO_PYTHON_2} \
+        -- \
+        ${SICKBEARD_DIR}/SickBeard.py \
+        -d \
+        --pidfile $(get_pidfile) \
+        --config ${SICKBEARD_CONFDIR}/config.ini \
+        --datadir ${SICKBEARD_DATADIR}
+    eend $?
+}
+
+start_pre() {
+    if [ "$RC_CMD" == "restart" ]; then
+        local pidfile=$(get_pidfile)
+        while [ -e ${pidfile} ]; do
+            sleep 1
+        done
+    fi
+
+    return 0
+}
+
+stop() {
+    local pidfile=$(get_pidfile)
+    local rc
+
+    ebegin "Stopping Sickbeard"
