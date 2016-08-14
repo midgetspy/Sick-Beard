@@ -68,7 +68,7 @@
     <exec_method
         type='method'
         name='start'
-        exec='/opt/sickbeard/SickBeard.py --daemon'
+        exec='/opt/sickbeard/SickBeard.py --daemon --nolaunch'
         timeout_seconds='60'>
     </exec_method>
  
