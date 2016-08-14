@@ -69,7 +69,7 @@ def sendNZB(nzb):
         params['mode'] = 'addfile'
         multiPartParams = {"nzbfile": (nzb.name + ".nzb", nzb.extraInfo[0])}
 
-    url = sickbeard.SAB_HOST + "api?" + urllib.urlencode(params)
+    url = 'http://' + sickbeard.SAB_HOST + "/api?" + urllib.urlencode(params)
 
     logger.log(u"Sending NZB to SABnzbd: %s" % nzb.name)
     logger.log(u"SABnzbd URL: " + url, logger.DEBUG)
