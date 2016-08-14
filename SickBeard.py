@@ -94,10 +94,6 @@ def daemonize():
 
     os.setsid()  # @UndefinedVariable - only available in UNIX
 
-    # Make sure I can read my own files and shut out others
-    prev = os.umask(0)
-    os.umask(prev and int('077', 8))
-
     # Make the child a session-leader by detaching from the terminal
     try:
         pid = os.fork()  # @UndefinedVariable - only available in UNIX
