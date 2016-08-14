@@ -202,6 +202,15 @@ def main():
     # Need console logging for SickBeard.py and SickBeard-console.exe
     consoleLogging = (not hasattr(sys, "frozen")) or (sickbeard.MY_NAME.lower().find('-console') > 0)
 
+    try:
+        from setproctitle import setproctitle
+    except ImportError:
+        if consoleLogging:
+            sys.stderr.write(u"setproctitle module is not available.\n")
+        setproctitle = lambda t: None
+
+    setproctitle(sickbeard.MY_NAME)
+
     # Rename the main thread
     threading.currentThread().name = "MAIN"
 
