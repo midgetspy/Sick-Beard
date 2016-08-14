@@ -34,7 +34,7 @@ from threading import Lock
 # apparently py2exe won't build these unless they're imported somewhere
 from sickbeard import providers, metadata
 
-from providers import ezrss, tvtorrents, torrentleech, btn, newznab, womble, omgwtfnzbs, hdbits
+from providers import ezrss, tvtorrents, kat, torrentleech, thorsland, btn, newznab, womble, omgwtfnzbs, hdbits
 from sickbeard.config import CheckSection, check_setting_int, check_setting_str, ConfigMigrator
 
 from sickbeard import searchCurrent, searchBacklog, showUpdater, versionChecker, properFinder, autoPostProcesser
@@ -153,6 +153,7 @@ NZB_METHOD = None
 NZB_DIR = None
 USENET_RETENTION = None
 DOWNLOAD_PROPERS = None
+PREFER_MAGNETS = None
 
 SEARCH_FREQUENCY = None
 BACKLOG_SEARCH_FREQUENCY = 21
@@ -165,6 +166,8 @@ DEFAULT_POSTPROCESS_FREQUENCY = 10
 
 EZRSS = False
 
+KAT = False
+
 HDBITS = False
 HDBITS_USERNAME = None
 HDBITS_PASSKEY = None
@@ -175,6 +178,10 @@ TVTORRENTS_HASH = None
 
 TORRENTLEECH = False
 TORRENTLEECH_KEY = None
+
+THORSLAND = False
+THORSLAND_KEY = None
+
 
 BTN = False
 BTN_API_KEY = None
@@ -355,8 +362,9 @@ def initialize(consoleLogging=True):
                 USE_TRAKT, TRAKT_USERNAME, TRAKT_PASSWORD, TRAKT_API, \
                 USE_PLEX, PLEX_NOTIFY_ONSNATCH, PLEX_NOTIFY_ONDOWNLOAD, PLEX_UPDATE_LIBRARY, \
                 PLEX_SERVER_HOST, PLEX_HOST, PLEX_USERNAME, PLEX_PASSWORD, \
-                showUpdateScheduler, __INITIALIZED__, LAUNCH_BROWSER, showList, loadingShowList, \
-                NEWZNAB_DATA, NZBS, NZBS_UID, NZBS_HASH, EZRSS, HDBITS, HDBITS_USERNAME, HDBITS_PASSKEY, TVTORRENTS, TVTORRENTS_DIGEST, TVTORRENTS_HASH, BTN, BTN_API_KEY, TORRENTLEECH, TORRENTLEECH_KEY, \
+                showUpdateScheduler, __INITIALIZED__, LAUNCH_BROWSER, showList, loadingShowList, PREFER_MAGNETS, \
+                NEWZNAB_DATA, NZBS, NZBS_UID, NZBS_HASH, EZRSS, KAT, HDBITS, HDBITS_USERNAME, HDBITS_PASSKEY, TVTORRENTS, TVTORRENTS_DIGEST, TVTORRENTS_HASH, \
+		BTN, BTN_API_KEY, TORRENTLEECH, TORRENTLEECH_KEY, THORSLAND, THORSLAND_KEY, \
                 TORRENT_DIR, USENET_RETENTION, SOCKET_TIMEOUT, \
                 SEARCH_FREQUENCY, DEFAULT_SEARCH_FREQUENCY, BACKLOG_SEARCH_FREQUENCY, \
                 POSTPROCESS_FREQUENCY, DEFAULT_POSTPROCESS_FREQUENCY, MIN_POSTPROCESS_FREQUENCY, \
@@ -501,6 +509,10 @@ def initialize(consoleLogging=True):
             CheckSection(CFG, 'EZRSS')
             EZRSS = bool(check_setting_int(CFG, 'EZRSS', 'ezrss', 0))
 
+        CheckSection(CFG, 'KAT')
+        KAT = bool(check_setting_int(CFG, 'KAT', 'kat', 1))
+        PREFER_MAGNETS = bool(0) #for now go the old way
+
         GIT_PATH = check_setting_str(CFG, 'General', 'git_path', '')
         IGNORE_WORDS = check_setting_str(CFG, 'General', 'ignore_words', IGNORE_WORDS)
         EXTRA_SCRIPTS = [x.strip() for x in check_setting_str(CFG, 'General', 'extra_scripts', '').split('|') if x.strip()]
@@ -544,7 +556,11 @@ def initialize(consoleLogging=True):
         CheckSection(CFG, 'TorrentLeech')
         TORRENTLEECH = bool(check_setting_int(CFG, 'TorrentLeech', 'torrentleech', 0))
         TORRENTLEECH_KEY = check_setting_str(CFG, 'TorrentLeech', 'torrentleech_key', '')
-
+	
+	CheckSection(CFG, 'ThorsLand')
+        THORSLAND = bool(check_setting_int(CFG, 'ThorsLand', 'thorsland', 0))
+        THORSLAND_KEY = check_setting_str(CFG, 'ThorsLand', 'thorsland_key', '')
+	
         CheckSection(CFG, 'NZBs')
         NZBS = bool(check_setting_int(CFG, 'NZBs', 'nzbs', 0))
         NZBS_UID = check_setting_str(CFG, 'NZBs', 'nzbs_uid', '')
@@ -1086,6 +1102,9 @@ def save_config():
     new_config['EZRSS'] = {}
     new_config['EZRSS']['ezrss'] = int(EZRSS)
 
+    new_config['KAT'] = {}
+    new_config['KAT']['kat'] = int(KAT)
+    
     new_config['HDBITS'] = {}
     new_config['HDBITS']['hdbits'] = int(HDBITS)
     new_config['HDBITS']['hdbits_username'] = HDBITS_USERNAME
@@ -1095,7 +1114,7 @@ def save_config():
     new_config['TVTORRENTS']['tvtorrents'] = int(TVTORRENTS)
     new_config['TVTORRENTS']['tvtorrents_digest'] = TVTORRENTS_DIGEST
     new_config['TVTORRENTS']['tvtorrents_hash'] = TVTORRENTS_HASH
-
+    
     new_config['BTN'] = {}
     new_config['BTN']['btn'] = int(BTN)
     new_config['BTN']['btn_api_key'] = BTN_API_KEY
@@ -1103,6 +1122,10 @@ def save_config():
     new_config['TorrentLeech'] = {}
     new_config['TorrentLeech']['torrentleech'] = int(TORRENTLEECH)
     new_config['TorrentLeech']['torrentleech_key'] = TORRENTLEECH_KEY
+
+    new_config['ThorsLand'] = {}
+    new_config['ThorsLand']['thorsland'] = int(THORSLAND)
+    new_config['ThorsLand']['thorsland_key'] = THORSLAND_KEY
 
     new_config['NZBs'] = {}
     new_config['NZBs']['nzbs'] = int(NZBS)
