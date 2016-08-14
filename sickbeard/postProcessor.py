@@ -844,6 +844,7 @@ class PostProcessor(object):
         ep_obj.saveToDB()
 
         # send notifiers library update
+        ep_obj.showPath = dest_path
         notifiers.update_library(ep_obj)
 
         self._run_extra_scripts(ep_obj)
