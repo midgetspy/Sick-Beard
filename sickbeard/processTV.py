@@ -161,6 +161,10 @@ def processDir(dirName, nzbName=None, method=None, recurse=False, pp_options={})
     # if there's more than one videofile in the folder, files can be lost (overwritten) when nzbName contains only one episode.
     if num_videoFiles >= 2:
         nzbName = None
+        
+    if len(videoFiles) == 0:
+        returnStr += logHelper(u"Folder contained no video files, will not process", logger.ERROR)
+        return returnStr
 
     # process any files in the dir
     for cur_video_file in videoFiles:
