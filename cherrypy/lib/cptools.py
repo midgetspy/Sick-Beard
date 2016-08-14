@@ -1,19 +1,10 @@
 """Functions for builtin CherryPy tools."""
 
 import logging
-try:
-    # Python 2.5+
-    from hashlib import md5
-except ImportError:
-    from md5 import new as md5
 import re
 
-try:
-    set
-except NameError:
-    from sets import Set as set
-
 import cherrypy
+from cherrypy._cpcompat import basestring, ntob, md5, set
 from cherrypy.lib import httputil as _httputil
 
 
@@ -33,7 +24,7 @@ def validate_etags(autotags=False, debug=False):
     use for entity tags in a possibly destructive fashion. Likewise, if you
     raise 304 Not Modified, the response body will be empty, the ETag hash
     will be incorrect, and your application will break.
-    See http://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html#sec14.24
+    See :rfc:`2616` Section 14.24.
     """
     response = cherrypy.serving.response
     
@@ -123,6 +114,36 @@ def validate_since():
 
 
 #                                Tool code                                #
+
+def allow(methods=None, debug=False):
+    """Raise 405 if request.method not in methods (default GET/HEAD).
+    
+    The given methods are case-insensitive, and may be in any order.
+    If only one method is allowed, you may supply a single string;
+    if more than one, supply a list of strings.
+    
+    Regardless of whether the current method is allowed or not, this
+    also emits an 'Allow' response header, containing the given methods.
+    """
+    if not isinstance(methods, (tuple, list)):
+        methods = [methods]
+    methods = [m.upper() for m in methods if m]
+    if not methods:
+        methods = ['GET', 'HEAD']
+    elif 'GET' in methods and 'HEAD' not in methods:
+        methods.append('HEAD')
+    
+    cherrypy.response.headers['Allow'] = ', '.join(methods)
+    if cherrypy.request.method not in methods:
+        if debug:
+            cherrypy.log('request.method %r not in methods %r' %
+                         (cherrypy.request.method, methods), 'TOOLS.ALLOW')
+        raise cherrypy.HTTPError(405)
+    else:
+        if debug:
+            cherrypy.log('request.method %r in methods %r' %
+                         (cherrypy.request.method, methods), 'TOOLS.ALLOW')
+
 
 def proxy(base=None, local='X-Forwarded-Host', remote='X-Forwarded-For',
           scheme='X-Forwarded-Proto', debug=False):
@@ -217,12 +238,22 @@ def referer(pattern, accept=True, accept_missing=False, error=403,
             message='Forbidden Referer header.', debug=False):
     """Raise HTTPError if Referer header does/does not match the given pattern.
     
-    pattern: a regular expression pattern to test against the Referer.
-    accept: if True, the Referer must match the pattern; if False,
+    pattern
+        A regular expression pattern to test against the Referer.
+        
+    accept
+        If True, the Referer must match the pattern; if False,
         the Referer must NOT match the pattern.
-    accept_missing: if True, permit requests with no Referer header.
-    error: the HTTP error code to return to the client on failure.
-    message: a string to include in the response body on failure.
+
+    accept_missing
+        If True, permit requests with no Referer header.
+
+    error
+        The HTTP error code to return to the client on failure.
+        
+    message
+        A string to include in the response body on failure.
+    
     """
     try:
         ref = cherrypy.serving.request.headers['Referer']
@@ -264,7 +295,7 @@ class SessionAuth(object):
         pass
     
     def login_screen(self, from_page='..', username='', error_msg='', **kwargs):
-        return """<html><body>
+        return ntob("""<html><body>
 Message: %(error_msg)s
 <form method="post" action="do_login">
     Login: <input type="text" name="username" value="%(username)s" size="10" /><br />
@@ -273,7 +304,7 @@ Message: %(error_msg)s
     <input type="submit" />
 </form>
 </body></html>""" % {'from_page': from_page, 'username': username,
-                     'error_msg': error_msg}
+                     'error_msg': error_msg}, "utf-8")
     
     def do_login(self, username, password, from_page='..', **kwargs):
         """Login. May raise redirect, or return True if request handled."""
@@ -400,13 +431,13 @@ def log_hooks(debug=False):
         v.sort()
         for h in v:
             msg.append("        %r" % h)
-    cherrypy.log('\nRequest Hooks for ' + cherrypy.url() + 
+    cherrypy.log('\nRequest Hooks for ' + cherrypy.url() +
                  ':\n' + '\n'.join(msg), "HTTP")
 
 def redirect(url='', internal=True, debug=False):
     """Raise InternalRedirect or HTTPRedirect to the given url."""
     if debug:
-        cherrypy.log('Redirecting %sto: %s' % 
+        cherrypy.log('Redirecting %sto: %s' %
                      ({True: 'internal ', False: ''}[internal], url),
                      'TOOLS.REDIRECT')
     if internal:
@@ -420,7 +451,7 @@ def trailing_slash(missing=True, extra=False, status=None, debug=False):
     pi = request.path_info
     
     if debug:
-        cherrypy.log('is_index: %r, missing: %r, extra: %r, path_info: %r' % 
+        cherrypy.log('is_index: %r, missing: %r, extra: %r, path_info: %r' %
                      (request.is_index, missing, extra, pi),
                      'TOOLS.TRAILING_SLASH')
     if request.is_index is True:
@@ -528,7 +559,7 @@ def accept(media=None, debug=False):
         msg = "Your client did not send an Accept header."
     else:
         msg = "Your client sent this Accept header: %s." % ah
-    msg += (" But this resource only emits these media types: %s." % 
+    msg += (" But this resource only emits these media types: %s." %
             ", ".join(media))
     raise cherrypy.HTTPError(406, msg)
 

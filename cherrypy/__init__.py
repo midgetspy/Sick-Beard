@@ -57,101 +57,10 @@ These API's are described in the CherryPy specification:
 http://www.cherrypy.org/wiki/CherryPySpec
 """
 
-__version__ = "3.2.0rc1"
+__version__ = "3.2.0"
 
-from urlparse import urljoin as _urljoin
-from urllib import urlencode as _urlencode
-
-
-class _AttributeDocstrings(type):
-    """Metaclass for declaring docstrings for class attributes."""
-    # The full docstring for this type is down in the __init__ method so
-    # that it doesn't show up in help() for every consumer class.
-    
-    def __init__(cls, name, bases, dct):
-        '''Metaclass for declaring docstrings for class attributes.
-        
-        Base Python doesn't provide any syntax for setting docstrings on
-        'data attributes' (non-callables). This metaclass allows class
-        definitions to follow the declaration of a data attribute with
-        a docstring for that attribute; the attribute docstring will be
-        popped from the class dict and folded into the class docstring.
-        
-        The naming convention for attribute docstrings is:
-            <attrname> + "__doc".
-        For example:
-        
-            class Thing(object):
-                """A thing and its properties."""
-                
-                __metaclass__ = cherrypy._AttributeDocstrings
-                
-                height = 50
-                height__doc = """The height of the Thing in inches."""
-        
-        In which case, help(Thing) starts like this:
-        
-            >>> help(mod.Thing)
-            Help on class Thing in module pkg.mod:
-            
-            class Thing(__builtin__.object)
-             |  A thing and its properties.
-             |  
-             |  height [= 50]:
-             |      The height of the Thing in inches.
-             | 
-        
-        The benefits of this approach over hand-edited class docstrings:
-            1. Places the docstring nearer to the attribute declaration.
-            2. Makes attribute docs more uniform ("name (default): doc").
-            3. Reduces mismatches of attribute _names_ between
-               the declaration and the documentation.
-            4. Reduces mismatches of attribute default _values_ between
-               the declaration and the documentation.
-        
-        The benefits of a metaclass approach over other approaches:
-            1. Simpler ("less magic") than interface-based solutions.
-            2. __metaclass__ can be specified at the module global level
-               for classic classes.
-        
-        For various formatting reasons, you should write multiline docs
-        with a leading newline and not a trailing one:
-            
-            response__doc = """
-            The response object for the current thread. In the main thread,
-            and any threads which are not HTTP requests, this is None."""
-        
-        The type of the attribute is intentionally not included, because
-        that's not How Python Works. Quack.
-        '''
-        
-        newdoc = [cls.__doc__ or ""]
-        
-        dctkeys = dct.keys()
-        dctkeys.sort()
-        for name in dctkeys:
-            if name.endswith("__doc"):
-                # Remove the magic doc attribute.
-                if hasattr(cls, name):
-                    delattr(cls, name)
-                
-                # Make a uniformly-indented docstring from it.
-                val = '\n'.join(['    ' + line.strip()
-                                 for line in dct[name].split('\n')])
-                
-                # Get the default value.
-                attrname = name[:-5]
-                try:
-                    attrval = getattr(cls, attrname)
-                except AttributeError:
-                    attrval = "missing"
-                
-                # Add the complete attribute docstring to our list.
-                newdoc.append("%s [= %r]:\n%s" % (attrname, attrval, val))
-        
-        # Add our list of new docstrings to the class docstring.
-        cls.__doc__ = "\n\n".join(newdoc)
-
+from cherrypy._cpcompat import urljoin as _urljoin, urlencode as _urlencode
+from cherrypy._cpcompat import basestring, unicodestr
 
 from cherrypy._cperror import HTTPError, HTTPRedirect, InternalRedirect
 from cherrypy._cperror import NotFound, CherryPyException, TimeoutError
@@ -248,10 +157,7 @@ def quickstart(root=None, script_name="", config=None):
     engine.block()
 
 
-try:
-    from threading import local as _local
-except ImportError:
-    from cherrypy._cpthreadinglocal import local as _local
+from cherrypy._cpcompat import threadlocal as _local
 
 class _Serving(_local):
     """An interface for registering request and response objects.
@@ -264,16 +170,14 @@ class _Serving(_local):
     thread-safe way.
     """
     
-    __metaclass__ = _AttributeDocstrings
-    
     request = _cprequest.Request(_httputil.Host("127.0.0.1", 80),
                                  _httputil.Host("127.0.0.1", 1111))
-    request__doc = """
+    """
     The request object for the current thread. In the main thread,
     and any threads which are not receiving HTTP requests, this is None."""
     
     response = _cprequest.Response()
-    response__doc = """
+    """
     The response object for the current thread. In the main thread,
     and any threads which are not receiving HTTP requests, this is None."""
     
@@ -300,7 +204,7 @@ class _ThreadLocalProxy(object):
         return getattr(child, name)
     
     def __setattr__(self, name, value):
-        if name in ("__attrname__",):
+        if name in ("__attrname__", ):
             object.__setattr__(self, name, value)
         else:
             child = getattr(serving, self.__attrname__)
@@ -340,7 +244,8 @@ class _ThreadLocalProxy(object):
     def __nonzero__(self):
         child = getattr(serving, self.__attrname__)
         return bool(child)
-
+    # Python 3
+    __bool__ = __nonzero__
 
 # Create request and response object (the same objects will be used
 #   throughout the entire life of the webserver, but will redirect
@@ -375,8 +280,17 @@ except ImportError:
 from cherrypy import _cplogging
 
 class _GlobalLogManager(_cplogging.LogManager):
+    """A site-wide LogManager; routes to app.log or global log as appropriate.
+    
+    This :class:`LogManager<cherrypy._cplogging.LogManager>` implements
+    cherrypy.log() and cherrypy.log.access(). If either
+    function is called during a request, the message will be sent to the
+    logger for the current Application. If they are called outside of a
+    request, the message will be sent to the site-wide logger.
+    """
     
     def __call__(self, *args, **kwargs):
+        """Log the given message to the app.log or global log as appropriate."""
         # Do NOT use try/except here. See http://www.cherrypy.org/ticket/945
         if hasattr(request, 'app') and hasattr(request.app, 'log'):
             log = request.app.log
@@ -385,6 +299,7 @@ class _GlobalLogManager(_cplogging.LogManager):
         return log.error(*args, **kwargs)
     
     def access(self):
+        """Log an access message to the app.log or global log as appropriate."""
         try:
             return request.app.log.access()
         except AttributeError:
@@ -444,6 +359,138 @@ def expose(func=None, alias=None):
         alias = func
         return expose_
 
+def popargs(*args, **kwargs):
+    """A decorator for _cp_dispatch 
+    (cherrypy.dispatch.Dispatcher.dispatch_method_name).
+
+    Optional keyword argument: handler=(Object or Function)
+    
+    Provides a _cp_dispatch function that pops off path segments into 
+    cherrypy.request.params under the names specified.  The dispatch
+    is then forwarded on to the next vpath element.
+    
+    Note that any existing (and exposed) member function of the class that
+    popargs is applied to will override that value of the argument.  For
+    instance, if you have a method named "list" on the class decorated with
+    popargs, then accessing "/list" will call that function instead of popping
+    it off as the requested parameter.  This restriction applies to all 
+    _cp_dispatch functions.  The only way around this restriction is to create
+    a "blank class" whose only function is to provide _cp_dispatch.
+    
+    If there are path elements after the arguments, or more arguments
+    are requested than are available in the vpath, then the 'handler'
+    keyword argument specifies the next object to handle the parameterized
+    request.  If handler is not specified or is None, then self is used.
+    If handler is a function rather than an instance, then that function
+    will be called with the args specified and the return value from that
+    function used as the next object INSTEAD of adding the parameters to
+    cherrypy.request.args.
+    
+    This decorator may be used in one of two ways:
+    
+    As a class decorator:
+    @cherrypy.popargs('year', 'month', 'day')
+    class Blog:
+        def index(self, year=None, month=None, day=None):
+            #Process the parameters here; any url like
+            #/, /2009, /2009/12, or /2009/12/31
+            #will fill in the appropriate parameters.
+            
+        def create(self):
+            #This link will still be available at /create.  Defined functions
+            #take precedence over arguments.
+            
+    Or as a member of a class:
+    class Blog:
+        _cp_dispatch = cherrypy.popargs('year', 'month', 'day')
+        #...
+        
+    The handler argument may be used to mix arguments with built in functions.
+    For instance, the following setup allows different activities at the
+    day, month, and year level:
+    
+    class DayHandler:
+        def index(self, year, month, day):
+            #Do something with this day; probably list entries
+            
+        def delete(self, year, month, day):
+            #Delete all entries for this day
+            
+    @cherrypy.popargs('day', handler=DayHandler())
+    class MonthHandler:
+        def index(self, year, month):
+            #Do something with this month; probably list entries
+            
+        def delete(self, year, month):
+            #Delete all entries for this month
+            
+    @cherrypy.popargs('month', handler=MonthHandler())
+    class YearHandler:
+        def index(self, year):
+            #Do something with this year
+            
+        #...
+        
+    @cherrypy.popargs('year', handler=YearHandler())
+    class Root:
+        def index(self):
+            #...
+        
+    """
+
+    #Since keyword arg comes after *args, we have to process it ourselves
+    #for lower versions of python.
+
+    handler = None
+    handler_call = False
+    for k,v in kwargs.items():
+        if k == 'handler':
+            handler = v
+        else:
+            raise TypeError(
+                "cherrypy.popargs() got an unexpected keyword argument '{0}'" \
+                .format(k)
+                )
+
+    import inspect
+
+    if handler is not None \
+        and (hasattr(handler, '__call__') or inspect.isclass(handler)):
+        handler_call = True
+    
+    def decorated(cls_or_self=None, vpath=None):
+        if inspect.isclass(cls_or_self):
+            #cherrypy.popargs is a class decorator
+            cls = cls_or_self
+            setattr(cls, dispatch.Dispatcher.dispatch_method_name, decorated)
+            return cls
+        
+        #We're in the actual function
+        self = cls_or_self
+        parms = {}
+        for arg in args:
+            if not vpath:
+                break
+            parms[arg] = vpath.pop(0)
+                
+        if handler is not None:
+            if handler_call:
+                return handler(**parms)
+            else:
+                request.params.update(parms)
+                return handler
+                
+        request.params.update(parms)
+            
+        #If we are the ultimate handler, then to prevent our _cp_dispatch
+        #from being called again, we will resolve remaining elements through
+        #getattr() directly.
+        if vpath:
+            return getattr(self, vpath.pop(0), None)
+        else:
+            return self
+        
+    return decorated
 
 def url(path="", qs="", script_name=None, base=None, relative=None):
     """Create an absolute URL for the given path.

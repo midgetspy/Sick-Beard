@@ -9,7 +9,7 @@ def process_body():
         import xmlrpclib
         return xmlrpclib.loads(cherrypy.request.body.read())
     except Exception:
-        return ('ERROR PARAMS',), 'ERRORMETHOD'
+        return ('ERROR PARAMS', ), 'ERRORMETHOD'
 
 
 def patched_path(path):

@@ -1,18 +1,18 @@
 import logging
 import mimetypes
 mimetypes.init()
-mimetypes.types_map['.dwg'] = 'image/x-dwg'
-mimetypes.types_map['.ico'] = 'image/x-icon'
-mimetypes.types_map['.bz2'] = 'application/x-bzip2'
-mimetypes.types_map['.gz'] = 'application/x-gzip'
+mimetypes.types_map['.dwg']='image/x-dwg'
+mimetypes.types_map['.ico']='image/x-icon'
+mimetypes.types_map['.bz2']='application/x-bzip2'
+mimetypes.types_map['.gz']='application/x-gzip'
 
 import os
 import re
 import stat
 import time
-from urllib import unquote
 
 import cherrypy
+from cherrypy._cpcompat import ntob, unquote
 from cherrypy.lib import cptools, httputil, file_generator_limited
 
 
@@ -174,8 +174,8 @@ def _serve_fileobj(fileobj, content_type, content_length, debug=False):
             else:
                 # Return a multipart/byteranges response.
                 response.status = "206 Partial Content"
-                import mimetools
-                boundary = mimetools.choose_boundary()
+                from mimetools import choose_boundary
+                boundary = choose_boundary()
                 ct = "multipart/byteranges; boundary=%s" % boundary
                 response.headers['Content-Type'] = ct
                 if "Content-Length" in response.headers:
@@ -184,25 +184,25 @@ def _serve_fileobj(fileobj, content_type, content_length, debug=False):
                 
                 def file_ranges():
                     # Apache compatibility:
-                    yield "\r\n"
+                    yield ntob("\r\n")
                     
                     for start, stop in r:
                         if debug:
                             cherrypy.log('Multipart; start: %r, stop: %r' % (start, stop),
                                          'TOOLS.STATIC')
-                        yield "--" + boundary
-                        yield "\r\nContent-type: %s" % content_type
-                        yield ("\r\nContent-range: bytes %s-%s/%s\r\n\r\n"
-                               % (start, stop - 1, content_length))
+                        yield ntob("--" + boundary, 'ascii')
+                        yield ntob("\r\nContent-type: %s" % content_type, 'ascii')
+                        yield ntob("\r\nContent-range: bytes %s-%s/%s\r\n\r\n"
+                                   % (start, stop - 1, content_length), 'ascii')
                         fileobj.seek(start)
-                        for chunk in file_generator_limited(fileobj, stop - start):
+                        for chunk in file_generator_limited(fileobj, stop-start):
                             yield chunk
-                        yield "\r\n"
+                        yield ntob("\r\n")
                     # Final boundary
-                    yield "--" + boundary + "--"
+                    yield ntob("--" + boundary + "--", 'ascii')
                     
                     # Apache compatibility:
-                    yield "\r\n"
+                    yield ntob("\r\n")
                 response.body = file_ranges()
             return response.body
         else:
@@ -223,7 +223,7 @@ def serve_download(path, name=None):
 
 def _attempt(filename, content_types, debug=False):
     if debug:
-        cherrypy.log('Attempting %r (content_types %r)' % 
+        cherrypy.log('Attempting %r (content_types %r)' %
                      (filename, content_types), 'TOOLS.STATICDIR')
     try:
         # you can set the content types for a
@@ -245,18 +245,21 @@ def staticdir(section, dir, root="", match="", content_types=None, index="",
               debug=False):
     """Serve a static resource from the given (root +) dir.
     
-    If 'match' is given, request.path_info will be searched for the given
-    regular expression before attempting to serve static content.
+    match
+        If given, request.path_info will be searched for the given
+        regular expression before attempting to serve static content.
     
-    If content_types is given, it should be a Python dictionary of
-    {file-extension: content-type} pairs, where 'file-extension' is
-    a string (e.g. "gif") and 'content-type' is the value to write
-    out in the Content-Type response header (e.g. "image/gif").
+    content_types
+        If given, it should be a Python dictionary of
+        {file-extension: content-type} pairs, where 'file-extension' is
+        a string (e.g. "gif") and 'content-type' is the value to write
+        out in the Content-Type response header (e.g. "image/gif").
     
-    If 'index' is provided, it should be the (relative) name of a file to
-    serve for directory requests. For example, if the dir argument is
-    '/home/me', the Request-URI is 'myapp', and the index arg is
-    'index.html', the file '/home/me/myapp/index.html' will be sought.
+    index
+        If provided, it should be the (relative) name of a file to
+        serve for directory requests. For example, if the dir argument is
+        '/home/me', the Request-URI is 'myapp', and the index arg is
+        'index.html', the file '/home/me/myapp/index.html' will be sought.
     """
     request = cherrypy.serving.request
     if request.method not in ('GET', 'HEAD'):
@@ -266,7 +269,7 @@ def staticdir(section, dir, root="", match="", content_types=None, index="",
     
     if match and not re.search(match, request.path_info):
         if debug:
-            cherrypy.log('request.path_info %r does not match pattern %r' % 
+            cherrypy.log('request.path_info %r does not match pattern %r' %
                          (request.path_info, match), 'TOOLS.STATICDIR')
         return False
     
@@ -293,7 +296,7 @@ def staticdir(section, dir, root="", match="", content_types=None, index="",
     # If branch is "", filename will end in a slash
     filename = os.path.join(dir, branch)
     if debug:
-        cherrypy.log('Checking file %r to fulfill %r' % 
+        cherrypy.log('Checking file %r to fulfill %r' %
                      (filename, request.path_info), 'TOOLS.STATICDIR')
     
     # There's a chance that the branch pulled from the URL might
@@ -314,13 +317,16 @@ def staticdir(section, dir, root="", match="", content_types=None, index="",
 def staticfile(filename, root=None, match="", content_types=None, debug=False):
     """Serve a static resource from the given (root +) filename.
     
-    If 'match' is given, request.path_info will be searched for the given
-    regular expression before attempting to serve static content.
+    match
+        If given, request.path_info will be searched for the given
+        regular expression before attempting to serve static content.
     
-    If content_types is given, it should be a Python dictionary of
-    {file-extension: content-type} pairs, where 'file-extension' is
-    a string (e.g. "gif") and 'content-type' is the value to write
-    out in the Content-Type response header (e.g. "image/gif").
+    content_types
+        If given, it should be a Python dictionary of
+        {file-extension: content-type} pairs, where 'file-extension' is
+        a string (e.g. "gif") and 'content-type' is the value to write
+        out in the Content-Type response header (e.g. "image/gif").
+    
     """
     request = cherrypy.serving.request
     if request.method not in ('GET', 'HEAD'):
@@ -330,7 +336,7 @@ def staticfile(filename, root=None, match="", content_types=None, debug=False):
     
     if match and not re.search(match, request.path_info):
         if debug:
-            cherrypy.log('request.path_info %r does not match pattern %r' % 
+            cherrypy.log('request.path_info %r does not match pattern %r' %
                          (request.path_info, match), 'TOOLS.STATICFILE')
         return False
     

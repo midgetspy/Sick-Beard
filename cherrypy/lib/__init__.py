@@ -18,7 +18,8 @@ class file_generator(object):
         if chunk:
             return chunk
         else:
-            self.input.close()
+            if hasattr(self.input, 'close'):
+                self.input.close()
             raise StopIteration()
     next = __next__
 
