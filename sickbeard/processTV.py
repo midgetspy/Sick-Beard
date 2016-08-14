@@ -143,6 +143,8 @@ def processDir(dirName, nzbName=None, method=None, recurse=False, pp_options={})
 
         if helpers.is_hidden_folder(cur_folder):
             returnStr += logHelper(u"Ignoring hidden folder: " + cur_folder, logger.DEBUG)
+        elif cur_folder.startswith('_unpack'):
+            returnStr += logHelper(u"Ignoring _unpack folder: " + cur_folder, logger.DEBUG)
         else:
             returnStr += logHelper(u"Recursively processing a folder: " + cur_folder, logger.DEBUG)
             returnStr += processDir(cur_folder, nzbName=parent_nzbName, recurse=True, method=method, pp_options=pp_options)
