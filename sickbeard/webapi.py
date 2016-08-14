@@ -173,6 +173,8 @@ class Api:
         response = cherrypy.response
         request = cherrypy.request
         response.headers['Content-Type'] = 'application/json;charset=UTF-8'
+        response.headers['Access-Control-Allow-Origin'] = 'http://localhost'	
+        response.headers['Access-Control-Allow-Headers'] = 'x-requested-with'
         try:
             out = json.dumps(dict, indent=self.intent, sort_keys=True)
             callback = request.params.get('callback') or request.params.get('jsonp')
