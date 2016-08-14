@@ -22,6 +22,13 @@ tests/cache.db
 #  IDE specific      #
 ######################
 *.bak
+dist/*
+build/*
+autoProcessTV/dist/*
+autoProcessTV/build/*
+SickBeard-win32-*.zip
+*.exe
+gc.ini
 *.tmp
 *.wpr
 *.project
