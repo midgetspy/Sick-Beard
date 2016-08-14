@@ -56,12 +56,10 @@ Then restart apache2 and access http://127.0.0.1:8080
 """
 
 import logging
-try:
-    from cStringIO import StringIO
-except ImportError:
-    from StringIO import StringIO
+import sys
 
 import cherrypy
+from cherrypy._cpcompat import BytesIO, copyitems, ntob
 from cherrypy._cperror import format_exc, bare_error
 from cherrypy.lib import httputil
 
@@ -186,7 +184,7 @@ def handler(req):
             path = req.uri
             qs = req.args or ""
             reqproto = req.protocol
-            headers = req.headers_in.items()
+            headers = copyitems(req.headers_in)
             rfile = _ReadOnlyRequest(req)
             prev = None
             
@@ -205,7 +203,8 @@ def handler(req):
                     try:
                         request.run(method, path, qs, reqproto, headers, rfile)
                         break
-                    except cherrypy.InternalRedirect, ir:
+                    except cherrypy.InternalRedirect:
+                        ir = sys.exc_info()[1]
                         app.release_serving()
                         prev = request
                         
@@ -223,7 +222,7 @@ def handler(req):
                         method = "GET"
                         path = ir.path
                         qs = ir.query_string
-                        rfile = StringIO()
+                        rfile = BytesIO()
                 
                 send_response(req, response.status, response.header_list,
                               response.body, response.stream)
@@ -270,10 +269,11 @@ import re
 
 
 def read_process(cmd, args=""):
-    pipein, pipeout = os.popen4("%s %s" % (cmd, args))
+    fullcmd = "%s %s" % (cmd, args)
+    pipein, pipeout = os.popen4(fullcmd)
     try:
         firstline = pipeout.readline()
-        if (re.search(r"(not recognized|No such file|not found)", firstline,
+        if (re.search(ntob("(not recognized|No such file|not found)"), firstline,
                       re.IGNORECASE)):
             raise IOError('%s must be on your system path.' % cmd)
         output = firstline + pipeout.read()

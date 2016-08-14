@@ -1,23 +1,64 @@
+"""
+CherryPy implements a simple caching system as a pluggable Tool. This tool tries
+to be an (in-process) HTTP/1.1-compliant cache. It's not quite there yet, but
+it's probably good enough for most sites.
+
+In general, GET responses are cached (along with selecting headers) and, if
+another request arrives for the same resource, the caching Tool will return 304
+Not Modified if possible, or serve the cached response otherwise. It also sets
+request.cached to True if serving a cached representation, and sets
+request.cacheable to False (so it doesn't get cached again).
+
+If POST, PUT, or DELETE requests are made for a cached resource, they invalidate
+(delete) any cached response.
+
+Usage
+=====
+
+Configuration file example::
+
+    [/]
+    tools.caching.on = True
+    tools.caching.delay = 3600
+
+You may use a class other than the default
+:class:`MemoryCache<cherrypy.lib.caching.MemoryCache>` by supplying the config
+entry ``cache_class``; supply the full dotted name of the replacement class
+as the config value. It must implement the basic methods ``get``, ``put``,
+``delete``, and ``clear``.
+
+You may set any attribute, including overriding methods, on the cache
+instance by providing them in config. The above sets the
+:attr:`delay<cherrypy.lib.caching.MemoryCache.delay>` attribute, for example.
+"""
+
 import datetime
+import sys
 import threading
 import time
 
 import cherrypy
 from cherrypy.lib import cptools, httputil
+from cherrypy._cpcompat import copyitems, ntob, set_daemon, sorted
 
 
 class Cache(object):
+    """Base class for Cache implementations."""
     
     def get(self):
+        """Return the current variant if in the cache, else None."""
         raise NotImplemented
     
     def put(self, obj, size):
+        """Store the current variant in the cache."""
         raise NotImplemented
     
     def delete(self):
+        """Remove ALL cached variants of the current resource."""
         raise NotImplemented
     
     def clear(self):
+        """Reset the cache to its initial, empty state."""
         raise NotImplemented
 
 
@@ -26,11 +67,12 @@ class Cache(object):
 
 
 class AntiStampedeCache(dict):
+    """A storage system for cached items which reduces stampede collisions."""
     
     def wait(self, key, timeout=5, debug=False):
         """Return the cached value for the given key, or None.
         
-        If timeout is not None (the default), and the value is already
+        If timeout is not None, and the value is already
         being calculated by another thread, wait until the given timeout has
         elapsed. If the value is available before the timeout expires, it is
         returned. If not, None is returned, and a sentinel placed in the cache
@@ -93,19 +135,31 @@ class MemoryCache(Cache):
     "selecting request headers"; that is, those named in the Vary
     response header. We assume the list of header names to be constant
     for each URI throughout the lifetime of the application, and store
-    that list in self.store[uri].selecting_headers.
+    that list in ``self.store[uri].selecting_headers``.
     
-    The items contained in self.store[uri] have keys which are tuples of request
-    header values (in the same order as the names in its selecting_headers),
-    and values which are the actual responses.
+    The items contained in ``self.store[uri]`` have keys which are tuples of
+    request header values (in the same order as the names in its
+    selecting_headers), and values which are the actual responses.
     """
     
     maxobjects = 1000
+    """The maximum number of cached objects; defaults to 1000."""
+    
     maxobj_size = 100000
+    """The maximum size of each cached object in bytes; defaults to 100 KB."""
+    
     maxsize = 10000000
+    """The maximum size of the entire cache in bytes; defaults to 10 MB."""
+    
     delay = 600
+    """Seconds until the cached content expires; defaults to 600 (10 minutes)."""
+    
     antistampede_timeout = 5
+    """Seconds to wait for other threads to release a cache lock."""
+    
     expire_freq = 0.1
+    """Seconds to sleep between cache expiration sweeps."""
+    
     debug = False
     
     def __init__(self):
@@ -114,11 +168,7 @@ class MemoryCache(Cache):
         # Run self.expire_cache in a separate daemon thread.
         t = threading.Thread(target=self.expire_cache, name='expire_cache')
         self.expiration_thread = t
-        if hasattr(threading.Thread, "daemon"):
-            # Python 2.6+
-            t.daemon = True
-        else:
-            t.setDaemon(True)
+        set_daemon(t, True)
         t.start()
     
     def clear(self):
@@ -133,19 +183,23 @@ class MemoryCache(Cache):
         self.cursize = 0
     
     def expire_cache(self):
-        # expire_cache runs in a separate thread which the servers are
-        # not aware of. It's possible that "time" will be set to None
+        """Continuously examine cached objects, expiring stale ones.
+        
+        This function is designed to be run in its own daemon thread,
+        referenced at ``self.expiration_thread``.
+        """
+        # It's possible that "time" will be set to None
         # arbitrarily, so we check "while time" to avoid exceptions.
         # See tickets #99 and #180 for more information.
         while time:
             now = time.time()
             # Must make a copy of expirations so it doesn't change size
             # during iteration
-            for expiration_time, objects in self.expirations.items():
+            for expiration_time, objects in copyitems(self.expirations):
                 if expiration_time <= now:
                     for obj_size, uri, sel_header_values in objects:
                         try:
-                            del self.store[uri][sel_header_values]
+                            del self.store[uri][tuple(sel_header_values)]
                             self.tot_expires += 1
                             self.cursize -= obj_size
                         except KeyError:
@@ -166,8 +220,7 @@ class MemoryCache(Cache):
         
         header_values = [request.headers.get(h, '')
                          for h in uricache.selecting_headers]
-        header_values.sort()
-        variant = uricache.wait(key=tuple(header_values),
+        variant = uricache.wait(key=tuple(sorted(header_values)),
                                 timeout=self.antistampede_timeout,
                                 debug=self.debug)
         if variant is not None:
@@ -200,8 +253,7 @@ class MemoryCache(Cache):
                 # add to the cache
                 header_values = [request.headers.get(h, '')
                                  for h in uricache.selecting_headers]
-                header_values.sort()
-                uricache[tuple(header_values)] = variant
+                uricache[tuple(sorted(header_values))] = variant
                 self.tot_puts += 1
                 self.cursize = total_size
     
@@ -224,8 +276,8 @@ def get(invalid_methods=("POST", "PUT", "DELETE"), debug=False, **kwargs):
         * sets request.cacheable = False
         * sets response.headers to the cached values
         * checks the cached Last-Modified response header against the
-            current If-(Un)Modified-Since request headers; raises 304
-            if necessary.
+          current If-(Un)Modified-Since request headers; raises 304
+          if necessary.
         * sets response.status and response.body to the cached values
         * returns True
     
@@ -250,7 +302,7 @@ def get(invalid_methods=("POST", "PUT", "DELETE"), debug=False, **kwargs):
     # See http://www.w3.org/Protocols/rfc2616/rfc2616-sec13.html#sec13.10.
     if request.method in invalid_methods:
         if debug:
-            cherrypy.log('request.method %r in invalid_methods %r' % 
+            cherrypy.log('request.method %r in invalid_methods %r' %
                          (request.method, invalid_methods), 'TOOLS.CACHING')
         cherrypy._cache.delete()
         request.cached = False
@@ -309,7 +361,8 @@ def get(invalid_methods=("POST", "PUT", "DELETE"), debug=False, **kwargs):
             # this was put into the cached copy, and should have been
             # resurrected just above (response.headers = cache_data[1]).
             cptools.validate_since()
-        except cherrypy.HTTPRedirect, x:
+        except cherrypy.HTTPRedirect:
+            x = sys.exc_info()[1]
             if x.status == 304:
                 cherrypy._cache.tot_non_modified += 1
             raise
@@ -324,6 +377,9 @@ def get(invalid_methods=("POST", "PUT", "DELETE"), debug=False, **kwargs):
 
 
 def tee_output():
+    """Tee response output to cache storage. Internal."""
+    # Used by CachingTool by attaching to request.hooks
+    
     request = cherrypy.serving.request
     if 'no-store' in request.headers.values('Cache-Control'):
         return
@@ -342,7 +398,7 @@ def tee_output():
             yield chunk
         
         # save the cache data
-        body = ''.join(output)
+        body = ntob('').join(output)
         cherrypy._cache.put((response.status, response.headers or {},
                              body, response.time), len(body))
     
@@ -352,19 +408,27 @@ def tee_output():
 
 def expires(secs=0, force=False, debug=False):
     """Tool for influencing cache mechanisms using the 'Expires' header.
+
+    secs
+        Must be either an int or a datetime.timedelta, and indicates the
+        number of seconds between response.time and when the response should
+        expire. The 'Expires' header will be set to response.time + secs.
+        If secs is zero, the 'Expires' header is set one year in the past, and
+        the following "cache prevention" headers are also set:
+        
+            * Pragma: no-cache
+            * Cache-Control': no-cache, must-revalidate
+
+    force
+        If False, the following headers are checked:
+        
+            * Etag
+            * Last-Modified
+            * Age
+            * Expires
+        
+        If any are already present, none of the above response headers are set.
     
-    'secs' must be either an int or a datetime.timedelta, and indicates the
-    number of seconds between response.time and when the response should
-    expire. The 'Expires' header will be set to (response.time + secs).
-    
-    If 'secs' is zero, the 'Expires' header is set one year in the past, and
-    the following "cache prevention" headers are also set:
-       'Pragma': 'no-cache'
-       'Cache-Control': 'no-cache, must-revalidate'
-    
-    If 'force' is False (the default), the following headers are checked:
-    'Etag', 'Last-Modified', 'Age', 'Expires'. If any are already present,
-    none of the above response headers are set.
     """
     
     response = cherrypy.serving.response

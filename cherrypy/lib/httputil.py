@@ -1,13 +1,15 @@
-"""HTTP library functions."""
+"""HTTP library functions.
 
-# This module contains functions for building an HTTP application
-# framework: any one, not just one whose name starts with "Ch". ;) If you
-# reference any modules from some popular framework inside *this* module,
-# FuManChu will personally hang you up by your thumbs and submit you
-# to a public caning.
+This module contains functions for building an HTTP application
+framework: any one, not just one whose name starts with "Ch". ;) If you
+reference any modules from some popular framework inside *this* module,
+FuManChu will personally hang you up by your thumbs and submit you
+to a public caning.
+"""
 
 from binascii import b2a_base64
-from BaseHTTPServer import BaseHTTPRequestHandler
+from cherrypy._cpcompat import BaseHTTPRequestHandler, HTTPDate, ntob, ntou, reversed, sorted
+from cherrypy._cpcompat import basestring, iteritems, unicodestr, unquote_qs
 response_codes = BaseHTTPRequestHandler.responses.copy()
 
 # From http://www.cherrypy.org/ticket/361
@@ -22,11 +24,10 @@ response_codes[503] = ('Service Unavailable',
 import re
 import urllib
 
-from rfc822 import formatdate as HTTPDate
 
 
 def urljoin(*atoms):
-    """Return the given path *atoms, joined into a single URL.
+    """Return the given path \*atoms, joined into a single URL.
     
     This will correctly join a SCRIPT_NAME and PATH_INFO into the
     original URL, even if either atom is blank.
@@ -104,12 +105,12 @@ class HeaderElement(object):
     def __cmp__(self, other):
         return cmp(self.value, other.value)
     
-    def __unicode__(self):
-        p = [";%s=%s" % (k, v) for k, v in self.params.iteritems()]
-        return u"%s%s" % (self.value, "".join(p))
-    
     def __str__(self):
-        return str(self.__unicode__())
+        p = [";%s=%s" % (k, v) for k, v in iteritems(self.params)]
+        return "%s%s" % (self.value, "".join(p))
+
+    def __unicode__(self):
+        return ntou(self.__str__())
     
     def parse(elementstr):
         """Transform 'token;key=val' to ('token', {'key': 'val'})."""
@@ -183,7 +184,7 @@ class AcceptElement(HeaderElement):
 
 
 def header_elements(fieldname, fieldvalue):
-    """Return a sorted HeaderElement list from a comma-separated header str."""
+    """Return a sorted HeaderElement list from a comma-separated header string."""
     if not fieldvalue:
         return []
     
@@ -194,12 +195,11 @@ def header_elements(fieldname, fieldvalue):
         else:
             hv = HeaderElement.from_str(element)
         result.append(hv)
-    result.sort()
-    result.reverse()
-    return result
+    
+    return list(reversed(sorted(result)))
 
 def decode_TEXT(value):
-    """Decode RFC-2047 TEXT (e.g. "=?utf-8?q?f=C3=BCr?=" -> u"f\xfcr")."""
+    r"""Decode :rfc:`2047` TEXT (e.g. "=?utf-8?q?f=C3=BCr?=" -> u"f\xfcr")."""
     from email.Header import decode_header
     atoms = decode_header(value)
     decodedvalue = ""
@@ -255,21 +255,21 @@ def valid_status(status):
 
 def _parse_qs(qs, keep_blank_values=0, strict_parsing=0, encoding='utf-8'):
     """Parse a query given as a string argument.
-
+    
     Arguments:
-
+    
     qs: URL-encoded query string to be parsed
-
+    
     keep_blank_values: flag indicating whether blank values in
         URL encoded queries should be treated as blank strings.  A
         true value indicates that blanks should be retained as blank
         strings.  The default false value indicates that blank values
         are to be ignored and treated as if they were  not included.
-
+    
     strict_parsing: flag indicating what to do with parsing errors. If
         false (the default), errors are silently ignored. If true,
         errors raise a ValueError exception.
-
+    
     Returns a dict, as G-d intended.
     """
     pairs = [s2 for s1 in qs.split('&') for s2 in s1.split(';')]
@@ -287,10 +287,8 @@ def _parse_qs(qs, keep_blank_values=0, strict_parsing=0, encoding='utf-8'):
             else:
                 continue
         if len(nv[1]) or keep_blank_values:
-            name = urllib.unquote(nv[0].replace('+', ' '))
-            name = name.decode(encoding, 'strict')
-            value = urllib.unquote(nv[1].replace('+', ' '))
-            value = value.decode(encoding, 'strict')
+            name = unquote_qs(nv[0], encoding)
+            value = unquote_qs(nv[1], encoding)
             if name in d:
                 if not isinstance(d[name], list):
                     d[name] = [d[name]]
@@ -366,16 +364,33 @@ class CaseInsensitiveDict(dict):
         return dict.pop(self, str(key).title(), default)
 
 
+#   TEXT = <any OCTET except CTLs, but including LWS>
+#
+# A CRLF is allowed in the definition of TEXT only as part of a header
+# field continuation. It is expected that the folding LWS will be
+# replaced with a single SP before interpretation of the TEXT value."
+header_translate_table = ''.join([chr(i) for i in xrange(256)])
+header_translate_deletechars = ''.join([chr(i) for i in xrange(32)]) + chr(127)
+
+
 class HeaderMap(CaseInsensitiveDict):
     """A dict subclass for HTTP request and response headers.
     
     Each key is changed on entry to str(key).title(). This allows headers
     to be case-insensitive and avoid duplicates.
     
-    Values are header values (decoded according to RFC 2047 if necessary).
+    Values are header values (decoded according to :rfc:`2047` if necessary).
     """
     
-    protocol = (1, 1)
+    protocol=(1, 1)
+    encodings = ["ISO-8859-1"]
+    
+    # Someday, when http-bis is done, this will probably get dropped
+    # since few servers, clients, or intermediaries do it. But until then,
+    # we're going to obey the spec as is.
+    # "Words of *TEXT MAY contain characters from character sets other than
+    # ISO-8859-1 only when encoded according to the rules of RFC 2047."
+    use_rfc_2047 = True
     
     def elements(self, key):
         """Return a sorted list of HeaderElements for the given header."""
@@ -391,44 +406,52 @@ class HeaderMap(CaseInsensitiveDict):
         """Transform self into a list of (name, value) tuples."""
         header_list = []
         for k, v in self.items():
-            if isinstance(k, unicode):
-                k = k.encode("ISO-8859-1")
+            if isinstance(k, unicodestr):
+                k = self.encode(k)
             
             if not isinstance(v, basestring):
                 v = str(v)
             
-            if isinstance(v, unicode):
+            if isinstance(v, unicodestr):
                 v = self.encode(v)
+            
+            # See header_translate_* constants above.
+            # Replace only if you really know what you're doing.
+            k = k.translate(header_translate_table, header_translate_deletechars)
+            v = v.translate(header_translate_table, header_translate_deletechars)
+            
             header_list.append((k, v))
         return header_list
     
     def encode(self, v):
-        """Return the given header value, encoded for HTTP output."""
-        # HTTP/1.0 says, "Words of *TEXT may contain octets 
-        # from character sets other than US-ASCII." and 
-        # "Recipients of header field TEXT containing octets 
-        # outside the US-ASCII character set may assume that 
-        # they represent ISO-8859-1 characters." 
-        try:
-            v = v.encode("ISO-8859-1")
-        except UnicodeEncodeError:
-            if self.protocol == (1, 1):
-                # Encode RFC-2047 TEXT 
-                # (e.g. u"\u8200" -> "=?utf-8?b?6IiA?="). 
-                # We do our own here instead of using the email module
-                # because we never want to fold lines--folding has
-                # been deprecated by the HTTP working group.
-                v = b2a_base64(v.encode('utf-8'))
-                v = ('=?utf-8?b?' + v.strip('\n') + '?=')
-            else:
-                raise
-        return v
+        """Return the given header name or value, encoded for HTTP output."""
+        for enc in self.encodings:
+            try:
+                return v.encode(enc)
+            except UnicodeEncodeError:
+                continue
+        
+        if self.protocol == (1, 1) and self.use_rfc_2047:
+            # Encode RFC-2047 TEXT 
+            # (e.g. u"\u8200" -> "=?utf-8?b?6IiA?="). 
+            # We do our own here instead of using the email module
+            # because we never want to fold lines--folding has
+            # been deprecated by the HTTP working group.
+            v = b2a_base64(v.encode('utf-8'))
+            return (ntob('=?utf-8?b?') + v.strip(ntob('\n')) + ntob('?='))
+        
+        raise ValueError("Could not encode header part %r using "
+                         "any of the encodings %r." %
+                         (v, self.encodings))
+
 
 class Host(object):
     """An internet address.
     
-    name should be the client's host name. If not available (because no DNS
+    name
+        Should be the client's host name. If not available (because no DNS
         lookup is performed), the IP address should be used instead.
+    
     """
     
     ip = "0.0.0.0"

@@ -20,18 +20,18 @@ autoreload component.
 Ideally, a Bus object will be flexible enough to be useful in a variety
 of invocation scenarios:
 
- 1. The deployer starts a site from the command line via a framework-
-     neutral deployment script; applications from multiple frameworks
-     are mixed in a single site. Command-line arguments and configuration
-     files are used to define site-wide components such as the HTTP server,
-     WSGI component graph, autoreload behavior, signal handling, etc.
+ 1. The deployer starts a site from the command line via a
+    framework-neutral deployment script; applications from multiple frameworks
+    are mixed in a single site. Command-line arguments and configuration
+    files are used to define site-wide components such as the HTTP server,
+    WSGI component graph, autoreload behavior, signal handling, etc.
  2. The deployer starts a site via some other process, such as Apache;
-     applications from multiple frameworks are mixed in a single site.
-     Autoreload and signal handling (from Python at least) are disabled.
+    applications from multiple frameworks are mixed in a single site.
+    Autoreload and signal handling (from Python at least) are disabled.
  3. The deployer starts a site via a framework-specific mechanism;
-     for example, when running tests, exploring tutorials, or deploying
-     single applications from a single framework. The framework controls
-     which site-wide components are enabled as it sees fit.
+    for example, when running tests, exploring tutorials, or deploying
+    single applications from a single framework. The framework controls
+    which site-wide components are enabled as it sees fit.
 
 The Bus object in this package uses topic-based publish-subscribe
 messaging to accomplish all this. A few topic channels are built in
@@ -46,7 +46,7 @@ messages and subscribing listeners.
 The Bus object works as a finite state machine which models the current
 state of the process. Bus methods move it from one state to another;
 those methods then publish to subscribed listeners on the channel for
-the new state.
+the new state.::
 
                         O
                         |
@@ -62,15 +62,13 @@ the new state.
 
 import atexit
 import os
-try:
-    set
-except NameError:
-    from sets import Set as set
 import sys
 import threading
 import time
 import traceback as _traceback
 import warnings
+
+from cherrypy._cpcompat import set
 
 # Here I save the value of os.getcwd(), which, if I am imported early enough,
 # will be the directory from which the startup script was run.  This is needed
@@ -81,6 +79,7 @@ import warnings
 _startup_cwd = os.getcwd()
 
 class ChannelFailures(Exception):
+    """Exception raised when errors occur in a listener during Bus.publish()."""
     delimiter = '\n'
     
     def __init__(self, *args, **kwargs):
@@ -90,15 +89,19 @@ class ChannelFailures(Exception):
         self._exceptions = list()
     
     def handle_exception(self):
+        """Append the current exception to self."""
         self._exceptions.append(sys.exc_info())
     
     def get_instances(self):
+        """Return a list of seen exception instances."""
         return [instance for cls, instance, traceback in self._exceptions]
     
     def __str__(self):
         exception_strings = map(repr, self.get_instances())
         return self.delimiter.join(exception_strings)
-    
+
+    __repr__ = __str__
+
     def __nonzero__(self):
         return bool(self._exceptions)
 
@@ -302,13 +305,14 @@ class Bus(object):
                 else:
                     d = t.isDaemon()
                 if not d:
+                    self.log("Waiting for thread %s." % t.getName())
                     t.join()
         
         if self.execv:
             self._do_execv()
     
     def wait(self, state, interval=0.1, channel=None):
-        """Wait for the given state(s)."""
+        """Poll for the given state(s) at intervals; publish to channel."""
         if isinstance(state, (tuple, list)):
             states = state
         else:
@@ -340,12 +344,17 @@ class Bus(object):
         """
         args = sys.argv[:]
         self.log('Re-spawning %s' % ' '.join(args))
-        args.insert(0, sys.executable)
-        if sys.platform == 'win32':
-            args = ['"%s"' % arg for arg in args]
+        
+        if sys.platform[:4] == 'java':
+            from _systemrestart import SystemRestart
+            raise SystemRestart
+        else:
+            args.insert(0, sys.executable)
+            if sys.platform == 'win32':
+                args = ['"%s"' % arg for arg in args]
 
-        os.chdir(_startup_cwd)
-        os.execv(sys.executable, args)
+            os.chdir(_startup_cwd)
+            os.execv(sys.executable, args)
     
     def stop(self):
         """Stop all services."""

@@ -18,7 +18,12 @@ by adding a named handler to Config.namespaces. The name can be any string,
 and the handler must be either a callable or a context manager.
 """
 
-from ConfigParser import ConfigParser
+try:
+    # Python 3.0+
+    from configparser import ConfigParser
+except ImportError:
+    from ConfigParser import ConfigParser
+
 try:
     set
 except NameError:
@@ -51,8 +56,9 @@ class NamespaceSet(dict):
     def __call__(self, config):
         """Iterate through config and pass it to each namespace handler.
         
-        'config' should be a flat dict, where keys use dots to separate
-        namespaces, and values are arbitrary.
+        config
+            A flat dict, where keys use dots to separate
+            namespaces, and values are arbitrary.
         
         The first name in each config key is used to look up the corresponding
         namespace handler. For example, a config entry of {'tools.gzip.on': v}
@@ -160,8 +166,8 @@ class Config(dict):
 
 
 class Parser(ConfigParser):
-    """Sub-class of ConfigParser that keeps the case of options and that raises
-    an exception if the file cannot be read.
+    """Sub-class of ConfigParser that keeps the case of options and that 
+    raises an exception if the file cannot be read.
     """
     
     def optionxform(self, optionstr):
@@ -194,7 +200,7 @@ class Parser(ConfigParser):
                     value = unrepr(value)
                 except Exception, x:
                     msg = ("Config error in section: %r, option: %r, "
-                           "value: %r. Config values must be valid Python." % 
+                           "value: %r. Config values must be valid Python." %
                            (section, option, value))
                     raise ValueError(msg, x.__class__.__name__, x.args)
                 result[section][option] = value
@@ -215,7 +221,7 @@ class _Builder:
     def build(self, o):
         m = getattr(self, 'build_' + o.__class__.__name__, None)
         if m is None:
-            raise TypeError("unrepr does not recognize %s" % 
+            raise TypeError("unrepr does not recognize %s" %
                             repr(o.__class__.__name__))
         return m(o)
     
@@ -285,7 +291,7 @@ class _Builder:
         return None
     
     def build_UnarySub(self, o):
-        return - self.build(o.getChildren()[0])
+        return -self.build(o.getChildren()[0])
     
     def build_UnaryAdd(self, o):
         return self.build(o.getChildren()[0])

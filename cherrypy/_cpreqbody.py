@@ -1,20 +1,30 @@
 """Request body processing for CherryPy.
 
+.. versionadded:: 3.2
+
+Application authors have complete control over the parsing of HTTP request
+entities. In short, :attr:`cherrypy.request.body<cherrypy._cprequest.Request.body>`
+is now always set to an instance of :class:`RequestBody<cherrypy._cpreqbody.RequestBody>`,
+and *that* class is a subclass of :class:`Entity<cherrypy._cpreqbody.Entity>`.
+
 When an HTTP request includes an entity body, it is often desirable to
 provide that information to applications in a form other than the raw bytes.
 Different content types demand different approaches. Examples:
 
  * For a GIF file, we want the raw bytes in a stream.
  * An HTML form is better parsed into its component fields, and each text field
-    decoded from bytes to unicode.
+   decoded from bytes to unicode.
  * A JSON body should be deserialized into a Python dict or list.
 
 When the request contains a Content-Type header, the media type is used as a
-key to look up a value in the 'request.body.processors' dict. If the full media
+key to look up a value in the
+:attr:`request.body.processors<cherrypy._cpreqbody.Entity.processors>` dict.
+If the full media
 type is not found, then the major type is tried; for example, if no processor
 is found for the 'image/jpeg' type, then we look for a processor for the 'image'
 types altogether. If neither the full type nor the major type has a matching
-processor, then a default processor is used (self.default_proc). For most
+processor, then a default processor is used
+(:func:`default_proc<cherrypy._cpreqbody.Entity.default_proc>`). For most
 types, this means no processing is done, and the body is left unread as a
 raw byte stream. Processors are configurable in an 'on_start_resource' hook.
 
@@ -22,7 +32,8 @@ Some processors, especially those for the 'text' types, attempt to decode bytes
 to unicode. If the Content-Type request header includes a 'charset' parameter,
 this is used to decode the entity. Otherwise, one or more default charsets may
 be attempted, although this decision is up to each processor. If a processor
-successfully decodes an Entity or Part, it should set the 'charset' attribute
+successfully decodes an Entity or Part, it should set the
+:attr:`charset<cherrypy._cpreqbody.Entity.charset>` attribute
 on the Entity or Part to the name of the successful charset, so that
 applications can easily re-encode or transcode the value if they wish.
 
@@ -31,14 +42,72 @@ the above parsing process, and possibly a decoding process, is performed for
 each part.
 
 For both the full entity and multipart parts, a Content-Disposition header may
-be used to fill .name and .filename attributes on the request.body or the Part.
+be used to fill :attr:`name<cherrypy._cpreqbody.Entity.name>` and
+:attr:`filename<cherrypy._cpreqbody.Entity.filename>` attributes on the
+request.body or the Part.
+
+.. _custombodyprocessors:
+
+Custom Processors
+=================
+
+You can add your own processors for any specific or major MIME type. Simply add
+it to the :attr:`processors<cherrypy._cprequest.Entity.processors>` dict in a
+hook/tool that runs at ``on_start_resource`` or ``before_request_body``. 
+Here's the built-in JSON tool for an example::
+
+    def json_in(force=True, debug=False):
+        request = cherrypy.serving.request
+        def json_processor(entity):
+            \"""Read application/json data into request.json.\"""
+            if not entity.headers.get("Content-Length", ""):
+                raise cherrypy.HTTPError(411)
+            
+            body = entity.fp.read()
+            try:
+                request.json = json_decode(body)
+            except ValueError:
+                raise cherrypy.HTTPError(400, 'Invalid JSON document')
+        if force:
+            request.body.processors.clear()
+            request.body.default_proc = cherrypy.HTTPError(
+                415, 'Expected an application/json content type')
+        request.body.processors['application/json'] = json_processor
+
+We begin by defining a new ``json_processor`` function to stick in the ``processors``
+dictionary. All processor functions take a single argument, the ``Entity`` instance
+they are to process. It will be called whenever a request is received (for those
+URI's where the tool is turned on) which has a ``Content-Type`` of
+"application/json".
+
+First, it checks for a valid ``Content-Length`` (raising 411 if not valid), then
+reads the remaining bytes on the socket. The ``fp`` object knows its own length, so
+it won't hang waiting for data that never arrives. It will return when all data
+has been read. Then, we decode those bytes using Python's built-in ``json`` module,
+and stick the decoded result onto ``request.json`` . If it cannot be decoded, we
+raise 400.
+
+If the "force" argument is True (the default), the ``Tool`` clears the ``processors``
+dict so that request entities of other ``Content-Types`` aren't parsed at all. Since
+there's no entry for those invalid MIME types, the ``default_proc`` method of ``cherrypy.request.body``
+is called. But this does nothing by default (usually to provide the page handler an opportunity to handle it.)
+But in our case, we want to raise 415, so we replace ``request.body.default_proc``
+with the error (``HTTPError`` instances, when called, raise themselves).
+
+If we were defining a custom processor, we can do so without making a ``Tool``. Just add the config entry::
+
+    request.body.processors = {'application/json': json_processor}
+
+Note that you can only replace the ``processors`` dict wholesale this way, not update the existing one.
 """
 
 import re
+import sys
 import tempfile
 from urllib import unquote_plus
 
 import cherrypy
+from cherrypy._cpcompat import basestring, ntob, ntou
 from cherrypy.lib import httputil
 
 
@@ -50,14 +119,14 @@ def process_urlencoded(entity):
     for charset in entity.attempt_charsets:
         try:
             params = {}
-            for aparam in qs.split('&'):
-                for pair in aparam.split(';'):
+            for aparam in qs.split(ntob('&')):
+                for pair in aparam.split(ntob(';')):
                     if not pair:
                         continue
                     
-                    atoms = pair.split('=', 1)
+                    atoms = pair.split(ntob('='), 1)
                     if len(atoms) == 1:
-                        atoms.append('')
+                        atoms.append(ntob(''))
                     
                     key = unquote_plus(atoms[0]).decode(charset)
                     value = unquote_plus(atoms[1]).decode(charset)
@@ -91,18 +160,18 @@ def process_urlencoded(entity):
 
 def process_multipart(entity):
     """Read all multipart parts into entity.parts."""
-    ib = u""
-    if u'boundary' in entity.content_type.params:
+    ib = ""
+    if 'boundary' in entity.content_type.params:
         # http://tools.ietf.org/html/rfc2046#section-5.1.1
         # "The grammar for parameters on the Content-type field is such that it
         # is often necessary to enclose the boundary parameter values in quotes
         # on the Content-type line"
-        ib = entity.content_type.params['boundary'].strip(u'"')
+        ib = entity.content_type.params['boundary'].strip('"')
     
-    if not re.match(u"^[ -~]{0,200}[!-~]$", ib):
-        raise ValueError(u'Invalid boundary in multipart form: %r' % (ib,))
+    if not re.match("^[ -~]{0,200}[!-~]$", ib):
+        raise ValueError('Invalid boundary in multipart form: %r' % (ib,))
     
-    ib = (u'--' + ib).encode('ascii')
+    ib = ('--' + ib).encode('ascii')
     
     # Find the first marker
     while True:
@@ -133,11 +202,18 @@ def process_multipart_form_data(entity):
         else:
             if part.filename is None:
                 # It's a regular field
-                entity.params[part.name] = part.fullvalue()
+                value = part.fullvalue()
             else:
                 # It's a file upload. Retain the whole part so consumer code
                 # has access to its .file and .filename attributes.
-                entity.params[part.name] = part
+                value = part
+            
+            if part.name in entity.params:
+                if not isinstance(entity.params[part.name], list):
+                    entity.params[part.name] = [entity.params[part.name]]
+                entity.params[part.name].append(value)
+            else:
+                entity.params[part.name] = value
     
     entity.parts = kept_parts
 
@@ -149,7 +225,7 @@ def _old_process_multipart(entity):
     
     for part in entity.parts:
         if part.name is None:
-            key = u'parts'
+            key = ntou('parts')
         else:
             key = part.name
         
@@ -174,12 +250,104 @@ def _old_process_multipart(entity):
 
 
 class Entity(object):
-    """An HTTP request body, or MIME multipart body."""
+    """An HTTP request body, or MIME multipart body.
     
-    __metaclass__ = cherrypy._AttributeDocstrings
+    This class collects information about the HTTP request entity. When a
+    given entity is of MIME type "multipart", each part is parsed into its own
+    Entity instance, and the set of parts stored in
+    :attr:`entity.parts<cherrypy._cpreqbody.Entity.parts>`.
+    
+    Between the ``before_request_body`` and ``before_handler`` tools, CherryPy
+    tries to process the request body (if any) by calling
+    :func:`request.body.process<cherrypy._cpreqbody.RequestBody.process`.
+    This uses the ``content_type`` of the Entity to look up a suitable processor
+    in :attr:`Entity.processors<cherrypy._cpreqbody.Entity.processors>`, a dict.
+    If a matching processor cannot be found for the complete Content-Type,
+    it tries again using the major type. For example, if a request with an
+    entity of type "image/jpeg" arrives, but no processor can be found for
+    that complete type, then one is sought for the major type "image". If a
+    processor is still not found, then the
+    :func:`default_proc<cherrypy._cpreqbody.Entity.default_proc>` method of the
+    Entity is called (which does nothing by default; you can override this too).
+    
+    CherryPy includes processors for the "application/x-www-form-urlencoded"
+    type, the "multipart/form-data" type, and the "multipart" major type.
+    CherryPy 3.2 processes these types almost exactly as older versions.
+    Parts are passed as arguments to the page handler using their
+    ``Content-Disposition.name`` if given, otherwise in a generic "parts"
+    argument. Each such part is either a string, or the
+    :class:`Part<cherrypy._cpreqbody.Part>` itself if it's a file. (In this
+    case it will have ``file`` and ``filename`` attributes, or possibly a
+    ``value`` attribute). Each Part is itself a subclass of
+    Entity, and has its own ``process`` method and ``processors`` dict.
+    
+    There is a separate processor for the "multipart" major type which is more
+    flexible, and simply stores all multipart parts in
+    :attr:`request.body.parts<cherrypy._cpreqbody.Entity.parts>`. You can
+    enable it with::
+    
+        cherrypy.request.body.processors['multipart'] = _cpreqbody.process_multipart
+    
+    in an ``on_start_resource`` tool.
+    """
+    
+    # http://tools.ietf.org/html/rfc2046#section-4.1.2:
+    # "The default character set, which must be assumed in the
+    # absence of a charset parameter, is US-ASCII."
+    # However, many browsers send data in utf-8 with no charset.
+    attempt_charsets = ['utf-8']
+    """A list of strings, each of which should be a known encoding.
+    
+    When the Content-Type of the request body warrants it, each of the given
+    encodings will be tried in order. The first one to successfully decode the
+    entity without raising an error is stored as
+    :attr:`entity.charset<cherrypy._cpreqbody.Entity.charset>`. This defaults
+    to ``['utf-8']`` (plus 'ISO-8859-1' for "text/\*" types, as required by 
+    `HTTP/1.1 <http://www.w3.org/Protocols/rfc2616/rfc2616-sec3.html#sec3.7.1>`_), 
+    but ``['us-ascii', 'utf-8']`` for multipart parts.
+    """
+    
+    charset = None
+    """The successful decoding; see "attempt_charsets" above."""
+    
+    content_type = None
+    """The value of the Content-Type request header.
+    
+    If the Entity is part of a multipart payload, this will be the Content-Type
+    given in the MIME headers for this part.
+    """
+    
+    default_content_type = 'application/x-www-form-urlencoded'
+    """This defines a default ``Content-Type`` to use if no Content-Type header
+    is given. The empty string is used for RequestBody, which results in the
+    request body not being read or parsed at all. This is by design; a missing
+    ``Content-Type`` header in the HTTP request entity is an error at best,
+    and a security hole at worst. For multipart parts, however, the MIME spec
+    declares that a part with no Content-Type defaults to "text/plain"
+    (see :class:`Part<cherrypy._cpreqbody.Part>`).
+    """
+    
+    filename = None
+    """The ``Content-Disposition.filename`` header, if available."""
+    
+    fp = None
+    """The readable socket file object."""
+    
+    headers = None
+    """A dict of request/multipart header names and values.
+    
+    This is a copy of the ``request.headers`` for the ``request.body``;
+    for multipart parts, it is the set of headers for that part.
+    """
+    
+    length = None
+    """The value of the ``Content-Length`` header, if provided."""
+    
+    name = None
+    """The "name" parameter of the ``Content-Disposition`` header, if any."""
     
     params = None
-    params__doc = u"""
+    """
     If the request Content-Type is 'application/x-www-form-urlencoded' or
     multipart, this will be a dict of the params pulled from the entity
     body; that is, it will be the portion of request.params that come
@@ -188,16 +356,21 @@ class Entity(object):
     the 'before_request_body' and 'before_handler' hooks (assuming that
     process_request_body is True)."""
     
-    default_content_type = u'application/x-www-form-urlencoded'
-    # http://tools.ietf.org/html/rfc2046#section-4.1.2:
-    # "The default character set, which must be assumed in the
-    # absence of a charset parameter, is US-ASCII."
-    # However, many browsers send data in utf-8 with no charset.
-    attempt_charsets = [u'utf-8']
-    processors = {u'application/x-www-form-urlencoded': process_urlencoded,
-                  u'multipart/form-data': process_multipart_form_data,
-                  u'multipart': process_multipart,
+    processors = {'application/x-www-form-urlencoded': process_urlencoded,
+                  'multipart/form-data': process_multipart_form_data,
+                  'multipart': process_multipart,
                   }
+    """A dict of Content-Type names to processor methods."""
+    
+    parts = None
+    """A list of Part instances if ``Content-Type`` is of major type "multipart"."""
+    
+    part_class = None
+    """The class used for multipart parts.
+    
+    You can replace this with custom subclasses to alter the processing of
+    multipart parts.
+    """
     
     def __init__(self, fp, headers, params=None, parts=None):
         # Make an instance-specific copy of the class processors
@@ -216,7 +389,7 @@ class Entity(object):
         self.parts = parts
         
         # Content-Type
-        self.content_type = headers.elements(u'Content-Type')
+        self.content_type = headers.elements('Content-Type')
         if self.content_type:
             self.content_type = self.content_type[0]
         else:
@@ -224,9 +397,9 @@ class Entity(object):
                 self.default_content_type)
         
         # Copy the class 'attempt_charsets', prepending any Content-Type charset
-        dec = self.content_type.params.get(u"charset", None)
+        dec = self.content_type.params.get("charset", None)
         if dec:
-            dec = dec.decode('ISO-8859-1')
+            #dec = dec.decode('ISO-8859-1')
             self.attempt_charsets = [dec] + [c for c in self.attempt_charsets
                                              if c != dec]
         else:
@@ -234,9 +407,9 @@ class Entity(object):
         
         # Length
         self.length = None
-        clen = headers.get(u'Content-Length', None)
+        clen = headers.get('Content-Length', None)
         # If Transfer-Encoding is 'chunked', ignore any Content-Length.
-        if clen is not None and 'chunked' not in headers.get(u'Transfer-Encoding', ''):
+        if clen is not None and 'chunked' not in headers.get('Transfer-Encoding', ''):
             try:
                 self.length = int(clen)
             except ValueError:
@@ -245,20 +418,21 @@ class Entity(object):
         # Content-Disposition
         self.name = None
         self.filename = None
-        disp = headers.elements(u'Content-Disposition')
+        disp = headers.elements('Content-Disposition')
         if disp:
             disp = disp[0]
             if 'name' in disp.params:
                 self.name = disp.params['name']
-                if self.name.startswith(u'"') and self.name.endswith(u'"'):
+                if self.name.startswith('"') and self.name.endswith('"'):
                     self.name = self.name[1:-1]
             if 'filename' in disp.params:
                 self.filename = disp.params['filename']
-                if self.filename.startswith(u'"') and self.filename.endswith(u'"'):
+                if self.filename.startswith('"') and self.filename.endswith('"'):
                     self.filename = self.filename[1:-1]
     
     # The 'type' attribute is deprecated in 3.2; remove it in 3.3.
-    type = property(lambda self: self.content_type)
+    type = property(lambda self: self.content_type,
+        doc="""A deprecated alias for :attr:`content_type<cherrypy._cpreqbody.Entity.content_type>`.""")
     
     def read(self, size=None, fp_out=None):
         return self.fp.read(size, fp_out)
@@ -286,9 +460,10 @@ class Entity(object):
         return fp_out
     
     def make_file(self):
-        """Return a file into which the request body will be read.
+        """Return a file-like object into which the request body will be read.
         
-        By default, this will return a TemporaryFile. Override as needed."""
+        By default, this will return a TemporaryFile. Override as needed.
+        See also :attr:`cherrypy._cpreqbody.Part.maxrambytes`."""
         return tempfile.TemporaryFile()
     
     def fullvalue(self):
@@ -309,7 +484,7 @@ class Entity(object):
         try:
             proc = self.processors[ct]
         except KeyError:
-            toptype = ct.split(u'/', 1)[0]
+            toptype = ct.split('/', 1)[0]
             try:
                 proc = self.processors[toptype]
             except KeyError:
@@ -320,6 +495,7 @@ class Entity(object):
             proc(self)
     
     def default_proc(self):
+        """Called if a more-specific processor is not found for the ``Content-Type``."""
         # Leave the fp alone for someone else to read. This works fine
         # for request.body, but the Part subclasses need to override this
         # so they can move on to the next part.
@@ -329,12 +505,40 @@ class Entity(object):
 class Part(Entity):
     """A MIME part entity, part of a multipart entity."""
     
-    default_content_type = u'text/plain'
     # "The default character set, which must be assumed in the absence of a
     # charset parameter, is US-ASCII."
-    attempt_charsets = [u'us-ascii', u'utf-8']
+    attempt_charsets = ['us-ascii', 'utf-8']
+    """A list of strings, each of which should be a known encoding.
+    
+    When the Content-Type of the request body warrants it, each of the given
+    encodings will be tried in order. The first one to successfully decode the
+    entity without raising an error is stored as
+    :attr:`entity.charset<cherrypy._cpreqbody.Entity.charset>`. This defaults
+    to ``['utf-8']`` (plus 'ISO-8859-1' for "text/\*" types, as required by 
+    `HTTP/1.1 <http://www.w3.org/Protocols/rfc2616/rfc2616-sec3.html#sec3.7.1>`_), 
+    but ``['us-ascii', 'utf-8']`` for multipart parts.
+    """
+    
+    boundary = None
+    """The MIME multipart boundary."""
+    
+    default_content_type = 'text/plain'
+    """This defines a default ``Content-Type`` to use if no Content-Type header
+    is given. The empty string is used for RequestBody, which results in the
+    request body not being read or parsed at all. This is by design; a missing
+    ``Content-Type`` header in the HTTP request entity is an error at best,
+    and a security hole at worst. For multipart parts, however (this class),
+    the MIME spec declares that a part with no Content-Type defaults to
+    "text/plain".
+    """
+    
     # This is the default in stdlib cgi. We may want to increase it.
     maxrambytes = 1000
+    """The threshold of bytes after which point the ``Part`` will store its data
+    in a file (generated by :func:`make_file<cherrypy._cprequest.Entity.make_file>`)
+    instead of a string. Defaults to 1000, just like the :mod:`cgi` module in
+    Python's standard library.
+    """
     
     def __init__(self, fp, headers, boundary):
         Entity.__init__(self, fp, headers)
@@ -353,25 +557,25 @@ class Part(Entity):
             line = fp.readline()
             if not line:
                 # No more data--illegal end of headers
-                raise EOFError(u"Illegal end of headers.")
+                raise EOFError("Illegal end of headers.")
             
-            if line == '\r\n':
+            if line == ntob('\r\n'):
                 # Normal end of headers
                 break
-            if not line.endswith('\r\n'):
-                raise ValueError(u"MIME requires CRLF terminators: %r" % line)
+            if not line.endswith(ntob('\r\n')):
+                raise ValueError("MIME requires CRLF terminators: %r" % line)
             
-            if line[0] in ' \t':
+            if line[0] in ntob(' \t'):
                 # It's a continuation line.
-                v = line.strip().decode(u'ISO-8859-1')
+                v = line.strip().decode('ISO-8859-1')
             else:
-                k, v = line.split(":", 1)
-                k = k.strip().decode(u'ISO-8859-1')
-                v = v.strip().decode(u'ISO-8859-1')
+                k, v = line.split(ntob(":"), 1)
+                k = k.strip().decode('ISO-8859-1')
+                v = v.strip().decode('ISO-8859-1')
             
             existing = headers.get(k)
             if existing:
-                v = u", ".join((existing, v))
+                v = ", ".join((existing, v))
             headers[k] = v
         
         return headers
@@ -387,16 +591,16 @@ class Part(Entity):
         supports the 'write' method; all bytes read will be written to the fp,
         and that fp is returned.
         """
-        endmarker = self.boundary + "--"
-        delim = ""
+        endmarker = self.boundary + ntob("--")
+        delim = ntob("")
         prev_lf = True
         lines = []
         seen = 0
         while True:
-            line = self.fp.readline(1 << 16)
+            line = self.fp.readline(1<<16)
             if not line:
-                raise EOFError(u"Illegal end of multipart body.")
-            if line.startswith("--") and prev_lf:
+                raise EOFError("Illegal end of multipart body.")
+            if line.startswith(ntob("--")) and prev_lf:
                 strippedline = line.strip()
                 if strippedline == self.boundary:
                     break
@@ -406,16 +610,16 @@ class Part(Entity):
             
             line = delim + line
             
-            if line.endswith("\r\n"):
-                delim = "\r\n"
+            if line.endswith(ntob("\r\n")):
+                delim = ntob("\r\n")
                 line = line[:-2]
                 prev_lf = True
-            elif line.endswith("\n"):
-                delim = "\n"
+            elif line.endswith(ntob("\n")):
+                delim = ntob("\n")
                 line = line[:-1]
                 prev_lf = True
             else:
-                delim = ""
+                delim = ntob("")
                 prev_lf = False
             
             if fp_out is None:
@@ -429,7 +633,7 @@ class Part(Entity):
                 fp_out.write(line)
         
         if fp_out is None:
-            result = ''.join(lines)
+            result = ntob('').join(lines)
             for charset in self.attempt_charsets:
                 try:
                     result = result.decode(charset)
@@ -447,6 +651,7 @@ class Part(Entity):
             return fp_out
     
     def default_proc(self):
+        """Called if a more-specific processor is not found for the ``Content-Type``."""
         if self.filename:
             # Always read into a file if a .filename was given.
             self.file = self.read_into_file()
@@ -489,7 +694,7 @@ class SizedReader:
         self.fp = fp
         self.length = length
         self.maxbytes = maxbytes
-        self.buffer = ''
+        self.buffer = ntob('')
         self.bufsize = bufsize
         self.bytes_read = 0
         self.done = False
@@ -525,7 +730,7 @@ class SizedReader:
         if remaining == 0:
             self.finish()
             if fp_out is None:
-                return ''
+                return ntob('')
             else:
                 return None
         
@@ -535,7 +740,7 @@ class SizedReader:
         if self.buffer:
             if remaining is inf:
                 data = self.buffer
-                self.buffer = ''
+                self.buffer = ntob('')
             else:
                 data = self.buffer[:remaining]
                 self.buffer = self.buffer[remaining:]
@@ -558,7 +763,8 @@ class SizedReader:
             chunksize = min(remaining, self.bufsize)
             try:
                 data = self.fp.read(chunksize)
-            except Exception, e:
+            except Exception:
+                e = sys.exc_info()[1]
                 if e.__class__.__name__ == 'MaxSizeExceeded':
                     # Post data is too big
                     raise cherrypy.HTTPError(
@@ -583,7 +789,7 @@ class SizedReader:
                 fp_out.write(data)
         
         if fp_out is None:
-            return ''.join(chunks)
+            return ntob('').join(chunks)
     
     def readline(self, size=None):
         """Read a line from the request body and return it."""
@@ -595,7 +801,7 @@ class SizedReader:
             data = self.read(chunksize)
             if not data:
                 break
-            pos = data.find('\n') + 1
+            pos = data.find(ntob('\n')) + 1
             if pos:
                 chunks.append(data[:pos])
                 remainder = data[pos:]
@@ -604,7 +810,7 @@ class SizedReader:
                 break
             else:
                 chunks.append(data)
-        return ''.join(chunks)
+        return ntob('').join(chunks)
     
     def readlines(self, sizehint=None):
         """Read lines from the request body and return them."""
@@ -633,12 +839,12 @@ class SizedReader:
             
             try:
                 for line in self.fp.read_trailer_lines():
-                    if line[0] in ' \t':
+                    if line[0] in ntob(' \t'):
                         # It's a continuation line.
                         v = line.strip()
                     else:
                         try:
-                            k, v = line.split(":", 1)
+                            k, v = line.split(ntob(":"), 1)
                         except ValueError:
                             raise ValueError("Illegal header line.")
                         k = k.strip().title()
@@ -647,9 +853,10 @@ class SizedReader:
                     if k in comma_separated_headers:
                         existing = self.trailers.get(envname)
                         if existing:
-                            v = ", ".join((existing, v))
+                            v = ntob(", ").join((existing, v))
                     self.trailers[k] = v
-            except Exception, e:
+            except Exception:
+                e = sys.exc_info()[1]
                 if e.__class__.__name__ == 'MaxSizeExceeded':
                     # Post data is too big
                     raise cherrypy.HTTPError(
@@ -659,13 +866,25 @@ class SizedReader:
 
 
 class RequestBody(Entity):
+    """The entity of the HTTP request."""
+    
+    bufsize = 8 * 1024
+    """The buffer size used when reading the socket."""
     
     # Don't parse the request body at all if the client didn't provide
     # a Content-Type header. See http://www.cherrypy.org/ticket/790
-    default_content_type = u''
+    default_content_type = ''
+    """This defines a default ``Content-Type`` to use if no Content-Type header
+    is given. The empty string is used for RequestBody, which results in the
+    request body not being read or parsed at all. This is by design; a missing
+    ``Content-Type`` header in the HTTP request entity is an error at best,
+    and a security hole at worst. For multipart parts, however, the MIME spec
+    declares that a part with no Content-Type defaults to "text/plain"
+    (see :class:`Part<cherrypy._cpreqbody.Part>`).
+    """
     
-    bufsize = 8 * 1024
     maxbytes = None
+    """Raise ``MaxSizeExceeded`` if more bytes than this are read from the socket."""
     
     def __init__(self, fp, headers, params=None, request_params=None):
         Entity.__init__(self, fp, headers, params)
@@ -676,21 +895,21 @@ class RequestBody(Entity):
         # to have a default charset value of "ISO-8859-1" when
         # received via HTTP.
         if self.content_type.value.startswith('text/'):
-            for c in (u'ISO-8859-1', u'iso-8859-1', u'Latin-1', u'latin-1'):
+            for c in ('ISO-8859-1', 'iso-8859-1', 'Latin-1', 'latin-1'):
                 if c in self.attempt_charsets:
                     break
             else:
-                self.attempt_charsets.append(u'ISO-8859-1')
+                self.attempt_charsets.append('ISO-8859-1')
         
         # Temporary fix while deprecating passing .parts as .params.
-        self.processors[u'multipart'] = _old_process_multipart
+        self.processors['multipart'] = _old_process_multipart
         
         if request_params is None:
             request_params = {}
         self.request_params = request_params
     
     def process(self):
-        """Include body params in request params."""
+        """Process the request entity based on its Content-Type."""
         # "The presence of a message-body in a request is signaled by the
         # inclusion of a Content-Length or Transfer-Encoding header field in
         # the request's message-headers."
@@ -698,7 +917,7 @@ class RequestBody(Entity):
         # however, app developers are responsible in that case to set
         # cherrypy.request.process_body to False so this method isn't called.
         h = cherrypy.serving.request.headers
-        if u'Content-Length' not in h and u'Transfer-Encoding' not in h:
+        if 'Content-Length' not in h and 'Transfer-Encoding' not in h:
             raise cherrypy.HTTPError(411)
         
         self.fp = SizedReader(self.fp, self.length,
@@ -720,4 +939,3 @@ class RequestBody(Entity):
                 request_params[key].append(value)
             else:
                 request_params[key] = value
-

@@ -2,15 +2,12 @@
 
 import os
 import re
-try:
-    set
-except NameError:
-    from sets import Set as set
 import signal as _signal
 import sys
 import time
-import thread
 import threading
+
+from cherrypy._cpcompat import basestring, get_daemon, get_thread_ident, ntob, set
 
 # _module__file__base is used by Autoreload to make
 # absolute any filenames retrieved from sys.modules which are not
@@ -33,6 +30,9 @@ _module__file__base = os.getcwd()
 
 class SimplePlugin(object):
     """Plugin base class which auto-subscribes methods for known channels."""
+    
+    bus = None
+    """A :class:`Bus <cherrypy.process.wspbus.Bus>`, usually cherrypy.engine."""
     
     def __init__(self, bus):
         self.bus = bus
@@ -58,16 +58,33 @@ class SimplePlugin(object):
 class SignalHandler(object):
     """Register bus channels (and listeners) for system signals.
     
-    By default, instantiating this object subscribes the following signals
-    and listeners:
+    You can modify what signals your application listens for, and what it does
+    when it receives signals, by modifying :attr:`SignalHandler.handlers`,
+    a dict of {signal name: callback} pairs. The default set is::
     
-        TERM: bus.exit
-        HUP : bus.restart
-        USR1: bus.graceful
+        handlers = {'SIGTERM': self.bus.exit,
+                    'SIGHUP': self.handle_SIGHUP,
+                    'SIGUSR1': self.bus.graceful,
+                   }
+    
+    The :func:`SignalHandler.handle_SIGHUP`` method calls
+    :func:`bus.restart()<cherrypy.process.wspbus.Bus.restart>`
+    if the process is daemonized, but
+    :func:`bus.exit()<cherrypy.process.wspbus.Bus.exit>`
+    if the process is attached to a TTY. This is because Unix window
+    managers tend to send SIGHUP to terminal windows when the user closes them.
+    
+    Feel free to add signals which are not available on every platform. The
+    :class:`SignalHandler` will ignore errors raised from attempting to register
+    handlers for unknown signals.
     """
     
-    # Map from signal numbers to names
+    handlers = {}
+    """A map from signal names (e.g. 'SIGTERM') to handlers (e.g. bus.exit)."""
+    
     signals = {}
+    """A map from signal numbers to names."""
+    
     for k, v in vars(_signal).items():
         if k.startswith('SIG') and not k.startswith('SIG_'):
             signals[v] = k
@@ -80,10 +97,23 @@ class SignalHandler(object):
                          'SIGHUP': self.handle_SIGHUP,
                          'SIGUSR1': self.bus.graceful,
                          }
-        
+
+        if sys.platform[:4] == 'java':
+            del self.handlers['SIGUSR1']
+            self.handlers['SIGUSR2'] = self.bus.graceful
+            self.bus.log("SIGUSR1 cannot be set on the JVM platform. "
+                         "Using SIGUSR2 instead.")
+            self.handlers['SIGINT'] = self._jython_SIGINT_handler
+
         self._previous_handlers = {}
     
+    def _jython_SIGINT_handler(self, signum=None, frame=None):
+        # See http://bugs.jython.org/issue1313
+        self.bus.log('Keyboard Interrupt: shutting down bus')
+        self.bus.exit()
+        
     def subscribe(self):
+        """Subscribe self.handlers to signals."""
         for sig, func in self.handlers.items():
             try:
                 self.set_handler(sig, func)
@@ -91,6 +121,7 @@ class SignalHandler(object):
                 pass
     
     def unsubscribe(self):
+        """Unsubscribe self.handlers from signals."""
         for signum, handler in self._previous_handlers.items():
             signame = self.signals[signum]
             
@@ -104,10 +135,10 @@ class SignalHandler(object):
                 our_handler = _signal.signal(signum, handler)
                 if our_handler is None:
                     self.bus.log("Restored old %s handler %r, but our "
-                                 "handler was not registered." % 
+                                 "handler was not registered." %
                                  (signame, handler), level=30)
             except ValueError:
-                self.bus.log("Unable to restore %s handler %r." % 
+                self.bus.log("Unable to restore %s handler %r." %
                              (signame, handler), level=40, traceback=True)
     
     def set_handler(self, signal, listener=None):
@@ -145,6 +176,7 @@ class SignalHandler(object):
         self.bus.publish(signame)
     
     def handle_SIGHUP(self):
+        """Restart if daemonized, else exit."""
         if os.isatty(sys.stdin.fileno()):
             # not daemonized (may be foreground or background)
             self.bus.log("SIGHUP caught but not daemonized. Exiting.")
@@ -184,7 +216,8 @@ class DropPrivileges(SimplePlugin):
             elif isinstance(val, basestring):
                 val = pwd.getpwnam(val)[2]
         self._uid = val
-    uid = property(_get_uid, _set_uid, doc="The uid under which to run.")
+    uid = property(_get_uid, _set_uid,
+        doc="The uid under which to run. Availability: Unix.")
     
     def _get_gid(self):
         return self._gid
@@ -197,7 +230,8 @@ class DropPrivileges(SimplePlugin):
             elif isinstance(val, basestring):
                 val = grp.getgrnam(val)[2]
         self._gid = val
-    gid = property(_get_gid, _set_gid, doc="The gid under which to run.")
+    gid = property(_get_gid, _set_gid,
+        doc="The gid under which to run. Availability: Unix.")
     
     def _get_umask(self):
         return self._umask
@@ -210,7 +244,12 @@ class DropPrivileges(SimplePlugin):
                              level=30)
                 val = None
         self._umask = val
-    umask = property(_get_umask, _set_umask, doc="The umask under which to run.")
+    umask = property(_get_umask, _set_umask,
+        doc="""The default permission mode for newly created files and directories.
+        
+        Usually expressed in octal format, for example, ``0644``.
+        Availability: Unix, Windows.
+        """)
     
     def start(self):
         # uid/gid
@@ -225,7 +264,7 @@ class DropPrivileges(SimplePlugin):
         
         if self.finalized:
             if not (self.uid is None and self.gid is None):
-                self.bus.log('Already running as uid: %r gid: %r' % 
+                self.bus.log('Already running as uid: %r gid: %r' %
                              current_ids())
         else:
             if self.uid is None and self.gid is None:
@@ -235,6 +274,7 @@ class DropPrivileges(SimplePlugin):
                 self.bus.log('Started as uid: %r gid: %r' % current_ids())
                 if self.gid is not None:
                     os.setgid(self.gid)
+                    os.setgroups([])
                 if self.uid is not None:
                     os.setuid(self.uid)
                 self.bus.log('Running as uid: %r gid: %r' % current_ids())
@@ -248,7 +288,7 @@ class DropPrivileges(SimplePlugin):
                 self.bus.log('umask not set', level=30)
             else:
                 old_umask = os.umask(self.umask)
-                self.bus.log('umask old: %03o, new: %03o' % 
+                self.bus.log('umask old: %03o, new: %03o' %
                              (old_umask, self.umask))
         
         self.finalized = True
@@ -261,8 +301,8 @@ class DropPrivileges(SimplePlugin):
 class Daemonizer(SimplePlugin):
     """Daemonize the running script.
     
-    Use this with a Web Site Process Bus via:
-        
+    Use this with a Web Site Process Bus via::
+    
         Daemonizer(bus).subscribe()
     
     When this component finishes, the process is completely decoupled from
@@ -294,7 +334,7 @@ class Daemonizer(SimplePlugin):
         # So we check for active threads:
         if threading.activeCount() != 1:
             self.bus.log('There are %r active threads. '
-                         'Daemonizing now may cause strange failures.' % 
+                         'Daemonizing now may cause strange failures.' %
                          threading.enumerate(), level=30)
         
         # See http://www.erlenstar.demon.co.uk/unix/faq_2.html#SEC16
@@ -315,8 +355,9 @@ class Daemonizer(SimplePlugin):
                 # This is the first parent. Exit, now that we've forked.
                 self.bus.log('Forking once.')
                 os._exit(0)
-        except OSError, exc:
+        except OSError:
             # Python raises OSError rather than returning negative numbers.
+            exc = sys.exc_info()[1]
             sys.exit("%s: fork #1 failed: (%d) %s\n"
                      % (sys.argv[0], exc.errno, exc.strerror))
         
@@ -328,7 +369,8 @@ class Daemonizer(SimplePlugin):
             if pid > 0:
                 self.bus.log('Forking twice.')
                 os._exit(0) # Exit second parent
-        except OSError, exc:
+        except OSError:
+            exc = sys.exc_info()[1]
             sys.exit("%s: fork #2 failed: (%d) %s\n"
                      % (sys.argv[0], exc.errno, exc.strerror))
         
@@ -364,7 +406,7 @@ class PIDFile(SimplePlugin):
         if self.finalized:
             self.bus.log('PID %r already written to %r.' % (pid, self.pidfile))
         else:
-            open(self.pidfile, "wb").write(str(pid))
+            open(self.pidfile, "wb").write(ntob("%s" % pid, 'utf8'))
             self.bus.log('PID %r written to %r.' % (pid, self.pidfile))
             self.finalized = True
     start.priority = 70
@@ -380,7 +422,12 @@ class PIDFile(SimplePlugin):
 
 
 class PerpetualTimer(threading._Timer):
-    """A subclass of threading._Timer whose run() method repeats."""
+    """A responsive subclass of threading._Timer whose run() method repeats.
+    
+    Use this timer only when you really need a very interruptible timer;
+    this checks its 'finished' condition up to 20 times a second, which can
+    results in pretty high CPU usage 
+    """
     
     def run(self):
         while True:
@@ -389,22 +436,63 @@ class PerpetualTimer(threading._Timer):
                 return
             try:
                 self.function(*self.args, **self.kwargs)
-            except Exception, x:
-                self.bus.log("Error in perpetual timer thread function %r." % 
+            except Exception:
+                self.bus.log("Error in perpetual timer thread function %r." %
                              self.function, level=40, traceback=True)
                 # Quit on first error to avoid massive logs.
                 raise
 
 
-class Monitor(SimplePlugin):
-    """WSPBus listener to periodically run a callback in its own thread.
+class BackgroundTask(threading.Thread):
+    """A subclass of threading.Thread whose run() method repeats.
     
-    bus: a Web Site Process Bus object.
-    callback: the function to call at intervals.
-    frequency: the time in seconds between callback runs.
+    Use this class for most repeating tasks. It uses time.sleep() to wait
+    for each interval, which isn't very responsive; that is, even if you call
+    self.cancel(), you'll have to wait until the sleep() call finishes before
+    the thread stops. To compensate, it defaults to being daemonic, which means
+    it won't delay stopping the whole process.
     """
     
+    def __init__(self, interval, function, args=[], kwargs={}):
+        threading.Thread.__init__(self)
+        self.interval = interval
+        self.function = function
+        self.args = args
+        self.kwargs = kwargs
+        self.running = False
+    
+    def cancel(self):
+        self.running = False
+    
+    def run(self):
+        self.running = True
+        while self.running:
+            time.sleep(self.interval)
+            if not self.running:
+                return
+            try:
+                self.function(*self.args, **self.kwargs)
+            except Exception:
+                self.bus.log("Error in background task thread function %r." %
+                             self.function, level=40, traceback=True)
+                # Quit on first error to avoid massive logs.
+                raise
+    
+    def _set_daemon(self):
+        return True
+
+
+class Monitor(SimplePlugin):
+    """WSPBus listener to periodically run a callback in its own thread."""
+    
+    callback = None
+    """The function to call at intervals."""
+    
     frequency = 60
+    """The time in seconds between callback runs."""
+    
+    thread = None
+    """A :class:`BackgroundTask<cherrypy.process.plugins.BackgroundTask>` thread."""
     
     def __init__(self, bus, callback, frequency=60, name=None):
         SimplePlugin.__init__(self, bus)
@@ -414,11 +502,11 @@ class Monitor(SimplePlugin):
         self.name = name
     
     def start(self):
-        """Start our callback in its own perpetual timer thread."""
+        """Start our callback in its own background thread."""
         if self.frequency > 0:
             threadname = self.name or self.__class__.__name__
             if self.thread is None:
-                self.thread = PerpetualTimer(self.frequency, self.callback)
+                self.thread = BackgroundTask(self.frequency, self.callback)
                 self.thread.bus = self.bus
                 self.thread.setName(threadname)
                 self.thread.start()
@@ -428,28 +516,54 @@ class Monitor(SimplePlugin):
     start.priority = 70
     
     def stop(self):
-        """Stop our callback's perpetual timer thread."""
+        """Stop our callback's background task thread."""
         if self.thread is None:
             self.bus.log("No thread running for %s." % self.name or self.__class__.__name__)
         else:
             if self.thread is not threading.currentThread():
                 name = self.thread.getName()
                 self.thread.cancel()
-                self.thread.join()
+                if not get_daemon(self.thread):
+                    self.bus.log("Joining %r" % name)
+                    self.thread.join()
                 self.bus.log("Stopped thread %r." % name)
             self.thread = None
     
     def graceful(self):
-        """Stop the callback's perpetual timer thread and restart it."""
+        """Stop the callback's background task thread and restart it."""
         self.stop()
         self.start()
 
 
 class Autoreloader(Monitor):
-    """Monitor which re-executes the process when files change."""
+    """Monitor which re-executes the process when files change.
+    
+    This :ref:`plugin<plugins>` restarts the process (via :func:`os.execv`)
+    if any of the files it monitors change (or is deleted). By default, the
+    autoreloader monitors all imported modules; you can add to the
+    set by adding to ``autoreload.files``::
+    
+        cherrypy.engine.autoreload.files.add(myFile)
+    
+    If there are imported files you do *not* wish to monitor, you can adjust the
+    ``match`` attribute, a regular expression. For example, to stop monitoring
+    cherrypy itself::
+    
+        cherrypy.engine.autoreload.match = r'^(?!cherrypy).+'
+    
+    Like all :class:`Monitor<cherrypy.process.plugins.Monitor>` plugins,
+    the autoreload plugin takes a ``frequency`` argument. The default is
+    1 second; that is, the autoreloader will examine files once each second.
+    """
+    
+    files = None
+    """The set of files to poll for modifications."""
     
     frequency = 1
+    """The interval in seconds at which to poll for modified files."""
+    
     match = '.*'
+    """A regular expression by which to match filenames."""
     
     def __init__(self, bus, frequency=1, match='.*'):
         self.mtimes = {}
@@ -458,14 +572,14 @@ class Autoreloader(Monitor):
         Monitor.__init__(self, bus, self.run, frequency)
     
     def start(self):
-        """Start our own perpetual timer thread for self.run."""
+        """Start our own background task thread for self.run."""
         if self.thread is None:
             self.mtimes = {}
         Monitor.start(self)
     start.priority = 70 
     
     def sysfiles(self):
-        """Return a Set of filenames which the Autoreloader will monitor."""
+        """Return a Set of sys.modules filenames to monitor."""
         files = set()
         for k, m in sys.modules.items():
             if re.match(self.match, k):
@@ -526,21 +640,26 @@ class ThreadManager(SimplePlugin):
     'stop_thread' listeners for you when it stops.
     """
     
+    threads = None
+    """A map of {thread ident: index number} pairs."""
+    
     def __init__(self, bus):
         self.threads = {}
         SimplePlugin.__init__(self, bus)
         self.bus.listeners.setdefault('acquire_thread', set())
+        self.bus.listeners.setdefault('start_thread', set())
         self.bus.listeners.setdefault('release_thread', set())
-    
+        self.bus.listeners.setdefault('stop_thread', set())
+
     def acquire_thread(self):
         """Run 'start_thread' listeners for the current thread.
         
         If the current thread has already been seen, any 'start_thread'
         listeners will not be run again.
         """
-        thread_ident = thread.get_ident()
+        thread_ident = get_thread_ident()
         if thread_ident not in self.threads:
-            # We can't just use _get_ident as the thread ID
+            # We can't just use get_ident as the thread ID
             # because some platforms reuse thread ID's.
             i = len(self.threads) + 1
             self.threads[thread_ident] = i
@@ -548,7 +667,7 @@ class ThreadManager(SimplePlugin):
     
     def release_thread(self):
         """Release the current thread and run 'stop_thread' listeners."""
-        thread_ident = threading._get_ident()
+        thread_ident = get_thread_ident()
         i = self.threads.pop(thread_ident, None)
         if i is not None:
             self.bus.publish('stop_thread', i)

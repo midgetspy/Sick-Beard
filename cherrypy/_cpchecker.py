@@ -2,25 +2,26 @@ import os
 import warnings
 
 import cherrypy
+from cherrypy._cpcompat import iteritems, copykeys, builtins
 
 
 class Checker(object):
     """A checker for CherryPy sites and their mounted applications.
     
-    on: set this to False to turn off the checker completely.
-    
     When this object is called at engine startup, it executes each
-    of its own methods whose names start with "check_". If you wish
+    of its own methods whose names start with ``check_``. If you wish
     to disable selected checks, simply add a line in your global
-    config which sets the appropriate method to False:
+    config which sets the appropriate method to False::
     
-    [global]
-    checker.check_skipped_app_config = False
+        [global]
+        checker.check_skipped_app_config = False
     
-    You may also dynamically add or replace check_* methods in this way.
+    You may also dynamically add or replace ``check_*`` methods in this way.
     """
     
     on = True
+    """If True (the default), run all checks; if False, turn off all checks."""
+    
     
     def __init__(self):
         self._populate_known_types()
@@ -34,7 +35,7 @@ class Checker(object):
                 for name in dir(self):
                     if name.startswith("check_"):
                         method = getattr(self, name)
-                        if method and callable(method):
+                        if method and hasattr(method, '__call__'):
                             method()
             finally:
                 warnings.formatwarning = oldformatwarning
@@ -47,6 +48,7 @@ class Checker(object):
     global_config_contained_paths = False
     
     def check_app_config_entries_dont_start_with_script_name(self):
+        """Check for Application config with sections that repeat script_name."""
         for sn, app in cherrypy.tree.apps.items():
             if not isinstance(app, cherrypy.Application):
                 continue
@@ -63,14 +65,15 @@ class Checker(object):
                         "entries that start with its script name: %r" % (sn, key))
     
     def check_site_config_entries_in_app_config(self):
-        for sn, app in cherrypy.tree.apps.iteritems():
+        """Check for mounted Applications that have site-scoped config."""
+        for sn, app in iteritems(cherrypy.tree.apps):
             if not isinstance(app, cherrypy.Application):
                 continue
             
             msg = []
-            for section, entries in app.config.iteritems():
+            for section, entries in iteritems(app.config):
                 if section.startswith('/'):
-                    for key, value in entries.iteritems():
+                    for key, value in iteritems(entries):
                         for n in ("engine.", "server.", "tree.", "checker."):
                             if key.startswith(n):
                                 msg.append("[%s] %s = %s" % (section, key, value))
@@ -83,6 +86,7 @@ class Checker(object):
                 warnings.warn(os.linesep.join(msg))
     
     def check_skipped_app_config(self):
+        """Check for mounted Applications that have no config."""
         for sn, app in cherrypy.tree.apps.items():
             if not isinstance(app, cherrypy.Application):
                 continue
@@ -98,6 +102,7 @@ class Checker(object):
                 return
     
     def check_app_config_brackets(self):
+        """Check for Application config with extraneous brackets in section names."""
         for sn, app in cherrypy.tree.apps.items():
             if not isinstance(app, cherrypy.Application):
                 continue
@@ -112,6 +117,7 @@ class Checker(object):
                         "(e.g. passed to tree.mount) do not." % (sn, key))
     
     def check_static_paths(self):
+        """Check Application config for incorrect static paths."""
         # Use the dummy Request object in the main thread.
         request = cherrypy.request
         for sn, app in cherrypy.tree.apps.items():
@@ -185,11 +191,11 @@ class Checker(object):
                 for k, v in conf.items():
                     if k in self.obsolete:
                         warnings.warn("%r is obsolete. Use %r instead.\n"
-                                      "section: [%s]" % 
+                                      "section: [%s]" %
                                       (k, self.obsolete[k], section))
                     elif k in self.deprecated:
                         warnings.warn("%r is deprecated. Use %r instead.\n"
-                                      "section: [%s]" % 
+                                      "section: [%s]" %
                                       (k, self.deprecated[k], section))
             else:
                 if section in self.obsolete:
@@ -214,10 +220,10 @@ class Checker(object):
     
     def _known_ns(self, app):
         ns = ["wsgi"]
-        ns.extend(app.toolboxes.keys())
-        ns.extend(app.namespaces.keys())
-        ns.extend(app.request_class.namespaces.keys())
-        ns.extend(cherrypy.config.namespaces.keys())
+        ns.extend(copykeys(app.toolboxes))
+        ns.extend(copykeys(app.namespaces))
+        ns.extend(copykeys(app.request_class.namespaces))
+        ns.extend(copykeys(cherrypy.config.namespaces))
         ns += self.extra_config_namespaces
         
         for section, conf in app.config.items():
@@ -260,7 +266,6 @@ class Checker(object):
     known_config_types = {}
     
     def _populate_known_types(self):
-        import __builtin__ as builtins
         b = [x for x in vars(builtins).values()
              if type(x) is type(str)]
         
