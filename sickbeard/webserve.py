@@ -1013,7 +1013,7 @@ class ConfigProviders:
                       newznab_string='',
                       omgwtfnzbs_username=None, omgwtfnzbs_apikey=None,
                       tvtorrents_digest=None, tvtorrents_hash=None,
-                      torrentleech_key=None,
+                      torrentleech_key=None, torrentleech_username=None, torrentleech_password=None,
                       btn_api_key=None, hdbits_username=None, hdbits_passkey=None,
                       provider_order=None):
 
@@ -1094,6 +1094,8 @@ class ConfigProviders:
         sickbeard.TVTORRENTS_HASH = tvtorrents_hash.strip()
 
         sickbeard.TORRENTLEECH_KEY = torrentleech_key.strip()
+        sickbeard.TORRENTLEECH_USERNAME = torrentleech_username.strip()
+        sickbeard.TORRENTLEECH_PASSWORD = torrentleech_password.strip()
 
         sickbeard.BTN_API_KEY = btn_api_key.strip()
 
