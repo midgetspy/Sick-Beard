@@ -44,7 +44,7 @@ class OmgwtfnzbsProvider(generic.NZBProvider):
     def __init__(self):
         generic.NZBProvider.__init__(self, "omgwtfnzbs")
         self.cache = OmgwtfnzbsCache(self)
-        self.url = 'https://omgwtfnzbs.org/'
+        self.url = 'https://omgwtfnzbs.me/'
         self.supportsBacklog = True
 
     def isEnabled(self):
@@ -110,7 +110,7 @@ class OmgwtfnzbsProvider(generic.NZBProvider):
         if retention or not params['retention']:
             params['retention'] = retention
 
-        search_url = 'https://api.omgwtfnzbs.org/json/?' + urllib.urlencode(params)
+        search_url = 'https://api.omgwtfnzbs.me/json/?' + urllib.urlencode(params)
         logger.log(u"Search url: " + search_url, logger.DEBUG)
 
         data = self.getURL(search_url)
@@ -173,7 +173,7 @@ class OmgwtfnzbsCache(tvcache.TVCache):
                   'delay': 30,
                   'catid': '19,20'}  # SD,HD
 
-        rss_url = 'https://rss.omgwtfnzbs.org/rss-download.php?' + urllib.urlencode(params)
+        rss_url = 'https://rss.omgwtfnzbs.me/rss-download.php?' + urllib.urlencode(params)
 
         logger.log(self.provider.name + u" cache update URL: " + rss_url, logger.DEBUG)
 
