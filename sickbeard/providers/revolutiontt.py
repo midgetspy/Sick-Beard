@@ -214,21 +214,28 @@ class RevolutionTTProvider(generic.TorrentProvider):
             self.session.get(self.url + "login.php", headers=self.header, timeout=30, verify=False)
             response = self.session.post(self.url + "takelogin.php", data=login_params, headers=self.header, timeout=30, verify=False)
         except (requests.exceptions.ConnectionError, requests.exceptions.HTTPError), e:
+            self.session = None
             sys.tracebacklimit = 0    # raise exception to sickbeard but hide the stack trace.
             raise Exception("[" + self.name + "] " + self.funcName() + " Error: " + ex(e))
-            return False
 
+        if 'refresh' in response.headers and "login.php?error=" in response.headers['refresh']:
+            self.session = None
+            sys.tracebacklimit = 0    # raise exception to sickbeard but hide the stack trace.
+            raise Exception("[" + self.name + "] " + self.funcName() + " Login Failed, redirected with error url, Bad Username / Password?")
+        
         if response.url.endswith('403.html') and 'You have been banned.' in response.content:
+            self.session = None
             sys.tracebacklimit = 0    # raise exception to sickbeard but hide the stack trace.
             raise Exception("[" + self.name + "] " + self.funcName() + " Login Failed, you have been BANNED.")
-            return False
 
-        if re.search("Login failed! Username or password incorrect.|<title>Revolution :: Login</title>|The page you tried to view can only be used when you're logged in", response.text) or response.status_code in [401, 403]:
+        if re.search("Username or password incorrect|<title>Revolution :: Login</title>|The page you tried to view can only be used when you're logged in", response.content) \
+        or response.status_code in [401, 403]:
+            self.session = None
             sys.tracebacklimit = 0    # raise exception to sickbeard but hide the stack trace.
             raise Exception("[" + self.name + "] " + self.funcName() + " Login Failed, Invalid username or password for " + self.name + ". Check your settings.")
-            return False
 
         if not self._getPassKey() or not self.rss_passkey:
+            self.session = None
             sys.tracebacklimit = 0    # raise exception to sickbeard but hide the stack trace.
             raise Exception("[" + self.name + "] " + self.funcName() + " Could not extract rssHash info... aborting.")
 
