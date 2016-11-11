@@ -231,19 +231,20 @@ class IPTorrentsProvider(generic.TorrentProvider):
         logger.log("[" + self.name + "] Attempting to Login")
 
         try:
-            response = self.session.post(self.url + "/t", data=login_params, timeout=30, verify=False)
+            response = self.session.post(self.url + "/take_login.php", data=login_params, timeout=30, verify=False)
         except (requests.exceptions.ConnectionError, requests.exceptions.HTTPError), e:
+            self.session = None
             sys.tracebacklimit = 0    # raise exception to sickbeard but hide the stack trace.
-            raise Exception("[" + self.name + "] " + self.funcName() + " Error: " + ex(e))
-            return False
+            raise Exception("[" + self.name + "] " + self.funcName() + " Error: " + str(e))
 
-        if re.search("Password not correct|<title>IPT</title>", response.text) \
+        if re.search("take_login\.php|Password not correct|<title>IPT</title>", response.content) \
         or response.status_code in [401, 403]:
+            self.session = None
             sys.tracebacklimit = 0    # raise exception to sickbeard but hide the stack trace.
             raise Exception("[" + self.name + "] " + self.funcName() + " Login Failed, Invalid username or password for " + self.name + ". Check your settings.")
-            return False
 
         if not self._getPassKey() or not self.rss_passkey:
+            self.session = None
             sys.tracebacklimit = 0    # raise exception to sickbeard but hide the stack trace.
             raise Exception("[" + self.name + "] " + self.funcName() + " Could not extract rssHash info... aborting.")
 
