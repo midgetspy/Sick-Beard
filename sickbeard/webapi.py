@@ -632,8 +632,10 @@ def _getQualityMap():
             Quality.FULLHDTV: 'fullhdtv',
             Quality.HDWEBDL: 'hdwebdl',
             Quality.FULLHDWEBDL: 'fullhdwebdl',
+            Quality.QUADHDWEBDL: 'quadhdwebdl',
             Quality.HDBLURAY: 'hdbluray',
             Quality.FULLHDBLURAY: 'fullhdbluray',
+            Quality.QUADHDBLURAY: 'quadhdbluray',
             Quality.UNKNOWN: 'unknown'}
 
 
@@ -1598,8 +1600,8 @@ class CMD_SickBeardSetDefaults(ApiCall):
     def __init__(self, args, kwargs):
         # required
         # optional
-        self.initial, args = self.check_params(args, kwargs, "initial", None, False, "list", ["sdtv", "sddvd", "hdtv", "rawhdtv", "fullhdtv", "hdwebdl", "fullhdwebdl", "hdbluray", "fullhdbluray", "unknown"])
-        self.archive, args = self.check_params(args, kwargs, "archive", None, False, "list", ["sddvd", "hdtv", "rawhdtv", "fullhdtv", "hdwebdl", "fullhdwebdl", "hdbluray", "fullhdbluray"])
+        self.initial, args = self.check_params(args, kwargs, "initial", None, False, "list", ["sdtv", "sddvd", "hdtv", "rawhdtv", "fullhdtv", "hdwebdl", "fullhdwebdl", "quadhdwebdl", "hdbluray", "fullhdbluray", "quadhdbluray", "unknown"])
+        self.archive, args = self.check_params(args, kwargs, "archive", None, False, "list", ["sddvd", "hdtv", "rawhdtv", "fullhdtv", "hdwebdl", "fullhdwebdl", "quadhdwebdl", "hdbluray", "fullhdbluray", "quadhdbluray"])
         self.future_show_paused, args = self.check_params(args, kwargs, "future_show_paused", None, False, "bool", [])
         self.flatten_folders, args = self.check_params(args, kwargs, "flatten_folders", None, False, "bool", [])
         self.status, args = self.check_params(args, kwargs, "status", None, False, "string", ["wanted", "skipped", "archived", "ignored"])
@@ -1616,8 +1618,10 @@ class CMD_SickBeardSetDefaults(ApiCall):
                        'fullhdtv': Quality.FULLHDTV,
                        'hdwebdl': Quality.HDWEBDL,
                        'fullhdwebdl': Quality.FULLHDWEBDL,
+                       'quadhdwebdl': Quality.QUADHDWEBDL,
                        'hdbluray': Quality.HDBLURAY,
                        'fullhdbluray': Quality.FULLHDBLURAY,
+                       'quadhdbluray': Quality.QUADHDBLURAY,
                        'unknown': Quality.UNKNOWN}
 
         iqualityID = []
@@ -1750,8 +1754,8 @@ class CMD_ShowAddExisting(ApiCall):
         self.location, args = self.check_params(args, kwargs, "location", None, True, "string", [])
         self.tvdbid, args = self.check_params(args, kwargs, "tvdbid", None, True, "int", [])
         # optional
-        self.initial, args = self.check_params(args, kwargs, "initial", None, False, "list", ["sdtv", "sddvd", "hdtv", "rawhdtv", "fullhdtv", "hdwebdl", "fullhdwebdl", "hdbluray", "fullhdbluray", "unknown"])
-        self.archive, args = self.check_params(args, kwargs, "archive", None, False, "list", ["sddvd", "hdtv", "rawhdtv", "fullhdtv", "hdwebdl", "fullhdwebdl", "hdbluray", "fullhdbluray"])
+        self.initial, args = self.check_params(args, kwargs, "initial", None, False, "list", ["sdtv", "sddvd", "hdtv", "rawhdtv", "fullhdtv", "hdwebdl", "fullhdwebdl", "quadhdwebdl", "hdbluray", "fullhdbluray", "quadhdbluray", "unknown"])
+        self.archive, args = self.check_params(args, kwargs, "archive", None, False, "list", ["sddvd", "hdtv", "rawhdtv", "fullhdtv", "hdwebdl", "fullhdwebdl", "quadhdwebdl", "hdbluray", "fullhdbluray", "quadhdbluray"])
         self.flatten_folders, args = self.check_params(args, kwargs, "flatten_folders", str(sickbeard.FLATTEN_FOLDERS_DEFAULT), False, "bool", [])
         # super, missing, help
         ApiCall.__init__(self, args, kwargs)
@@ -1784,8 +1788,10 @@ class CMD_ShowAddExisting(ApiCall):
                        'fullhdtv': Quality.FULLHDTV,
                        'hdwebdl': Quality.HDWEBDL,
                        'fullhdwebdl': Quality.FULLHDWEBDL,
+                       'quadhdwebdl': Quality.QUADHDWEBDL,
                        'hdbluray': Quality.HDBLURAY,
                        'fullhdbluray': Quality.FULLHDBLURAY,
+                       'quadhdbluray': Quality.QUADHDBLURAY,
                        'unknown': Quality.UNKNOWN}
 
         # use default quality as a failsafe
@@ -1831,8 +1837,8 @@ class CMD_ShowAddNew(ApiCall):
         self.tvdbid, args = self.check_params(args, kwargs, "tvdbid", None, True, "int", [])
         # optional
         self.location, args = self.check_params(args, kwargs, "location", None, False, "string", [])
-        self.initial, args = self.check_params(args, kwargs, "initial", None, False, "list", ["sdtv", "sddvd", "hdtv", "rawhdtv", "fullhdtv", "hdwebdl", "fullhdwebdl", "hdbluray", "fullhdbluray", "unknown"])
-        self.archive, args = self.check_params(args, kwargs, "archive", None, False, "list", ["sddvd", "hdtv", "rawhdtv", "fullhdtv", "hdwebdl", "fullhdwebdl", "hdbluray", "fullhdbluray"])
+        self.initial, args = self.check_params(args, kwargs, "initial", None, False, "list", ["sdtv", "sddvd", "hdtv", "rawhdtv", "fullhdtv", "hdwebdl", "fullhdwebdl", "quadhdwebdl", "hdbluray", "fullhdbluray", "quadhdbluray", "unknown"])
+        self.archive, args = self.check_params(args, kwargs, "archive", None, False, "list", ["sddvd", "hdtv", "rawhdtv", "fullhdtv", "hdwebdl", "fullhdwebdl", "quadhdwebdl", "hdbluray", "fullhdbluray", "quadhdbluray"])
         self.flatten_folders, args = self.check_params(args, kwargs, "flatten_folders", str(sickbeard.FLATTEN_FOLDERS_DEFAULT), False, "bool", [])
         self.status, args = self.check_params(args, kwargs, "status", None, False, "string", ["wanted", "skipped", "archived", "ignored"])
         self.lang, args = self.check_params(args, kwargs, "lang", "en", False, "string", self.valid_languages.keys())
@@ -1864,8 +1870,10 @@ class CMD_ShowAddNew(ApiCall):
                        'fullhdtv': Quality.FULLHDTV,
                        'hdwebdl': Quality.HDWEBDL,
                        'fullhdwebdl': Quality.FULLHDWEBDL,
+                       'quadhdwebdl': Quality.QUADHDWEBDL,
                        'hdbluray': Quality.HDBLURAY,
                        'fullhdbluray': Quality.FULLHDBLURAY,
+                       'quadhdbluray': Quality.QUADHDBLURAY,
                        'unknown': Quality.UNKNOWN}
 
         # use default quality as a failsafe
@@ -2219,8 +2227,8 @@ class CMD_ShowSetQuality(ApiCall):
         # optional
         # this for whatever reason removes hdbluray not sdtv... which is just wrong. reverting to previous code.. plus we didnt use the new code everywhere.
         # self.archive, args = self.check_params(args, kwargs, "archive", None, False, "list", _getQualityMap().values()[1:])
-        self.initial, args = self.check_params(args, kwargs, "initial", None, False, "list", ["sdtv", "sddvd", "hdtv", "rawhdtv", "fullhdtv", "hdwebdl", "fullhdwebdl", "hdbluray", "fullhdbluray", "unknown"])
-        self.archive, args = self.check_params(args, kwargs, "archive", None, False, "list", ["sddvd", "hdtv", "rawhdtv", "fullhdtv", "hdwebdl", "fullhdwebdl", "hdbluray", "fullhdbluray"])
+        self.initial, args = self.check_params(args, kwargs, "initial", None, False, "list", ["sdtv", "sddvd", "hdtv", "rawhdtv", "fullhdtv", "hdwebdl", "fullhdwebdl", "quadhdwebdl", "hdbluray", "fullhdbluray", "quadhdbluray", "unknown"])
+        self.archive, args = self.check_params(args, kwargs, "archive", None, False, "list", ["sddvd", "hdtv", "rawhdtv", "fullhdtv", "hdwebdl", "fullhdwebdl", "quadhdwebdl", "hdbluray", "fullhdbluray", "quadhdbluray"])
         # super, missing, help
         ApiCall.__init__(self, args, kwargs)
 
@@ -2239,8 +2247,10 @@ class CMD_ShowSetQuality(ApiCall):
                        'fullhdtv': Quality.FULLHDTV,
                        'hdwebdl': Quality.HDWEBDL,
                        'fullhdwebdl': Quality.FULLHDWEBDL,
+                       'quadhdwebdl': Quality.QUADHDWEBDL,
                        'hdbluray': Quality.HDBLURAY,
                        'fullhdbluray': Quality.FULLHDBLURAY,
+                       'quadhdbluray': Quality.QUADHDBLURAY,
                        'unknown': Quality.UNKNOWN}
 
         # use default quality as a failsafe

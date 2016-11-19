@@ -337,7 +337,7 @@ class Add1080pAndRawHDQualities(RenameSeasonFolders):
 
         # update ANY -- shift existing qualities and add new 1080p qualities, note that rawHD was not added to the ANY template
         old_any = common.Quality.combineQualities([common.Quality.SDTV, common.Quality.SDDVD, common.Quality.HDTV, common.Quality.HDWEBDL >> 2, common.Quality.HDBLURAY >> 3, common.Quality.UNKNOWN], [])
-        new_any = common.Quality.combineQualities([common.Quality.SDTV, common.Quality.SDDVD, common.Quality.HDTV, common.Quality.FULLHDTV, common.Quality.HDWEBDL, common.Quality.FULLHDWEBDL, common.Quality.HDBLURAY, common.Quality.FULLHDBLURAY, common.Quality.UNKNOWN], [])
+        new_any = common.Quality.combineQualities([common.Quality.SDTV, common.Quality.SDDVD, common.Quality.HDTV, common.Quality.FULLHDTV, common.Quality.HDWEBDL, common.Quality.FULLHDWEBDL, common.Quality.HDBLURAY, common.Quality.FULLHDBLURAY, common.Quality.QUADHDWEBDL, common.Quality.QUADHDBLURAY, common.Quality.UNKNOWN], [])
 
         # update qualities (including templates)
         logger.log(u"[1/4] Updating pre-defined templates and the quality for each show...", logger.MESSAGE)
