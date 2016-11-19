@@ -78,6 +78,9 @@ class QualityTests(unittest.TestCase):
         self.assertEqual(common.Quality.FULLHDWEBDL, common.Quality.nameQuality("Test Show S01E02 1080p iTunes H 264 AAC-GROUP"))
         self.assertEqual(common.Quality.FULLHDWEBDL, common.Quality.nameQuality("Test_Show_S01E02_1080p_iTunes_H_264_AAC-GROUP"))
 
+    def test_QUADHDWEBDL(self):
+        self.assertEqual(common.Quality.QUADHDWEBDL, common.Quality.nameQuality("Test.Show.S01E02.2160p.WEBRip.x264-GROUP"))
+
     def test_HDBLURAY(self):
         self.assertEqual(common.Quality.HDBLURAY, common.Quality.nameQuality("Test.Show.S01E02.720p.BluRay.x264-GROUP"))
         self.assertEqual(common.Quality.HDBLURAY, common.Quality.nameQuality("Test.Show.S01E02.720p.HDDVD.x264-GROUP"))
@@ -85,6 +88,9 @@ class QualityTests(unittest.TestCase):
     def test_FULLHDBLURAY(self):
         self.assertEqual(common.Quality.FULLHDBLURAY, common.Quality.nameQuality("Test.Show.S01E02.1080p.BluRay.x264-GROUP"))
         self.assertEqual(common.Quality.FULLHDBLURAY, common.Quality.nameQuality("Test.Show.S01E02.1080p.HDDVD.x264-GROUP"))
+
+    def test_QUADHDBLURAY(self):
+        self.assertEqual(common.Quality.QUADHDBLURAY, common.Quality.nameQuality("Test.Show.S01E02.2160p.Ultra.HD.BluRay.x264-GROUP"))
 
     def test_UNKNOWN(self):
         self.assertEqual(common.Quality.UNKNOWN, common.Quality.nameQuality("Test.Show.S01E02-SiCKBEARD"))
@@ -97,8 +103,10 @@ class QualityTests(unittest.TestCase):
         self.assertEqual(common.Quality.FULLHDTV, common.Quality.nameQuality("Test Show - S01E02 - 1080p HD TV - GROUP"))
         self.assertEqual(common.Quality.HDWEBDL, common.Quality.nameQuality("Test Show - S01E02 - 720p WEB-DL - GROUP"))
         self.assertEqual(common.Quality.FULLHDWEBDL, common.Quality.nameQuality("Test Show - S01E02 - 1080p WEB-DL - GROUP"))
+        self.assertEqual(common.Quality.QUADHDWEBDL, common.Quality.nameQuality("Test Show - S01E02 - 2160p WEBRip - GROUP"))
         self.assertEqual(common.Quality.HDBLURAY, common.Quality.nameQuality("Test Show - S01E02 - 720p BluRay - GROUP"))
         self.assertEqual(common.Quality.FULLHDBLURAY, common.Quality.nameQuality("Test Show - S01E02 - 1080p BluRay - GROUP"))
+        self.assertEqual(common.Quality.QUADHDBLURAY, common.Quality.nameQuality("Test Show - S01E02 - 2160p BluRay - GROUP"))
         self.assertEqual(common.Quality.UNKNOWN, common.Quality.nameQuality("Test Show - S01E02 - Unknown - SiCKBEARD"))
 
 if __name__ == '__main__':
