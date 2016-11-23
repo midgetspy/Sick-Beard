@@ -146,11 +146,11 @@ class SpeedProvider(generic.TorrentProvider):
                 item = (self.remove_tags.sub('', torrent.group('title')), self.url + "download.php?torrent=" + torrent.group('id'))
                 results.append(item)
             if len(results):
-                logger.log("[" + self.name + "] " + self.funcName() + " Some results found.")
+                logger.log("[" + self.name + "] " + self.funcName() + " Some results found.", logger.DEBUG)
             else:
-                logger.log("[" + self.name + "] " + self.funcName() + " No results found.")
+                logger.log("[" + self.name + "] " + self.funcName() + " No results found.", logger.DEBUG)
         else:
-            logger.log("[" + self.name + "] " + self.funcName() + " Error no data returned!!")
+            logger.log("[" + self.name + "] " + self.funcName() + " Error no data returned!!", logger.ERROR)
         return results
 
     ###################################################################################################
