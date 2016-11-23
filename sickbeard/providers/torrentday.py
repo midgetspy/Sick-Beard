@@ -48,8 +48,8 @@ class TorrentDayProvider(generic.TorrentProvider):
         generic.TorrentProvider.__init__(self, "TorrentDay")
         self.cache = TorrentDayCache(self)
         self.name = "TorrentDay"
-        self.rsshash = None
-        self.rssuid = None
+        self.rss_passkey = None
+        self.rss_uid = None
         self.session = None
         self.supportsBacklog = True
         self.url = 'https://www.torrentday.com/'
@@ -163,7 +163,7 @@ class TorrentDayProvider(generic.TorrentProvider):
         results = []
 
         for torrent in torrents:
-            item = (torrent['name'].replace('.', ' '), self.url + "download.php/" + str(torrent['id']) + "/" + torrent['fname'] + "?torrent_pass=" + self.rsshash)
+            item = (torrent['name'].replace('.', ' '), self.url + "download.php/" + str(torrent['id']) + "/" + torrent['fname'] + "?torrent_pass=" + self.rss_passkey)
             results.append(item)
             logger.log("[" + self.name + "] " + self.funcName() + " Title: " + torrent['name'], logger.DEBUG)
 
@@ -230,22 +230,20 @@ class TorrentDayProvider(generic.TorrentProvider):
     def _getPassKey(self):
         logger.log("[" + self.name + "] _getPassKey() Attempting to acquire RSS info")
         try:
-            rssData = re.findall(r'u=(.*);tp=([0-9A-Fa-f]{32})', self.getURL(self.url + "rss.php", data={'cat[]': '26', 'feed': 'direct', 'login': 'passkey'}))[0]
-            self.rssuid = rssData[0]
-            self.rsshash = rssData[1]
+            self.rss_uid, self.rss_passkey = re.findall(r'u=(.*);tp=([0-9A-Fa-f]{32})', self.getURL(self.url + "rss.php", data={'cat[]': '26', 'feed': 'direct', 'login': 'passkey'}))[0]
         except:
             logger.log("[" + self.name + "] " + self.funcName() + " Failed to scrape authentication parameters for rss.",logger.ERROR)
             return False
                     
-        if self.rssuid == None:
+        if self.rss_uid == None:
             logger.log("[" + self.name + "] " + self.funcName() + " Can't extract uid from rss authentication scrape.",logger.ERROR)
             return False
         
-        if self.rsshash == None:
+        if self.rss_passkey == None:
             logger.log("[" + self.name + "] " + self.funcName() + " Can't extract password hash from rss authentication scrape.",logger.ERROR)
             return False
             
-        logger.log("[" + self.name + "] " + self.funcName() + " rssuid = " + self.rssuid + ", rsshash = " + self.rsshash,logger.DEBUG)
+        logger.log("[" + self.name + "] " + self.funcName() + " rss_uid = " + self.rss_uid + ", rss_passkey = " + self.rss_passkey,logger.DEBUG)
         return True
 
     ###################################################################################################
@@ -254,8 +252,8 @@ class TorrentDayProvider(generic.TorrentProvider):
         self.session = requests.Session()        
         self.checkAuthCookies()
 
-        if not self._getPassKey() or not self.rssuid or not self.rsshash:
-            raise Exception("[" + self.name + "] " + self.funcName() + " Could not extract rssHash info... aborting")
+        if not self._getPassKey() or not self.rss_uid or not self.rss_passkey:
+            raise Exception("[" + self.name + "] " + self.funcName() + " Could not extract rss uid/passkey... aborting.")
         
         return True
 
@@ -275,9 +273,22 @@ class TorrentDayCache(tvcache.TVCache):
         if not provider.session:
             provider._doLogin()
 
-        self.rss_url = "{0}t.rss?download;7;14;24;26;33;u={1};tp={2}".format(provider.url, provider.rssuid, provider.rsshash)
-        logger.log("[" + provider.name + "] RSS URL - {0}".format(self.rss_url))
-        return provider.getURL(self.rss_url)
+        self.rss_url = provider.url + "t.rss?download;7;14;24;26;33;u=" + provider.rss_uid + ";tp=" + provider.rss_passkey
+        logger.log("[" + provider.name + "] " + provider.funcName() + " RSS URL - " + self.rss_url)
+        xml = provider.getURL(self.rss_url)
+        if xml is not None:
+            xml = xml.decode('utf8', 'ignore')
+        else:
+            logger.log("[" + provider.name + "] " + provider.funcName() + " empty RSS data received.", logger.ERROR)
+            xml = "<rss xmlns:atom=\"http://www.w3.org/2005/Atom\" version=\"2.0\">" + \
+                "<channel>" + \
+                "<title>" + provider.name + "</title>" + \
+                "<link>" + provider.url + "</link>" + \
+                "<description>torrent search</description>" + \
+                "<language>en-us</language>" + \
+                "<atom:link href=\"" + provider.url + "\" rel=\"self\" type=\"application/rss+xml\"/>" + \
+                "</channel></rss>"
+        return xml
 
     ###################################################################################################
 

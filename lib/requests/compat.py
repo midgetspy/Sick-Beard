@@ -1,7 +1,11 @@
 # -*- coding: utf-8 -*-
 
 """
-pythoncompat
+requests.compat
+~~~~~~~~~~~~~~~
+
+This module handles import compatibility issues between Python 2 and
+Python 3.
 """
 
 from .packages import chardet
@@ -46,6 +50,7 @@ if is_py2:
     str = unicode
     basestring = basestring
     numeric_types = (int, long, float)
+    integer_types = (int, long)
 
 elif is_py3:
     from urllib.parse import urlparse, urlunparse, urljoin, urlsplit, urlencode, quote, unquote, quote_plus, unquote_plus, urldefrag
@@ -60,3 +65,4 @@ elif is_py3:
     bytes = bytes
     basestring = (str, bytes)
     numeric_types = (int, float)
+    integer_types = (int,)
