@@ -1,12 +1,12 @@
-
-import os
 import sys
 import time
 import warnings
 
+import six
+
 import cherrypy
-from cherrypy._cpcompat import basestring, copykeys, ntob, unicodestr
-from cherrypy._cpcompat import SimpleCookie, CookieError, py3k
+from cherrypy._cpcompat import text_or_bytes, copykeys, ntob
+from cherrypy._cpcompat import SimpleCookie, CookieError
 from cherrypy import _cpreqbody, _cpconfig
 from cherrypy._cperror import format_exc, bare_error
 from cherrypy.lib import httputil, file_generator
@@ -41,11 +41,11 @@ class Hook(object):
         self.callback = callback
 
         if failsafe is None:
-            failsafe = getattr(callback, "failsafe", False)
+            failsafe = getattr(callback, 'failsafe', False)
         self.failsafe = failsafe
 
         if priority is None:
-            priority = getattr(callback, "priority", 50)
+            priority = getattr(callback, 'priority', 50)
         self.priority = priority
 
         self.kwargs = kwargs
@@ -64,10 +64,10 @@ class Hook(object):
 
     def __repr__(self):
         cls = self.__class__
-        return ("%s.%s(callback=%r, failsafe=%r, priority=%r, %s)"
+        return ('%s.%s(callback=%r, failsafe=%r, priority=%r, %s)'
                 % (cls.__module__, cls.__name__, self.callback,
                    self.failsafe, self.priority,
-                   ", ".join(['%s=%r' % (k, v)
+                   ', '.join(['%s=%r' % (k, v)
                               for k, v in self.kwargs.items()])))
 
 
@@ -124,7 +124,7 @@ class HookMap(dict):
 
     def __repr__(self):
         cls = self.__class__
-        return "%s.%s(points=%r)" % (
+        return '%s.%s(points=%r)' % (
             cls.__module__,
             cls.__name__,
             copykeys(self)
@@ -138,8 +138,8 @@ def hooks_namespace(k, v):
     # Use split again to allow multiple hooks for a single
     # hookpoint per path (e.g. "hooks.before_handler.1").
     # Little-known fact you only get from reading source ;)
-    hookpoint = k.split(".", 1)[0]
-    if isinstance(v, basestring):
+    hookpoint = k.split('.', 1)[0]
+    if isinstance(v, text_or_bytes):
         v = cherrypy.lib.attributes(v)
     if not isinstance(v, Hook):
         v = Hook(v)
@@ -199,23 +199,23 @@ class Request(object):
     unless we are processing an InternalRedirect."""
 
     # Conversation/connection attributes
-    local = httputil.Host("127.0.0.1", 80)
-    "An httputil.Host(ip, port, hostname) object for the server socket."
+    local = httputil.Host('127.0.0.1', 80)
+    'An httputil.Host(ip, port, hostname) object for the server socket.'
 
-    remote = httputil.Host("127.0.0.1", 1111)
-    "An httputil.Host(ip, port, hostname) object for the client socket."
+    remote = httputil.Host('127.0.0.1', 1111)
+    'An httputil.Host(ip, port, hostname) object for the client socket.'
 
-    scheme = "http"
+    scheme = 'http'
     """
     The protocol used between client and server. In most cases,
     this will be either 'http' or 'https'."""
 
-    server_protocol = "HTTP/1.1"
+    server_protocol = 'HTTP/1.1'
     """
     The HTTP version for which the HTTP server is at least
     conditionally compliant."""
 
-    base = ""
+    base = ''
     """The (scheme://host) portion of the requested URL.
     In some cases (e.g. when proxying via mod_rewrite), this may contain
     path segments which cherrypy.url uses when constructing url's, but
@@ -223,13 +223,13 @@ class Request(object):
     MUST NOT end in a slash."""
 
     # Request-Line attributes
-    request_line = ""
+    request_line = ''
     """
     The complete Request-Line received from the client. This is a
     single string consisting of the request method, URI, and protocol
     version (joined by spaces). Any final CRLF is removed."""
 
-    method = "GET"
+    method = 'GET'
     """
     Indicates the HTTP method to be performed on the resource identified
     by the Request-URI. Common methods include GET, HEAD, POST, PUT, and
@@ -237,7 +237,7 @@ class Request(object):
     servers and gateways may restrict the set of allowable methods.
     CherryPy applications SHOULD restrict the set (on a per-URI basis)."""
 
-    query_string = ""
+    query_string = ''
     """
     The query component of the Request-URI, a string of information to be
     interpreted by the resource. The query portion of a URI follows the
@@ -312,7 +312,7 @@ class Request(object):
     If True, the rfile (if any) is automatically read and parsed,
     and the result placed into request.params or request.body."""
 
-    methods_with_bodies = ("POST", "PUT")
+    methods_with_bodies = ('POST', 'PUT')
     """
     A sequence of HTTP methods for which CherryPy will automatically
     attempt to read a body from the rfile. If you are going to change
@@ -341,7 +341,7 @@ class Request(object):
     to a hierarchical arrangement of objects, starting at request.app.root.
     See help(cherrypy.dispatch) for more information."""
 
-    script_name = ""
+    script_name = ''
     """
     The 'mount point' of the application which is handling this request.
 
@@ -349,7 +349,7 @@ class Request(object):
     the root of the URI, it MUST be an empty string (not "/").
     """
 
-    path_info = "/"
+    path_info = '/'
     """
     The 'relative path' portion of the Request-URI. This is relative
     to the script_name ('mount point') of the application which is
@@ -468,15 +468,15 @@ class Request(object):
     This is useful when debugging a live server with hung requests."""
 
     namespaces = _cpconfig.NamespaceSet(
-        **{"hooks": hooks_namespace,
-           "request": request_namespace,
-           "response": response_namespace,
-           "error_page": error_page_namespace,
-           "tools": cherrypy.tools,
+        **{'hooks': hooks_namespace,
+           'request': request_namespace,
+           'response': response_namespace,
+           'error_page': error_page_namespace,
+           'tools': cherrypy.tools,
            })
 
-    def __init__(self, local_host, remote_host, scheme="http",
-                 server_protocol="HTTP/1.1"):
+    def __init__(self, local_host, remote_host, scheme='http',
+                 server_protocol='HTTP/1.1'):
         """Populate a new Request object.
 
         local_host should be an httputil.Host object with the server info.
@@ -544,7 +544,7 @@ class Request(object):
             self.error_response = cherrypy.HTTPError(500).set_response
 
             self.method = method
-            path = path or "/"
+            path = path or '/'
             self.query_string = query_string or ''
             self.params = {}
 
@@ -600,11 +600,11 @@ class Request(object):
                 if self.show_tracebacks:
                     body = format_exc()
                 else:
-                    body = ""
+                    body = ''
                 r = bare_error(body)
                 response.output_status, response.header_list, response.body = r
 
-        if self.method == "HEAD":
+        if self.method == 'HEAD':
             # HEAD requests MUST NOT return a message-body in the response.
             response.body = []
 
@@ -696,14 +696,14 @@ class Request(object):
                 self.query_string, encoding=self.query_string_encoding)
         except UnicodeDecodeError:
             raise cherrypy.HTTPError(
-                404, "The given query string could not be processed. Query "
-                "strings for this resource must be encoded with %r." %
+                404, 'The given query string could not be processed. Query '
+                'strings for this resource must be encoded with %r.' %
                 self.query_string_encoding)
 
         # Python 2 only: keyword arguments must be byte strings (type 'str').
-        if not py3k:
+        if six.PY2:
             for key, value in p.items():
-                if isinstance(key, unicode):
+                if isinstance(key, six.text_type):
                     del p[key]
                     p[key.encode(self.query_string_encoding)] = value
         self.params.update(p)
@@ -722,7 +722,7 @@ class Request(object):
             # (AFAIK, only Konqueror does that), only the last one will
             # remain in headers (but they will be correctly stored in
             # request.cookie).
-            if "=?" in value:
+            if '=?' in value:
                 dict.__setitem__(headers, name, httputil.decode_TEXT(value))
             else:
                 dict.__setitem__(headers, name, value)
@@ -733,7 +733,7 @@ class Request(object):
                 try:
                     self.cookie.load(value)
                 except CookieError:
-                    msg = "Illegal cookie name %s" % value.split('=')[0]
+                    msg = 'Illegal cookie name %s' % value.split('=')[0]
                     raise cherrypy.HTTPError(400, msg)
 
         if not dict.__contains__(headers, 'Host'):
@@ -746,7 +746,7 @@ class Request(object):
         host = dict.get(headers, 'Host')
         if not host:
             host = self.local.name or self.local.ip
-        self.base = "%s://%s" % (self.scheme, host)
+        self.base = '%s://%s' % (self.scheme, host)
 
     def get_resource(self, path):
         """Call a dispatcher (which sets self.handler and .config). (Core)"""
@@ -754,7 +754,7 @@ class Request(object):
         # dispatchers can only be specified in app.config, not in _cp_config
         # (since custom dispatchers may not even have an app.root).
         dispatch = self.app.find_config(
-            path, "request.dispatch", self.dispatch)
+            path, 'request.dispatch', self.dispatch)
 
         # dispatch() should set self.handler and self.config
         dispatch(path)
@@ -762,10 +762,10 @@ class Request(object):
     def handle_error(self):
         """Handle the last unanticipated exception. (Core)"""
         try:
-            self.hooks.run("before_error_response")
+            self.hooks.run('before_error_response')
             if self.error_response:
                 self.error_response()
-            self.hooks.run("after_error_response")
+            self.hooks.run('after_error_response')
             cherrypy.serving.response.finalize()
         except cherrypy.HTTPRedirect:
             inst = sys.exc_info()[1]
@@ -776,8 +776,8 @@ class Request(object):
 
     def _get_body_params(self):
         warnings.warn(
-            "body_params is deprecated in CherryPy 3.2, will be removed in "
-            "CherryPy 3.3.",
+            'body_params is deprecated in CherryPy 3.2, will be removed in '
+            'CherryPy 3.3.',
             DeprecationWarning
         )
         return self.body.params
@@ -799,9 +799,9 @@ class ResponseBody(object):
 
     """The body of the HTTP response (the response entity)."""
 
-    if py3k:
-        unicode_err = ("Page handlers MUST return bytes. Use tools.encode "
-                       "if you wish to return unicode.")
+    if six.PY3:
+        unicode_err = ('Page handlers MUST return bytes. Use tools.encode '
+                       'if you wish to return unicode.')
 
     def __get__(self, obj, objclass=None):
         if obj is None:
@@ -812,10 +812,10 @@ class ResponseBody(object):
 
     def __set__(self, obj, value):
         # Convert the given value to an iterable object.
-        if py3k and isinstance(value, str):
+        if six.PY3 and isinstance(value, str):
             raise ValueError(self.unicode_err)
 
-        if isinstance(value, basestring):
+        if isinstance(value, text_or_bytes):
             # strings get wrapped in a list because iterating over a single
             # item list is much faster than iterating over every character
             # in a long string.
@@ -824,7 +824,7 @@ class ResponseBody(object):
             else:
                 # [''] doesn't evaluate to False, so replace it with [].
                 value = []
-        elif py3k and isinstance(value, list):
+        elif six.PY3 and isinstance(value, list):
             # every item in a list must be bytes...
             for i, item in enumerate(value):
                 if isinstance(item, str):
@@ -842,7 +842,7 @@ class Response(object):
 
     """An HTTP Response, including status, headers, and body."""
 
-    status = ""
+    status = ''
     """The HTTP Status-Code and Reason-Phrase."""
 
     header_list = []
@@ -893,20 +893,20 @@ class Response(object):
         # Since we know all our keys are titled strings, we can
         # bypass HeaderMap.update and get a big speed boost.
         dict.update(self.headers, {
-            "Content-Type": 'text/html',
-            "Server": "CherryPy/" + cherrypy.__version__,
-            "Date": httputil.HTTPDate(self.time),
+            'Content-Type': 'text/html',
+            'Server': 'CherryPy/' + cherrypy.__version__,
+            'Date': httputil.HTTPDate(self.time),
         })
         self.cookie = SimpleCookie()
 
     def collapse_body(self):
         """Collapse self.body to a single string; replace it and return it."""
-        if isinstance(self.body, basestring):
+        if isinstance(self.body, text_or_bytes):
             return self.body
 
         newbody = []
         for chunk in self.body:
-            if py3k and not isinstance(chunk, bytes):
+            if six.PY3 and not isinstance(chunk, bytes):
                 raise TypeError("Chunk %s is not of type 'bytes'." %
                                 repr(chunk))
             newbody.append(chunk)
@@ -924,9 +924,9 @@ class Response(object):
 
         headers = self.headers
 
-        self.status = "%s %s" % (code, reason)
+        self.status = '%s %s' % (code, reason)
         self.output_status = ntob(str(code), 'ascii') + \
-            ntob(" ") + headers.encode(reason)
+            ntob(' ') + headers.encode(reason)
 
         if self.stream:
             # The upshot: wsgiserver will chunk the response if
@@ -939,7 +939,7 @@ class Response(object):
             # and 304 (not modified) responses MUST NOT
             # include a message-body."
             dict.pop(headers, 'Content-Length', None)
-            self.body = ntob("")
+            self.body = ntob('')
         else:
             # Responses which are not streamed should have a Content-Length,
             # but allow user code to set Content-Length if desired.
@@ -952,14 +952,11 @@ class Response(object):
 
         cookie = self.cookie.output()
         if cookie:
-            for line in cookie.split("\n"):
-                if line.endswith("\r"):
-                    # Python 2.4 emits cookies joined by LF but 2.5+ by CRLF.
-                    line = line[:-1]
-                name, value = line.split(": ", 1)
-                if isinstance(name, unicodestr):
-                    name = name.encode("ISO-8859-1")
-                if isinstance(value, unicodestr):
+            for line in cookie.split('\r\n'):
+                name, value = line.split(': ', 1)
+                if isinstance(name, six.text_type):
+                    name = name.encode('ISO-8859-1')
+                if isinstance(value, six.text_type):
                     value = headers.encode(value)
                 h.append((name, value))
 

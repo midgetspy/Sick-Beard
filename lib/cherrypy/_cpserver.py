@@ -1,10 +1,10 @@
 """Manage HTTP servers with CherryPy."""
 
-import warnings
+import six
 
 import cherrypy
-from cherrypy.lib import attributes
-from cherrypy._cpcompat import basestring, py3k
+from cherrypy.lib.reprconf import attributes
+from cherrypy._cpcompat import text_or_bytes
 
 # We import * because we want to export check_port
 # et al as attributes of this module.
@@ -35,7 +35,7 @@ class Server(ServerAdapter):
         if value == '':
             raise ValueError("The empty string ('') is not an allowed value. "
                              "Use '0.0.0.0' instead to listen on all active "
-                             "interfaces (INADDR_ANY).")
+                             'interfaces (INADDR_ANY).')
         self._socket_host = value
     socket_host = property(
         _get_socket_host,
@@ -61,11 +61,11 @@ class Server(ServerAdapter):
 
     socket_timeout = 10
     """The timeout in seconds for accepted connections (default 10)."""
-    
+
     accepted_queue_size = -1
     """The maximum number of requests which will be queued up before
     the server refuses to accept it (default -1, meaning no limit)."""
-    
+
     accepted_queue_timeout = 10
     """The timeout in seconds for attempting to add a request to the
     queue when the queue is full (default 10)."""
@@ -113,7 +113,7 @@ class Server(ServerAdapter):
     ssl_private_key = None
     """The filename of the private key to use with SSL."""
 
-    if py3k:
+    if six.PY3:
         ssl_module = 'builtin'
         """The name of a registered SSL adaptation module to use with
         the builtin WSGI server. Builtin options are: 'builtin' (to
@@ -156,7 +156,7 @@ class Server(ServerAdapter):
         if httpserver is None:
             from cherrypy import _cpwsgi_server
             httpserver = _cpwsgi_server.CPWSGIServer(self)
-        if isinstance(httpserver, basestring):
+        if isinstance(httpserver, text_or_bytes):
             # Is anyone using this? Can I add an arg?
             httpserver = attributes(httpserver)(self)
         return httpserver, self.bind_addr
@@ -180,7 +180,7 @@ class Server(ServerAdapter):
             self.socket_file = None
             self.socket_host = None
             self.socket_port = None
-        elif isinstance(value, basestring):
+        elif isinstance(value, text_or_bytes):
             self.socket_file = value
             self.socket_host = None
             self.socket_port = None
@@ -189,9 +189,9 @@ class Server(ServerAdapter):
                 self.socket_host, self.socket_port = value
                 self.socket_file = None
             except ValueError:
-                raise ValueError("bind_addr must be a (host, port) tuple "
-                                 "(for TCP sockets) or a string (for Unix "
-                                 "domain sockets), not %r" % value)
+                raise ValueError('bind_addr must be a (host, port) tuple '
+                                 '(for TCP sockets) or a string (for Unix '
+                                 'domain sockets), not %r' % value)
     bind_addr = property(
         _get_bind_addr,
         _set_bind_addr,
@@ -215,12 +215,12 @@ class Server(ServerAdapter):
         port = self.socket_port
 
         if self.ssl_certificate:
-            scheme = "https"
+            scheme = 'https'
             if port != 443:
-                host += ":%s" % port
+                host += ':%s' % port
         else:
-            scheme = "http"
+            scheme = 'http'
             if port != 80:
-                host += ":%s" % port
+                host += ':%s' % port
 
-        return "%s://%s" % (scheme, host)
+        return '%s://%s' % (scheme, host)

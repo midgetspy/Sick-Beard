@@ -36,17 +36,16 @@ usage:
 The other HTTP methods are supported - see `requests.api`. Full documentation
 is at <http://python-requests.org>.
 
-:copyright: (c) 2015 by Kenneth Reitz.
+:copyright: (c) 2016 by Kenneth Reitz.
 :license: Apache 2.0, see LICENSE for more details.
-
 """
 
 __title__ = 'requests'
-__version__ = '2.7.0'
-__build__ = 0x020700
+__version__ = '2.12.1'
+__build__ = 0x021201
 __author__ = 'Kenneth Reitz'
 __license__ = 'Apache 2.0'
-__copyright__ = 'Copyright 2015 Kenneth Reitz'
+__copyright__ = 'Copyright 2016 Kenneth Reitz'
 
 # Attempt to enable urllib3's SNI support, if possible
 try:
@@ -55,6 +54,12 @@ try:
 except ImportError:
     pass
 
+import warnings
+
+# urllib3's DependencyWarnings should be silenced.
+from .packages.urllib3.exceptions import DependencyWarning
+warnings.simplefilter('ignore', DependencyWarning)
+
 from . import utils
 from .models import Request, Response, PreparedRequest
 from .api import request, get, head, post, patch, put, delete, options
@@ -62,7 +67,8 @@ from .sessions import session, Session
 from .status_codes import codes
 from .exceptions import (
     RequestException, Timeout, URLRequired,
-    TooManyRedirects, HTTPError, ConnectionError
+    TooManyRedirects, HTTPError, ConnectionError,
+    FileModeWarning, ConnectTimeout, ReadTimeout
 )
 
 # Set default logging handler to avoid "No handler found" warnings.
@@ -75,3 +81,6 @@ except ImportError:
             pass
 
 logging.getLogger(__name__).addHandler(NullHandler())
+
+# FileModeWarnings go off per the default.
+warnings.simplefilter('default', FileModeWarning, append=True)
