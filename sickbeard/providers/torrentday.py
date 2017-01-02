@@ -142,7 +142,7 @@ class TorrentDayProvider(generic.TorrentProvider):
         search_params = search_params.replace('.', ' ')
         logger.log("[" + self.name + "] Performing Search For: {0}".format(search_params))
         searchUrl = self.url + "V3/API/API.php"
-        PostData = {'/browse.php?': None, 'cata': 'yes', 'jxt': 8, 'jxw': 'b', 'search': search_params, 'c7': 1, 'c14': 1, 'c24': 1, 'c26': 1, 'c33': 1}
+        PostData = {'/browse.php?': None, 'cata': 'yes', 'jxt': 8, 'jxw': 'b', 'search': search_params, 'c7': 1, 'c14': 1, 'c24': 1, 'c26': 1, 'c33': 1,'c34': 1}
 
         try:
             data = self.getURL(searchUrl, data=PostData)
@@ -273,7 +273,7 @@ class TorrentDayCache(tvcache.TVCache):
         if not provider.session:
             provider._doLogin()
 
-        self.rss_url = provider.url + "t.rss?download;7;14;24;26;33;u=" + provider.rss_uid + ";tp=" + provider.rss_passkey
+        self.rss_url = provider.url + "t.rss?download;7;14;24;26;33;34;u=" + provider.rss_uid + ";tp=" + provider.rss_passkey
         logger.log("[" + provider.name + "] " + provider.funcName() + " RSS URL - " + self.rss_url)
         xml = provider.getURL(self.rss_url)
         if xml is not None:
