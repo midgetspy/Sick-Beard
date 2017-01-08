@@ -145,7 +145,7 @@ class TorrentLeechProvider(generic.TorrentProvider):
         if data:
             logger.log("[" + self.name + "] parseResults() URL: " + searchUrl, logger.DEBUG)
             
-            for torrent in re.compile('<span class="title"><a href="/torrent/\d+">(?P<title>.*?)</a>.*?<td class="quickdownload">\s+<a href="/(?P<url>.*?)">',re.MULTILINE|re.DOTALL).finditer(data):
+            for torrent in re.compile('<span class="title"><a href="/torrent/\d+">(?P<title>.*?)</a>.*?<td class="quickdownload">\s+<a href="(?P<url>.*?)">',re.MULTILINE|re.DOTALL).finditer(data):
                 try:
                     item = (torrent.group('title').replace('.',' ').decode('ascii'), self.url + torrent.group('url'))
                     logger.log("[" + self.name + "] parseResults() Title: " + torrent.group('title'), logger.DEBUG)
