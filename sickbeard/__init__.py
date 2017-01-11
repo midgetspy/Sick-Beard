@@ -188,7 +188,6 @@ KICKASS = False
 KICKASS_ALT_URL = None
 
 TORRENTZ = False
-TORRENTZ_VERIFIED = False
 
 TORRENTLEECH = False
 TORRENTLEECH_USERNAME = None
@@ -425,7 +424,7 @@ def initialize(consoleLogging=True):
                 BTN, BTN_API_KEY, \
                 TORRENT_DIR, USENET_RETENTION, SOCKET_TIMEOUT, \
                 KICKASS, KICKASS_ALT_URL, \
-                TORRENTZ, TORRENTZ_VERIFIED, \
+                TORRENTZ, \
                 TORRENTLEECH, TORRENTLEECH_USERNAME, TORRENTLEECH_PASSWORD, \
                 TORRENTDAY, TORRENTDAY_PHPSESSID, TORRENTDAY_UID, TORRENTDAY_PASS, \
                 SCENEACCESS, SCENEACCESS_USERNAME, SCENEACCESS_PASSWORD, \
@@ -605,7 +604,6 @@ def initialize(consoleLogging=True):
         KICKASS_ALT_URL = check_setting_str(CFG, 'KICKASS', 'kickass_alt_url', '')
         
         TORRENTZ = bool(check_setting_int(CFG, 'TORRENTZ', 'torrentz', 0))    
-        TORRENTZ_VERIFIED = bool(check_setting_int(CFG, 'TORRENTZ', 'torrentz_verified', 0))    
 
         TORRENTLEECH = bool(check_setting_int(CFG, 'TORRENTLEECH', 'torrentleech', 0))    
         TORRENTLEECH_USERNAME = check_setting_str(CFG, 'TORRENTLEECH', 'torrentleech_username', '')   
@@ -1258,7 +1256,6 @@ def save_config():
 
     new_config['TORRENTZ'] = {}
     new_config['TORRENTZ']['torrentz'] = int(TORRENTZ)
-    new_config['TORRENTZ']['torrentz_verified'] = int(TORRENTZ_VERIFIED)
  
     new_config['TORRENTLEECH'] = {}
     new_config['TORRENTLEECH']['torrentleech'] = int(TORRENTLEECH)

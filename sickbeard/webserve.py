@@ -1055,7 +1055,6 @@ class ConfigProviders:
                       iptorrents_username = None, iptorrents_password = None, iptorrents_eu = None, 
                       bithdtv_username = None, bithdtv_password = None,
                       torrentshack_username = None, torrentshack_password = None, torrentshack_uid = None, torrentshack_auth = None, torrentshack_pass_key = None, torrentshack_auth_key = None,
-                      torrentz_verified = None,
                       speed_username = None, speed_password = None, speed_rsshash = None,
                       revolutiontt_username = None, revolutiontt_password = None, 
                       kickass_alt_url = None,
@@ -1219,13 +1218,6 @@ class ConfigProviders:
         sickbeard.REVOLUTIONTT_USERNAME = revolutiontt_username.strip()
         sickbeard.REVOLUTIONTT_PASSWORD = revolutiontt_password.strip()
         
-        if torrentz_verified == "on":
-            torrentz_verified = 1
-        else:
-            torrentz_verified = 0
-
-        sickbeard.TORRENTZ_VERIFIED = torrentz_verified
-
         sickbeard.BTN_API_KEY = btn_api_key.strip()
 
         sickbeard.OMGWTFNZBS_USERNAME = omgwtfnzbs_username.strip()
