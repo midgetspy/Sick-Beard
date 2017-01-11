@@ -211,7 +211,7 @@ class TORRENTZCache(tvcache.TVCache):
     def _getRSSData(self):
         logger.log("[" + provider.name + "] Retriving RSS")
 
-        searchData = self.provider._doSearch("tv+added%3A2d")
+        searchData = self.provider._doSearch("tv added:2d")
 
         xml = "<rss xmlns:atom=\"http://www.w3.org/2005/Atom\" version=\"2.0\">" + \
             "<channel>" + \
