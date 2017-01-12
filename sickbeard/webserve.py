@@ -725,6 +725,7 @@ class ConfigGeneral:
                     web_password=None, version_notify=None, enable_https=None, https_cert=None, https_key=None):
 
         results = []
+        restart_required = False
 
         # Misc
         sickbeard.LAUNCH_BROWSER = config.checkbox_to_value(launch_browser)
@@ -738,6 +739,9 @@ class ConfigGeneral:
         if not config.change_LOG_DIR(log_dir, web_log):
             results += ["Unable to create directory " + os.path.normpath(log_dir) + ", log directory not changed."]
 
+        if config.to_int(web_port, default=8081) != sickbeard.WEB_PORT or web_host != sickbeard.WEB_HOST:
+            restart_required = True
+            
         sickbeard.WEB_PORT = config.to_int(web_port, default=8081)
         sickbeard.WEB_HOST = web_host
         
@@ -765,9 +769,12 @@ class ConfigGeneral:
                         '<br />\n'.join(results))
         else:
             ui.notifications.message('Configuration Saved', ek.ek(os.path.join, sickbeard.CONFIG_FILE) )
+        
+        if restart_required:
+            ui.notifications.message('Restarting Web Service For Sick Beard.')
+            Home().restart(sickbeard.PID)
 
         redirect("/config/general/")
-
 
 class ConfigSearch:
 
