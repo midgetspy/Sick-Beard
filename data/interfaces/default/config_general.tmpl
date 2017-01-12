@@ -91,6 +91,17 @@
                         
                         <div class="field-pair">
                             <label class="nocheck clearfix">
+                                <span class="component-title">HTTP Listen IP</span>
+                                <input type="text" title="Use 0.0.0.0 to listen on all interfaces." name="web_host" #if $sickbeard.WEB_HOST then "value=\"" + $sickbeard.WEB_HOST + "\"" else "value=\"0.0.0.0\""# size="10"/>
+                            </label>
+                            <label class="nocheck clearfix">
+                                <span class="component-title">&nbsp;</span>
+                                <span class="component-desc">IP Address that Sick Beard will listen on (eg. 192.168.0.1)</span>
+                            </label>
+                        </div>
+                        
+                        <div class="field-pair">
+                            <label class="nocheck clearfix">
                                 <span class="component-title">HTTP Port</span>
                                 <input type="text" name="web_port" value="$sickbeard.WEB_PORT" size="10" />
                             </label>

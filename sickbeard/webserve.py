@@ -720,7 +720,7 @@ class ConfigGeneral:
         return m.hexdigest()
 
     @cherrypy.expose
-    def saveGeneral(self, log_dir=None, web_port=None, web_log=None, web_ipv6=None,
+    def saveGeneral(self, log_dir=None, web_host=None, web_port=None, web_log=None, web_ipv6=None,
                     launch_browser=None, web_username=None, use_api=None, api_key=None,
                     web_password=None, version_notify=None, enable_https=None, https_cert=None, https_key=None):
 
@@ -739,7 +739,8 @@ class ConfigGeneral:
             results += ["Unable to create directory " + os.path.normpath(log_dir) + ", log directory not changed."]
 
         sickbeard.WEB_PORT = config.to_int(web_port, default=8081)
-
+        sickbeard.WEB_HOST = web_host
+        
         sickbeard.WEB_USERNAME = web_username
         sickbeard.WEB_PASSWORD = web_password
 
