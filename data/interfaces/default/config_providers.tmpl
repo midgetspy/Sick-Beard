@@ -66,7 +66,7 @@
                             <a href="$curProvider.url" class="imgLink" rel="noreferrer" onclick="window.open('${sickbeard.ANON_REDIRECT}' + this.href, '_blank'); return false;"><img src="$sbRoot/images/providers/$curProvider.imageName()" alt="" title="$curProvider.name" width="16" height="16" /></a>
                             $curProvider.name
                             #if not $curProvider.supportsBacklog then "*" else ""#
-                            #if $curProvider.name == "EZRSS" or $curProvider.name == "ThePirateBay" then "**" else ""#
+                            #if $curProvider.name == "ThePirateBay" then "**" else ""#
                             <span class="ui-icon ui-icon-arrowthick-2-n-s pull-right"></span>
                           </li>
                         #end for
