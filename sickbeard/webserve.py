@@ -1123,8 +1123,6 @@ class ConfigProviders:
                 sickbeard.WOMBLE = curEnabled
             elif curProvider == 'omgwtfnzbs':
                 sickbeard.OMGWTFNZBS = curEnabled
-            elif curProvider == 'ezrss':
-                sickbeard.EZRSS = curEnabled
             elif curProvider == 'eztv':
                 sickbeard.EZTV = curEnabled
             elif curProvider == 'hdbits':

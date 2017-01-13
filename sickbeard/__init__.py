@@ -34,7 +34,7 @@ from threading import Lock
 # apparently py2exe won't build these unless they're imported somewhere
 from sickbeard import providers, metadata
 
-from providers import ezrss, eztv, tvtorrents, torrentleech, btn, newznab, womble, omgwtfnzbs, hdbits
+from providers import eztv, tvtorrents, torrentleech, btn, newznab, womble, omgwtfnzbs, hdbits
 
 from providers import kickass, torrentz, thepiratebay, torrentday
 from providers import sceneaccess, iptorrents, bithdtv, btdigg, torrentshack
@@ -165,8 +165,6 @@ SEARCH_FREQUENCY = None
 BACKLOG_SEARCH_FREQUENCY = 21
 MIN_SEARCH_FREQUENCY = 10
 DEFAULT_SEARCH_FREQUENCY = 40
-
-EZRSS = False
 
 EZTV = False
 
@@ -417,7 +415,6 @@ def initialize(consoleLogging=True):
                 PLEX_SERVER_HOST, PLEX_HOST, PLEX_USERNAME, PLEX_PASSWORD, \
                 showUpdateScheduler, __INITIALIZED__, LAUNCH_BROWSER, showList, loadingShowList, \
                 NEWZNAB_DATA, NZBS, NZBS_UID, NZBS_HASH, \
-                EZRSS, \
                 EZTV, \
                 HDBITS, HDBITS_USERNAME, HDBITS_PASSKEY, \
                 TVTORRENTS, TVTORRENTS_DIGEST, TVTORRENTS_HASH, \
@@ -434,7 +431,7 @@ def initialize(consoleLogging=True):
                 SPEED, SPEED_USERNAME, SPEED_PASSWORD, \
                 REVOLUTIONTT, REVOLUTIONTT_USERNAME, REVOLUTIONTT_PASSWORD, \
                 BTDIGG, \
-                NZBS, NZBS_UID, NZBS_HASH, EZRSS, \
+                NZBS, NZBS_UID, NZBS_HASH, \
                 THEPIRATEBAY, THEPIRATEBAY_TRUSTED, THEPIRATEBAY_PROXY, THEPIRATEBAY_PROXY_URL, THEPIRATEBAY_URL_OVERRIDE, \
                 TVTORRENTS, TVTORRENTS_DIGEST, TVTORRENTS_HASH, BTN, BTN_API_KEY, TORRENT_DIR, USENET_RETENTION, SOCKET_TIMEOUT, \
                 SEARCH_FREQUENCY, DEFAULT_SEARCH_FREQUENCY, BACKLOG_SEARCH_FREQUENCY, \
@@ -584,12 +581,6 @@ def initialize(consoleLogging=True):
         FILTER_ASSOCIATED_FILES = check_setting_str(CFG, 'General', 'filter_associated_files', '')
         CREATE_MISSING_SHOW_DIRS = check_setting_int(CFG, 'General', 'create_missing_show_dirs', 0)
         ADD_SHOWS_WO_DIR = check_setting_int(CFG, 'General', 'add_shows_wo_dir', 0)
-
-        EZRSS = bool(check_setting_int(CFG, 'General', 'use_torrent', 0))
-        if not EZRSS:
-            CheckSection(CFG, 'EZRSS')
-            EZRSS = bool(check_setting_int(CFG, 'EZRSS', 'ezrss', 0))
-
 
         TVTORRENTS = bool(check_setting_int(CFG, 'TVTORRENTS', 'tvtorrents', 0))
         TVTORRENTS_DIGEST = check_setting_str(CFG, 'TVTORRENTS', 'tvtorrents_digest', '')
@@ -1237,9 +1228,6 @@ def save_config():
     new_config['Blackhole'] = {}
     new_config['Blackhole']['nzb_dir'] = NZB_DIR
     new_config['Blackhole']['torrent_dir'] = TORRENT_DIR
-
-    new_config['EZRSS'] = {}
-    new_config['EZRSS']['ezrss'] = int(EZRSS)
 
     new_config['EZTV'] = {}
     new_config['EZTV']['eztv'] = int(EZTV)
