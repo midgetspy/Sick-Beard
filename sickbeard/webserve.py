@@ -1119,9 +1119,7 @@ class ConfigProviders:
 
             provider_list.append(curProvider)
 
-            if curProvider == 'womble_s_index':
-                sickbeard.WOMBLE = curEnabled
-            elif curProvider == 'omgwtfnzbs':
+            if curProvider == 'omgwtfnzbs':
                 sickbeard.OMGWTFNZBS = curEnabled
             elif curProvider == 'eztv':
                 sickbeard.EZTV = curEnabled

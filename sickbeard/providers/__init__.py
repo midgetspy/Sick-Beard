@@ -20,7 +20,6 @@ __all__ = [
            'eztv',
            'hdbits',
            'tvtorrents',
-           'womble',
            'btn',
            'omgwtfnzbs',
            'kickass',
