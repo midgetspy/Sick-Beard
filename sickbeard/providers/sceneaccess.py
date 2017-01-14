@@ -195,11 +195,10 @@ class SceneAccessProvider(generic.TorrentProvider):
         logger.log("[" + self.name + "] " + self.funcName() + " Attempting to acquire RSS authentication details.")
         try:
             post_params = {
-                'cat[]': '',
                 'feed': 'dl',
                 'submit': 'Generate RSS link'
             }
-            self.rss_passkey = re.findall(r'rss\?feed=dl\&cat=\&passkey=([0-9A-Fa-f]{32})', self.getURL(self.url + "getrss.php", post_params))[0]
+            self.rss_passkey = re.findall(r'rss\?feed=dl\&passkey=([0-9A-Fa-f]{32})', self.getURL(self.url + "getrss.php", post_params))[0]
         except:
             logger.log("[" + self.name + "] " + self.funcName() + " Failed to scrape authentication parameters for rss.", logger.ERROR)
             return False
