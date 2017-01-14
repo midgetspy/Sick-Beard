@@ -178,7 +178,7 @@ class SceneAccessProvider(generic.TorrentProvider):
             logger.log("[" + self.name + "] " + self.funcName() + " requested URL - " + url + " returned status code is " + str(response.status_code), logger.ERROR)
             return None
         
-        return getattr(response, content, None)
+        return getattr(response, 'content', None)
 
     ###################################################################################################
 
