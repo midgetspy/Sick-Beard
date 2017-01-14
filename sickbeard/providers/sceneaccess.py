@@ -204,7 +204,7 @@ class SceneAccessProvider(generic.TorrentProvider):
             logger.log("[" + self.name + "] " + self.funcName() + " Failed to scrape authentication parameters for rss.", logger.ERROR)
             return False
 
-        if self.rss_passkey is None:
+        if not self.rss_passkey:
             logger.log("[" + self.name + "] " + self.funcName() + " Can't extract password hash from rss authentication scrape.", logger.ERROR)
             return False
 
