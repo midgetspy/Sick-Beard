@@ -258,15 +258,22 @@ class SceneAccessCache(tvcache.TVCache):
     ###################################################################################################
 
     def _getRSSData(self):
+        xml = None
+        
         if not provider.session:
             provider._doLogin()
-
-        self.rss_url = provider.url + "rss?feed=dl&cat=27,17,11&passkey=" + provider.rss_passkey
-        logger.log("[" + provider.name + "] " + provider.funcName() + " RSS URL - " + self.rss_url)
-        xml = provider.getURL(self.rss_url)
-        if xml is not None:
-            xml = xml.decode('utf8', 'ignore')
-        else:
+        
+        if provider.rss_passkey:
+            try:
+                self.rss_url = provider.url + "rss?feed=dl&cat=27,17,11&passkey=" + provider.rss_passkey
+                logger.log("[" + provider.name + "] " + provider.funcName() + " RSS URL - " + self.rss_url)
+                xml = provider.getURL(self.rss_url)
+                if xml:
+                    xml = xml.decode('utf8', 'ignore')
+            except:
+                pass
+            
+        if not xml:
             logger.log("[" + provider.name + "] " + provider.funcName() + " empty RSS data received.", logger.ERROR)
             xml = "<rss xmlns:atom=\"http://www.w3.org/2005/Atom\" version=\"2.0\">" + \
                 "<channel>" + \
