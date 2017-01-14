@@ -170,13 +170,24 @@ class SceneAccessProvider(generic.TorrentProvider):
         except (requests.exceptions.ConnectionError, requests.exceptions.HTTPError), e:
             logger.log("[" + self.name + "] " + self.funcName() + " Error loading " + self.name + " URL: " + ex(e), logger.ERROR)
             return None
-
+        
+        self._CloudFlareError(response)
+        
         if response.status_code not in [200, 302, 303]:
             logger.log("[" + self.name + "] " + self.funcName() + " requested URL - " + url + " returned status code is " + str(response.status_code), logger.ERROR)
             return None
+        
+        return getattr(response, content, None)
 
-        return response.content
+    ###################################################################################################
 
+    def _CloudFlareError(self, response):
+        if getattr(response, status_code, 0) in [520, 521]:
+            self.session = None
+            logger.log("[" + self.name + "] " + self.funcName() + " Site down/overloaded cloudflare status code: " +  str(response.status_code))
+            sys.tracebacklimit = 0    # raise exception to sickbeard but hide the stack trace.
+            raise Exception("[" + self.name + "] " + self.funcName() + " Site down/overloaded cloudflare status code: " +  str(response.status_code))
+        
     ###################################################################################################
 
     def _getPassKey(self):
@@ -192,7 +203,7 @@ class SceneAccessProvider(generic.TorrentProvider):
             logger.log("[" + self.name + "] " + self.funcName() + " Failed to scrape authentication parameters for rss.", logger.ERROR)
             return False
 
-        if self.rss_passkey == None:
+        if self.rss_passkey is None:
             logger.log("[" + self.name + "] " + self.funcName() + " Can't extract password hash from rss authentication scrape.", logger.ERROR)
             return False
 
@@ -214,14 +225,19 @@ class SceneAccessProvider(generic.TorrentProvider):
         try:
             response = self.session.post(self.url + "login", data=login_params, headers=self.header, timeout=30, verify=False)
         except (requests.exceptions.ConnectionError, requests.exceptions.HTTPError), e:
+            self.session = None
             sys.tracebacklimit = 0    # raise exception to sickbeard but hide the stack trace.
             raise Exception("[" + self.name + "] " + self.funcName() + " Error: " + str(e))
 
+        self._CloudFlareError(response)
+        
         if re.search("Username or password incorrect|<title>SceneAccess \| Login</title>", response.content) or response.status_code in [401, 403]:
+            self.session = None
             sys.tracebacklimit = 0    # raise exception to sickbeard but hide the stack trace.
             raise Exception("[" + self.name + "] " + self.funcName() + " Login Failed, Invalid username or password for " + self.name + ". Check your settings.")
 
         if not self._getPassKey() or not self.rss_passkey:
+            self.session = None
             sys.tracebacklimit = 0    # raise exception to sickbeard but hide the stack trace.
             raise Exception("[" + self.name + "] " + self.funcName() + " Could not extract rss passkey... aborting.")
 
