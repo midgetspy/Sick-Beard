@@ -171,7 +171,8 @@ class SceneAccessProvider(generic.TorrentProvider):
             logger.log("[" + self.name + "] " + self.funcName() + " Error loading " + self.name + " URL: " + ex(e), logger.ERROR)
             return None
         
-        self._CloudFlareError(response)
+        if self._CloudFlareError(response):
+            return None
         
         if response.status_code not in [200, 302, 303]:
             logger.log("[" + self.name + "] " + self.funcName() + " requested URL - " + url + " returned status code is " + str(response.status_code), logger.ERROR)
@@ -185,8 +186,8 @@ class SceneAccessProvider(generic.TorrentProvider):
         if getattr(response, 'status_code', 0) in [520, 521]:
             self.session = None
             logger.log("[" + self.name + "] " + self.funcName() + " Site down/overloaded cloudflare status code: " +  str(response.status_code))
-            sys.tracebacklimit = 0    # raise exception to sickbeard but hide the stack trace.
-            raise Exception("[" + self.name + "] " + self.funcName() + " Site down/overloaded cloudflare status code: " +  str(response.status_code))
+            return True
+        return False
         
     ###################################################################################################
 
@@ -229,7 +230,8 @@ class SceneAccessProvider(generic.TorrentProvider):
             sys.tracebacklimit = 0    # raise exception to sickbeard but hide the stack trace.
             raise Exception("[" + self.name + "] " + self.funcName() + " Error: " + str(e))
 
-        self._CloudFlareError(response)
+        if self._CloudFlareError(response):
+            return False
         
         if re.search("Username or password incorrect|<title>SceneAccess \| Login</title>", response.content) or response.status_code in [401, 403]:
             self.session = None
