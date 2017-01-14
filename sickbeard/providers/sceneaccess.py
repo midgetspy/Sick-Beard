@@ -182,7 +182,7 @@ class SceneAccessProvider(generic.TorrentProvider):
     ###################################################################################################
 
     def _CloudFlareError(self, response):
-        if getattr(response, status_code, 0) in [520, 521]:
+        if getattr(response, 'status_code', 0) in [520, 521]:
             self.session = None
             logger.log("[" + self.name + "] " + self.funcName() + " Site down/overloaded cloudflare status code: " +  str(response.status_code))
             sys.tracebacklimit = 0    # raise exception to sickbeard but hide the stack trace.
