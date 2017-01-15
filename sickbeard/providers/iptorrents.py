@@ -41,7 +41,7 @@ class IPTorrentsProvider(generic.TorrentProvider):
         generic.TorrentProvider.__init__(self, "IPTorrents")
         self.supportsBacklog = True
         self.cache = IPTorrentsCache(self)
-        self.url = 'https://www.iptorrents.com/'
+        self.url = 'https://iptorrents.com/'
         self.rss_uid = None
         self.rss_passkey = None
         self.name = "IPTorrents"
@@ -132,7 +132,7 @@ class IPTorrentsProvider(generic.TorrentProvider):
     ###################################################################################################
 
     def switchURL(self):
-        new_url = 'https://www.iptorrents.com/' if not getattr(sickbeard, 'IPTORRENTS_EU', False) else 'https://iptorrents.eu/'
+        new_url = 'https://iptorrents.com/' if not getattr(sickbeard, 'IPTORRENTS_EU', False) else 'https://iptorrents.eu/'
         # Reset auth session , different domain.
         if new_url != self.url:
             self.session = None
