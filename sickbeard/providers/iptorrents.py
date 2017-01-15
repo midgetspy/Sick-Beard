@@ -154,6 +154,7 @@ class IPTorrentsProvider(generic.TorrentProvider):
         if data:
             for torrent in re.compile('<a class="t_title" href="/details\.php\?id=\d+">(?P<title>.*?)</a>.*?<a href="/download\.php/(?P<url>.*?)"><', re.MULTILINE | re.DOTALL).finditer(data):
                 item = (torrent.group('title').replace('.', ' '), self.url + "download.php/" + torrent.group('url'))
+                logger.log("[" + self.name + "] " + self.funcName() + " Title: " + torrent.group('title').replace('.', ' '), logger.DEBUG)
                 results.append(item)
             if len(results):
                 logger.log("[" + self.name + "] " + self.funcName() + ") Some results found.")
@@ -165,6 +166,15 @@ class IPTorrentsProvider(generic.TorrentProvider):
 
     ###################################################################################################
 
+    def _CloudFlareError(self, response):
+        if getattr(response, 'status_code', 0) in [520, 521]:
+            self.session = None
+            logger.log("[" + self.name + "] " + self.funcName() + " Site down/overloaded cloudflare status code: " +  str(response.status_code))
+            return True
+        return False
+    
+    ###################################################################################################
+    
     def getURL(self, url, data=None):
         response = None
 
@@ -180,11 +190,14 @@ class IPTorrentsProvider(generic.TorrentProvider):
             logger.log("[" + self.name + "] " + self.funcName() + " Error loading " + self.name + " URL: " + ex(e), logger.ERROR)
             return None
 
-        if response.status_code not in [200, 302, 303]:
+        if self._CloudFlareError(response):
+            return None
+        
+        if hasattr(response, 'status_code') and response.status_code not in [200, 302, 303]:
             logger.log("[" + self.name + "] " + self.funcName() + " requested URL - " + url + " returned status code is " + str(response.status_code), logger.ERROR)
             return None
 
-        return response.content
+        return getattr(response, 'content', None)
 
     ###################################################################################################
 
