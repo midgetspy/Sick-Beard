@@ -141,7 +141,7 @@ class IPTorrentsProvider(generic.TorrentProvider):
     ###################################################################################################
 
     def _doSearch(self, search_params, show=None):
-        logger.log("[" + self.name + "] " + self.funcName() + " Performing Search: " + search_params)
+        logger.log("[" + self.name + "] " + self.funcName() + " Performing Search: " + search_params, logger.DEBUG)
         self.switchURL()
         searchUrl = self.url + "t?&99=&78=&23=&25=&65=&79=&22=&5=&q=" + urllib.quote(search_params) + "&qf=#torrents"
         return self.parseResults(searchUrl)
@@ -152,7 +152,7 @@ class IPTorrentsProvider(generic.TorrentProvider):
         data = self.getURL(searchUrl)
         results = []
         if data:
-            for torrent in re.compile('<a class="t_title" href="/details\.php\?id=\d+">(?P<title>.*?)</a>.*?<a href="/download\.php/(?P<url>.*?)"><', re.MULTILINE | re.DOTALL).finditer(data):
+            for torrent in re.compile('<a class="b" href="/details\.php\?id=\d+">(?P<title>.*?)</a>.*?<a href="/download\.php/(?P<url>.*?)"><', re.MULTILINE | re.DOTALL).finditer(data):
                 item = (torrent.group('title').replace('.', ' '), self.url + "download.php/" + torrent.group('url'))
                 logger.log("[" + self.name + "] " + self.funcName() + " Title: " + torrent.group('title').replace('.', ' '), logger.DEBUG)
                 results.append(item)
