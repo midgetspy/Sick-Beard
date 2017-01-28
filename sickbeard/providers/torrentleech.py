@@ -133,7 +133,7 @@ class TorrentLeechProvider(generic.TorrentProvider):
 
     def _doSearch(self, search_params, show=None):
         logger.log("[" + self.name + "] Performing Search: {0}".format(search_params))
-        searchUrl = self.url + "torrents/browse/index/query/" + search_params.replace(':','') + "/categories/26,27,32"
+        searchUrl = self.url + "torrents/browse/index/query/" + search_params.replace(':','') + "/categories/26,27,32/newfilter/3"
         return self.parseResults(searchUrl)
     
     ##################################################################################################
