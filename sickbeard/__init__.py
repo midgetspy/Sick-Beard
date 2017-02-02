@@ -476,9 +476,9 @@ def initialize(consoleLogging=True):
             WEB_PORT = 8081
 
         try:
-            WEB_HOST = check_setting_str(CFG, 'General', 'web_host', '0.0.0.0', True)
+            WEB_HOST = check_setting_str(CFG, 'General', 'web_host', '127.0.0.1', True)
         except:
-            WEB_HOST = '0.0.0.0'
+            WEB_HOST = '127.0.0.1'
 
         if WEB_PORT < 21 or WEB_PORT > 65535:
             WEB_PORT = 8081

@@ -358,7 +358,7 @@ def main():
         if sickbeard.WEB_IPV6:
             webhost = '::'
         else:
-            webhost = '0.0.0.0'
+            webhost = '127.0.0.1'
 
     if forcedHost:
         logger.log(u"Forcing web server to address " + str(forcedHost))
