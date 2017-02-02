@@ -44,6 +44,8 @@ from sickbeard import search_queue
 from sickbeard import image_cache
 from sickbeard import naming
 
+from sickbeard.scene_exceptions import retrieve_exceptions
+
 from sickbeard.providers import newznab
 from sickbeard.common import Quality, Overview, statusStrings
 from sickbeard.common import SNATCHED, SKIPPED, UNAIRED, IGNORED, ARCHIVED, WANTED
@@ -192,7 +194,6 @@ class ManageSearches:
 
     @cherrypy.expose
     def forceVersionCheck(self):
-
         # force a check to see if there is a new version
         result = sickbeard.versionCheckScheduler.action.check_for_new_version(force=True)  # @UndefinedVariable
         if result:
@@ -200,6 +201,18 @@ class ManageSearches:
 
         redirect("/manage/manageSearches/")
 
+    @cherrypy.expose   
+    def forceSceneExceptions(self):
+        # force a resync of scene Exceptions.
+        logger.log(u"Forcing Scene Exceptions Update")
+        if not retrieve_exceptions():
+            logger.log(u"Scene Exceptions Update Failed.")
+            ui.notifications.error('Forced Scene Exceptions', 'Update Failed.')
+        else:
+            logger.log(u"Scene Exceptions Update Completed.")
+            ui.notifications.message('Forced Scene Exceptions', 'Update Completed.')
+            
+        redirect("/manage/manageSearches/")
 
 class Manage:
 
