@@ -88,7 +88,7 @@ class Deluge:
             except (requests.exceptions.ConnectionError, requests.exceptions.HTTPError), e:
                 logger.log("[" + self.name + "] " + self.funcName() + " Error  - " + str(e), logger.ERROR)
                 return False
-        logger.log("[" + self.name + "] " + self.funcName() + " ... no session??",logger.ERROR)
+        logger.log("[" + self.name + "] " + self.funcName() + " ... no session??", logger.ERROR)
         return False
     
     ###################################################################################################
@@ -119,7 +119,7 @@ class Deluge:
             if r.content:
                 logger.log("[" + self.name + "] " + self.funcName() + " Succesfully downloaded torrent from " + torrent.url, logger.DEBUG)
             else:
-                logger.log("[" + self.name + "] " + self.funcName() + " Error no content data found for torrent file.",logger.ERROR)
+                logger.log("[" + self.name + "] " + self.funcName() + " Error no content data found for torrent file.", logger.ERROR)
                 return False
         
         ###################################################################################################
@@ -140,7 +140,7 @@ class Deluge:
         
         if torrent.url.startswith("magnet:"):
             if not self._sendRequest({'method': 'core.add_torrent_magnet', 'params': [torrent.url, options], 'id': self.seq_id}):
-                logger.log("[" + self.name + "] " + self.funcName() + " Error grabbing torrent from " + torrent.url,logger.ERROR)
+                logger.log("[" + self.name + "] " + self.funcName() + " Error grabbing torrent from " + torrent.url, logger.ERROR)
                 return False
             else:
                 logger.log("[" + self.name + "] " + self.funcName() + " Downloaded torrent from " + torrent.url, logger.DEBUG)
@@ -168,7 +168,7 @@ class Deluge:
                 if not self._sendRequest({'method': 'core.set_torrent_stop_at_ratio', 'params': [torrentHash, True], 'id': self.seq_id}):
                     logger.log("[" + self.name + "] " + self.funcName() + " Error setting Stop At Ratio on torrent hash " + torrentHash,logger.ERROR)
                 
-                if not self._sendRequest({'method': 'core.set_torrent_stop_ratio','params': [torrentHash, float(sickbeard.TORRENT_RATIO)],'id': self.seq_id}):
+                if not self._sendRequest({'method': 'core.set_torrent_stop_ratio','params': [torrentHash, float(sickbeard.TORRENT_RATIO)], 'id': self.seq_id}):
                     logger.log("[" + self.name + "] " + self.funcName() + " Error setting Stop Ration On torrent hash " + torrentHash, logger.ERROR)
                     
             ###################################################################################################
@@ -199,8 +199,8 @@ class Deluge:
             
             logger.log("[" + self.name + "] " + self.funcName() + " Torrent added successfully.", logger.DEBUG)
             return True
-        logger.log("[" + self.name + "] " + self.funcName() + " Failed, no hash returned. ", logger.ERROR)
-        logger.log("[" + self.name + "] " + self.funcName() + " Failed, result =  " + self.jdata['result'] + ", seq_id = " +  (self.seq_id-1) + " vs deluge.seq_id = " + self.jdata['id'], logger.DEBUG)
+        logger.log("[" + self.name + "] " + self.funcName() + " Failed, no hash returned.", logger.ERROR)
+        logger.log("[" + self.name + "] " + self.funcName() + " Failed, result =  " + str(self.jdata['result']) + ", error = " + str(self.jdata['error']) + ", seq_id = " + str(self.seq_id-1) + " vs deluge.seq_id = " + self.jdata['id'], logger.DEBUG)
         return False
 
 ###################################################################################################
