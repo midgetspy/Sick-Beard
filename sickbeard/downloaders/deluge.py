@@ -199,7 +199,8 @@ class Deluge:
             
             logger.log("[" + self.name + "] " + self.funcName() + " Torrent added successfully.", logger.DEBUG)
             return True
-        logger.log("[" + self.name + "] " + self.funcName() + " Failed, no hash returned.", logger.ERROR)
+        logger.log("[" + self.name + "] " + self.funcName() + " Failed, no hash returned. ", logger.ERROR)
+        logger.log("[" + self.name + "] " + self.funcName() + " Failed, result =  " + self.jdata['result'] + ", seq_id = " +  (self.seq_id-1) + " vs deluge.seq_id = " + self.jdata['id'], logger.DEBUG)
         return False
 
 ###################################################################################################
