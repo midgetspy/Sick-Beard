@@ -18,22 +18,18 @@
 # along with Sick Beard.  If not, see <http://www.gnu.org/licenses/>.
 ###################################################################################################
 
-import os
 import re
 import sys
 import urllib
 import generic
 import datetime
 import sickbeard
-import exceptions
 
 from lib import requests
-from xml.sax.saxutils import escape
 
 from sickbeard import db
 from sickbeard import logger
 from sickbeard import tvcache
-from sickbeard.exceptions import ex
 from sickbeard.common import Quality
 from sickbeard.common import Overview
 from sickbeard import show_name_helpers
@@ -46,6 +42,7 @@ class BitHDTVProvider(generic.TorrentProvider):
         generic.TorrentProvider.__init__(self, "BitHDTV")
         self.cache = BitHDTVCache(self)
         self.name = "BitHDTV"
+        self.post_data = None
         self.rss_passkey = None
         self.session = None
         self.supportsBacklog = True
@@ -167,7 +164,7 @@ class BitHDTVProvider(generic.TorrentProvider):
 
     ###################################################################################################
 
-    def getURL(self, url, data=None):
+    def getURL(self, url):
         response = None
 
         if not self.session and not self._doLogin():
@@ -175,7 +172,7 @@ class BitHDTVProvider(generic.TorrentProvider):
 
         try:
             if 'rss.php' in url:
-                response = self.session.post(url, data=data, timeout=30, verify=False)
+                response = self.session.post(url, data=self.post_data, timeout=30, verify=False)
             else:
                 response = self.session.get(url, timeout=30, verify=False)
         except (requests.exceptions.ConnectionError, requests.exceptions.HTTPError), e:
@@ -193,14 +190,14 @@ class BitHDTVProvider(generic.TorrentProvider):
     def _getPassKey(self):
         logger.log("[" + self.name + "] " + self.funcName() + " Attempting to acquire RSS authentication details.")
 
-        post_params = {
+        self.post_data = {
             'cat[]': '10',
             'feed': 'dl',
             'login': 'passkey'
         }
 
         try:
-            self.rss_passkey = re.findall(r'rss.php\?feed=dl&cat=10&passkey=([0-9A-Fa-f]{32})', self.getURL(self.url + "getrss.php", post_params))[0]
+            self.rss_passkey = re.findall(r'rss.php\?feed=dl&cat=10&passkey=([0-9A-Fa-f]{32})', self.getURL(self.url + "getrss.php"))[0]
         except:
             logger.log("[" + self.name + "] " + self.funcName() + " Failed to scrape authentication parameters for rss.", logger.ERROR)
             return False
