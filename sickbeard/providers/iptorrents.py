@@ -24,7 +24,6 @@ import urllib
 import generic
 import datetime
 import sickbeard
-import exceptions
 
 from lib import requests
 
@@ -74,7 +73,7 @@ class IPTorrentsProvider(generic.TorrentProvider):
     ###################################################################################################
 
     def _get_airbydate_season_range(self, season):
-        if season == None:
+        if season is None:
             return ()
         year, month = map(int, season.split('-'))
         min_date = datetime.date(year, month, 1)
@@ -198,9 +197,7 @@ class IPTorrentsProvider(generic.TorrentProvider):
                 'cat[]': '5',
                 'feed': 'direct',
             }
-            rssData = re.findall(r'torrents\/rss\?u=(.*);tp=([0-9A-Fa-f]{32});', self.getURL(self.url + "getrss.php", post_params))[0]
-            self.rss_uid = rssData[0]
-            self.rss_passkey = rssData[1]
+            (self.rss_uid, self.rss_passkey)  = re.findall(r'torrents\/rss\?u=(\d+);tp=([0-9A-Fa-f]{32});', self.getURL(self.url + "getrss.php", post_params))[0]
         except:
             logger.log("[" + self.name + "] " + self.funcName() + " Failed to scrape authentication parameters for rss.", logger.ERROR)
             return False
