@@ -1267,6 +1267,7 @@ class ConfigNotifications:
                           use_boxcar2=None, boxcar2_notify_onsnatch=None, boxcar2_notify_ondownload=None, boxcar2_access_token=None, boxcar2_sound=None,
                           use_pushover=None, pushover_notify_onsnatch=None, pushover_notify_ondownload=None, pushover_userkey=None, pushover_priority=None,
                               pushover_device=None, pushover_sound=None, pushover_device_list=None,
+                          use_slack=None, slack_notify_onsnatch=None, slack_notify_ondownload=None, slack_webhook_url=None, slack_channel=None, slack_bot_name=None, slack_icon_url=None,
                           use_libnotify=None, libnotify_notify_onsnatch=None, libnotify_notify_ondownload=None,
                           use_nmj=None, nmj_host=None, nmj_database=None, nmj_mount=None,
                           use_synoindex=None, synoindex_notify_onsnatch=None, synoindex_notify_ondownload=None, synoindex_update_library=None,
@@ -1384,6 +1385,14 @@ class ConfigNotifications:
         sickbeard.TRAKT_USERNAME = trakt_username
         sickbeard.TRAKT_PASSWORD = trakt_password
         sickbeard.TRAKT_API = trakt_api
+
+        sickbeard.USE_SLACK = config.checkbox_to_value(use_slack)
+        sickbeard.SLACK_NOTIFY_ONSNATCH = config.checkbox_to_value(slack_notify_onsnatch)
+        sickbeard.SLACK_NOTIFY_ONDOWNLOAD = config.checkbox_to_value(slack_notify_ondownload)
+        sickbeard.SLACK_WEBHOOK_URL = slack_webhook_url
+        sickbeard.SLACK_CHANNEL = slack_channel
+        sickbeard.SLACK_BOT_NAME = slack_bot_name
+        sickbeard.SLACK_ICON_URL = slack_icon_url
 
         sickbeard.save_config()
 
@@ -2289,6 +2298,16 @@ class Home:
             return result
         else:
             return "{}"
+
+    @cherrypy.expose
+    def testSlack(self, webhookUrl=None, channel=None, bot_name=None, icon_url=None):
+        cherrypy.response.headers['Cache-Control'] = "max-age=0,no-cache,no-store"
+
+        result = notifiers.slack_notifier.test_notify(webhookUrl, channel, bot_name, icon_url)
+        if result:
+            return "Slack notification succeeded. Check your Slack clients to make sure it worked"
+        else:
+            return "Error sending Slack notification"
 
     @cherrypy.expose
     def shutdown(self, pid=None):
