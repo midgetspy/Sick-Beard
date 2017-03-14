@@ -384,6 +384,14 @@ PUSHBULLET_NOTIFY_ONDOWNLOAD = False
 PUSHBULLET_ACCESS_TOKEN = None
 PUSHBULLET_DEVICE_IDEN = None
 
+USE_SLACK = False
+SLACK_NOTIFY_ONSNATCH = False
+SLACK_NOTIFY_ONDOWNLOAD = False
+SLACK_WEBHOOK_URL = None
+SLACK_CHANNEL = None
+SLACK_BOT_NAME = None
+SLACK_ICON_URL = None
+
 COMING_EPS_LAYOUT = None
 COMING_EPS_DISPLAY_PAUSED = None
 COMING_EPS_SORT = None
@@ -446,6 +454,7 @@ def initialize(consoleLogging=True):
                 USE_NMA, NMA_NOTIFY_ONSNATCH, NMA_NOTIFY_ONDOWNLOAD, NMA_API, NMA_PRIORITY, \
                 USE_PUSHALOT, PUSHALOT_NOTIFY_ONSNATCH, PUSHALOT_NOTIFY_ONDOWNLOAD, PUSHALOT_AUTHORIZATIONTOKEN, PUSHALOT_SILENT, PUSHALOT_IMPORTANT, \
                 USE_PUSHBULLET, PUSHBULLET_NOTIFY_ONSNATCH, PUSHBULLET_NOTIFY_ONDOWNLOAD, PUSHBULLET_ACCESS_TOKEN, PUSHBULLET_DEVICE_IDEN, \
+                USE_SLACK, SLACK_NOTIFY_ONSNATCH, SLACK_NOTIFY_ONDOWNLOAD, SLACK_WEBHOOK_URL, SLACK_CHANNEL, SLACK_BOT_NAME, SLACK_ICON_URL, \
                 versionCheckScheduler, VERSION_NOTIFY, PROCESS_AUTOMATICALLY, \
                 KEEP_PROCESSED_DIR, TV_DOWNLOAD_DIR, TVDB_BASE_URL, MIN_SEARCH_FREQUENCY, \
                 showQueueScheduler, searchQueueScheduler, ROOT_DIRS, CACHE_DIR, ACTUAL_CACHE_DIR, TVDB_API_PARMS, \
@@ -851,6 +860,15 @@ def initialize(consoleLogging=True):
         PUSHBULLET_NOTIFY_ONDOWNLOAD = bool(check_setting_int(CFG, 'Pushbullet', 'pushbullet_notify_ondownload', 0))
         PUSHBULLET_ACCESS_TOKEN = check_setting_str(CFG, 'Pushbullet', 'pushbullet_access_token', '')
         PUSHBULLET_DEVICE_IDEN = check_setting_str(CFG, 'Pushbullet', 'pushbullet_device_iden', '')
+
+        CheckSection(CFG, 'Slack')
+        USE_SLACK = bool(check_setting_int(CFG, 'Slack', 'use_slack', 0))
+        SLACK_NOTIFY_ONSNATCH = bool(check_setting_int(CFG, 'Slack', 'slack_notify_onsnatch', 0))
+        SLACK_NOTIFY_ONDOWNLOAD = bool(check_setting_int(CFG, 'Slack', 'slack_notify_ondownload', 0))
+        SLACK_WEBHOOK_URL = check_setting_str(CFG, 'Slack', 'slack_webhook_url', '')
+        SLACK_CHANNEL = check_setting_str(CFG, 'Slack', 'slack_channel', '')
+        SLACK_BOT_NAME = check_setting_str(CFG, 'Slack', 'slack_bot_name', '')
+        SLACK_ICON_URL = check_setting_str(CFG, 'Slack', 'slack_icon_url', '')
 
         if not os.path.isfile(CONFIG_FILE):
             logger.log(u"Unable to find '" + CONFIG_FILE + "', all settings will be default!", logger.DEBUG)
@@ -1482,6 +1500,15 @@ def save_config():
     new_config['GUI']['coming_eps_layout'] = COMING_EPS_LAYOUT
     new_config['GUI']['coming_eps_display_paused'] = int(COMING_EPS_DISPLAY_PAUSED)
     new_config['GUI']['coming_eps_sort'] = COMING_EPS_SORT
+
+    new_config['Slack'] = {}
+    new_config['Slack']['use_slack'] = int(USE_SLACK)
+    new_config['Slack']['slack_notify_onsnatch'] = int(SLACK_NOTIFY_ONSNATCH)
+    new_config['Slack']['slack_notify_ondownload'] = int(SLACK_NOTIFY_ONDOWNLOAD)
+    new_config['Slack']['slack_webhook_url'] = SLACK_WEBHOOK_URL
+    new_config['Slack']['slack_channel'] = SLACK_CHANNEL
+    new_config['Slack']['slack_bot_name'] = SLACK_BOT_NAME
+    new_config['Slack']['slack_icon_url'] = SLACK_ICON_URL
 
     new_config.write()
 
