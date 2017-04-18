@@ -137,8 +137,8 @@ class RevolutionTTProvider(generic.TorrentProvider):
 
     def _doSearch(self, search_params, show=None):
         results = []
-        logger.log("[" + self.name + "] Performing Search: {0}".format(search_params))
         for section in [41, 42, 45]:
+            logger.log("[" + self.name + "] Performing Search(cat={0}): {1}".format(section, search_params), logger.DEBUG)
             searchUrl = self.url + "browse.php?search=" + urllib.quote(search_params) + "&cat=" + str(section) + "&titleonly=1"
             results.extend(self.parseResults(searchUrl))
         if len(results):
