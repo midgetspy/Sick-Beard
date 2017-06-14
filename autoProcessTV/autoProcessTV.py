@@ -56,11 +56,12 @@ def processEpisode(dir_to_process, org_NZB_name=None):
     port = "8081"
     username = ""
     password = ""
-    ssl = 0
+    dossl = 0
+    verify = 0
     web_root = "/"
 
     default_url = host + ":" + port + web_root
-    if ssl:
+    if dossl:
         default_url = "https://" + default_url
     else:
         default_url = "http://" + default_url
@@ -88,7 +89,13 @@ def processEpisode(dir_to_process, org_NZB_name=None):
             password = config.get("SickBeard", "password")
 
             try:
-                ssl = int(config.get("SickBeard", "ssl"))
+                dossl = int(config.get("SickBeard", "ssl"))
+
+            except (configparser.NoOptionError, ValueError):
+                pass
+
+            try:
+                verify = int(config.get("SickBeard", "verify"))
 
             except (configparser.NoOptionError, ValueError):
                 pass
@@ -118,7 +125,7 @@ def processEpisode(dir_to_process, org_NZB_name=None):
     if org_NZB_name != None:
         params['nzbName'] = org_NZB_name
 
-    if ssl:
+    if dossl:
         protocol = "https://"
     else:
         protocol = "http://"
@@ -131,7 +138,8 @@ def processEpisode(dir_to_process, org_NZB_name=None):
         password_mgr = urllib2.HTTPPasswordMgrWithDefaultRealm()
         password_mgr.add_password(None, url, username, password)
         handler = HTTPBasicAuthHandler(password_mgr)
-        opener = urllib2.build_opener(handler)
+        #opener = urllib2.build_opener(handler)
+        opener = urllib2.build_opener(handler, urllib2.HTTPSHandler(context=sslModule._create_unverified_context()))
         urllib2.install_opener(opener)
 
         result = opener.open(url).readlines()

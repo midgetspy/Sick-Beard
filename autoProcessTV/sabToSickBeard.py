@@ -21,11 +21,11 @@
 
 import sys
 
-try:
-    import autoProcessTV
-except:
-    print ("Can't import autoProcessTV.py, make sure it's in the same folder as " + sys.argv[0])
-    sys.exit(1)
+#try:
+import autoProcessTV
+#except:
+#    print ("Can't import autoProcessTV.py, make sure it's in the same folder as " + sys.argv[0])
+#    sys.exit(1)
 
 # SABnzbd user script parameters - see: http://wiki.sabnzbd.org/user-scripts
 
