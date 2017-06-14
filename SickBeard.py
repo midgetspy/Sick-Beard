@@ -363,6 +363,7 @@ def main():
                       'enable_https': sickbeard.ENABLE_HTTPS,
                       'https_cert': sickbeard.HTTPS_CERT,
                       'https_key': sickbeard.HTTPS_KEY,
+                      'https_chain': sickbeard.HTTPS_CHAIN,
                       })
     except IOError:
         logger.log(u"Unable to start web server, is something else running on port: " + str(startPort), logger.ERROR)

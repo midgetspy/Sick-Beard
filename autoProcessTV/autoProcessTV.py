@@ -22,6 +22,7 @@ from __future__ import with_statement
 
 import os.path
 import sys
+import ssl as sslModule
 
 # Try importing Python 2 modules using new names
 try:
