@@ -153,7 +153,7 @@ class RevolutionTTProvider(generic.TorrentProvider):
         data = self.getURL(searchUrl)
         results = []
         if data:
-            for torrent in re.compile('<a href="details\.php\?id=\w+&amp;hit=1"><b>(?P<title>.*?)</b>.*?<td align="center" class=\'br_left\'><a href="(?P<url>.*?)">', re.MULTILINE | re.DOTALL).finditer(data):
+            for torrent in re.compile('a href="details\.php\?id=\w+&amp;hit=1"><b>(?P<title>.*?)</b></a>.*?<td align="center" class="br_left"><a href="(?P<url>.*?)">', re.MULTILINE | re.DOTALL).finditer(data):
                 item = (torrent.group('title').replace('.', ' '), self.url + torrent.group('url'))
                 logger.log("[" + self.name + "] " + self.funcName() + " Title: " + torrent.group('title'), logger.DEBUG)
                 results.append(item)
@@ -222,7 +222,7 @@ class RevolutionTTProvider(generic.TorrentProvider):
             self.session = None
             logger.log("[" + self.name + "] " + self.funcName() + " Login Failed, redirected with error url, Bad Username / Password?", logger.ERROR)
             return False
-        
+
         if response.url.endswith('403.html') and 'You have been banned.' in response.content:
             self.session = None
             logger.log("[" + self.name + "] " + self.funcName() + " Login Failed, you have been BANNED.", logger.ERROR)
@@ -256,10 +256,10 @@ class RevolutionTTCache(tvcache.TVCache):
 
     def _getRSSData(self):
         xml = None
-        
+
         if not provider.session:
             provider._doLogin()
-            
+
         if provider.rss_passkey:
             try:
                 self.rss_url = provider.url + "rss.php?feed=dl&cat=41,42,45&passkey={0}".format(provider.rss_passkey)
@@ -269,7 +269,7 @@ class RevolutionTTCache(tvcache.TVCache):
                     xml = xml.decode('utf8', 'ignore')
             except:
                 pass
-        
+
         if not xml:
             logger.log("[" + provider.name + "] " + provider.funcName() + " empty RSS data received.", logger.ERROR)
             xml = "<rss xmlns:atom=\"http://www.w3.org/2005/Atom\" version=\"2.0\">" + \
@@ -285,3 +285,4 @@ class RevolutionTTCache(tvcache.TVCache):
     ###################################################################################################
 
 provider = RevolutionTTProvider()
+
