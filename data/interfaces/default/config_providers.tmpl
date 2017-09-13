@@ -88,7 +88,7 @@
                                 <span class="component-title jumbo">Configure Provider:</span>
                                 <span class="component-desc">
                                     #set $provider_config_list = []
-                                    #for $cur_provider in sorted(("btn", "hdbits", "omgwtfnzbs", "tvtorrents", "torrentleech", "thepiratebay", "torrentz", "torrentday", "sceneaccess", "iptorrents", "bithdtv", "torrentshack","speed","kickass","revolutiontt")):
+                                    #for $cur_provider in sorted(("btn", "hdbits", "omgwtfnzbs", "tvtorrents", "torrentleech", "thepiratebay", "torrentz", "torrentday", "iptorrents", "bithdtv", "torrentshack","speed","kickass","revolutiontt")):
                                         #set $cur_provider_obj = $sickbeard.providers.getProviderClass($cur_provider)
                                         #if $cur_provider_obj.providerType == $GenericProvider.NZB and not $sickbeard.USE_NZBS:
                                             #continue
@@ -304,21 +304,6 @@
                             </label>
                         </div>
                     </div><!-- /torrentleechDiv //-->
-                    
-                    <div class="providerDiv" id="sceneaccessDiv">
-                        <div class="field-pair">
-                            <label class="clearfix">
-                                <span class="component-title">Username:</span>
-                                <input class="component-desc" type="text" name="sceneaccess_username" value="$sickbeard.SCENEACCESS_USERNAME" size="40" />
-                            </label>
-                        </div>
-                        <div class="field-pair">
-                            <label class="clearfix">
-                                <span class="component-title">Password:</span>
-                                <input class="component-desc" type="password" name="sceneaccess_password" value="$sickbeard.SCENEACCESS_PASSWORD" size="40" />
-                            </label>
-                        </div>
-                    </div><!-- /sceneaccessDiv //-->
                     
                     <div class="providerDiv" id="iptorrentsDiv">
                         <div class="field-pair">

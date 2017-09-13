@@ -27,7 +27,6 @@ __all__ = [
            'thepiratebay',
            'torrentleech',
            'torrentday',
-           'sceneaccess',
            'iptorrents',
            'bithdtv',
            'btdigg',

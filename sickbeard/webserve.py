@@ -1072,7 +1072,6 @@ class ConfigProviders:
                       thepiratebay_trusted = None, thepiratebay_proxy = None, thepiratebay_proxy_url = None,thepiratebay_url_override = None, thepiratebay_url_override_enable = None,
                       torrentleech_username = None, torrentleech_password = None,
                       torrentday_phpsessid = None, torrentday_uid = None, torrentday_pass = None,
-                      sceneaccess_username = None, sceneaccess_password = None, 
                       iptorrents_username = None, iptorrents_password = None, iptorrents_eu = None, 
                       bithdtv_username = None, bithdtv_password = None,
                       torrentshack_username = None, torrentshack_password = None, torrentshack_uid = None, torrentshack_auth = None, torrentshack_pass_key = None, torrentshack_auth_key = None,
@@ -1150,8 +1149,6 @@ class ConfigProviders:
                 sickbeard.TORRENTLEECH = curEnabled
             elif curProvider == 'torrentday':
                 sickbeard.TORRENTDAY = curEnabled
-            elif curProvider == 'sceneaccess':
-                sickbeard.SCENEACCESS = curEnabled
             elif curProvider == 'iptorrents':
                 sickbeard.IPTORRENTS = curEnabled
             elif curProvider == 'bithdtv':
@@ -1211,10 +1208,7 @@ class ConfigProviders:
         sickbeard.TORRENTDAY_PHPSESSID = torrentday_phpsessid.strip()
         sickbeard.TORRENTDAY_UID = torrentday_uid.strip()
         sickbeard.TORRENTDAY_PASS = torrentday_pass.strip()
-        
-        sickbeard.SCENEACCESS_USERNAME = sceneaccess_username.strip()
-        sickbeard.SCENEACCESS_PASSWORD = sceneaccess_password.strip()
-        
+                
         sickbeard.IPTORRENTS_USERNAME = iptorrents_username.strip()
         sickbeard.IPTORRENTS_PASSWORD = iptorrents_password.strip()
         sickbeard.IPTORRENTS_EU = 1 if iptorrents_eu == 'on' else 0
