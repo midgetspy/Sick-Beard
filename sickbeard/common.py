@@ -161,7 +161,7 @@ class Quality:
         elif checkName(["720p", "web.dl|webrip"], all) or checkName(["720p", "itunes", "h.?264"], all):
             return Quality.HDWEBDL
         elif checkName(["1080p", "web.dl|webrip"], all) or checkName(["1080p", "itunes", "h.?264"], all):
-            return Quality.FULLHDWEBDL  
+            return Quality.FULLHDWEBDL
         elif checkName(["720p", "bluray|hddvd", "x264"], all):
             return Quality.HDBLURAY
         elif checkName(["1080p", "bluray|hddvd", "x264"], all):
@@ -170,14 +170,13 @@ class Quality:
             return Quality.attemptFitQuality(name)
         else:
             return Quality.UNKNOWN
-        
     @staticmethod
     def attemptFitQuality(name):
         # perform a hierarchical search
         # -> Resolution
         #   -> Source
         #     -> Encoding
-        
+
         bestQuality = Quality.UNKNOWN
         if re.search("1080", name, re.I) :
             bestQuality = Quality.FULLHDTV
@@ -197,7 +196,7 @@ class Quality:
             bestQuality = Quality.SDTV
             if re.search("(dvdrip|bdrip)", name, re.I) :
                 bestQuality = Quality.SDDVD
-        
+
         return bestQuality
 
     @staticmethod
