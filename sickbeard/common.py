@@ -21,6 +21,7 @@ import operator
 import platform
 import re
 
+import sickbeard
 from sickbeard import version
 
 USER_AGENT = 'Sick Beard/alpha2-' + version.SICKBEARD_VERSION.replace(' ', '-') + ' (' + platform.system() + ' ' + platform.release() + ')'
@@ -160,13 +161,44 @@ class Quality:
         elif checkName(["720p", "web.dl|webrip"], all) or checkName(["720p", "itunes", "h.?264"], all):
             return Quality.HDWEBDL
         elif checkName(["1080p", "web.dl|webrip"], all) or checkName(["1080p", "itunes", "h.?264"], all):
-            return Quality.FULLHDWEBDL
+            return Quality.FULLHDWEBDL  
         elif checkName(["720p", "bluray|hddvd", "x264"], all):
             return Quality.HDBLURAY
         elif checkName(["1080p", "bluray|hddvd", "x264"], all):
             return Quality.FULLHDBLURAY
+        elif sickbeard.BEST_FIT_QUALITY :
+            return Quality.attemptFitQuality(name)
         else:
             return Quality.UNKNOWN
+        
+    @staticmethod
+    def attemptFitQuality(name):
+        # perform a hierarchical search
+        # -> Resolution
+        #   -> Source
+        #     -> Encoding
+        
+        bestQuality = Quality.UNKNOWN
+        if re.search("1080", name, re.I) :
+            bestQuality = Quality.FULLHDTV
+            if re.search("bluray|hddvd", name, re.I) :
+                bestQuality = Quality.FULLHDBLURAY
+            elif re.search("web", name, re.I) :
+                bestQuality = Quality.FULLHDWEBDL
+        elif re.search("720", name, re.I) :
+            bestQuality = Quality.HDTV
+            if re.search("bluray|hddvd", name, re.I) :
+                bestQuality = Quality.HDBLURAY
+            elif re.search("web", name, re.I) :
+                bestQuality = Quality.HDWEBDL
+            elif re.search("mpeg-?2", name, re.I) :
+                bestQuality = Quality.RAWHDTV
+        elif re.search("(pdtv|hdtv|dsr|tvrip)", name, re.I ) :
+            bestQuality = Quality.SDTV
+            if re.search("(dvdrip|bdrip)", name, re.I) :
+                bestQuality = Quality.SDDVD
+        
+        return bestQuality
 
     @staticmethod
     def assumeQuality(name):
