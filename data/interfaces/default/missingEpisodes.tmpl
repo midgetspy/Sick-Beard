@@ -1,0 +1,292 @@
+#import sickbeard
+#import datetime
+#from sickbeard.common import *
+#set global $title="Missing Episodes"
+
+#set global $sbPath=".."
+
+#set global $topmenu="missingEpisodes"
+#import os.path
+#include $os.path.join($sickbeard.PROG_DIR, "data/interfaces/default/inc_top.tmpl")
+#set $sort = $sickbeard.MISSING_EPS_SORT
+<script src="$sbRoot/js/ajaxEpSearch.js?$sbPID"></script>
+
+#if $layout == 'list':
+<!-- start list view //-->
+<script src="$sbRoot/js/plotTooltip.js?$sbPID"></script>
+<script charset="utf-8">
+<!--
+\$.tablesorter.addParser({
+    id: 'loadingNames',
+    is: function(s) {
+        return false;
+    },
+    format: function(s) {
+        if (s.indexOf('Loading...') == 0)
+            return s.replace('Loading...', '000');
+        return /^(a to )/i.test(s || '') ? s : (s || '').replace(/^(The|A|An)\s/i,'');
+    },
+    type: 'text'
+});
+\$.tablesorter.addParser({
+    id: 'quality',
+    is: function(s) {
+        return false;
+    },
+    format: function(s) {
+        return s.replace('hd1080p',5).replace('hd720p',4).replace('hd',3).replace('sd',2).replace('any',1).replace('best',0).replace('custom',7);
+    },
+    type: 'numeric'
+});
+
+
+\$(document).ready(function(){
+
+#set $sort_codes = {'date': 0, 'show': 1, 'network': 4}
+#if $sort not in $sort_codes:
+    $sort = 'date'
+#end if
+    sortList = [[$ sort_codes[$sort],0]];
+
+    \$("#showListTable:has(tbody tr)").tablesorter({
+        widgets: ['stickyHeaders'],
+        sortList: sortList,
+        textExtraction: {
+            6: function(node) { return \$(node).find("span").text().toLowerCase(); }
+        },
+        headers: {
+            0: { sorter: 'isoDate' },
+            1: { sorter: 'loadingNames' },
+            3: { sorter: 'loadingNames' },
+            4: { sorter: false },
+            6: { sorter: 'quality' },
+            7: { sorter: false },
+            8: { sorter: false }
+        }
+    });
+
+    \$('#sbRoot').ajaxEpSearch();
+
+});
+//-->
+</script>
+
+    #set $show_div = "listing-default"
+
+<input type="hidden" id="sbRoot" value="$sbRoot" />
+
+<br/>
+    <table id="showListTable" class="tablesorter" cellspacing="1" border="0" cellpadding="0">
+    <thead>
+        <tr>
+            <th>Airdate</th>
+            <th>Show</th>
+            <th class="nowrap">Next Ep</th>
+            <th>Next Ep Name</th>
+            <th class="col-plotinfo">&nbsp;</th>
+            <th>Network</th>
+            <th>Quality</th>
+            <th>tvDB</th>
+            <th>Search</th>
+        </tr>
+    </thead>
+    <tbody>
+
+    #for $cur_result in $sql_results:
+
+        #set $myShowList = $list($sickbeard.showList)
+        #for $curShow in $myShowList:
+            #if $curShow.tvdbid == $cur_result["showid"]:
+            #break
+            #end if
+        #end for
+
+        #if $curShow.status == "Ended" and not $sickbeard.MISSING_EPS_DISPLAY_ENDED:
+            #continue
+        #end if
+
+        #set $cur_ep_airdate = int($cur_result["airdate"])
+            #if $cur_ep_airdate < $today:
+                #set $show_div = "listing-overdue"
+            #elif $cur_ep_airdate >= $today:
+                #if $cur_ep_airdate == $today:
+                    #set $show_div = "listing-current"
+                #else:
+                    #set $show_div = "listing-default"
+                #end if
+            #end if
+
+    <!-- start $cur_result["show_name"] //-->
+      <tr class="$show_div">
+        <td align="center" class="nowrap">$datetime.date.fromordinal(int($cur_result["airdate"]))</td>
+        <td class="tvShow"><a href="$sbRoot/home/displayShow?show=${cur_result["showid"]}">$cur_result["show_name"]</a>
+            #if $curShow.status == "Ended":
+            <span class="pause">[ended]</span>
+            #end if
+        </td>
+        <td class="nowrap" align="center"><%="%02ix%02i" % (int(cur_result["season"]), int(cur_result["episode"])) %></td>
+        <td>$cur_result["name"]</td>
+        <td class="col-plotinfo">
+        #if $cur_result["description"] != "" and $cur_result["description"] != None:
+            <img alt="" src="$sbRoot/images/info32.png" height="16" width="16" class="plotInfo" id="plot_info_<%=str(cur_result["showid"])+"_"+str(cur_result["season"])+"_"+str(cur_result["episode"])%>" />
+        #else:
+            <img src="$sbRoot/images/info32.png" width="16" height="16" class="plotInfoNone" alt="" />
+        #end if
+        </td>
+        <td align="center">$cur_result["network"]</td>
+        <td align="center">
+#if int($cur_result["quality"]) in $qualityPresets:
+    <span class="quality $qualityPresetStrings[int($cur_result["quality"])]">$qualityPresetStrings[int($cur_result["quality"])]</span>
+#else:
+    <span class="quality Custom">Custom</span>
+#end if
+        </td>
+        <td align="center"><a href="http://thetvdb.com/?tab=series&amp;id=${cur_result["showid"]}" rel="noreferrer" onclick="window.open('${sickbeard.ANON_REDIRECT}' + this.href, '_blank'); return false;" title="http://thetvdb.com/?tab=series&amp;id=${cur_result["showid"]}"><img alt="[info]" height="16" width="16" src="$sbRoot/images/thetvdb16.png" /></a></td>
+        <td align="center">
+        <a href="$sbRoot/home/searchEpisode?show=${cur_result["showid"]}&amp;season=$cur_result["season"]&amp;episode=$cur_result["episode"]" title="Manual Search" id="forceUpdate-${cur_result["showid"]}" class="forceUpdate epSearch"><img alt="[search]" height="16" width="16" src="$sbRoot/images/search16.png" id="forceUpdateImage-${cur_result["showid"]}" /></a>
+        </td>
+      </tr>
+    <!-- end $cur_result["show_name"] //-->
+    #end for
+    </tbody>
+    </table>
+<!-- end list view //-->
+#else:
+<!-- start non list view //-->
+<script charset="utf-8">
+<!--
+\$(document).ready(function(){
+  \$('#sbRoot').ajaxEpSearch({'size': 16, 'loadingImage': 'loading16_333333.gif'});
+  \$(".epSummary").hide();
+  \$(".epSummaryTrigger").click(function() {
+    \$(this).next(".epSummary").slideToggle('normal', function() {
+        \$(this).prev(".epSummaryTrigger").attr('src', function(i, src) {
+            return \$(this).next(".epSummary").is(':visible') ? src.replace('plus','minus') : src.replace('minus','plus');
+        });
+    });
+  });
+});
+//-->
+</script>
+
+    #set $cur_segment = None
+    #set $too_late_header = False
+    #set $missed_header = False
+    #set $show_div = "epListing listing-default"
+
+    #if $sort == "show":
+        <br/><br/>
+    #end if
+
+    #for $cur_result in $sql_results:
+    <!-- start $cur_result["show_name"] //-->
+
+        #set $myShowList = $list($sickbeard.showList)
+        #for $curShow in $myShowList:
+            #if $curShow.tvdbid == $cur_result["showid"]:
+            #break
+            #end if
+        #end for
+
+        #if $curShow.status == "Ended" and not $sickbeard.MISSING_EPS_DISPLAY_ENDED:
+            #continue
+        #end if
+
+        #if $sort == "network":
+            #if $cur_result["network"] and $cur_segment != $cur_result["network"]:
+                <br /><h2 class="network">$cur_result["network"]</h2>
+                #set $cur_ep_airdate = int($cur_result["airdate"])
+                #if $cur_ep_airdate < $today:
+                    #set $show_div = "epListing listing-overdue"
+                #elif $cur_ep_airdate >= $today:
+                    #if $cur_ep_airdate == $today:
+                        #set $show_div = "epListing listing-current"
+                    #else:
+                        #set $show_div = "epListing listing-default"
+                    #end if
+                #end if
+                #set $cur_segment = $cur_result["network"]
+            #end if
+        #elif $sort == "date":
+            #set $cur_ep_airdate = int($cur_result["airdate"])
+            #if $cur_segment != $cur_ep_airdate:
+                #if $cur_ep_airdate < $today and not $missed_header:
+                    <br /><h2 class="day">Missed</h2>
+                    #set $missed_header = True
+                    #set $show_div = "epListing listing-overdue"
+                #elif $cur_ep_airdate >= $today:
+                    #if $cur_ep_airdate == $today:
+                    <br /><h2 class="day">$datetime.date.fromordinal($cur_ep_airdate).strftime("%A").decode($sickbeard.SYS_ENCODING) <span style="font-size: 12px;">[today]</span></h2>
+                        #set $show_div = "epListing listing-current"
+                    #else:
+                    <br /><h2 class="day">$datetime.date.fromordinal($cur_ep_airdate).strftime("%A").decode($sickbeard.SYS_ENCODING)</h2>
+                        #set $show_div = "epListing listing-default"
+                    #end if
+                #end if
+                #set $cur_segment = $cur_ep_airdate
+            #end if
+        #end if
+
+    <div class="$show_div" id="listing-${cur_result["showid"]}">
+      <div class="tvshowDiv">
+      <table width="100%" border="0" cellpadding="0" cellspacing="0">
+        <tr>
+          <th #if $layout == 'banner' then "" else "colspan=\"2\""#>
+            <span class="tvshowTitle"><a href="$sbRoot/home/displayShow?show=${cur_result["showid"]}">$cur_result["show_name"]
+            #if $curShow.status == "Ended":
+            <span class="pause">[status]</span>
+            #end if
+            </a></span>
+            <span class="tvshowTitleIcons">
+                <a href="http://thetvdb.com/?tab=series&amp;id=${cur_result["showid"]}" rel="noreferrer" onclick="window.open('${sickbeard.ANON_REDIRECT}' + this.href, '_blank'); return false;" title="http://thetvdb.com/?tab=series&amp;id=${cur_result["showid"]}"><img alt="[tvdb]" height="16" width="16" src="$sbRoot/images/thetvdb16.png" /></a>
+                <span><a href="$sbRoot/home/searchEpisode?show=${cur_result["showid"]}&amp;season=$cur_result["season"]&amp;episode=$cur_result["episode"]" title="Manual Search" id="forceUpdate-${cur_result["showid"]}" class="epSearch forceUpdate"><img alt="[search]" height="16" width="16" src="$sbRoot/images/search16.png" id="forceUpdateImage-${cur_result["showid"]}" /></a></span>
+            </span>
+          </th>
+        </tr>
+        <tr>
+          <th #if $layout == 'banner' then "class=\"nobg\"" else "rowspan=\"2\""# style="background-color: #efefef;">
+            <a href="$sbRoot/home/displayShow?show=${cur_result["showid"]}"><img alt="" class="#if $layout == 'banner' then "bannerThumb" else "posterThumb"#" src="$sbRoot/showPoster/?show=${cur_result["showid"]}&amp;which=$layout" /></a>
+          </th>
+#if $layout == 'banner':
+        </tr>
+        <tr>
+#end if
+          <td class="nextEp">
+            <span class="title">Next Episode:</span> <span><%=str(cur_result["season"])+"x"+"%02i" % int(cur_result["episode"]) %> - $cur_result["name"] ($datetime.date.fromordinal(int($cur_result["airdate"])))</span>
+          </td>
+        </tr>
+        <tr>
+          <td style="vertical-align: top;">
+            <span class="title">Airs:</span> <span>$cur_result["airs"] on $cur_result["network"]</span>
+#if int($cur_result["quality"]) in $qualityPresets:
+ [<span class="title">$qualityPresetStrings[int($cur_result["quality"])]</span>]<br />
+#else:
+ [<span class="title">Custom</span>]<br />
+#end if
+            #if $cur_result["description"] == '':
+                <div class="epSummary" style="margin-left:0;display:block !important;">[There is no summary added for this episode]</div>
+            #else:
+                <img class="epSummaryTrigger" src="$sbRoot/images/plus.png" height="16" width="16" alt="" title="Toggle Summary" /><div class="epSummary">$cur_result["description"]</div>
+            #end if
+            <br/>
+          </td>
+        </tr>
+      </table>
+      </div>
+    </div>
+
+    <!-- end $cur_result["show_name"] //-->
+    #end for
+
+    <br/>
+
+<!-- end non list view //-->
+#end if
+
+<script>
+<!--
+window.setInterval( "location.reload(true)", 600000); // Refresh every 10 minutes
+//-->
+</script>
+
+#include $os.path.join($sickbeard.PROG_DIR, "data/interfaces/default/inc_bottom.tmpl")

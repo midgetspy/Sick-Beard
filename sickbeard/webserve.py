@@ -92,6 +92,7 @@ class PageTemplate (Template):
         self.menu = [
             { 'title': 'Home',            'key': 'home'           },
             { 'title': 'Coming Episodes', 'key': 'comingEpisodes' },
+            { 'title': 'Missing Episodes', 'key': 'missingEpisodes' },
             { 'title': 'History',         'key': 'history'        },
             { 'title': 'Manage',          'key': 'manage'         },
             { 'title': 'Config',          'key': 'config'         },
@@ -2866,6 +2867,59 @@ class WebInterface:
         ]
 
         t.next_week = next_week
+        t.today = today
+        t.sql_results = sql_results
+
+        # allow local overriding of layout parameter
+        if layout and layout in ('poster', 'banner', 'list'):
+            t.layout = layout
+        else:
+            t.layout = sickbeard.COMING_EPS_LAYOUT
+
+        return _munge(t)
+
+    @cherrypy.expose
+    def toggleMissingEpsDisplayEnded(self):
+
+        sickbeard.MISSING_EPS_DISPLAY_ENDED = not sickbeard.MISSING_EPS_DISPLAY_ENDED
+
+        redirect("/missingEpisodes/")
+
+    @cherrypy.expose
+    def missingEpisodes(self, layout="None"):
+
+        myDB = db.DBConnection()
+
+        today = datetime.date.today().toordinal()
+
+        done_show_list = []
+        qualList = Quality.DOWNLOADED + Quality.SNATCHED + [ARCHIVED, IGNORED]
+        sql_results = myDB.select("SELECT *, tv_shows.status as show_status FROM tv_episodes LEFT JOIN tv_shows ON tv_shows.tvdb_id = tv_episodes.showid WHERE season > 0 AND airdate <= ? AND tv_episodes.status NOT IN (" + ','.join(['?'] * len(qualList)) + ")", [today] + qualList)
+        for cur_result in sql_results:
+            done_show_list.append(int(cur_result["showid"]))
+
+        more_sql_results = myDB.select("SELECT *, tv_shows.status as show_status FROM tv_episodes outer_eps, tv_shows WHERE season > 0 AND showid NOT IN (" + ','.join(['?'] * len(done_show_list)) + ") AND tv_shows.tvdb_id = outer_eps.showid AND airdate = (SELECT airdate FROM tv_episodes inner_eps WHERE inner_eps.season > 0 AND inner_eps.showid = outer_eps.showid AND inner_eps.airdate <= ? ORDER BY inner_eps.airdate ASC LIMIT 1) AND outer_eps.status NOT IN (" + ','.join(['?'] * len(Quality.DOWNLOADED + Quality.SNATCHED)) + ")", done_show_list + [today] + Quality.DOWNLOADED + Quality.SNATCHED)
+        sql_results += more_sql_results
+
+        more_sql_results = myDB.select("SELECT *, tv_shows.status as show_status FROM tv_episodes, tv_shows WHERE season > 0 AND tv_shows.tvdb_id = tv_episodes.showid AND airdate < ? AND tv_episodes.status = ? AND tv_episodes.status NOT IN (" + ','.join(['?'] * len(qualList)) + ")", [today, WANTED] + qualList)
+        sql_results += more_sql_results
+
+        # sort by air date
+        sorts = {
+            'date': (lambda x, y: cmp(int(x["airdate"]), int(y["airdate"]))),
+            'show': (lambda a, b: cmp(a["show_name"], b["show_name"])),
+            'network': (lambda a, b: cmp(a["network"], b["network"])),
+        }
+
+        sql_results.sort(sorts[sickbeard.COMING_EPS_SORT])
+
+        t = PageTemplate(file="missingEpisodes.tmpl")
+        ended_item = { 'title': '', 'path': 'toggleMissingEpsDisplayEnded' }
+        ended_item['title'] = 'Hide Ended' if sickbeard.MISSING_EPS_DISPLAY_ENDED else 'Show Ended'
+        t.submenu = [
+            ended_item,
+        ]
+
         t.today = today
         t.sql_results = sql_results
 
