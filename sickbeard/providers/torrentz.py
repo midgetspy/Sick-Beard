@@ -28,6 +28,7 @@ import sickbeard
 import time
 
 from lib import requests
+from lib import cfscrape
 from xml.sax.saxutils import escape
 
 import xml.etree.cElementTree as etree
@@ -176,11 +177,14 @@ class TORRENTZProvider(generic.TorrentProvider):
 
         if not headers:
             headers = {}
-
-        headers['User-Agent'] = "SickBeard Torrent Edition."
+            headers['User-Agent'] = "SickBeard Torrent Edition."
 
         try:
             response = self.session.get(url, verify=False, headers=headers)
+            cf = cfscrape.create_scraper(sess=self.session)
+            if cf.is_cloudflare_challenge(response):
+                logger.log("[" + self.name + "] " + self.funcName() + " requested URL - " + url + ", encounted CloudFlare DDOS Protection.. Bypassing.", logger.DEBUG)
+                response = cf.get(url, verify=False)
         except (requests.exceptions.ConnectionError, requests.exceptions.HTTPError), e:
             logger.log("[" + self.name + "] " + self.funcName() + " Error loading " + self.name + " URL: " + str(e), logger.ERROR)
             return None
