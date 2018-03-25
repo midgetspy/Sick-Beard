@@ -133,7 +133,7 @@ class TorrentLeechProvider(generic.TorrentProvider):
 
     def _doSearch(self, search_params, show=None):
         logger.log("[" + self.name + "] Performing Search: {0}".format(search_params))
-        searchUrl = self.url + "torrents/browse/index/query/" + search_params.replace(':','') + "/categories/26,27,32"
+        searchUrl = self.url + "torrents/browse/index/query/" + search_params.replace(':','') + "/categories/26,27,32/newfilter/3"
         return self.parseResults(searchUrl)
     
     ##################################################################################################
@@ -145,9 +145,9 @@ class TorrentLeechProvider(generic.TorrentProvider):
         if data:
             logger.log("[" + self.name + "] parseResults() URL: " + searchUrl, logger.DEBUG)
             
-            for torrent in re.compile('<span class="title"><a href="/torrent/\d+">(?P<title>.*?)</a>.*?<td class="quickdownload">\s+<a href="/(?P<url>.*?)">',re.MULTILINE|re.DOTALL).finditer(data):
+            for torrent in re.compile('<span class="title"><a href="/torrent/\d+">(?P<title>.*?)</a>.*?<td class="quickdownload">\s+<a href="(?P<url>.*?)">',re.MULTILINE|re.DOTALL).finditer(data):
                 try:
-                    item = (torrent.group('title').replace('.',' ').decode('ascii'), self.url + torrent.group('url'))
+                    item = (torrent.group('title').replace('.',' ').decode('ascii'), torrent.group('url'))
                     logger.log("[" + self.name + "] parseResults() Title: " + torrent.group('title'), logger.DEBUG)
                 except:
                     logger.log("[" + self.name + "] Skipping torrent, non standard character found and/or unable to extract torrent download information.",logger.DEBUG)

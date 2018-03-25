@@ -34,10 +34,10 @@ from threading import Lock
 # apparently py2exe won't build these unless they're imported somewhere
 from sickbeard import providers, metadata
 
-from providers import ezrss, eztv, tvtorrents, torrentleech, btn, newznab, womble, omgwtfnzbs, hdbits
+from providers import eztv, tvtorrents, torrentleech, btn, newznab, omgwtfnzbs, hdbits
 
 from providers import kickass, torrentz, thepiratebay, torrentday
-from providers import sceneaccess, iptorrents, bithdtv, btdigg, torrentshack
+from providers import iptorrents, bithdtv, btdigg, torrentshack
 from providers import speed, revolutiontt
 
 from sickbeard.config import CheckSection, check_setting_int, check_setting_str, ConfigMigrator
@@ -166,8 +166,6 @@ BACKLOG_SEARCH_FREQUENCY = 21
 MIN_SEARCH_FREQUENCY = 10
 DEFAULT_SEARCH_FREQUENCY = 40
 
-EZRSS = False
-
 EZTV = False
 
 HDBITS = False
@@ -188,7 +186,6 @@ KICKASS = False
 KICKASS_ALT_URL = None
 
 TORRENTZ = False
-TORRENTZ_VERIFIED = False
 
 TORRENTLEECH = False
 TORRENTLEECH_USERNAME = None
@@ -198,10 +195,6 @@ TORRENTDAY = False
 TORRENTDAY_PHPSESSID = None
 TORRENTDAY_UID = None
 TORRENTDAY_PASS = None
-
-SCENEACCESS = False
-SCENEACCESS_USERNAME = None
-SCENEACCESS_PASSWORD = None
 
 IPTORRENTS = False
 IPTORRENTS_USERNAME = None
@@ -248,8 +241,6 @@ TV_DOWNLOAD_DIR = None
 NZBS = False
 NZBS_UID = None
 NZBS_HASH = None
-
-WOMBLE = False
 
 OMGWTFNZBS = False
 OMGWTFNZBS_USERNAME = None
@@ -426,24 +417,22 @@ def initialize(consoleLogging=True):
                 PLEX_SERVER_HOST, PLEX_HOST, PLEX_USERNAME, PLEX_PASSWORD, \
                 showUpdateScheduler, __INITIALIZED__, LAUNCH_BROWSER, showList, loadingShowList, \
                 NEWZNAB_DATA, NZBS, NZBS_UID, NZBS_HASH, \
-                EZRSS, \
                 EZTV, \
                 HDBITS, HDBITS_USERNAME, HDBITS_PASSKEY, \
                 TVTORRENTS, TVTORRENTS_DIGEST, TVTORRENTS_HASH, \
                 BTN, BTN_API_KEY, \
                 TORRENT_DIR, USENET_RETENTION, SOCKET_TIMEOUT, \
                 KICKASS, KICKASS_ALT_URL, \
-                TORRENTZ, TORRENTZ_VERIFIED, \
+                TORRENTZ, \
                 TORRENTLEECH, TORRENTLEECH_USERNAME, TORRENTLEECH_PASSWORD, \
                 TORRENTDAY, TORRENTDAY_PHPSESSID, TORRENTDAY_UID, TORRENTDAY_PASS, \
-                SCENEACCESS, SCENEACCESS_USERNAME, SCENEACCESS_PASSWORD, \
                 IPTORRENTS, IPTORRENTS_USERNAME, IPTORRENTS_PASSWORD, IPTORRENTS_EU, \
                 BITHDTV, BITHDTV_USERNAME, BITHDTV_PASSWORD, \
                 TORRENTSHACK, TORRENTSHACK_USERNAME, TORRENTSHACK_PASSWORD, TORRENTSHACK_UID, TORRENTSHACK_AUTH, TORRENTSHACK_PASS_KEY ,TORRENTSHACK_AUTH_KEY, \
                 SPEED, SPEED_USERNAME, SPEED_PASSWORD, \
                 REVOLUTIONTT, REVOLUTIONTT_USERNAME, REVOLUTIONTT_PASSWORD, \
                 BTDIGG, \
-                NZBS, NZBS_UID, NZBS_HASH, EZRSS, \
+                NZBS, NZBS_UID, NZBS_HASH, \
                 THEPIRATEBAY, THEPIRATEBAY_TRUSTED, THEPIRATEBAY_PROXY, THEPIRATEBAY_PROXY_URL, THEPIRATEBAY_URL_OVERRIDE, \
                 TVTORRENTS, TVTORRENTS_DIGEST, TVTORRENTS_HASH, BTN, BTN_API_KEY, TORRENT_DIR, USENET_RETENTION, SOCKET_TIMEOUT, \
                 SEARCH_FREQUENCY, DEFAULT_SEARCH_FREQUENCY, BACKLOG_SEARCH_FREQUENCY, \
@@ -460,7 +449,7 @@ def initialize(consoleLogging=True):
                 showQueueScheduler, searchQueueScheduler, ROOT_DIRS, CACHE_DIR, ACTUAL_CACHE_DIR, TVDB_API_PARMS, \
                 NAMING_PATTERN, NAMING_MULTI_EP, NAMING_FORCE_FOLDERS, NAMING_ABD_PATTERN, NAMING_CUSTOM_ABD, \
                 RENAME_EPISODES, properFinderScheduler, PROVIDER_ORDER, autoPostProcesserScheduler, \
-                WOMBLE, OMGWTFNZBS, OMGWTFNZBS_USERNAME, OMGWTFNZBS_APIKEY, providerList, newznabProviderList, \
+                OMGWTFNZBS, OMGWTFNZBS_USERNAME, OMGWTFNZBS_APIKEY, providerList, newznabProviderList, \
                 EXTRA_SCRIPTS, USE_TWITTER, TWITTER_USERNAME, TWITTER_PASSWORD, TWITTER_PREFIX, \
                 USE_BOXCAR2, BOXCAR2_ACCESS_TOKEN, BOXCAR2_NOTIFY_ONDOWNLOAD, BOXCAR2_NOTIFY_ONSNATCH, BOXCAR2_SOUND, \
                 USE_PUSHOVER, PUSHOVER_USERKEY, PUSHOVER_NOTIFY_ONDOWNLOAD, PUSHOVER_NOTIFY_ONSNATCH, PUSHOVER_PRIORITY, PUSHOVER_DEVICE, PUSHOVER_SOUND, \
@@ -490,10 +479,14 @@ def initialize(consoleLogging=True):
         except:
             WEB_PORT = 8081
 
+        try:
+            WEB_HOST = check_setting_str(CFG, 'General', 'web_host', '127.0.0.1', True)
+        except:
+            WEB_HOST = '127.0.0.1'
+
         if WEB_PORT < 21 or WEB_PORT > 65535:
             WEB_PORT = 8081
 
-        WEB_HOST = check_setting_str(CFG, 'General', 'web_host', '0.0.0.0')
         WEB_IPV6 = bool(check_setting_int(CFG, 'General', 'web_ipv6', 0))
         WEB_ROOT = check_setting_str(CFG, 'General', 'web_root', '').rstrip("/")
         WEB_LOG = bool(check_setting_int(CFG, 'General', 'web_log', 0))
@@ -591,54 +584,42 @@ def initialize(consoleLogging=True):
         CREATE_MISSING_SHOW_DIRS = check_setting_int(CFG, 'General', 'create_missing_show_dirs', 0)
         ADD_SHOWS_WO_DIR = check_setting_int(CFG, 'General', 'add_shows_wo_dir', 0)
 
-        EZRSS = bool(check_setting_int(CFG, 'General', 'use_torrent', 0))
-        if not EZRSS:
-            CheckSection(CFG, 'EZRSS')
-            EZRSS = bool(check_setting_int(CFG, 'EZRSS', 'ezrss', 0))
-
-        
-        TVTORRENTS = bool(check_setting_int(CFG, 'TVTORRENTS', 'tvtorrents', 0))    
+        TVTORRENTS = bool(check_setting_int(CFG, 'TVTORRENTS', 'tvtorrents', 0))
         TVTORRENTS_DIGEST = check_setting_str(CFG, 'TVTORRENTS', 'tvtorrents_digest', '')
         TVTORRENTS_HASH = check_setting_str(CFG, 'TVTORRENTS', 'tvtorrents_hash', '')
 
-        THEPIRATEBAY = bool(check_setting_int(CFG, 'THEPIRATEBAY', 'thepiratebay', 0)) 
-        THEPIRATEBAY_TRUSTED = bool(check_setting_int(CFG, 'THEPIRATEBAY', 'thepiratebay_trusted', 0))         
+        THEPIRATEBAY = bool(check_setting_int(CFG, 'THEPIRATEBAY', 'thepiratebay', 0))
+        THEPIRATEBAY_TRUSTED = bool(check_setting_int(CFG, 'THEPIRATEBAY', 'thepiratebay_trusted', 0))
         THEPIRATEBAY_PROXY = bool(check_setting_int(CFG, 'THEPIRATEBAY', 'thepiratebay_proxy', 0))
         THEPIRATEBAY_PROXY_URL = check_setting_str(CFG, 'THEPIRATEBAY', 'thepiratebay_proxy_url', '')
         THEPIRATEBAY_URL_OVERRIDE = check_setting_str(CFG, 'THEPIRATEBAY', 'thepiratebay_url_override', '')
 
-        BTN = bool(check_setting_int(CFG, 'BTN', 'btn', 0))    
+        BTN = bool(check_setting_int(CFG, 'BTN', 'btn', 0))
         BTN_API_KEY = check_setting_str(CFG, 'BTN', 'btn_api_key', '')
 
         KICKASS = bool(check_setting_int(CFG, 'KICKASS', 'kickass', 0))
         KICKASS_ALT_URL = check_setting_str(CFG, 'KICKASS', 'kickass_alt_url', '')
-        
-        TORRENTZ = bool(check_setting_int(CFG, 'TORRENTZ', 'torrentz', 0))    
-        TORRENTZ_VERIFIED = bool(check_setting_int(CFG, 'TORRENTZ', 'torrentz_verified', 0))    
 
-        TORRENTLEECH = bool(check_setting_int(CFG, 'TORRENTLEECH', 'torrentleech', 0))    
-        TORRENTLEECH_USERNAME = check_setting_str(CFG, 'TORRENTLEECH', 'torrentleech_username', '')   
+        TORRENTZ = bool(check_setting_int(CFG, 'TORRENTZ', 'torrentz', 0))
+
+        TORRENTLEECH = bool(check_setting_int(CFG, 'TORRENTLEECH', 'torrentleech', 0))
+        TORRENTLEECH_USERNAME = check_setting_str(CFG, 'TORRENTLEECH', 'torrentleech_username', '')
         TORRENTLEECH_PASSWORD = check_setting_str(CFG, 'TORRENTLEECH', 'torrentleech_password', '')
-        
-        TORRENTDAY = bool(check_setting_int(CFG, 'TORRENTDAY', 'torrentday', 0))    
-        TORRENTDAY_PHPSESSID = check_setting_str(CFG, 'TORRENTDAY', 'torrentday_phpsessid', '')   
+
+        TORRENTDAY = bool(check_setting_int(CFG, 'TORRENTDAY', 'torrentday', 0))
+        TORRENTDAY_PHPSESSID = check_setting_str(CFG, 'TORRENTDAY', 'torrentday_phpsessid', '')
         TORRENTDAY_UID = check_setting_str(CFG, 'TORRENTDAY', 'torrentday_uid', '')
         TORRENTDAY_PASS = check_setting_str(CFG, 'TORRENTDAY', 'torrentday_pass', '')
-        
-        
-        SCENEACCESS = bool(check_setting_int(CFG, 'SCENEACCESS', 'sceneaccess', 0))
-        SCENEACCESS_USERNAME = check_setting_str(CFG, 'SCENEACCESS', 'sceneaccess_username', '')
-        SCENEACCESS_PASSWORD = check_setting_str(CFG, 'SCENEACCESS', 'sceneaccess_password', '')
-        
+
         IPTORRENTS = bool(check_setting_int(CFG, 'IPTORRENTS', 'iptorrents', 0))
         IPTORRENTS_USERNAME = check_setting_str(CFG, 'IPTORRENTS', 'iptorrents_username', '')
         IPTORRENTS_PASSWORD = check_setting_str(CFG, 'IPTORRENTS', 'iptorrents_password', '')
         IPTORRENTS_EU = bool(check_setting_int(CFG, 'IPTORRENTS', 'iptorrents_eu', 0))
-        
+
         BITHDTV = bool(check_setting_int(CFG, 'BITHDTV', 'bithdtv', 0))
         BITHDTV_USERNAME = check_setting_str(CFG, 'BITHDTV', 'bithdtv_username', '')
         BITHDTV_PASSWORD = check_setting_str(CFG, 'BITHDTV', 'bithdtv_password', '')
-        
+
         TORRENTSHACK = bool(check_setting_int(CFG, 'TORRENTSHACK', 'torrentshack', 0))
         TORRENTSHACK_USERNAME = check_setting_str(CFG, 'TORRENTSHACK', 'torrentshack_username', '')
         TORRENTSHACK_PASSWORD = check_setting_str(CFG, 'TORRENTSHACK', 'torrentshack_password', '')
@@ -646,17 +627,17 @@ def initialize(consoleLogging=True):
         TORRENTSHACK_AUTH = check_setting_str(CFG, 'TORRENTSHACK', 'torrentshack_auth', '')
         TORRENTSHACK_PASS_KEY = check_setting_str(CFG, 'TORRENTSHACK', 'torrentshack_pass_key', '')
         TORRENTSHACK_AUTH_KEY = check_setting_str(CFG, 'TORRENTSHACK', 'torrentshack_auth_key', '')
-        
+
         SPEED = bool(check_setting_int(CFG, 'SPEED', 'speed', 0))
         SPEED_USERNAME = check_setting_str(CFG, 'SPEED', 'speed_username', '')
         SPEED_PASSWORD = check_setting_str(CFG, 'SPEED', 'speed_password', '')
-                
+
         REVOLUTIONTT = bool(check_setting_int(CFG, 'REVOLUTIONTT', 'revolutiontt', 0))
         REVOLUTIONTT_USERNAME = check_setting_str(CFG, 'REVOLUTIONTT', 'revolutiontt_username', '')
         REVOLUTIONTT_PASSWORD = check_setting_str(CFG, 'REVOLUTIONTT', 'revolutiontt_password', '')
-        
+
         BTDIGG = bool(check_setting_int(CFG, 'BTDIGG', 'btdigg', 0))
-        
+
         GIT_PATH = check_setting_str(CFG, 'General', 'git_path', '')
         IGNORE_WORDS = check_setting_str(CFG, 'General', 'ignore_words', IGNORE_WORDS)
         EXTRA_SCRIPTS = [x.strip() for x in check_setting_str(CFG, 'General', 'extra_scripts', '').split('|') if x.strip()]
@@ -685,7 +666,7 @@ def initialize(consoleLogging=True):
 
         CheckSection(CFG, 'EZTV')
         EZTV = bool(check_setting_int(CFG, 'EZTV', 'eztv', 0))
-        
+
         CheckSection(CFG, 'HDBITS')
         HDBITS = bool(check_setting_int(CFG, 'HDBITS', 'hdbits', 0))
         HDBITS_USERNAME = check_setting_str(CFG, 'HDBITS', 'hdbits_username', '')
@@ -704,9 +685,6 @@ def initialize(consoleLogging=True):
         NZBS = bool(check_setting_int(CFG, 'NZBs', 'nzbs', 0))
         NZBS_UID = check_setting_str(CFG, 'NZBs', 'nzbs_uid', '')
         NZBS_HASH = check_setting_str(CFG, 'NZBs', 'nzbs_hash', '')
-
-        CheckSection(CFG, 'Womble')
-        WOMBLE = bool(check_setting_int(CFG, 'Womble', 'womble', 1))
 
         CheckSection(CFG, 'omgwtfnzbs')
         OMGWTFNZBS = bool(check_setting_int(CFG, 'omgwtfnzbs', 'omgwtfnzbs', 0))
@@ -732,7 +710,7 @@ def initialize(consoleLogging=True):
         TORRENT_HOST = check_setting_str(CFG, 'TORRENT', 'torrent_host', '')
         TORRENT_PATH = check_setting_str(CFG, 'TORRENT', 'torrent_path', '')
         TORRENT_RATIO = check_setting_str(CFG, 'TORRENT', 'torrent_ratio', '')
-        TORRENT_PAUSED = bool(check_setting_int(CFG, 'TORRENT', 'torrent_paused', 0)) 
+        TORRENT_PAUSED = bool(check_setting_int(CFG, 'TORRENT', 'torrent_paused', 0))
 
         CheckSection(CFG, 'XBMC')
         USE_XBMC = bool(check_setting_int(CFG, 'XBMC', 'use_xbmc', 0))
@@ -800,7 +778,7 @@ def initialize(consoleLogging=True):
         PUSHBULLET_NOTIFY_ONDOWNLOAD = bool(check_setting_int(CFG, 'Pushbullet', 'pushbullet_notify_ondownload', 0))
         PUSHBULLET_APIKEY = check_setting_str(CFG, 'Pushbullet', 'pushbullet_apikey', '')
         PUSHBULLET_DEVICE = check_setting_str(CFG, 'Pushbullet', 'pushbullet_device', '')
-        
+
         CheckSection(CFG, 'Libnotify')
         USE_LIBNOTIFY = bool(check_setting_int(CFG, 'Libnotify', 'use_libnotify', 0))
         LIBNOTIFY_NOTIFY_ONSNATCH = bool(check_setting_int(CFG, 'Libnotify', 'libnotify_notify_onsnatch', 0))
@@ -1254,9 +1232,6 @@ def save_config():
     new_config['Blackhole']['nzb_dir'] = NZB_DIR
     new_config['Blackhole']['torrent_dir'] = TORRENT_DIR
 
-    new_config['EZRSS'] = {}
-    new_config['EZRSS']['ezrss'] = int(EZRSS)
-    
     new_config['EZTV'] = {}
     new_config['EZTV']['eztv'] = int(EZTV)
 
@@ -1276,8 +1251,7 @@ def save_config():
 
     new_config['TORRENTZ'] = {}
     new_config['TORRENTZ']['torrentz'] = int(TORRENTZ)
-    new_config['TORRENTZ']['torrentz_verified'] = int(TORRENTZ_VERIFIED)
- 
+
     new_config['TORRENTLEECH'] = {}
     new_config['TORRENTLEECH']['torrentleech'] = int(TORRENTLEECH)
     new_config['TORRENTLEECH']['torrentleech_username'] = TORRENTLEECH_USERNAME
@@ -1289,22 +1263,17 @@ def save_config():
     new_config['TORRENTDAY']['torrentday_uid'] = TORRENTDAY_UID
     new_config['TORRENTDAY']['torrentday_pass'] = TORRENTDAY_PASS
 
-    new_config['SCENEACCESS'] = {}
-    new_config['SCENEACCESS']['sceneaccess'] = int(SCENEACCESS)
-    new_config['SCENEACCESS']['sceneaccess_username'] = SCENEACCESS_USERNAME
-    new_config['SCENEACCESS']['sceneaccess_password'] = SCENEACCESS_PASSWORD
-
     new_config['IPTORRENTS'] = {}
     new_config['IPTORRENTS']['iptorrents'] = int(IPTORRENTS)
     new_config['IPTORRENTS']['iptorrents_username'] = IPTORRENTS_USERNAME
     new_config['IPTORRENTS']['iptorrents_password'] = IPTORRENTS_PASSWORD
     new_config['IPTORRENTS']['iptorrents_eu'] = IPTORRENTS_EU
-    
+
     new_config['BITHDTV'] = {}
     new_config['BITHDTV']['bithdtv'] = int(BITHDTV)
     new_config['BITHDTV']['bithdtv_username'] = BITHDTV_USERNAME
     new_config['BITHDTV']['bithdtv_password'] = BITHDTV_PASSWORD
-    
+
     new_config['TORRENTSHACK'] = {}
     new_config['TORRENTSHACK']['torrentshack'] = int(TORRENTSHACK)
     new_config['TORRENTSHACK']['torrentshack_username'] = TORRENTSHACK_USERNAME
@@ -1318,22 +1287,22 @@ def save_config():
     new_config['SPEED']['speed'] = int(SPEED)
     new_config['SPEED']['speed_username'] = SPEED_USERNAME
     new_config['SPEED']['speed_password'] = SPEED_PASSWORD
-    
+
     new_config['REVOLUTIONTT'] = {}
     new_config['REVOLUTIONTT']['revolutiontt'] = int(REVOLUTIONTT)
     new_config['REVOLUTIONTT']['revolutiontt_username'] = REVOLUTIONTT_USERNAME
     new_config['REVOLUTIONTT']['revolutiontt_password'] = REVOLUTIONTT_PASSWORD
-    
+
     new_config['BTDIGG'] = {}
     new_config['BTDIGG']['btdigg'] = int(BTDIGG)
-    
+
     new_config['THEPIRATEBAY'] = {}
     new_config['THEPIRATEBAY']['thepiratebay'] = int(THEPIRATEBAY)
-    new_config['THEPIRATEBAY']['thepiratebay_trusted'] = int(THEPIRATEBAY_TRUSTED)    
+    new_config['THEPIRATEBAY']['thepiratebay_trusted'] = int(THEPIRATEBAY_TRUSTED)
     new_config['THEPIRATEBAY']['thepiratebay_proxy'] = int(THEPIRATEBAY_PROXY)
     new_config['THEPIRATEBAY']['thepiratebay_proxy_url'] = THEPIRATEBAY_PROXY_URL
     new_config['THEPIRATEBAY']['thepiratebay_url_override'] = THEPIRATEBAY_URL_OVERRIDE
-    
+
     new_config['BTN'] = {}
     new_config['BTN']['btn'] = int(BTN)
     new_config['BTN']['btn_api_key'] = BTN_API_KEY
@@ -1342,9 +1311,6 @@ def save_config():
     new_config['NZBs']['nzbs'] = int(NZBS)
     new_config['NZBs']['nzbs_uid'] = NZBS_UID
     new_config['NZBs']['nzbs_hash'] = NZBS_HASH
-
-    new_config['Womble'] = {}
-    new_config['Womble']['womble'] = int(WOMBLE)
 
     new_config['omgwtfnzbs'] = {}
     new_config['omgwtfnzbs']['omgwtfnzbs'] = int(OMGWTFNZBS)
@@ -1513,13 +1479,13 @@ def save_config():
     new_config.write()
 
 
-def launchBrowser(startPort=None):
+def launchBrowser(host, startPort=None):
     if not startPort:
         startPort = WEB_PORT
     if ENABLE_HTTPS:
-        browserURL = 'https://localhost:%d%s' % (startPort, WEB_ROOT)
+        browserURL = 'https://%s:%d%s' % (host, startPort, WEB_ROOT)
     else:
-        browserURL = 'http://localhost:%d%s' % (startPort, WEB_ROOT)
+        browserURL = 'http://%s:%d%s' % (host, startPort, WEB_ROOT)
     try:
         webbrowser.open(browserURL, 2, 1)
     except:
@@ -1551,3 +1517,4 @@ def getEpList(epIDs, showid=None):
         epList.append(curEpObj)
 
     return epList
+

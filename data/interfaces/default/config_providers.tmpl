@@ -66,7 +66,7 @@
                             <a href="$curProvider.url" class="imgLink" rel="noreferrer" onclick="window.open('${sickbeard.ANON_REDIRECT}' + this.href, '_blank'); return false;"><img src="$sbRoot/images/providers/$curProvider.imageName()" alt="" title="$curProvider.name" width="16" height="16" /></a>
                             $curProvider.name
                             #if not $curProvider.supportsBacklog then "*" else ""#
-                            #if $curProvider.name == "EZRSS" or $curProvider.name == "ThePirateBay" then "**" else ""#
+                            #if $curProvider.name == "ThePirateBay" then "**" else ""#
                             <span class="ui-icon ui-icon-arrowthick-2-n-s pull-right"></span>
                           </li>
                         #end for
@@ -88,7 +88,7 @@
                                 <span class="component-title jumbo">Configure Provider:</span>
                                 <span class="component-desc">
                                     #set $provider_config_list = []
-                                    #for $cur_provider in sorted(("btn", "hdbits", "omgwtfnzbs", "tvtorrents", "torrentleech", "thepiratebay", "torrentz", "torrentday", "sceneaccess", "iptorrents", "bithdtv", "torrentshack","speed","kickass","revolutiontt")):
+                                    #for $cur_provider in sorted(("btn", "hdbits", "omgwtfnzbs", "tvtorrents", "torrentleech", "thepiratebay", "torrentz", "torrentday", "iptorrents", "bithdtv", "torrentshack","speed","kickass","revolutiontt")):
                                         #set $cur_provider_obj = $sickbeard.providers.getProviderClass($cur_provider)
                                         #if $cur_provider_obj.providerType == $GenericProvider.NZB and not $sickbeard.USE_NZBS:
                                             #continue
@@ -189,7 +189,7 @@
                         </div>
                     </div><!-- /tvtorrentsDiv //-->
                     
-		    <div class="providerDiv" id="thepiratebayDiv">
+                <div class="providerDiv" id="thepiratebayDiv">
                         <div class="field-pair">
                             <input type="checkbox" class="enabler" name="thepiratebay_proxy" id="thepiratebay_proxy" #if $sickbeard.THEPIRATEBAY_PROXY then "checked=\"checked\"" else ""#/>
                             <label class="clearfix" for="thepiratebay_proxy">
@@ -243,16 +243,6 @@
                             </label>
                         </div>
                     </div><!-- /btnDiv //-->
-
-                    <div class="providerDiv" id="torrentzDiv">
-                        <div class="field-pair">
-                            <input type="checkbox" name="torrentz_verified" id="torrentz_verified" #if $sickbeard.TORRENTZ_VERIFIED then "checked=\"checked\"" else ""#/>
-                            <label class="clearfix" for="torrentz_verified">
-                                <span class="component-title">Only Verified</span>
-                                <span class="component-desc">Download only verified torrents?</span>
-                            </label>
-                        </div>
-		    </div><!-- /torrentzDiv //-->
                     
                     <div class="providerDiv" id="kickassDiv">
                         <div class="field-pair">
@@ -314,21 +304,6 @@
                             </label>
                         </div>
                     </div><!-- /torrentleechDiv //-->
-                    
-                    <div class="providerDiv" id="sceneaccessDiv">
-                        <div class="field-pair">
-                            <label class="clearfix">
-                                <span class="component-title">Username:</span>
-                                <input class="component-desc" type="text" name="sceneaccess_username" value="$sickbeard.SCENEACCESS_USERNAME" size="40" />
-                            </label>
-                        </div>
-                        <div class="field-pair">
-                            <label class="clearfix">
-                                <span class="component-title">Password:</span>
-                                <input class="component-desc" type="password" name="sceneaccess_password" value="$sickbeard.SCENEACCESS_PASSWORD" size="40" />
-                            </label>
-                        </div>
-                    </div><!-- /sceneaccessDiv //-->
                     
                     <div class="providerDiv" id="iptorrentsDiv">
                         <div class="field-pair">

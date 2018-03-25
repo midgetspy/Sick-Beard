@@ -44,6 +44,8 @@ from sickbeard import search_queue
 from sickbeard import image_cache
 from sickbeard import naming
 
+from sickbeard.scene_exceptions import retrieve_exceptions
+
 from sickbeard.providers import newznab
 from sickbeard.common import Quality, Overview, statusStrings
 from sickbeard.common import SNATCHED, SKIPPED, UNAIRED, IGNORED, ARCHIVED, WANTED
@@ -192,7 +194,6 @@ class ManageSearches:
 
     @cherrypy.expose
     def forceVersionCheck(self):
-
         # force a check to see if there is a new version
         result = sickbeard.versionCheckScheduler.action.check_for_new_version(force=True)  # @UndefinedVariable
         if result:
@@ -200,6 +201,18 @@ class ManageSearches:
 
         redirect("/manage/manageSearches/")
 
+    @cherrypy.expose   
+    def forceSceneExceptions(self):
+        # force a resync of scene Exceptions.
+        logger.log(u"Forcing Scene Exceptions Update")
+        if not retrieve_exceptions():
+            logger.log(u"Scene Exceptions Update Failed.")
+            ui.notifications.error('Forced Scene Exceptions', 'Update Failed.')
+        else:
+            logger.log(u"Scene Exceptions Update Completed.")
+            ui.notifications.message('Forced Scene Exceptions', 'Update Completed.')
+            
+        redirect("/manage/manageSearches/")
 
 class Manage:
 
@@ -720,11 +733,12 @@ class ConfigGeneral:
         return m.hexdigest()
 
     @cherrypy.expose
-    def saveGeneral(self, log_dir=None, web_port=None, web_log=None, web_ipv6=None,
+    def saveGeneral(self, log_dir=None, web_host=None, web_port=None, web_log=None, web_ipv6=None,
                     launch_browser=None, web_username=None, use_api=None, api_key=None,
                     web_password=None, version_notify=None, enable_https=None, https_cert=None, https_key=None):
 
         results = []
+        restart_required = False
 
         # Misc
         sickbeard.LAUNCH_BROWSER = config.checkbox_to_value(launch_browser)
@@ -738,8 +752,12 @@ class ConfigGeneral:
         if not config.change_LOG_DIR(log_dir, web_log):
             results += ["Unable to create directory " + os.path.normpath(log_dir) + ", log directory not changed."]
 
+        if config.to_int(web_port, default=8081) != sickbeard.WEB_PORT or web_host != sickbeard.WEB_HOST:
+            restart_required = True
+            
         sickbeard.WEB_PORT = config.to_int(web_port, default=8081)
-
+        sickbeard.WEB_HOST = web_host
+        
         sickbeard.WEB_USERNAME = web_username
         sickbeard.WEB_PASSWORD = web_password
 
@@ -764,9 +782,12 @@ class ConfigGeneral:
                         '<br />\n'.join(results))
         else:
             ui.notifications.message('Configuration Saved', ek.ek(os.path.join, sickbeard.CONFIG_FILE) )
+        
+        if restart_required:
+            ui.notifications.message('Restarting Web Service For Sick Beard.')
+            Home().restart(sickbeard.PID)
 
         redirect("/config/general/")
-
 
 class ConfigSearch:
 
@@ -1051,11 +1072,9 @@ class ConfigProviders:
                       thepiratebay_trusted = None, thepiratebay_proxy = None, thepiratebay_proxy_url = None,thepiratebay_url_override = None, thepiratebay_url_override_enable = None,
                       torrentleech_username = None, torrentleech_password = None,
                       torrentday_phpsessid = None, torrentday_uid = None, torrentday_pass = None,
-                      sceneaccess_username = None, sceneaccess_password = None, 
                       iptorrents_username = None, iptorrents_password = None, iptorrents_eu = None, 
                       bithdtv_username = None, bithdtv_password = None,
                       torrentshack_username = None, torrentshack_password = None, torrentshack_uid = None, torrentshack_auth = None, torrentshack_pass_key = None, torrentshack_auth_key = None,
-                      torrentz_verified = None,
                       speed_username = None, speed_password = None, speed_rsshash = None,
                       revolutiontt_username = None, revolutiontt_password = None, 
                       kickass_alt_url = None,
@@ -1112,12 +1131,8 @@ class ConfigProviders:
 
             provider_list.append(curProvider)
 
-            if curProvider == 'womble_s_index':
-                sickbeard.WOMBLE = curEnabled
-            elif curProvider == 'omgwtfnzbs':
+            if curProvider == 'omgwtfnzbs':
                 sickbeard.OMGWTFNZBS = curEnabled
-            elif curProvider == 'ezrss':
-                sickbeard.EZRSS = curEnabled
             elif curProvider == 'eztv':
                 sickbeard.EZTV = curEnabled
             elif curProvider == 'hdbits':
@@ -1134,8 +1149,6 @@ class ConfigProviders:
                 sickbeard.TORRENTLEECH = curEnabled
             elif curProvider == 'torrentday':
                 sickbeard.TORRENTDAY = curEnabled
-            elif curProvider == 'sceneaccess':
-                sickbeard.SCENEACCESS = curEnabled
             elif curProvider == 'iptorrents':
                 sickbeard.IPTORRENTS = curEnabled
             elif curProvider == 'bithdtv':
@@ -1195,10 +1208,7 @@ class ConfigProviders:
         sickbeard.TORRENTDAY_PHPSESSID = torrentday_phpsessid.strip()
         sickbeard.TORRENTDAY_UID = torrentday_uid.strip()
         sickbeard.TORRENTDAY_PASS = torrentday_pass.strip()
-        
-        sickbeard.SCENEACCESS_USERNAME = sceneaccess_username.strip()
-        sickbeard.SCENEACCESS_PASSWORD = sceneaccess_password.strip()
-        
+                
         sickbeard.IPTORRENTS_USERNAME = iptorrents_username.strip()
         sickbeard.IPTORRENTS_PASSWORD = iptorrents_password.strip()
         sickbeard.IPTORRENTS_EU = 1 if iptorrents_eu == 'on' else 0
@@ -1219,13 +1229,6 @@ class ConfigProviders:
         sickbeard.REVOLUTIONTT_USERNAME = revolutiontt_username.strip()
         sickbeard.REVOLUTIONTT_PASSWORD = revolutiontt_password.strip()
         
-        if torrentz_verified == "on":
-            torrentz_verified = 1
-        else:
-            torrentz_verified = 0
-
-        sickbeard.TORRENTZ_VERIFIED = torrentz_verified
-
         sickbeard.BTN_API_KEY = btn_api_key.strip()
 
         sickbeard.OMGWTFNZBS_USERNAME = omgwtfnzbs_username.strip()

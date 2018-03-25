@@ -137,8 +137,8 @@ class RevolutionTTProvider(generic.TorrentProvider):
 
     def _doSearch(self, search_params, show=None):
         results = []
-        logger.log("[" + self.name + "] Performing Search: {0}".format(search_params))
         for section in [41, 42, 45]:
+            logger.log("[" + self.name + "] Performing Search(cat={0}): {1}".format(section, search_params), logger.DEBUG)
             searchUrl = self.url + "browse.php?search=" + urllib.quote(search_params) + "&cat=" + str(section) + "&titleonly=1"
             results.extend(self.parseResults(searchUrl))
         if len(results):
@@ -153,8 +153,9 @@ class RevolutionTTProvider(generic.TorrentProvider):
         data = self.getURL(searchUrl)
         results = []
         if data:
-            for torrent in re.compile('<a href="details\.php\?id=\w+&amp;hit=1"><b>(?P<title>.*?)</b>.*?<td align="center" class=\'br_left\'><a href="(?P<url>.*?)">', re.MULTILINE | re.DOTALL).finditer(data):
+            for torrent in re.compile('a href="details\.php\?id=\w+&amp;hit=1"><b>(?P<title>.*?)</b></a>.*?<td align="center" class="br_left"><a href="(?P<url>.*?)">', re.MULTILINE | re.DOTALL).finditer(data):
                 item = (torrent.group('title').replace('.', ' '), self.url + torrent.group('url'))
+                logger.log("[" + self.name + "] " + self.funcName() + " Title: " + torrent.group('title'), logger.DEBUG)
                 results.append(item)
         else:
             logger.log("[" + self.name + "] " + self.funcName() + " Error no data returned!!")
@@ -165,9 +166,8 @@ class RevolutionTTProvider(generic.TorrentProvider):
     def getURL(self, url):
         response = None
 
-        if not self.session:
-            if not self._doLogin():
-                return response
+        if not self.session and not self._doLogin():
+            return response
 
         try:
             response = self.session.get(url, headers=self.header, verify=False)
@@ -207,7 +207,7 @@ class RevolutionTTProvider(generic.TorrentProvider):
         }
 
         self.session = requests.Session()
-        logger.log("[" + self.name + "] Attempting to Login")
+        logger.log("[" + self.name + "]" + self.funcName() + " Attempting to Login")
 
         try:
             # have to init first...
@@ -215,29 +215,29 @@ class RevolutionTTProvider(generic.TorrentProvider):
             response = self.session.post(self.url + "takelogin.php", data=login_params, headers=self.header, timeout=30, verify=False)
         except (requests.exceptions.ConnectionError, requests.exceptions.HTTPError), e:
             self.session = None
-            sys.tracebacklimit = 0    # raise exception to sickbeard but hide the stack trace.
-            raise Exception("[" + self.name + "] " + self.funcName() + " Error: " + ex(e))
+            logger.log("[" + self.name + "] " + self.funcName() + " Error: " + str(e), logger.ERROR)
+            return False
 
         if 'refresh' in response.headers and "login.php?error=" in response.headers['refresh']:
             self.session = None
-            sys.tracebacklimit = 0    # raise exception to sickbeard but hide the stack trace.
-            raise Exception("[" + self.name + "] " + self.funcName() + " Login Failed, redirected with error url, Bad Username / Password?")
-        
+            logger.log("[" + self.name + "] " + self.funcName() + " Login Failed, redirected with error url, Bad Username / Password?", logger.ERROR)
+            return False
+
         if response.url.endswith('403.html') and 'You have been banned.' in response.content:
             self.session = None
-            sys.tracebacklimit = 0    # raise exception to sickbeard but hide the stack trace.
-            raise Exception("[" + self.name + "] " + self.funcName() + " Login Failed, you have been BANNED.")
+            logger.log("[" + self.name + "] " + self.funcName() + " Login Failed, you have been BANNED.", logger.ERROR)
+            return False
 
         if re.search("Username or password incorrect|<title>Revolution :: Login</title>|The page you tried to view can only be used when you're logged in", response.content) \
         or response.status_code in [401, 403]:
             self.session = None
-            sys.tracebacklimit = 0    # raise exception to sickbeard but hide the stack trace.
-            raise Exception("[" + self.name + "] " + self.funcName() + " Login Failed, Invalid username or password for " + self.name + ". Check your settings.")
+            logger.log("[" + self.name + "] " + self.funcName() + " Login Failed, Invalid username or password for " + self.name + ". Check your settings.", logger.ERROR)
+            return False
 
         if not self._getPassKey() or not self.rss_passkey:
             self.session = None
-            sys.tracebacklimit = 0    # raise exception to sickbeard but hide the stack trace.
-            raise Exception("[" + self.name + "] " + self.funcName() + " Could not extract rssHash info... aborting.")
+            logger.log("[" + self.name + "] " + self.funcName() + " Could not extract rssHash info... aborting.", logger.ERROR)
+            return False
 
         return True
 
@@ -255,16 +255,23 @@ class RevolutionTTCache(tvcache.TVCache):
     ###################################################################################################
 
     def _getRSSData(self):
+        xml = None
+
         if not provider.session:
             provider._doLogin()
 
-        self.rss_url = provider.url + "rss.php?feed=dl&cat=41,42,45&passkey={0}".format(provider.rss_passkey)
-        logger.log("[" + provider.name + "] " + provider.funcName() + " RSS URL - {0}".format(self.rss_url))
-        xml = provider.getURL(self.rss_url)
-        if xml is not None:
-            xml = xml.decode('utf8', 'ignore')
-        else:
-            logger.log("[" + provider.name + "] " + provider.funcName() + " WARNING: empty RSS data.")
+        if provider.rss_passkey:
+            try:
+                self.rss_url = provider.url + "rss.php?feed=dl&cat=41,42,45&passkey={0}".format(provider.rss_passkey)
+                logger.log("[" + provider.name + "] " + provider.funcName() + " RSS URL - {0}".format(self.rss_url))
+                xml = provider.getURL(self.rss_url)
+                if xml is not None:
+                    xml = xml.decode('utf8', 'ignore')
+            except:
+                pass
+
+        if not xml:
+            logger.log("[" + provider.name + "] " + provider.funcName() + " empty RSS data received.", logger.ERROR)
             xml = "<rss xmlns:atom=\"http://www.w3.org/2005/Atom\" version=\"2.0\">" + \
                 "<channel>" + \
                 "<title>" + provider.name + "</title>" + \
@@ -278,3 +285,4 @@ class RevolutionTTCache(tvcache.TVCache):
     ###################################################################################################
 
 provider = RevolutionTTProvider()
+
