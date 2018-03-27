@@ -41,7 +41,7 @@ class IPTorrentsProvider(generic.TorrentProvider):
         generic.TorrentProvider.__init__(self, "IPTorrents")
         self.supportsBacklog = True
         self.cache = IPTorrentsCache(self)
-        self.url = 'https://www.iptorrents.com/'
+        self.url = 'https://iptorrents.com/'
         self.rss_uid = None
         self.rss_passkey = None
         self.name = "IPTorrents"
@@ -132,7 +132,7 @@ class IPTorrentsProvider(generic.TorrentProvider):
     ###################################################################################################
 
     def switchURL(self):
-        new_url = 'https://www.iptorrents.com/' if not getattr(sickbeard, 'IPTORRENTS_EU', False) else 'https://iptorrents.eu/'
+        new_url = 'https://iptorrents.com/' if not getattr(sickbeard, 'IPTORRENTS_EU', False) else 'https://iptorrents.eu/'
         # Reset auth session , different domain.
         if new_url != self.url:
             self.session = None
@@ -141,7 +141,7 @@ class IPTorrentsProvider(generic.TorrentProvider):
     ###################################################################################################
 
     def _doSearch(self, search_params, show=None):
-        logger.log("[" + self.name + "] " + self.funcName() + " Performing Search: " + search_params)
+        logger.log("[" + self.name + "] " + self.funcName() + " Performing Search: " + search_params, logger.DEBUG)
         self.switchURL()
         searchUrl = self.url + "t?&99=&78=&23=&25=&65=&79=&22=&5=&q=" + urllib.quote(search_params) + "&qf=#torrents"
         return self.parseResults(searchUrl)
@@ -152,8 +152,9 @@ class IPTorrentsProvider(generic.TorrentProvider):
         data = self.getURL(searchUrl)
         results = []
         if data:
-            for torrent in re.compile('<a class="t_title b" href="/details\.php\?id=\d+">(?P<title>.*?)</a>.*?<a href="/download\.php/(?P<url>.*?)"><', re.MULTILINE | re.DOTALL).finditer(data):
+            for torrent in re.compile('<a class="b" href="/details\.php\?id=\d+">(?P<title>.*?)</a>.*?<a href="/download\.php/(?P<url>.*?)"><', re.MULTILINE | re.DOTALL).finditer(data):
                 item = (torrent.group('title').replace('.', ' '), self.url + "download.php/" + torrent.group('url'))
+                logger.log("[" + self.name + "] " + self.funcName() + " Title: " + torrent.group('title').replace('.', ' '), logger.DEBUG)
                 results.append(item)
             if len(results):
                 logger.log("[" + self.name + "] " + self.funcName() + ") Some results found.")
@@ -165,6 +166,15 @@ class IPTorrentsProvider(generic.TorrentProvider):
 
     ###################################################################################################
 
+    def _CloudFlareError(self, response):
+        if getattr(response, 'status_code', 0) in [520, 521]:
+            self.session = None
+            logger.log("[" + self.name + "] " + self.funcName() + " Site down/overloaded cloudflare status code: " +  str(response.status_code), logger.ERROR)
+            return True
+        return False
+    
+    ###################################################################################################
+    
     def getURL(self, url, data=None):
         response = None
 
@@ -180,16 +190,19 @@ class IPTorrentsProvider(generic.TorrentProvider):
             logger.log("[" + self.name + "] " + self.funcName() + " Error loading " + self.name + " URL: " + ex(e), logger.ERROR)
             return None
 
-        if response.status_code not in [200, 302, 303]:
+        if self._CloudFlareError(response):
+            return None
+        
+        if hasattr(response, 'status_code') and response.status_code not in [200, 302, 303]:
             logger.log("[" + self.name + "] " + self.funcName() + " requested URL - " + url + " returned status code is " + str(response.status_code), logger.ERROR)
             return None
 
-        return response.content
+        return getattr(response, 'content', None)
 
     ###################################################################################################
 
     def _getPassKey(self):
-        logger.log("[" + self.name + "] " + self.funcName() + " Attempting to acquire RSS authentication details.")
+        logger.log("[" + self.name + "] " + self.funcName() + " Attempting to acquire RSS authentication details.", logger.DEBUG)
         try:
             post_params = {
                 's0': '',
@@ -202,11 +215,11 @@ class IPTorrentsProvider(generic.TorrentProvider):
             logger.log("[" + self.name + "] " + self.funcName() + " Failed to scrape authentication parameters for rss.", logger.ERROR)
             return False
 
-        if self.rss_uid == None:
+        if not self.rss_uid:
             logger.log("[" + self.name + "] " + self.funcName() + " Can't extract uid from rss authentication scrape.", logger.ERROR)
             return False
 
-        if self.rss_passkey == None:
+        if not self.rss_passkey:
             logger.log("[" + self.name + "] " + self.funcName() + " Can't extract password hash from rss authentication scrape.", logger.ERROR)
             return False
 
@@ -231,19 +244,22 @@ class IPTorrentsProvider(generic.TorrentProvider):
             response = self.session.post(self.url + "/take_login.php", data=login_params, timeout=30, verify=False)
         except (requests.exceptions.ConnectionError, requests.exceptions.HTTPError), e:
             self.session = None
-            sys.tracebacklimit = 0    # raise exception to sickbeard but hide the stack trace.
-            raise Exception("[" + self.name + "] " + self.funcName() + " Error: " + str(e))
+            logger.log("[" + self.name + "] " + self.funcName() + "Error: " + str(e), logger.ERROR)
+            return False
 
+        if self._CloudFlareError(response):
+            return False
+        
         if re.search("take_login\.php|Password not correct|<title>IPT</title>", response.content) \
         or response.status_code in [401, 403]:
             self.session = None
-            sys.tracebacklimit = 0    # raise exception to sickbeard but hide the stack trace.
-            raise Exception("[" + self.name + "] " + self.funcName() + " Login Failed, Invalid username or password for " + self.name + ". Check your settings.")
+            logger.log("[" + self.name + "] " + self.funcName() + " Login Failed, Invalid username or password for " + self.name + ". Check your settings.", logger.ERROR)
+            return False
 
         if not self._getPassKey() or not self.rss_passkey:
             self.session = None
-            sys.tracebacklimit = 0    # raise exception to sickbeard but hide the stack trace.
-            raise Exception("[" + self.name + "] " + self.funcName() + " Could not extract rssHash info... aborting.")
+            logger.log("[" + self.name + "] " + self.funcName() + " Could not extract rssHash info... aborting.", logger.ERROR)
+            return False
 
         return True
 
@@ -260,17 +276,24 @@ class IPTorrentsCache(tvcache.TVCache):
     ###################################################################################################
 
     def _getRSSData(self):
+        xml = None
+        
         provider.switchURL()
  
         if not provider.session:
             provider._doLogin()
-
-        self.rss_url = provider.url + "torrents/rss?u=" + provider.rss_uid + ";tp=" + provider.rss_passkey + ";99;79;78;65;25;23;22;5;download"
-        logger.log("[" + provider.name + "] " + provider.funcName() + " RSS URL - " + self.rss_url)
-        xml = provider.getURL(self.rss_url)
-        if xml is not None:
-            xml = xml.decode('utf8', 'ignore')
-        else:
+        
+        if provider.rss_passkey:
+            try:
+                self.rss_url = provider.url + "torrents/rss?u=" + provider.rss_uid + ";tp=" + provider.rss_passkey + ";99;79;78;65;25;23;22;5;download"
+                logger.log("[" + provider.name + "] " + provider.funcName() + " RSS URL - " + self.rss_url, logger.DEBUG)
+                xml = provider.getURL(self.rss_url)
+                if xml is not None:
+                    xml = xml.decode('utf8', 'ignore')
+            except:
+                pass
+        
+        if not xml:
             logger.log("[" + provider.name + "] " + provider.funcName() + " empty RSS data received.", logger.ERROR)
             xml = "<rss xmlns:atom=\"http://www.w3.org/2005/Atom\" version=\"2.0\">" + \
                 "<channel>" + \

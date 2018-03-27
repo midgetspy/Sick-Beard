@@ -1173,6 +1173,84 @@
                     </fieldset>
                 </div><!-- /trakt component-group //-->
 
+                <div class="component-group clearfix">
+                    <div class="component-group-desc">
+                        <img class="notifier-icon" src="$sbRoot/images/notifiers/slack.png" alt="" title="Slack" />
+                        <h3><a href="http://slack.com/" rel="noreferrer" onclick="window.open('${sickbeard.ANON_REDIRECT}' + this.href, '_blank'); return false;">Slack</a></h3>
+                        <p>Team communication for the 21st century.</p>
+                    </div>
+                    <fieldset class="component-group-list">
+                        <div class="field-pair">
+                            <input type="checkbox" class="enabler" name="use_slack" id="use_slack" #if $sickbeard.USE_SLACK then "checked=\"checked\"" else ""# />
+                            <label class="clearfix" for="use_slack">
+                                <span class="component-title">Enable</span>
+                                <span class="component-desc">Should Sick Beard send Slack notifications?</span>
+                            </label>
+                        </div>
+                        <div class="field-pair">
+                            <input type="checkbox" name="slack_notify_onsnatch" id="slack_notify_onsnatch" #if $sickbeard.SLACK_NOTIFY_ONSNATCH then "checked=\"checked\"" else ""# />
+                            <label class="clearfix" for="slack_notify_onsnatch">
+                                <span class="component-title">Notify on Snatch</span>
+                                <span class="component-desc">Send notification when we start a download?</span>
+                            </label>
+                        </div>
+                        <div class="field-pair">
+                            <input type="checkbox" name="slack_notify_ondownload" id="slack_notify_ondownload" #if $sickbeard.SLACK_NOTIFY_ONDOWNLOAD then "checked=\"checked\"" else ""# />
+                            <label class="clearfix" for="slack_notify_ondownload">
+                                <span class="component-title">Notify on Download</span>
+                                <span class="component-desc">Send notification when we finish a download?</span>
+                            </label>
+                        </div>
+
+                        <div id="content_use_slack">
+                            <div class="field-pair">
+                                <label class="nocheck clearfix">
+                                    <span class="component-title">Slack WebHook URL:</span>
+                                    <input type="text" name="slack_webhook_url" id="slack_webhook_url" value="$sickbeard.SLACK_WEBHOOK_URL" size="35" />
+                                </label>
+                                <label class="nocheck clearfix">
+                                    <span class="component-title">&nbsp;</span>
+                                    <span class="component-desc">Configure your web hook at: <a href="https://my.slack.com/services/new/incoming-webhook/" rel="noreferrer" onclick="window.open('${sickbeard.ANON_REDIRECT}' + this.href, '_blank'); return false;">https://my.slack.com/services/new/incoming-webhook/</a></span>
+                                </label>
+                            </div>
+                            <div class="field-pair">
+                                <label class="nocheck clearfix">
+                                    <span class="component-title">Slack Channel</span>
+                                    <input type="text" name="slack_channel" id="slack_channel" value="$sickbeard.SLACK_CHANNEL" size="35" />
+                                </label>
+                                <label class="nocheck clearfix">
+                                    <span class="component-title">&nbsp;</span>
+                                    <span class="component-desc">Channel Sick Beard should send notifications to.</span>
+                                </label>
+                            </div>
+                            <div class="field-pair">
+                                <label class="nocheck clearfix">
+                                    <span class="component-title">Slack Bot Name</span>
+                                    <input type="text" name="slack_bot_name" id="slack_bot_name" value="$sickbeard.SLACK_BOT_NAME" size="35" />
+                                </label>
+                                <label class="nocheck clearfix">
+                                    <span class="component-title">&nbsp;</span>
+                                    <span class="component-desc">Name of the bot that will send the notifications.</span>
+                                </label>
+                            </div>
+                            <div class="field-pair">
+                                <label class="nocheck clearfix">
+                                    <span class="component-title">Slack Bot Icon URL</span>
+                                    <input type="text" name="slack_icon_url" id="slack_icon_url" value="$sickbeard.SLACK_ICON_URL" size="35" />
+                                </label>
+                                <label class="nocheck clearfix">
+                                    <span class="component-title">&nbsp;</span>
+                                    <span class="component-desc">URL to an image to use as the icon for this bot.</span>
+                                </label>
+                            </div>
+                            <div class="testNotification" id="testSlack-result">Click below to test.</div>
+                            <input type="button" class="btn" value="Test Slack" id="testSlack" />
+                            <input type="submit" class="btn config_submitter" value="Save Changes" />
+                        </div><!-- /content_use_slack //-->
+
+                    </fieldset>
+                </div><!-- /slack component-group //-->
+
                 <div class="component-group-save">
                     <input type="submit" class="btn config_submitter" value="Save Changes" />
                 </div><br />

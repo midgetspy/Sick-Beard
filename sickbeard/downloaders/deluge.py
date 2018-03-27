@@ -16,6 +16,7 @@
 # You should have received a copy of the GNU General Public License
 # along with Sick Beard.  If not, see <http://www.gnu.org/licenses/>.
 
+import sys
 import sickbeard
 
 from lib import requests
@@ -40,12 +41,13 @@ class Deluge:
         self.deluge_host = None
         self.label_created = False
         self.name = "Deluge"
+        self.funcName = lambda n=0: sys._getframe(n + 1).f_code.co_name + "()"
         
         logger.log("[" + self.name + "] initializing...", logger.DEBUG)
         
     ###################################################################################################
     
-    def _authenicate(self,host,password):
+    def _authenicate(self, host, password):
         try:
             if not host.startswith('http'):
                 host = 'http://' + host
@@ -58,15 +60,15 @@ class Deluge:
                 
             self.deluge_host = host
         except Exception:
-            logger.log("[" + self.name + "] _authenicate() Host properties are not filled in correctly.",logger.ERROR)
-            return False, u"[" + self.name + "] Host properties are not filled in correctly."
+            logger.log("[" + self.name + "] " + self.funcName() + " Host properties are not filled in correctly.", logger.ERROR)
+            return False, u"[" + self.name + "] " + self.funcName() + "Host properties are not filled in correctly."
         
-        if self._sendRequest({'method': 'auth.login','params': [password],'id': self.seq_id }):
-            logger.log("[" + self.name + "] _authenicate() Success: Connected and Authenticated.",logger.DEBUG)
-            return True,u"[" + self.name + "] _authenicate() Success: Connected and Authenticated."
+        if self._sendRequest({'method': 'auth.login', 'params': [password], 'id': self.seq_id }):
+            logger.log("[" + self.name + "] "+ self.funcName() + " Success: Connected and Authenticated.", logger.DEBUG)
+            return True,u"[" + self.name + "] "+ self.funcName() + " Success: Connected and Authenticated."
         else:
-            logger.log("[" + self.name + "] _authenicate() Authenication Failure...",logger.ERROR)
-            return False,u"[" + self.name + "] _authenicate() Authenication Failure..."
+            logger.log("[" + self.name + "] " + self.funcName() + " Authenication Failure...", logger.ERROR)
+            return False,u"[" + self.name + "] " + self.funcName() + " Authenication Failure..."
         
     ###################################################################################################
 
@@ -74,18 +76,19 @@ class Deluge:
         if self.session:
             try:
                 self.jdata = None
-                self.seq_id+=1
-                r = self.session.post(self.deluge_host, data=json.dumps(post_data), timeout=30, verify=False) 
-                if not r.json()['error']:
+                self.seq_id += 1
+                r = self.session.post(self.deluge_host, data=json.dumps(post_data), timeout=30, verify=False)
+                if r.json()['result'] is not False:
                     self.jdata = r.json()
                     return True
                 else:
-                    logger.log("[" + self.name + "] _sendRequest() request failed..  ", logger.DEBUG)
+                    logger.log("[" + self.name + "] " + self.funcName() + " request failed.. Request: " + str(post_data) + ", Response: " + r.content, logger.DEBUG)
+                    logger.log("[" + self.name + "] " + self.funcName() + " request failed..", logger.ERROR)
                     return False
             except (requests.exceptions.ConnectionError, requests.exceptions.HTTPError), e:
-                logger.log("[" + self.name + "]  _sendRequest() Error  - " + str(e), logger.ERROR)
+                logger.log("[" + self.name + "] " + self.funcName() + " Error  - " + str(e), logger.ERROR)
                 return False
-        logger.log("[" + self.name + "] _sendRequest() ... no session??",logger.ERROR)
+        logger.log("[" + self.name + "] " + self.funcName() + " ... no session??", logger.ERROR)
         return False
     
     ###################################################################################################
@@ -111,18 +114,18 @@ class Deluge:
                 
                 r =  self.session.get(torrent.url, verify=False, headers=headers, timeout=60)
             except (requests.exceptions.ConnectionError, requests.exceptions.HTTPError), e:
-               logger.log("[" + self.name + "] _sendTORRENT() Error grabbing torrent " + torrent.url + " - " + ex(e), logger.ERROR)
+               logger.log("[" + self.name + "] " + self.funcName() + " Error grabbing torrent " + torrent.url + " - " + str(e), logger.ERROR)
                return False
             if r.content:
-                logger.log("[" + self.name + "] _sendTORRENT() Succesfully downloaded torrent from " + torrent.url, logger.DEBUG)
+                logger.log("[" + self.name + "] " + self.funcName() + " Succesfully downloaded torrent from " + torrent.url, logger.DEBUG)
             else:
-                logger.log("[" + self.name + "] _sendTORRENT() Error no content data found for torrent file.",logger.ERROR)
+                logger.log("[" + self.name + "] " + self.funcName() + " Error no content data found for torrent file.", logger.ERROR)
                 return False
         
         ###################################################################################################
         
-        if not self._authenicate(sickbeard.TORRENT_HOST,sickbeard.TORRENT_PASSWORD)[0]:
-                    return False
+        if not self._authenicate(sickbeard.TORRENT_HOST, sickbeard.TORRENT_PASSWORD)[0]:
+            return False
 
         ###################################################################################################
         
@@ -137,13 +140,13 @@ class Deluge:
         
         if torrent.url.startswith("magnet:"):
             if not self._sendRequest({'method': 'core.add_torrent_magnet', 'params': [torrent.url, options], 'id': self.seq_id}):
-                    logger.log("[" + self.name + "] _sendTORRENT() Error grabbing torrent from " + torrent.url,logger.ERROR)
-                    return False
+                logger.log("[" + self.name + "] " + self.funcName() + " Error grabbing torrent from " + torrent.url, logger.ERROR)
+                return False
             else:
-                logger.log("[" + self.name + "] _sendTORRENT() Downloaded torrent from " + torrent.url, logger.DEBUG)
+                logger.log("[" + self.name + "] " + self.funcName() + " Downloaded torrent from " + torrent.url, logger.DEBUG)
         else:
-            if not self._sendRequest({'method': 'core.add_torrent_file', 'params': ['',b64encode(r.content), options], 'id': self.seq_id}):
-                logger.log("[" + self.name + "] _sendTORRENT() Error Adding torrent to deluge.",logger.ERROR)
+            if not self._sendRequest({'method': 'core.add_torrent_file', 'params': ['', b64encode(r.content), options], 'id': self.seq_id}):
+                logger.log("[" + self.name + "] " + self.funcName() + " Error Adding torrent to deluge.",logger.ERROR)
                 return False
         ###################################################################################################
         
@@ -157,28 +160,28 @@ class Deluge:
             
             if sickbeard.TORRENT_PAUSED:
                 if not self._sendRequest({'method': 'core.pause_torrent', 'params': [[torrenthash]], 'id': self.seq_id}):
-                    logger.log("[" + self.name + "] _sendTORRENT() Error setting Pause on torrent hash " + torrentHash,logger.ERROR)
+                    logger.log("[" + self.name + "] " + self.funcName() + " Error setting Pause on torrent hash " + torrentHash, logger.ERROR)
             
             ###################################################################################################
             
             if  sickbeard.TORRENT_RATIO:
                 if not self._sendRequest({'method': 'core.set_torrent_stop_at_ratio', 'params': [torrentHash, True], 'id': self.seq_id}):
-                    logger.log("[" + self.name + "] _sendTORRENT() Error setting Stop At Ratio on torrent hash " + torrentHash,logger.ERROR)
+                    logger.log("[" + self.name + "] " + self.funcName() + " Error setting Stop At Ratio on torrent hash " + torrentHash,logger.ERROR)
                 
-                if not self._sendRequest({'method': 'core.set_torrent_stop_ratio','params': [torrentHash,float(sickbeard.TORRENT_RATIO)],'id': self.seq_id}):
-                    logger.log("[" + self.name + "] _sendTORRENT() Error setting Stop Ration On torrent hash " + torrentHash,logger.ERROR)
+                if not self._sendRequest({'method': 'core.set_torrent_stop_ratio','params': [torrentHash, float(sickbeard.TORRENT_RATIO)], 'id': self.seq_id}):
+                    logger.log("[" + self.name + "] " + self.funcName() + " Error setting Stop Ration On torrent hash " + torrentHash, logger.ERROR)
                     
             ###################################################################################################
             
             if sickbeard.TORRENT_LABEL:
                 sickbeard.TORRENT_LABEL = sickbeard.TORRENT_LABEL.replace("/", "_").replace("\\", "_")
                 if not self._sendRequest({'method': 'label.get_labels', 'params': [], 'id': self.seq_id}):
-                    logger.log("[" + self.name + "] _sendTORRENT() Error requesting Labels.",logger.ERROR)
+                    logger.log("[" + self.name + "] " + self.funcName() + " Error requesting Labels.", logger.ERROR)
                 else:
                     if sickbeard.TORRENT_LABEL not in self.jdata['result']:
-                        logger.log("[" + self.name + "] _sendTORRENT() " + sickbeard.TORRENT_LABEL + " label does not exist, Attempting to add it.",logger.DEBUG)
+                        logger.log("[" + self.name + "] " + self.funcName() + " " + sickbeard.TORRENT_LABEL + " label does not exist, Attempting to add it.", logger.DEBUG)
                         if not self._sendRequest({'method': 'label.add', 'params': [sickbeard.TORRENT_LABEL], 'id': self.seq_id}):
-                            logger.log("[" + self.name + "] _sendTORRENT() Could not create label " + sickbeard.TORRENT_LABEL,logger.ERROR)
+                            logger.log("[" + self.name + "] _sendTORRENT() Could not create label " + sickbeard.TORRENT_LABEL, logger.ERROR)
                         
                     ###################################################################################################
                     # Recheck & Set Label on hash.
@@ -186,17 +189,18 @@ class Deluge:
                     if self._sendRequest({'method': 'label.get_labels', 'params': [], 'id': self.seq_id}):
                         if sickbeard.TORRENT_LABEL in self.jdata['result']:
                             if not self._sendRequest({'method': 'label.set_torrent', 'params': [torrentHash, sickbeard.TORRENT_LABEL], 'id': self.seq_id}):
-                                logger.log("[" + self.name + "] _sendTORRENT() Error setting label " + sickbeard.TORRENT_LABEL + " on Torrent Hash " + torrentHash,logger.ERROR)
+                                logger.log("[" + self.name + "] " + self.funcName() + " Error setting label " + sickbeard.TORRENT_LABEL + " on Torrent Hash " + torrentHash, logger.ERROR)
                         else:
-                            logger.log("[" + self.name + "] _sendTORRENT() Could not find label " + sickbeard.TORRENT_LABEL + ", giving up", logger.ERROR)
+                            logger.log("[" + self.name + "] " + self.funcName() + " Could not find label " + sickbeard.TORRENT_LABEL + ", giving up", logger.ERROR)
                     else:
-                        logger.log("[" + self.name + "] _sendTORRENT() Error requesting Labels.",logger.ERROR)
+                        logger.log("[" + self.name + "] " + self.funcName() + " Error requesting Labels.", logger.ERROR)
                 
             ###################################################################################################
             
-            logger.log("[" + self.name + "] _sendTORRENT() Torrent added successfully.", logger.DEBUG)
+            logger.log("[" + self.name + "] " + self.funcName() + " Torrent added successfully.", logger.DEBUG)
             return True
-        logger.log("[" + self.name + "] _sendTORRENT() Failed, no hash returned.",logger.ERROR)
+        logger.log("[" + self.name + "] " + self.funcName() + " Failed, no hash returned.", logger.ERROR)
+        logger.log("[" + self.name + "] " + self.funcName() + " Failed, result =  " + str(self.jdata['result']) + ", error = " + str(self.jdata['error']) + ", seq_id = " + str(self.seq_id-1) + " vs deluge.seq_id = " + self.jdata['id'], logger.DEBUG)
         return False
 
 ###################################################################################################
@@ -204,7 +208,7 @@ class Deluge:
 def testAuthentication(host, username, password):
     deluge = Deluge()
     deluge.session = requests.Session()
-    return deluge._authenicate(host,password)
+    return deluge._authenicate(host, password)
 
 ###################################################################################################
 

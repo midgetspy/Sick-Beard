@@ -143,7 +143,7 @@ class BTDIGGProvider(generic.TorrentProvider):
         tmp_results = []
         if data:
             logger.log("[" + self.name + "] parseResults() URL: " + searchUrl, logger.DEBUG)
-            jdata = json.load(data)
+            jdata = json.loads(data)
             for torrent in sorted(jdata, key=itemgetter('reqs'), reverse=True):
                 found = 0
 

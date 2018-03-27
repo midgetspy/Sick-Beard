@@ -44,6 +44,8 @@ from sickbeard import search_queue
 from sickbeard import image_cache
 from sickbeard import naming
 
+from sickbeard.scene_exceptions import retrieve_exceptions
+
 from sickbeard.providers import newznab
 from sickbeard.common import Quality, Overview, statusStrings
 from sickbeard.common import SNATCHED, SKIPPED, UNAIRED, IGNORED, ARCHIVED, WANTED
@@ -192,7 +194,6 @@ class ManageSearches:
 
     @cherrypy.expose
     def forceVersionCheck(self):
-
         # force a check to see if there is a new version
         result = sickbeard.versionCheckScheduler.action.check_for_new_version(force=True)  # @UndefinedVariable
         if result:
@@ -200,6 +201,18 @@ class ManageSearches:
 
         redirect("/manage/manageSearches/")
 
+    @cherrypy.expose   
+    def forceSceneExceptions(self):
+        # force a resync of scene Exceptions.
+        logger.log(u"Forcing Scene Exceptions Update")
+        if not retrieve_exceptions():
+            logger.log(u"Scene Exceptions Update Failed.")
+            ui.notifications.error('Forced Scene Exceptions', 'Update Failed.')
+        else:
+            logger.log(u"Scene Exceptions Update Completed.")
+            ui.notifications.message('Forced Scene Exceptions', 'Update Completed.')
+            
+        redirect("/manage/manageSearches/")
 
 class Manage:
 
@@ -720,11 +733,12 @@ class ConfigGeneral:
         return m.hexdigest()
 
     @cherrypy.expose
-    def saveGeneral(self, log_dir=None, web_port=None, web_log=None, web_ipv6=None,
+    def saveGeneral(self, log_dir=None, web_host=None, web_port=None, web_log=None, web_ipv6=None,
                     launch_browser=None, web_username=None, use_api=None, api_key=None,
                     web_password=None, version_notify=None, enable_https=None, https_cert=None, https_key=None):
 
         results = []
+        restart_required = False
 
         # Misc
         sickbeard.LAUNCH_BROWSER = config.checkbox_to_value(launch_browser)
@@ -738,8 +752,12 @@ class ConfigGeneral:
         if not config.change_LOG_DIR(log_dir, web_log):
             results += ["Unable to create directory " + os.path.normpath(log_dir) + ", log directory not changed."]
 
+        if config.to_int(web_port, default=8081) != sickbeard.WEB_PORT or web_host != sickbeard.WEB_HOST:
+            restart_required = True
+            
         sickbeard.WEB_PORT = config.to_int(web_port, default=8081)
-
+        sickbeard.WEB_HOST = web_host
+        
         sickbeard.WEB_USERNAME = web_username
         sickbeard.WEB_PASSWORD = web_password
 
@@ -764,9 +782,12 @@ class ConfigGeneral:
                         '<br />\n'.join(results))
         else:
             ui.notifications.message('Configuration Saved', ek.ek(os.path.join, sickbeard.CONFIG_FILE) )
+        
+        if restart_required:
+            ui.notifications.message('Restarting Web Service For Sick Beard.')
+            Home().restart(sickbeard.PID)
 
         redirect("/config/general/")
-
 
 class ConfigSearch:
 
@@ -1054,11 +1075,9 @@ class ConfigProviders:
                       thepiratebay_trusted = None, thepiratebay_proxy = None, thepiratebay_proxy_url = None,thepiratebay_url_override = None, thepiratebay_url_override_enable = None,
                       torrentleech_username = None, torrentleech_password = None,
                       torrentday_phpsessid = None, torrentday_uid = None, torrentday_pass = None,
-                      sceneaccess_username = None, sceneaccess_password = None, 
                       iptorrents_username = None, iptorrents_password = None, iptorrents_eu = None, 
                       bithdtv_username = None, bithdtv_password = None,
                       torrentshack_username = None, torrentshack_password = None, torrentshack_uid = None, torrentshack_auth = None, torrentshack_pass_key = None, torrentshack_auth_key = None,
-                      torrentz_verified = None,
                       speed_username = None, speed_password = None, speed_rsshash = None,
                       revolutiontt_username = None, revolutiontt_password = None, 
                       kickass_alt_url = None,
@@ -1115,12 +1134,8 @@ class ConfigProviders:
 
             provider_list.append(curProvider)
 
-            if curProvider == 'womble_s_index':
-                sickbeard.WOMBLE = curEnabled
-            elif curProvider == 'omgwtfnzbs':
+            if curProvider == 'omgwtfnzbs':
                 sickbeard.OMGWTFNZBS = curEnabled
-            elif curProvider == 'ezrss':
-                sickbeard.EZRSS = curEnabled
             elif curProvider == 'eztv':
                 sickbeard.EZTV = curEnabled
             elif curProvider == 'hdbits':
@@ -1137,8 +1152,6 @@ class ConfigProviders:
                 sickbeard.TORRENTLEECH = curEnabled
             elif curProvider == 'torrentday':
                 sickbeard.TORRENTDAY = curEnabled
-            elif curProvider == 'sceneaccess':
-                sickbeard.SCENEACCESS = curEnabled
             elif curProvider == 'iptorrents':
                 sickbeard.IPTORRENTS = curEnabled
             elif curProvider == 'bithdtv':
@@ -1198,10 +1211,7 @@ class ConfigProviders:
         sickbeard.TORRENTDAY_PHPSESSID = torrentday_phpsessid.strip()
         sickbeard.TORRENTDAY_UID = torrentday_uid.strip()
         sickbeard.TORRENTDAY_PASS = torrentday_pass.strip()
-        
-        sickbeard.SCENEACCESS_USERNAME = sceneaccess_username.strip()
-        sickbeard.SCENEACCESS_PASSWORD = sceneaccess_password.strip()
-        
+                
         sickbeard.IPTORRENTS_USERNAME = iptorrents_username.strip()
         sickbeard.IPTORRENTS_PASSWORD = iptorrents_password.strip()
         sickbeard.IPTORRENTS_EU = 1 if iptorrents_eu == 'on' else 0
@@ -1270,6 +1280,7 @@ class ConfigNotifications:
                           use_boxcar2=None, boxcar2_notify_onsnatch=None, boxcar2_notify_ondownload=None, boxcar2_access_token=None, boxcar2_sound=None,
                           use_pushover=None, pushover_notify_onsnatch=None, pushover_notify_ondownload=None, pushover_userkey=None, pushover_priority=None,
                               pushover_device=None, pushover_sound=None, pushover_device_list=None,
+                          use_slack=None, slack_notify_onsnatch=None, slack_notify_ondownload=None, slack_webhook_url=None, slack_channel=None, slack_bot_name=None, slack_icon_url=None,
                           use_libnotify=None, libnotify_notify_onsnatch=None, libnotify_notify_ondownload=None,
                           use_nmj=None, nmj_host=None, nmj_database=None, nmj_mount=None,
                           use_synoindex=None, synoindex_notify_onsnatch=None, synoindex_notify_ondownload=None, synoindex_update_library=None,
@@ -1387,6 +1398,14 @@ class ConfigNotifications:
         sickbeard.TRAKT_USERNAME = trakt_username
         sickbeard.TRAKT_PASSWORD = trakt_password
         sickbeard.TRAKT_API = trakt_api
+
+        sickbeard.USE_SLACK = config.checkbox_to_value(use_slack)
+        sickbeard.SLACK_NOTIFY_ONSNATCH = config.checkbox_to_value(slack_notify_onsnatch)
+        sickbeard.SLACK_NOTIFY_ONDOWNLOAD = config.checkbox_to_value(slack_notify_ondownload)
+        sickbeard.SLACK_WEBHOOK_URL = slack_webhook_url
+        sickbeard.SLACK_CHANNEL = slack_channel
+        sickbeard.SLACK_BOT_NAME = slack_bot_name
+        sickbeard.SLACK_ICON_URL = slack_icon_url
 
         sickbeard.save_config()
 
@@ -2292,6 +2311,16 @@ class Home:
             return result
         else:
             return "{}"
+
+    @cherrypy.expose
+    def testSlack(self, webhookUrl=None, channel=None, bot_name=None, icon_url=None):
+        cherrypy.response.headers['Cache-Control'] = "max-age=0,no-cache,no-store"
+
+        result = notifiers.slack_notifier.test_notify(webhookUrl, channel, bot_name, icon_url)
+        if result:
+            return "Slack notification succeeded. Check your Slack clients to make sure it worked"
+        else:
+            return "Error sending Slack notification"
 
     @cherrypy.expose
     def shutdown(self, pid=None):

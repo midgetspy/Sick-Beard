@@ -16,11 +16,10 @@
 # You should have received a copy of the GNU General Public License
 # along with Sick Beard.  If not, see <http://www.gnu.org/licenses/>.
 
-__all__ = ['ezrss',
+__all__ = [
            'eztv',
            'hdbits',
            'tvtorrents',
-           'womble',
            'btn',
            'omgwtfnzbs',
            'kickass',
@@ -28,7 +27,6 @@ __all__ = ['ezrss',
            'thepiratebay',
            'torrentleech',
            'torrentday',
-           'sceneaccess',
            'iptorrents',
            'bithdtv',
            'btdigg',

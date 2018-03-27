@@ -150,6 +150,7 @@ def help_message():
         help_msg += "    -d          --daemon            Run as double forked daemon (includes options --quiet --nolaunch)\n"
         help_msg += "                --pidfile=<path>    Combined with --daemon creates a pidfile (full path including filename)\n"
 
+    help_msg += "    -a <ipaddr> --addr=<ipaddr>     Override default/configured ip address to listen on\n"
     help_msg += "    -p <port>   --port=<port>       Override default/configured port to listen on\n"
     help_msg += "                --datadir=<path>    Override folder (full path) as location for\n"
     help_msg += "                                    storing database, configfile, cache, logfiles \n"
@@ -206,11 +207,12 @@ def main():
     threading.currentThread().name = "MAIN"
 
     try:
-        opts, args = getopt.getopt(sys.argv[1:], "hfqdp::", ['help', 'forceupdate', 'quiet', 'nolaunch', 'daemon', 'pidfile=', 'port=', 'datadir=', 'config=', 'noresize'])  # @UnusedVariable
+        opts, args = getopt.getopt(sys.argv[1:], "hfqda:p::", ['help', 'forceupdate', 'quiet', 'nolaunch', 'daemon', 'pidfile=','addr=', 'port=', 'datadir=', 'config=', 'noresize'])  # @UnusedVariable
     except getopt.GetoptError:
         sys.exit(help_message())
 
     forceUpdate = False
+    forcedHost = None
     forcedPort = None
     noLaunch = False
 
@@ -259,6 +261,13 @@ def main():
                 forcedPort = int(a)
             except ValueError:
                 sys.exit("Port: " + str(a) + " is not a number. Exiting.")
+
+        # Override default/configured host
+        if o in ('-a', '--addr'):
+            try:
+                forcedHost = str(a)
+            except ValueError:
+                sys.exit("Host: " + str(a) + " is not a string. Exiting.")
 
         # Specify folder to use as data dir (storing database, configfile, cache, logfiles)
         if o in ('--datadir',):
@@ -349,7 +358,11 @@ def main():
         if sickbeard.WEB_IPV6:
             webhost = '::'
         else:
-            webhost = '0.0.0.0'
+            webhost = '127.0.0.1'
+
+    if forcedHost:
+        logger.log(u"Forcing web server to address " + str(forcedHost))
+        webhost = forcedHost
 
     try:
         initWebServer({
@@ -368,7 +381,7 @@ def main():
         logger.log(u"Unable to start web server, is something else running on port: " + str(startPort), logger.ERROR)
         if sickbeard.LAUNCH_BROWSER and not sickbeard.DAEMON:
             logger.log(u"Launching browser and exiting", logger.ERROR)
-            sickbeard.launchBrowser(startPort)
+            sickbeard.launchBrowser(webhost, startPort)
         sys.exit("Unable to start web server, is something else running on port: " + str(startPort))
 
     # Build from the DB to start with
@@ -380,7 +393,7 @@ def main():
 
     # Launch browser if we're supposed to
     if sickbeard.LAUNCH_BROWSER and not noLaunch and not sickbeard.DAEMON:
-        sickbeard.launchBrowser(startPort)
+        sickbeard.launchBrowser(webhost, startPort)
 
     # Start an update if we're supposed to
     if forceUpdate:
