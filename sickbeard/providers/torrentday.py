@@ -55,6 +55,7 @@ class TorrentDayProvider(
         self.session = None
         self.supportsBacklog = True
         self.url = 'https://www.torrentday.com/'
+        self.categories = { '7': 1, '14': 1, '24': 1, '26': 1, '33': 1, '34':1 }
         self.funcName = lambda n=0: sys._getframe(n + 1).f_code.co_name + "()"
         logger.log('[' + self.name + '] initializing...')
 
@@ -185,25 +186,19 @@ class TorrentDayProvider(
     def _doSearch(self, search_params, show=None):
         search_params = search_params.replace('.', ' ')
         logger.log("[" + self.name + "] Performing Search For: {0}".format(search_params))
-        searchUrl = self.url + "V3/API/API.php"
-        PostData = {
-            '/browse.php?': None,
-            'cata': 'yes',
-            'jxt': 8,
-            'jxw': 'b',
-            'search': search_params,
-            'c7': 1,
-            'c14': 1,
-            'c24': 1,
-            'c26': 1,
-            'c33': 1,
-            'c34': 1
-        }
+    
+        searchUrl = self.url + "/t.json"
+        query = { 'q': search_params }
+        query.update(self.categories)
 
         try:
-            data = self.getURL(searchUrl, data=PostData)
-            jdata = json.loads(data)
-            if jdata.get('Fs', [])[0].get('Fn', {}) == "Oarrive":
+            jdata = json.loads(
+                self.getURL(
+                    searchUrl,
+                    data=query
+                )
+            )
+            if not jdata:
                 logger.log("[{0}] {1} search data sent 0 results.".format(
                         self.name,
                         self.funcName(),
@@ -211,7 +206,17 @@ class TorrentDayProvider(
                     logger.MESSAGE
                 )
                 return []
-            torrents = jdata.get('Fs', [])[0].get('Cn', {}).get('torrents', [])
+            
+            torrents = []
+            for torrent in jdata:
+                if torrent.get('t') and torrent.get('name'):
+                    torrents.append(
+                        {
+                            'id': torrent.get('t'),
+                            'name': torrent.get('name')
+                        }
+                    )
+                #torrents = jdata.get('Fs', [])[0].get('Cn', {}).get('torrents', [])
         except ValueError, e:
             logger.log("[{0}] {1} invalid json returned.".format(
                     self.name,
@@ -231,11 +236,11 @@ class TorrentDayProvider(
         for torrent in torrents:
             results.append(
                 (
-                    torrent['name'].replace('.', ' '),
-                    "{0}download.php/{1}/{2}?torrent_pass={3}".format(
+                    torrent.get('name').replace('.', ' '),
+                    "{0}download.php/{1}/{2}.torrent?torrent_pass={3}".format(
                         self.url,
                         torrent.get('id'),
-                        torrent.get('fname'),
+                        torrent.get('name'),
                         self.rss_passkey
                     )
                 )
@@ -268,69 +273,14 @@ class TorrentDayProvider(
 
     ###########################################################################
 
-    def checkAuth(self, response):
-        if "www.torrentday.com/login.php" in response.url:
-            logger.log("[{0}] {1} Error: We no longer appear to be authenticated. Aborting.".format(
-                    self.name,
-                    self.funcName()
-                ),
-                logger.MESSAGE
-            )
-            # raise exception to sickbeard but hide the stack trace.
-            sys.tracebacklimit = 0
-            raise Exception("[{0}] {1} Error: We no longer appear to be authenticated. Aborting..".format(
-                    self.name,
-                    self.funcName()
-                )
-            )
-
-    ###########################################################################
-
-    def checkAuthCookies(self, cookies={}):
-        if not cookies:
-            cookies = {
-                'uid': sickbeard.TORRENTDAY_UID,
-                'pass': sickbeard.TORRENTDAY_PASS
-            }
-
-        existing_cookies = requests.utils.dict_from_cookiejar(self.session.cookies)
-        for cookie_name in cookies:
-            if cookie_name in existing_cookies:
-                if existing_cookies.get(cookie_name) != cookies.get(cookie_name):
-                    logger.log("[{0}] {1} Updating Cookie {2} from {3} to {4}".format(
-                            self.name,
-                            self.funcName(),
-                            cookie_name,
-                            existing_cookies.get(cookie_name),
-                            cookies.get(cookie_name)
-                        ),
-                        logger.DEBUG
-                    )
-            else:
-                logger.log("[{0}] {1} Adding Cookie {2} with value of {3}".format(
-                        self.name,
-                        self.funcName(),
-                        cookie_name,
-                        cookies.get(cookie_name)
-                    ),
-                    logger.DEBUG
-                )
-            self.session.cookies.set(cookie_name, cookies.get(cookie_name))
-
-    ###########################################################################
-
     def getURL(self, url, headers=[], data=None):
         response = None
 
         if not self.session or not sickbeard.TORRENTDAY_UID or not sickbeard.TORRENTDAY_PASS:
             if not self._doLogin():
                 return response
-        
         try:
-            if "/t.rss" in url:
-                response = self.session.get(url, verify=False)
-            else:
-                response = self.session.post(url, verify=False, data=data)
+            response = self.session.get(url, params=data, verify=False)
         except (requests.exceptions.ConnectionError, requests.exceptions.HTTPError), e:
             logger.log("[{0}] {1} Error loading URL: {2}, Error: {3}".format(
                     self.name,
@@ -409,6 +359,57 @@ class TorrentDayProvider(
         )
 
         return True
+
+    ###########################################################################
+
+    def checkAuth(self, response):
+        if "www.torrentday.com/login.php" in response.url:
+            logger.log("[{0}] {1} Error: We no longer appear to be authenticated. Aborting.".format(
+                    self.name,
+                    self.funcName()
+                ),
+                logger.MESSAGE
+            )
+            # raise exception to sickbeard but hide the stack trace.
+            sys.tracebacklimit = 0
+            raise Exception("[{0}] {1} Error: We no longer appear to be authenticated. Aborting..".format(
+                    self.name,
+                    self.funcName()
+                )
+            )
+
+    ###########################################################################
+
+    def checkAuthCookies(self, cookies={}):
+        if not cookies:
+            cookies = {
+                'uid': sickbeard.TORRENTDAY_UID,
+                'pass': sickbeard.TORRENTDAY_PASS
+            }
+
+        existing_cookies = requests.utils.dict_from_cookiejar(self.session.cookies)
+        for cookie_name in cookies:
+            if cookie_name in existing_cookies:
+                if existing_cookies.get(cookie_name) != cookies.get(cookie_name):
+                    logger.log("[{0}] {1} Updating Cookie {2} from {3} to {4}".format(
+                            self.name,
+                            self.funcName(),
+                            cookie_name,
+                            existing_cookies.get(cookie_name),
+                            cookies.get(cookie_name)
+                        ),
+                        logger.DEBUG
+                    )
+            else:
+                logger.log("[{0}] {1} Adding Cookie {2} with value of {3}".format(
+                        self.name,
+                        self.funcName(),
+                        cookie_name,
+                        cookies.get(cookie_name)
+                    ),
+                    logger.DEBUG
+                )
+            self.session.cookies.set(cookie_name, cookies.get(cookie_name))
 
     ###########################################################################
 
