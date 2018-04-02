@@ -192,9 +192,12 @@ TORRENTLEECH_USERNAME = None
 TORRENTLEECH_PASSWORD = None
 
 TORRENTDAY = False
-TORRENTDAY_PHPSESSID = None
+TORRENTDAY_ANTICAPTCHA_KEY = None
+TORRENTDAY_USERNAME = None
+TORRENTDAY_PASSWORD = None
 TORRENTDAY_UID = None
 TORRENTDAY_PASS = None
+TORRENTDAY_EMAIL_URL = None
 
 IPTORRENTS = False
 IPTORRENTS_USERNAME = None
@@ -417,7 +420,7 @@ def initialize(consoleLogging=True):
                 KICKASS, KICKASS_ALT_URL, \
                 TORRENTZ, \
                 TORRENTLEECH, TORRENTLEECH_USERNAME, TORRENTLEECH_PASSWORD, \
-                TORRENTDAY, TORRENTDAY_PHPSESSID, TORRENTDAY_UID, TORRENTDAY_PASS, \
+                TORRENTDAY, TORRENTDAY_ANTICAPTCHA_KEY, TORRENTDAY_USERNAME, TORRENTDAY_PASSWORD, TORRENTDAY_UID, TORRENTDAY_PASS, TORRENTDAY_EMAIL_URL, \
                 IPTORRENTS, IPTORRENTS_USERNAME, IPTORRENTS_PASSWORD, IPTORRENTS_EU, \
                 BITHDTV, BITHDTV_USERNAME, BITHDTV_PASSWORD, \
                 TORRENTSHACK, TORRENTSHACK_USERNAME, TORRENTSHACK_PASSWORD, TORRENTSHACK_UID, TORRENTSHACK_AUTH, TORRENTSHACK_PASS_KEY ,TORRENTSHACK_AUTH_KEY, \
@@ -598,9 +601,12 @@ def initialize(consoleLogging=True):
         TORRENTLEECH_PASSWORD = check_setting_str(CFG, 'TORRENTLEECH', 'torrentleech_password', '')
 
         TORRENTDAY = bool(check_setting_int(CFG, 'TORRENTDAY', 'torrentday', 0))
-        TORRENTDAY_PHPSESSID = check_setting_str(CFG, 'TORRENTDAY', 'torrentday_phpsessid', '')
+        TORRENTDAY_ANTICAPTCHA_KEY = check_setting_str(CFG, 'TORRENTDAY', 'torrentday_anticaptcha_key', '')
+        TORRENTDAY_USERNAME = check_setting_str(CFG, 'TORRENTDAY', 'torrentday_username', '')
+        TORRENTDAY_PASSWORD = check_setting_str(CFG, 'TORRENTDAY', 'torrentday_password', '')
         TORRENTDAY_UID = check_setting_str(CFG, 'TORRENTDAY', 'torrentday_uid', '')
         TORRENTDAY_PASS = check_setting_str(CFG, 'TORRENTDAY', 'torrentday_pass', '')
+        TORRENTDAY_EMAIL_URL = check_setting_str(CFG, 'TORRENTDAY', 'torrentday_email_url', '')
 
         IPTORRENTS = bool(check_setting_int(CFG, 'IPTORRENTS', 'iptorrents', 0))
         IPTORRENTS_USERNAME = check_setting_str(CFG, 'IPTORRENTS', 'iptorrents_username', '')
@@ -1139,7 +1145,6 @@ def restart(soft=True):
         #cherrypy.engine.restart()
         logger.log(u"Re-initializing all data")
         initialize()
-
     else:
         saveAndShutdown(restart=True)
 
@@ -1241,9 +1246,12 @@ def save_config():
 
     new_config['TORRENTDAY'] = {}
     new_config['TORRENTDAY']['torrentday'] = int(TORRENTDAY)
-    new_config['TORRENTDAY']['torrentday_phpsessid'] = TORRENTDAY_PHPSESSID
+    new_config['TORRENTDAY']['torrentday_anticaptcha_key'] = TORRENTDAY_ANTICAPTCHA_KEY
+    new_config['TORRENTDAY']['torrentday_username'] = TORRENTDAY_USERNAME
+    new_config['TORRENTDAY']['torrentday_password'] = TORRENTDAY_PASSWORD
     new_config['TORRENTDAY']['torrentday_uid'] = TORRENTDAY_UID
     new_config['TORRENTDAY']['torrentday_pass'] = TORRENTDAY_PASS
+    new_config['TORRENTDAY']['torrentday_email_url'] = TORRENTDAY_EMAIL_URL
 
     new_config['IPTORRENTS'] = {}
     new_config['IPTORRENTS']['iptorrents'] = int(IPTORRENTS)
