@@ -659,7 +659,7 @@ class TorrentDayCache(tvcache.TVCache):
                 "<atom:link href=\"" + provider.url + "\" rel=\"self\" type=\"application/rss+xml\"/>" + \
                 "</channel></rss>"
 
-        if not provider.rss_uid or provider.rss_passkey:
+        if not provider.rss_uid or not provider.rss_passkey:
             if not provider._doLogin():
                 return xml
 
