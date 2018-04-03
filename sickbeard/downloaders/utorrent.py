@@ -116,7 +116,6 @@ def sendTORRENT(torrent):
         else:
             try:
                 headers = {
-                    'User-Agent': sickbeard.common.USER_AGENT,
                     'Referer': torrent.url
                 }
                 

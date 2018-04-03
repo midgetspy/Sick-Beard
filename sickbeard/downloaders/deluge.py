@@ -108,7 +108,6 @@ class Deluge:
             # Attempt to download torrent file.
             try:
                 headers = {
-                    'User-Agent': sickbeard.common.USER_AGENT,
                     'Referer': torrent.url
                 }
                 
