@@ -50,6 +50,7 @@ class TorrentLeechProvider(generic.TorrentProvider):
         self.session = None
         self.supportsBacklog = True
         self.url = 'https://classic.torrentleech.org/'
+        self.funcName = lambda n=0: sys._getframe(n + 1).f_code.co_name + "()"
         logger.log("[" + self.name + "] initializing...")
         
     ###################################################################################################
