@@ -27,7 +27,9 @@ import datetime
 import sickbeard
 import exceptions
 
+from lib import cfscrape
 from lib import requests
+
 from xml.sax.saxutils import escape
 
 from sickbeard import db
@@ -145,13 +147,18 @@ class TorrentLeechProvider(generic.TorrentProvider):
         if data:
             logger.log("[" + self.name + "] parseResults() URL: " + searchUrl, logger.DEBUG)
             
-            for torrent in re.compile('<span class="title"><a href="/torrent/\d+">(?P<title>.*?)</a>.*?<td class="quickdownload">\s+<a href="(?P<url>.*?)">',re.MULTILINE|re.DOTALL).finditer(data):
+            for torrent in re.compile('<span class="title"><a href="/torrent/\d+">(?P<title>.*?)</a>.*?<td class="quickdownload">\s+<a href="(?P<url>.*?)">', re.MULTILINE|re.DOTALL).finditer(data):
                 try:
-                    item = (torrent.group('title').replace('.',' ').decode('ascii'), torrent.group('url'))
+                    results.append(
+                        (
+                            torrent.group('title').replace('.',' ').decode('ascii'),
+                            torrent.group('url')
+                        )
+                    )
                     logger.log("[" + self.name + "] parseResults() Title: " + torrent.group('title'), logger.DEBUG)
                 except:
-                    logger.log("[" + self.name + "] Skipping torrent, non standard character found and/or unable to extract torrent download information.",logger.DEBUG)
-                results.append(item)                        
+                    logger.log("[" + self.name + "] Skipping torrent, non standard character found and/or unable to extract torrent download information.", logger.DEBUG)
+
             if len(results):
                 logger.log("[" + self.name + "] parseResults() Some results found.")
             else:
@@ -174,16 +181,51 @@ class TorrentLeechProvider(generic.TorrentProvider):
             
         try:
             response = self.session.get(url, verify=False)
+            if (True, True) == self._cloudFlare(response):
+                response = self.session.get(url, verify=False)
+                
         except (requests.exceptions.ConnectionError, requests.exceptions.HTTPError), e:
             logger.log("[" + self.name + "] getURL() Error loading " + self.name + " URL: " + ex(e), logger.ERROR)
             return None
         
         if response.status_code not in [200,302,303]:
-            logger.log("[" + self.name + "] getURL() requested URL - " + url +" returned status code is " + str(response.status_code), logger.ERROR)
+            logger.log("[{0}] {1} requested URL: {2} returned status code is {3}".format(
+                    self.name,
+                    self.funcName(),
+                    url,
+                    response.status_code
+                ),
+                logger.ERROR
+            )
             return None
 
         return response.content
 
+    ###################################################################################################
+
+    def _cloudFlare(self, response):
+        cf = cfscrape.create_scraper(sess=self.session)
+        if cf.is_cloudflare_challenge(response):
+            logger.log(
+                "[{0}] {1} requested URL - {2}, encounted CloudFlare DDOS Protection.. Bypassing.".format(
+                    self.name,
+                    self.funcName(),
+                    response.url
+                ),
+                logger.DEBUG
+            )
+            
+            response = cf.get(
+                "{0}/torrents/browse".format(self.url),
+                verify=False
+            )
+            
+            if not cf.is_cloudflare_challenge(response):
+                return (True, True);
+            
+            return (True, False)
+        
+        return (False, True)
     ###################################################################################################
     
     def _doLogin(self):
@@ -198,7 +240,20 @@ class TorrentLeechProvider(generic.TorrentProvider):
         logger.log("[" + self.name + "] Attempting to Login")
         
         try:
-            response = self.session.post(self.url + "user/account/login", data=login_params, timeout=30, verify=False)
+            response = self.session.post(
+                "{0}user/account/login".format(self.url),
+                data=login_params,
+                timeout=30,
+                verify=False
+            )
+            
+            if (True, True) == self._cloudFlare(response):
+                response = self.session.post(
+                    "{0}user/account/login".format(self.url),
+                    data=login_params,
+                    timeout=30,
+                    verify=False
+                )
         except (requests.exceptions.ConnectionError, requests.exceptions.HTTPError), e:
             raise Exception("[" + self.name + "] _doLogin() Error: " + ex(e))
             return False
@@ -210,6 +265,7 @@ class TorrentLeechProvider(generic.TorrentProvider):
         return True
     
     ###################################################################################################
+
 
 class TorrentLeechCache(tvcache.TVCache):
     
