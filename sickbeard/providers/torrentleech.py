@@ -179,7 +179,7 @@ class TorrentLeechProvider(generic.TorrentProvider):
     ###########################################################################
 
     def _doSearch(self, search_params, show=None):
-        logger.log("[{0]} {1} Performing Search: {2}".format(
+        logger.log("[{0}] {1} Performing Search: {2}".format(
                 self.name,
                 self.funcName(),
                 search_params
