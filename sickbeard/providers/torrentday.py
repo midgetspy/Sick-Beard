@@ -57,8 +57,12 @@ class TorrentDayProvider(
         self.url = 'https://www.torrentday.com/'
         self.categories = { '7': 1, '14': 1, '24': 1, '26': 1, '33': 1, '34':1 }
         self.funcName = lambda n=0: sys._getframe(n + 1).f_code.co_name + "()"
-        logger.log('[' + self.name + '] initializing...')
-
+        logger.log(
+            "[{0}] initializing...".format(
+                self.name
+            )
+        )
+        
     ###########################################################################
 
     def isEnabled(self):
@@ -184,22 +188,29 @@ class TorrentDayProvider(
     ###########################################################################
 
     def _doSearch(self, search_params, show=None):
+        
         search_params = search_params.replace('.', ' ')
-        logger.log("[" + self.name + "] Performing Search For: {0}".format(search_params))
-    
-        searchUrl = self.url + "/t.json"
+        logger.log(
+            "[{0}] {1} Performing Search For: {2}".format(
+                self.name,
+                self.funcName(),
+                search_params
+            )
+        )
+                   
         query = { 'q': search_params }
         query.update(self.categories)
 
         try:
             jdata = json.loads(
                 self.getURL(
-                    searchUrl,
+                    '{0}/t.json'.format(self.url),
                     data=query
                 )
             )
             if not jdata:
-                logger.log("[{0}] {1} search data sent 0 results.".format(
+                logger.log(
+                    "[{0}] {1} search data sent 0 results.".format(
                         self.name,
                         self.funcName(),
                     ),
@@ -216,9 +227,9 @@ class TorrentDayProvider(
                             'name': torrent.get('name')
                         }
                     )
-                #torrents = jdata.get('Fs', [])[0].get('Cn', {}).get('torrents', [])
         except ValueError, e:
-            logger.log("[{0}] {1} invalid json returned.".format(
+            logger.log(
+                "[{0}] {1} invalid json returned.".format(
                     self.name,
                     self.funcName(),
                 ),
@@ -246,7 +257,8 @@ class TorrentDayProvider(
                 )
             )
 
-            logger.log("[{0}] {1} Title: {2}".format(
+            logger.log(
+                "[{0}] {1} Title: {2}".format(
                     self.name,
                     self.funcName(),
                     torrent.get('name')
@@ -255,7 +267,8 @@ class TorrentDayProvider(
             )
 
         if len(results):
-            logger.log("[{0}] {1} Some results found.".format(
+            logger.log(
+                "[{0}] {1} Some results found.".format(
                     self.name,
                     self.funcName()
                 ),
@@ -282,7 +295,8 @@ class TorrentDayProvider(
         try:
             response = self.session.get(url, params=data, verify=False)
         except (requests.exceptions.ConnectionError, requests.exceptions.HTTPError), e:
-            logger.log("[{0}] {1} Error loading URL: {2}, Error: {3}".format(
+            logger.log(
+                "[{0}] {1} Error loading URL: {2}, Error: {3}".format(
                     self.name,
                     self.funcName(),
                     self.url,
@@ -295,7 +309,8 @@ class TorrentDayProvider(
         self.checkAuth(response)
 
         if response.status_code not in [200, 302, 303]:
-            logger.log("[{0}] {1} requested URL: {2} returned status code is {3}".format(
+            logger.log(
+                "[{0}] {1} requested URL: {2} returned status code is {3}".format(
                     self.name,
                     self.funcName(),
                     self.url,
@@ -310,7 +325,13 @@ class TorrentDayProvider(
     ###########################################################################
 
     def _getPassKey(self):
-        logger.log("[" + self.name + "] _getPassKey() Attempting to acquire RSS info")
+        logger.log(
+            "[{0}] {1} Attempting to acquire RSS info".format(
+                self.name,
+                self.funcName(),
+            )
+        )
+
         try:
             self.rss_uid, self.rss_passkey = re.findall(
                 r'u=(.*);tp=([0-9A-Fa-f]{32})',
@@ -324,7 +345,8 @@ class TorrentDayProvider(
                 )
             )[0]
         except:
-            logger.log("[{0}] {1} Failed to scrape authentication parameters for rss.".format(
+            logger.log(
+                "[{0}] {1} Failed to scrape authentication parameters for rss.".format(
                     self.name,
                     self.funcName(),
                 ),
@@ -333,7 +355,8 @@ class TorrentDayProvider(
             return False
 
         if self.rss_uid is None:
-            logger.log("[{0}] {1} Can't extract uid from rss authentication scrape.".format(
+            logger.log(
+                "[{0}] {1} Can't extract uid from rss authentication scrape.".format(
                     self.name,
                     self.funcName(),
                 ),
@@ -342,7 +365,8 @@ class TorrentDayProvider(
             return False
 
         if self.rss_passkey is None:
-            logger.log("[{0}] {1} Can't extract password hash from rss authentication scrape.".format(
+            logger.log(
+                "[{0}] {1} Can't extract password hash from rss authentication scrape.".format(
                     self.name,
                     self.funcName(),
                 ),
@@ -350,7 +374,8 @@ class TorrentDayProvider(
             )
             return False
 
-        logger.log("[{0}] {1} rss_uid = {2}, rss_passkey = {3}".format(
+        logger.log(
+            "[{0}] {1} rss_uid = {2}, rss_passkey = {3}".format(
                 self.name,
                 self.funcName(),
                 self.rss_uid,
@@ -364,7 +389,8 @@ class TorrentDayProvider(
 
     def checkAuth(self, response):
         if "www.torrentday.com/login.php" in response.url:
-            logger.log("[{0}] {1} Error: We no longer appear to be authenticated. Aborting.".format(
+            logger.log(
+                "[{0}] {1} Error: We no longer appear to be authenticated. Aborting.".format(
                     self.name,
                     self.funcName()
                 ),
@@ -372,7 +398,8 @@ class TorrentDayProvider(
             )
             # raise exception to sickbeard but hide the stack trace.
             sys.tracebacklimit = 0
-            raise Exception("[{0}] {1} Error: We no longer appear to be authenticated. Aborting..".format(
+            raise Exception(
+                "[{0}] {1} Error: We no longer appear to be authenticated. Aborting..".format(
                     self.name,
                     self.funcName()
                 )
@@ -391,7 +418,8 @@ class TorrentDayProvider(
         for cookie_name in cookies:
             if cookie_name in existing_cookies:
                 if existing_cookies.get(cookie_name) != cookies.get(cookie_name):
-                    logger.log("[{0}] {1} Updating Cookie {2} from {3} to {4}".format(
+                    logger.log(
+                        "[{0}] {1} Updating Cookie {2} from {3} to {4}".format(
                             self.name,
                             self.funcName(),
                             cookie_name,
@@ -401,7 +429,8 @@ class TorrentDayProvider(
                         logger.DEBUG
                     )
             else:
-                logger.log("[{0}] {1} Adding Cookie {2} with value of {3}".format(
+                logger.log(
+                    "[{0}] {1} Adding Cookie {2} with value of {3}".format(
                         self.name,
                         self.funcName(),
                         cookie_name,
@@ -416,7 +445,8 @@ class TorrentDayProvider(
     def _handleEmailLink(self):
         passcode = None
 
-        logger.log("[{0}] {1} Attempting to extract authentication code from Email link provided.".format(
+        logger.log(
+            "[{0}] {1} Attempting to extract authentication code from Email link provided.".format(
                 self.name,
                 self.funcName()
             ),
@@ -432,7 +462,8 @@ class TorrentDayProvider(
                     sickbeard.TORRENTDAY_EMAIL_URL
                 ).group(1)
             except AttributeError:
-                logger.log("[{0}] {1} Failed to extract authentication code from Email link, erasing link from config.".format(
+                logger.log(
+                    "[{0}] {1} Failed to extract authentication code from Email link, erasing link from config.".format(
                         self.name,
                         self.funcName()
                     ),
@@ -443,7 +474,8 @@ class TorrentDayProvider(
                 return False
 
         if passcode:
-            logger.log("[{0}] {1} Extracted pass code, Requesting authentication via Email link.".format(
+            logger.log(
+                "[{0}] {1} Extracted pass code, Requesting authentication via Email link.".format(
                     self.name,
                     self.funcName()
                 )
@@ -458,7 +490,8 @@ class TorrentDayProvider(
             )
 
             if 'sign-in.php' in response.url:
-                logger.log("[{0}] {1} pass code {2}, is not valid, erasing it from the config as not to trigger again.".format(
+                logger.log(
+                    "[{0}] {1} pass code {2}, is not valid, erasing it from the config as not to trigger again.".format(
                         self.name,
                         self.funcName(),
                         passcode
@@ -469,7 +502,8 @@ class TorrentDayProvider(
                 return False
 
             if response.status_code not in [200, 302, 303]:
-                logger.log("[{0}] {1} requested URL: {2}/sign-in.php with pass code {3}, returned status code {4}".format(
+                logger.log(
+                    "[{0}] {1} requested URL: {2}/sign-in.php with pass code {3}, returned status code {4}".format(
                         self.name,
                         self.funcName(),
                         self.url,
@@ -482,7 +516,8 @@ class TorrentDayProvider(
 
             cookies = requests.utils.dict_from_cookiejar(self.session.cookies)
             if cookies.get('uid') and cookies.get('pass'):
-                logger.log("[{0}] {1} Appears we authenticated with TorrentDay, storing away session for later use.".format(
+                logger.log(
+                    "[{0}] {1} Appears we authenticated with TorrentDay, storing away session for later use.".format(
                         self.name,
                         self.funcName()
                     )
@@ -493,7 +528,8 @@ class TorrentDayProvider(
                 sickbeard.save_config()
                 return True
 
-        logger.log("[{0}] {1} Technically we shouldn't be here... yet we are?".format(
+        logger.log(
+            "[{0}] {1} Technically we shouldn't be here... yet we are?".format(
                 self.name,
                 self.funcName()
             ),
@@ -514,7 +550,8 @@ class TorrentDayProvider(
 
         client = AnticaptchaClient(sickbeard.TORRENTDAY_ANTICAPTCHA_KEY)
         
-        logger.log("[{0}] {1} Anti-Captcha.com Balance: {2}".format(
+        logger.log(
+            "[{0}] {1} Anti-Captcha.com Balance: {2}".format(
                 self.name,
                 self.funcName(),
                 client.getBalance()
@@ -525,7 +562,8 @@ class TorrentDayProvider(
             ret = self.session.get(self.url + '/login.php', verify=False)
             sitekey = re.search('data-sitekey="(.+?)"', ret.content).group(1)
         except AttributeError:
-            logger.log("[{0}] {1} Can't extract sitekey from {2}/login.php.".format(
+            logger.log(
+                "[{0}] {1} Can't extract sitekey from {2}/login.php.".format(
                     self.name,
                     self.funcName(),
                     self.url
@@ -537,7 +575,8 @@ class TorrentDayProvider(
         if sitekey is None:
             return False
 
-        logger.log("[{0}] {1} Requesting Anti-Captcha.com Job.".format(
+        logger.log(
+            "[{0}] {1} Requesting Anti-Captcha.com Job.".format(
                 self.name,
                 self.funcName()
             )
@@ -548,7 +587,8 @@ class TorrentDayProvider(
             job = client.createTask(task)
             job.join()
         except AnticaptchaException, e:
-            logger.log("[{0}] {1} Error Attempting anti-captcha.com job: {2}".format(
+            logger.log(
+                "[{0}] {1} Error Attempting anti-captcha.com job: {2}".format(
                     self.name,
                     self.funcName(),
                     e
@@ -556,7 +596,8 @@ class TorrentDayProvider(
             )
             return False
 
-        logger.log("[{0}] {1} Attempting to authenicate with TorrentDay with response from Anti-Capthca.com, clearing away any old cookies.".format(
+        logger.log(
+            "[{0}] {1} Attempting to authenicate with TorrentDay with response from Anti-Capthca.com, clearing away any old cookies.".format(
                 self.name,
                 self.funcName()
             )
@@ -587,7 +628,8 @@ class TorrentDayProvider(
 
         cookies = requests.utils.dict_from_cookiejar(self.session.cookies)
         if cookies.get('uid') and cookies.get('pass'):
-            logger.log("[{0}] {1} Appears we authenicated with TorrentDay, storing away session for later use.".format(
+            logger.log(
+                "[{0}] {1} Appears we authenicated with TorrentDay, storing away session for later use.".format(
                     self.name,
                     self.funcName()
                 )
@@ -617,7 +659,8 @@ class TorrentDayProvider(
                 if not self._bypassCaptcha():
                     return False
             else:
-                logger.log("[{0}] {1} Appears we cannot authenicate with TorrentDay.".format(
+                logger.log(
+                    "[{0}] {1} Appears we cannot authenicate with TorrentDay.".format(
                         self.name,
                         self.funcName()
                     ),
@@ -626,7 +669,8 @@ class TorrentDayProvider(
                 return False
 
         if not self._getPassKey() or not self.rss_uid or not self.rss_passkey:
-            logger.log("[{0}] {1} Could not extract rss uid/passkey... aborting.".format(
+            logger.log(
+                "[{0}] {1} Could not extract rss uid/passkey... aborting.".format(
                     self.name,
                     self.funcName()
                 ),
@@ -663,13 +707,18 @@ class TorrentDayCache(tvcache.TVCache):
             if not provider._doLogin():
                 return xml
 
-        self.rss_url = "{0}t.rss?download;7;14;24;26;33;34;u={1};tp={2}".format(
+        self.rss_url = "{0}t.rss?download;{1};u={2};tp={3}".format(
             provider.url,
+            ';'.join('{0}'.format(
+                    key
+                ) for key in provider.categories.keys()
+            ),
             provider.rss_uid,
             provider.rss_passkey
         )
 
-        logger.log("[{0}] {1} RSS URL: {2}".format(
+        logger.log(
+            "[{0}] {1} RSS URL: {2}".format(
                 provider.name,
                 provider.funcName(),
                 self.rss_url
@@ -681,7 +730,8 @@ class TorrentDayCache(tvcache.TVCache):
         if provider_xml:
             xml = provider_xml.decode('utf8', 'ignore')
         else:
-            logger.log("[{0}] {1} empty RSS data received.".format(
+            logger.log(
+                "[{0}] {1} empty RSS data received.".format(
                     provider.name,
                     provider.funcName()
                 ),
