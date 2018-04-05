@@ -15,6 +15,9 @@ except ImportError:
 
 __version__ = "1.9.5"
 
+# Orignally written by https://github.com/Anorov/cloudflare-scrape
+# Rewritten by VeNoMouS - <venom@gen-x.co.nz> for https://github.com/VeNoMouS/Sick-Beard - 24/3/2018 NZDT
+
 DEFAULT_USER_AGENTS = [
     "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_2) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/65.0.3325.181 Safari/537.36",
     "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Ubuntu Chromium/65.0.3325.181 Chrome/65.0.3325.181 Safari/537.36",
@@ -29,9 +32,6 @@ DEFAULT_USER_AGENT = random.choice(DEFAULT_USER_AGENTS)
 
 BUG_REPORT = """\
 Cloudflare may have changed their technique, or there may be a bug in the script.
-
-Please read https://github.com/Anorov/cloudflare-scrape#updates, then file a \
-bug report at https://github.com/Anorov/cloudflare-scrape/issues."\
 """
 
 ANSWER_ACCEPT_ERROR = """\
@@ -39,9 +39,6 @@ The challenge answer was not properly accepted by Cloudflare. This can occur if 
 the target website is under heavy load, or if Cloudflare is experiencing issues. You can
 potentially resolve this by increasing the challenge answer delay (default: 8 seconds). \
 For example: cfscrape.create_scraper(delay=15)
-
-If increasing the delay does not help, please open a GitHub issue at \
-https://github.com/Anorov/cloudflare-scrape/issues\
 """
 
 class CloudflareScraper(Session):
