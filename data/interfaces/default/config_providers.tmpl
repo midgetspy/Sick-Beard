@@ -260,32 +260,86 @@
                     </div><!-- /KickAssDiv //-->
                     
                     <div class="providerDiv" id="torrentdayDiv">
-                        <div id='popup_div'>
-                            <span class='button small pop2 x-content' data-bpopup="
+                        <select id="torrentdayDivdropDown">
+                             <option value="">Authenication Method...</option>
+                             <option value="torrentdayDiv1">Anti-Captcha</option>
+                             <option value="torrentdayDiv2">Cookie</option>
+                             <option value="torrentdayDiv3">Email Request</option>
+                        </select>
+                            
+                        <div id="torrentdayDiv1" class="drop-down-show-hide">
+                             <div class="field-pair">
+                                <label class="clearfix">
+                                    <span class="component-title"><a href='https://anti-captcha.com/mainpage'>Anti-Captcha</a> API Key:</span>
+                                    <input class="component-desc" type="text" name="torrentday_anticaptcha_key" value="$sickbeard.TORRENTDAY_ANTICAPTCHA_KEY" size="40" />
+                                </label>
+                            </div>
+                            <div class="field-pair">
+                                <label class="clearfix">
+                                    <span class="component-title">TorrentDay Username:</span>
+                                    <input class="component-desc" type="text" name="torrentday_username" value="$sickbeard.TORRENTDAY_USERNAME" size="40" />
+                                </label>
+                            </div>
+                            <div class="field-pair">
+                                <label class="clearfix">
+                                    <span class="component-title">TorrentDay Password:</span>
+                                    <input class="component-desc" type="password" name="torrentday_password" value=$sickbeard.TORRENTDAY_PASSWORD"" size="40" />
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <div id="torrentdayDiv2" class="drop-down-show-hide">
+                            <div class="field-pair">
+                                <label class="clearfix">
+                                    <span class="component-title">UID Cookie:</span>
+                                    <input class="component-desc" type="text" name="torrentday_uid" value="$sickbeard.TORRENTDAY_UID" size="40" />
+                                </label>
+                            </div>
+                            <div class="field-pair">
+                                <label class="clearfix">
+                                    <span class="component-title">Pass Cookie:</span>
+                                    <input class="component-desc" type="text" name="torrentday_pass" value="$sickbeard.TORRENTDAY_PASS" size="40" />
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <div id="torrentdayDiv3" class="drop-down-show-hide">
+                            <div id='popup_div'>
+                                <span class='button small pop2 x-content' data-bpopup="
                                     <form method='post' class='form-1' id='ajaxform' action='/home/MITM'>
-                                    <p class='field'><input type='text' name='username' placeholder='Username'><i class='fa fa-user fa-lg'></i></p>
-                                    <p class='field'><input type='password' name='password' placeholder='Password'><i class='fa fa-lock fa-lg'></i></p>
-                                    <p class='captcha'><div class='g-recaptcha' data-sitekey='6Le55woTAAAAAPhIVSrY5FjnEImKS4gvQ3Kqmn_X'></div></p>
-                                    <p class='submit'><button name='submit' id='mitm-post'><i class='fa fa-arrow-right fa-lg'></i></button></p>
+                                        <p class='field'><input type='text' name='em' placeholder='Email'><i class='fa fa-user fa-lg'></i></p>
+                                        <p class='submit'><button name='submit' id='mitm-post'><i class='fa fa-arrow-right fa-lg'></i></button></p>
                                     </form>
-        
-                                    <script src='https://www.google.com/recaptcha/api.js?hl=en' type='text/javascript'></script>
                                     <script src='/js/mitm/form.js'></script>
                                 ">
-                               Click Here To Authenticate
-                            </span>
-                            <div id='popup2'><span class='button b-close'><span>X</span></span><div class='content'></div></div>
+                                   Click Here To Request Email
+                                </span>
+                                <div id='popup2'><span class='button b-close'><span>X</span></span>
+                                    <div class='content'></div>
+                                </div>
+                            </div>
+                            <script src="/js/mitm/jquery.bpopup.min.js"></script>
+                            <script src="/js/mitm/scripting.min.js"></script>
+                            
+                            <div class="field-pair" id='response_email'>
+                                </br></br>
+                                <label class="clearfix">
+                                    <span class="component-title">URL or Code from TorrentDay Email:</span>
+                                    <input class="component-desc" type="text" name="torrentday_email_url" value="" size="40" />
+                                </label>
+                            </div>
                         </div>
-                        <input type='hidden' name='torrentday_phpsessid' id='torrentday_phpsessid' value='$sickbeard.TORRENTDAY_PHPSESSID'/>
-                        <input type='hidden' name='torrentday_uid' id='torrentday_uid' value='$sickbeard.TORRENTDAY_UID'/>
-                        <input type='hidden' name='torrentday_pass' id='torrentday_pass' value='$sickbeard.TORRENTDAY_PASS'/>
-                        <script src="/js/mitm/jquery.bpopup.min.js"></script>
-                        <script src="/js/mitm/scripting.min.js"></script>
                         
                         <script type='text/javascript'>
-                            if(['127.0.0.1','localhost'].indexOf(window.location.hostname) != 0) {
-                                \$("\#popup_div").html("</br><b>Sorry in order to use this function, your URL has to be 127.0.0.1 or localhost</b></br></br>* Note: If this a remote host, try ssh tunneling and binding the port to your localhost.</br>");
-                            }
+                            \$('#response_email').hide();
+                            \$('.drop-down-show-hide').hide();
+                            
+                            \$('#torrentdayDivdropDown').change(function () {
+                                \$(this).find("option").each(function () {
+                                    \$('#' + this.value).hide();
+                                });
+                                \$('#' + this.value).show();
+                            });
                         </script>
                     </div><!-- /torrentdayDiv //-->
                 

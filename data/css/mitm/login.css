@@ -148,7 +148,7 @@
 
 .form-1 .submit:after {
     /* Size and position */
-    content: "";
+    /*content: "";*/
     width: 10px;
     height: 10px;
     position: absolute;
