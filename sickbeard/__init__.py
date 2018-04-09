@@ -38,7 +38,7 @@ from providers import eztv, tvtorrents, torrentleech, btn, newznab, omgwtfnzbs, 
 
 from providers import kickass, torrentz, thepiratebay, torrentday
 from providers import iptorrents, bithdtv, btdigg, torrentshack
-from providers import speed, revolutiontt
+from providers import speed, revolutiontt, rarbg
 
 from sickbeard.config import CheckSection, check_setting_int, check_setting_str, ConfigMigrator
 
@@ -225,6 +225,8 @@ SPEED_PASSWORD = None
 REVOLUTIONTT = False
 REVOLUTIONTT_USERNAME = None
 REVOLUTIONTT_PASSWORD = None
+
+RARBG = False
 
 BTN = False
 BTN_API_KEY = None
@@ -434,6 +436,7 @@ def initialize(consoleLogging=True):
                 TORRENTSHACK, TORRENTSHACK_USERNAME, TORRENTSHACK_PASSWORD, TORRENTSHACK_UID, TORRENTSHACK_AUTH, TORRENTSHACK_PASS_KEY ,TORRENTSHACK_AUTH_KEY, \
                 SPEED, SPEED_USERNAME, SPEED_PASSWORD, \
                 REVOLUTIONTT, REVOLUTIONTT_USERNAME, REVOLUTIONTT_PASSWORD, \
+                RARBG, \
                 BTDIGG, \
                 NZBS, NZBS_UID, NZBS_HASH, \
                 THEPIRATEBAY, THEPIRATEBAY_TRUSTED, THEPIRATEBAY_PROXY, THEPIRATEBAY_PROXY_URL, THEPIRATEBAY_URL_OVERRIDE, \
@@ -642,6 +645,8 @@ def initialize(consoleLogging=True):
         REVOLUTIONTT_USERNAME = check_setting_str(CFG, 'REVOLUTIONTT', 'revolutiontt_username', '')
         REVOLUTIONTT_PASSWORD = check_setting_str(CFG, 'REVOLUTIONTT', 'revolutiontt_password', '')
 
+        RARBG = bool(check_setting_int(CFG, 'RARBG', 'rarbg', 0))
+        
         BTDIGG = bool(check_setting_int(CFG, 'BTDIGG', 'btdigg', 0))
 
         GIT_PATH = check_setting_str(CFG, 'General', 'git_path', '')
@@ -1301,6 +1306,9 @@ def save_config():
     new_config['REVOLUTIONTT']['revolutiontt_username'] = REVOLUTIONTT_USERNAME
     new_config['REVOLUTIONTT']['revolutiontt_password'] = REVOLUTIONTT_PASSWORD
 
+    new_config['RARBG'] = {}
+    new_config['RARBG']['rarbg'] = int(RARBG)
+    
     new_config['BTDIGG'] = {}
     new_config['BTDIGG']['btdigg'] = int(BTDIGG)
 

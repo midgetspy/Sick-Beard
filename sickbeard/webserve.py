@@ -1161,6 +1161,8 @@ class ConfigProviders:
                 sickbeard.SPEED = curEnabled
             elif curProvider == 'revolutiontt':
                 sickbeard.REVOLUTIONTT = curEnabled
+            elif curProvider == 'rarbg':
+                sickbeard.RARBG = curEnabled
             elif curProvider == 'btn':
                 sickbeard.BTN = curEnabled
             elif curProvider in newznabProviderDict:
