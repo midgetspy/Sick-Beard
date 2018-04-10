@@ -205,10 +205,10 @@ class RarbgProvider(
             torrents = []
             for torrent in response.get('torrent_results'):
                 torrents.append(
-                    {
-                        'title': torrent.get('title'),
-                        'url': torrent.get('download')
-                    }
+                    (
+                        torrent.get('title'),
+                        torrent.get('download')
+                    )
                 )
                 
             logger.log(
@@ -376,8 +376,8 @@ class RarbgCache(tvcache.TVCache):
 
         search_ret = provider._doSearch("")
         if search_ret:
-            for torrent in search_ret:
-                xml += "<item>" + "<title>" + escape(torrent.get('title')) + "</title>" +  "<link>"+ urllib.quote(torrent.get('url'),'/,:') + "</link>" + "</item>"
+            for title, url in search_ret:
+                xml += "<item>" + "<title>" + escape(title) + "</title>" +  "<link>"+ urllib.quote(url, '/,:') + "</link>" + "</item>"
         
         xml += "</channel> </rss>"
         return xml
