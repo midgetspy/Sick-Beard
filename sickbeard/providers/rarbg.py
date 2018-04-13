@@ -339,7 +339,8 @@ class RarbgProvider(
         try:
             self.token = {
                 'token': response.json().get('token'),
-                'token_expires': datetime.now() + timedelta(minutes=14, seconds=30)
+                'token_expires': datetime.now() + timedelta(minutes=14, seconds=30),
+                'last_request': int(time.time())+5
             }
         except ValueError:
             logger.log(
