@@ -256,16 +256,29 @@ class RarbgProvider(
             return None
 
         if response.status_code not in [200, 302, 303]:
-            logger.log(
-                "[{0}] {1} requested URL: {2}, with params: {3}, returned status code is {4}".format(
-                    self.name,
-                    self.funcName(),
-                    self.url,
-                    data,
-                    response.status_code
-                ),
-                logger.ERROR
-            )
+            if response.status_code == 429:
+                logger.log(
+                    "[{0}] {1} requested URL: {2}, with params: {3}, returned status code is {4}, with a Retry-After of {5}".format(
+                        self.name,
+                        self.funcName(),
+                        self.url,
+                        data,
+                        response.status_code,
+                        response.headers.get('Retry-After')
+                    ),
+                    logger.ERROR
+                )
+            else:
+                logger.log(
+                    "[{0}] {1} requested URL: {2}, with params: {3}, returned status code is {4}".format(
+                        self.name,
+                        self.funcName(),
+                        self.url,
+                        data,
+                        response.status_code
+                    ),
+                    logger.ERROR
+                )
             return None
         
         try:
