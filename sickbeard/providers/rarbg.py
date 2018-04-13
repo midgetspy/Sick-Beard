@@ -26,7 +26,9 @@ import generic
 import sickbeard
 import exceptions
 
+
 from lib import requests
+from datetime import datetime, timedelta
 from xml.sax.saxutils import escape
 
 from sickbeard import db
@@ -238,7 +240,7 @@ class RarbgProvider(
             time.sleep(self.token.get('last_request') - int(time.time()))
         
         try:
-            self.token['last_request'] = int(time.time())+2
+            self.token['last_request'] = int(time.time())+5
             response = self.session.get(url, params=data, verify=False)
         except (requests.exceptions.ConnectionError, requests.exceptions.HTTPError), e:
             logger.log(
@@ -297,10 +299,9 @@ class RarbgProvider(
 
     ###########################################################################
 
-    def _validToken(self):
-        if self.token.get('token') and int(time.time()) < self.token.get('token_expiry'):
+    def _isValidToken(self):
+        if self.token.get('token') and datetime.now() < self.token.get('token_expires'):
             return True
-        
         return False
     
     ###########################################################################
@@ -309,7 +310,7 @@ class RarbgProvider(
         if not self.session:
             self.session = requests.Session()
 
-        if self._validToken():
+        if self._isValidToken():
             return True
 
         response = self.session.get(
@@ -338,7 +339,7 @@ class RarbgProvider(
         try:
             self.token = {
                 'token': response.json().get('token'),
-                'token_expiry': int(time.time()) + 900
+                'token_expires': datetime.now() + timedelta(minutes=14, seconds=30)
             }
         except ValueError:
             logger.log(
