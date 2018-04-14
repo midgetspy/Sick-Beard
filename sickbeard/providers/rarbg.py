@@ -188,20 +188,29 @@ class RarbgProvider(
     ###########################################################################
 
     def _doSearch(self, search_params, show=None):
+        payload = {
+            "app_id": "sickbeard-torrentProviders",
+            "category": "tv",
+            "min_seeders": 1,
+            "min_leechers": 0,
+            "limit": 100,
+            "format": "json_extended",
+            "token": self.token.get('token'),
+            "search_string": search_params
+        }
 
         response = self.getURL(
             self.url,
-            data={
-                "app_id": "sickbeard-torrentProviders",
-                "category": "tv",
-                "min_seeders": 1,
-                "min_leechers": 0,
-                "limit": 100,
-                "format": "json_extended",
-                "token": self.token.get('token'),
-                "search_string": search_params
-            }
+            data=payload
         )
+
+        # Retry if there was an invalid token response.
+        if response.get('error_code') == 4:
+            time.sleep(5)
+            response = self.getURL(
+                self.url,
+                data=payload
+            )
 
         if response:
             torrents = []
@@ -231,7 +240,7 @@ class RarbgProvider(
 
         if not self.session or not self._isValidToken():
             if not self._doLogin():
-                return None
+                return {}
 
         if not data.get('token'):
             data['token'] = self.token.get('token')
@@ -253,7 +262,7 @@ class RarbgProvider(
                 ),
                 logger.ERROR
             )
-            return None
+            return {}
 
         if response.status_code not in [200, 302, 303]:
             if response.status_code == 429:
@@ -279,7 +288,7 @@ class RarbgProvider(
                     ),
                     logger.ERROR
                 )
-            return None
+            return {}
 
         try:
             if response.json().get('error') and response.json().get('error_code') != 20:
@@ -294,7 +303,13 @@ class RarbgProvider(
                     ),
                     logger.ERROR
                 )
-                return None
+
+                if response.json().get('error_code') == 4:
+                    # error_code 4, Invalid token. Use get_token for a new one!
+                    self.token = {}
+                    return response.json()
+
+                return {}
         except ValueError:
             logger.log(
                 "[{0}] {1} Can't get json payload from {2} with params {3}.".format(
@@ -305,7 +320,7 @@ class RarbgProvider(
                 ),
                 logger.ERROR
             )
-            return None
+            return {}
 
         return response.json()
 
@@ -313,7 +328,7 @@ class RarbgProvider(
     ###########################################################################
 
     def _isValidToken(self):
-        if self.token.get('token') and datetime.now() < self.token.get('token_expires'):
+        if all([self.token.get('token'), self.token.get('token_expires')]) and datetime.now() < self.token.get('token_expires'):
             return True
         return False
 
