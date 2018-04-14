@@ -196,9 +196,13 @@ class RarbgProvider(
             "limit": 100,
             "format": "json_extended",
             "token": self.token.get('token'),
-            "search_string": search_params
+            "search_string": search_params,
+            "mode": "search"
         }
 
+        if not search_params:
+            payload['mode'] = 'list'
+        
         response = self.getURL(
             self.url,
             data=payload
@@ -236,7 +240,7 @@ class RarbgProvider(
 
     ###########################################################################
 
-    def getURL(self, url, headers=[], data=None):
+    def getURL(self, url, headers=[], data={}):
 
         if not self.session or not self._isValidToken():
             if not self._doLogin():
