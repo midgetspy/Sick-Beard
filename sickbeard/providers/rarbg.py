@@ -202,7 +202,7 @@ class RarbgProvider(
                 "search_string": search_params
             }
         )
-        
+
         if response:
             torrents = []
             for torrent in response.get('torrent_results'):
@@ -212,7 +212,7 @@ class RarbgProvider(
                         torrent.get('download')
                     )
                 )
-                
+
             logger.log(
                 "[{0}] {1} Found {2} entries.".format(
                     self.name,
@@ -220,11 +220,11 @@ class RarbgProvider(
                     len(torrents),
                 )
             )
-            
+
             return torrents
-        
+
         return None
-        
+
     ###########################################################################
 
     def getURL(self, url, headers=[], data=None):
@@ -238,7 +238,7 @@ class RarbgProvider(
 
         if self.token.get('last_request') >= int(time.time()):
             time.sleep(self.token.get('last_request') - int(time.time()))
-        
+
         try:
             self.token['last_request'] = int(time.time())+5
             response = self.session.get(url, params=data, verify=False)
@@ -280,7 +280,7 @@ class RarbgProvider(
                     logger.ERROR
                 )
             return None
-        
+
         try:
             if response.json().get('error') and response.json().get('error_code') != 20:
                 logger.log(
@@ -306,7 +306,7 @@ class RarbgProvider(
                 logger.ERROR
             )
             return None
-        
+
         return response.json()
 
 
@@ -316,9 +316,9 @@ class RarbgProvider(
         if self.token.get('token') and datetime.now() < self.token.get('token_expires'):
             return True
         return False
-    
+
     ###########################################################################
-    
+
     def _doLogin(self):
         if not self.session:
             self.session = requests.Session()
@@ -336,7 +336,7 @@ class RarbgProvider(
             verify=False,
             timeout=30
         )
-        
+
         if response.status_code not in [200, 302, 303]:
             logger.log(
                 "[{0}] {1} requested URL: {2} , requesting token, returned status code {3}".format(
@@ -348,11 +348,11 @@ class RarbgProvider(
                 logger.ERROR
             )
             return False
-        
+
         try:
             self.token = {
                 'token': response.json().get('token'),
-                'token_expires': datetime.now() + timedelta(minutes=14, seconds=30),
+                'token_expires': datetime.now() + timedelta(minutes=10),
                 'last_request': int(time.time())+5
             }
         except ValueError:
@@ -365,7 +365,7 @@ class RarbgProvider(
                 logger.ERROR
             )
             return False
-        
+
         return True
 
     ###########################################################################
@@ -393,7 +393,7 @@ class RarbgCache(tvcache.TVCache):
         if search_ret:
             for title, url in search_ret:
                 xml += "<item>" + "<title>" + escape(title) + "</title>" +  "<link>"+ urllib.quote(url, '/,:') + "</link>" + "</item>"
-        
+
         xml += "</channel> </rss>"
         return xml
 
