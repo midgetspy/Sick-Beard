@@ -229,7 +229,7 @@ class RarbgProvider(
 
     def getURL(self, url, headers=[], data=None):
 
-        if not self.session or not self._validToken():
+        if not self.session or not self._isValidToken():
             if not self._doLogin():
                 return None
 
