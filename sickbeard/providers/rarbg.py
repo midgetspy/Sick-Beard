@@ -210,13 +210,13 @@ class RarbgProvider(
 
         # Retry if there was an invalid token response.
         if response.get('error_code') == 4:
-            time.sleep(5)
+            time.sleep(20)
             response = self.getURL(
                 self.url,
                 data=payload
             )
 
-        if response:
+        if response and response.get('torrent_results'):
             torrents = []
             for torrent in response.get('torrent_results'):
                 torrents.append(
@@ -241,10 +241,8 @@ class RarbgProvider(
     ###########################################################################
 
     def getURL(self, url, headers=[], data={}):
-
-        if not self.session or not self._isValidToken():
-            if not self._doLogin():
-                return {}
+        if not self._doLogin():
+            return {}
 
         if not data.get('token'):
             data['token'] = self.token.get('token')
