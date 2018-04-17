@@ -236,7 +236,7 @@ class RarbgProvider(
 
             return torrents
 
-        return None
+        return []
 
     ###########################################################################
 
@@ -294,6 +294,19 @@ class RarbgProvider(
 
         try:
             if response.json().get('error') and response.json().get('error_code') != 20:
+                # error_code 4, Invalid token. Use get_token for a new one!
+                if response.json().get('error_code') == 4:
+                    logger.log(
+                        "[{0}] {1} Invalid token response returned, {2}".format(
+                            self.name,
+                            self.funcName(),
+                            response.json().get('error'),
+                        ),
+                        logger.WARNING
+                    )
+                    self.token = {}
+                    return response.json()
+                
                 logger.log(
                     "[{0}] {1} requested URL: {2}, with params: {3}, returned error code #{4} / {5}".format(
                         self.name,
@@ -305,12 +318,6 @@ class RarbgProvider(
                     ),
                     logger.ERROR
                 )
-
-                if response.json().get('error_code') == 4:
-                    # error_code 4, Invalid token. Use get_token for a new one!
-                    self.token = {}
-                    return response.json()
-
                 return {}
         except ValueError:
             logger.log(
