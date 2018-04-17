@@ -18,18 +18,17 @@
 # along with Sick Beard.  If not, see <http://www.gnu.org/licenses/>.
 ###########################################################################
 
-import os
-import re
+import json
 import sys
+import time
 import urllib
 import generic
-import datetime
 import sickbeard
 import exceptions
 
-from lib import cfscrape
-from lib import requests
 
+from lib import requests
+from datetime import datetime, timedelta
 from xml.sax.saxutils import escape
 
 from sickbeard import db
@@ -40,29 +39,39 @@ from sickbeard.common import Quality
 from sickbeard.common import Overview
 from sickbeard import show_name_helpers
 
+###########################################################################
 
-class TorrentLeechProvider(generic.TorrentProvider):
+
+class RarbgProvider(
+    generic.TorrentProvider
+):
 
     ###########################################################################
+
     def __init__(self):
-        generic.TorrentProvider.__init__(self, "TorrentLeech")
-        self.cache = TorrentLeechCache(self)
-        self.name = "TorrentLeech"
+        generic.TorrentProvider.__init__(self, "Rarbg")
+        self.cache = RarbgCache(self)
+        self.name = "Rarbg"
         self.session = None
+        self.token = {}
         self.supportsBacklog = True
-        self.url = 'https://classic.torrentleech.org/'
+        self.url = 'https://torrentapi.org/pubapi_v2.php'
         self.funcName = lambda n=0: sys._getframe(n + 1).f_code.co_name + "()"
-        logger.log("[" + self.name + "] initializing...")
+        logger.log(
+            "[{0}] initializing...".format(
+                self.name
+            )
+        )
 
     ###########################################################################
 
     def isEnabled(self):
-        return sickbeard.TORRENTLEECH
+        return sickbeard.RARBG
 
     ###########################################################################
 
     def imageName(self):
-        return 'torrentleech.png'
+        return 'rarbg.png'
 
     ###########################################################################
 
@@ -179,222 +188,223 @@ class TorrentLeechProvider(generic.TorrentProvider):
     ###########################################################################
 
     def _doSearch(self, search_params, show=None):
-        logger.log("[{0}] {1} Performing Search: {2}".format(
-                self.name,
-                self.funcName(),
-                search_params
-            )
+        payload = {
+            "app_id": "sickbeard-torrentProviders",
+            "category": "tv",
+            "min_seeders": 1,
+            "min_leechers": 0,
+            "limit": 100,
+            "format": "json_extended",
+            "token": self.token.get('token'),
+            "search_string": search_params,
+            "mode": "search"
+        }
+
+        if not search_params:
+            payload['mode'] = 'list'
+        
+        response = self.getURL(
+            self.url,
+            data=payload
         )
 
-        return self.parseResults(
-            "{0}torrents/browse/index/query/{1}/categories/26,27,32/newfilter/3".format(
+        # Retry if there was an invalid token response.
+        if response.get('error_code') == 4:
+            time.sleep(20)
+            response = self.getURL(
                 self.url,
-                search_params.replace(':','')
+                data=payload
             )
-        )
 
-    ##################################################################################################
+        if response and response.get('torrent_results'):
+            torrents = []
+            for torrent in response.get('torrent_results'):
+                torrents.append(
+                    (
+                        torrent.get('title'),
+                        torrent.get('download')
+                    )
+                )
 
-    def parseResults(self, searchUrl):
-        data = self.getURL(searchUrl)
-        results = []
-
-        if data:
-            logger.log("[{0}] {1} URL: {2}".format(
+            logger.log(
+                "[{0}] {1} Found {2} entries.".format(
                     self.name,
                     self.funcName(),
-                    searchUrl
-                ),
-                logger.DEBUG
-            )
-
-            for torrent in re.compile(
-                '<span class="title"><a href="/torrent/\d+">(?P<title>.*?)</a>.*?<td class="quickdownload">\s+<a href="(?P<url>.*?)">',
-                re.MULTILINE|re.DOTALL
-            ).finditer(data):
-                try:
-                    results.append(
-                        (
-                            torrent.group('title').replace('.',' ').decode('ascii'),
-                            torrent.group('url')
-                        )
-                    )
-
-                    logger.log("[{0}] {1} Title: {2}".format(
-                            self.name,
-                            self.funcName(),
-                            torrent.group('title')
-                        ),
-                        logger.DEBUG
-                    )
-
-                except:
-                    logger.log("[{0}] {1} Skipping torrent, non standard character found and/or unable to extract torrent download information.".format(
-                            self.name,
-                            self.funcName(),
-                        ),
-                        logger.DEBUG
-                    )
-
-            if len(results):
-                logger.log("[{0}] {1} Some results found.".format(
-                        self.name,
-                        self.funcName(),
-                    )
-                )
-            else:
-                logger.log("[{0}] {1} No results found.".format(
-                        self.name,
-                        self.funcName(),
-                    )
-                )
-        else:
-            logger.log("[{0}] {1} Error no data returned!!".format(
-                    self.name,
-                    self.funcName(),
+                    len(torrents),
                 )
             )
-        return results
+
+            return torrents
+
+        return []
 
     ###########################################################################
 
-    def getURL(self, url, headers=None):
-        response = None
+    def getURL(self, url, headers=[], data={}):
+        if not self._doLogin():
+            return {}
 
-        if not self.session:
-             if not self._doLogin():
-                return response
+        if not data.get('token'):
+            data['token'] = self.token.get('token')
 
-        if not headers:
-            headers = []
+        if self.token.get('last_request') >= int(time.time()):
+            time.sleep(self.token.get('last_request') - int(time.time()))
 
         try:
-            response = self.session.get(url, verify=False)
-            if (True, True) == self._cloudFlare(response):
-                response = self.session.get(url, verify=False)
-
+            self.token['last_request'] = int(time.time())+5
+            response = self.session.get(url, params=data, verify=False)
         except (requests.exceptions.ConnectionError, requests.exceptions.HTTPError), e:
-            logger.log("[{0}] {1}  Error loading URL: {2}, Error: {3} ".format(
+            logger.log(
+                "[{0}] {1} Error loading URL: {2}, with params: {3}, Error: {4}".format(
                     self.name,
                     self.funcName(),
-                    url,
+                    self.url,
+                    data,
                     e
                 ),
                 logger.ERROR
             )
-            return None
+            return {}
 
-        if response.status_code not in [200,302,303]:
-            logger.log("[{0}] {1} requested URL: {2} returned status code is {3}".format(
+        if response.status_code not in [200, 302, 303]:
+            if response.status_code == 429:
+                logger.log(
+                    "[{0}] {1} requested URL: {2}, with params: {3}, returned status code is {4}, with a Retry-After of {5}".format(
+                        self.name,
+                        self.funcName(),
+                        self.url,
+                        data,
+                        response.status_code,
+                        response.headers.get('Retry-After')
+                    ),
+                    logger.ERROR
+                )
+            else:
+                logger.log(
+                    "[{0}] {1} requested URL: {2}, with params: {3}, returned status code is {4}".format(
+                        self.name,
+                        self.funcName(),
+                        self.url,
+                        data,
+                        response.status_code
+                    ),
+                    logger.ERROR
+                )
+            return {}
+
+        try:
+            if response.json().get('error') and response.json().get('error_code') != 20:
+                # error_code 4, Invalid token. Use get_token for a new one!
+                if response.json().get('error_code') == 4:
+                    logger.log(
+                        "[{0}] {1} Invalid token response returned, {2}".format(
+                            self.name,
+                            self.funcName(),
+                            response.json().get('error'),
+                        ),
+                        logger.WARNING
+                    )
+                    self.token = {}
+                    return response.json()
+                
+                logger.log(
+                    "[{0}] {1} requested URL: {2}, with params: {3}, returned error code #{4} / {5}".format(
+                        self.name,
+                        self.funcName(),
+                        self.url,
+                        data,
+                        response.json().get('error_code'),
+                        response.json().get('error'),
+                    ),
+                    logger.ERROR
+                )
+                return {}
+        except ValueError:
+            logger.log(
+                "[{0}] {1} Can't get json payload from {2} with params {3}.".format(
                     self.name,
                     self.funcName(),
-                    url,
-                    response.status_code
+                    self.url,
+                    data
                 ),
                 logger.ERROR
             )
-            return None
+            return {}
 
-        return response.content
+        return response.json()
+
 
     ###########################################################################
 
-    def _cloudFlare(self, response):
-        cf = cfscrape.create_scraper(sess=self.session)
-        if cf.is_cloudflare_challenge(response):
-            logger.log(
-                "[{0}] {1} requested URL - {2}, encounted CloudFlare DDOS Protection.. Bypassing.".format(
-                    self.name,
-                    self.funcName(),
-                    response.url
-                ),
-                logger.DEBUG
-            )
-
-            response = cf.get(
-                "{0}/torrents/browse".format(self.url),
-                verify=False
-            )
-
-            if not cf.is_cloudflare_challenge(response):
-                logger.log(
-                    "[{0}] {1} CloudFlare DDOS Protection.. Bypassed successfully.".format(
-                        self.name,
-                        self.funcName(),
-                    ),
-                    logger.DEBUG
-                )
-                return (True, True);
-
-            return (True, False)
-
-        return (False, True)
+    def _isValidToken(self):
+        if all([self.token.get('token'), self.token.get('token_expires')]) and datetime.now() < self.token.get('token_expires'):
+            return True
+        return False
 
     ###########################################################################
 
     def _doLogin(self):
-        login_params  = {
-            'username': sickbeard.TORRENTLEECH_USERNAME,
-            'password': sickbeard.TORRENTLEECH_PASSWORD,
-            'remember_me': 'on',
-            'login': 'submit'
-        }
+        if not self.session:
+            self.session = requests.Session()
 
-        self.session = requests.Session()
-        logger.log("[" + self.name + "] Attempting to Login")
+        if self._isValidToken():
+            return True
+
+        response = self.session.get(
+            self.url,
+            params={
+                'app_id': 'sickbeard-torrentProviders',
+                'get_token': 'get_token',
+                'format': 'json'
+            },
+            verify=False,
+            timeout=30
+        )
+
+        if response.status_code not in [200, 302, 303]:
+            logger.log(
+                "[{0}] {1} requested URL: {2} , requesting token, returned status code {3}".format(
+                    self.name,
+                    self.funcName(),
+                    self.url,
+                    response.status_code
+                ),
+                logger.ERROR
+            )
+            return False
 
         try:
-            response = self.session.post(
-                "{0}user/account/login".format(self.url),
-                data=login_params,
-                timeout=30,
-                verify=False
-            )
-
-            if (True, True) == self._cloudFlare(response):
-                response = self.session.post(
-                    "{0}user/account/login".format(self.url),
-                    data=login_params,
-                    timeout=30,
-                    verify=False
-                )
-        except (requests.exceptions.ConnectionError, requests.exceptions.HTTPError), e:
-            logger.log("[{0}] {1} Error: {2}".format(
+            self.token = {
+                'token': response.json().get('token'),
+                'token_expires': datetime.now() + timedelta(minutes=10),
+                'last_request': int(time.time())+5
+            }
+        except ValueError:
+            logger.log(
+                "[{0}] {1} Can't get token from {2}.".format(
                     self.name,
                     self.funcName(),
-                    e
+                    self.url
                 ),
                 logger.ERROR
             )
             return False
 
-        if re.search("Invalid Username/password|<title>Login :: TorrentLeech.org</title>", response.text) \
-        or response.status_code in [401,403]:
-            logger.log("[{0}] {1} Login Failed, Invalid username or password, Check your settings".format(
-                    self.name,
-                    self.funcName(),
-                ),
-                logger.ERROR
-            )
-            return False
         return True
 
     ###########################################################################
 
-
-class TorrentLeechCache(tvcache.TVCache):
+class RarbgCache(tvcache.TVCache):
 
     ###########################################################################
 
     def __init__(self, provider):
         tvcache.TVCache.__init__(self, provider)
-        # only poll TorrentLeech every 15 minutes max
         self.minTime = 15
 
     ###########################################################################
 
     def _getRSSData(self):
-        # TorrentLeech's RSS sucks.. its all or nothing... so manual reconstruction required for just tv sections...
         xml = "<rss xmlns:atom=\"http://www.w3.org/2005/Atom\" version=\"2.0\">" + \
             "<channel>" + \
             "<title>" + provider.name + "</title>" + \
@@ -406,11 +416,11 @@ class TorrentLeechCache(tvcache.TVCache):
         search_ret = provider._doSearch("")
         if search_ret:
             for title, url in search_ret:
-                xml += "<item>" + "<title>" + escape(title) + "</title>" +  "<link>"+ urllib.quote(url,'/,:') + "</link>" + "</item>"
+                xml += "<item>" + "<title>" + escape(title) + "</title>" +  "<link>"+ urllib.quote(url, '/,:') + "</link>" + "</item>"
 
         xml += "</channel> </rss>"
         return xml
 
     ###########################################################################
 
-provider = TorrentLeechProvider()
+provider = RarbgProvider()
