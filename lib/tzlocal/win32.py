@@ -4,7 +4,7 @@ except ImportError:
     import winreg
 
 from tzlocal.windows_tz import win_tz
-import pytz
+from lib import pytz
 
 _cache_tz = None
 

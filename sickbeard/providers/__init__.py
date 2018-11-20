@@ -32,7 +32,8 @@ __all__ = [
            'btdigg',
            'torrentshack',
            'speed',
-           'revolutiontt'
+           'revolutiontt',
+           'rarbg'
            ]
 
 import sickbeard

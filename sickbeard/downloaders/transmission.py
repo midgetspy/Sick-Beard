@@ -90,7 +90,6 @@ def sendTORRENT(torrent):
         if not torrent.url.startswith("magnet:"):
             try:
                 headers = {
-                    'User-Agent': sickbeard.common.USER_AGENT,
                     'Referer': torrent.url
                 }
                 

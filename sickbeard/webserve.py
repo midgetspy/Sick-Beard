@@ -1074,7 +1074,7 @@ class ConfigProviders:
                       btn_api_key=None, hdbits_username=None, hdbits_passkey=None,
                       thepiratebay_trusted = None, thepiratebay_proxy = None, thepiratebay_proxy_url = None,thepiratebay_url_override = None, thepiratebay_url_override_enable = None,
                       torrentleech_username = None, torrentleech_password = None,
-                      torrentday_phpsessid = None, torrentday_uid = None, torrentday_pass = None,
+                      torrentday_anticaptcha_key = None, torrentday_username = None, torrentday_password = None, torrentday_uid = None, torrentday_pass = None, torrentday_email_url = None, 
                       iptorrents_username = None, iptorrents_password = None, iptorrents_eu = None, 
                       bithdtv_username = None, bithdtv_password = None,
                       torrentshack_username = None, torrentshack_password = None, torrentshack_uid = None, torrentshack_auth = None, torrentshack_pass_key = None, torrentshack_auth_key = None,
@@ -1164,6 +1164,8 @@ class ConfigProviders:
                 sickbeard.SPEED = curEnabled
             elif curProvider == 'revolutiontt':
                 sickbeard.REVOLUTIONTT = curEnabled
+            elif curProvider == 'rarbg':
+                sickbeard.RARBG = curEnabled
             elif curProvider == 'btn':
                 sickbeard.BTN = curEnabled
             elif curProvider in newznabProviderDict:
@@ -1208,9 +1210,12 @@ class ConfigProviders:
         sickbeard.TORRENTLEECH_USERNAME = torrentleech_username
         sickbeard.TORRENTLEECH_PASSWORD = torrentleech_password
         
-        sickbeard.TORRENTDAY_PHPSESSID = torrentday_phpsessid.strip()
+        sickbeard.TORRENTDAY_ANTICAPTCHA_KEY = torrentday_anticaptcha_key.strip()
+        sickbeard.TORRENTDAY_USERNAME = torrentday_username.strip()
+        sickbeard.TORRENTDAY_PASSWORD = torrentday_password.strip()
         sickbeard.TORRENTDAY_UID = torrentday_uid.strip()
         sickbeard.TORRENTDAY_PASS = torrentday_pass.strip()
+        sickbeard.TORRENTDAY_EMAIL_URL = torrentday_email_url.strip()
                 
         sickbeard.IPTORRENTS_USERNAME = iptorrents_username.strip()
         sickbeard.IPTORRENTS_PASSWORD = iptorrents_password.strip()
@@ -2369,18 +2374,17 @@ class Home:
     def MITM(self, **kwargs):
         post_params = cherrypy.request.body.params
         
-        for param_name in [ 'username', 'password', 'g-recaptcha-response' ]:
-            if param_name not in post_params or (param_name in post_params and len(post_params[param_name]) == 0):
-                raise cherrypy.HTTPError(400,"You didn't send requird params...")
+        if not post_params.get('em') or len(post_params.get('em')) == 0:
+            raise cherrypy.HTTPError(400,"You didn't send requird params...")
         
         session = requests.session()
         session.get('https://www.torrentday.com/login.php', verify=False, timeout=30) # get __cfduid cookie
-        session.post('https://www.torrentday.com/tak3login.php', verify=False, timeout=30, data=post_params)
+        response = session.post('https://www.torrentday.com/sign-in.php', verify=False, timeout=30, data=post_params)
         
-        if not hasattr(session,'cookies') or not all(s in requests.utils.dict_from_cookiejar(session.cookies) for s in ['PHPSESSID', 'uid', 'pass']):
-            raise cherrypy.HTTPError(400,"Website didnt send all required cookies back to us...")
+        if response.status_code not in [200, 302, 303]:
+            raise cherrypy.HTTPError(400, "TorrentDay didn't like us for some reason.")
         
-        return json.dumps(requests.utils.dict_from_cookiejar(session.cookies))
+        return json.dumps({'status': 1})
 
     @cherrypy.expose
     def displayShow(self, show=None):

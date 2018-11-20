@@ -1,6 +1,6 @@
 import os
 import re
-import pytz
+from lib import pytz
 
 _cache_tz = None
 
