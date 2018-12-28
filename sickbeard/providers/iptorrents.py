@@ -143,17 +143,31 @@ class IPTorrentsProvider(generic.TorrentProvider):
     def _doSearch(self, search_params, show=None):
         logger.log("[{}] {} Performing Search: {}".format(self.name, self.funcName(), search_params), logger.DEBUG)
         self.switchURL()
-        return self.parseResults("{}t?99=&78=&23=&25=&65=&79=&22=&5=&q={}&qf=#torrents".format(self.url, urllib.quote(search_params)))
+        return self.parseResults("{}t?99=&78=&23=&25=&65=&79=&22=&5=&q={}&qf=#torrents".format(
+                self.url,
+                urllib.quote(search_params)
+            )
+        )
 
     ###################################################################################################
 
     def parseResults(self, searchUrl):
+        logger.log("[{}] {} URL: {}".format(self.name, self.funcName(), searchUrl))
         data = self.getURL(searchUrl)
         results = []
         if data:
-            for torrent in re.compile('<a class="b" href="/details\.php\?id=\d+">(?P<title>.*?)</a>.*?<a href="/download\.php/(?P<url>.*?)"><', re.MULTILINE | re.DOTALL).finditer(data):
+            for torrent in re.compile(
+                    '<a class="b" href="/details\.php\?id=\d+">(?P<title>.*?)</a>.*?<a href="/download\.php/(?P<url>.*?)"><',
+                    re.MULTILINE | re.DOTALL
+                ).finditer(data):
                 item = (torrent.group('title').replace('.', ' '), self.url + "download.php/" + torrent.group('url'))
-                logger.log("[{}] {} Title: {}".format(self.name, self.funcName(), torrent.group('title').replace('.', ' ')), logger.DEBUG)
+                logger.log("[{}] {} Title: {}".format(
+                        self.name,
+                        self.funcName(),
+                        torrent.group('title').replace('.', ' ')
+                    ),
+                    logger.DEBUG
+                )
                 results.append(item)
             if len(results):
                 logger.log("[{}] {} Some results found.".format(self.name, self.funcName()))
@@ -168,7 +182,13 @@ class IPTorrentsProvider(generic.TorrentProvider):
     def _CloudFlareError(self, response):
         if getattr(response, 'status_code', 0) in [520, 521]:
             self.session = None
-            logger.log("[{}] {} Site down/overloaded cloudflare status code: {}".format(self.name, self.funcName(), response.status_code), logger.ERROR)
+            logger.log("[{}] {} Site down/overloaded cloudflare status code: {}".format(
+                    self.name,
+                    self.funcName(),
+                    response.status_code
+                ),
+                logger.ERROR
+            )
             return True
         return False
     
@@ -186,14 +206,28 @@ class IPTorrentsProvider(generic.TorrentProvider):
             else:
                 response = self.session.get(url, timeout=30, verify=False)
         except (requests.exceptions.ConnectionError, requests.exceptions.HTTPError), e:
-            logger.log("[{}] {} Error loading {} URL: {}".format(self.name, self.funcName(), self.name, ex(e)), logger.ERROR)
+            logger.log("[{}] {} Error loading {} URL: {}".format(
+                    self.name,
+                    self.funcName(),
+                    self.name,
+                    ex(e)
+                ),
+                logger.ERROR
+            )
             return None
 
         if self._CloudFlareError(response):
             return None
         
         if hasattr(response, 'status_code') and response.status_code not in [200, 302, 303]:
-            logger.log("[{}] {} requested URL - {} returned status code is {}".format(self.name, self.funcName(), url, response.status_code), logger.ERROR)
+            logger.log("[{}] {} requested URL - {} returned status code is {}".format(
+                    self.name,
+                    self.funcName(),
+                    url,
+                    response.status_code
+                ),
+                logger.ERROR
+            )
             return None
 
         return getattr(response, 'content', None)
@@ -201,7 +235,12 @@ class IPTorrentsProvider(generic.TorrentProvider):
     ###################################################################################################
 
     def _getPassKey(self):
-        logger.log("[{}] {} Attempting to acquire RSS authentication details.".format(self.name, self.funcName()), logger.DEBUG)
+        logger.log("[{}] {} Attempting to acquire RSS authentication details.".format(
+                self.name,
+                self.funcName()
+            ),
+            logger.DEBUG
+        )
         try:
             post_params = {
                 's0': '',
@@ -209,20 +248,47 @@ class IPTorrentsProvider(generic.TorrentProvider):
                 'cat[]': '5',
                 'feed': 'direct',
             }
-            (self.rss_uid, self.rss_passkey)  = re.findall(r'\/t\.rss\?u=(\d+);tp=([0-9A-Fa-f]{32});', self.getURL("{}getrss.php".format(self.url), post_params))[0]
+            (self.rss_uid, self.rss_passkey) = re.findall(
+                r'\/t\.rss\?u=(\d+);tp=([0-9A-Fa-f]{32});',
+                self.getURL(
+                    "{}getrss.php".format(self.url),
+                    post_params
+                )
+            )[0]
         except:
-            logger.log("[{}] {} Failed to scrape authentication parameters for rss.".format(self.name, self.funcName()), logger.ERROR)
+            logger.log("[{}] {} Failed to scrape authentication parameters for rss.".format(
+                    self.name,
+                    self.funcName()
+                ),
+                logger.ERROR
+            )
             return False
 
         if not self.rss_uid:
-            logger.log("[{}] {} Can't extract uid from rss authentication scrape.".format(self.name, self.funcName()), logger.ERROR)
+            logger.log("[{}] {} Can't extract uid from rss authentication scrape.".format(
+                    self.name,
+                    self.funcName()
+                ),
+                logger.ERROR
+            )
             return False
 
         if not self.rss_passkey:
-            logger.log("[{}] {} Can't extract password hash from rss authentication scrape.".format(self.name, self.funcName()), logger.ERROR)
+            logger.log("[{}] {} Can't extract password hash from rss authentication scrape.".format(
+                    self.name,
+                    self.funcName()
+                ),
+                logger.ERROR
+            )
             return False
 
-        logger.log("[{}] {} Scraped RSS passkey {}".format(self.name, self.funcName(), self.rss_passkey), logger.DEBUG)
+        logger.log("[{}] {} Scraped RSS passkey {}".format(
+                self.name,
+                self.funcName(),
+                self.rss_passkey
+            ),
+            logger.DEBUG
+        )
         return True
 
     ###################################################################################################
@@ -240,7 +306,12 @@ class IPTorrentsProvider(generic.TorrentProvider):
         logger.log("[{}] Attempting to Login".format(self.name))
 
         try:
-            response = self.session.post("{}/take_login.php".format(self.url), data=login_params, timeout=30, verify=False)
+            response = self.session.post(
+                "{}/take_login.php".format(self.url),
+                data=login_params,
+                timeout=30,
+                verify=False
+            )
         except (requests.exceptions.ConnectionError, requests.exceptions.HTTPError), e:
             self.session = None
             logger.log("[{}] {} Error: {}".foramt(self.name, self.funcName(), str(e)), logger.ERROR)
@@ -252,12 +323,23 @@ class IPTorrentsProvider(generic.TorrentProvider):
         if re.search("take_login\.php|Password not correct|<title>IPT</title>", response.content) \
         or response.status_code in [401, 403]:
             self.session = None
-            logger.log("[{}] {} Login Failed, Invalid username or password for {}. Check your settings.".format(self.name, self.funcName(), self.name), logger.ERROR)
+            logger.log("[{}] {} Login Failed, Invalid username or password for {}. Check your settings.".format(
+                    self.name,
+                    self.funcName(),
+                    self.name
+                ),
+                logger.ERROR
+            )
             return False
 
         if not self._getPassKey() or not self.rss_passkey:
             self.session = None
-            logger.log("[{}] {} Could not extract rssHash info... aborting.".format(self.name, self.funcName()), logger.ERROR)
+            logger.log("[{}] {} Could not extract rssHash info... aborting.".format(
+                    self.name,
+                    self.funcName()
+                ),
+                logger.ERROR
+            )
             return False
 
         return True
@@ -284,7 +366,11 @@ class IPTorrentsCache(tvcache.TVCache):
         
         if provider.rss_passkey:
             try:
-                self.rss_url = "{}t.rss?u={};tp={};99;79;78;65;25;23;22;5;download".format(provider.ur, provider.rss_uid, provider.rss_passkey)
+                self.rss_url = "{}t.rss?u={};tp={};99;79;78;65;25;23;22;5;download".format(
+                    provider.ur,
+                    provider.rss_uid,
+                    provider.rss_passkey
+                )
                 logger.log("[{}] {} RSS URL - {}".format(provider.name, provider.funcName(), self.rss_url), logger.DEBUG)
                 xml = provider.getURL(self.rss_url)
                 if xml is not None:
