@@ -153,14 +153,14 @@ class IPTorrentsProvider(generic.TorrentProvider):
         if data:
             for torrent in re.compile('<a class="b" href="/details\.php\?id=\d+">(?P<title>.*?)</a>.*?<a href="/download\.php/(?P<url>.*?)"><', re.MULTILINE | re.DOTALL).finditer(data):
                 item = (torrent.group('title').replace('.', ' '), self.url + "download.php/" + torrent.group('url'))
-                logger.log("[{}] {} Title: {}".format(self.name, self.funcName, torrent.group('title').replace('.', ' ')), logger.DEBUG)
+                logger.log("[{}] {} Title: {}".format(self.name, self.funcName(), torrent.group('title').replace('.', ' ')), logger.DEBUG)
                 results.append(item)
             if len(results):
-                logger.log("[{}] {} Some results found.".format(self.name, self.funcName))
+                logger.log("[{}] {} Some results found.".format(self.name, self.funcName()))
             else:
-                logger.log("[{}] {} No results found.".format(self.name, self.funcName))
+                logger.log("[{}] {} No results found.".format(self.name, self.funcName()))
         else:
-            logger.log("[{}] {} Error no data returned!!".format(self.name, self.funcName))
+            logger.log("[{}] {} Error no data returned!!".format(self.name, self.funcName()))
         return results
 
     ###################################################################################################
