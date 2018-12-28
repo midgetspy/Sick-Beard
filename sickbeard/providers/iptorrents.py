@@ -143,7 +143,7 @@ class IPTorrentsProvider(generic.TorrentProvider):
     def _doSearch(self, search_params, show=None):
         logger.log("[{}] {} Performing Search: {}".format(self.name, self.funcName(), search_params), logger.DEBUG)
         self.switchURL()
-        return self.parseResults("{}t?&99=&78=&23=&25=&65=&79=&22=&5=&q={}&qf=#torrents".format(self.url, urllib.quote(search_params)))
+        return self.parseResults("{}t?99=&78=&23=&25=&65=&79=&22=&5=&q={}&qf=#torrents".format(self.url, urllib.quote(search_params)))
 
     ###################################################################################################
 
