@@ -367,7 +367,7 @@ class IPTorrentsCache(tvcache.TVCache):
         if provider.rss_passkey:
             try:
                 self.rss_url = "{}t.rss?u={};tp={};99;79;78;65;25;23;22;5;download".format(
-                    provider.ur,
+                    provider.url,
                     provider.rss_uid,
                     provider.rss_passkey
                 )
