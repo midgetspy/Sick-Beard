@@ -132,43 +132,63 @@ class SpeedProvider(generic.TorrentProvider):
     ###################################################################################################
 
     def _doSearch(self, search_params, show=None):
-        logger.log("[" + self.name + "] Performing Search: {0}".format(search_params), logger.DEBUG)
-        searchUrl = self.url + "browse.php?c2=1&c30=1&c41=1&c49=1&c52=1&c55=1&search=" + urllib.quote(search_params)
-        return self.parseResults(searchUrl)
+        logger.log("[{}] {} Performing Search: {}".format(self.name, self.funcName(), search_params), logger.DEBUG)
+        data = self.getURL(
+            '{}browse.php'.format(self.url),
+            params={
+                'c': [2,30,41,49,52,55],
+                'search': search_params
+            }
+        )
+        return self.parseResults(data)
 
     ###################################################################################################
 
-    def parseResults(self, searchUrl):
-        data = self.getURL(searchUrl)
+    def parseResults(self, data):
         results = []
         if data:
-            for torrent in re.compile("<td class=\"lft\"><div><a href=\"\/t\/.*?\" class=\"torrent\" id=\"(?P<id>.*?)\"><b>(?P<title>.*?)</b></a>", re.MULTILINE | re.DOTALL).finditer(data):
-                item = (self.remove_tags.sub('', torrent.group('title')), self.url + "download.php?torrent=" + torrent.group('id'))
-                results.append(item)
+            for torrent in re.compile("<div><a href=\"\/t\/(?P<id>\d+)\"><b>(?P<title>.*?)<\/b>.*?<td>(<b>|)(?P<seeds>\d+)(<\/b>|)<\/td><td>(<b>|)(?P<peers>\d+)(<\/b>|)<\/td><\/tr>", re.MULTILINE | re.DOTALL).finditer(data):
+                if int(torrent.group('seeds')) > 0:
+                    item = (self.remove_tags.sub('', torrent.group('title')), '{}download.php?torrent={}'.format(self.url, torrent.group('id')))
+                    results.append(item)
             if len(results):
-                logger.log("[" + self.name + "] " + self.funcName() + " Some results found.", logger.DEBUG)
+                logger.log("[{}] {} Some results found.".format(self.name, self.funcName()))
             else:
-                logger.log("[" + self.name + "] " + self.funcName() + " No results found.", logger.DEBUG)
+                logger.log("[{}] {} No results found.".format(self.name, self.funcName()))
         else:
-            logger.log("[" + self.name + "] " + self.funcName() + " Error no data returned!!", logger.ERROR)
+            logger.log("[{}] {} Error no data returned!!".format(self.name, self.funcName()))
         return results
 
     ###################################################################################################
 
-    def getURL(self, url):
+    def getURL(self, url, params={}):
         response = None
 
         if not self.session and not self._doLogin():
             return response
 
         try:
-            response = self.session.get(url, verify=False, timeout=30)
+            response = self.session.get(url, params=params, verify=False, timeout=30)
         except (requests.exceptions.ConnectionError, requests.exceptions.HTTPError), e:
-            logger.log("[" + self.name + "] getURL() Error loading " + self.name + " URL: " + str(e), logger.ERROR)
+            logger.log("[{}] {} Error loading {} URL: {}".format(
+                    self.name,
+                    self.funcName(),
+                    self.name,
+                    ex(e)
+                ),
+                logger.ERROR
+            )
             return None
 
-        if response.status_code not in [200, 302, 303]:
-            logger.log("[" + self.name + "] " + self.funcName() + " requested URL - " + url + " returned status code is " + str(response.status_code), logger.ERROR)
+        if hasattr(response, 'status_code') and response.status_code not in [200, 302, 303]:
+            logger.log("[{}] {} requested URL - {} returned status code is {}".format(
+                    self.name,
+                    self.funcName(),
+                    url,
+                    response.status_code
+                ),
+                logger.ERROR
+            )
             return None
 
         return response.content
@@ -182,51 +202,104 @@ class SpeedProvider(generic.TorrentProvider):
         }
 
         self.session = requests.Session()
-        logger.log("[" + self.name + "] Attempting to Login")
+        logger.log("[{}] Attempting to Login".format(self.name))
 
         try:
-            response = self.session.post(self.url + "takeElogin.php", data=login_params, timeout=30, verify=False)
+            response = self.session.post("{}takelogin.php".format(self.url), data=login_params, timeout=30, verify=False)
         except (requests.exceptions.ConnectionError, requests.exceptions.HTTPError), e:
-            self.session = None
-            sys.tracebacklimit = 0    # raise exception to sickbeard but hide the stack trace.
-            raise Exception("[" + self.name + "] " + self.funcName() + " Error: " + str(e))
+            logger.log("[{}] {} Error loading {} URL: {}".format(
+                    self.name,
+                    self.funcName(),
+                    self.name,
+                    ex(e)
+                ),
+                logger.ERROR
+            )
 
         if "We could not recognize your account properly. Mind if we double check that? It's for your own security." in response.content:
             self.session = None
             sys.tracebacklimit = 0    # raise exception to sickbeard but hide the stack trace.
-            raise Exception("[" + self.name + "] Login attempt blocked, You have not logged into website via a browser from this ip address before, please do so to have this ip whitelisted.")
+            logger.log("[{}] {} Login Failed,  Login attempt blocked, You have not logged into website via a browser from this ip address before, please do so to have this ip whitelisted.".format(
+                self.name,
+                self.funcName()
+                ),
+                logger.ERROR
+            )
 
-        if re.search("Incorrect username or Password|<title>SPEED\.CD \:\: You're home now", response.content) or response.status_code in [401, 403]:
+        if re.search("Incorrect username or Password|<title>SPEED\.CD \:\: You're home now", response.content) \
+        or response.status_code in [401, 403]:
             self.session = None
-            sys.tracebacklimit = 0    # raise exception to sickbeard but hide the stack trace.
-            raise Exception("[" + self.name + "] Login Failed, Invalid username or password for " + self.name + ". Check your settings.")
+            logger.log("[{}] {} Login Failed, Invalid username or password for {}. Check your settings.".format(
+                    self.name,
+                    self.funcName(),
+                    self.name
+                ),
+                logger.ERROR
+            )
+            return False
 
         if not self._getPassKey() or not self.rss_passkey:
             self.session = None
-            sys.tracebacklimit = 0    # raise exception to sickbeard but hide the stack trace.
-            raise Exception("[" + self.name + "] " + self.funcName() + " Could not extract rssHash info... aborting.")
-
+            logger.log("[{}] {} Could not extract rssHash info... aborting.".format(
+                    self.name,
+                    self.funcName()
+                ),
+                logger.ERROR
+            )
+            return False
+        
         return True
 
     ###################################################################################################
 
     def _getPassKey(self):
-        logger.log("[" + self.name + "] " + self.funcName() + " Attempting to acquire RSS info")
+        logger.log("[{}] {} Attempting to acquire RSS authentication details.".format(
+                self.name,
+                self.funcName()
+            ),
+            logger.DEBUG
+        )
         try:
-            self.rss_uid, self.rss_passkey = re.findall(r'name=\"user\" value=\"(.*)\" />.*?name=\"passkey\" value=\"([0-9A-Fa-f]{32})\"', self.getURL(self.url + "rss.php"))[0]
+            self.rss_uid, self.rss_passkey = re.findall(
+                r'name=\"user\" value=\"(.*)\" />.*?name=\"passkey\" value=\"([0-9A-Fa-f]{32})\"',
+                self.getURL(
+                    '{}rss.php'.format(self.url)
+                )
+            )[0]
         except:
-            logger.log("[" + self.name + "] " + self.funcName() + " Failed to scrape authentication parameters for rss.", logger.ERROR)
+            logger.log("[{}] {} Failed to scrape authentication parameters for rss.".format(
+                    self.name,
+                    self.funcName()
+                ),
+                logger.ERROR
+            )
             return False
 
-        if self.rss_uid is None:
-            logger.log("[" + self.name + "] " + self.funcName() + " Can't extract uid from rss authentication scrape.", logger.ERROR)
+        if not self.rss_uid:
+            logger.log("[{}] {} Can't extract uid from rss authentication scrape.".format(
+                    self.name,
+                    self.funcName()
+                ),
+                logger.ERROR
+            )
             return False
 
-        if self.rss_passkey is None:
-            logger.log("[" + self.name + "] " + self.funcName() + " Can't extract password hash from rss authentication scrape.", logger.ERROR)
+        if not self.rss_passkey:
+            logger.log("[{}] {} Can't extract password hash from rss authentication scrape.".format(
+                    self.name,
+                    self.funcName()
+                ),
+                logger.ERROR
+            )
             return False
 
-        logger.log("[" + self.name + "] " + self.funcName() + " rss_uid = " + self.rss_uid + ", rss_passkey = " + self.rss_passkey, logger.DEBUG)
+        logger.log("[{}] {} Scraped RSS passkey {}".format(
+                self.name,
+                self.funcName(),
+                self.rss_passkey
+            ),
+            logger.DEBUG
+        )
         return True
 
     ###################################################################################################
@@ -247,8 +320,8 @@ class SpeedCache(tvcache.TVCache):
 
         xml = None
         if provider.rss_uid and provider.rss_passkey:
-            self.rss_url = provider.url + "get_rss.php?cat=2,30,41,49,52,55&feed=dl&user=" + provider.rss_uid + "&passkey=" + provider.rss_passkey
-            logger.log("[" + provider.name + "] " + provider.funcName() + " RSS URL - " + self.rss_url)
+            self.rss_url = "{}get_rss.php?cat=2,30,41,49,52,55&feed=dl&user={}&passkey={}".format(provider.url, provider.rss_uid, provider.rss_passkey)
+            logger.log("[{}] {} RSS URL - {}".format(provider.name, provider.funcName(), self.rss_url))
             xml = provider.getURL(self.rss_url)
 
         if xml is not None:
