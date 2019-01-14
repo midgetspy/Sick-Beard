@@ -147,9 +147,10 @@ class SpeedProvider(generic.TorrentProvider):
     def parseResults(self, data):
         results = []
         if data:
-            for torrent in re.compile("<div><a href=\"\/t\/(?P<id>\d+)\"><b>(?P<title>.*?)<\/b>", re.MULTILINE | re.DOTALL).finditer(data):
-                item = (self.remove_tags.sub('', torrent.group('title')), '{}download.php?torrent={}'.format(self.url, torrent.group('id')))
-                results.append(item)
+            for torrent in re.compile("<div><a href=\"\/t\/(?P<id>\d+)\"><b>(?P<title>.*?)<\/b>.*?<td>(<b>|)(?P<seeds>\d+)(<\/b>|)<\/td><td>(<b>|)(?P<peers>\d+)(<\/b>|)<\/td><\/tr>", re.MULTILINE | re.DOTALL).finditer(data):
+                if int(torrent.group('seeds')) > 0:
+                    item = (self.remove_tags.sub('', torrent.group('title')), '{}download.php?torrent={}'.format(self.url, torrent.group('id')))
+                    results.append(item)
             if len(results):
                 logger.log("[{}] {} Some results found.".format(self.name, self.funcName()))
             else:
