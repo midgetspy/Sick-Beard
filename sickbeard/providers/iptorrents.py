@@ -210,7 +210,7 @@ class IPTorrentsProvider(generic.TorrentProvider):
                 'cat[]': '5',
                 'feed': 'direct',
             }
-            (self.rss_uid, self.rss_passkey)  = re.findall(r'torrents\/rss\?u=(\d+);tp=([0-9A-Fa-f]{32});', self.getURL(self.url + "getrss.php", post_params))[0]
+            (self.rss_uid, self.rss_passkey)  = re.findall(r'\/t\.rss\?u=(\d+);tp=([0-9A-Fa-f]{32});', self.getURL(self.url + "getrss.php", post_params))[0]
         except:
             logger.log("[" + self.name + "] " + self.funcName() + " Failed to scrape authentication parameters for rss.", logger.ERROR)
             return False
