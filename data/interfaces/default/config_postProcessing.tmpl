@@ -492,6 +492,7 @@
             <label for="${cur_id}_season_banners" class="clearfix"><input type="checkbox" class="float-left metadata_checkbox" id="${cur_id}_season_banners" #if $cur_metadata_inst.season_banners then "checked=\"checked\"" else ""#/>&nbsp;Season Banners</label>
             <label for="${cur_id}_season_all_poster" class="clearfix"><input type="checkbox" class="float-left metadata_checkbox" id="${cur_id}_season_all_poster" #if $cur_metadata_inst.season_all_poster then "checked=\"checked\"" else ""#/>&nbsp;Season All Poster</label>
             <label for="${cur_id}_season_all_banner" class="clearfix"><input type="checkbox" class="float-left metadata_checkbox" id="${cur_id}_season_all_banner" #if $cur_metadata_inst.season_all_banner then "checked=\"checked\"" else ""#/>&nbsp;Season All Banner</label>
+            <label for="${cur_id}_subtitles" class="clearfix"><input type="checkbox" class="float-left metadata_checkbox" id="${cur_id}_subtitles" #if $cur_metadata_inst.subtitles then "checked=\"checked\"" else ""#/>&nbsp;Subtitles</label>
         </div>
     </div>
     <div class="metadata-example-wrapper">
@@ -507,6 +508,7 @@
             <label for="${cur_id}_season_banners"><span id="${cur_id}_eg_season_banners">$cur_metadata_inst.eg_season_banners</span></label>
             <label for="${cur_id}_season_all_poster"><span id="${cur_id}_eg_season_all_poster">$cur_metadata_inst.eg_season_all_poster</span></label>
             <label for="${cur_id}_season_all_banner"><span id="${cur_id}_eg_season_all_banner">$cur_metadata_inst.eg_season_all_banner</span></label>
+            <label for="${cur_id}_subtitles"><span id="${cur_id}_eg_subtitles">$cur_metadata_inst.eg_subtitles</span></label>
         </div>
     </div>
 
@@ -514,7 +516,22 @@
 </div>
 #end for
 
-                        <div class="clearfix"></div><br/>
+                        <div class="field-pair clearfix">
+
+                            <label class="clearfix">
+                                <span class="component-title">Subtitle languages:</span>
+                                <span class="component-desc">
+                                	<input type="text" name="subtitle_languages" id="subtitle_languages" value="$sickbeard.SUBTITLE_LANGUAGES" size="35" />
+                                </span>
+                            </label>
+                            <label class="clearfix">
+                                <span class="component-title">&nbsp;</span>
+                            	<span class="component-desc">
+									Download subtitles of the specified languages. Use comma separated values. Eg: en-us, pt-br, fr, pt. <br />
+								    Subtitles feature works better with 'Rename Episodes' disabled.</span>
+                            </label>
+                        </div>
+                        
                         <input type="submit" class="btn config_submitter" value="Save Changes" /><br/>
 
                     </fieldset>

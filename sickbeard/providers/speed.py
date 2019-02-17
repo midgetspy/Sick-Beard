@@ -216,6 +216,11 @@ class SpeedProvider(generic.TorrentProvider):
                 logger.ERROR
             )
 
+        if "No page exists at your destination address" in response.content:
+            self.session = None
+            sys.tracebacklimit = 0    # raise exception to sickbeard but hide the stack trace.
+            raise Exception("[" + self.name + "] Login attempt returned 404 page.")
+
         if "We could not recognize your account properly. Mind if we double check that? It's for your own security." in response.content:
             self.session = None
             sys.tracebacklimit = 0    # raise exception to sickbeard but hide the stack trace.

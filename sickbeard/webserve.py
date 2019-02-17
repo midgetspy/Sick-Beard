@@ -893,6 +893,7 @@ class ConfigPostProcessing:
     def savePostProcessing(self, naming_pattern=None, naming_multi_ep=None,
                     xbmc_data=None, xbmc_12plus_data=None, mediabrowser_data=None, sony_ps3_data=None, wdtv_data=None, tivo_data=None, mede8er_data=None,
                     keep_processed_dir=None, process_automatically=None, rename_episodes=None,
+                    subtitle_languages=None,
                     move_associated_files=None, filter_associated_files=None, tv_download_dir=None, naming_custom_abd=None, naming_abd_pattern=None):
 
         results = []
@@ -946,6 +947,8 @@ class ConfigPostProcessing:
         sickbeard.metadata_provider_dict['Mede8er'].set_config(sickbeard.METADATA_MEDE8ER)
 
         # Save changes
+
+        sickbeard.SUBTITLE_LANGUAGES = subtitle_languages
         sickbeard.save_config()
 
         if len(results) > 0:
@@ -1175,7 +1178,7 @@ class ConfigProviders:
 
         sickbeard.TVTORRENTS_DIGEST = tvtorrents_digest.strip()
         sickbeard.TVTORRENTS_HASH = tvtorrents_hash.strip()
-
+        
         if thepiratebay_trusted == "on":
             thepiratebay_trusted = 1
         else:
@@ -1233,6 +1236,13 @@ class ConfigProviders:
         
         sickbeard.REVOLUTIONTT_USERNAME = revolutiontt_username.strip()
         sickbeard.REVOLUTIONTT_PASSWORD = revolutiontt_password.strip()
+        
+        if torrentz_verified == "on":
+            torrentz_verified = 1
+        else:
+            torrentz_verified = 0
+
+        sickbeard.TORRENTZ_VERIFIED = torrentz_verified
         
         sickbeard.BTN_API_KEY = btn_api_key.strip()
 
@@ -1364,7 +1374,7 @@ class ConfigNotifications:
         sickbeard.BOXCAR2_NOTIFY_ONDOWNLOAD = config.checkbox_to_value(boxcar2_notify_ondownload)
         sickbeard.BOXCAR2_ACCESS_TOKEN = boxcar2_access_token
         sickbeard.BOXCAR2_SOUND = boxcar2_sound
-
+        
         sickbeard.USE_NMA = config.checkbox_to_value(use_nma)
         sickbeard.NMA_NOTIFY_ONSNATCH = config.checkbox_to_value(nma_notify_onsnatch)
         sickbeard.NMA_NOTIFY_ONDOWNLOAD = config.checkbox_to_value(nma_notify_ondownload)
@@ -2126,7 +2136,7 @@ class Home:
     @cherrypy.expose
     def getPushoverDevices(self, userKey=None):
         cherrypy.response.headers['Cache-Control'] = "max-age=0,no-cache,no-store"
-
+        
         result = notifiers.pushover_notifier.get_devices(userKey)
         if result:
             return result

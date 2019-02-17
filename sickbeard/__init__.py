@@ -44,6 +44,7 @@ from sickbeard.config import CheckSection, check_setting_int, check_setting_str,
 
 from sickbeard import searchCurrent, searchBacklog, showUpdater, versionChecker, properFinder, autoPostProcesser
 from sickbeard import helpers, db, exceptions, show_queue, search_queue, scheduler
+from sickbeard import subtitle_queue
 from sickbeard import logger
 from sickbeard import naming
 
@@ -85,6 +86,7 @@ showQueueScheduler = None
 searchQueueScheduler = None
 properFinderScheduler = None
 autoPostProcesserScheduler = None
+subtitleQueueScheduler = None
 
 showList = None
 loadingShowList = None
@@ -135,6 +137,8 @@ METADATA_PS3 = None
 METADATA_WDTV = None
 METADATA_TIVO = None
 METADATA_MEDE8ER = None
+
+SUBTITLE_LANGUAGES = None
 
 QUALITY_DEFAULT = None
 STATUS_DEFAULT = None
@@ -462,6 +466,7 @@ def initialize(consoleLogging=True):
                 USE_LIBNOTIFY, LIBNOTIFY_NOTIFY_ONSNATCH, LIBNOTIFY_NOTIFY_ONDOWNLOAD, USE_NMJ, NMJ_HOST, NMJ_DATABASE, NMJ_MOUNT, USE_NMJv2, NMJv2_HOST, NMJv2_DATABASE, NMJv2_DBLOC, \
                 USE_SYNOINDEX, SYNOINDEX_NOTIFY_ONSNATCH, SYNOINDEX_NOTIFY_ONDOWNLOAD, SYNOINDEX_UPDATE_LIBRARY, \
                 USE_LISTVIEW, METADATA_XBMC, METADATA_XBMC_12PLUS, METADATA_MEDIABROWSER, METADATA_MEDE8ER, METADATA_PS3, metadata_provider_dict, \
+                SUBTITLE_LANGUAGES, subtitleQueueScheduler, \
                 GIT_PATH, MOVE_ASSOCIATED_FILES, FILTER_ASSOCIATED_FILES, \
                 COMING_EPS_LAYOUT, COMING_EPS_SORT, COMING_EPS_DISPLAY_PAUSED, METADATA_WDTV, METADATA_TIVO, IGNORE_WORDS, CREATE_MISSING_SHOW_DIRS, \
                 ADD_SHOWS_WO_DIR, ANON_REDIRECT, DISPLAY_ALL_SEASONS
@@ -569,7 +574,7 @@ def initialize(consoleLogging=True):
         NZB_METHOD = check_setting_str(CFG, 'General', 'nzb_method', 'blackhole')
         if NZB_METHOD not in ('blackhole', 'sabnzbd', 'nzbget'):
             NZB_METHOD = 'blackhole'
-
+        
         TORRENT_METHOD = check_setting_str(CFG, 'General', 'torrent_method', 'blackhole')
         if TORRENT_METHOD not in ('blackhole', 'utorrent', 'transmission', 'downloadstation', 'deluge'):
             TORRENT_METHOD = 'blackhole'
@@ -590,7 +595,15 @@ def initialize(consoleLogging=True):
         CREATE_MISSING_SHOW_DIRS = check_setting_int(CFG, 'General', 'create_missing_show_dirs', 0)
         ADD_SHOWS_WO_DIR = check_setting_int(CFG, 'General', 'add_shows_wo_dir', 0)
 
-        TVTORRENTS = bool(check_setting_int(CFG, 'TVTORRENTS', 'tvtorrents', 0))
+        EZRSS = bool(check_setting_int(CFG, 'General', 'use_torrent', 0))
+        if not EZRSS:
+            CheckSection(CFG, 'EZRSS')
+            EZRSS = bool(check_setting_int(CFG, 'EZRSS', 'ezrss', 0))
+        
+
+        SUBTITLE_LANGUAGES = check_setting_str(CFG, 'General', 'subtitle_languages', '')
+        
+        TVTORRENTS = bool(check_setting_int(CFG, 'TVTORRENTS', 'tvtorrents', 0))    
         TVTORRENTS_DIGEST = check_setting_str(CFG, 'TVTORRENTS', 'tvtorrents_digest', '')
         TVTORRENTS_HASH = check_setting_str(CFG, 'TVTORRENTS', 'tvtorrents_hash', '')
 
@@ -714,7 +727,7 @@ def initialize(consoleLogging=True):
         NZBGET_PASSWORD = check_setting_str(CFG, 'NZBget', 'nzbget_password', 'tegbzn6789')
         NZBGET_CATEGORY = check_setting_str(CFG, 'NZBget', 'nzbget_category', 'tv')
         NZBGET_HOST = check_setting_str(CFG, 'NZBget', 'nzbget_host', '')
-
+        
         TORRENT_USERNAME = check_setting_str(CFG, 'TORRENT', 'torrent_username', '')
         TORRENT_PASSWORD = check_setting_str(CFG, 'TORRENT', 'torrent_password', '')
         TORRENT_LABEL = check_setting_str(CFG, 'TORRENT', 'torrent_label', '')
@@ -800,13 +813,13 @@ def initialize(consoleLogging=True):
         NMJ_HOST = check_setting_str(CFG, 'NMJ', 'nmj_host', '')
         NMJ_DATABASE = check_setting_str(CFG, 'NMJ', 'nmj_database', '')
         NMJ_MOUNT = check_setting_str(CFG, 'NMJ', 'nmj_mount', '')
-
+        
         CheckSection(CFG, 'NMJv2')
         USE_NMJv2 = bool(check_setting_int(CFG, 'NMJv2', 'use_nmjv2', 0))
         NMJv2_HOST = check_setting_str(CFG, 'NMJv2', 'nmjv2_host', '')
         NMJv2_DATABASE = check_setting_str(CFG, 'NMJv2', 'nmjv2_database', '')
         NMJv2_DBLOC = check_setting_str(CFG, 'NMJv2', 'nmjv2_dbloc', '')
-
+        
         CheckSection(CFG, 'Synology')
         USE_SYNOINDEX = bool(check_setting_int(CFG, 'Synology', 'use_synoindex', 0))
         SYNOINDEX_NOTIFY_ONSNATCH = bool(check_setting_int(CFG, 'Synology', 'synoindex_notify_onsnatch', 0))
@@ -955,6 +968,10 @@ def initialize(consoleLogging=True):
         if not PROCESS_AUTOMATICALLY:
             autoPostProcesserScheduler.silent = True
 
+        subtitleQueueScheduler = scheduler.Scheduler(subtitle_queue.SubtitleQueue(),
+                                               cycleTime=datetime.timedelta(seconds=3),
+                                               threadName="SUBTITLEQUEUE",
+                                               silent=True)
         showList = []
         loadingShowList = {}
 
@@ -967,6 +984,7 @@ def start():
     global __INITIALIZED__, currentSearchScheduler, backlogSearchScheduler, \
             showUpdateScheduler, versionCheckScheduler, showQueueScheduler, \
             properFinderScheduler, autoPostProcesserScheduler, searchQueueScheduler, \
+            subtitleQueueScheduler, \
             started
 
     with INIT_LOCK:
@@ -997,6 +1015,9 @@ def start():
             # start the proper finder
             autoPostProcesserScheduler.thread.start()
 
+            #start subtitle queue
+            subtitleQueueScheduler.thread.start()
+                        
             started = True
 
 
@@ -1004,6 +1025,7 @@ def halt():
 
     global __INITIALIZED__, currentSearchScheduler, backlogSearchScheduler, showUpdateScheduler, \
             showQueueScheduler, properFinderScheduler, autoPostProcesserScheduler, searchQueueScheduler, \
+            subtitleQueueScheduler, \
             started
 
     with INIT_LOCK:
@@ -1070,6 +1092,13 @@ def halt():
             except:
                 pass
 
+            subtitleQueueScheduler.abort = True
+            logger.log(u"Waiting for the SUBTITLEQUEUE thread to exit")
+            try:
+                subtitleQueueScheduler.thread.abort()
+            except:
+                pass
+            
             __INITIALIZED__ = False
 
 
@@ -1222,6 +1251,7 @@ def save_config():
     new_config['General']['metadata_wdtv'] = METADATA_WDTV
     new_config['General']['metadata_tivo'] = METADATA_TIVO
     new_config['General']['metadata_mede8er'] = METADATA_MEDE8ER
+    new_config['General']['subtitle_languages'] = SUBTITLE_LANGUAGES
 
     new_config['General']['cache_dir'] = ACTUAL_CACHE_DIR if ACTUAL_CACHE_DIR else 'cache'
     new_config['General']['root_dirs'] = ROOT_DIRS if ROOT_DIRS else ''
@@ -1328,6 +1358,9 @@ def save_config():
     new_config['NZBs']['nzbs_uid'] = NZBS_UID
     new_config['NZBs']['nzbs_hash'] = NZBS_HASH
 
+    new_config['Womble'] = {}
+    new_config['Womble']['womble'] = int(WOMBLE)
+    
     new_config['omgwtfnzbs'] = {}
     new_config['omgwtfnzbs']['omgwtfnzbs'] = int(OMGWTFNZBS)
     new_config['omgwtfnzbs']['omgwtfnzbs_username'] = OMGWTFNZBS_USERNAME
@@ -1345,7 +1378,7 @@ def save_config():
     new_config['NZBget']['nzbget_password'] = NZBGET_PASSWORD
     new_config['NZBget']['nzbget_category'] = NZBGET_CATEGORY
     new_config['NZBget']['nzbget_host'] = NZBGET_HOST
-
+    
     new_config['TORRENT'] = {}
     new_config['TORRENT']['torrent_username'] = TORRENT_USERNAME
     new_config['TORRENT']['torrent_password'] = TORRENT_PASSWORD
@@ -1414,7 +1447,7 @@ def save_config():
     new_config['Pushover']['pushover_priority'] = int(PUSHOVER_PRIORITY)
     new_config['Pushover']['pushover_device'] = PUSHOVER_DEVICE
     new_config['Pushover']['pushover_sound'] = PUSHOVER_SOUND
-
+    
     new_config['Libnotify'] = {}
     new_config['Libnotify']['use_libnotify'] = int(USE_LIBNOTIFY)
     new_config['Libnotify']['libnotify_notify_onsnatch'] = int(LIBNOTIFY_NOTIFY_ONSNATCH)
@@ -1437,7 +1470,7 @@ def save_config():
     new_config['NMJv2']['nmjv2_host'] = NMJv2_HOST
     new_config['NMJv2']['nmjv2_database'] = NMJv2_DATABASE
     new_config['NMJv2']['nmjv2_dbloc'] = NMJv2_DBLOC
-
+    
     new_config['Trakt'] = {}
     new_config['Trakt']['use_trakt'] = int(USE_TRAKT)
     new_config['Trakt']['trakt_username'] = TRAKT_USERNAME

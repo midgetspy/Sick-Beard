@@ -77,7 +77,7 @@ initially download: <b><%=", ".join([Quality.qualityStrings[x] for x in sorted(a
 #end if
 #if $bestQualities:
 replace with: <b><%=", ".join([Quality.qualityStrings[x] for x in sorted(bestQualities)])%></b>
-#end if
+#end if 
 #end if
     </td></tr>
     <tr><td class="showLegend">Language:</td><td><img src="$sbRoot/images/flags/${show.lang}.png" width="16" height="11" alt="" /> $show.lang</td></tr>
@@ -112,26 +112,26 @@ Change selected episodes to
         <label for="skipped" class="checkbox inline skipped"><input type="checkbox" id="skipped" checked="checked" /> Skipped: <b>$epCounts[$Overview.SKIPPED]</b></label>
     </div>
     <div class="pull-right" style="padding-bottom: 5px;">
-        <button class="btn btn-mini seriesCheck"><a href="#" onclick="return false;">Select Filtered Episodes</a></button>
+        <button class="btn btn-mini seriesCheck"><a href="#" onclick="return false;">Select Filtered Episodes</a></button> 
         <button class="btn btn-mini clearAll"><a href="#" onclick="return false;">Clear All</a></button>
     </div>
 </div>
 
 <table class="sickbeardTable2" style="text-align: center;">
-
+    
 #set $curSeason = -1
 #set $seasonCount = 0
 #for $epResult in $sqlResults:
 
-  #if int($epResult["season"]) != $curSeason:
-    #set $curSeason = int($epResult["season"])
+    #if int($epResult["season"]) != $curSeason:
+        #set $curSeason = int($epResult["season"])
 
     #if $curSeason != -1:
 
       #set $seasonCount = $seasonCount + 1
       #if $sickbeard.DISPLAY_ALL_SEASONS == False and $seasonCount == 2:
       <tbody id="segment" class="hide">
-      #end if
+    #end if    
 
       <!-- start season $epResult["season"] -->
       <tr id="season-$epResult["season"]">
@@ -142,6 +142,7 @@ Change selected episodes to
         <th class="col-checkbox"><input type="checkbox" class="seasonCheck" id="$epResult["season"]" /></th>
         <th class="col-metadata">NFO</th>
         <th class="col-metadata">TBN</th>
+        <th class="col-metadata">SRT</th>
         <th class="col-ep">Episode</th>
         <th class="col-name">Name</th>
         <th class="col-plotinfo">&nbsp;</th>
@@ -163,12 +164,13 @@ Change selected episodes to
 
   <tr class="$Overview.overviewStrings[$epCats[$epStr]] season-$curSeason">
     <td class="col-checkbox">
-    #if int($epResult["status"]) != $UNAIRED
+#if int($epResult["status"]) != $UNAIRED
       <input type="checkbox" class="epCheck" id="<%=str(epResult["season"]) + 'x' + str(epResult["episode"])%>" name="<%=str(epResult["season"]) + "x" + str(epResult["episode"]) %>" />
-    #end if
+#end if
     </td>
     <td class="col-metadata"><img src="$sbRoot/images/#if $epResult["hasnfo"] == 1 then "nfo.gif\" alt=\"Y" else "nfo-no.gif\" alt=\"N"#" width="23" height="11" /></td>
     <td class="col-metadata"><img src="$sbRoot/images/#if $epResult["hastbn"] == 1 then "tbn.gif\" alt=\"Y" else "tbn-no.gif\" alt=\"N"#" width="23" height="11" /></td>
+    <td class="col-metadata"><img src="$sbRoot/images/#if $epResult["hassrt"] == 1 then "srt.gif\" alt=\"Y" else "srt-no.gif\" alt=\"N"#" width="23" height="11" /></td>
     <td class="col-ep">$epResult["episode"]</td>
     <td class="col-name mightOverflow">$epResult["name"]</td>
     <td class="col-plotinfo">
@@ -182,7 +184,7 @@ Change selected episodes to
     <td class="col-filename mightOverflow">$epDisplayLoc</td>
     <td class="col-status mightOverflow status_column">$statusStrings[int($epResult["status"])]</td>
     <td class="col-search"><a class="epSearch" href="searchEpisode?show=$show.tvdbid&amp;season=$epResult["season"]&amp;episode=$epResult["episode"]"><img src="$sbRoot/images/search16.png" width="16" height="16" alt="search" title="Manual Search" /></a></td>
-  </tr>
+   </tr>
 
 #end for
 #if $sickbeard.DISPLAY_ALL_SEASONS == False and $seasonCount > 1:

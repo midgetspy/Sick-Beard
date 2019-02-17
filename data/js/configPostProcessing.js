@@ -215,6 +215,8 @@ $(document).ready(function () {
             var season_all_poster = $("#" + generator_name + "_season_all_poster").prop('checked');
             var season_all_banner = $("#" + generator_name + "_season_all_banner").prop('checked');
 
+            var subtitles = $("#" + generator_name + "_subtitles").prop('checked');
+
             config_arr.push(show_metadata ? '1' : '0');
             config_arr.push(episode_metadata ? '1' : '0');
             config_arr.push(fanart ? '1' : '0');
@@ -225,6 +227,8 @@ $(document).ready(function () {
             config_arr.push(season_banners ? '1' : '0');
             config_arr.push(season_all_poster ? '1' : '0');
             config_arr.push(season_all_banner ? '1' : '0');
+
+            config_arr.push(subtitles ? '1' : '0');
 
             var cur_num = 0;
             for (var i = 0; i < config_arr.length; i++) {
@@ -246,6 +250,8 @@ $(document).ready(function () {
             $("#" + generator_name + "_eg_season_all_poster").attr('class', season_all_poster ? 'enabled' : 'disabled');
             $("#" + generator_name + "_eg_season_all_banner").attr('class', season_all_banner ? 'enabled' : 'disabled');
             $("#" + generator_name + "_data").val(config_arr.join('|'));
+
+            $("#" + generator_name + "_eg_subtitles").attr('class', subtitles ? 'enabled' : 'disabled');
 
         });
 
