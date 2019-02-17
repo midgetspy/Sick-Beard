@@ -45,3 +45,5 @@ Thumbs.db
 *.pyproj
 *.sln
 ._.DS_Store
+.vs
+
