@@ -52,7 +52,7 @@ class PyNMA(object):
                 self._apikey.remove(key)
         elif type(key) == list:
             for k in key:
-                if key in self._apikey:
+                if k in self._apikey:
                     self._apikey.remove(k)
 
     def developerkey(self, developerkey):
