@@ -116,7 +116,19 @@ def processDir(dirName, nzbName=None, method=None, recurse=False, pp_options={})
             returnStr += u"\n"
             return returnStr
 
-    fileList = ek.ek(os.listdir, dirName)
+    # wait if any file was modified in the last 15 seconds. it might still be open for writing.
+    while True:
+        fileList = ek.ek(os.listdir, dirName)
+        waiting = False
+        for filename in fileList:
+            filename = ek.ek(os.path.join, dirName, filename)
+            ctime = max(os.path.getctime(filename), os.path.getmtime(filename))
+            if time.time() > ctime > time.time() - 15:
+                time.sleep(max(time.time() - ctime, 0))
+                waiting = True
+                break
+        if not waiting:
+            break
 
     # split the list into video files and folders
     folders = filter(lambda x: ek.ek(os.path.isdir, ek.ek(os.path.join, dirName, x)), fileList)
