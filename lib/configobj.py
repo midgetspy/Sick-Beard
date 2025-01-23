@@ -2057,7 +2057,11 @@ class ConfigObj(Section):
         if self.BOM and ((self.encoding is None) or match_utf8(self.encoding)):
             # Add the UTF8 BOM
             output = BOM_UTF8 + output
-            
+
+        # Protect our configuration file so we can read the configuration file, and others can not.
+        prev = os.umask(0)
+        os.umask(prev and int('077', 8))
+        
         if not output.endswith(newline):
             output += newline
         if outfile is not None:
@@ -2066,6 +2070,8 @@ class ConfigObj(Section):
             h = open(self.filename, 'wb')
             h.write(output)
             h.close()
+        # Reset the umask to the original setting
+        os.umask(prev)
 
 
     def validate(self, validator, preserve_errors=False, copy=False,
