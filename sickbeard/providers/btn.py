@@ -130,7 +130,7 @@ class BTNProvider(generic.TorrentProvider):
 
     def _api_call(self, apikey, params={}, results_per_page=1000, offset=0):
 
-        server = jsonrpclib.Server('http://api.btnapps.net')
+        server = jsonrpclib.Server('https://api.broadcasthe.net/')
         parsedJSON = {}
 
         try:
