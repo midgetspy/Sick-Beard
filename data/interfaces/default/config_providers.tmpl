@@ -86,7 +86,7 @@
                                 <span class="component-title jumbo">Configure Provider:</span>
                                 <span class="component-desc">
                                     #set $provider_config_list = []
-                                    #for $cur_provider in ("btn", "hdbits", "omgwtfnzbs", "tvtorrents", "torrentleech"):
+                                    #for $cur_provider in ("btn", "hdbits", "pisexy", "omgwtfnzbs", "tvtorrents", "torrentleech"):
                                         #set $cur_provider_obj = $sickbeard.providers.getProviderClass($cur_provider)
                                         #if $cur_provider_obj.providerType == $GenericProvider.NZB and not $sickbeard.USE_NZBS:
                                             #continue
@@ -156,6 +156,21 @@
                             </label>
                         </div>
                     </div><!-- /hdbitsDiv //-->
+
+                    <div class="providerDiv" id="pisexyDiv">
+                        <div class="field-pair">
+                            <label class="clearfix">
+                                <span class="component-title">PiSexy Username</span>
+                                <input class="component-desc" type="text" name="pisexy_username" value="$sickbeard.PISEXY_USERNAME" size="40" />
+                            </label>
+                        </div>
+                        <div class="field-pair">
+                            <label class="clearfix">
+                                <span class="component-title">PiSexy Passkey</span>
+                                <input class="component-desc" type="text" name="pisexy_passkey" value="$sickbeard.PISEXY_PASSKEY" size="40" />
+                            </label>
+                        </div>
+                    </div><!-- /pisexyDiv //-->
 
                     <div class="providerDiv" id="tvtorrentsDiv">
                         <div class="field-pair">
