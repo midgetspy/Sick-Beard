@@ -1,0 +1,33 @@
+[uwsgi]
+plugins = python27, gevent27
+http_socket = http://127.0.0.1:3003
+
+uid = nginx
+gid = nginx
+
+chdir = /opt/Sick-Beard
+
+; Listening interface and port,
+env = SICKBEARD_LISTEN=127.0.0.1
+env = SICKBEARD_PORT=8081
+
+;Location of your configuration file
+env = SICKBEARD_CONF=config.ini
+
+;Force an update on start
+;env = SICKBEARD_UPDATE=0
+
+;Auto-resize the header with PIL
+;env = SICKBEARD_NO_RESIZE=0
+
+;Data root, defaults to the cwd/data
+;env = SICKBEARD_DATA_DIR=""
+
+;Directory to store your logs
+;env = SICKBEARD_LOGDIR=""
+
+module = SickBeard_wsgi:app
+threads = 1
+processes = 1
+
+socket = /tmp/sickbeard.sock
