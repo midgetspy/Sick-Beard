@@ -777,12 +777,13 @@ class ConfigSearch:
     @cherrypy.expose
     def saveSearch(self, use_nzbs=None, use_torrents=None, nzb_dir=None, sab_username=None, sab_password=None,
                        sab_apikey=None, sab_category=None, sab_host=None, nzbget_username=None, nzbget_password=None, nzbget_category=None, nzbget_host=None,
-                       torrent_dir=None, nzb_method=None, usenet_retention=None, search_frequency=None, download_propers=None, ignore_words=None):
+                       torrent_dir=None, nzb_method=None, usenet_retention=None, search_frequency=None, download_propers=None, best_fit_quality=None, ignore_words=None):
 
         results = []
 
         # Episode Search
         sickbeard.DOWNLOAD_PROPERS = config.checkbox_to_value(download_propers)
+        sickbeard.BEST_FIT_QUALITY = config.checkbox_to_value(best_fit_quality)
 
         config.change_SEARCH_FREQUENCY(search_frequency)
         sickbeard.USENET_RETENTION = config.to_int(usenet_retention, default=500)

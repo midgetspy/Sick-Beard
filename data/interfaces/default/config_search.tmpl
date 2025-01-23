@@ -34,6 +34,13 @@
                                 <span class="component-desc">Replace original download with "Proper/Repack" if nuked?</span>
                             </label>
                         </div>
+                        <div class="field-pair">
+                            <input type="checkbox" name="best_fit_quality" id="best_fit_quality" #if $sickbeard.BEST_FIT_QUALITY == True then "checked=\"checked\"" else ""# />
+                            <label class="clearfix" for="best_fit_quality">
+                                <span class="component-title">Best Fit Quality</span>
+                                <span class="component-desc">Attempt to guess the quality in the case a perfect match cannot be found</span>
+                            </label>
+                        </div>
 
                         <div class="field-pair">
                             <label class="nocheck clearfix">
