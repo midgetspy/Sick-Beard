@@ -34,7 +34,7 @@ from threading import Lock
 # apparently py2exe won't build these unless they're imported somewhere
 from sickbeard import providers, metadata
 
-from providers import ezrss, tvtorrents, torrentleech, btn, newznab, womble, omgwtfnzbs, hdbits
+from providers import ezrss, tvtorrents, torrentleech, bitmetv, btn, newznab, womble, omgwtfnzbs, hdbits
 from sickbeard.config import CheckSection, check_setting_int, check_setting_str, ConfigMigrator
 
 from sickbeard import searchCurrent, searchBacklog, showUpdater, versionChecker, properFinder, autoPostProcesser
@@ -175,6 +175,11 @@ TVTORRENTS_HASH = None
 
 TORRENTLEECH = False
 TORRENTLEECH_KEY = None
+
+BITMETV = False
+BITMETV_UID = None
+BITMETV_KEY = None
+BITMETV_PASS = None
 
 BTN = False
 BTN_API_KEY = None
@@ -356,7 +361,7 @@ def initialize(consoleLogging=True):
                 USE_PLEX, PLEX_NOTIFY_ONSNATCH, PLEX_NOTIFY_ONDOWNLOAD, PLEX_UPDATE_LIBRARY, \
                 PLEX_SERVER_HOST, PLEX_HOST, PLEX_USERNAME, PLEX_PASSWORD, \
                 showUpdateScheduler, __INITIALIZED__, LAUNCH_BROWSER, showList, loadingShowList, \
-                NEWZNAB_DATA, NZBS, NZBS_UID, NZBS_HASH, EZRSS, HDBITS, HDBITS_USERNAME, HDBITS_PASSKEY, TVTORRENTS, TVTORRENTS_DIGEST, TVTORRENTS_HASH, BTN, BTN_API_KEY, TORRENTLEECH, TORRENTLEECH_KEY, \
+                NEWZNAB_DATA, NZBS, NZBS_UID, NZBS_HASH, EZRSS, HDBITS, HDBITS_USERNAME, HDBITS_PASSKEY, TVTORRENTS, TVTORRENTS_DIGEST, TVTORRENTS_HASH, BTN, BTN_API_KEY, TORRENTLEECH, TORRENTLEECH_KEY, BITMETV, BITMETV_UID, BITMETV_KEY, BITMETV_PASS, \
                 TORRENT_DIR, USENET_RETENTION, SOCKET_TIMEOUT, \
                 SEARCH_FREQUENCY, DEFAULT_SEARCH_FREQUENCY, BACKLOG_SEARCH_FREQUENCY, \
                 POSTPROCESS_FREQUENCY, DEFAULT_POSTPROCESS_FREQUENCY, MIN_POSTPROCESS_FREQUENCY, \
@@ -544,6 +549,12 @@ def initialize(consoleLogging=True):
         CheckSection(CFG, 'TorrentLeech')
         TORRENTLEECH = bool(check_setting_int(CFG, 'TorrentLeech', 'torrentleech', 0))
         TORRENTLEECH_KEY = check_setting_str(CFG, 'TorrentLeech', 'torrentleech_key', '')
+
+        CheckSection(CFG, 'BitMeTV')
+        BITMETV = bool(check_setting_int(CFG, 'BitMeTV', 'bitmetv', 0))
+        BITMETV_UID = check_setting_str(CFG, 'BitMeTV', 'bitmetv_uid', '')
+        BITMETV_KEY = check_setting_str(CFG, 'BitMeTV', 'bitmetv_key', '')
+        BITMETV_PASS = check_setting_str(CFG, 'BitMeTV', 'bitmetv_pass', '')
 
         CheckSection(CFG, 'NZBs')
         NZBS = bool(check_setting_int(CFG, 'NZBs', 'nzbs', 0))
@@ -1103,6 +1114,12 @@ def save_config():
     new_config['TorrentLeech'] = {}
     new_config['TorrentLeech']['torrentleech'] = int(TORRENTLEECH)
     new_config['TorrentLeech']['torrentleech_key'] = TORRENTLEECH_KEY
+
+    new_config['BitMeTV'] = {}
+    new_config['BitMeTV']['bitmetv'] = int(BITMETV)
+    new_config['BitMeTV']['bitmetv_uid'] = BITMETV_UID
+    new_config['BitMeTV']['bitmetv_key'] = BITMETV_KEY
+    new_config['BitMeTV']['bitmetv_pass'] = BITMETV_PASS
 
     new_config['NZBs'] = {}
     new_config['NZBs']['nzbs'] = int(NZBS)

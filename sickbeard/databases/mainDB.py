@@ -596,7 +596,7 @@ class AddHistorySource(AddSkipNotifications):
         self.connection.action("UPDATE history SET source = 'nzb' WHERE action % 100 = 2")
         # set source to torrent where needed
         set_torrent_source = []
-        history_results = self.connection.select("SELECT * FROM history WHERE action % 100 = 2 AND provider IN ('BTN', 'HDbits', 'TorrentLeech', 'TvTorrents')")
+        history_results = self.connection.select("SELECT * FROM history WHERE action % 100 = 2 AND provider IN ('BTN', 'HDbits', 'TorrentLeech', 'BitMeTV', 'TvTorrents')")
         for cur_result in history_results:
                 set_torrent_source.append(["UPDATE history SET source = 'torrent' WHERE action = ? AND date = ? AND showid = ? AND provider = ? AND quality = ?", \
                                           [cur_result["action"], cur_result["date"], cur_result["showid"], cur_result["provider"], cur_result["quality"]]

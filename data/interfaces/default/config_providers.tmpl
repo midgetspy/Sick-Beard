@@ -86,7 +86,7 @@
                                 <span class="component-title jumbo">Configure Provider:</span>
                                 <span class="component-desc">
                                     #set $provider_config_list = []
-                                    #for $cur_provider in ("btn", "hdbits", "omgwtfnzbs", "tvtorrents", "torrentleech"):
+                                    #for $cur_provider in ("btn", "hdbits", "omgwtfnzbs", "tvtorrents", "torrentleech", "bitmetv"):
                                         #set $cur_provider_obj = $sickbeard.providers.getProviderClass($cur_provider)
                                         #if $cur_provider_obj.providerType == $GenericProvider.NZB and not $sickbeard.USE_NZBS:
                                             #continue
@@ -180,6 +180,28 @@
                             </label>
                         </div>
                     </div><!-- /torrentleechDiv //-->
+
+                    <div class="providerDiv" id="bitmetvDiv">
+                      <div class="field-pair">
+                        <label class="clearfix">
+                          <span class="component-title">BitMeTV UID</span>
+                          <input class="component-desc" type="text" name="bitmetv_uid" value="$sickbeard.BITMETV_UID" size="40" />
+                        </label>
+                      </div>
+                      <div class="field-pair">
+                        <label class="clearfix">
+                          <span class="component-title">BitMeTV Passkey</span>
+                          <input class="component-desc" type="text" name="bitmetv_key" value="$sickbeard.BITMETV_KEY" size="40" />
+                        </label>
+                      </div>
+                      <div class="field-pair">
+                        <label class="clearfix">
+                          <span class="component-title">BitMeTV Pass</span>
+                          <input class="component-desc" type="text" name="bitmetv_pass" value="$sickbeard.BITMETV_PASS" size="40" />
+                        </label>
+                      </div>
+                      <p>For a detailed explanation of how to get your UID, Passkey and Pass. <a href="http://www.bitmetv.org/forums.php?action=viewtopic&topicid=22460&page=1" target="_BLANK">Read this forum post</a>.</p>
+                    </div><!-- /bitmetvDiv //-->
 
                     <div class="providerDiv" id="btnDiv">
                         <div class="field-pair">
