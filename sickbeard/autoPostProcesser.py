@@ -1,4 +1,4 @@
-# Author: Nic Wolfe <nic@wolfeden.ca>
+stars# Author: Nic Wolfe <nic@wolfeden.ca>
 # URL: http://code.google.com/p/sickbeard/
 #
 # This file is part of Sick Beard.
@@ -38,5 +38,6 @@ class PostProcesser():
         if not ek.ek(os.path.isabs, sickbeard.TV_DOWNLOAD_DIR):
             logger.log(u"Automatic post-processing attempted but dir " + sickbeard.TV_DOWNLOAD_DIR + " is relative (and probably not what you really want to process)", logger.ERROR)
             return
+
 
         processTV.processDir(sickbeard.TV_DOWNLOAD_DIR, method='Automatic')
