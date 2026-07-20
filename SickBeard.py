@@ -203,7 +203,7 @@ def main():
     consoleLogging = (not hasattr(sys, "frozen")) or (sickbeard.MY_NAME.lower().find('-console') > 0)
 
     # Rename the main thread
-    threading.currentThread().name = "MAIN"
+    threading.current_thread().name = "MAIN"
 
     try:
         opts, args = getopt.getopt(sys.argv[1:], "hfqdp::", ['help', 'forceupdate', 'quiet', 'nolaunch', 'daemon', 'pidfile=', 'port=', 'datadir=', 'config=', 'noresize'])  # @UnusedVariable
